@@ -1,9 +1,14 @@
+"""
+Main Window - v10.0 "Zenith Update"
+Consolidated 15-tab layout with sidebar navigation.
+"""
+
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem, 
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem,
     QStackedWidget, QLabel, QFrame
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QFont, QColor
+from PyQt6.QtGui import QIcon, QFont, QColor, QShortcut, QKeySequence
 
 # Only import essential tabs eagerly (Dashboard is always shown first)
 from ui.dashboard_tab import DashboardTab
@@ -12,140 +17,126 @@ from ui.lazy_widget import LazyWidget
 from utils.system import SystemManager
 from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
+from version import __version__
 import os
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.1.0"))
+        self.setWindowTitle(self.tr(f"Loofi Fedora Tweaks v{__version__}"))
         self.resize(1100, 700)
-        
+
         # Initialize Pulse event listener
         self.pulse = None
         self.pulse_thread = None
         self._start_pulse_listener()
-        
+
         # Load Modern Theme
         self.load_theme()
-        
+
         # Central Widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        
+
         # Main Layout (Horizontal: Sidebar | Content)
         main_layout = QHBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         central_widget.setLayout(main_layout)
-        
+
         # Sidebar
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(240)
-        # Prevent focus rectangle
         self.sidebar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.sidebar.currentRowChanged.connect(self.change_page)
         main_layout.addWidget(self.sidebar)
-        
+
         # Content Area
         self.content_area = QStackedWidget()
         main_layout.addWidget(self.content_area)
-        
-        # Initialize Pages - Eager loading for essential tabs only
-        self.pages = {}
-        
-        # Dashboard is always shown first - load eagerly
-        self.add_page(self.tr("Home"), "🏠", DashboardTab(self))
-        self.add_page(self.tr("System Info"), "ℹ️", SystemInfoTab())
-        
-        # All other tabs use lazy loading for faster startup
-        self.add_page(self.tr("Updates"), "📦", self._lazy_tab("updates"))
-        self.add_page(self.tr("Cleanup"), "🧹", self._lazy_tab("cleanup"))
-        self.add_page(self.tr("Hardware"), "⚡", self._lazy_tab("hardware"))
-        self.add_page(self.tr("HP Tweaks"), "💻", self._lazy_tab("tweaks"))
-        self.add_page(self.tr("Apps"), "🚀", self._lazy_tab("apps"))
-        self.add_page(self.tr("Advanced"), "⚙️", self._lazy_tab("advanced"))
-        self.add_page(self.tr("Gaming"), "🎮", self._lazy_tab("gaming"))
-        self.add_page(self.tr("Network"), "🌐", self._lazy_tab("network"))
-        self.add_page(self.tr("Presets"), "💾", self._lazy_tab("presets"))
-        self.add_page(self.tr("Marketplace"), "🌐", self._lazy_tab("marketplace"))
-        self.add_page(self.tr("Scheduler"), "⏰", self._lazy_tab("scheduler"))
-        self.add_page(self.tr("Boot"), "🔧", self._lazy_tab("boot"))
-        
-        # v7.1: Developer tools
-        self.add_page(self.tr("Containers"), "📦", self._lazy_tab("containers"))
-        self.add_page(self.tr("Developer"), "🛠️", self._lazy_tab("developer"))
-        
-        # v7.5: Watchtower diagnostics
-        self.add_page(self.tr("Watchtower"), "🔭", self._lazy_tab("watchtower"))
-        
-        # v8.0: Replicator (IaC exports)
-        self.add_page(self.tr("Replicator"), "🔄", self._lazy_tab("replicator"))
-        
-        # v8.1: AI Lab
-        self.add_page(self.tr("AI Lab"), "🧠", self._lazy_tab("ai"))
-        
-        # v8.5: Security Center
-        self.add_page(self.tr("Security"), "🛡️", self._lazy_tab("security"))
-        
-        # v9.0: Director - Window Management
-        self.add_page(self.tr("Director"), "🎬", self._lazy_tab("director"))
-        
-        # v9.1: Pulse - Event-driven automation
-        self.add_page(self.tr("Automation"), "⚡", self._lazy_tab("pulse"))
 
-        # v9.2: Pulse - Real-time monitoring
-        self.add_page(self.tr("Performance"), "📊", self._lazy_tab("performance"))
-        self.add_page(self.tr("Processes"), "🔍", self._lazy_tab("processes"))
-        
-        # Atomic-only: Overlays tab
-        if SystemManager.is_atomic():
-            self.add_page(self.tr("Overlays"), "📦", self._lazy_tab("overlays"))
-        
-        # Group less used ones
-        self.add_page(self.tr("Repos"), "📂", self._lazy_tab("repos"))
-        self.add_page(self.tr("Privacy"), "🔒", self._lazy_tab("privacy"))
-        self.add_page(self.tr("Theming"), "🎨", self._lazy_tab("theming"))
-        
+        # Initialize Pages
+        self.pages = {}
+
+        # ==================== V10.0 CONSOLIDATED TABS (15) ====================
+
+        # Eagerly loaded
+        self.add_page(self.tr("Home"), "\U0001f3e0", DashboardTab(self))
+        self.add_page(self.tr("System Info"), "\u2139\ufe0f", SystemInfoTab())
+
+        # System monitoring (Performance + Processes)
+        self.add_page(self.tr("System Monitor"), "\U0001f4ca", self._lazy_tab("monitor"))
+
+        # Maintenance (Updates + Cleanup + Overlays)
+        self.add_page(self.tr("Maintenance"), "\U0001f527", self._lazy_tab("maintenance"))
+
+        # Hardware (CPU/GPU/Fan/Battery/Audio/Fingerprint - merged with HP Tweaks)
+        self.add_page(self.tr("Hardware"), "\u26a1", self._lazy_tab("hardware"))
+
+        # Software (Apps + Repos)
+        self.add_page(self.tr("Software"), "\U0001f4e6", self._lazy_tab("software"))
+
+        # Security & Privacy (merged)
+        self.add_page(self.tr("Security & Privacy"), "\U0001f6e1\ufe0f", self._lazy_tab("security"))
+
+        # Network
+        self.add_page(self.tr("Network"), "\U0001f310", self._lazy_tab("network"))
+
+        # Gaming
+        self.add_page(self.tr("Gaming"), "\U0001f3ae", self._lazy_tab("gaming"))
+
+        # Desktop (Director + Theming)
+        self.add_page(self.tr("Desktop"), "\U0001f3a8", self._lazy_tab("desktop"))
+
+        # Development (Containers + Developer Tools)
+        self.add_page(self.tr("Development"), "\U0001f6e0\ufe0f", self._lazy_tab("development"))
+
+        # AI Lab
+        self.add_page(self.tr("AI Lab"), "\U0001f9e0", self._lazy_tab("ai"))
+
+        # Automation (Scheduler + Replicator + Pulse)
+        self.add_page(self.tr("Automation"), "\u23f0", self._lazy_tab("automation"))
+
+        # Community (Presets + Marketplace)
+        self.add_page(self.tr("Community"), "\U0001f30d", self._lazy_tab("community"))
+
+        # Diagnostics (Watchtower + Boot)
+        self.add_page(self.tr("Diagnostics"), "\U0001f52d", self._lazy_tab("diagnostics"))
+
         # Select first item
         self.sidebar.setCurrentRow(0)
 
-        # System Tray logic (Keep existing logic, simplified here)
+        # System Tray
         self.setup_tray()
         self.check_dependencies()
-    
+
+        # Ctrl+K Command Palette shortcut
+        self._setup_command_palette_shortcut()
+
+        # First-run wizard
+        self._check_first_run()
+
     def _lazy_tab(self, tab_name: str) -> LazyWidget:
         """Create a lazy-loaded tab widget."""
         loaders = {
-            "updates": lambda: __import__("ui.updates_tab", fromlist=["UpdatesTab"]).UpdatesTab(),
-            "cleanup": lambda: __import__("ui.cleanup_tab", fromlist=["CleanupTab"]).CleanupTab(),
+            # v10.0 consolidated tabs
+            "monitor": lambda: __import__("ui.monitor_tab", fromlist=["MonitorTab"]).MonitorTab(self),
+            "maintenance": lambda: __import__("ui.maintenance_tab", fromlist=["MaintenanceTab"]).MaintenanceTab(),
             "hardware": lambda: __import__("ui.hardware_tab", fromlist=["HardwareTab"]).HardwareTab(),
-            "tweaks": lambda: __import__("ui.tweaks_tab", fromlist=["TweaksTab"]).TweaksTab(),
-            "apps": lambda: __import__("ui.apps_tab", fromlist=["AppsTab"]).AppsTab(),
-            "advanced": lambda: __import__("ui.advanced_tab", fromlist=["AdvancedTab"]).AdvancedTab(),
-            "gaming": lambda: __import__("ui.gaming_tab", fromlist=["GamingTab"]).GamingTab(),
-            "network": lambda: __import__("ui.network_tab", fromlist=["NetworkTab"]).NetworkTab(),
-            "presets": lambda: __import__("ui.presets_tab", fromlist=["PresetsTab"]).PresetsTab(),
-            "marketplace": lambda: __import__("ui.marketplace_tab", fromlist=["MarketplaceTab"]).MarketplaceTab(),
-            "scheduler": lambda: __import__("ui.scheduler_tab", fromlist=["SchedulerTab"]).SchedulerTab(),
-            "boot": lambda: __import__("ui.boot_tab", fromlist=["BootTab"]).BootTab(),
-            "overlays": lambda: __import__("ui.overlays_tab", fromlist=["OverlaysTab"]).OverlaysTab(),
-            "repos": lambda: __import__("ui.repos_tab", fromlist=["ReposTab"]).ReposTab(),
-            "privacy": lambda: __import__("ui.privacy_tab", fromlist=["PrivacyTab"]).PrivacyTab(),
-            "theming": lambda: __import__("ui.theming_tab", fromlist=["ThemingTab"]).ThemingTab(),
-            "containers": lambda: __import__("ui.containers_tab", fromlist=["ContainersTab"]).ContainersTab(),
-            "developer": lambda: __import__("ui.developer_tab", fromlist=["DeveloperTab"]).DeveloperTab(),
-            "watchtower": lambda: __import__("ui.watchtower_tab", fromlist=["WatchtowerTab"]).WatchtowerTab(),
-            "replicator": lambda: __import__("ui.replicator_tab", fromlist=["ReplicatorTab"]).ReplicatorTab(),
-            "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
+            "software": lambda: __import__("ui.software_tab", fromlist=["SoftwareTab"]).SoftwareTab(),
             "security": lambda: __import__("ui.security_tab", fromlist=["SecurityTab"]).SecurityTab(),
-            "director": lambda: __import__("ui.director_tab", fromlist=["DirectorTab"]).DirectorTab(),
-            "pulse": lambda: self._create_pulse_tab(),
-            "performance": lambda: __import__("ui.performance_tab", fromlist=["PerformanceTab"]).PerformanceTab(self),
-            "processes": lambda: __import__("ui.processes_tab", fromlist=["ProcessesTab"]).ProcessesTab(),
+            "network": lambda: __import__("ui.network_tab", fromlist=["NetworkTab"]).NetworkTab(),
+            "gaming": lambda: __import__("ui.gaming_tab", fromlist=["GamingTab"]).GamingTab(),
+            "desktop": lambda: __import__("ui.desktop_tab", fromlist=["DesktopTab"]).DesktopTab(),
+            "development": lambda: __import__("ui.development_tab", fromlist=["DevelopmentTab"]).DevelopmentTab(),
+            "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
+            "automation": lambda: __import__("ui.automation_tab", fromlist=["AutomationTab"]).AutomationTab(),
+            "community": lambda: __import__("ui.community_tab", fromlist=["CommunityTab"]).CommunityTab(),
+            "diagnostics": lambda: __import__("ui.diagnostics_tab", fromlist=["DiagnosticsTab"]).DiagnosticsTab(),
         }
         return LazyWidget(loaders[tab_name])
-    
+
     def _start_pulse_listener(self):
         """Initialize and start the Pulse event listener."""
         try:
@@ -153,17 +144,8 @@ class MainWindow(QMainWindow):
             self.pulse_thread = PulseThread(self.pulse)
             self.pulse.moveToThread(self.pulse_thread)
             self.pulse_thread.start()
-            print("[MainWindow] Pulse event listener started")
-        except Exception as e:
-            print(f"[MainWindow] Could not start Pulse listener: {e}")
-    
-    def _create_pulse_tab(self):
-        """Create Pulse tab and connect to event listener."""
-        from ui.pulse_tab import PulseTab
-        tab = PulseTab()
-        if self.pulse:
-            tab.connect_pulse(self.pulse)
-        return tab
+        except Exception:
+            pass
 
     def load_theme(self):
         theme_path = os.path.join(os.path.dirname(__file__), "..", "assets", "modern.qss")
@@ -173,7 +155,6 @@ class MainWindow(QMainWindow):
 
     def add_page(self, name, icon, widget):
         item = QListWidgetItem(f"{icon}   {name}")
-        # center vertically
         item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
         self.sidebar.addItem(item)
         self.content_area.addWidget(widget)
@@ -181,15 +162,41 @@ class MainWindow(QMainWindow):
 
     def change_page(self, index):
         self.content_area.setCurrentIndex(index)
-        
+
     def switch_to_tab(self, name):
-        """Helper for Dashboard to switch tabs"""
-        # Find index by name
+        """Helper for Dashboard and Command Palette to switch tabs."""
         for i in range(self.sidebar.count()):
             item = self.sidebar.item(i)
             if name in item.text():
                 self.sidebar.setCurrentRow(i)
                 return
+
+    def _setup_command_palette_shortcut(self):
+        """Register Ctrl+K shortcut for the command palette."""
+        shortcut = QShortcut(QKeySequence("Ctrl+K"), self)
+        shortcut.activated.connect(self._show_command_palette)
+
+    def _show_command_palette(self):
+        """Show the command palette dialog."""
+        try:
+            from ui.command_palette import CommandPalette
+            palette = CommandPalette(self.switch_to_tab, self)
+            palette.exec()
+        except ImportError:
+            pass
+
+    def _check_first_run(self):
+        """Show first-run wizard if this is the first launch."""
+        config_dir = os.path.expanduser("~/.config/loofi-fedora-tweaks")
+        first_run_file = os.path.join(config_dir, "first_run_complete")
+
+        if not os.path.exists(first_run_file):
+            try:
+                from ui.wizard import FirstRunWizard
+                wizard = FirstRunWizard(self)
+                wizard.exec()
+            except ImportError:
+                pass
 
     def setup_tray(self):
         from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
@@ -202,20 +209,20 @@ class MainWindow(QMainWindow):
                  self.tray_icon.setIcon(QIcon(icon_path))
             else:
                  self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
-             
+
             tray_menu = QMenu()
             show_action = QAction(self.tr("Show"), self)
             show_action.triggered.connect(self.show)
-            
+
             # Focus Mode toggle
             self.focus_action = QAction(self.tr("Focus Mode"), self)
             self.focus_action.setCheckable(True)
             self.focus_action.setChecked(FocusMode.is_active())
             self.focus_action.triggered.connect(self._toggle_focus_mode)
-            
+
             quit_action = QAction(self.tr("Quit"), self)
             quit_action.triggered.connect(self.quit_app)
-            
+
             tray_menu.addAction(show_action)
             tray_menu.addSeparator()
             tray_menu.addAction(self.focus_action)
@@ -230,7 +237,7 @@ class MainWindow(QMainWindow):
         """Toggle Focus Mode from tray."""
         result = FocusMode.toggle()
         self.focus_action.setChecked(FocusMode.is_active())
-        
+
         if self.tray_icon:
             message = result.get("message", "Focus Mode toggled")
             self.tray_icon.showMessage(
@@ -244,7 +251,7 @@ class MainWindow(QMainWindow):
         # Stop Pulse listener
         if self.pulse_thread:
             self.pulse_thread.stop()
-        
+
         if self.tray_icon:
             self.tray_icon.hide()
         from PyQt6.QtWidgets import QApplication
@@ -274,4 +281,3 @@ class MainWindow(QMainWindow):
         from ui.doctor import DependencyDoctor
         doctor = DependencyDoctor(self)
         doctor.exec()
-

@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QRadioButton, QButtonGroup, QTextEdit, QHBoxLayout, QComboBox
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 import threading
 import time
 

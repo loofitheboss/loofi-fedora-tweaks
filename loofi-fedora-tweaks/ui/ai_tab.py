@@ -171,7 +171,7 @@ class AITab(QWidget):
                 btn_layout.addWidget(start_btn)
             else:
                 stop_btn = QPushButton(self.tr("⏹️ Stop Service"))
-                stop_btn.setEnabled(False)  # TODO: implement stop
+                stop_btn.clicked.connect(self._stop_ollama)
                 btn_layout.addWidget(stop_btn)
         
         btn_layout.addStretch()
@@ -278,6 +278,15 @@ class AITab(QWidget):
         # Update status
         if result.success:
             self.ollama_status.setText("✅ Installed  |  🟢 Running")
+    
+    def _stop_ollama(self):
+        """Stop Ollama service."""
+        result = OllamaManager.stop_service()
+        self.log(result.message)
+        
+        # Update status
+        if result.success:
+            self.ollama_status.setText("✅ Installed  |  🔴 Stopped")
     
     def _refresh_models(self):
         """Refresh installed models list."""

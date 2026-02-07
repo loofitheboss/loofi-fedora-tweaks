@@ -109,8 +109,11 @@ class DiskManager:
                 if len(parts) >= 6:
                     mount = parts[0]
                     # Skip virtual filesystem mount points (not device sources)
-                    # e.g., /dev (devtmpfs), /run (tmpfs), /sys, /proc
-                    if mount.startswith(("/dev", "/run", "/sys", "/proc")):
+                    # e.g., /dev (devtmpfs), /sys, /proc
+                    # Keep /run/media (removable device auto-mounts)
+                    if mount.startswith("/run/media"):
+                        pass  # Allow removable media mounts
+                    elif mount.startswith(("/dev", "/run", "/sys", "/proc")):
                         continue
                     if mount in ("/boot", "/boot/efi"):
                         continue

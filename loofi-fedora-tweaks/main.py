@@ -5,6 +5,8 @@ import argparse
 # Ensure we can import from local modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from version import __version__
+
 
 def main():
     """Main entry point with argument parsing."""
@@ -25,7 +27,7 @@ def main():
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version="%(prog)s 9.2.0"
+        version=f"%(prog)s {__version__}"
     )
     
     args, remaining = parser.parse_known_args()

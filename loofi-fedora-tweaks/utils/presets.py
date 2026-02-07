@@ -16,6 +16,16 @@ class PresetManager:
         files = [f for f in os.listdir(self.PRESETS_DIR) if f.endswith(".json")]
         return [os.path.splitext(f)[0] for f in files]
 
+    @staticmethod
+    def _sanitize_name(name: str) -> str:
+        """Sanitize preset name to prevent path traversal."""
+        # Strip directory separators and dangerous characters
+        safe = os.path.basename(name)
+        safe = safe.replace("..", "").replace("/", "").replace("\\", "")
+        if not safe:
+            safe = "unnamed_preset"
+        return safe
+
     def save_preset(self, name):
         """Captures current system state and saves as JSON."""
         data = {
@@ -28,14 +38,16 @@ class PresetManager:
             "power_profile": self._get_power_profile()
         }
         
-        path = os.path.join(self.PRESETS_DIR, f"{name}.json")
+        safe_name = self._sanitize_name(name)
+        path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         with open(path, 'w') as f:
             json.dump(data, f, indent=4)
         return True
 
     def load_preset(self, name):
         """Loads a preset and applies settings."""
-        path = os.path.join(self.PRESETS_DIR, f"{name}.json")
+        safe_name = self._sanitize_name(name)
+        path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         if not os.path.exists(path):
             return False
             
@@ -56,7 +68,8 @@ class PresetManager:
         return data
 
     def delete_preset(self, name):
-        path = os.path.join(self.PRESETS_DIR, f"{name}.json")
+        safe_name = self._sanitize_name(name)
+        path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         if os.path.exists(path):
             os.remove(path)
             return True
@@ -64,7 +77,8 @@ class PresetManager:
     
     def save_preset_data(self, name, data):
         """Save preset from provided data (for community presets)."""
-        path = os.path.join(self.PRESETS_DIR, f"{name.lower().replace(' ', '_')}.json")
+        safe_name = self._sanitize_name(name)
+        path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         try:
             with open(path, 'w') as f:
                 json.dump({"name": name, **data}, f, indent=4)

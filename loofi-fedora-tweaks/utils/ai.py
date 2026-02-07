@@ -152,6 +152,36 @@ class OllamaManager:
             return Result(False, f"Failed to start: {e}")
     
     @classmethod
+    def stop_service(cls) -> Result:
+        """Stop the Ollama service."""
+        if not cls.is_installed():
+            return Result(False, "Ollama is not installed")
+        
+        if not cls.is_running():
+            return Result(True, "Ollama is already stopped")
+        
+        try:
+            # Try systemctl first (if running as a service)
+            result = subprocess.run(
+                ["systemctl", "--user", "stop", "ollama"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                return Result(True, "Ollama service stopped")
+            
+            # Fallback: kill the process
+            result = subprocess.run(
+                ["pkill", "-f", "ollama serve"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                return Result(True, "Ollama process stopped")
+            
+            return Result(False, "Could not stop Ollama")
+        except Exception as e:
+            return Result(False, f"Failed to stop: {e}")
+    
+    @classmethod
     def list_models(cls) -> list[dict]:
         """List installed models."""
         if not cls.is_installed():

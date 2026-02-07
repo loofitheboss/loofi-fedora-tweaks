@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QListWidg
 from PyQt6.QtGui import QIcon, QColor
 from PyQt6.QtCore import Qt
 import shutil
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class DependencyDoctor(QDialog):
     def __init__(self, parent=None):

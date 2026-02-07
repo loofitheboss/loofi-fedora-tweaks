@@ -1,6 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QMessageBox
 from PyQt6.QtCore import QTimer
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 import subprocess
 
 class GamingTab(QWidget):
@@ -59,9 +62,7 @@ class GamingTab(QWidget):
         self.check_gamemode_status()
 
     def handle_output(self, text):
-        print(text) # For debugging, main window usually handles central logging? 
-        # Actually we might want a local log or redirect to main window if possible.
-        # For now, let's just use QMessageBox for success/fail if needed or just let the runner do its thing.
+        logger.debug("Command output: %s", text.strip())
         pass
 
     def install_gamemode(self):

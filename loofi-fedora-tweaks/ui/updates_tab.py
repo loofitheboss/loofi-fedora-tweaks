@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout, QGroupBox, QProgressBar
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class UpdatesTab(QWidget):
     def __init__(self):

@@ -1,5 +1,5 @@
 import os
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class BatteryManager:
     SCRIPT_PATH = "/usr/local/bin/loofi-battery-limit.sh"

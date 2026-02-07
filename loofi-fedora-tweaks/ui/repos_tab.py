@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTextEdit, QGroupBox, QCheckBox
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class ReposTab(QWidget):
     def __init__(self):

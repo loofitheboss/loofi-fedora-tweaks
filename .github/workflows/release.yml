@@ -1,0 +1,51 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: dnf install -y rpm-build python3
+
+      - name: Build RPM
+        run: bash build_rpm.sh
+
+      - name: Get version from tag
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package-${{ steps.version.outputs.tag }}
+          path: rpmbuild/RPMS/noarch/*.rpm
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Loofi Fedora Tweaks ${{ steps.version.outputs.tag }}"
+          body: |
+            ## Loofi Fedora Tweaks ${{ steps.version.outputs.tag }}
+
+            ### Installation
+            ```bash
+            sudo dnf install ./loofi-fedora-tweaks-*.rpm
+            ```
+
+            ### What's new
+            See [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, '-rc') || contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-alpha') }}
+          files: rpmbuild/RPMS/noarch/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -321,10 +321,12 @@ class SystemPulse(QObject):
                 capture_output=True, text=True, check=False, timeout=5
             )
             state = result.stdout.strip().lower()
-            if "connected" in state:
-                return NetworkState.CONNECTED.value
+            if "disconnected" in state:
+                return NetworkState.DISCONNECTED.value
             elif "connecting" in state:
                 return NetworkState.CONNECTING.value
+            elif "connected" in state:
+                return NetworkState.CONNECTED.value
         except Exception:
             pass
         return NetworkState.DISCONNECTED.value

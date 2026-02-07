@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QProgressBar, QPushButton, QMessageBox
 from PyQt6.QtCore import QProcess, Qt
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 class FingerprintDialog(QDialog):
     def __init__(self, parent=None):
@@ -80,7 +83,7 @@ class FingerprintDialog(QDialog):
     def on_error(self):
         data = self.process.readAllStandardError().data().decode().strip()
         if data:
-            print(f"Enroll Error: {data}")
+            logger.error("Enroll error: %s", data)
             # Some prompts appear in stderr sometimes?
             if "Permission denied" in data:
                  self.lbl_status.setText("Error: Permission Denied.")

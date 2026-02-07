@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file.
 
+## [10.0.0] - 2026-02-07 "Zenith Update"
+
+### Major Changes
+
+- **Tab Consolidation**: 25 tabs reduced to 15 with sub-navigation via QTabWidget.
+- **BaseTab Class**: New `ui/base_tab.py` eliminates code duplication across all command-executing tabs.
+- **PrivilegedCommand Builder**: Centralized `utils/commands.py` for safe pkexec operations (argument arrays, not shell strings).
+- **Error Framework**: `utils/errors.py` with typed exceptions (DnfLockedError, PrivilegeError, etc.) and recovery hints.
+- **Hardware Profiles**: Auto-detect HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS via DMI sysfs data.
+
+### New Features
+
+- **First-Run Wizard**: Hardware auto-detection, use-case selection, and profile persistence on first launch.
+- **Command Palette**: Ctrl+K opens a fuzzy-search palette with 60+ feature entries and keyboard navigation.
+- **Shared Formatting**: `utils/formatting.py` with bytes_to_human(), seconds_to_human(), percent_bar().
+- **CI/CD Pipeline**: GitHub Actions workflows for lint (flake8), test (pytest), build (Fedora 43 rpmbuild), and tag-triggered releases.
+
+### Consolidated Tabs
+
+- **Maintenance**: Merges Updates + Cleanup + Overlays (Atomic overlay conditionally shown).
+- **Software**: Merges Apps + Repos into Applications and Repositories sub-tabs.
+- **System Monitor**: Merges Performance + Processes with live graphs and process management.
+- **Hardware**: Absorbs HP Tweaks (now hardware-agnostic) with audio, battery limit, and fingerprint cards.
+- **Security & Privacy**: Merges Security Center + Privacy tab with firewall, telemetry, and security updates sections.
+- **Desktop**: Merges Director + Theming into Window Manager and Theming sub-tabs.
+- **Development**: Merges Containers + Developer Tools with Distrobox GUI and toolchain installers.
+- **Community**: Merges Presets + Marketplace with community preset browsing.
+- **Automation**: Merges Scheduler + Replicator + Pulse for task scheduling, IaC exports, and event-driven automation.
+- **Diagnostics**: Merges Watchtower + Boot with services, journal viewer, boot analyzer.
+
+### CLI Enhancements
+
+- **`--json` Flag**: Machine-readable JSON output for all CLI commands.
+- **`doctor` Command**: Checks critical and optional tool dependencies.
+- **`hardware` Command**: Shows detected hardware profile.
+- **Version Sync**: CLI version now imports from centralized `version.py`.
+
+### New Files
+
+- `ui/base_tab.py` - Common base class for command-executing tabs
+- `ui/maintenance_tab.py` - Consolidated maintenance tab (Updates + Cleanup + Overlays)
+- `ui/software_tab.py` - Consolidated software tab (Apps + Repos)
+- `ui/monitor_tab.py` - Consolidated system monitor (Performance + Processes)
+- `ui/diagnostics_tab.py` - Consolidated diagnostics (Watchtower + Boot)
+- `ui/desktop_tab.py` - Consolidated desktop tab (Director + Theming)
+- `ui/development_tab.py` - Consolidated development tab (Containers + Developer)
+- `ui/community_tab.py` - Consolidated community tab (Presets + Marketplace)
+- `ui/automation_tab.py` - Consolidated automation tab (Scheduler + Replicator)
+- `ui/wizard.py` - First-run wizard with hardware detection
+- `ui/command_palette.py` - Ctrl+K fuzzy-search command palette
+- `utils/errors.py` - Centralized error hierarchy
+- `utils/commands.py` - PrivilegedCommand builder
+- `utils/formatting.py` - Shared formatting utilities
+- `utils/hardware_profiles.py` - Hardware profile auto-detection
+- `tests/conftest.py` - Shared test fixtures
+- `tests/test_v10_features.py` - 57 tests for v10 foundation modules
+- `tests/test_cli_enhanced.py` - 30 tests for enhanced CLI
+- `.github/workflows/ci.yml` - CI pipeline (lint, test, build)
+- `.github/workflows/release.yml` - Tag-triggered release pipeline
+
+### Tests
+
+- 87+ new unit tests covering errors, commands, formatting, hardware profiles, and CLI.
+- Shared test fixtures in `conftest.py` for mock_subprocess, temp_config_dir, mock_which.
+
+---
+
 ## [9.1.0] - 2026-02-07 "Pulse Update"
 
 ### Added

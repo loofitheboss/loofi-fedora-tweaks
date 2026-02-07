@@ -266,6 +266,11 @@ class ProcessManager:
         Returns:
             Tuple of (success, message).
         """
+        # Validate signal number (0-64 on Linux)
+        if not isinstance(signal, int) or signal < 0 or signal > 64:
+            return False, f"Invalid signal number: {signal}"
+        if not isinstance(pid, int) or pid <= 0:
+            return False, f"Invalid PID: {pid}"
         try:
             os.kill(pid, signal)
             return True, f"Signal {signal} sent to process {pid}"

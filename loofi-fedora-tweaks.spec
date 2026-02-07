@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        9.2.0
+Version:        10.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -52,6 +52,22 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 10.0.0-1
+- Zenith Update: Major consolidation and modernization release
+- Tab consolidation: 25 tabs reduced to 15 with sub-navigation
+- New BaseTab class eliminates code duplication across UI layer
+- First-run wizard with hardware auto-detection
+- Command palette (Ctrl+K) for global feature search
+- Hardware profiles: HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS
+- Centralized command builder (PrivilegedCommand) for safe pkexec operations
+- Error handling framework with recovery hints
+- CI/CD pipeline with GitHub Actions
+- New consolidated tabs: Maintenance, Software, Monitor, Desktop, Development, Community, Automation, Diagnostics
+- Privacy features merged into Security Center
+- HP Tweaks merged into Hardware tab (now hardware-agnostic)
+- CLI version synced, new doctor and suggest commands
+- 40+ new unit tests, shared test fixtures
+
 * Sat Feb 07 2026 Loofi <loofi@example.com> - 9.2.0-1
 - Pulse Update: Real-time performance monitoring and process management
 - Performance tab: Live CPU, RAM, Network, Disk I/O graphs

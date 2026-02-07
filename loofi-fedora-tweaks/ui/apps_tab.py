@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTextEdit, QScrollArea, QFrame
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 import json
 import subprocess
 import os

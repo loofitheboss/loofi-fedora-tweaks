@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit, QComboBox
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class ThemingTab(QWidget):
     def __init__(self):

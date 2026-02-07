@@ -336,7 +336,7 @@ class ContainersTab(QWidget):
     
     def _install_distrobox(self):
         """Install distrobox via DNF."""
-        from utils.process import CommandRunner
+        from utils.command_runner import CommandRunner
         
         self.runner = CommandRunner()
         self.runner.finished.connect(self._on_install_finished)

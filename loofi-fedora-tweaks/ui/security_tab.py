@@ -1,12 +1,14 @@
 """
 Security Tab - Proactive security hardening interface.
-Part of v8.5 "Sentinel" update.
+Part of v8.5 "Sentinel" update, expanded in v10.0 "Zenith" to absorb Privacy features.
 
 Features:
 - Port auditor with security score
 - USB Guard management
 - Application sandboxing
-- Firewall status
+- Firewall control (from Privacy tab)
+- Telemetry removal (from Privacy tab)
+- Security updates check (from Privacy tab)
 """
 
 from PyQt6.QtWidgets import (
@@ -21,6 +23,7 @@ from PyQt6.QtGui import QColor
 from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
 from utils.ports import PortAuditor
+from utils.command_runner import CommandRunner
 
 
 class SecurityTab(QWidget):
@@ -28,7 +31,28 @@ class SecurityTab(QWidget):
     
     def __init__(self):
         super().__init__()
+        self._setup_command_runner()
         self.init_ui()
+
+    def _setup_command_runner(self):
+        """Setup CommandRunner for privacy-related commands."""
+        self.privacy_runner = CommandRunner()
+        self.privacy_runner.output_received.connect(self._on_privacy_output)
+        self.privacy_runner.finished.connect(self._on_privacy_command_finished)
+
+    def _on_privacy_output(self, text):
+        """Handle output from privacy commands."""
+        self.log(text.rstrip('\n'))
+
+    def _on_privacy_command_finished(self, exit_code):
+        """Handle privacy command completion."""
+        self.log(self.tr("Command finished with exit code: {}").format(exit_code))
+
+    def _run_privacy_command(self, cmd, args, description=""):
+        """Execute a privacy-related command with output logging."""
+        if description:
+            self.log(description)
+        self.privacy_runner.run_command(cmd, args)
     
     def init_ui(self):
         """Initialize the UI."""
@@ -56,7 +80,16 @@ class SecurityTab(QWidget):
         
         # Sandbox Manager
         layout.addWidget(self._create_sandbox_section())
-        
+
+        # Firewall Control (absorbed from Privacy tab)
+        layout.addWidget(self._create_firewall_section())
+
+        # Telemetry & Tracking (absorbed from Privacy tab)
+        layout.addWidget(self._create_telemetry_section())
+
+        # Security Updates Check (absorbed from Privacy tab)
+        layout.addWidget(self._create_security_updates_section())
+
         # Log
         log_group = QGroupBox(self.tr("Activity Log"))
         log_layout = QVBoxLayout(log_group)
@@ -404,17 +437,90 @@ class SecurityTab(QWidget):
         if not cmd:
             self.log("Enter a command to run.")
             return
-        
+
         no_net = self.no_network_check.isChecked()
         private = self.private_home_check.isChecked()
-        
+
         result = SandboxManager.run_sandboxed(
             cmd.split(),
             no_network=no_net,
             private_home=private
         )
         self.log(result.message)
-    
+
+    # ==================== FIREWALL (from Privacy tab) ====================
+
+    def _create_firewall_section(self) -> QGroupBox:
+        """Create firewall control section (absorbed from PrivacyTab)."""
+        group = QGroupBox(self.tr("Firewall (firewalld)"))
+        fw_layout = QHBoxLayout(group)
+
+        btn_fw_status = QPushButton(self.tr("Check Status"))
+        btn_fw_status.clicked.connect(
+            lambda: self._run_privacy_command(
+                "systemctl", ["status", "firewalld"],
+                self.tr("Checking Firewall Status...")
+            )
+        )
+        fw_layout.addWidget(btn_fw_status)
+
+        btn_fw_enable = QPushButton(self.tr("Enable Firewall"))
+        btn_fw_enable.clicked.connect(
+            lambda: self._run_privacy_command(
+                "pkexec", ["systemctl", "enable", "--now", "firewalld"],
+                self.tr("Enabling Firewall...")
+            )
+        )
+        fw_layout.addWidget(btn_fw_enable)
+
+        btn_fw_disable = QPushButton(self.tr("Disable Firewall"))
+        btn_fw_disable.clicked.connect(
+            lambda: self._run_privacy_command(
+                "pkexec", ["systemctl", "disable", "--now", "firewalld"],
+                self.tr("Disabling Firewall...")
+            )
+        )
+        fw_layout.addWidget(btn_fw_disable)
+
+        return group
+
+    # ==================== TELEMETRY (from Privacy tab) ====================
+
+    def _create_telemetry_section(self) -> QGroupBox:
+        """Create telemetry removal section (absorbed from PrivacyTab)."""
+        group = QGroupBox(self.tr("Telemetry & Tracking"))
+        tele_layout = QVBoxLayout(group)
+
+        btn_remove_tele = QPushButton(self.tr("Remove Fedora Telemetry Packages"))
+        tele_cmd = "dnf remove -y abrt* gnome-abrt* || true"
+        btn_remove_tele.clicked.connect(
+            lambda: self._run_privacy_command(
+                "pkexec", ["sh", "-c", tele_cmd],
+                self.tr("Removing Telemetry Packages...")
+            )
+        )
+        tele_layout.addWidget(btn_remove_tele)
+
+        return group
+
+    # ==================== SECURITY UPDATES (from Privacy tab) ====================
+
+    def _create_security_updates_section(self) -> QGroupBox:
+        """Create security updates check section (absorbed from PrivacyTab)."""
+        group = QGroupBox(self.tr("Security Checks"))
+        sec_layout = QVBoxLayout(group)
+
+        btn_check_updates = QPushButton(self.tr("Check for Security Updates"))
+        btn_check_updates.clicked.connect(
+            lambda: self._run_privacy_command(
+                "dnf", ["check-update", "--security"],
+                self.tr("Checking for Security Updates...")
+            )
+        )
+        sec_layout.addWidget(btn_check_updates)
+
+        return group
+
     def log(self, message: str):
         """Add message to log."""
         self.log_text.append(message)

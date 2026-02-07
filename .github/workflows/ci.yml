@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install flake8
+      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest pytest-cov PyQt6
+      - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
+
+  build:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+      - run: dnf install -y rpm-build python3
+      - run: bash build_rpm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: "*.rpm"

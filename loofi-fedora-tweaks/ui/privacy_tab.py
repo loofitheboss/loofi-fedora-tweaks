@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit
-from utils.process import CommandRunner
+from utils.command_runner import CommandRunner
 
 class PrivacyTab(QWidget):
     def __init__(self):

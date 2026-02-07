@@ -1,14 +1,20 @@
 """
 Hardware Tab - Consolidated hardware control interface.
 CPU Governor, GPU Mode, Fan Control, Battery Limits
+Expanded in v10.0 "Zenith" to absorb Tweaks tab features:
+- Audio services restart (Pipewire)
+- Battery charge limit control
+- Fingerprint enrollment
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QComboBox, QGroupBox, QSlider, QFrame, QMessageBox, QGridLayout
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QComboBox, QGroupBox, QSlider, QFrame, QMessageBox, QGridLayout,
+    QTextEdit
 )
 from PyQt6.QtCore import Qt, QTimer
 from utils.hardware import HardwareManager
+from utils.command_runner import CommandRunner
 
 
 class HardwareTab(QWidget):
@@ -16,12 +22,48 @@ class HardwareTab(QWidget):
     
     def __init__(self):
         super().__init__()
+        self._setup_command_runner()
         self.init_ui()
-        
+
         # Auto-refresh timer for dynamic values
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.refresh_status)
         self.refresh_timer.start(5000)  # Refresh every 5 seconds
+
+    def _setup_command_runner(self):
+        """Setup CommandRunner for hardware commands (from Tweaks tab)."""
+        self.hw_runner = CommandRunner()
+        self.hw_runner.output_received.connect(self._on_hw_output)
+        self.hw_runner.finished.connect(self._on_hw_command_finished)
+
+    def _on_hw_output(self, text):
+        """Handle output from hardware commands."""
+        if hasattr(self, 'hw_output_area'):
+            self.hw_output_area.moveCursor(
+                self.hw_output_area.textCursor().MoveOperation.End
+            )
+            self.hw_output_area.insertPlainText(text)
+            self.hw_output_area.moveCursor(
+                self.hw_output_area.textCursor().MoveOperation.End
+            )
+
+    def _on_hw_command_finished(self, exit_code):
+        """Handle hardware command completion."""
+        if hasattr(self, 'hw_output_area'):
+            self.hw_output_area.moveCursor(
+                self.hw_output_area.textCursor().MoveOperation.End
+            )
+            self.hw_output_area.insertPlainText(
+                self.tr("\nCommand finished with exit code: {}\n").format(exit_code)
+            )
+
+    def _run_hw_command(self, cmd, args, description=""):
+        """Execute a hardware command with output logging."""
+        if hasattr(self, 'hw_output_area'):
+            self.hw_output_area.clear()
+            if description:
+                self.hw_output_area.setPlainText(description + "\n")
+        self.hw_runner.run_command(cmd, args)
     
     def init_ui(self):
         layout = QVBoxLayout()
@@ -53,8 +95,28 @@ class HardwareTab(QWidget):
         # Fan Control Card
         fan_card = self.create_fan_card()
         grid.addWidget(fan_card, 1, 1)
-        
+
+        # Audio Card (from Tweaks tab, row 2, col 0)
+        audio_card = self.create_audio_card()
+        grid.addWidget(audio_card, 2, 0)
+
+        # Battery Limit Card (from Tweaks tab, row 2, col 1)
+        battery_card = self.create_battery_limit_card()
+        grid.addWidget(battery_card, 2, 1)
+
+        # Fingerprint Card (from Tweaks tab, row 3, col 0)
+        fingerprint_card = self.create_fingerprint_card()
+        grid.addWidget(fingerprint_card, 3, 0)
+
         layout.addLayout(grid)
+
+        # Output area for hardware commands (from Tweaks tab)
+        layout.addWidget(QLabel(self.tr("Output Log:")))
+        self.hw_output_area = QTextEdit()
+        self.hw_output_area.setReadOnly(True)
+        self.hw_output_area.setMaximumHeight(150)
+        layout.addWidget(self.hw_output_area)
+
         layout.addStretch()
     
     def create_card(self, title: str, icon: str) -> QGroupBox:
@@ -328,6 +390,97 @@ class HardwareTab(QWidget):
             "3. Find a config for your laptop model\n"
             "4. Restart this app")
         )
+
+    # ==================== AUDIO (from Tweaks tab) ====================
+
+    def create_audio_card(self) -> QGroupBox:
+        """Create audio services restart card (from TweaksTab)."""
+        card = self.create_card(self.tr("Audio Services"), "🔊")
+        layout = QVBoxLayout(card)
+
+        desc = QLabel(self.tr("Restart Pipewire audio services if sound is not working"))
+        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        btn_restart_audio = QPushButton(self.tr("Restart Audio Services (Pipewire)"))
+        btn_restart_audio.clicked.connect(
+            lambda: self._run_hw_command(
+                "systemctl",
+                ["--user", "restart", "pipewire", "pipewire-pulse", "wireplumber"],
+                self.tr("Restarting Audio Services...")
+            )
+        )
+        layout.addWidget(btn_restart_audio)
+
+        return card
+
+    # ==================== BATTERY LIMIT (from Tweaks tab) ====================
+
+    def create_battery_limit_card(self) -> QGroupBox:
+        """Create battery charge limit card (from TweaksTab)."""
+        card = self.create_card(self.tr("Battery Charge Limit"), "🔋")
+        layout = QVBoxLayout(card)
+
+        desc = QLabel(self.tr("Limit battery charge to extend battery lifespan"))
+        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        btn_layout = QHBoxLayout()
+
+        btn_limit_80 = QPushButton(self.tr("Limit to 80%"))
+        btn_limit_80.clicked.connect(lambda: self._set_battery_limit(80))
+        btn_layout.addWidget(btn_limit_80)
+
+        btn_limit_100 = QPushButton(self.tr("Limit to 100% (Full)"))
+        btn_limit_100.clicked.connect(lambda: self._set_battery_limit(100))
+        btn_layout.addWidget(btn_limit_100)
+
+        layout.addLayout(btn_layout)
+
+        return card
+
+    def _set_battery_limit(self, limit):
+        """Set battery charge limit using BatteryManager."""
+        from utils.battery import BatteryManager
+        manager = BatteryManager()
+        cmd, args = manager.set_limit(limit)
+
+        if cmd:
+            self._run_hw_command(
+                cmd, args,
+                self.tr("Setting Battery Limit to {}% (Persistent)...").format(limit)
+            )
+        else:
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText(
+                    self.tr("Failed to prepare battery script.\n")
+                )
+
+    # ==================== FINGERPRINT (from Tweaks tab) ====================
+
+    def create_fingerprint_card(self) -> QGroupBox:
+        """Create fingerprint enrollment card (from TweaksTab)."""
+        card = self.create_card(self.tr("Fingerprint Reader"), "👆")
+        layout = QVBoxLayout(card)
+
+        desc = QLabel(self.tr("Enroll your fingerprint for authentication"))
+        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        btn_enroll_finger = QPushButton(self.tr("Enroll Fingerprint (GUI)"))
+        btn_enroll_finger.clicked.connect(self._enroll_fingerprint)
+        layout.addWidget(btn_enroll_finger)
+
+        return card
+
+    def _enroll_fingerprint(self):
+        """Open the fingerprint enrollment dialog."""
+        from ui.fingerprint_dialog import FingerprintDialog
+        dialog = FingerprintDialog(self)
+        dialog.exec()
     
     # ==================== UTILITIES ====================
     
