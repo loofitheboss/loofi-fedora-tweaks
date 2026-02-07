@@ -16,6 +16,7 @@ class SafetyManager:
             # Also check process list for 'dnf', 'yum', 'rpm'
             # pgrep returns 0 if found, 1 if not.
             subprocess.check_call(["pgrep", "-f", "dnf|yum|rpm"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call(["pgrep", "-f", "dnf|dnf5|yum|rpm"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return True
         except subprocess.CalledProcessError:
             return False
