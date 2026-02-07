@@ -14,7 +14,7 @@ from ui.network_tab import NetworkTab # New import
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.0.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.0.1 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -54,10 +54,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.privacy_tab, "Privacy & Security")
         self.tabs.addTab(self.theming_tab, "Theming")
         
-        # New Repos Tab (Phase 2)
-        from ui.repos_tab import ReposTab
-        self.repos_tab = ReposTab()
-        self.tabs.addTab(self.repos_tab, "Repositories")
+
 
         
         # Check dependencies

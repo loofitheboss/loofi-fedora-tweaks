@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit
 from utils.process import CommandRunner
 
-class AdvancedTweaksTab(QWidget):
+class AdvancedTab(QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
