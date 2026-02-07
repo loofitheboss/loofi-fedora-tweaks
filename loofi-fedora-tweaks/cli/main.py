@@ -20,6 +20,10 @@ from utils.system import SystemManager
 from utils.disk import DiskManager
 from utils.monitor import SystemMonitor
 from utils.plugin_base import PluginLoader
+from utils.performance import PerformanceCollector
+from utils.processes import ProcessManager
+from utils.temperature import TemperatureManager
+from utils.network_monitor import NetworkMonitor
 
 
 def run_operation(op_result):
@@ -112,7 +116,7 @@ def cmd_network(args):
 def cmd_info(args):
     """Show system information."""
     print("═══════════════════════════════════════════")
-    print("   Loofi Fedora Tweaks v9.0.0 CLI")
+    print("   Loofi Fedora Tweaks v9.2.0 CLI")
     print("═══════════════════════════════════════════")
     print(f"🖥️  System: {'Atomic' if SystemManager.is_atomic() else 'Traditional'} Fedora")
     print(f"📦 Package Manager: {SystemManager.get_package_manager()}")
@@ -205,13 +209,114 @@ def cmd_disk(args):
     return 0
 
 
+def cmd_processes(args):
+    """Show top processes."""
+    print("═══════════════════════════════════════════")
+    print("   Process Monitor")
+    print("═══════════════════════════════════════════")
+
+    counts = ProcessManager.get_process_count()
+    print(f"\n📊 Total: {counts['total']} | Running: {counts['running']} | Sleeping: {counts['sleeping']} | Zombie: {counts['zombie']}")
+
+    n = getattr(args, "count", 10)
+    sort_by = getattr(args, "sort", "cpu")
+
+    if sort_by == "memory":
+        processes = ProcessManager.get_top_by_memory(n)
+        print(f"\n🔍 Top {n} by Memory:")
+    else:
+        processes = ProcessManager.get_top_by_cpu(n)
+        print(f"\n🔍 Top {n} by CPU:")
+
+    print(f"{'PID':>7}  {'CPU%':>6}  {'MEM%':>6}  {'Memory':>10}  {'User':<12}  {'Name'}")
+    print("─" * 70)
+    for p in processes:
+        mem_human = ProcessManager.bytes_to_human(p.memory_bytes)
+        print(f"{p.pid:>7}  {p.cpu_percent:>5.1f}%  {p.memory_percent:>5.1f}%  {mem_human:>10}  {p.user:<12}  {p.name}")
+
+    return 0
+
+
+def cmd_temperature(args):
+    """Show temperature readings."""
+    print("═══════════════════════════════════════════")
+    print("   Temperature Monitor")
+    print("═══════════════════════════════════════════")
+
+    sensors = TemperatureManager.get_all_sensors()
+    if not sensors:
+        print("\n⚠️  No temperature sensors found.")
+        print("   Ensure lm_sensors is installed: sudo dnf install lm_sensors")
+        return 1
+
+    for sensor in sensors:
+        if sensor.critical and sensor.current >= sensor.critical:
+            icon = "🔴"
+        elif sensor.high and sensor.current >= sensor.high:
+            icon = "🟡"
+        else:
+            icon = "🟢"
+
+        line = f"{icon} {sensor.label:<20} {sensor.current:>5.1f}°C"
+        if sensor.high:
+            line += f"  (high: {sensor.high:.0f}°C)"
+        if sensor.critical:
+            line += f"  (crit: {sensor.critical:.0f}°C)"
+        print(line)
+
+    if len(sensors) > 1:
+        avg_temp = sum(s.current for s in sensors) / len(sensors)
+        hottest = max(sensors, key=lambda s: s.current)
+        print(f"\n📊 Summary: avg {avg_temp:.1f}°C | max {hottest.current:.1f}°C ({hottest.label})")
+
+    return 0
+
+
+def cmd_netmon(args):
+    """Show network interface stats."""
+    print("═══════════════════════════════════════════")
+    print("   Network Monitor")
+    print("═══════════════════════════════════════════")
+
+    interfaces = NetworkMonitor.get_all_interfaces()
+    if not interfaces:
+        print("\n⚠️  No network interfaces found.")
+        return 1
+
+    for iface in interfaces:
+        status = "UP" if iface.is_up else "DOWN"
+        icon = "🟢" if iface.is_up else "🔴"
+        print(f"\n{icon} {iface.name} ({iface.type}) [{status}]")
+        if iface.ip_address:
+            print(f"   IP: {iface.ip_address}")
+        print(f"   RX: {NetworkMonitor.bytes_to_human(iface.bytes_recv)}  TX: {NetworkMonitor.bytes_to_human(iface.bytes_sent)}")
+        if iface.recv_rate > 0 or iface.send_rate > 0:
+            print(f"   Rate: ↓{NetworkMonitor.bytes_to_human(int(iface.recv_rate))}/s  ↑{NetworkMonitor.bytes_to_human(int(iface.send_rate))}/s")
+
+    summary = NetworkMonitor.get_bandwidth_summary()
+    print(f"\n📊 Total: ↓{NetworkMonitor.bytes_to_human(summary['total_recv'])} ↑{NetworkMonitor.bytes_to_human(summary['total_sent'])}")
+
+    if getattr(args, "connections", False):
+        connections = NetworkMonitor.get_active_connections()
+        if connections:
+            print(f"\n🔗 Active Connections ({len(connections)}):")
+            print(f"{'Proto':<6} {'Local':>21} {'Remote':>21} {'State':<14} {'Process'}")
+            print("─" * 80)
+            for conn in connections[:20]:
+                local = f"{conn.local_addr}:{conn.local_port}"
+                remote = f"{conn.remote_addr}:{conn.remote_port}" if conn.remote_addr != "0.0.0.0" else "*"
+                print(f"{conn.protocol:<6} {local:>21} {remote:>21} {conn.state:<14} {conn.process_name}")
+
+    return 0
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     parser = argparse.ArgumentParser(
         prog="loofi",
         description="Loofi Fedora Tweaks - System management CLI"
     )
-    parser.add_argument("-v", "--version", action="version", version="9.0.0")
+    parser.add_argument("-v", "--version", action="version", version="9.2.0")
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
@@ -224,7 +329,19 @@ def main(argv: Optional[List[str]] = None):
     # Disk command
     disk_parser = subparsers.add_parser("disk", help="Disk usage information")
     disk_parser.add_argument("--details", action="store_true", help="Show large directories")
-    
+
+    # Process monitor command
+    proc_parser = subparsers.add_parser("processes", help="Show top processes")
+    proc_parser.add_argument("-n", "--count", type=int, default=10, help="Number of processes to show")
+    proc_parser.add_argument("--sort", choices=["cpu", "memory"], default="cpu", help="Sort by")
+
+    # Temperature command
+    temp_parser = subparsers.add_parser("temperature", help="Show temperature readings")
+
+    # Network monitor command
+    netmon_parser = subparsers.add_parser("netmon", help="Network interface monitoring")
+    netmon_parser.add_argument("--connections", action="store_true", help="Show active connections")
+
     # Cleanup subcommand
     cleanup_parser = subparsers.add_parser("cleanup", help="System cleanup operations")
     cleanup_parser.add_argument(
@@ -274,6 +391,12 @@ def main(argv: Optional[List[str]] = None):
         return cmd_health(args)
     elif args.command == "disk":
         return cmd_disk(args)
+    elif args.command == "processes":
+        return cmd_processes(args)
+    elif args.command == "temperature":
+        return cmd_temperature(args)
+    elif args.command == "netmon":
+        return cmd_netmon(args)
     elif args.command == "cleanup":
         return cmd_cleanup(args)
     elif args.command == "tweak":

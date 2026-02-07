@@ -25,7 +25,7 @@ def main():
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version="%(prog)s 9.0.0"
+        version="%(prog)s 9.2.0"
     )
     
     args, remaining = parser.parse_known_args()

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        9.0.0
+Version:        9.2.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -52,6 +52,15 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 9.2.0-1
+- Pulse Update: Real-time performance monitoring and process management
+- Performance tab: Live CPU, RAM, Network, Disk I/O graphs
+- Process monitor tab: Top processes with kill/renice support
+- Temperature monitoring via hwmon sensors
+- Network traffic monitor with per-interface bandwidth
+- Dashboard auto-refresh with CPU load indicator
+- CLI commands: processes, temperature, netmon
+
 * Fri Feb 07 2026 Loofi <loofi@example.com> - 9.0.0-1
 - Director Update: Window management for KDE, Hyprland, Sway
 - Director tab: Tiling presets, workspace templates, dotfile sync

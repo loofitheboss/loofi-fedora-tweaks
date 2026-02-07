@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.2.0] - 2026-02-07 "Pulse Update"
+
+### Added
+
+- **Performance Tab**: Live graphs for CPU, RAM, Network, and Disk I/O with real-time 60-second history.
+- **Process Monitor Tab**: Top processes by CPU/RAM with kill/renice functionality and right-click context menu.
+- **Temperature Monitoring**: System temperature tracking for CPU, GPU, and NVMe drives via hwmon.
+- **Network Traffic Monitor**: Per-interface bandwidth monitoring with connection tracking.
+- **Dashboard Auto-Refresh**: Health metrics now auto-refresh every 5 seconds with CPU load indicator.
+- **CLI `processes` Command**: View top processes by CPU or memory usage.
+- **CLI `temperature` Command**: Check system temperature sensors from terminal.
+- **CLI `netmon` Command**: Monitor network interfaces and active connections.
+
+### New Files
+
+- `utils/performance.py` - CPU, RAM, Disk I/O, and Network I/O data collection from /proc
+- `utils/processes.py` - Process listing, monitoring, kill/renice management
+- `utils/temperature.py` - Temperature sensor reading via /sys/class/hwmon
+- `utils/network_monitor.py` - Network interface stats and connection tracking
+- `ui/performance_tab.py` - Real-time performance graphs with QTimer refresh
+- `ui/processes_tab.py` - Process monitor with sortable tree view
+- `tests/test_pulse_features.py` - Unit tests for all v9.2 modules
+
+---
+
 ## [9.1.0] - 2026-02-07 "Vital Signs Update"
 
 ### Added

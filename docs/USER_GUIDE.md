@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide 📖
 
-> **Version 8.0.0 "Replicator Update"**  
+> **Version 9.2.0 "Pulse Update"**  
 > Complete documentation for all features and functionality.
 
 ---
@@ -9,14 +9,20 @@
 
 1. [Quick Start](#quick-start)
 2. [Dashboard](#dashboard)
-3. [Developer Tools (v7.1+)](#developer-tools)
-4. [Watchtower Diagnostics (v7.5+)](#watchtower-diagnostics)
-5. [Replicator - IaC Export (v8.0+)](#replicator---iac-export)
-6. [Boot Management](#boot-management)
-7. [Marketplace & Drift Detection](#marketplace--drift-detection)
-8. [CLI Reference](#cli-reference)
-9. [All Tabs Overview](#all-tabs-overview)
-10. [Troubleshooting](#troubleshooting)
+3. [Performance Monitor (v9.2)](#performance-monitor)
+4. [Process Manager (v9.2)](#process-manager)
+5. [Temperature Monitor (v9.2)](#temperature-monitor)
+6. [Network Traffic Monitor (v9.2)](#network-traffic-monitor)
+7. [Developer Tools (v7.1+)](#developer-tools)
+8. [Watchtower Diagnostics (v7.5+)](#watchtower-diagnostics)
+9. [Replicator - IaC Export (v8.0+)](#replicator---iac-export)
+10. [Security Center (v8.5+)](#security-center)
+11. [Director - Window Management (v9.0)](#director---window-management)
+12. [Boot Management](#boot-management)
+13. [Marketplace & Drift Detection](#marketplace--drift-detection)
+14. [CLI Reference](#cli-reference)
+15. [All Tabs Overview](#all-tabs-overview)
+16. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -59,6 +65,124 @@ The **Dashboard** is your system health overview:
 | **Run Cleanup** | Clean DNF cache, vacuum journal, TRIM SSD |
 | **Check Updates** | Check for system updates |
 | **Apply Preset** | Apply your saved configuration preset |
+
+### Auto-Refresh (v9.2)
+
+The dashboard now auto-refreshes every 5 seconds with live system health:
+
+| Indicator | Description |
+|-----------|-------------|
+| **CPU Load** | Real-time CPU usage with color-coded status (green/yellow/red) |
+| **Memory** | Current RAM usage updated automatically |
+| **Disk** | Disk space utilization |
+
+---
+
+## Performance Monitor
+
+### 📊 Performance Tab (v9.2)
+
+Real-time system performance graphs with 60-second rolling history:
+
+| Graph | Data Source | Description |
+|-------|------------|-------------|
+| **CPU Usage** | `/proc/stat` | Per-core and total CPU utilization percentage |
+| **Memory** | `/proc/meminfo` | Used, cached, and available RAM |
+| **Disk I/O** | `/proc/diskstats` | Read/write throughput in MB/s |
+| **Network I/O** | `/proc/net/dev` | Upload/download bandwidth per interface |
+
+All data is collected directly from `/proc` without external dependencies (no psutil required).
+
+**Key Features:**
+- Graphs auto-update every 2 seconds
+- 60-second rolling window with history
+- Human-readable bandwidth display (KB/s, MB/s, GB/s)
+- Catppuccin Mocha color-coded charts
+
+---
+
+## Process Manager
+
+### 🔍 Process Manager Tab (v9.2)
+
+Monitor and manage running processes with a sortable tree view:
+
+| Column | Description |
+|--------|-------------|
+| **PID** | Process ID |
+| **Name** | Process name from /proc/[pid]/stat |
+| **User** | Process owner |
+| **CPU %** | CPU usage (calculated from /proc/[pid]/stat deltas) |
+| **Memory %** | RAM usage percentage |
+| **Memory** | Absolute memory in human-readable format |
+| **State** | Process state (R=Running, S=Sleeping, Z=Zombie, etc.) |
+
+**Context Menu (Right-Click):**
+
+| Action | Description |
+|--------|-------------|
+| **Kill (SIGTERM)** | Gracefully terminate the process |
+| **Force Kill (SIGKILL)** | Forcefully terminate the process |
+| **Renice** | Change process priority (-20 to 19) |
+
+Privileged operations automatically escalate via `pkexec` when needed.
+
+**Sorting & Filtering:**
+- Click column headers to sort by any field
+- Filter by current user only
+- Top processes by CPU or memory usage
+
+---
+
+## Temperature Monitor
+
+### 🌡️ Temperature Monitoring (v9.2)
+
+Hardware temperature monitoring via the Linux hwmon sysfs interface:
+
+| Sensor Type | hwmon Drivers | Example |
+|-------------|---------------|---------|
+| **CPU** | coretemp, k10temp, zenpower | Intel Core, AMD Ryzen |
+| **GPU** | amdgpu, nouveau, nvidia | Discrete graphics cards |
+| **Disk** | nvme, drivetemp | NVMe SSDs, SATA drives |
+| **Other** | Various | Motherboard, chipset sensors |
+
+**Health Status Levels:**
+
+| Status | Condition | Indicator |
+|--------|-----------|-----------|
+| **OK** | All sensors below thresholds | Green |
+| **Warning** | Any sensor at/above high threshold | Yellow |
+| **Critical** | Any sensor at/above critical threshold | Red |
+
+Temperature data is read from `/sys/class/hwmon/hwmon*/temp*_input` files.
+
+---
+
+## Network Traffic Monitor
+
+### 📡 Network Traffic Monitor (v9.2)
+
+Per-interface network monitoring with bandwidth tracking and connection listing:
+
+| Feature | Description |
+|---------|-------------|
+| **Interface Stats** | Bytes sent/received, packet counts per interface |
+| **Bandwidth Calculation** | Real-time upload/download rates |
+| **Interface Classification** | Auto-detect WiFi, Ethernet, Loopback, VPN |
+| **Active Connections** | TCP/UDP connections with remote addresses |
+| **Process Mapping** | Map connections to owning processes via /proc/[pid]/fd |
+
+**Interface Types:**
+
+| Pattern | Type |
+|---------|------|
+| `wl*` | WiFi |
+| `en*`, `eth*` | Ethernet |
+| `lo` | Loopback |
+| `tun*`, `wg*` | VPN |
+
+Data sources: `/proc/net/dev`, `/proc/net/tcp`, `/proc/net/udp`, `/sys/class/net/*/operstate`
 
 ---
 
@@ -243,6 +367,20 @@ loofi network dns --provider cloudflare
 loofi network dns --provider google
 ```
 
+### System Monitoring (v9.2)
+
+```bash
+loofi health                  # System health overview
+loofi disk                    # Disk usage analysis
+loofi disk --details          # Include large directory listing
+loofi processes               # Top 15 processes by CPU
+loofi processes --sort memory # Sort by memory usage
+loofi processes -n 25         # Show top 25 processes
+loofi temperature             # Hardware temperature readings
+loofi netmon                  # Network interface stats
+loofi netmon --connections    # Include active connections
+```
+
 ---
 
 ## All Tabs Overview
@@ -267,6 +405,11 @@ loofi network dns --provider google
 | **Developer** | 🛠️ | Version managers, VS Code **(v7.1)** |
 | **Watchtower** | 🔭 | Services, boot, journal **(v7.5)** |
 | **Replicator** | 🔄 | Ansible/Kickstart export **(v8.0)** |
+| **AI Lab** | 🧠 | Local AI setup (Ollama) **(v8.1)** |
+| **Security** | 🛡️ | Port audit, USB Guard **(v8.5)** |
+| **Director** | 🎬 | Window management **(v9.0)** |
+| **Performance** | 📊 | Live CPU, RAM, I/O graphs **(v9.2)** |
+| **Processes** | 🔍 | Process monitor with kill/renice **(v9.2)** |
 | **Repos** | 📁 | Repository management |
 | **Privacy** | 🔒 | Telemetry settings |
 | **Theming** | 🎨 | GTK/Qt themes |
@@ -302,4 +445,4 @@ Use the **Watchtower** → **Journal** → **🆘 Export Panic Log** button to g
 
 ---
 
-*Documentation last updated: v8.0.0 - February 2026*
+*Documentation last updated: v9.2.0 - February 2026*

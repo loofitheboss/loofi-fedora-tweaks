@@ -1,17 +1,17 @@
-# Loofi Fedora Tweaks v9.0.0 "Director Update" 🎬
+# Loofi Fedora Tweaks v9.2.0 "Pulse Update" 📊
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
 </p>
 
 <p align="center">
-  <strong>Complete Fedora System Management with AI, Security & Window Management</strong><br>
+  <strong>Complete Fedora System Management with Real-time Monitoring, AI, Security &amp; Window Management</strong><br>
   <em>Optimized for HP Elitebook 840 G8 | Supports Atomic Variants | Developer-Focused</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v9.0.0">
-    <img src="https://img.shields.io/badge/Release-v9.0.0-blue?style=for-the-badge&logo=github" alt="Release v9.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v9.2.0">
+    <img src="https://img.shields.io/badge/Release-v9.2.0-blue?style=for-the-badge&logo=github" alt="Release v9.2.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,7 +20,24 @@
 
 ---
 
-## 🚀 What's New in v9.0?
+## What's New in v9.2?
+
+### Pulse Update - Real-time System Monitoring (v9.2)
+
+Live system monitoring with real-time graphs and process management!
+
+* **Performance Graphs**: Live CPU, RAM, Disk I/O, and Network I/O graphs with 60-second history
+* **Process Monitor**: Top processes by CPU/Memory with kill and renice support
+* **Temperature Monitoring**: CPU, GPU, and NVMe drive temperatures via hwmon sensors
+* **Network Traffic Monitor**: Per-interface bandwidth tracking with active connection listing
+* **Dashboard Auto-Refresh**: Health metrics update every 5 seconds with CPU load indicator
+* **New CLI Commands**: `loofi processes`, `loofi temperature`, `loofi netmon`
+
+### Vital Signs Update - System Health (v9.1)
+
+* **Disk Space Monitoring**: Usage stats, health checks, and large directory finder
+* **System Resource Monitor**: Memory, CPU, and uptime tracking
+* **CLI Health Check**: Quick system health overview from terminal
 
 ### 🎬 Director Update - Window Management (v9.0)
 
@@ -59,6 +76,16 @@ Local AI with hardware-accelerated inference!
 
 ## ✨ Feature Overview
 
+### Pulse - Real-time Monitoring (v9.2)
+
+| Feature | Description |
+|---------|-------------|
+| **Performance Graphs** | Live CPU, RAM, Disk I/O, Network I/O with 60s rolling history |
+| **Process Monitor** | Sortable process table with kill/renice context menu |
+| **Temperature Sensors** | hwmon-based CPU, GPU, NVMe temperature readings |
+| **Network Traffic** | Per-interface bandwidth and active TCP/UDP connections |
+| **Dashboard Auto-Refresh** | 5-second health metric updates with CPU load |
+
 ### 🎬 Director - Window Management (v9.0)
 
 | Feature | Description |
@@ -87,6 +114,10 @@ Local AI with hardware-accelerated inference!
 
 ### Previous Features
 
+* **📊 Performance**: Live CPU, RAM, Disk I/O, Network I/O graphs
+* **🔍 Processes**: Process monitor with kill/renice
+* **🌡️ Temperature**: Hardware temperature sensors
+* **📡 Network Monitor**: Per-interface bandwidth tracking
 * **🔄 Replicator**: Ansible/Kickstart export
 * **🔭 Watchtower**: System diagnostics
 * **📦 Containers**: Distrobox GUI
@@ -110,7 +141,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### 📥 Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v9.0.0/loofi-fedora-tweaks-9.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v9.2.0/loofi-fedora-tweaks-9.2.0-1.fc43.noarch.rpm
 ```
 
 ### 🖥️ Run from Source
@@ -132,6 +163,11 @@ loofi-fedora-tweaks
 
 # CLI commands
 loofi info                    # System information
+loofi health                  # System health check
+loofi disk                    # Disk usage analysis
+loofi processes               # Top processes by CPU/memory
+loofi temperature             # Hardware temperature sensors
+loofi netmon                  # Network interface monitoring
 loofi cleanup                 # Run full cleanup
 loofi tweak power --profile performance
 loofi network dns --provider cloudflare
@@ -142,7 +178,7 @@ loofi --version
 
 ---
 
-## 📋 Tabs Overview (20 Tabs)
+## 📋 Tabs Overview (25 Tabs)
 
 | Tab | Description |
 |:----|:------------|
@@ -167,6 +203,8 @@ loofi --version
 | **🧠 AI Lab** | Local AI setup **(v8.1 NEW!)** |
 | **🛡️ Security** | Port audit, USB Guard **(v8.5 NEW!)** |
 | **🎬 Director** | Window management **(v9.0 NEW!)** |
+| **📊 Performance** | Live performance graphs with CPU, RAM, I/O **(v9.2 NEW!)** |
+| **🔍 Processes** | Process monitor with kill/renice **(v9.2 NEW!)** |
 | **🎨 Theming** | GTK/Qt theme settings |
 | **🔒 Privacy** | Telemetry and privacy tweaks |
 | **📦 Overlays** | rpm-ostree packages (Atomic only) |

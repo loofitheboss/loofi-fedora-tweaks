@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout, QFrame
 )
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, QTimer
 from PyQt6.QtGui import QIcon
 import shutil
 import subprocess
@@ -44,6 +44,10 @@ class DashboardTab(QWidget):
         # Memory Usage
         self.lbl_memory = QLabel(self.tr("🧠 Memory: Checking..."))
         h_layout.addWidget(self.lbl_memory)
+
+        # CPU Load
+        self.lbl_cpu = QLabel(self.tr("🔥 CPU: Checking..."))
+        h_layout.addWidget(self.lbl_cpu)
         
         # System Type (Atomic/Workstation)
         variant = SystemManager.get_variant_name()
@@ -100,6 +104,11 @@ class DashboardTab(QWidget):
         
         # Start initial checks
         self.check_status()
+
+        # Auto-refresh health metrics every 5 seconds
+        self.refresh_timer = QTimer(self)
+        self.refresh_timer.timeout.connect(self.check_status)
+        self.refresh_timer.start(5000)
 
     def create_card(self, title):
         card = QFrame()
@@ -182,6 +191,25 @@ class DashboardTab(QWidget):
         else:
             self.lbl_memory.setText(self.tr("🧠 Memory: N/A"))
             self.lbl_memory.setStyleSheet("color: #6c7086;")
+
+        # CPU load check
+        cpu = SystemMonitor.get_cpu_info()
+        if cpu:
+            if cpu.load_percent >= 90:
+                self.lbl_cpu.setText(f"🔥 CPU: {cpu.load_percent}%")
+                self.lbl_cpu.setStyleSheet("color: #f38ba8; font-weight: bold;")
+            elif cpu.load_percent >= 60:
+                self.lbl_cpu.setText(f"🔥 CPU: {cpu.load_percent}%")
+                self.lbl_cpu.setStyleSheet("color: #f9e2af; font-weight: bold;")
+            else:
+                self.lbl_cpu.setText(f"🔥 CPU: {cpu.load_1min}")
+                self.lbl_cpu.setStyleSheet("color: #a6e3a1;")
+            self.lbl_cpu.setToolTip(
+                f"Load: {cpu.load_1min}/{cpu.load_5min}/{cpu.load_15min} ({cpu.core_count} cores)"
+            )
+        else:
+            self.lbl_cpu.setText(self.tr("🔥 CPU: N/A"))
+            self.lbl_cpu.setStyleSheet("color: #6c7086;")
         
     def go_to_cleanup(self):
         # Switch to Cleanup Tab (index 6, roughly)

@@ -16,7 +16,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.0.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.2.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -83,6 +83,10 @@ class MainWindow(QMainWindow):
         
         # v9.0: Director - Window Management
         self.add_page(self.tr("Director"), "🎬", self._lazy_tab("director"))
+
+        # v9.2: Pulse - Real-time monitoring
+        self.add_page(self.tr("Performance"), "📊", self._lazy_tab("performance"))
+        self.add_page(self.tr("Processes"), "🔍", self._lazy_tab("processes"))
         
         # Atomic-only: Overlays tab
         if SystemManager.is_atomic():
@@ -126,6 +130,8 @@ class MainWindow(QMainWindow):
             "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
             "security": lambda: __import__("ui.security_tab", fromlist=["SecurityTab"]).SecurityTab(),
             "director": lambda: __import__("ui.director_tab", fromlist=["DirectorTab"]).DirectorTab(),
+            "performance": lambda: __import__("ui.performance_tab", fromlist=["PerformanceTab"]).PerformanceTab(self),
+            "processes": lambda: __import__("ui.processes_tab", fromlist=["ProcessesTab"]).ProcessesTab(),
         }
         return LazyWidget(loaders[tab_name])
 
