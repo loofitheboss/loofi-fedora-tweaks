@@ -1,17 +1,17 @@
-# Loofi Fedora Tweaks v7.0.0 "Community Update" 🌐
+# Loofi Fedora Tweaks v8.0.0 "Replicator Update" 🔄
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
 </p>
 
 <p align="center">
-  <strong>The Ultimate System Management Utility for Fedora 43+ KDE</strong><br>
-  <em>Optimized for HP Elitebook 840 G8 | Supports Atomic Variants</em>
+  <strong>The Ultimate System Management & Developer Tooling for Fedora 43+ KDE</strong><br>
+  <em>Optimized for HP Elitebook 840 G8 | Supports Atomic Variants | Developer-Focused</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v7.0.0">
-    <img src="https://img.shields.io/badge/Release-v7.0.0-blue?style=for-the-badge&logo=github" alt="Release v7.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v8.0.0">
+    <img src="https://img.shields.io/badge/Release-v8.0.0-blue?style=for-the-badge&logo=github" alt="Release v8.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,15 +20,31 @@
 
 ---
 
-## 🚀 What's New in v7.0?
+## 🚀 What's New in v8.0?
 
-### 🌐 Community Update
+### 🔄 Replicator Update - Infrastructure as Code
 
-Connect with the community through preset sharing and configuration tracking!
+Export your entire system configuration and replicate it anywhere!
 
-* **Preset Marketplace**: Browse and download community presets from GitHub.
-* **Configuration Drift Detection**: Track when your system changes from applied presets.
-* **Marketplace Tab**: New UI for discovering and applying community configurations.
+* **Ansible Playbook Export**: Generate standard Ansible playbooks from your installed packages, Flatpaks, and GNOME settings.
+* **Kickstart Generator**: Create Anaconda-compatible .ks files for automated Fedora reinstalls.
+* **No Loofi Required**: Exported configs work with standard tools—use them anywhere.
+
+### 🔭 Watchtower Update (v7.5) - System Diagnostics
+
+* **Gaming-Focused Service Manager**: Filter services by gaming, failed, or active states.
+* **Boot Analyzer**: Visualize boot time breakdown with optimization suggestions.
+* **Panic Button**: One-click log export ready for support forums.
+
+### 🛠️ Developer Update (v7.1) - Containers & Dev Tools
+
+* **Distrobox GUI**: Create, enter, and manage containers graphically.
+* **Language Version Managers**: One-click install for PyEnv, NVM, Rustup.
+* **VS Code Extension Profiles**: Install curated extension packs for Python, C++, Rust, Web, Containers.
+
+### ⚡ Performance Enhancement
+
+* **Lazy Tab Loading**: Tabs load on-demand for instant startup.
 
 ---
 
@@ -40,46 +56,38 @@ Connect with the community through preset sharing and configuration tracking!
 
 ## ✨ Feature Overview
 
-### 🌐 Community Features (v7.0)
+### 🔄 Replicator - IaC Export (v8.0)
 
-* **Preset Marketplace**: Browse community presets with ratings and downloads.
-* **Search & Filter**: Find presets by category (Gaming, Privacy, Performance).
-* **Drift Detection**: Know when your system configuration changes.
-* **Baseline Tracking**: Compare current state to applied preset.
+| Feature | Description |
+|---------|-------------|
+| **Ansible Export** | Generate playbooks with packages, Flatpaks, settings |
+| **Kickstart Export** | Create .ks files for automated installs |
+| **Preview Mode** | View generated config before export |
 
-### 🔧 Boot Management (v6.2)
+### 🔭 Watchtower - Diagnostics (v7.5)
 
-* **Kernel Parameter Editor**: Add/remove boot parameters with common presets.
-* **ZRAM Tuner**: Configure memory compression ratio and algorithm.
-* **Secure Boot Helper**: Generate and enroll MOK keys for third-party modules.
+| Feature | Description |
+|---------|-------------|
+| **Service Manager** | Start/stop/mask services with gaming filter |
+| **Boot Analyzer** | Identify slow services, get optimization tips |
+| **Journal Viewer** | Quick error view + Panic Button export |
 
-### 🛠️ Developer Features (v6.5)
+### 🛠️ Developer Tools (v7.1)
 
-* **CLI Mode**: Full `loofi` command-line interface for scripting.
-* **Plugin System**: Extend functionality with custom plugins.
-* **Operations Layer**: Clean separation of UI and business logic.
+| Feature | Description |
+|---------|-------------|
+| **Containers** | Distrobox GUI for development environments |
+| **Version Managers** | PyEnv, NVM, Rustup installers |
+| **VS Code Setup** | Extension profiles for Python, C++, Rust, Web |
 
-### 🌐 Localization (v6.1)
+### Previous Features
 
-* **17 UI Files Localized**: All tabs wrapped with `self.tr()`.
-* **Auto-Detection**: Loads translations based on system locale.
-
-### ⏰ Automation (v6.0)
-
-* **Scheduled Tasks**: Hourly, daily, weekly automation.
-* **Power Triggers**: On-battery / On-AC event handling.
-
-### ⚡ Hardware Control (v5.2)
-
-* **CPU Governor**: Switch between powersave/schedutil/performance.
-* **Power Profiles**: Quick toggle for power modes.
-* **GPU Mode Switching**: Integrated/Hybrid/NVIDIA modes.
-* **Fan Control**: Manual speed slider or auto mode.
-
-### 🧬 Atomic Support (v5.1)
-
-* **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` automatically.
-* **System Overlays Tab**: Manage layered packages.
+* **🌐 Marketplace**: Browse/download community presets
+* **🔧 Boot Management**: Kernel params, ZRAM, Secure Boot
+* **⚡ Hardware Control**: CPU, GPU, Fan, Power profiles
+* **🧬 Atomic Support**: Silverblue/Kinoite compatible
+* **⏰ Automation**: Scheduled tasks, power triggers
+* **🖥️ CLI Mode**: Full command-line interface
 
 ---
 
@@ -91,20 +99,10 @@ Connect with the community through preset sharing and configuration tracking!
 curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
 ```
 
-### 💾 DNF Repository
-
-```bash
-# Add repository
-sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/loofi-fedora-tweaks.repo
-
-# Install
-sudo dnf install loofi-fedora-tweaks
-```
-
 ### 📥 Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v7.0.0/loofi-fedora-tweaks-7.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v8.0.0/loofi-fedora-tweaks-8.0.0-1.fc43.noarch.rpm
 ```
 
 ### 🖥️ Run from Source
@@ -128,7 +126,6 @@ loofi-fedora-tweaks
 loofi info                    # System information
 loofi cleanup                 # Run full cleanup
 loofi tweak power --profile performance
-loofi advanced bbr            # Enable TCP BBR
 loofi network dns --provider cloudflare
 
 # Version
@@ -155,6 +152,10 @@ loofi --version
 | **🌐 Marketplace** | Community presets + drift detection |
 | **⏰ Scheduler** | Automated task management |
 | **🔧 Boot** | Kernel params, ZRAM, Secure Boot |
+| **📦 Containers** | Distrobox GUI **(v7.1 NEW!)** |
+| **🛠️ Developer** | Language managers, VS Code **(v7.1 NEW!)** |
+| **🔭 Watchtower** | Services, Boot, Journal **(v7.5 NEW!)** |
+| **🔄 Replicator** | Ansible/Kickstart export **(v8.0 NEW!)** |
 | **🎨 Theming** | GTK/Qt theme settings |
 | **🔒 Privacy** | Telemetry and privacy tweaks |
 | **📦 Overlays** | rpm-ostree packages (Atomic only) |
@@ -179,27 +180,6 @@ loofi --version
 3. Commit your Changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-### 🔌 Plugin Development
-
-Create plugins in `plugins/` directory:
-
-```python
-from utils.plugin_base import LoofiPlugin, PluginInfo
-
-class MyPlugin(LoofiPlugin):
-    @property
-    def info(self) -> PluginInfo:
-        return PluginInfo("My Plugin", "1.0", "Author", "Description")
-    
-    def create_widget(self):
-        # Return PyQt6 widget
-        pass
-    
-    def get_cli_commands(self):
-        # Return dict of CLI commands
-        return {}
-```
 
 ---
 

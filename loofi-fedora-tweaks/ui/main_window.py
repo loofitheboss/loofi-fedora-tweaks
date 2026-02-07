@@ -5,32 +5,18 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QFont, QColor
 
+# Only import essential tabs eagerly (Dashboard is always shown first)
 from ui.dashboard_tab import DashboardTab
 from ui.system_info_tab import SystemInfoTab
-from ui.updates_tab import UpdatesTab
-from ui.cleanup_tab import CleanupTab
-from ui.tweaks_tab import TweaksTab
-from ui.apps_tab import AppsTab
-from ui.advanced_tab import AdvancedTab
-from ui.repos_tab import ReposTab
-from ui.gaming_tab import GamingTab
-from ui.network_tab import NetworkTab
-from ui.presets_tab import PresetsTab
-from ui.privacy_tab import PrivacyTab
-from ui.theming_tab import ThemingTab
-from ui.overlays_tab import OverlaysTab
-from ui.hardware_tab import HardwareTab
-from ui.scheduler_tab import SchedulerTab
-from ui.boot_tab import BootTab
-from ui.marketplace_tab import MarketplaceTab
-from ui.doctor import DependencyDoctor
+from ui.lazy_widget import LazyWidget
 from utils.system import SystemManager
 import os
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v7.0.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v7.1.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -58,31 +44,45 @@ class MainWindow(QMainWindow):
         self.content_area = QStackedWidget()
         main_layout.addWidget(self.content_area)
         
-        # Initialize Pages
+        # Initialize Pages - Eager loading for essential tabs only
         self.pages = {}
         
+        # Dashboard is always shown first - load eagerly
         self.add_page(self.tr("Home"), "🏠", DashboardTab(self))
         self.add_page(self.tr("System Info"), "ℹ️", SystemInfoTab())
-        self.add_page(self.tr("Updates"), "📦", UpdatesTab())
-        self.add_page(self.tr("Cleanup"), "🧹", CleanupTab())
-        self.add_page(self.tr("Hardware"), "⚡", HardwareTab())
-        self.add_page(self.tr("HP Tweaks"), "💻", TweaksTab())
-        self.add_page(self.tr("Apps"), "🚀", AppsTab())
-        self.add_page(self.tr("Advanced"), "⚙️", AdvancedTab())
-        self.add_page(self.tr("Gaming"), "🎮", GamingTab())
-        self.add_page(self.tr("Network"), "🌐", NetworkTab())
-        self.add_page(self.tr("Presets"), "💾", PresetsTab())
-        self.add_page(self.tr("Marketplace"), "🌐", MarketplaceTab())
-        self.add_page(self.tr("Scheduler"), "⏰", SchedulerTab())
-        self.add_page(self.tr("Boot"), "🔧", BootTab())
+        
+        # All other tabs use lazy loading for faster startup
+        self.add_page(self.tr("Updates"), "📦", self._lazy_tab("updates"))
+        self.add_page(self.tr("Cleanup"), "🧹", self._lazy_tab("cleanup"))
+        self.add_page(self.tr("Hardware"), "⚡", self._lazy_tab("hardware"))
+        self.add_page(self.tr("HP Tweaks"), "💻", self._lazy_tab("tweaks"))
+        self.add_page(self.tr("Apps"), "🚀", self._lazy_tab("apps"))
+        self.add_page(self.tr("Advanced"), "⚙️", self._lazy_tab("advanced"))
+        self.add_page(self.tr("Gaming"), "🎮", self._lazy_tab("gaming"))
+        self.add_page(self.tr("Network"), "🌐", self._lazy_tab("network"))
+        self.add_page(self.tr("Presets"), "💾", self._lazy_tab("presets"))
+        self.add_page(self.tr("Marketplace"), "🌐", self._lazy_tab("marketplace"))
+        self.add_page(self.tr("Scheduler"), "⏰", self._lazy_tab("scheduler"))
+        self.add_page(self.tr("Boot"), "🔧", self._lazy_tab("boot"))
+        
+        # v7.1: Developer tools
+        self.add_page(self.tr("Containers"), "📦", self._lazy_tab("containers"))
+        self.add_page(self.tr("Developer"), "🛠️", self._lazy_tab("developer"))
+        
+        # v7.5: Watchtower diagnostics
+        self.add_page(self.tr("Watchtower"), "🔭", self._lazy_tab("watchtower"))
+        
+        # v8.0: Replicator (IaC exports)
+        self.add_page(self.tr("Replicator"), "🔄", self._lazy_tab("replicator"))
+        
         # Atomic-only: Overlays tab
         if SystemManager.is_atomic():
-            self.add_page(self.tr("Overlays"), "📦", OverlaysTab())
+            self.add_page(self.tr("Overlays"), "📦", self._lazy_tab("overlays"))
         
         # Group less used ones
-        self.add_page(self.tr("Repos"), "📂", ReposTab())
-        self.add_page(self.tr("Privacy"), "🔒", PrivacyTab())
-        self.add_page(self.tr("Theming"), "🎨", ThemingTab())
+        self.add_page(self.tr("Repos"), "📂", self._lazy_tab("repos"))
+        self.add_page(self.tr("Privacy"), "🔒", self._lazy_tab("privacy"))
+        self.add_page(self.tr("Theming"), "🎨", self._lazy_tab("theming"))
         
         # Select first item
         self.sidebar.setCurrentRow(0)
@@ -90,6 +90,33 @@ class MainWindow(QMainWindow):
         # System Tray logic (Keep existing logic, simplified here)
         self.setup_tray()
         self.check_dependencies()
+    
+    def _lazy_tab(self, tab_name: str) -> LazyWidget:
+        """Create a lazy-loaded tab widget."""
+        loaders = {
+            "updates": lambda: __import__("ui.updates_tab", fromlist=["UpdatesTab"]).UpdatesTab(),
+            "cleanup": lambda: __import__("ui.cleanup_tab", fromlist=["CleanupTab"]).CleanupTab(),
+            "hardware": lambda: __import__("ui.hardware_tab", fromlist=["HardwareTab"]).HardwareTab(),
+            "tweaks": lambda: __import__("ui.tweaks_tab", fromlist=["TweaksTab"]).TweaksTab(),
+            "apps": lambda: __import__("ui.apps_tab", fromlist=["AppsTab"]).AppsTab(),
+            "advanced": lambda: __import__("ui.advanced_tab", fromlist=["AdvancedTab"]).AdvancedTab(),
+            "gaming": lambda: __import__("ui.gaming_tab", fromlist=["GamingTab"]).GamingTab(),
+            "network": lambda: __import__("ui.network_tab", fromlist=["NetworkTab"]).NetworkTab(),
+            "presets": lambda: __import__("ui.presets_tab", fromlist=["PresetsTab"]).PresetsTab(),
+            "marketplace": lambda: __import__("ui.marketplace_tab", fromlist=["MarketplaceTab"]).MarketplaceTab(),
+            "scheduler": lambda: __import__("ui.scheduler_tab", fromlist=["SchedulerTab"]).SchedulerTab(),
+            "boot": lambda: __import__("ui.boot_tab", fromlist=["BootTab"]).BootTab(),
+            "overlays": lambda: __import__("ui.overlays_tab", fromlist=["OverlaysTab"]).OverlaysTab(),
+            "repos": lambda: __import__("ui.repos_tab", fromlist=["ReposTab"]).ReposTab(),
+            "privacy": lambda: __import__("ui.privacy_tab", fromlist=["PrivacyTab"]).PrivacyTab(),
+            "theming": lambda: __import__("ui.theming_tab", fromlist=["ThemingTab"]).ThemingTab(),
+            "containers": lambda: __import__("ui.containers_tab", fromlist=["ContainersTab"]).ContainersTab(),
+            "developer": lambda: __import__("ui.developer_tab", fromlist=["DeveloperTab"]).DeveloperTab(),
+            "watchtower": lambda: __import__("ui.watchtower_tab", fromlist=["WatchtowerTab"]).WatchtowerTab(),
+            "replicator": lambda: __import__("ui.replicator_tab", fromlist=["ReplicatorTab"]).ReplicatorTab(),
+        }
+        return LazyWidget(loaders[tab_name])
+
 
     def load_theme(self):
         theme_path = os.path.join(os.path.dirname(__file__), "..", "assets", "modern.qss")
@@ -169,5 +196,7 @@ class MainWindow(QMainWindow):
              self.show_doctor()
 
     def show_doctor(self):
+        from ui.doctor import DependencyDoctor
         doctor = DependencyDoctor(self)
         doctor.exec()
+
