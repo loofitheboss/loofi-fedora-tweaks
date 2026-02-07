@@ -19,6 +19,7 @@ from ui.presets_tab import PresetsTab
 from ui.privacy_tab import PrivacyTab
 from ui.theming_tab import ThemingTab
 from ui.overlays_tab import OverlaysTab
+from ui.hardware_tab import HardwareTab
 from ui.doctor import DependencyDoctor
 from utils.system import SystemManager
 import os
@@ -26,7 +27,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v5.1.0")
+        self.setWindowTitle("Loofi Fedora Tweaks v5.2.0")
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -61,7 +62,8 @@ class MainWindow(QMainWindow):
         self.add_page("System Info", "ℹ️", SystemInfoTab())
         self.add_page("Updates", "📦", UpdatesTab())
         self.add_page("Cleanup", "🧹", CleanupTab())
-        self.add_page("HP Tweaks", "💻", TweaksTab())
+        self.add_page("Hardware", "⚡", HardwareTab())  # v5.2: Consolidated hardware controls
+        self.add_page("HP Tweaks", "💻", TweaksTab())  # Legacy, kept for battery/fingerprint
         self.add_page("Apps", "🚀", AppsTab())
         self.add_page("Advanced", "⚙️", AdvancedTab())
         self.add_page("Gaming", "🎮", GamingTab())

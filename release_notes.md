@@ -1,41 +1,48 @@
-# Loofi Fedora Tweaks v5.1.0 - The "Atomic" Update ⚛️
+# Loofi Fedora Tweaks v5.2.0 - The "Silicon" Update ⚡
 
-This update brings full support for Fedora Silverblue, Kinoite, and other Atomic Desktop variants!
+This update brings advanced hardware control for power users, gamers, and developers!
 
-## ⚛️ Fedora Atomic Support
+## ⚡ New Hardware Tab
 
-* **rpm-ostree Detection**: The app automatically detects if you're on an immutable system and routes all commands accordingly.
-* **Overlays Tab**: A new tab (visible only on Atomic systems) to manage layered packages, with "Remove" and "Reset to Base Image" options.
-* **Reboot Indicators**: The Dashboard now shows when a reboot is required to apply pending changes.
-* **System Type Display**: See "Workstation (dnf)" or "Silverblue (rpm-ostree)" right on the Dashboard.
+A brand new consolidated hardware control interface:
 
-## 🔐 Polkit Integration
+### CPU Governor
 
-* **Professional Auth Dialogs**: We now ship a polkit policy file (`org.loofi.fedora-tweaks.policy`) for cleaner authentication prompts.
-* **Action Categories**: Separate policies for package management, updates, hardware settings, and system cleanup.
+* **Real-time frequency display**: See your current CPU frequency.
+* **Governor selector**: Switch between `powersave`, `schedutil`, and `performance` instantly.
 
-## 🏗️ Architecture Improvements
+### Power Profiles
 
-* **New `utils/system.py`**: Central `SystemManager` class for all system detection logic.
-* **New `utils/package_manager.py`**: Unified `PackageManager` abstraction for DNF and rpm-ostree.
-* **Modular Design**: Paves the way for a future CLI version (`loofi-cli`).
+* **One-click switching**: Power Saver, Balanced, or Performance modes via `power-profiles-daemon`.
+
+### GPU Mode Switching (Hybrid Laptops)
+
+* **Automatic detection**: Detects NVIDIA Optimus laptops.
+* **Mode toggle**: Switch between Integrated, Hybrid, and Dedicated GPU modes (via `envycontrol`).
+* **Logout warning**: Clear indication that a logout/reboot is required.
+
+### Fan Control
+
+* **NBFC integration**: Works with `nbfc-linux` for notebook fan control.
+* **Manual slider**: Set fan speed from 0-100%.
+* **Auto mode**: Let the system manage fan speed automatically.
+
+## 🏗️ Architecture
+
+* **`utils/hardware.py`**: New `HardwareManager` class centralizing all hardware controls.
+* **`ui/hardware_tab.py`**: New consolidated UI with card-based layout.
+* **Auto-refresh**: Dynamic values (CPU freq, fan speed) update every 5 seconds.
 
 ## 📦 Installation
 
-**Via DNF (Recommended):**
+**Via DNF:**
 
 ```bash
 sudo dnf update loofi-fedora-tweaks --refresh
 ```
 
-**Manual RPM Install:**
+**Manual:**
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.1.0-1.fc43.noarch.rpm
-```
-
-**On Silverblue/Kinoite:**
-
-```bash
-rpm-ostree install ./loofi-fedora-tweaks-5.1.0-1.fc43.noarch.rpm --apply-live
+sudo dnf install ./loofi-fedora-tweaks-5.2.0-1.fc43.noarch.rpm
 ```
