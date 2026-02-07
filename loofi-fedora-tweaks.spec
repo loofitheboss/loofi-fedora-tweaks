@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        4.5.0
+Version:        4.6.0
 Release:        1%{?dist}
 Summary:        System tweaks and maintenance for HP Elitebook 840 G8
 

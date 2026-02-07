@@ -1,5 +1,7 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QRadioButton, QButtonGroup, QTextEdit, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QRadioButton, QButtonGroup, QTextEdit, QHBoxLayout, QComboBox
 from utils.process import CommandRunner
+import threading
+import time
 
 class TweaksTab(QWidget):
     def __init__(self):
@@ -75,6 +77,7 @@ class TweaksTab(QWidget):
 
         # HP Fan Control
         fan_group = QGroupBox("HP Fan Control (nbfc-linux)")
+        fan_group.setObjectName("HP Fan Control (nbfc-linux)")
         fan_layout = QHBoxLayout()
         fan_group.setLayout(fan_layout)
         
@@ -103,7 +106,6 @@ class TweaksTab(QWidget):
         self.check_nbfc_status()
 
     def install_nbfc(self):
-        # We can also add a check here to see if service is running
         self.run_command("pkexec", ["sh", "-c", "dnf install -y nbfc-linux && systemctl enable --now nbfc_service"], "Installing and enabling nbfc-linux...")
 
     def check_nbfc_status(self):
@@ -112,12 +114,29 @@ class TweaksTab(QWidget):
             self.btn_install_nbfc.setText("NBFC Installed")
             self.btn_install_nbfc.setEnabled(False)
             
-            # Add simple controls or status if easy
-            # But nbfc-linux is quite automatic. 
-            # We could add a button to "Set Quiet Profile"
-            self.btn_quiet = QPushButton("Set Quiet Profile")
-            self.btn_quiet.clicked.connect(lambda: self.run_command("nbfc", ["config", "-a", "quiet"], "Setting NBFC profile to Quiet..."))
-            self.layout().addWidget(self.btn_quiet)
+            # Fan Profile Dropdown
+            self.lbl_fan_profile = QLabel("Fan Profile:")
+            self.combo_fan_profile = QComboBox()
+            self.combo_fan_profile.addItems(["Quiet", "Balanced", "Performance", "Cool"])
+            self.combo_fan_profile.setCurrentIndex(1) # Balanced default
+            
+            self.btn_apply_fan = QPushButton("Apply Fan Profile")
+            self.btn_apply_fan.clicked.connect(self.apply_fan_profile)
+            
+            # Add to layout dynamically if not already there
+            # (Ideally this should be in __init__ but hidden, but for now we append)
+            # Find the fan layout
+            fan_group = self.findChild(QGroupBox, "HP Fan Control (nbfc-linux)")
+            if fan_group:
+                 layout = fan_group.layout()
+                 layout.addWidget(self.lbl_fan_profile)
+                 layout.addWidget(self.combo_fan_profile)
+                 layout.addWidget(self.btn_apply_fan)
+
+    def apply_fan_profile(self):
+        profile = self.combo_fan_profile.currentText().lower()
+        # nbfc config -a <profile>
+        self.run_command("nbfc", ["config", "-a", profile], f"Setting NBFC Fan Profile to {profile}...")
 
     def enroll_fingerprint(self):
         from ui.fingerprint_dialog import FingerprintDialog

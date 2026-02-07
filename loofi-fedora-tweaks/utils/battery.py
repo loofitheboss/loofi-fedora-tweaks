@@ -11,55 +11,48 @@ class BatteryManager:
 
     def set_limit(self, limit):
         """
-        Sets the battery charge limit (80 or 100).
-        Creates a persistent script and systemd service.
+        Sets the battery charge limit (80 or 100) using a persistent Systemd service.
         """
-        script_content = f"""#!/bin/bash
-# Apply immediate limit
-echo {limit} | tee /sys/class/power_supply/BAT0/charge_control_end_threshold
+        # 1. Save config for the UI to read back
+        try:
+            os.makedirs(os.path.dirname(self.CONFIG_PATH), exist_ok=True)
+            with open(self.CONFIG_PATH, "w") as f:
+                f.write(str(limit))
+        except Exception as e:
+            print(f"Failed to save battery config: {e}")
 
-# Save config
-mkdir -p /etc/loofi-fedora-tweaks
-echo {limit} > {self.CONFIG_PATH}
-
-# Create wrapper script for boot
-cat <<EOF > {self.SCRIPT_PATH}
-#!/bin/bash
-if [ -f {self.CONFIG_PATH} ]; then
-    cat {self.CONFIG_PATH} > /sys/class/power_supply/BAT0/charge_control_end_threshold
-fi
-EOF
-chmod +x {self.SCRIPT_PATH}
-
-# Create Systemd Service
-cat <<EOF > {self.SERVICE_PATH}
-[Unit]
-Description=Restore Loofi Battery Limit
+        # 2. Create the Systemd Service content
+        # We use a oneshot service that simple echoes the value at boot.
+        service_content = f"""[Unit]
+Description=Restore HP Battery Charge Limit ({limit}%)
 After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart={self.SCRIPT_PATH}
+ExecStart=/bin/sh -c 'echo {limit} > /sys/class/power_supply/BAT0/charge_control_end_threshold'
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
-EOF
-
-# Reload and Enable
-systemctl daemon-reload
-systemctl enable loofi-battery.service
 """
-        # Write to temp file
-        tmp_script = "/tmp/loofi_battery_setup.sh"
+        
+        # 3. Write to a temporary file to prepare for pkexec move
+        tmp_service = "/tmp/loofi-battery.service"
         try:
-            with open(tmp_script, "w") as f:
-                f.write(script_content)
-            os.chmod(tmp_script, 0o755)
+            with open(tmp_service, "w") as f:
+                f.write(service_content)
             
-            # Execute with pkexec
-            # We assume the caller handles the async execution or we run it and return the command details
-            # Here we return the command args so the UI can run it via its CommandRunner to show output
-            return "pkexec", [tmp_script]
+            # 4. Construct the command to move it and enable it
+            # We chain commands: mv temp -> /etc/... && daemon-reload && enable --now
+            # Note: We also apply it immediately via the shell command in the chain for instant feedback
+            
+            cmd = f"mv {tmp_service} {self.SERVICE_PATH} && " \
+                  f"systemctl daemon-reload && " \
+                  f"systemctl enable --now loofi-battery.service && " \
+                  f"to_apply={limit}; echo $to_apply > /sys/class/power_supply/BAT0/charge_control_end_threshold"
+            
+            return "pkexec", ["sh", "-c", cmd]
+            
         except Exception as e:
-            print(f"Error preparing battery script: {e}")
+            print(f"Error preparing battery service: {e}")
             return None, None

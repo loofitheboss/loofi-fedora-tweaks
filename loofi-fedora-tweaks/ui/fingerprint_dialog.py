@@ -1,7 +1,5 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QMessageBox, QProgressBar
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import Qt, QTimer
-from utils.fingerprint import FingerprintWorker
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QProgressBar, QPushButton, QMessageBox
+from PyQt6.QtCore import QProcess, Qt
 
 class FingerprintDialog(QDialog):
     def __init__(self, parent=None):
@@ -12,75 +10,82 @@ class FingerprintDialog(QDialog):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
-        # Icon / Instructions
-        self.lbl_icon = QLabel("👆") # Placeholder, could be an image
-        self.lbl_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_icon.setStyleSheet("font-size: 64px;")
-        layout.addWidget(self.lbl_icon)
-        
-        self.lbl_status = QLabel("Ready to enroll Right Index Finger...")
+        # Instructions
+        self.lbl_status = QLabel("Ready to enroll.\nClick 'Start Enrollment' to begin.")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_status.setWordWrap(True)
-        self.lbl_status.setStyleSheet("font-size: 14px; font-weight: bold;")
+        self.lbl_status.setStyleSheet("font-size: 14px; margin: 10px;")
         layout.addWidget(self.lbl_status)
         
+        # Progress
         self.progress = QProgressBar()
-        self.progress.setRange(0, 5) # strict 5 steps for fprintd-enroll usually
+        self.progress.setRange(0, 100) # fprintd doesn't give exact % but usually 5-7 touches?
         self.progress.setValue(0)
+        self.progress.setTextVisible(False)
         layout.addWidget(self.progress)
+        
+        # Step Counter
+        self.lbl_steps = QLabel("Waiting...")
+        self.lbl_steps.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.lbl_steps)
         
         # Buttons
         self.btn_start = QPushButton("Start Enrollment")
         self.btn_start.clicked.connect(self.start_enrollment)
         layout.addWidget(self.btn_start)
         
-        self.btn_cancel = QPushButton("Cancel")
-        self.btn_cancel.clicked.connect(self.reject)
+        self.btn_cancel = QPushButton("Close")
+        self.btn_cancel.clicked.connect(self.accept)
         layout.addWidget(self.btn_cancel)
         
-        self.worker = None
+        # Process
+        self.process = QProcess()
+        self.process.readyReadStandardOutput.connect(self.on_output)
+        self.process.readyReadStandardError.connect(self.on_error)
+        self.process.finished.connect(self.on_finished)
+        
+        self.enroll_step = 0
 
     def start_enrollment(self):
         self.btn_start.setEnabled(False)
-        self.btn_cancel.setEnabled(True)
-        self.lbl_status.setText("Initializing...")
+        self.lbl_status.setText("Enrolling right index finger...\nPlease swipe/touch the sensor.")
+        self.progress.setValue(0)
+        self.enroll_step = 0
         
-        self.worker = FingerprintWorker() # Default: right-index-finger
-        self.worker.progress_update.connect(self.update_status)
-        self.worker.enroll_success.connect(self.on_success)
-        self.worker.enroll_fail.connect(self.on_fail)
-        self.worker.start()
+        # We enroll the right index finger by default for simplicity
+        # Command: fprintd-enroll <user> (defaults to current user) -f right-index-finger
+        self.process.start("fprintd-enroll", ["-f", "right-index-finger"])
 
-    def update_status(self, text):
-        self.lbl_status.setText(text)
-        
-        # Parse progress
-        # "Enrollment scan 1 of 5"
-        if "scan" in text and "of" in text:
-            try:
-                parts = text.split()
-                # Find the number before "of"
-                idx = parts.index("of")
-                current = int(parts[idx-1])
-                self.progress.setValue(current)
-            except:
-                pass
+    def on_output(self):
+        data = self.process.readAllStandardOutput().data().decode().strip()
+        # Parse output
+        # Typical output: "Enroll result: enroll-stage-passed"
+        lines = data.split('\n')
+        for line in lines:
+            if "enroll-stage-passed" in line:
+                self.enroll_step += 1
+                # Heuristic: usually requires ~5 successful touches
+                new_val = min(self.enroll_step * 20, 95)
+                self.progress.setValue(new_val)
+                self.lbl_steps.setText(f"Successful scans: {self.enroll_step}")
+                self.lbl_status.setText("Scan accepted! Lift and touch again.")
+            elif "enroll-retry-scan" in line:
+                 self.lbl_status.setText("Scan failed - too short or dirty. Try again.")
+            elif "enroll-completed" in line:
+                self.progress.setValue(100)
+                self.lbl_status.setText("Enrollment Completed Successfully! 🎉")
+                self.lbl_steps.setText("Done.")
+                self.btn_start.setText("Enroll Again")
+                self.btn_start.setEnabled(True)
 
-    def on_success(self):
-        self.progress.setValue(5)
-        self.lbl_status.setText("Enrollment Complete! 🎉")
-        self.lbl_status.setStyleSheet("color: green; font-size: 16px; font-weight: bold;")
-        self.btn_cancel.setText("Close")
-        self.btn_start.hide()
-        QMessageBox.information(self, "Success", "Fingerprint enrolled successfully.")
+    def on_error(self):
+        data = self.process.readAllStandardError().data().decode().strip()
+        if data:
+            print(f"Enroll Error: {data}")
+            # Some prompts appear in stderr sometimes?
+            if "Permission denied" in data:
+                 self.lbl_status.setText("Error: Permission Denied.")
 
-    def on_fail(self, error):
-        self.lbl_status.setText(f"Error: {error}")
-        self.lbl_status.setStyleSheet("color: red;")
+    def on_finished(self, exit_code, exit_status):
         self.btn_start.setEnabled(True)
-        self.btn_start.setText("Retry")
-
-    def reject(self):
-        if self.worker and self.worker.isRunning():
-            self.worker.terminate()
-        super().reject()
+        if exit_code != 0 and self.progress.value() < 100:
+            self.lbl_status.setText(f"Enrollment failed or cancelled.")

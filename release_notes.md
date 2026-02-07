@@ -1,16 +1,21 @@
-# Loofi Fedora Tweaks v4.5.0 - The Polish Update ✨
+# Loofi Fedora Tweaks v4.6.0 - The Hardware Mastery Update 🛠️
 
-We've been busy under the hood making things smoother and more reliable!
+We're going deep on HP Elitebook integration! This release ensures your settings stick and your biometrics just work.
 
-## 🛡️ Robustness Improvements
+## 🔋 Persistent Battery Limits
 
-* **Smarter System Tray**: The app now intelligently checks if your desktop environment supports a System Tray before trying to create an icon. No more potential crashes on minimal window managers!
-* **Graceful Degradation**: Features like "User Presets" now check if tools like `powerprofilesctl` or `gsettings` are actually installed. If they're missing (e.g., on a desktop without a battery), the app won't panic—it just works around it.
+* **Set it and Forget it**: Your 80% battery limit now survives reboots!
+* **Systemd Service**: We now generate a robust "oneshot" systemd service that reapplies your charge threshold every time your computer starts.
 
-## 🧪 Technical Improvements
+## 👆 Fingerprint Enrollment Wizard
 
-* **Unit Tests**: We've added a comprehensive test suite for our core utilities (`tests/test_utils.py`) to prevent regressions.
-* **Linting & Cleanup**: Fixed numerous internal code warnings for a cleaner, more maintainable codebase.
+* **Visual Guide**: A new GUI dialog (`fprintd` integration) walks you through the fingerprint enrollment process.
+* **Progress Bar**: Visual feedback for each successful scan. No more guessing in the terminal!
+
+## ❄️ Enhanced Fan Control
+
+* **Profile Selection**: New Dropdown menu for **NBFC (NoteBook FanControl)**.
+* **Modes**: Easily switch between **Quiet**, **Balanced**, and **Performance** cooling profiles.
 
 ## 📦 Installation
 
@@ -24,5 +29,5 @@ sudo dnf update loofi-fedora-tweaks --refresh
 Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-4.5.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-4.6.0-1.fc43.noarch.rpm
 ```

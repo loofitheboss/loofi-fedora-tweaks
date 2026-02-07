@@ -15,7 +15,7 @@ from ui.presets_tab import PresetsTab
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.5.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.6.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
