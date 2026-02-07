@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QHBoxLayout, QGroupBox
 from utils.process import CommandRunner
 
 class UpdatesTab(QWidget):
@@ -12,7 +12,13 @@ class UpdatesTab(QWidget):
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         layout.addWidget(header)
         
-        # Buttons
+        # Update All Button (Prominent)
+        self.btn_update_all = QPushButton("🔄 Update All (DNF + Flatpak + Firmware)")
+        self.btn_update_all.setStyleSheet("font-size: 14px; padding: 10px; background-color: #3daee9; color: white;")
+        self.btn_update_all.clicked.connect(self.run_update_all)
+        layout.addWidget(self.btn_update_all)
+        
+        # Individual Update Buttons
         btn_layout = QHBoxLayout()
         
         self.btn_dnf = QPushButton("Update System (DNF)")
@@ -29,6 +35,21 @@ class UpdatesTab(QWidget):
         
         layout.addLayout(btn_layout)
         
+        # Kernel Management Group
+        kernel_group = QGroupBox("Kernel Management")
+        kernel_layout = QHBoxLayout()
+        kernel_group.setLayout(kernel_layout)
+        
+        btn_list_kernels = QPushButton("List Installed Kernels")
+        btn_list_kernels.clicked.connect(lambda: self.run_single_command("rpm", ["-qa", "kernel"], "Listing Installed Kernels..."))
+        kernel_layout.addWidget(btn_list_kernels)
+        
+        btn_remove_old = QPushButton("Remove Old Kernels")
+        btn_remove_old.clicked.connect(lambda: self.run_single_command("pkexec", ["dnf", "remove", "--oldinstallonly", "-y"], "Removing Old Kernels..."))
+        kernel_layout.addWidget(btn_remove_old)
+        
+        layout.addWidget(kernel_group)
+        
         # Output Area
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
@@ -37,6 +58,9 @@ class UpdatesTab(QWidget):
         self.runner = CommandRunner()
         self.runner.output_received.connect(self.append_output)
         self.runner.finished.connect(self.command_finished)
+        
+        self.update_queue = []
+        self.current_update_index = 0
 
     def run_dnf_update(self):
         self.output_area.clear()
@@ -75,3 +99,37 @@ class UpdatesTab(QWidget):
         self.btn_dnf.setEnabled(True)
         self.btn_flatpak.setEnabled(True)
         self.btn_fw.setEnabled(True)
+        self.btn_update_all.setEnabled(True)
+        
+        # Handle sequential update all
+        if self.update_queue and self.current_update_index < len(self.update_queue) - 1:
+            self.current_update_index += 1
+            cmd, args, desc = self.update_queue[self.current_update_index]
+            self.append_output(f"\n\n{desc}\n")
+            self.runner.run_command(cmd, args)
+        else:
+            self.update_queue = []
+            self.current_update_index = 0
+
+    def run_update_all(self):
+        self.output_area.clear()
+        self.btn_update_all.setEnabled(False)
+        self.btn_dnf.setEnabled(False)
+        self.btn_flatpak.setEnabled(False)
+        self.btn_fw.setEnabled(False)
+        
+        # Queue up all updates
+        self.update_queue = [
+            ("pkexec", ["dnf", "update", "-y"], "Starting System Update (DNF)..."),
+            ("flatpak", ["update", "-y"], "Starting Flatpak Update..."),
+            ("pkexec", ["fwupdmgr", "update", "-y"], "Starting Firmware Update...")
+        ]
+        self.current_update_index = 0
+        cmd, args, desc = self.update_queue[0]
+        self.append_output(desc + "\n")
+        self.runner.run_command(cmd, args)
+
+    def run_single_command(self, cmd, args, description):
+        self.output_area.clear()
+        self.append_output(f"{description}\n")
+        self.runner.run_command(cmd, args)

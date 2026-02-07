@@ -26,7 +26,7 @@ class AppsTab(QWidget):
         self.runner.output_received.connect(self.append_output)
         self.runner.finished.connect(self.command_finished)
 
-        # App List definition
+        # App List definition (v2.0 - Fixed and expanded)
         self.apps = [
             {
                 "name": "Google Chrome",
@@ -36,20 +36,15 @@ class AppsTab(QWidget):
             },
             {
                 "name": "Visual Studio Code",
-                "desc": "Code Editor",
-                "cmd": "pkexec",
-                 # Simplified for robustness: separate repo add and install might be better, 
-                 # but for a single button we can try to chain or just assume repo exists? 
-                 # Let's do a reliable install script approach or just DNF if repo is commonly added manually?
-                 # Better approach for this demo: simple DNF install if repo exists, or flatpak. 
-                 # Let's use the official repo import command sequence wrapped in sh -c
-                "args": ["sh", "-c", "rpm --import https://packages.microsoft.com/keys/microsoft.asc && sh -c 'echo -e \"[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc\" > /etc/yum.repos.d/vscode.repo' && dnf check-update && dnf install -y code"]
+                "desc": "Code Editor (Flatpak)",
+                "cmd": "flatpak",
+                "args": ["install", "-y", "flathub", "com.visualstudio.code"]
             },
             {
                 "name": "Steam",
-                "desc": "Gaming Platform (RPM Fusion)",
+                "desc": "Gaming Platform",
                 "cmd": "pkexec",
-                "args": ["dnf", "install", "-y", "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm", "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm", "&&", "dnf", "install", "-y", "steam"]
+                "args": ["sh", "-c", "dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && dnf install -y steam"]
             },
             {
                 "name": "VLC Media Player",
@@ -57,11 +52,41 @@ class AppsTab(QWidget):
                 "cmd": "pkexec",
                 "args": ["dnf", "install", "-y", "vlc"]
             },
-             {
+            {
                 "name": "Discord",
                 "desc": "Chat & Voice (Flatpak)",
                 "cmd": "flatpak",
                 "args": ["install", "-y", "flathub", "com.discordapp.Discord"]
+            },
+            {
+                "name": "Spotify",
+                "desc": "Music Streaming (Flatpak)",
+                "cmd": "flatpak",
+                "args": ["install", "-y", "flathub", "com.spotify.Client"]
+            },
+            {
+                "name": "OBS Studio",
+                "desc": "Streaming & Recording (Flatpak)",
+                "cmd": "flatpak",
+                "args": ["install", "-y", "flathub", "com.obsproject.Studio"]
+            },
+            {
+                "name": "GIMP",
+                "desc": "Image Editor",
+                "cmd": "pkexec",
+                "args": ["dnf", "install", "-y", "gimp"]
+            },
+            {
+                "name": "LibreOffice",
+                "desc": "Office Suite",
+                "cmd": "pkexec",
+                "args": ["dnf", "install", "-y", "libreoffice"]
+            },
+            {
+                "name": "Brave Browser",
+                "desc": "Privacy Browser",
+                "cmd": "pkexec",
+                "args": ["sh", "-c", "dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && dnf install -y brave-browser"]
             }
         ]
 
@@ -82,7 +107,7 @@ class AppsTab(QWidget):
         lbl_desc = QLabel(app_data['desc'])
         
         btn_install = QPushButton("Install")
-        btn_install.clicked.connect(lambda: self.install_app(app_data))
+        btn_install.clicked.connect(lambda checked, app=app_data: self.install_app(app))
         
         row_layout.addWidget(lbl_name)
         row_layout.addWidget(lbl_desc)
