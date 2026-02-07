@@ -1,18 +1,24 @@
-# Loofi Fedora Tweaks v5.0.0 - The "Visual Revolution" Update 🎨
+# Loofi Fedora Tweaks v5.1.0 - The "Atomic" Update ⚛️
 
-Welcome to the future! We've ditched the old tabbed interface for a stunning, modern desktop experience.
+This update brings full support for Fedora Silverblue, Kinoite, and other Atomic Desktop variants!
 
-## 🎨 Modern Dashboard & Sidebar
+## ⚛️ Fedora Atomic Support
 
-* **Sidebar Navigation**: A sleek left-side menu replaces the clutter of top tabs.
-* **Dashboard**: Your new home screen! Check system health (Snapshots, Updates) and launch quick actions instantly.
-* **Dark Glass Theme**: A custom `modern.qss` theme gives the app a premium, rounded look inspired by modern design languages.
+* **rpm-ostree Detection**: The app automatically detects if you're on an immutable system and routes all commands accordingly.
+* **Overlays Tab**: A new tab (visible only on Atomic systems) to manage layered packages, with "Remove" and "Reset to Base Image" options.
+* **Reboot Indicators**: The Dashboard now shows when a reboot is required to apply pending changes.
+* **System Type Display**: See "Workstation (dnf)" or "Silverblue (rpm-ostree)" right on the Dashboard.
 
-## 🛡️ Safety & Recovery (Retained from v4.7)
+## 🔐 Polkit Integration
 
-* **Snapshot Check**: Still keeping you safe with Timeshift prompts.
-* **Undo System**: Revert changes with one click.
-* **Smart Locks**: Waiting for DNF locks gracefully.
+* **Professional Auth Dialogs**: We now ship a polkit policy file (`org.loofi.fedora-tweaks.policy`) for cleaner authentication prompts.
+* **Action Categories**: Separate policies for package management, updates, hardware settings, and system cleanup.
+
+## 🏗️ Architecture Improvements
+
+* **New `utils/system.py`**: Central `SystemManager` class for all system detection logic.
+* **New `utils/package_manager.py`**: Unified `PackageManager` abstraction for DNF and rpm-ostree.
+* **Modular Design**: Paves the way for a future CLI version (`loofi-cli`).
 
 ## 📦 Installation
 
@@ -23,8 +29,13 @@ sudo dnf update loofi-fedora-tweaks --refresh
 ```
 
 **Manual RPM Install:**
-Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.0.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-5.1.0-1.fc43.noarch.rpm
+```
+
+**On Silverblue/Kinoite:**
+
+```bash
+rpm-ostree install ./loofi-fedora-tweaks-5.1.0-1.fc43.noarch.rpm --apply-live
 ```

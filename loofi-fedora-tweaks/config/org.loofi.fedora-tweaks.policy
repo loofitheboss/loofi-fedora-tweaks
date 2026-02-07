@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+
+  <vendor>Loofi Fedora Tweaks</vendor>
+  <vendor_url>https://github.com/loofitheboss/loofi-fedora-tweaks</vendor_url>
+
+  <!-- Package Installation/Removal -->
+  <action id="org.loofi.fedora-tweaks.package-manage">
+    <description>Install or remove packages via Loofi Fedora Tweaks</description>
+    <message>Authentication is required to manage packages.</message>
+    <icon_name>package-x-generic</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <!-- System Updates -->
+  <action id="org.loofi.fedora-tweaks.system-update">
+    <description>Run system updates via Loofi Fedora Tweaks</description>
+    <message>Authentication is required to update your system.</message>
+    <icon_name>system-software-update</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <!-- Hardware Settings (Battery, Fan) -->
+  <action id="org.loofi.fedora-tweaks.hardware-settings">
+    <description>Change hardware settings via Loofi Fedora Tweaks</description>
+    <message>Authentication is required to change hardware settings.</message>
+    <icon_name>preferences-system-power</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+  </action>
+
+  <!-- System Cleanup -->
+  <action id="org.loofi.fedora-tweaks.system-cleanup">
+    <description>Clean system cache and orphan packages</description>
+    <message>Authentication is required to clean the system.</message>
+    <icon_name>user-trash</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <!-- rpm-ostree Overlay Management -->
+  <action id="org.loofi.fedora-tweaks.ostree-manage">
+    <description>Manage rpm-ostree overlays via Loofi Fedora Tweaks</description>
+    <message>Authentication is required to manage system overlays.</message>
+    <icon_name>drive-harddisk-system</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+</policyconfig>

@@ -5,6 +5,7 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon
 import shutil
 import subprocess
+from utils.system import SystemManager
 
 class DashboardTab(QWidget):
     def __init__(self, main_window):
@@ -34,7 +35,35 @@ class DashboardTab(QWidget):
         self.lbl_updates = QLabel("📦 Updates: Checking...")
         h_layout.addWidget(self.lbl_updates)
         
+        # System Type (Atomic/Workstation)
+        variant = SystemManager.get_variant_name()
+        pkg_mgr = SystemManager.get_package_manager()
+        self.lbl_system_type = QLabel(f"💻 {variant} ({pkg_mgr})")
+        self.lbl_system_type.setStyleSheet("color: #89b4fa; font-weight: bold;")
+        h_layout.addWidget(self.lbl_system_type)
+        
         layout.addWidget(health_card)
+        
+        # Pending Reboot Warning (Atomic only)
+        self.reboot_banner = QFrame()
+        self.reboot_banner.setStyleSheet("""
+            QFrame {
+                background-color: #f9e2af;
+                border-radius: 8px;
+                padding: 10px;
+            }
+        """)
+        reboot_layout = QHBoxLayout(self.reboot_banner)
+        reboot_label = QLabel("⚠️ Pending changes require reboot!")
+        reboot_label.setStyleSheet("color: #1e1e2e; font-weight: bold;")
+        reboot_layout.addWidget(reboot_label)
+        reboot_layout.addStretch()
+        reboot_btn = QPushButton("🔁 Reboot Now")
+        reboot_btn.setStyleSheet("background-color: #1e1e2e; color: #f9e2af; padding: 5px 10px; border-radius: 5px;")
+        reboot_btn.clicked.connect(self.reboot_system)
+        reboot_layout.addWidget(reboot_btn)
+        layout.addWidget(self.reboot_banner)
+        self.reboot_banner.setVisible(SystemManager.has_pending_deployment())
         
         # Quick Actions Grid
         actions_label = QLabel("Quick Actions")
@@ -127,3 +156,14 @@ class DashboardTab(QWidget):
         # For now just print or show message
         if hasattr(self.main_window, "switch_to_tab"):
             self.main_window.switch_to_tab("Presets")
+    
+    def reboot_system(self):
+        """Reboot the system to apply pending changes."""
+        from PyQt6.QtWidgets import QMessageBox
+        reply = QMessageBox.question(
+            self, "Reboot Now?",
+            "Reboot now to apply pending changes?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            subprocess.run(["systemctl", "reboot"])

@@ -18,13 +18,15 @@ from ui.network_tab import NetworkTab
 from ui.presets_tab import PresetsTab
 from ui.privacy_tab import PrivacyTab
 from ui.theming_tab import ThemingTab
+from ui.overlays_tab import OverlaysTab
 from ui.doctor import DependencyDoctor
+from utils.system import SystemManager
 import os
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v5.0.0")
+        self.setWindowTitle("Loofi Fedora Tweaks v5.1.0")
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -65,7 +67,11 @@ class MainWindow(QMainWindow):
         self.add_page("Gaming", "🎮", GamingTab())
         self.add_page("Network", "🌐", NetworkTab())
         self.add_page("Presets", "💾", PresetsTab())
-        # Group less used ones?
+        # Atomic-only: Overlays tab
+        if SystemManager.is_atomic():
+            self.add_page("Overlays", "📦", OverlaysTab())
+        
+        # Group less used ones
         self.add_page("Repos", "📂", ReposTab())
         self.add_page("Privacy", "🔒", PrivacyTab())
         self.add_page("Theming", "🎨", ThemingTab())
