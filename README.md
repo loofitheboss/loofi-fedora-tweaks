@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v6.1.0 "Polyglot Update" 🌐
+# Loofi Fedora Tweaks v6.2.0 "Engine Room" 🔧
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>

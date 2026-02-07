@@ -21,6 +21,7 @@ from ui.theming_tab import ThemingTab
 from ui.overlays_tab import OverlaysTab
 from ui.hardware_tab import HardwareTab
 from ui.scheduler_tab import SchedulerTab
+from ui.boot_tab import BootTab
 from ui.doctor import DependencyDoctor
 from utils.system import SystemManager
 import os
@@ -28,7 +29,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v6.1.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v6.2.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -71,6 +72,7 @@ class MainWindow(QMainWindow):
         self.add_page(self.tr("Network"), "🌐", NetworkTab())
         self.add_page(self.tr("Presets"), "💾", PresetsTab())
         self.add_page(self.tr("Scheduler"), "⏰", SchedulerTab())
+        self.add_page(self.tr("Boot"), "🔧", BootTab())
         # Atomic-only: Overlays tab
         if SystemManager.is_atomic():
             self.add_page(self.tr("Overlays"), "📦", OverlaysTab())

@@ -1,8 +1,4 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-## [6.1.0] - 2026-02-07 "Polyglot Update"
+# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n## [6.2.0] - 2026-02-07 \"Engine Room Update\"\n\n### Added\n\n- **Boot Tab**: New comprehensive boot management interface.\n- **Kernel Parameter Editor**: GUI wrapper for `grubby` with common presets.\n- **ZRAM Tuner**: Adjust compressed swap size and compression algorithm.\n- **Secure Boot Helper**: MOK key generation and enrollment wizard.\n- **Backup/Restore**: Auto-backup GRUB config before changes.\n\n### New Files\n\n- `utils/kernel.py` - Kernel parameter management.\n- `utils/zram.py` - ZRAM configuration.\n- `utils/secureboot.py` - MOK key management.\n- `ui/boot_tab.py` - Boot management GUI.\n\n---\n\n## [6.1.0] - 2026-02-07 \"Polyglot Update\"
 
 ### Added
 
