@@ -1,0 +1,6 @@
+[loofi-fedora-tweaks]
+name=Loofi Fedora Tweaks
+baseurl=https://loofitheboss.github.io/loofi-fedora-tweaks/repo
+enabled=1
+gpgcheck=0
+type=rpm-md
