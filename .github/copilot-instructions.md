@@ -1,0 +1,187 @@
+# Loofi Fedora Tweaks — AI Coding Instructions
+
+## Architecture
+
+PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
+- **GUI** (default): `MainWindow` sidebar with 15 consolidated lazy-loaded tabs
+- **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
+- **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
+
+### Layer Structure
+```
+ui/*_tab.py      -> GUI tabs (PyQt6 widgets, inherit BaseTab for command tabs)
+ui/base_tab.py   -> BaseTab class (shared CommandRunner wiring, output area)
+utils/*.py       -> Business logic, system commands, all reusable ops
+utils/commands.py -> PrivilegedCommand builder (safe pkexec, no shell strings)
+utils/errors.py  -> Error hierarchy (LoofiError, DnfLockedError, etc.)
+cli/main.py      -> CLI that calls into utils/ (never into ui/)
+config/          -> apps.json (app catalog), polkit policy, systemd service
+plugins/         -> Third-party extensions via LoofiPlugin ABC
+```
+
+**Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
+
+## V10.0 Tab Consolidation (15 tabs)
+
+The app consolidated from 25 to 15 tabs in v10.0:
+
+| Tab | Consolidates | File |
+|-----|-------------|------|
+| Home | Dashboard | `dashboard_tab.py` |
+| System Info | System info | `system_info_tab.py` |
+| System Monitor | Performance + Processes | `monitor_tab.py` |
+| Maintenance | Updates + Cleanup + Overlays | `maintenance_tab.py` |
+| Hardware | Hardware + HP Tweaks | `hardware_tab.py` |
+| Software | Apps + Repos | `software_tab.py` |
+| Security & Privacy | Security + Privacy | `security_tab.py` |
+| Network | Network | `network_tab.py` |
+| Gaming | Gaming | `gaming_tab.py` |
+| Desktop | Director + Theming | `desktop_tab.py` |
+| Development | Containers + Developer | `development_tab.py` |
+| AI Lab | AI | `ai_tab.py` |
+| Automation | Scheduler + Replicator + Pulse | `automation_tab.py` |
+| Community | Presets + Marketplace | `community_tab.py` |
+| Diagnostics | Watchtower + Boot | `diagnostics_tab.py` |
+
+Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
+
+## Critical Patterns
+
+### BaseTab Class (v10.0)
+All command-executing tabs should inherit from `BaseTab`:
+```python
+from ui.base_tab import BaseTab
+
+class MyTab(BaseTab):
+    def __init__(self):
+        super().__init__()
+        # Provides: self.output_area, self.runner (CommandRunner),
+        # self.run_command(), self.append_output(), self.add_section(),
+        # self.add_output_section()
+```
+
+### PrivilegedCommand Builder (v10.0)
+Use `PrivilegedCommand` for safe pkexec operations — argument arrays, not shell strings:
+```python
+from utils.commands import PrivilegedCommand
+
+cmd = PrivilegedCommand.dnf("install", "-y", "package")
+# Returns: ["pkexec", "dnf", "install", "-y", "package"]
+
+cmd = PrivilegedCommand.systemctl("restart", "service")
+# Returns: ["pkexec", "systemctl", "restart", "service"]
+```
+Auto-detects Atomic vs Traditional for dnf/rpm-ostree.
+
+### Error Framework (v10.0)
+Use typed exceptions from `utils/errors.py`:
+```python
+from utils.errors import LoofiError, DnfLockedError, PrivilegeError, CommandFailedError
+
+# Each has: code, hint, recoverable attributes
+raise DnfLockedError()  # code="DNF_LOCKED", hint="Wait for other package operations..."
+```
+
+### Hardware Profiles (v10.0)
+`utils/hardware_profiles.py` auto-detects hardware via /sys/class/dmi/id/:
+```python
+from utils.hardware_profiles import detect_hardware_profile, get_profile_label
+profile = detect_hardware_profile()  # e.g., "hp-elitebook"
+label = get_profile_label(profile)   # e.g., "HP EliteBook"
+```
+
+### Operations Tuple
+Most operations return `Tuple[str, List[str], str]` — (command, args, description). Example:
+```python
+# In utils/operations.py
+@staticmethod
+def clean_dnf_cache() -> Tuple[str, List[str], str]:
+    pm = SystemManager.get_package_manager()
+    if pm == "rpm-ostree":
+        return ("pkexec", ["rpm-ostree", "cleanup", "--base"], "Cleaning rpm-ostree base...")
+    return ("pkexec", ["dnf", "clean", "all"], "Cleaning DNF cache...")
+```
+CLI executes these via `run_operation()` in `cli/main.py`. GUI tabs use `CommandRunner` (see below).
+
+### Atomic/Immutable Fedora Support
+`SystemManager.is_atomic()` detects OSTree systems (Silverblue, Kinoite). All package operations must branch:
+- Traditional: `dnf install -y ...`
+- Atomic: `rpm-ostree install ...`
+
+Always use `SystemManager.get_package_manager()` from `utils/system.py` — never hardcode `dnf`.
+
+### Privilege Escalation
+Use `pkexec` (Polkit) for root operations — **never `sudo`**. Policy at `config/org.loofi.fedora-tweaks.policy`. Prefer `PrivilegedCommand` builder over raw command arrays.
+
+### CommandRunner (Async GUI Commands)
+`utils/command_runner.py` wraps `QProcess` for non-blocking command execution in UI tabs. Signals: `output_received`, `finished`, `error_occurred`, `progress_update`. Auto-detects Flatpak sandbox (`/.flatpak-info`) and wraps commands with `flatpak-spawn --host`. Usage pattern in tabs:
+```python
+from utils.command_runner import CommandRunner
+self.runner = CommandRunner()
+self.runner.finished.connect(self.on_done)
+self.runner.run_command("pkexec", ["dnf", "update", "-y"])
+```
+
+### Lazy Tab Loading
+Tabs load on first view via `ui/lazy_widget.py`. Register in `MainWindow._lazy_tab()` loaders dict:
+```python
+"mytab": lambda: __import__("ui.mytab_tab", fromlist=["MyTabTab"]).MyTabTab(),
+```
+Only `DashboardTab` and `SystemInfoTab` are eagerly imported.
+
+### Safety & History
+- `utils/safety.py` `SafetyManager.confirm_action()` prompts snapshot creation (Timeshift/Snapper) before risky ops
+- `utils/history.py` `HistoryManager.log_change()` records actions with undo commands (max 50)
+- Always offer snapshot + log undo commands for destructive operations
+
+## Adding a New Feature
+
+1. Create `utils/newthing.py` — all business logic, `@staticmethod` methods returning operations tuples
+2. Create `ui/newthing_tab.py` — inherit from `BaseTab`, use `self.run_command()` for async ops
+3. Register in `MainWindow._lazy_tab()` loaders dict + `add_page()` with emoji icon
+4. Add CLI subcommand in `cli/main.py` calling utils directly (with `--json` support)
+5. Use `self.tr("...")` for all user-visible strings (i18n)
+6. Add tests in `tests/` using `@patch` decorators, mock all system calls
+7. Use `PrivilegedCommand` for any pkexec operations
+8. Use typed errors from `utils/errors.py` for error handling
+
+## Version Management
+
+Three files must stay in sync when bumping version:
+- `loofi-fedora-tweaks/version.py` — `__version__`, `__version_codename__` (source of truth)
+- `build_rpm.sh` — `VERSION=`
+- `loofi-fedora-tweaks.spec` — `Version:`
+
+## Build & Run
+
+```bash
+./run.sh                                              # Dev run (needs .venv with PyQt6)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (225+ passing)
+./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
+```
+
+## Testing Conventions
+
+- Framework: `unittest` + `unittest.mock` (plus shared fixtures in `tests/conftest.py`)
+- **All system calls must be mocked** — tests run without root, without real packages
+- Test files add `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))` at top
+- Mock targets: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`, `builtins.open`
+- Verify both success and failure paths (e.g., `CalledProcessError`, `FileNotFoundError`)
+- Use `@patch` decorators, not context managers, for consistency with existing tests
+- Test new v10 modules: errors, commands, formatting, hardware_profiles
+
+## CI/CD
+
+- `.github/workflows/ci.yml` — Runs on every push/PR: lint (flake8), test (pytest), build (rpmbuild in Fedora 43 container)
+- `.github/workflows/release.yml` — Triggered by `v*` tags: builds RPM and creates GitHub release with artifact
+
+## Conventions
+
+- **Naming:** `ui/*_tab.py` -> `*Tab` class; `utils/*.py` -> `*Manager`/`*Ops` with `@staticmethod`
+- **QSS theming:** `assets/modern.qss`; use `setObjectName()` for targeted styling
+- **Config storage:** User data at `~/.config/loofi-fedora-tweaks/`
+- **App catalog:** `config/apps.json` — entries have `name`, `desc`, `cmd`, `args`, `check_cmd` fields; fetched remotely via `utils/remote_config.py` with local fallback
+- **Plugin system:** Extend `LoofiPlugin` ABC from `utils/plugin_base.py`, place in `plugins/<name>/plugin.py`
+- **Dependencies:** `DependencyDoctor` (`ui/doctor.py`) runs at startup to check for critical tools (`dnf`, `pkexec`)
+- **First-run:** `ui/wizard.py` runs on first launch, saves profile to `~/.config/loofi-fedora-tweaks/profile.json`
+- **Command palette:** `ui/command_palette.py` activated via Ctrl+K shortcut

@@ -1,6 +1,6 @@
-# Loofi Fedora Tweaks - User Guide 📖
+# Loofi Fedora Tweaks - User Guide
 
-> **Version 9.2.0 "Pulse Update"**  
+> **Version 10.0.0 "Zenith Update"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -8,21 +8,25 @@
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-2. [Dashboard](#dashboard)
-3. [Performance Monitor (v9.2)](#performance-monitor)
-4. [Process Manager (v9.2)](#process-manager)
-5. [Temperature Monitor (v9.2)](#temperature-monitor)
-6. [Network Traffic Monitor (v9.2)](#network-traffic-monitor)
-7. [Developer Tools (v7.1+)](#developer-tools)
-8. [Watchtower Diagnostics (v7.5+)](#watchtower-diagnostics)
-9. [Replicator - IaC Export (v8.0+)](#replicator---iac-export)
-10. [Security Center (v8.5+)](#security-center)
-11. [Director - Window Management (v9.0)](#director---window-management)
-12. [Boot Management](#boot-management)
-13. [Marketplace & Drift Detection](#marketplace--drift-detection)
-14. [CLI Reference](#cli-reference)
-15. [All Tabs Overview](#all-tabs-overview)
-16. [Troubleshooting](#troubleshooting)
+2. [First-Run Wizard (v10.0)](#first-run-wizard)
+3. [Command Palette (v10.0)](#command-palette)
+4. [Dashboard](#dashboard)
+5. [System Monitor](#system-monitor)
+6. [Maintenance](#maintenance)
+7. [Hardware](#hardware)
+8. [Software](#software)
+9. [Security & Privacy](#security--privacy)
+10. [Network](#network)
+11. [Gaming](#gaming)
+12. [Desktop](#desktop)
+13. [Development](#development)
+14. [AI Lab](#ai-lab)
+15. [Automation](#automation)
+16. [Community](#community)
+17. [Diagnostics](#diagnostics)
+18. [CLI Reference](#cli-reference)
+19. [All Tabs Overview](#all-tabs-overview)
+20. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -48,9 +52,36 @@ loofi cleanup
 
 ---
 
+## First-Run Wizard
+
+On first launch, the **First-Run Wizard** guides you through initial setup:
+
+| Step | Description |
+|------|-------------|
+| **System Detection** | Auto-detects hardware via DMI sysfs (HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS, etc.) |
+| **Use Case Selection** | Choose your primary use case (Development, Gaming, Creative Work, Office) |
+| **Apply Profile** | Saves `~/.config/loofi-fedora-tweaks/profile.json` with your preferences |
+
+The wizard runs once and creates `~/.config/loofi-fedora-tweaks/first_run_complete` as a sentinel.
+
+---
+
+## Command Palette
+
+Press **Ctrl+K** anywhere in the application to open the Command Palette.
+
+| Feature | Description |
+|---------|-------------|
+| **Fuzzy Search** | Type to filter 60+ feature entries by name, category, or keyword |
+| **Keyboard Navigation** | Up/Down arrows to browse, Enter to activate, Escape to close |
+| **Scored Results** | Results ranked by relevance (exact > starts-with > contains > fuzzy) |
+| **Tab Switching** | Select any entry to jump directly to the corresponding tab |
+
+---
+
 ## Dashboard
 
-The **Dashboard** is your system health overview:
+The **Dashboard** (Home tab) is your system health overview:
 
 | Card | Description |
 |------|-------------|
@@ -66,9 +97,9 @@ The **Dashboard** is your system health overview:
 | **Check Updates** | Check for system updates |
 | **Apply Preset** | Apply your saved configuration preset |
 
-### Auto-Refresh (v9.2)
+### Auto-Refresh
 
-The dashboard now auto-refreshes every 5 seconds with live system health:
+The dashboard auto-refreshes every 5 seconds with live system health:
 
 | Indicator | Description |
 |-----------|-------------|
@@ -78,166 +109,303 @@ The dashboard now auto-refreshes every 5 seconds with live system health:
 
 ---
 
-## Performance Monitor
+## System Monitor
 
-### 📊 Performance Tab (v9.2)
+The **System Monitor** tab consolidates Performance and Process management (previously two separate tabs).
+
+### Performance Sub-Tab
 
 Real-time system performance graphs with 60-second rolling history:
 
 | Graph | Data Source | Description |
 |-------|------------|-------------|
-| **CPU Usage** | `/proc/stat` | Per-core and total CPU utilization percentage |
+| **CPU Usage** | `/proc/stat` | Per-core and total CPU utilization |
 | **Memory** | `/proc/meminfo` | Used, cached, and available RAM |
 | **Disk I/O** | `/proc/diskstats` | Read/write throughput in MB/s |
-| **Network I/O** | `/proc/net/dev` | Upload/download bandwidth per interface |
+| **Network I/O** | `/proc/net/dev` | Upload/download bandwidth |
 
-All data is collected directly from `/proc` without external dependencies (no psutil required).
+All data collected from `/proc` — no external dependencies required.
 
-**Key Features:**
-- Graphs auto-update every 2 seconds
-- 60-second rolling window with history
-- Human-readable bandwidth display (KB/s, MB/s, GB/s)
-- Catppuccin Mocha color-coded charts
+### Processes Sub-Tab
 
----
-
-## Process Manager
-
-### 🔍 Process Manager Tab (v9.2)
-
-Monitor and manage running processes with a sortable tree view:
+Monitor and manage running processes:
 
 | Column | Description |
 |--------|-------------|
 | **PID** | Process ID |
-| **Name** | Process name from /proc/[pid]/stat |
+| **Name** | Process name |
 | **User** | Process owner |
-| **CPU %** | CPU usage (calculated from /proc/[pid]/stat deltas) |
-| **Memory %** | RAM usage percentage |
-| **Memory** | Absolute memory in human-readable format |
-| **State** | Process state (R=Running, S=Sleeping, Z=Zombie, etc.) |
+| **CPU %** | CPU usage |
+| **Memory %** | RAM percentage |
+| **Memory** | Absolute memory (human-readable) |
+| **State** | R=Running, S=Sleeping, Z=Zombie |
 
 **Context Menu (Right-Click):**
 
 | Action | Description |
 |--------|-------------|
-| **Kill (SIGTERM)** | Gracefully terminate the process |
-| **Force Kill (SIGKILL)** | Forcefully terminate the process |
-| **Renice** | Change process priority (-20 to 19) |
-
-Privileged operations automatically escalate via `pkexec` when needed.
-
-**Sorting & Filtering:**
-- Click column headers to sort by any field
-- Filter by current user only
-- Top processes by CPU or memory usage
+| **Kill (SIGTERM)** | Gracefully terminate |
+| **Force Kill (SIGKILL)** | Forcefully terminate |
+| **Renice** | Change priority (-20 to 19) |
 
 ---
 
-## Temperature Monitor
+## Maintenance
 
-### 🌡️ Temperature Monitoring (v9.2)
+The **Maintenance** tab consolidates Updates, Cleanup, and Overlays (previously three separate tabs).
 
-Hardware temperature monitoring via the Linux hwmon sysfs interface:
-
-| Sensor Type | hwmon Drivers | Example |
-|-------------|---------------|---------|
-| **CPU** | coretemp, k10temp, zenpower | Intel Core, AMD Ryzen |
-| **GPU** | amdgpu, nouveau, nvidia | Discrete graphics cards |
-| **Disk** | nvme, drivetemp | NVMe SSDs, SATA drives |
-| **Other** | Various | Motherboard, chipset sensors |
-
-**Health Status Levels:**
-
-| Status | Condition | Indicator |
-|--------|-----------|-----------|
-| **OK** | All sensors below thresholds | Green |
-| **Warning** | Any sensor at/above high threshold | Yellow |
-| **Critical** | Any sensor at/above critical threshold | Red |
-
-Temperature data is read from `/sys/class/hwmon/hwmon*/temp*_input` files.
-
----
-
-## Network Traffic Monitor
-
-### 📡 Network Traffic Monitor (v9.2)
-
-Per-interface network monitoring with bandwidth tracking and connection listing:
+### Updates Sub-Tab
 
 | Feature | Description |
 |---------|-------------|
-| **Interface Stats** | Bytes sent/received, packet counts per interface |
-| **Bandwidth Calculation** | Real-time upload/download rates |
-| **Interface Classification** | Auto-detect WiFi, Ethernet, Loopback, VPN |
-| **Active Connections** | TCP/UDP connections with remote addresses |
-| **Process Mapping** | Map connections to owning processes via /proc/[pid]/fd |
+| **DNF Updates** | Check and install system package updates |
+| **Flatpak Updates** | Update all Flatpak applications |
+| **Atomic Updates** | rpm-ostree upgrade (on Atomic variants) |
 
-**Interface Types:**
-
-| Pattern | Type |
-|---------|------|
-| `wl*` | WiFi |
-| `en*`, `eth*` | Ethernet |
-| `lo` | Loopback |
-| `tun*`, `wg*` | VPN |
-
-Data sources: `/proc/net/dev`, `/proc/net/tcp`, `/proc/net/udp`, `/sys/class/net/*/operstate`
-
----
-
-## Developer Tools
-
-### 📦 Containers Tab (v7.1+)
-
-Manage Distrobox containers graphically:
+### Cleanup Sub-Tab
 
 | Feature | Description |
 |---------|-------------|
-| **Container List** | View all containers with status (running/stopped) |
-| **Create Container** | Select from popular images (Fedora, Ubuntu, Arch, etc.) |
-| **Context Menu** | Right-click to Enter, Stop, Delete, or Open Terminal |
+| **DNF Cache** | Clean package manager cache |
+| **Journal Vacuum** | Reduce systemd journal size |
+| **SSD TRIM** | Run fstrim on SSD drives |
+| **Orphan Removal** | Remove unneeded packages |
+
+### Overlays Sub-Tab (Atomic only)
+
+| Feature | Description |
+|---------|-------------|
+| **Layered Packages** | View and manage rpm-ostree overlays |
+| **Add/Remove** | Install or remove layered packages |
+
+This sub-tab is only shown on Atomic Fedora variants (Silverblue, Kinoite).
+
+---
+
+## Hardware
+
+The **Hardware** tab now includes all hardware controls plus features previously in the HP Tweaks tab, made hardware-agnostic.
+
+| Feature | Description |
+|---------|-------------|
+| **CPU Governor** | Toggle powersave/schedutil/performance |
+| **Power Profile** | Switch power-saver/balanced/performance |
+| **GPU Mode** | Integrated/Hybrid/Dedicated via envycontrol |
+| **Fan Control** | Manual slider and auto mode via nbfc-linux |
+| **Audio Fixes** | PulseAudio/PipeWire configuration for hardware-specific issues |
+| **Battery Limit** | Set charge limit (80%/100%) with systemd persistence |
+| **Fingerprint** | Fingerprint enrollment wizard via fprintd |
+
+Hardware profiles auto-detected via DMI sysfs data. Supported profiles:
+
+| Profile | Detection |
+|---------|-----------|
+| **HP EliteBook** | Product name contains "EliteBook" |
+| **HP ProBook** | Product name contains "ProBook" |
+| **ThinkPad** | Product name contains "ThinkPad" |
+| **Dell XPS** | Product name contains "XPS" |
+| **Dell Latitude** | Product name contains "Latitude" |
+| **Framework** | Manufacturer contains "Framework" |
+| **ASUS ZenBook** | Product name contains "ZenBook" |
+| **Generic Laptop** | Chassis type 9/10 (laptop) |
+| **Generic Desktop** | Fallback for unrecognized hardware |
+
+---
+
+## Software
+
+The **Software** tab consolidates Apps and Repos (previously two separate tabs).
+
+### Applications Sub-Tab
+
+One-click installation for popular applications:
+
+| Category | Examples |
+|----------|----------|
+| **Browsers** | Chrome, Firefox additions |
+| **Development** | VS Code, JetBrains |
+| **Communication** | Discord, Slack, Zoom |
+| **Media** | Spotify, VLC, OBS Studio |
+
+### Repositories Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **RPM Fusion** | Enable Free/Nonfree repos |
+| **Flathub** | Enable Flatpak repository |
+| **Multimedia Codecs** | Install codec packages |
+
+---
+
+## Security & Privacy
+
+The **Security & Privacy** tab merges the Security Center and Privacy features.
+
+| Feature | Description |
+|---------|-------------|
+| **Security Score** | 0-100 health rating with recommendations |
+| **Port Auditor** | Find risky open ports, block with firewall |
+| **USB Guard** | Whitelist/blacklist USB devices |
+| **Sandbox** | Firejail/Bubblewrap app isolation |
+| **Firewall** | Manage firewalld rules |
+| **Telemetry** | Disable system telemetry and trackers |
+| **Security Updates** | Automatic security update configuration |
+
+---
+
+## Network
+
+| Feature | Description |
+|---------|-------------|
+| **DNS Switcher** | Google, Cloudflare, Quad9 |
+| **MAC Randomization** | Random MAC per connection |
+| **Firewall Rules** | Basic firewalld management |
+
+---
+
+## Gaming
+
+| Feature | Description |
+|---------|-------------|
+| **GameMode** | Install and configure Feral GameMode |
+| **MangoHud** | FPS overlay for Vulkan/OpenGL |
+| **ProtonUp-Qt** | Manage Proton-GE versions |
+| **Steam Devices** | Install udev rules for controllers |
+
+---
+
+## Desktop
+
+The **Desktop** tab consolidates Director (window management) and Theming.
+
+### Window Manager Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Compositor Detection** | Auto-detect KDE Plasma, Hyprland, Sway |
+| **Tiling Presets** | Vim (H/J/K/L) or Arrow key bindings |
+| **Workspace Templates** | Development, Gaming, Creative layouts |
+| **Dotfile Sync** | Git-based config backup |
+| **KWin Scripts** | Custom tiling scripts for KDE Plasma |
+
+### Theming Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **GTK Themes** | Configure GTK application themes |
+| **Qt Themes** | Configure Qt application themes |
+| **Icon Packs** | Install and switch icon themes |
+
+---
+
+## Development
+
+The **Development** tab consolidates Containers and Developer Tools.
+
+### Containers Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Container List** | View Distrobox containers with status |
+| **Create Container** | Select from popular images (Fedora, Ubuntu, Arch) |
+| **Context Menu** | Enter, Stop, Delete, Open Terminal |
 | **Export Apps** | Export applications from containers to host |
 
-### 🛠️ Developer Tab (v7.1+)
-
-One-click installation for development environments:
+### Developer Tools Sub-Tab
 
 **Language Version Managers:**
 
 | Tool | Description |
 |------|-------------|
-| **PyEnv** | Install multiple Python versions without affecting system |
-| **NVM** | Node.js version manager for JavaScript development |
-| **Rustup** | Rust toolchain installer with easy version switching |
+| **PyEnv** | Multiple Python versions |
+| **NVM** | Node.js version manager |
+| **Rustup** | Rust toolchain installer |
 
 **VS Code Extension Profiles:**
 
-| Profile | Extensions Included |
-|---------|---------------------|
+| Profile | Extensions |
+|---------|-----------|
 | **Python** | pylance, debugpy, black, jupyter, ruff |
 | **C/C++** | cpptools, cmake-tools, clang-format |
 | **Rust** | rust-analyzer, toml, lldb |
 | **Web** | prettier, eslint, tailwindcss |
-| **Containers** | docker, remote-containers |
 
 ---
 
-## Watchtower Diagnostics
-
-### 🔭 Watchtower Tab (v7.5+)
-
-System diagnostics hub with three sub-tabs:
-
-#### Services
+## AI Lab
 
 | Feature | Description |
 |---------|-------------|
-| **Gaming Filter** | Show only gaming-related services (GameMode, Steam, etc.) |
-| **Failed Filter** | Find services that failed to start |
-| **Context Menu** | Start, Stop, Restart, Mask, Unmask services |
+| **Hardware Detection** | CUDA, ROCm, Intel/AMD NPU support |
+| **Ollama Manager** | Install, manage, and run local AI |
+| **Model Downloads** | One-click download for Llama 3, Mistral, CodeLlama, Phi-3 |
 
-#### Boot Analyzer
+---
+
+## Automation
+
+The **Automation** tab consolidates Scheduler, Replicator, and Pulse features.
+
+### Scheduler Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Task Scheduling** | Create automated tasks with time or event triggers |
+| **Power Triggers** | Execute on battery/AC transitions |
+| **Boot Triggers** | Run tasks at login |
+
+### Replicator Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Ansible Export** | Generate playbooks with packages, Flatpaks, GNOME settings |
+| **Kickstart Export** | Create Anaconda .ks files for automated installs |
+
+### Pulse Events (v9.1)
+
+| Feature | Description |
+|---------|-------------|
+| **Event-Driven Automation** | React to hardware, network, and system events |
+| **Focus Mode** | Domain blocking, DND, process killing |
+| **Automation Profiles** | Rules that trigger actions on system events |
+
+---
+
+## Community
+
+The **Community** tab consolidates Presets and Marketplace.
+
+### My Presets Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Save Preset** | Save current system configuration |
+| **Load Preset** | Apply a saved preset |
+| **Cloud Sync** | Sync to GitHub Gist |
+
+### Marketplace Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Browse** | Search community presets by category |
+| **Download** | Save presets locally |
+| **Drift Detection** | Track configuration changes from baseline |
+
+---
+
+## Diagnostics
+
+The **Diagnostics** tab consolidates Watchtower and Boot management.
+
+### Services Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Gaming Filter** | Show only gaming-related services |
+| **Failed Filter** | Find services that failed to start |
+| **Context Menu** | Start, Stop, Restart, Mask, Unmask |
+
+### Boot Analyzer Sub-Tab
 
 | Feature | Description |
 |---------|-------------|
@@ -245,132 +413,30 @@ System diagnostics hub with three sub-tabs:
 | **Slow Services** | List services taking >5s to start |
 | **Suggestions** | Optimization recommendations |
 
-#### Journal Viewer
+### Journal Viewer Sub-Tab
 
 | Feature | Description |
 |---------|-------------|
 | **Quick Diagnostic** | Error count and failed services at a glance |
 | **Boot Errors** | View current boot errors |
-| **🆘 Panic Button** | Export forum-ready log with system info |
-
----
-
-## Replicator - IaC Export
-
-### 🔄 Replicator Tab (v8.0+)
-
-Export your system configuration as Infrastructure as Code:
-
-#### Ansible Playbook Export
-
-Generate standard Ansible playbooks that work on any Fedora/RHEL machine:
-
-| Option | Description |
-|--------|-------------|
-| **DNF Packages** | Export user-installed packages |
-| **Flatpak Apps** | Export Flatpak applications |
-| **GNOME Settings** | Export theme, fonts, settings |
-
-**Usage:**
-
-```bash
-cd ~/loofi-playbook
-ansible-playbook site.yml --ask-become-pass
-```
-
-#### Kickstart Generator
-
-Create Anaconda-compatible .ks files for automated installs:
-
-| Option | Description |
-|--------|-------------|
-| **Packages** | Include DNF package list |
-| **Flatpaks** | Add Flatpak install in %post |
-
-**Usage during installation:**
-
-```
-inst.ks=file:///path/to/loofi.ks
-```
-
----
-
-## Boot Management
-
-The **Boot** tab provides three powerful sections:
-
-### 1. Kernel Parameters
-
-| Preset | Parameters | Use Case |
-|--------|------------|----------|
-| **AMD GPU** | `amdgpu.ppfeaturemask=0xffffffff` | Enable AMD GPU overclocking |
-| **Intel IOMMU** | `intel_iommu=on iommu=pt` | GPU passthrough for VMs |
-| **NVIDIA** | `nvidia-drm.modeset=1` | Enable NVIDIA modesetting |
-
-### 2. ZRAM Configuration
-
-| Setting | Range | Recommendation |
-|---------|-------|----------------|
-| **Size** | 25-150% RAM | 50-100% for most users |
-| **Algorithm** | zstd, lz4, lzo | `zstd` (best compression) |
-
-### 3. Secure Boot & MOK
-
-1. **Generate Key**: Creates RSA 2048-bit key pair
-2. **Enroll Key**: Imports key to MOK list
-3. **Reboot**: Press any key in MOK Manager, enter password
-
----
-
-## Marketplace & Drift Detection
-
-### Community Marketplace (v7.0+)
-
-1. **Search**: Find presets by name or description
-2. **Filter**: Categories (Gaming, Privacy, Performance, etc.)
-3. **Download**: Save preset locally
-4. **Apply**: Apply preset and set drift baseline
-
-### Configuration Drift Detection
-
-| State | Meaning |
-|-------|---------|
-| **No Baseline** | No preset has been applied with tracking |
-| **Stable** | System matches the baseline |
-| **Drifted** | Changes detected |
+| **Panic Button** | Export forum-ready log with system info |
 
 ---
 
 ## CLI Reference
 
-### Basic Commands
+### Info & Health
 
 ```bash
-loofi info              # System information
-loofi cleanup           # Full cleanup
-loofi cleanup dnf       # DNF cache only
-loofi cleanup journal   # Journal vacuum
+loofi info                    # System information
+loofi health                  # System health check
+loofi doctor                  # Check tool dependencies
+loofi hardware                # Show detected hardware profile
 ```
 
-### Power Management
+### Monitoring
 
 ```bash
-loofi tweak power --profile performance
-loofi tweak power --profile balanced
-loofi tweak battery --limit 80  # HP Elitebook
-```
-
-### Network
-
-```bash
-loofi network dns --provider cloudflare
-loofi network dns --provider google
-```
-
-### System Monitoring (v9.2)
-
-```bash
-loofi health                  # System health overview
 loofi disk                    # Disk usage analysis
 loofi disk --details          # Include large directory listing
 loofi processes               # Top 15 processes by CPU
@@ -381,39 +447,57 @@ loofi netmon                  # Network interface stats
 loofi netmon --connections    # Include active connections
 ```
 
+### Management
+
+```bash
+loofi cleanup                 # Full cleanup
+loofi cleanup dnf             # DNF cache only
+loofi cleanup journal         # Journal vacuum
+loofi tweak power --profile performance
+loofi tweak power --profile balanced
+loofi tweak battery --limit 80
+loofi network dns --provider cloudflare
+loofi network dns --provider google
+loofi advanced bbr            # Enable TCP BBR
+loofi advanced swappiness 10  # Set swappiness
+```
+
+### JSON Output (v10.0)
+
+```bash
+loofi --json info             # JSON system information
+loofi --json health           # JSON health check
+loofi --json doctor           # JSON dependency check
+loofi --json hardware         # JSON hardware profile
+```
+
+### Daemon Mode
+
+```bash
+loofi-fedora-tweaks --daemon  # Run as background service
+```
+
 ---
 
 ## All Tabs Overview
 
 | Tab | Icon | Description |
 |-----|------|-------------|
-| **Home** | 🏠 | Dashboard with system health |
-| **System Info** | ℹ️ | Hardware specs, OS version |
-| **Updates** | 📦 | System update management |
-| **Cleanup** | 🧹 | Cache cleaning, orphan removal |
-| **Hardware** | ⚡ | CPU governor, power profiles |
-| **HP Tweaks** | 💻 | Battery limit (HP specific) |
-| **Apps** | 🚀 | One-click app installation |
-| **Advanced** | ⚙️ | DNF optimization, TCP BBR |
-| **Gaming** | 🎮 | MangoHud, ProtonUp |
-| **Network** | 🌐 | DNS, firewall, MAC |
-| **Presets** | 💾 | Save/load configurations |
-| **Marketplace** | 🌐 | Community presets |
-| **Scheduler** | ⏰ | Automated tasks |
-| **Boot** | 🔧 | Kernel params, ZRAM |
-| **Containers** | 📦 | Distrobox GUI **(v7.1)** |
-| **Developer** | 🛠️ | Version managers, VS Code **(v7.1)** |
-| **Watchtower** | 🔭 | Services, boot, journal **(v7.5)** |
-| **Replicator** | 🔄 | Ansible/Kickstart export **(v8.0)** |
-| **AI Lab** | 🧠 | Local AI setup (Ollama) **(v8.1)** |
-| **Security** | 🛡️ | Port audit, USB Guard **(v8.5)** |
-| **Director** | 🎬 | Window management **(v9.0)** |
-| **Performance** | 📊 | Live CPU, RAM, I/O graphs **(v9.2)** |
-| **Processes** | 🔍 | Process monitor with kill/renice **(v9.2)** |
-| **Repos** | 📁 | Repository management |
-| **Privacy** | 🔒 | Telemetry settings |
-| **Theming** | 🎨 | GTK/Qt themes |
-| **Overlays** | 📦 | rpm-ostree (Atomic only) |
+| **Home** | Home | Dashboard with system health |
+| **System Info** | Info | Hardware specs, OS version |
+| **System Monitor** | Chart | Live performance graphs + process manager |
+| **Maintenance** | Wrench | Updates + cleanup + overlays |
+| **Hardware** | Lightning | CPU, GPU, fan, power, battery, audio, fingerprint |
+| **Software** | Package | One-click apps + repository management |
+| **Security & Privacy** | Shield | Security score, ports, USB, firewall, telemetry |
+| **Network** | Globe | DNS, firewall, MAC |
+| **Gaming** | Controller | GameMode, MangoHud, ProtonUp |
+| **Desktop** | Palette | Window management + theming |
+| **Development** | Tools | Containers + developer toolchains |
+| **AI Lab** | Brain | Ollama, model management |
+| **Automation** | Clock | Scheduler + replicator + pulse events |
+| **Community** | Globe | Presets + marketplace |
+| **Diagnostics** | Telescope | Services + boot + journal |
 
 ---
 
@@ -432,9 +516,25 @@ python3 main.py
 sudo dnf install polkit
 ```
 
+### Check Dependencies
+
+```bash
+loofi doctor
+```
+
+The `doctor` command checks for all critical and optional tools and reports what's missing.
+
 ### Panic Log for Support
 
-Use the **Watchtower** → **Journal** → **🆘 Export Panic Log** button to generate a forum-ready diagnostic file.
+Use **Diagnostics** > **Journal** > **Export Panic Log** to generate a forum-ready diagnostic file.
+
+### Reset First-Run Wizard
+
+```bash
+rm ~/.config/loofi-fedora-tweaks/first_run_complete
+```
+
+Relaunch the app to trigger the wizard again.
 
 ---
 
@@ -445,4 +545,4 @@ Use the **Watchtower** → **Journal** → **🆘 Export Panic Log** button to g
 
 ---
 
-*Documentation last updated: v9.2.0 - February 2026*
+*Documentation last updated: v10.0.0 - February 2026*

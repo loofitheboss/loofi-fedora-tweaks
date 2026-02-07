@@ -1,66 +1,106 @@
-# Loofi Fedora Tweaks v6.0.0 - The "Autonomy" Update ⏰
+# Loofi Fedora Tweaks v10.0.0 - The "Zenith" Update
 
-This major update introduces task automation and a background service!
+The biggest release yet: a major consolidation and modernization of the entire application.
 
-## ⏰ New Scheduler Tab
+## Architecture Overhaul
 
-Schedule automated tasks to run in the background:
+* **25 tabs consolidated to 15** with QTabWidget sub-navigation within each consolidated tab
+* **BaseTab class** (`ui/base_tab.py`) eliminates command-execution boilerplate across all tabs
+* **PrivilegedCommand builder** (`utils/commands.py`) for safe pkexec operations using argument arrays
+* **Error framework** (`utils/errors.py`) with typed exceptions and recovery hints
+* **Hardware profiles** (`utils/hardware_profiles.py`) auto-detect hardware via DMI sysfs data
 
-### Supported Actions
+## New Features
 
-* **🧹 System Cleanup** - Auto-clean caches and orphaned packages
-* **📦 Update Check** - Check for updates and notify you
-* **☁️ Sync Config** - Auto-sync your settings to GitHub Gist
-* **💾 Apply Preset** - Auto-apply a preset on schedule
+### First-Run Wizard
+On first launch, automatically detects your hardware and asks about your use case:
+* HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS ZenBook auto-detection
+* Use case selection: Development, Gaming, Creative Work, Office
+* Profile saved to `~/.config/loofi-fedora-tweaks/profile.json`
 
-### Schedule Triggers
+### Command Palette (Ctrl+K)
+* 60+ searchable feature entries
+* Fuzzy matching with scored relevance
+* Keyboard navigation (Up/Down, Enter, Escape)
 
-* **⏰ Hourly / 📅 Daily / 📆 Weekly** - Time-based automation
-* **🚀 On Boot** - Run when you log in
-* **🔋 On Battery** - Trigger when unplugging AC
-* **🔌 On AC Power** - Trigger when plugging in
+### CLI Enhancements
+* `--json` flag for machine-readable output on all commands
+* `doctor` command checks critical and optional tool dependencies
+* `hardware` command shows detected hardware profile
 
-## 🔧 Background Service
+### CI/CD Pipeline
+* GitHub Actions: lint (flake8), test (pytest), build (Fedora 43 rpmbuild)
+* Tag-triggered releases with RPM artifact upload
 
-* **Systemd User Service** - Runs in the background without root
-* **Enable/Disable** - One-click service management from the app
-* **Power-aware** - Automatically detects power state changes
-* **Notifications** - Toast notifications when tasks complete
+## Consolidated Tabs
 
-## 🏗️ New Modules
+| New Tab | Merges |
+|---------|--------|
+| **Maintenance** | Updates + Cleanup + Overlays |
+| **Software** | Apps + Repos |
+| **System Monitor** | Performance + Processes |
+| **Hardware** | Hardware Control + HP Tweaks (now hardware-agnostic) |
+| **Security & Privacy** | Security Center + Privacy |
+| **Desktop** | Director + Theming |
+| **Development** | Containers + Developer Tools |
+| **Community** | Presets + Marketplace |
+| **Automation** | Scheduler + Replicator + Pulse |
+| **Diagnostics** | Watchtower + Boot |
+
+## New Modules
 
 | File | Description |
 |:---|:---|
-| `utils/notifications.py` | Desktop notification wrapper |
-| `utils/scheduler.py` | Task scheduling engine |
-| `utils/daemon.py` | Background service daemon |
-| `ui/scheduler_tab.py` | Scheduler management UI |
-| `config/loofi-fedora-tweaks.service` | Systemd unit file |
+| `ui/base_tab.py` | BaseTab class with CommandRunner wiring |
+| `ui/maintenance_tab.py` | Consolidated maintenance (Updates + Cleanup + Overlays) |
+| `ui/software_tab.py` | Consolidated software (Apps + Repos) |
+| `ui/monitor_tab.py` | Consolidated system monitor (Performance + Processes) |
+| `ui/diagnostics_tab.py` | Consolidated diagnostics (Watchtower + Boot) |
+| `ui/desktop_tab.py` | Consolidated desktop (Director + Theming) |
+| `ui/development_tab.py` | Consolidated development (Containers + Developer) |
+| `ui/community_tab.py` | Consolidated community (Presets + Marketplace) |
+| `ui/automation_tab.py` | Consolidated automation (Scheduler + Replicator) |
+| `ui/wizard.py` | First-run wizard with hardware detection |
+| `ui/command_palette.py` | Ctrl+K fuzzy-search command palette |
+| `utils/errors.py` | Centralized error hierarchy |
+| `utils/commands.py` | PrivilegedCommand builder |
+| `utils/formatting.py` | Shared formatting utilities |
+| `utils/hardware_profiles.py` | Hardware profile auto-detection |
 
-## 📦 Installation
+## Bug Fixes
+
+* **Network state detection**: Fixed Pulse `get_network_state()` incorrectly matching "disconnected" as "connected" due to substring check order
+
+## Tests
+
+* 225 tests passing (87+ new for v10 modules)
+* Shared test fixtures in `tests/conftest.py`
+* CI pipeline validates on every push
+
+## Installation
 
 **Via DNF:**
 
 ```bash
-sudo dnf update loofi-fedora-tweaks --refresh
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v10.0.0/loofi-fedora-tweaks-10.0.0-1.fc43.noarch.rpm
 ```
 
-**Enable the background service:**
+**Build from source:**
 
 ```bash
-systemctl --user enable --now loofi-fedora-tweaks
+./build_rpm.sh
+sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-10.0.0-1.fc43.noarch.rpm
 ```
 
-## 🚀 CLI Support
-
-Run in daemon mode directly:
+## Quick Start
 
 ```bash
-loofi-fedora-tweaks --daemon
-```
+# GUI
+loofi-fedora-tweaks
 
-Check version:
-
-```bash
-loofi-fedora-tweaks --version
+# CLI
+loofi info
+loofi doctor
+loofi hardware
+loofi --json health
 ```
