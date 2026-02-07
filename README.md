@@ -53,7 +53,8 @@ Local AI with hardware-accelerated inference!
 
 ## 📚 Documentation
 
-📖 **[User Guide](docs/USER_GUIDE.md)** - Complete documentation with screenshots
+📖 **[User Guide](docs/USER_GUIDE.md)** - Complete documentation with screenshots  
+🗺️ **[Roadmap](ROADMAP.md)** - Future plans and upcoming features
 
 ---
 
