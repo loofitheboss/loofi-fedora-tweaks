@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [8.0.0] - 2026-02-07 "Replicator Update"
+
+### Added
+
+- **Replicator Tab**: Export system configuration as Infrastructure as Code.
+- **Ansible Playbook Export**: Generate playbooks with packages, Flatpaks, GNOME settings.
+- **Kickstart Generator**: Create Anaconda-compatible .ks files for automated installs.
+- **Watchtower Tab**: Combined diagnostics hub with services, boot analyzer, journal viewer.
+- **Gaming-Focused Service Manager**: Filter and manage gaming-related systemd services.
+- **Boot Time Analyzer**: Visualize boot time breakdown with optimization suggestions.
+- **Panic Button Log Export**: One-click forum-ready diagnostic log export.
+- **Containers Tab**: Distrobox GUI for managing development containers.
+- **Developer Tab**: One-click install for PyEnv, NVM, Rustup + VS Code extension profiles.
+- **Lazy Tab Loading**: Tabs load on-demand for faster application startup.
+
+### New Files
+
+- `utils/ansible_export.py` - Ansible playbook generator
+- `utils/kickstart.py` - Kickstart file generator
+- `utils/services.py` - Gaming-focused systemd service manager
+- `utils/boot_analyzer.py` - Boot time analyzer
+- `utils/journal.py` - Journal viewer with panic button
+- `utils/containers.py` - Distrobox wrapper
+- `utils/devtools.py` - PyEnv, NVM, Rustup installers
+- `utils/vscode.py` - VS Code extension management
+- `ui/replicator_tab.py` - IaC export UI
+- `ui/watchtower_tab.py` - Diagnostics hub UI
+- `ui/containers_tab.py` - Container management UI
+- `ui/developer_tab.py` - Developer tools UI
+- `ui/lazy_widget.py` - Lazy loading widget
+
+---
+
 ## [7.0.0] - 2026-02-07 "Community Update"
 
 ### Added

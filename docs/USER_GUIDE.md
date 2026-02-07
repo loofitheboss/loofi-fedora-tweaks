@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide 📖
 
-> **Version 7.0.0 "Community Update"**  
+> **Version 8.0.0 "Replicator Update"**  
 > Complete documentation for all features and functionality.
 
 ---
@@ -9,11 +9,14 @@
 
 1. [Quick Start](#quick-start)
 2. [Dashboard](#dashboard)
-3. [Boot Management](#boot-management)
-4. [Marketplace & Drift Detection](#marketplace--drift-detection)
-5. [CLI Reference](#cli-reference)
-6. [All Tabs Overview](#all-tabs-overview)
-7. [Troubleshooting](#troubleshooting)
+3. [Developer Tools (v7.1+)](#developer-tools)
+4. [Watchtower Diagnostics (v7.5+)](#watchtower-diagnostics)
+5. [Replicator - IaC Export (v8.0+)](#replicator---iac-export)
+6. [Boot Management](#boot-management)
+7. [Marketplace & Drift Detection](#marketplace--drift-detection)
+8. [CLI Reference](#cli-reference)
+9. [All Tabs Overview](#all-tabs-overview)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -41,8 +44,6 @@ loofi cleanup
 
 ## Dashboard
 
-![Dashboard](dashboard.png)
-
 The **Dashboard** is your system health overview:
 
 | Card | Description |
@@ -61,15 +62,120 @@ The **Dashboard** is your system health overview:
 
 ---
 
+## Developer Tools
+
+### 📦 Containers Tab (v7.1+)
+
+Manage Distrobox containers graphically:
+
+| Feature | Description |
+|---------|-------------|
+| **Container List** | View all containers with status (running/stopped) |
+| **Create Container** | Select from popular images (Fedora, Ubuntu, Arch, etc.) |
+| **Context Menu** | Right-click to Enter, Stop, Delete, or Open Terminal |
+| **Export Apps** | Export applications from containers to host |
+
+### 🛠️ Developer Tab (v7.1+)
+
+One-click installation for development environments:
+
+**Language Version Managers:**
+
+| Tool | Description |
+|------|-------------|
+| **PyEnv** | Install multiple Python versions without affecting system |
+| **NVM** | Node.js version manager for JavaScript development |
+| **Rustup** | Rust toolchain installer with easy version switching |
+
+**VS Code Extension Profiles:**
+
+| Profile | Extensions Included |
+|---------|---------------------|
+| **Python** | pylance, debugpy, black, jupyter, ruff |
+| **C/C++** | cpptools, cmake-tools, clang-format |
+| **Rust** | rust-analyzer, toml, lldb |
+| **Web** | prettier, eslint, tailwindcss |
+| **Containers** | docker, remote-containers |
+
+---
+
+## Watchtower Diagnostics
+
+### 🔭 Watchtower Tab (v7.5+)
+
+System diagnostics hub with three sub-tabs:
+
+#### Services
+
+| Feature | Description |
+|---------|-------------|
+| **Gaming Filter** | Show only gaming-related services (GameMode, Steam, etc.) |
+| **Failed Filter** | Find services that failed to start |
+| **Context Menu** | Start, Stop, Restart, Mask, Unmask services |
+
+#### Boot Analyzer
+
+| Feature | Description |
+|---------|-------------|
+| **Boot Stats** | Firmware, loader, kernel, userspace timing |
+| **Slow Services** | List services taking >5s to start |
+| **Suggestions** | Optimization recommendations |
+
+#### Journal Viewer
+
+| Feature | Description |
+|---------|-------------|
+| **Quick Diagnostic** | Error count and failed services at a glance |
+| **Boot Errors** | View current boot errors |
+| **🆘 Panic Button** | Export forum-ready log with system info |
+
+---
+
+## Replicator - IaC Export
+
+### 🔄 Replicator Tab (v8.0+)
+
+Export your system configuration as Infrastructure as Code:
+
+#### Ansible Playbook Export
+
+Generate standard Ansible playbooks that work on any Fedora/RHEL machine:
+
+| Option | Description |
+|--------|-------------|
+| **DNF Packages** | Export user-installed packages |
+| **Flatpak Apps** | Export Flatpak applications |
+| **GNOME Settings** | Export theme, fonts, settings |
+
+**Usage:**
+
+```bash
+cd ~/loofi-playbook
+ansible-playbook site.yml --ask-become-pass
+```
+
+#### Kickstart Generator
+
+Create Anaconda-compatible .ks files for automated installs:
+
+| Option | Description |
+|--------|-------------|
+| **Packages** | Include DNF package list |
+| **Flatpaks** | Add Flatpak install in %post |
+
+**Usage during installation:**
+
+```
+inst.ks=file:///path/to/loofi.ks
+```
+
+---
+
 ## Boot Management
 
-![Boot Tab](boot_tab.png)
-
-The **Boot** tab (v6.2+) provides three powerful sections:
+The **Boot** tab provides three powerful sections:
 
 ### 1. Kernel Parameters
-
-Manage kernel command line parameters with common presets:
 
 | Preset | Parameters | Use Case |
 |--------|------------|----------|
@@ -77,13 +183,7 @@ Manage kernel command line parameters with common presets:
 | **Intel IOMMU** | `intel_iommu=on iommu=pt` | GPU passthrough for VMs |
 | **NVIDIA** | `nvidia-drm.modeset=1` | Enable NVIDIA modesetting |
 
-**Custom Parameters**: Add any kernel parameter manually.
-
-> ⚠️ **Backup**: The tool automatically backs up GRUB config before changes.
-
 ### 2. ZRAM Configuration
-
-Compressed swap in RAM for better performance:
 
 | Setting | Range | Recommendation |
 |---------|-------|----------------|
@@ -91,8 +191,6 @@ Compressed swap in RAM for better performance:
 | **Algorithm** | zstd, lz4, lzo | `zstd` (best compression) |
 
 ### 3. Secure Boot & MOK
-
-Manage Machine Owner Keys for third-party kernel modules:
 
 1. **Generate Key**: Creates RSA 2048-bit key pair
 2. **Enroll Key**: Imports key to MOK list
@@ -102,33 +200,20 @@ Manage Machine Owner Keys for third-party kernel modules:
 
 ## Marketplace & Drift Detection
 
-![Marketplace](marketplace.png)
-
 ### Community Marketplace (v7.0+)
-
-Browse and download presets created by the community:
 
 1. **Search**: Find presets by name or description
 2. **Filter**: Categories (Gaming, Privacy, Performance, etc.)
-3. **Details**: View stars, downloads, and description
-4. **Download**: Save preset locally
-5. **Apply**: Apply preset and set drift baseline
+3. **Download**: Save preset locally
+4. **Apply**: Apply preset and set drift baseline
 
 ### Configuration Drift Detection
-
-Monitor when your system diverges from applied presets:
 
 | State | Meaning |
 |-------|---------|
 | **No Baseline** | No preset has been applied with tracking |
 | **Stable** | System matches the baseline |
-| **Drifted** | Changes detected (packages, services, kernel) |
-
-**What is tracked:**
-
-- Kernel command line parameters
-- Installed/layered packages
-- User-enabled systemd services
+| **Drifted** | Changes detected |
 
 ---
 
@@ -137,59 +222,25 @@ Monitor when your system diverges from applied presets:
 ### Basic Commands
 
 ```bash
-# System information
-loofi info
-
-# Full cleanup (DNF + journal + trim)
-loofi cleanup
-
-# Cleanup specific action
-loofi cleanup dnf
-loofi cleanup journal --days 7
-loofi cleanup trim
+loofi info              # System information
+loofi cleanup           # Full cleanup
+loofi cleanup dnf       # DNF cache only
+loofi cleanup journal   # Journal vacuum
 ```
 
 ### Power Management
 
 ```bash
-# Set power profile
 loofi tweak power --profile performance
 loofi tweak power --profile balanced
-loofi tweak power --profile power-saver
-
-# Check current status
-loofi tweak status
-
-# Restart audio
-loofi tweak audio
-
-# Set battery limit (HP Elitebook)
-loofi tweak battery --limit 80
-```
-
-### Advanced Operations
-
-```bash
-# Apply DNF optimizations
-loofi advanced dnf-tweaks
-
-# Enable TCP BBR
-loofi advanced bbr
-
-# Install GameMode
-loofi advanced gamemode
-
-# Set swappiness
-loofi advanced swappiness --value 10
+loofi tweak battery --limit 80  # HP Elitebook
 ```
 
 ### Network
 
 ```bash
-# Set DNS provider
 loofi network dns --provider cloudflare
 loofi network dns --provider google
-loofi network dns --provider quad9
 ```
 
 ---
@@ -198,24 +249,28 @@ loofi network dns --provider quad9
 
 | Tab | Icon | Description |
 |-----|------|-------------|
-| **Home** | 🏠 | Dashboard with system health and quick actions |
-| **System Info** | ℹ️ | Hardware specs, OS version, kernel info |
-| **Updates** | 📦 | Check and install system updates |
-| **Cleanup** | 🧹 | DNF cache, orphans, journal vacuum |
-| **Hardware** | ⚡ | CPU governor, power profiles, GPU mode |
-| **HP Tweaks** | 💻 | Battery limit, fingerprint (HP specific) |
-| **Apps** | 🚀 | One-click installation of popular apps |
-| **Advanced** | ⚙️ | DNF optimization, TCP BBR, GameMode |
-| **Gaming** | 🎮 | MangoHud, ProtonUp, Game Mode |
-| **Network** | 🌐 | DNS, firewall, MAC address |
-| **Presets** | 💾 | Save/load/sync configurations |
-| **Marketplace** | 🌐 | Community presets + drift detection |
-| **Scheduler** | ⏰ | Automated tasks and triggers |
-| **Boot** | 🔧 | Kernel params, ZRAM, Secure Boot |
+| **Home** | 🏠 | Dashboard with system health |
+| **System Info** | ℹ️ | Hardware specs, OS version |
+| **Updates** | 📦 | System update management |
+| **Cleanup** | 🧹 | Cache cleaning, orphan removal |
+| **Hardware** | ⚡ | CPU governor, power profiles |
+| **HP Tweaks** | 💻 | Battery limit (HP specific) |
+| **Apps** | 🚀 | One-click app installation |
+| **Advanced** | ⚙️ | DNF optimization, TCP BBR |
+| **Gaming** | 🎮 | MangoHud, ProtonUp |
+| **Network** | 🌐 | DNS, firewall, MAC |
+| **Presets** | 💾 | Save/load configurations |
+| **Marketplace** | 🌐 | Community presets |
+| **Scheduler** | ⏰ | Automated tasks |
+| **Boot** | 🔧 | Kernel params, ZRAM |
+| **Containers** | 📦 | Distrobox GUI **(v7.1)** |
+| **Developer** | 🛠️ | Version managers, VS Code **(v7.1)** |
+| **Watchtower** | 🔭 | Services, boot, journal **(v7.5)** |
+| **Replicator** | 🔄 | Ansible/Kickstart export **(v8.0)** |
 | **Repos** | 📁 | Repository management |
-| **Privacy** | 🔒 | Telemetry and privacy settings |
-| **Theming** | 🎨 | GTK/Qt theme configuration |
-| **Overlays** | 📦 | rpm-ostree packages (Atomic only) |
+| **Privacy** | 🔒 | Telemetry settings |
+| **Theming** | 🎨 | GTK/Qt themes |
+| **Overlays** | 📦 | rpm-ostree (Atomic only) |
 
 ---
 
@@ -224,46 +279,19 @@ loofi network dns --provider quad9
 ### App Won't Launch
 
 ```bash
-# Check dependencies
 pip install PyQt6
-
-# Run from source
-cd loofi-fedora-tweaks/loofi-fedora-tweaks
 python3 main.py
 ```
 
 ### Permission Denied
 
-Most operations require root. The app uses `pkexec` for privilege escalation.
-
 ```bash
-# Ensure polkit is installed
 sudo dnf install polkit
 ```
 
-### DNF Lock Error
+### Panic Log for Support
 
-Another package manager is running:
-
-```bash
-# Wait for it to finish, or:
-sudo rm /var/run/dnf.pid
-```
-
-### Secure Boot Key Not Enrolling
-
-1. Reboot after `mokutil --import`
-2. In MOK Manager, select **Enroll MOK**
-3. Enter the password you set
-4. Continue boot
-
-### Marketplace Not Loading
-
-Check internet connection:
-
-```bash
-curl -I https://raw.githubusercontent.com
-```
+Use the **Watchtower** → **Journal** → **🆘 Export Panic Log** button to generate a forum-ready diagnostic file.
 
 ---
 
@@ -274,4 +302,4 @@ curl -I https://raw.githubusercontent.com
 
 ---
 
-*Documentation last updated: v7.0.0 - February 2026*
+*Documentation last updated: v8.0.0 - February 2026*
