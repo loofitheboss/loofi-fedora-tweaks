@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="6.5.0"
+VERSION="7.0.0"
 
 # Setup build directories in /tmp to avoid spaces in path
 BUILD_DIR="/tmp/loofi-fedora-tweaks-build"

@@ -109,7 +109,7 @@ def cmd_network(args):
 def cmd_info(args):
     """Show system information."""
     print("═══════════════════════════════════════════")
-    print("   Loofi Fedora Tweaks v6.5.0 CLI")
+    print("   Loofi Fedora Tweaks v7.0.0 CLI")
     print("═══════════════════════════════════════════")
     print(f"🖥️  System: {'Atomic' if SystemManager.is_atomic() else 'Traditional'} Fedora")
     print(f"📦 Package Manager: {SystemManager.get_package_manager()}")
@@ -128,7 +128,7 @@ def main(argv: Optional[List[str]] = None):
         prog="loofi",
         description="Loofi Fedora Tweaks - System management CLI"
     )
-    parser.add_argument("-v", "--version", action="version", version="6.5.0")
+    parser.add_argument("-v", "--version", action="version", version="7.0.0")
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     

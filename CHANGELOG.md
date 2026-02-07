@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.0.0] - 2026-02-07 "Community Update"
+
+### Added
+
+- **Preset Marketplace**: Browse and download community presets from GitHub.
+- **Configuration Drift Detection**: Track system changes from applied presets.
+- **Marketplace Tab**: New UI for community preset discovery.
+
+### New Files
+
+- `utils/marketplace.py` - GitHub-based preset marketplace
+- `utils/drift.py` - Configuration drift detection
+- `ui/marketplace_tab.py` - Marketplace UI
+
+---
+
 ## [6.5.0] - 2026-02-07 "Architect Update"
 
 ### Added
