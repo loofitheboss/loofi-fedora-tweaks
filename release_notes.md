@@ -1,33 +1,41 @@
-# Loofi Fedora Tweaks v5.5.0 - The "Ecosystem" Update 🌐
+# Loofi Fedora Tweaks v6.0.0 - The "Autonomy" Update ⏰
 
-This update introduces cloud sync and community preset sharing!
+This major update introduces task automation and a background service!
 
-## 🌐 New Presets & Sync Tab
+## ⏰ New Scheduler Tab
 
-The Presets tab has been completely redesigned with three sub-tabs:
+Schedule automated tasks to run in the background:
 
-### 📁 My Presets
+### Supported Actions
 
-* Save and restore your system configuration locally.
+* **🧹 System Cleanup** - Auto-clean caches and orphaned packages
+* **📦 Update Check** - Check for updates and notify you
+* **☁️ Sync Config** - Auto-sync your settings to GitHub Gist
+* **💾 Apply Preset** - Auto-apply a preset on schedule
 
-### 🌐 Community Presets
+### Schedule Triggers
 
-* **Browse**: Discover presets shared by other Fedora users.
-* **Download**: One-click download and apply community presets.
-* **Categories**: Gaming, Productivity, Privacy, and more.
+* **⏰ Hourly / 📅 Daily / 📆 Weekly** - Time-based automation
+* **🚀 On Boot** - Run when you log in
+* **🔋 On Battery** - Trigger when unplugging AC
+* **🔌 On AC Power** - Trigger when plugging in
 
-### ☁️ Backup & Sync
+## 🔧 Background Service
 
-* **Export/Import**: Backup all settings to a JSON file.
-* **GitHub Gist Sync**: Sync your config to a private Gist.
-  * Push your config to the cloud.
-  * Pull config from Gist on any machine.
-  * Secure: Uses your personal GitHub token.
+* **Systemd User Service** - Runs in the background without root
+* **Enable/Disable** - One-click service management from the app
+* **Power-aware** - Automatically detects power state changes
+* **Notifications** - Toast notifications when tasks complete
 
-## 🏗️ New Utilities
+## 🏗️ New Modules
 
-* **`utils/config_manager.py`**: `ConfigManager` for full config export/import.
-* **`utils/cloud_sync.py`**: `CloudSyncManager` for Gist sync and community presets.
+| File | Description |
+|:---|:---|
+| `utils/notifications.py` | Desktop notification wrapper |
+| `utils/scheduler.py` | Task scheduling engine |
+| `utils/daemon.py` | Background service daemon |
+| `ui/scheduler_tab.py` | Scheduler management UI |
+| `config/loofi-fedora-tweaks.service` | Systemd unit file |
 
 ## 📦 Installation
 
@@ -37,14 +45,22 @@ The Presets tab has been completely redesigned with three sub-tabs:
 sudo dnf update loofi-fedora-tweaks --refresh
 ```
 
-**Manual:**
+**Enable the background service:**
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.5.0-1.fc43.noarch.rpm
+systemctl --user enable --now loofi-fedora-tweaks
 ```
 
-## 🔐 Privacy Note
+## 🚀 CLI Support
 
-* All cloud features are **optional**.
-* GitHub tokens are stored locally with restrictive permissions.
-* Community presets are read-only from a public GitHub repo.
+Run in daemon mode directly:
+
+```bash
+loofi-fedora-tweaks --daemon
+```
+
+Check version:
+
+```bash
+loofi-fedora-tweaks --version
+```

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        5.5.0
+Version:        6.0.0
 Release:        1%{?dist}
 Summary:        System tweaks and maintenance for HP Elitebook 840 G8 (Supports Atomic)
 
@@ -25,12 +25,16 @@ mkdir -p "%{buildroot}/usr/lib/%{name}"
 mkdir -p "%{buildroot}/usr/bin"
 mkdir -p "%{buildroot}/usr/share/applications"
 mkdir -p "%{buildroot}/usr/share/polkit-1/actions"
+mkdir -p "%{buildroot}/usr/lib/systemd/user"
 
 # Copy source code
 cp -r loofi-fedora-tweaks/* "%{buildroot}/usr/lib/%{name}/"
 
 # Install polkit policy
 cp loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.policy "%{buildroot}/usr/share/polkit-1/actions/"
+
+# Install systemd user service
+cp loofi-fedora-tweaks/config/loofi-fedora-tweaks.service "%{buildroot}/usr/lib/systemd/user/"
 
 # Create wrapper script
 echo '#!/bin/bash' > "%{buildroot}/usr/bin/%{name}"
@@ -46,6 +50,7 @@ cp loofi-fedora-tweaks.desktop "%{buildroot}/usr/share/applications/"
 /usr/bin/%{name}
 /usr/share/applications/loofi-fedora-tweaks.desktop
 /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
+/usr/lib/systemd/user/loofi-fedora-tweaks.service
 
 %changelog
 * Sat Feb 07 2026 Loofi <loofi@loofi.com> - 1.0.0-1

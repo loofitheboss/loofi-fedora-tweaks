@@ -1,0 +1,15 @@
+[Unit]
+Description=Loofi Fedora Tweaks Background Service
+Documentation=https://github.com/loofitheboss/loofi-fedora-tweaks
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/loofi-fedora-tweaks --daemon
+Restart=on-failure
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target
