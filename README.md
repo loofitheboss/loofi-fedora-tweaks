@@ -82,12 +82,12 @@ One-click installers for:
 sudo tee /etc/yum.repos.d/loofi-fedora-tweaks.repo << EOF
 [loofi-fedora-tweaks]
 name=Loofi Fedora Tweaks
-baseurl=https://loofitheboss.github.io/loofi-fedora-tweaks/repo
+baseurl=https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo
 enabled=1
 gpgcheck=0
 EOF
 
-sudo dnf install loofi-fedora-tweaks
+sudo dnf install loofi-fedora-tweaks --refresh
 ```
 
 ### Option 2: RPM Package
