@@ -365,3 +365,139 @@ done
             return profiles if profiles else ["power-saver", "balanced", "performance"]
         except Exception:
             return ["power-saver", "balanced", "performance"]
+    
+    # ==================== AI HARDWARE ACCELERATION ====================
+    
+    @classmethod
+    def get_ai_capabilities(cls) -> dict:
+        """
+        Detect hardware acceleration support for AI workloads.
+        
+        Returns a dict with:
+            - cuda: bool - NVIDIA CUDA GPU detected
+            - rocm: bool - AMD ROCm GPU detected
+            - npu_intel: bool - Intel NPU (Meteor Lake/Arrow Lake) detected
+            - npu_amd: bool - AMD Ryzen AI NPU detected
+            - details: dict - Additional hardware details
+        """
+        caps = {
+            "cuda": False,
+            "rocm": False,
+            "npu_intel": False,
+            "npu_amd": False,
+            "details": {}
+        }
+        
+        # 1. Check NVIDIA CUDA
+        if shutil.which("nvidia-smi"):
+            try:
+                result = subprocess.run(
+                    ["nvidia-smi", "-L"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode == 0 and "GPU" in result.stdout:
+                    caps["cuda"] = True
+                    # Extract GPU name
+                    lines = result.stdout.strip().split("\n")
+                    if lines:
+                        caps["details"]["nvidia_gpu"] = lines[0].strip()
+            except Exception:
+                pass
+        
+        # 2. Check AMD ROCm
+        if shutil.which("rocminfo"):
+            try:
+                result = subprocess.run(
+                    ["rocminfo"],
+                    capture_output=True,
+                    text=True,
+                    timeout=15
+                )
+                if result.returncode == 0 and "Agent" in result.stdout:
+                    caps["rocm"] = True
+                    caps["details"]["rocm_available"] = True
+            except Exception:
+                pass
+        
+        # Alternative AMD check via hip
+        if not caps["rocm"] and shutil.which("hipconfig"):
+            try:
+                result = subprocess.run(
+                    ["hipconfig", "--platform"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode == 0 and "amd" in result.stdout.lower():
+                    caps["rocm"] = True
+            except Exception:
+                pass
+        
+        # 3. Check Intel NPU (Core Ultra / Meteor Lake)
+        # NPUs appear in /dev/accel/ on newer kernels (6.5+)
+        try:
+            result = subprocess.run(
+                "ls /dev/accel/* 2>/dev/null",
+                shell=True,
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                caps["npu_intel"] = True
+                caps["details"]["npu_devices"] = result.stdout.strip().split("\n")
+        except Exception:
+            pass
+        
+        # Alternative Intel NPU check via sysfs
+        npu_path = "/sys/class/misc/intel_vpu"
+        if os.path.exists(npu_path):
+            caps["npu_intel"] = True
+        
+        # 4. Check AMD Ryzen AI NPU (XDNA)
+        xdna_path = "/sys/class/amdxdna"
+        if os.path.exists(xdna_path):
+            caps["npu_amd"] = True
+            caps["details"]["amd_xdna"] = True
+        
+        # Check for NPU driver module
+        try:
+            result = subprocess.run(
+                ["lsmod"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if "intel_vpu" in result.stdout:
+                caps["npu_intel"] = True
+            if "amdxdna" in result.stdout:
+                caps["npu_amd"] = True
+        except Exception:
+            pass
+        
+        return caps
+    
+    @classmethod
+    def get_ai_summary(cls) -> str:
+        """
+        Get a human-readable summary of AI capabilities.
+        """
+        caps = cls.get_ai_capabilities()
+        
+        parts = []
+        if caps["cuda"]:
+            gpu_name = caps["details"].get("nvidia_gpu", "NVIDIA GPU")
+            parts.append(f"✅ CUDA ({gpu_name})")
+        if caps["rocm"]:
+            parts.append("✅ ROCm (AMD GPU)")
+        if caps["npu_intel"]:
+            parts.append("✅ Intel NPU")
+        if caps["npu_amd"]:
+            parts.append("✅ AMD Ryzen AI NPU")
+        
+        if not parts:
+            return "❌ No AI hardware acceleration detected (CPU-only mode)"
+        
+        return "AI Hardware: " + ", ".join(parts)
+
