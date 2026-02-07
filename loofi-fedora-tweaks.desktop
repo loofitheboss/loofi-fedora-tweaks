@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Loofi Fedora Tweaks
 Comment=System tweaks and maintenance for HP Elitebook 840 G8
-Exec=/home/loofi/Loofi\ Fedora\ Tweaks/run.sh
-Icon=utilities-terminal
+Exec=loofi-fedora-tweaks
+Icon=org.loofi.FedoraTweaks
 Terminal=false
 Type=Application
 Categories=System;Settings;

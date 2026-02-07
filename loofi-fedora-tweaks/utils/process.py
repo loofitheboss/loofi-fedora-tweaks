@@ -14,6 +14,14 @@ class CommandRunner(QObject):
         self.process.errorOccurred.connect(self.handle_error)
 
     def run_command(self, command, args):
+        import os
+        if os.path.exists('/.flatpak-info'):
+            # We are running inside Flatpak, use flatpak-spawn --host
+            # Prepend flatpak-spawn --host to the command
+            new_args = ["--host", command] + args
+            command = "flatpak-spawn"
+            args = new_args
+            
         self.process.start(command, args)
 
     def handle_stdout(self):
