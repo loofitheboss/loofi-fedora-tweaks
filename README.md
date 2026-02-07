@@ -84,28 +84,63 @@ Full localization infrastructure for international users!
 
 ## 📦 Installation
 
-### Option 1: DNF Repository (Recommended)
+### ⚡ Quick Install (Recommended)
+
+One command to install everything:
 
 ```bash
-sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo/loofi-fedora-tweaks.repo
-sudo dnf install loofi-fedora-tweaks --refresh
+curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
 ```
 
-### Option 2: Manual RPM Install
+---
 
-Download from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases):
+### 💾 Option 1: Add DNF Repository
+
+Add the repository once, then install and update normally:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-6.1.0-1.fc43.noarch.rpm
+# Add repository
+sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/loofi-fedora-tweaks.repo
+
+# Install
+sudo dnf install loofi-fedora-tweaks
+
+# Update (anytime)
+sudo dnf upgrade loofi-fedora-tweaks
 ```
 
-### Option 3: Run from Source
+---
+
+### 📥 Option 2: Direct RPM Download
+
+Download from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/latest):
+
+```bash
+# Download and install latest
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v6.1.0/loofi-fedora-tweaks-6.1.0-1.fc43.noarch.rpm
+```
+
+---
+
+### 🖥️ Option 3: Run from Source
 
 ```bash
 git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
-cd loofi-fedora-tweaks
-pip install -r requirements.txt
-python3 loofi-fedora-tweaks/main.py
+cd loofi-fedora-tweaks/loofi-fedora-tweaks
+pip install -r ../requirements.txt
+python3 main.py
+```
+
+---
+
+### 🗑️ Uninstall
+
+```bash
+# Via DNF
+sudo dnf remove loofi-fedora-tweaks
+
+# Or use uninstall script
+curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/uninstall.sh | bash
 ```
 
 ---
