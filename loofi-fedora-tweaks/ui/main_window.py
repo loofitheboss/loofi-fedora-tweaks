@@ -16,7 +16,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v8.5.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.0.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -81,6 +81,9 @@ class MainWindow(QMainWindow):
         # v8.5: Security Center
         self.add_page(self.tr("Security"), "🛡️", self._lazy_tab("security"))
         
+        # v9.0: Director - Window Management
+        self.add_page(self.tr("Director"), "🎬", self._lazy_tab("director"))
+        
         # Atomic-only: Overlays tab
         if SystemManager.is_atomic():
             self.add_page(self.tr("Overlays"), "📦", self._lazy_tab("overlays"))
@@ -122,6 +125,7 @@ class MainWindow(QMainWindow):
             "replicator": lambda: __import__("ui.replicator_tab", fromlist=["ReplicatorTab"]).ReplicatorTab(),
             "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
             "security": lambda: __import__("ui.security_tab", fromlist=["SecurityTab"]).SecurityTab(),
+            "director": lambda: __import__("ui.director_tab", fromlist=["DirectorTab"]).DirectorTab(),
         }
         return LazyWidget(loaders[tab_name])
 
