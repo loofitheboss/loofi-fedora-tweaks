@@ -2,32 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
-## [9.2.0] - 2026-02-07 "Pulse Update"
+## [9.1.0] - 2026-02-07 "Pulse Update"
 
 ### Added
 
-- **Performance Tab**: Live graphs for CPU, RAM, Network, and Disk I/O with real-time 60-second history.
-- **Process Monitor Tab**: Top processes by CPU/RAM with kill/renice functionality and right-click context menu.
-- **Temperature Monitoring**: System temperature tracking for CPU, GPU, and NVMe drives via hwmon.
-- **Network Traffic Monitor**: Per-interface bandwidth monitoring with connection tracking.
-- **Dashboard Auto-Refresh**: Health metrics now auto-refresh every 5 seconds with CPU load indicator.
-- **CLI `processes` Command**: View top processes by CPU or memory usage.
-- **CLI `temperature` Command**: Check system temperature sensors from terminal.
-- **CLI `netmon` Command**: Monitor network interfaces and active connections.
+- **Event-Driven Automation**: React to hardware changes, network status, and system events in real-time.
+- **SystemPulse Engine**: DBus-based event listener for power, network, and monitor changes with polling fallback.
+- **Focus Mode**: Distraction blocking with domain blocking, Do Not Disturb, and process killing.
+- **Automation Profiles**: Create rules that trigger actions based on system events.
+- **Automation Tab**: New UI for managing automation rules, focus mode profiles, and system status.
+- **System Tray Focus Toggle**: Quick Focus Mode toggle from the system tray.
+- **Power Event Triggers**: React immediately to AC/Battery transitions.
+- **Network Event Triggers**: Detect public Wi-Fi, home network, and VPN connections.
+- **Monitor Event Triggers**: React to ultrawide monitor connections, laptop-only mode.
+
+### Automation Actions
+
+- Set Power Profile (power-saver, balanced, performance)
+- Set CPU Governor (powersave, schedutil, performance)
+- Enable/Disable VPN
+- Enable/Disable KWin Tiling
+- Set Theme (light/dark)
+- Enable/Disable Focus Mode
+- Run Custom Command
+
+### New Preset Rules
+
+- **Battery Saver**: Auto-switch to power-saver profile on battery
+- **Ultrawide Tiling**: Enable tiling when ultrawide monitor connected
 
 ### New Files
 
-- `utils/performance.py` - CPU, RAM, Disk I/O, and Network I/O data collection from /proc
-- `utils/processes.py` - Process listing, monitoring, kill/renice management
-- `utils/temperature.py` - Temperature sensor reading via /sys/class/hwmon
-- `utils/network_monitor.py` - Network interface stats and connection tracking
-- `ui/performance_tab.py` - Real-time performance graphs with QTimer refresh
-- `ui/processes_tab.py` - Process monitor with sortable tree view
-- `tests/test_pulse_features.py` - Unit tests for all v9.2 modules
+- `utils/pulse.py` - DBus event listener with power, network, and monitor detection
+- `utils/focus_mode.py` - Focus Mode with domain blocking and process management
+- `utils/automation_profiles.py` - Event-triggered automation rules engine
+- `ui/pulse_tab.py` - Automation and Focus Mode UI
+- `tests/test_pulse_system.py` - Unit tests for v9.1 features
 
 ---
 
-## [9.1.0] - 2026-02-07 "Vital Signs Update"
+## [9.0.0] - 2026-02-07 "Director Update"
 
 ### Added
 

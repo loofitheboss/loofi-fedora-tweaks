@@ -10,14 +10,21 @@ from ui.dashboard_tab import DashboardTab
 from ui.system_info_tab import SystemInfoTab
 from ui.lazy_widget import LazyWidget
 from utils.system import SystemManager
+from utils.pulse import SystemPulse, PulseThread
+from utils.focus_mode import FocusMode
 import os
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.2.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v9.1.0"))
         self.resize(1100, 700)
+        
+        # Initialize Pulse event listener
+        self.pulse = None
+        self.pulse_thread = None
+        self._start_pulse_listener()
         
         # Load Modern Theme
         self.load_theme()
@@ -83,6 +90,9 @@ class MainWindow(QMainWindow):
         
         # v9.0: Director - Window Management
         self.add_page(self.tr("Director"), "🎬", self._lazy_tab("director"))
+        
+        # v9.1: Pulse - Event-driven automation
+        self.add_page(self.tr("Automation"), "⚡", self._lazy_tab("pulse"))
 
         # v9.2: Pulse - Real-time monitoring
         self.add_page(self.tr("Performance"), "📊", self._lazy_tab("performance"))
@@ -130,11 +140,30 @@ class MainWindow(QMainWindow):
             "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
             "security": lambda: __import__("ui.security_tab", fromlist=["SecurityTab"]).SecurityTab(),
             "director": lambda: __import__("ui.director_tab", fromlist=["DirectorTab"]).DirectorTab(),
+            "pulse": lambda: self._create_pulse_tab(),
             "performance": lambda: __import__("ui.performance_tab", fromlist=["PerformanceTab"]).PerformanceTab(self),
             "processes": lambda: __import__("ui.processes_tab", fromlist=["ProcessesTab"]).ProcessesTab(),
         }
         return LazyWidget(loaders[tab_name])
-
+    
+    def _start_pulse_listener(self):
+        """Initialize and start the Pulse event listener."""
+        try:
+            self.pulse = SystemPulse()
+            self.pulse_thread = PulseThread(self.pulse)
+            self.pulse.moveToThread(self.pulse_thread)
+            self.pulse_thread.start()
+            print("[MainWindow] Pulse event listener started")
+        except Exception as e:
+            print(f"[MainWindow] Could not start Pulse listener: {e}")
+    
+    def _create_pulse_tab(self):
+        """Create Pulse tab and connect to event listener."""
+        from ui.pulse_tab import PulseTab
+        tab = PulseTab()
+        if self.pulse:
+            tab.connect_pulse(self.pulse)
+        return tab
 
     def load_theme(self):
         theme_path = os.path.join(os.path.dirname(__file__), "..", "assets", "modern.qss")
@@ -177,17 +206,45 @@ class MainWindow(QMainWindow):
             tray_menu = QMenu()
             show_action = QAction(self.tr("Show"), self)
             show_action.triggered.connect(self.show)
+            
+            # Focus Mode toggle
+            self.focus_action = QAction(self.tr("Focus Mode"), self)
+            self.focus_action.setCheckable(True)
+            self.focus_action.setChecked(FocusMode.is_active())
+            self.focus_action.triggered.connect(self._toggle_focus_mode)
+            
             quit_action = QAction(self.tr("Quit"), self)
             quit_action.triggered.connect(self.quit_app)
             
             tray_menu.addAction(show_action)
+            tray_menu.addSeparator()
+            tray_menu.addAction(self.focus_action)
+            tray_menu.addSeparator()
             tray_menu.addAction(quit_action)
             self.tray_icon.setContextMenu(tray_menu)
             self.tray_icon.show()
         else:
             self.tray_icon = None
 
+    def _toggle_focus_mode(self):
+        """Toggle Focus Mode from tray."""
+        result = FocusMode.toggle()
+        self.focus_action.setChecked(FocusMode.is_active())
+        
+        if self.tray_icon:
+            message = result.get("message", "Focus Mode toggled")
+            self.tray_icon.showMessage(
+                self.tr("Focus Mode"),
+                message,
+                self.tray_icon.MessageIcon.Information,
+                2000
+            )
+
     def quit_app(self):
+        # Stop Pulse listener
+        if self.pulse_thread:
+            self.pulse_thread.stop()
+        
         if self.tray_icon:
             self.tray_icon.hide()
         from PyQt6.QtWidgets import QApplication
