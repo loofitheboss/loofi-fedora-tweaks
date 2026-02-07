@@ -64,25 +64,32 @@ class PresetManager:
 
     # --- Helpers ---
     def _get_gsettings(self, schema, key):
+        if not shutil.which("gsettings"):
+            return None
         try:
             return subprocess.check_output(["gsettings", "get", schema, key], text=True).strip().strip("'")
-        except:
+        except subprocess.CalledProcessError:
             return None
 
     def _set_gsettings(self, schema, key, value):
-        if value:
-            subprocess.run(["gsettings", "set", schema, key, value])
+        if value and shutil.which("gsettings"):
+            try:
+                subprocess.run(["gsettings", "set", schema, key, value], check=False)
+            except Exception:
+                pass
 
     def _get_battery_limit(self):
         # Read from config file primarily
         try:
             with open("/etc/loofi-fedora-tweaks/battery.conf", "r") as f:
                 return int(f.read().strip())
-        except:
+        except (FileNotFoundError, ValueError):
             return 100
 
     def _get_power_profile(self):
+        if not shutil.which("powerprofilesctl"):
+            return "balanced"
         try:
             return subprocess.check_output(["powerprofilesctl", "get"], text=True).strip()
-        except:
+        except subprocess.CalledProcessError:
             return "balanced"

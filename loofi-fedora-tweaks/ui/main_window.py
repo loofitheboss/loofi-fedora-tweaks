@@ -15,7 +15,7 @@ from ui.presets_tab import PresetsTab
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.4.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.5.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -65,39 +65,42 @@ class MainWindow(QMainWindow):
         from PyQt6.QtGui import QIcon, QAction
         import os
         
-        self.tray_icon = QSystemTrayIcon(self)
-        # Use a standard icon or app icon
-        icon_path = os.path.join(os.path.dirname(__file__), "..", "assets", "loofi-fedora-tweaks.png")
-        if os.path.exists(icon_path):
-             self.tray_icon.setIcon(QIcon(icon_path))
-        else:
-             # Fallback to a system icon or just standard window icon
-             self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray_icon = QSystemTrayIcon(self)
+            # Use a standard icon or app icon
+            icon_path = os.path.join(os.path.dirname(__file__), "..", "assets", "loofi-fedora-tweaks.png")
+            if os.path.exists(icon_path):
+                 self.tray_icon.setIcon(QIcon(icon_path))
+            else:
+                 # Fallback to a system icon or just standard window icon
+                 self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
              
-        # Tray Menu
-        tray_menu = QMenu()
-        
-        show_action = QAction("Show", self)
-        show_action.triggered.connect(self.show)
-        
-        doctor_action = QAction("System Doctor", self)
-        doctor_action.triggered.connect(self.show_doctor)
-        
-        quit_action = QAction("Quit", self)
-        quit_action.triggered.connect(self.quit_app)
-        
-        tray_menu.addAction(show_action)
-        tray_menu.addAction(doctor_action)
-        tray_menu.addAction(quit_action)
-        self.tray_icon.setContextMenu(tray_menu)
-        self.tray_icon.show()
+            # Tray Menu
+            tray_menu = QMenu()
+            
+            show_action = QAction("Show", self)
+            show_action.triggered.connect(self.show)
+            
+            doctor_action = QAction("System Doctor", self)
+            doctor_action.triggered.connect(self.show_doctor)
+            
+            quit_action = QAction("Quit", self)
+            quit_action.triggered.connect(self.quit_app)
+            
+            tray_menu.addAction(show_action)
+            tray_menu.addAction(doctor_action)
+            tray_menu.addAction(quit_action)
+            self.tray_icon.setContextMenu(tray_menu)
+            self.tray_icon.show()
+        else:
+            self.tray_icon = None
         
         # Check dependencies
         self.check_dependencies()
 
     def closeEvent(self, event):
         # Minimize to tray instead of closing
-        if self.tray_icon.isVisible():
+        if self.tray_icon and self.tray_icon.isVisible():
             self.hide()
             self.tray_icon.showMessage(
                 "Loofi Fedora Tweaks",

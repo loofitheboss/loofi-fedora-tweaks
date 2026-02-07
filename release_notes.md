@@ -1,21 +1,16 @@
-# Loofi Fedora Tweaks v4.4.0 - The Scalability Update 🚀
+# Loofi Fedora Tweaks v4.5.0 - The Polish Update ✨
 
-We're thinking big! This release focuses on making the app easier to maintain and more customizable for you.
+We've been busy under the hood making things smoother and more reliable!
 
-## 🚀 New Features
+## 🛡️ Robustness Improvements
 
-* **Remote App Configuration**:
-  * The "Essential Apps" list now fetches updates directly from GitHub.
-  * This means we can add new recommended apps *instantly* without you needing to update the whole application!
-* **User Presets**:
-  * Introducing the **Presets Tab**!
-  * Save your current setup (Theme, Icons, Battery Limit, Power Profile) into a named preset.
-  * Load your favorite configs (e.g., "Gaming Mode", "Office Mode") with a single click.
+* **Smarter System Tray**: The app now intelligently checks if your desktop environment supports a System Tray before trying to create an icon. No more potential crashes on minimal window managers!
+* **Graceful Degradation**: Features like "User Presets" now check if tools like `powerprofilesctl` or `gsettings` are actually installed. If they're missing (e.g., on a desktop without a battery), the app won't panic—it just works around it.
 
-## ✨ Improvements
+## 🧪 Technical Improvements
 
-* Moved `AppsTab` to use a threaded fetcher for better responsiveness.
-* Added `urllib` based remote config to minimize dependencies.
+* **Unit Tests**: We've added a comprehensive test suite for our core utilities (`tests/test_utils.py`) to prevent regressions.
+* **Linting & Cleanup**: Fixed numerous internal code warnings for a cleaner, more maintainable codebase.
 
 ## 📦 Installation
 
@@ -29,5 +24,5 @@ sudo dnf update loofi-fedora-tweaks --refresh
 Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-4.4.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-4.5.0-1.fc43.noarch.rpm
 ```
