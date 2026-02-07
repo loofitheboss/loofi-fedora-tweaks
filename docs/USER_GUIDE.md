@@ -1,233 +1,277 @@
 # Loofi Fedora Tweaks - User Guide 📖
 
-Welcome to **Loofi Fedora Tweaks v5.0.0**! This guide will help you get started with the app and explore all its features.
+> **Version 7.0.0 "Community Update"**  
+> Complete documentation for all features and functionality.
 
 ---
 
 ## Table of Contents
 
-1. [Getting Started](#getting-started)
-2. [Navigation](#navigation)
-3. [Dashboard](#dashboard)
-4. [System Updates](#system-updates)
-5. [HP Elitebook Tweaks](#hp-elitebook-tweaks)
-6. [Gaming & Performance](#gaming--performance)
-7. [Network & Privacy](#network--privacy)
-8. [Safety Features](#safety-features)
-9. [Troubleshooting](#troubleshooting)
+1. [Quick Start](#quick-start)
+2. [Dashboard](#dashboard)
+3. [Boot Management](#boot-management)
+4. [Marketplace & Drift Detection](#marketplace--drift-detection)
+5. [CLI Reference](#cli-reference)
+6. [All Tabs Overview](#all-tabs-overview)
+7. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Getting Started
+## Quick Start
 
 ### Installation
 
-**Recommended: Using DNF**
-
 ```bash
-sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo/loofi-fedora-tweaks.repo
-sudo dnf install loofi-fedora-tweaks --refresh
+# One-command install
+curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
 ```
 
-**Manual Install**
-Download the `.rpm` from [GitHub Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases) and run:
+### Launch
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.0.0-1.fc43.noarch.rpm
+# GUI Mode
+loofi-fedora-tweaks
+
+# CLI Mode
+loofi info
+loofi cleanup
 ```
-
-### Launching the App
-
-After installation, you can launch the app from:
-
-* **Application Menu**: Search for "Loofi Fedora Tweaks"
-* **Terminal**: Run `loofi-fedora-tweaks`
-
----
-
-## Navigation
-
-Loofi Fedora Tweaks v5.0 features a **modern sidebar navigation** on the left side of the window. Click any item to switch between sections:
-
-| Icon | Section | Description |
-|:---:|:---|:---|
-| 🏠 | **Home** | Dashboard with quick actions and system health |
-| ℹ️ | **System Info** | View CPU, RAM, Battery, and Disk info |
-| 📦 | **Updates** | Manage DNF and Flatpak updates |
-| 🧹 | **Cleanup** | Clean cache, orphan packages, and logs |
-| 💻 | **HP Tweaks** | Battery limits, Fan control, Fingerprint setup |
-| 🚀 | **Apps** | Install essential apps (VS Code, Chrome, etc.) |
-| 🎮 | **Gaming** | GameMode, MangoHud, Proton tools |
-| 🌐 | **Network** | DNS Switcher, MAC Randomization, Undo |
-| 💾 | **Presets** | Save and load system configurations |
-| 📂 | **Repos** | Enable RPM Fusion, Flathub, Codecs |
-| 🔒 | **Privacy** | Telemetry and privacy settings |
-| 🎨 | **Theming** | Change accent colors and themes |
 
 ---
 
 ## Dashboard
 
-The **Dashboard** (Home) is your starting point. It shows:
+![Dashboard](dashboard.png)
 
-### System Health
+The **Dashboard** is your system health overview:
 
-* **Snapshot Status**: Shows if Timeshift is installed and ready.
-* **Update Status**: Indicates if updates are available.
+| Card | Description |
+|------|-------------|
+| **CPU Usage** | Current CPU utilization percentage |
+| **Memory** | RAM usage (used/total) |
+| **Disk Space** | Storage utilization |
 
 ### Quick Actions
 
-Four large buttons for common tasks:
-
-* 🧹 **Clean Cache**: Jump to the Cleanup tab.
-* 🔄 **Update All**: Jump to the Updates tab.
-* 🔋 **Power Profile**: Jump to the Presets tab.
-* 🎮 **Gaming Mode**: Jump to the Gaming tab.
+| Button | Action |
+|--------|--------|
+| **Run Cleanup** | Clean DNF cache, vacuum journal, TRIM SSD |
+| **Check Updates** | Check for system updates |
+| **Apply Preset** | Apply your saved configuration preset |
 
 ---
 
-## System Updates
+## Boot Management
 
-### Update All
+![Boot Tab](boot_tab.png)
 
-Click **Update All** to run:
+The **Boot** tab (v6.2+) provides three powerful sections:
+
+### 1. Kernel Parameters
+
+Manage kernel command line parameters with common presets:
+
+| Preset | Parameters | Use Case |
+|--------|------------|----------|
+| **AMD GPU** | `amdgpu.ppfeaturemask=0xffffffff` | Enable AMD GPU overclocking |
+| **Intel IOMMU** | `intel_iommu=on iommu=pt` | GPU passthrough for VMs |
+| **NVIDIA** | `nvidia-drm.modeset=1` | Enable NVIDIA modesetting |
+
+**Custom Parameters**: Add any kernel parameter manually.
+
+> ⚠️ **Backup**: The tool automatically backs up GRUB config before changes.
+
+### 2. ZRAM Configuration
+
+Compressed swap in RAM for better performance:
+
+| Setting | Range | Recommendation |
+|---------|-------|----------------|
+| **Size** | 25-150% RAM | 50-100% for most users |
+| **Algorithm** | zstd, lz4, lzo | `zstd` (best compression) |
+
+### 3. Secure Boot & MOK
+
+Manage Machine Owner Keys for third-party kernel modules:
+
+1. **Generate Key**: Creates RSA 2048-bit key pair
+2. **Enroll Key**: Imports key to MOK list
+3. **Reboot**: Press any key in MOK Manager, enter password
+
+---
+
+## Marketplace & Drift Detection
+
+![Marketplace](marketplace.png)
+
+### Community Marketplace (v7.0+)
+
+Browse and download presets created by the community:
+
+1. **Search**: Find presets by name or description
+2. **Filter**: Categories (Gaming, Privacy, Performance, etc.)
+3. **Details**: View stars, downloads, and description
+4. **Download**: Save preset locally
+5. **Apply**: Apply preset and set drift baseline
+
+### Configuration Drift Detection
+
+Monitor when your system diverges from applied presets:
+
+| State | Meaning |
+|-------|---------|
+| **No Baseline** | No preset has been applied with tracking |
+| **Stable** | System matches the baseline |
+| **Drifted** | Changes detected (packages, services, kernel) |
+
+**What is tracked:**
+
+- Kernel command line parameters
+- Installed/layered packages
+- User-enabled systemd services
+
+---
+
+## CLI Reference
+
+### Basic Commands
 
 ```bash
-sudo dnf update -y && flatpak update -y
+# System information
+loofi info
+
+# Full cleanup (DNF + journal + trim)
+loofi cleanup
+
+# Cleanup specific action
+loofi cleanup dnf
+loofi cleanup journal --days 7
+loofi cleanup trim
 ```
 
-Before any update, the app will:
+### Power Management
 
-1. **Check for DNF Lock**: If another update is running, you'll see a warning instead of the app freezing.
-2. **Prompt for Snapshot**: If Timeshift is installed, you'll be asked to create a backup first.
+```bash
+# Set power profile
+loofi tweak power --profile performance
+loofi tweak power --profile balanced
+loofi tweak power --profile power-saver
 
-### Per-Package Updates
+# Check current status
+loofi tweak status
 
-You can also see individual package updates and choose which to install.
+# Restart audio
+loofi tweak audio
 
----
+# Set battery limit (HP Elitebook)
+loofi tweak battery --limit 80
+```
 
-## HP Elitebook Tweaks
+### Advanced Operations
 
-Specific optimizations for **HP Elitebook 840 G8**.
+```bash
+# Apply DNF optimizations
+loofi advanced dnf-tweaks
 
-### Battery Charge Limit
+# Enable TCP BBR
+loofi advanced bbr
 
-* **80% Limit**: Click to limit battery charge to 80%, extending battery lifespan.
-* **100% Limit**: Click to allow full charge.
-* **Persistence**: The setting is saved via a Systemd service and reapplied on every reboot.
+# Install GameMode
+loofi advanced gamemode
 
-### Fingerprint Reader
+# Set swappiness
+loofi advanced swappiness --value 10
+```
 
-* Click **Enroll Fingerprint** to launch the fingerprint setup wizard.
-* The wizard wraps `fprintd-enroll` with a visual progress bar.
+### Network
 
-### Fan Control (NBFC)
-
-* If `nbfc-linux` is installed, you can switch between **Quiet**, **Balanced**, and **Performance** fan profiles.
-* If not installed, you'll see a prompt to install it.
-
----
-
-## Gaming & Performance
-
-### GameMode
-
-* **Enable**: Click to activate Feral GameMode (CPU/GPU performance boost).
-* **Disable**: Click to deactivate.
-
-### MangoHud
-
-* **Toggle**: Enable/disable the FPS overlay for Vulkan/OpenGL games.
-
-### ProtonUp-Qt
-
-* **Install**: One-click install for ProtonUp-Qt, a tool to manage Proton-GE versions for Steam.
-
-### Steam Devices
-
-* **Install**: Fix controller support by installing `steam-devices` udev rules.
+```bash
+# Set DNS provider
+loofi network dns --provider cloudflare
+loofi network dns --provider google
+loofi network dns --provider quad9
+```
 
 ---
 
-## Network & Privacy
+## All Tabs Overview
 
-### DNS Switcher
-
-Quickly switch your system DNS to one of the following:
-
-* **Google**: 8.8.8.8, 8.8.4.4
-* **Cloudflare**: 1.1.1.1, 1.0.0.1
-* **Quad9**: 9.9.9.9, 149.112.112.112
-* **Reset**: Restore to automatic DHCP DNS.
-
-### MAC Randomization
-
-* Toggle to randomize your Wi-Fi MAC address on each connection for enhanced privacy.
-
-### Undo Last Action
-
-* Made a mistake? Click **Undo Last Action** to revert your most recent network change (like MAC randomization or DNS override).
-
----
-
-## Safety Features
-
-Loofi Fedora Tweaks is designed to keep your system safe.
-
-### Timeshift Snapshot Prompts
-
-Before you run **Update All** or **Clean All**, the app checks if Timeshift is installed. If it is, you'll be prompted:
-
-> "Would you like to create a Timeshift snapshot before proceeding?"
-
-* Click **Yes** to create a backup.
-* Click **No** to skip (at your own risk).
-
-### DNF Lock Detection
-
-If another package manager (like GNOME Software or another terminal) is running an update, the app will detect the lock file (`/var/run/dnf.pid`) and display a warning instead of hanging.
-
-### Undo System
-
-The **Network** tab tracks your changes in a history file. If you toggle MAC Randomization or change DNS, you can click **Undo** to revert.
+| Tab | Icon | Description |
+|-----|------|-------------|
+| **Home** | 🏠 | Dashboard with system health and quick actions |
+| **System Info** | ℹ️ | Hardware specs, OS version, kernel info |
+| **Updates** | 📦 | Check and install system updates |
+| **Cleanup** | 🧹 | DNF cache, orphans, journal vacuum |
+| **Hardware** | ⚡ | CPU governor, power profiles, GPU mode |
+| **HP Tweaks** | 💻 | Battery limit, fingerprint (HP specific) |
+| **Apps** | 🚀 | One-click installation of popular apps |
+| **Advanced** | ⚙️ | DNF optimization, TCP BBR, GameMode |
+| **Gaming** | 🎮 | MangoHud, ProtonUp, Game Mode |
+| **Network** | 🌐 | DNS, firewall, MAC address |
+| **Presets** | 💾 | Save/load/sync configurations |
+| **Marketplace** | 🌐 | Community presets + drift detection |
+| **Scheduler** | ⏰ | Automated tasks and triggers |
+| **Boot** | 🔧 | Kernel params, ZRAM, Secure Boot |
+| **Repos** | 📁 | Repository management |
+| **Privacy** | 🔒 | Telemetry and privacy settings |
+| **Theming** | 🎨 | GTK/Qt theme configuration |
+| **Overlays** | 📦 | rpm-ostree packages (Atomic only) |
 
 ---
 
 ## Troubleshooting
 
-### App Won't Start
+### App Won't Launch
 
-* Ensure `python3-pyqt6` is installed: `sudo dnf install python3-pyqt6`
-* Try running from terminal to see errors: `loofi-fedora-tweaks`
+```bash
+# Check dependencies
+pip install PyQt6
 
-### "pkexec not found"
+# Run from source
+cd loofi-fedora-tweaks/loofi-fedora-tweaks
+python3 main.py
+```
 
-* Install polkit: `sudo dnf install polkit`
+### Permission Denied
 
-### Battery Limit Not Persisting
+Most operations require root. The app uses `pkexec` for privilege escalation.
 
-* Ensure the Systemd service is enabled: `systemctl status loofi-battery-limit.service`
-* If it fails, check logs: `journalctl -xeu loofi-battery-limit.service`
+```bash
+# Ensure polkit is installed
+sudo dnf install polkit
+```
 
-### Fingerprint Enrollment Fails
+### DNF Lock Error
 
-* Ensure `fprintd` is installed: `sudo dnf install fprintd fprintd-pam`
-* Run `fprintd-enroll` manually to check for errors.
+Another package manager is running:
 
-### Fan Control Not Showing Profiles
+```bash
+# Wait for it to finish, or:
+sudo rm /var/run/dnf.pid
+```
 
-* Install NBFC: Follow the [nbfc-linux](https://github.com/nbfc-linux/nbfc-linux) installation guide.
-* Load a profile for your laptop model.
+### Secure Boot Key Not Enrolling
+
+1. Reboot after `mokutil --import`
+2. In MOK Manager, select **Enroll MOK**
+3. Enter the password you set
+4. Continue boot
+
+### Marketplace Not Loading
+
+Check internet connection:
+
+```bash
+curl -I https://raw.githubusercontent.com
+```
 
 ---
 
-## Feedback & Support
+## Support
 
-Found a bug or have a feature request?
-
-* Open an issue on [GitHub](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
+- **Issues**: [GitHub Issues](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
+- **Releases**: [GitHub Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases)
 
 ---
 
-**Thank you for using Loofi Fedora Tweaks!** 🎉
+*Documentation last updated: v7.0.0 - February 2026*

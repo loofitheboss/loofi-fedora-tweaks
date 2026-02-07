@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v6.2.0 "Engine Room" 🔧
+# Loofi Fedora Tweaks v7.0.0 "Community Update" 🌐
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v6.1.0">
-    <img src="https://img.shields.io/badge/Release-v6.1.0-blue?style=for-the-badge&logo=github" alt="Release v6.1.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v7.0.0">
+    <img src="https://img.shields.io/badge/Release-v7.0.0-blue?style=for-the-badge&logo=github" alt="Release v7.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,65 +20,66 @@
 
 ---
 
-## 🚀 What's New in v6.1?
+## 🚀 What's New in v7.0?
 
-### 🌐 Polyglot Update
+### 🌐 Community Update
 
-Full localization infrastructure for international users!
+Connect with the community through preset sharing and configuration tracking!
 
-* **Internationalization Ready**: All 414 UI strings wrapped with `self.tr()` for translation.
-* **Translation Files**: `.ts` files for English and Swedish included.
-* **System Locale Detection**: Automatically loads translations based on system language.
-* **Translator Tools**: Ready for community translations via Qt Linguist.
+* **Preset Marketplace**: Browse and download community presets from GitHub.
+* **Configuration Drift Detection**: Track when your system changes from applied presets.
+* **Marketplace Tab**: New UI for discovering and applying community configurations.
+
+---
+
+## 📚 Documentation
+
+📖 **[User Guide](docs/USER_GUIDE.md)** - Complete documentation with screenshots
 
 ---
 
 ## ✨ Feature Overview
 
-### 🎨 Modern UI (v5.0)
+### 🌐 Community Features (v7.0)
 
-* **Glassmorphism Design**: Dark theme with blur effects and rounded corners.
+* **Preset Marketplace**: Browse community presets with ratings and downloads.
+* **Search & Filter**: Find presets by category (Gaming, Privacy, Performance).
+* **Drift Detection**: Know when your system configuration changes.
+* **Baseline Tracking**: Compare current state to applied preset.
 
-* **Sidebar Navigation**: Clean, organized interface.
-* **Dashboard**: System health at a glance with quick actions.
+### 🔧 Boot Management (v6.2)
 
-### 🧬 Atomic Support (v5.1)
+* **Kernel Parameter Editor**: Add/remove boot parameters with common presets.
+* **ZRAM Tuner**: Configure memory compression ratio and algorithm.
+* **Secure Boot Helper**: Generate and enroll MOK keys for third-party modules.
 
-* **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` systems automatically.
+### 🛠️ Developer Features (v6.5)
 
-* **System Overlays Tab**: Manage layered packages on Atomic variants.
-* **Flatpak First**: Prioritizes Flatpak for app installations.
-
-### ⚡ Hardware Control (v5.2)
-
-* **CPU Governor**: Switch between powersave/schedutil/performance.
-
-* **Power Profiles**: Quick toggle for power-saver/balanced/performance.
-* **GPU Mode Switching**: Integrated/Hybrid/NVIDIA modes (via envycontrol).
-* **Fan Control**: Manual speed slider or auto mode (via nbfc-linux).
-
-### ☁️ Cloud Sync (v5.5)
-
-* **Export/Import Config**: Backup all settings to JSON.
-
-* **GitHub Gist Sync**: Push/pull config across machines.
-* **Community Presets**: Browse and download shared configurations.
-
-### ⏰ Automation (v6.0)
-
-* **Scheduled Tasks**: Hourly, daily, weekly automation.
-
-* **Boot Actions**: Run tasks on login.
-* **Power Triggers**: On-battery / On-AC event handling.
-* **System Cleanup, Update Checks, Preset Application**.
+* **CLI Mode**: Full `loofi` command-line interface for scripting.
+* **Plugin System**: Extend functionality with custom plugins.
+* **Operations Layer**: Clean separation of UI and business logic.
 
 ### 🌐 Localization (v6.1)
 
 * **17 UI Files Localized**: All tabs wrapped with `self.tr()`.
-
-* **414 Translatable Strings**: Extracted to `.ts` files.
-* **Swedish Translation**: Template included for community contribution.
 * **Auto-Detection**: Loads translations based on system locale.
+
+### ⏰ Automation (v6.0)
+
+* **Scheduled Tasks**: Hourly, daily, weekly automation.
+* **Power Triggers**: On-battery / On-AC event handling.
+
+### ⚡ Hardware Control (v5.2)
+
+* **CPU Governor**: Switch between powersave/schedutil/performance.
+* **Power Profiles**: Quick toggle for power modes.
+* **GPU Mode Switching**: Integrated/Hybrid/NVIDIA modes.
+* **Fan Control**: Manual speed slider or auto mode.
+
+### 🧬 Atomic Support (v5.1)
+
+* **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` automatically.
+* **System Overlays Tab**: Manage layered packages.
 
 ---
 
@@ -86,17 +87,11 @@ Full localization infrastructure for international users!
 
 ### ⚡ Quick Install (Recommended)
 
-One command to install everything:
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
 ```
 
----
-
-### 💾 Option 1: Add DNF Repository
-
-Add the repository once, then install and update normally:
+### 💾 DNF Repository
 
 ```bash
 # Add repository
@@ -104,25 +99,15 @@ sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofithebos
 
 # Install
 sudo dnf install loofi-fedora-tweaks
-
-# Update (anytime)
-sudo dnf upgrade loofi-fedora-tweaks
 ```
 
----
-
-### 📥 Option 2: Direct RPM Download
-
-Download from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/latest):
+### 📥 Direct RPM Download
 
 ```bash
-# Download and install latest
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v6.1.0/loofi-fedora-tweaks-6.1.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v7.0.0/loofi-fedora-tweaks-7.0.0-1.fc43.noarch.rpm
 ```
 
----
-
-### 🖥️ Option 3: Run from Source
+### 🖥️ Run from Source
 
 ```bash
 git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
@@ -133,48 +118,21 @@ python3 main.py
 
 ---
 
-### 🗑️ Uninstall
-
-```bash
-# Via DNF
-sudo dnf remove loofi-fedora-tweaks
-
-# Or use uninstall script
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/uninstall.sh | bash
-```
-
----
-
-## 🔧 Background Service
-
-Enable automated task execution:
-
-```bash
-# Enable and start the service
-systemctl --user enable --now loofi-fedora-tweaks
-
-# Check status
-systemctl --user status loofi-fedora-tweaks
-
-# Disable
-systemctl --user disable --now loofi-fedora-tweaks
-```
-
-Or manage it from the **Scheduler** tab in the app.
-
----
-
 ## 🖥️ CLI Usage
 
 ```bash
 # Launch GUI
 loofi-fedora-tweaks
 
-# Run as background daemon
-loofi-fedora-tweaks --daemon
+# CLI commands
+loofi info                    # System information
+loofi cleanup                 # Run full cleanup
+loofi tweak power --profile performance
+loofi advanced bbr            # Enable TCP BBR
+loofi network dns --provider cloudflare
 
-# Show version
-loofi-fedora-tweaks --version
+# Version
+loofi --version
 ```
 
 ---
@@ -194,11 +152,12 @@ loofi-fedora-tweaks --version
 | **🎮 Gaming** | GameMode, MangoHud, ProtonUp |
 | **🌐 Network** | DNS, Firewall, MAC management |
 | **💾 Presets** | Save/Load configs, Cloud sync |
+| **🌐 Marketplace** | Community presets + drift detection |
 | **⏰ Scheduler** | Automated task management |
+| **🔧 Boot** | Kernel params, ZRAM, Secure Boot |
 | **🎨 Theming** | GTK/Qt theme settings |
 | **🔒 Privacy** | Telemetry and privacy tweaks |
-| **📦 Overlays** | rpm-ostree layered packages (Atomic only) |
-| **🩺 Doctor** | Dependency checker |
+| **📦 Overlays** | rpm-ostree packages (Atomic only) |
 | **📁 Repos** | Repository management |
 
 ---
@@ -220,6 +179,27 @@ loofi-fedora-tweaks --version
 3. Commit your Changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+### 🔌 Plugin Development
+
+Create plugins in `plugins/` directory:
+
+```python
+from utils.plugin_base import LoofiPlugin, PluginInfo
+
+class MyPlugin(LoofiPlugin):
+    @property
+    def info(self) -> PluginInfo:
+        return PluginInfo("My Plugin", "1.0", "Author", "Description")
+    
+    def create_widget(self):
+        # Return PyQt6 widget
+        pass
+    
+    def get_cli_commands(self):
+        # Return dict of CLI commands
+        return {}
+```
 
 ---
 
