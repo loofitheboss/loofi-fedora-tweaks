@@ -30,7 +30,7 @@ class HardwareTab(QWidget):
         self.setLayout(layout)
         
         # Header
-        header = QLabel("⚡ Hardware Control")
+        header = QLabel(self.tr("⚡ Hardware Control"))
         header.setObjectName("header")
         layout.addWidget(header)
         
@@ -77,7 +77,7 @@ class HardwareTab(QWidget):
     # ==================== CPU GOVERNOR ====================
     
     def create_cpu_card(self) -> QGroupBox:
-        card = self.create_card("CPU Governor", "🔧")
+        card = self.create_card(self.tr("CPU Governor"), "🔧")
         layout = QVBoxLayout(card)
         
         # Current frequency display
@@ -88,7 +88,7 @@ class HardwareTab(QWidget):
         
         # Governor dropdown
         h_layout = QHBoxLayout()
-        h_layout.addWidget(QLabel("Governor:"))
+        h_layout.addWidget(QLabel(self.tr("Governor:")))
         
         self.combo_governor = QComboBox()
         governors = HardwareManager.get_available_governors()
@@ -104,7 +104,7 @@ class HardwareTab(QWidget):
         layout.addLayout(h_layout)
         
         # Description
-        desc = QLabel("Controls CPU frequency scaling policy")
+        desc = QLabel(self.tr("Controls CPU frequency scaling policy"))
         desc.setStyleSheet("color: #6c7086; font-size: 11px;")
         layout.addWidget(desc)
         
@@ -114,9 +114,9 @@ class HardwareTab(QWidget):
         """Handle governor change."""
         success = HardwareManager.set_governor(governor)
         if success:
-            self.show_toast(f"CPU Governor set to '{governor}'")
+            self.show_toast(self.tr("CPU Governor set to '{}'").format(governor))
         else:
-            QMessageBox.warning(self, "Error", f"Failed to set governor to '{governor}'")
+            QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to set governor to '{}'").format(governor))
             # Revert combo box
             current = HardwareManager.get_current_governor()
             self.combo_governor.blockSignals(True)
@@ -126,11 +126,11 @@ class HardwareTab(QWidget):
     # ==================== POWER PROFILE ====================
     
     def create_power_profile_card(self) -> QGroupBox:
-        card = self.create_card("Power Profile", "🔋")
+        card = self.create_card(self.tr("Power Profile"), "🔋")
         layout = QVBoxLayout(card)
         
         if not HardwareManager.is_power_profiles_available():
-            layout.addWidget(QLabel("❌ power-profiles-daemon not installed"))
+            layout.addWidget(QLabel(self.tr("❌ power-profiles-daemon not installed")))
             return card
         
         # Current profile
@@ -172,25 +172,25 @@ class HardwareTab(QWidget):
     def set_power_profile(self, profile: str):
         success = HardwareManager.set_power_profile(profile)
         if success:
-            self.lbl_power_profile.setText(f"Current: {profile.title()}")
-            self.show_toast(f"Power profile set to '{profile}'")
+            self.lbl_power_profile.setText(self.tr("Current: {}").format(profile.title()))
+            self.show_toast(self.tr("Power profile set to '{}'").format(profile))
         else:
-            QMessageBox.warning(self, "Error", f"Failed to set power profile to '{profile}'")
+            QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to set power profile to '{}'").format(profile))
     
     # ==================== GPU MODE ====================
     
     def create_gpu_card(self) -> QGroupBox:
-        card = self.create_card("GPU Mode", "🎮")
+        card = self.create_card(self.tr("GPU Mode"), "🎮")
         layout = QVBoxLayout(card)
         
         if not HardwareManager.is_hybrid_gpu():
-            layout.addWidget(QLabel("ℹ️ No hybrid GPU detected"))
+            layout.addWidget(QLabel(self.tr("ℹ️ No hybrid GPU detected")))
             return card
         
         tools = HardwareManager.get_available_gpu_tools()
         if not tools:
-            layout.addWidget(QLabel("❌ No GPU switching tool found"))
-            install_btn = QPushButton("📦 Install envycontrol")
+            layout.addWidget(QLabel(self.tr("❌ No GPU switching tool found")))
+            install_btn = QPushButton(self.tr("📦 Install envycontrol"))
             install_btn.clicked.connect(self.install_envycontrol)
             layout.addWidget(install_btn)
             return card
@@ -231,7 +231,7 @@ class HardwareTab(QWidget):
         layout.addLayout(btn_layout)
         
         # Warning
-        warn = QLabel("⚠️ Requires logout/reboot")
+        warn = QLabel(self.tr("⚠️ Requires logout/reboot"))
         warn.setStyleSheet("color: #f9e2af; font-size: 11px;")
         layout.addWidget(warn)
         
@@ -239,37 +239,37 @@ class HardwareTab(QWidget):
     
     def set_gpu_mode(self, mode: str):
         reply = QMessageBox.question(
-            self, "Confirm GPU Mode Change",
-            f"Switch GPU to '{mode.title()}' mode?\n\nThis requires a logout or reboot.",
+            self, self.tr("Confirm GPU Mode Change"),
+            self.tr("Switch GPU to '{}' mode?\n\nThis requires a logout or reboot.").format(mode.title()),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
         if reply == QMessageBox.StandardButton.Yes:
             success, message = HardwareManager.set_gpu_mode(mode)
             if success:
-                self.lbl_gpu_mode.setText(f"Current: {mode.title()} (pending)")
-                QMessageBox.information(self, "Success", message)
+                self.lbl_gpu_mode.setText(self.tr("Current: {} (pending)").format(mode.title()))
+                QMessageBox.information(self, self.tr("Success"), message)
             else:
-                QMessageBox.warning(self, "Error", message)
+                QMessageBox.warning(self, self.tr("Error"), message)
     
     def install_envycontrol(self):
         """Guide user to install envycontrol."""
         QMessageBox.information(
-            self, "Install envycontrol",
-            "To control GPU modes, install envycontrol:\n\n"
+            self, self.tr("Install envycontrol"),
+            self.tr("To control GPU modes, install envycontrol:\n\n"
             "pip install --user envycontrol\n\n"
-            "Or visit: https://github.com/bayasdev/envycontrol"
+            "Or visit: https://github.com/bayasdev/envycontrol")
         )
     
     # ==================== FAN CONTROL ====================
     
     def create_fan_card(self) -> QGroupBox:
-        card = self.create_card("Fan Control", "🌀")
+        card = self.create_card(self.tr("Fan Control"), "🌀")
         layout = QVBoxLayout(card)
         
         if not HardwareManager.is_nbfc_available():
-            layout.addWidget(QLabel("❌ nbfc-linux not installed"))
-            install_btn = QPushButton("📦 Learn how to install")
+            layout.addWidget(QLabel(self.tr("❌ nbfc-linux not installed")))
+            install_btn = QPushButton(self.tr("📦 Learn how to install"))
             install_btn.clicked.connect(self.show_nbfc_help)
             layout.addWidget(install_btn)
             return card
@@ -282,7 +282,7 @@ class HardwareTab(QWidget):
         
         # Fan speed slider
         slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel("Manual:"))
+        slider_layout.addWidget(QLabel(self.tr("Manual:")))
         
         self.slider_fan = QSlider(Qt.Orientation.Horizontal)
         self.slider_fan.setRange(0, 100)
@@ -300,11 +300,11 @@ class HardwareTab(QWidget):
         # Buttons
         btn_layout = QHBoxLayout()
         
-        btn_apply = QPushButton("✅ Apply")
+        btn_apply = QPushButton(self.tr("✅ Apply"))
         btn_apply.clicked.connect(lambda: self.set_fan_speed(self.slider_fan.value()))
         btn_layout.addWidget(btn_apply)
         
-        btn_auto = QPushButton("🔄 Auto")
+        btn_auto = QPushButton(self.tr("🔄 Auto"))
         btn_auto.clicked.connect(lambda: self.set_fan_speed(-1))
         btn_layout.addWidget(btn_auto)
         
@@ -314,19 +314,19 @@ class HardwareTab(QWidget):
     def set_fan_speed(self, speed: int):
         success = HardwareManager.set_fan_speed(speed)
         if success:
-            mode = "Auto" if speed < 0 else f"{speed}%"
-            self.show_toast(f"Fan speed set to {mode}")
+            mode = self.tr("Auto") if speed < 0 else f"{speed}%"
+            self.show_toast(self.tr("Fan speed set to {}").format(mode))
         else:
-            QMessageBox.warning(self, "Error", "Failed to set fan speed")
+            QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to set fan speed"))
     
     def show_nbfc_help(self):
         QMessageBox.information(
-            self, "Install nbfc-linux",
-            "NBFC (NoteBook FanControl) for Linux:\n\n"
+            self, self.tr("Install nbfc-linux"),
+            self.tr("NBFC (NoteBook FanControl) for Linux:\n\n"
             "1. Visit: https://github.com/nbfc-linux/nbfc-linux\n"
             "2. Follow installation instructions for your distro\n"
             "3. Find a config for your laptop model\n"
-            "4. Restart this app"
+            "4. Restart this app")
         )
     
     # ==================== UTILITIES ====================

@@ -10,51 +10,51 @@ class NetworkTab(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
-        header = QLabel("Network & Privacy")
+        header = QLabel(self.tr("Network & Privacy"))
         header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
         
         # Undo Button
-        self.btn_undo = QPushButton("↩ Undo Last Action")
+        self.btn_undo = QPushButton(self.tr("↩ Undo Last Action"))
         self.btn_undo.setStyleSheet("background-color: #444; color: white;")
         self.btn_undo.clicked.connect(self.undo_last)
         layout.addWidget(self.btn_undo)
         
         # DNS Switcher Group
-        dns_group = QGroupBox("DNS Switcher")
+        dns_group = QGroupBox(self.tr("DNS Switcher"))
         dns_layout = QVBoxLayout()
         dns_group.setLayout(dns_layout)
         
-        dns_desc = QLabel("Change DNS for the current active connection.")
+        dns_desc = QLabel(self.tr("Change DNS for the current active connection."))
         dns_layout.addWidget(dns_desc)
         
         self.dns_combo = QComboBox()
-        self.dns_combo.addItem("Cloudflare (1.1.1.1)", "1.1.1.1 1.0.0.1")
-        self.dns_combo.addItem("Google (8.8.8.8)", "8.8.8.8 8.8.4.4")
-        self.dns_combo.addItem("Quad9 (9.9.9.9)", "9.9.9.9 149.112.112.112")
-        self.dns_combo.addItem("AdGuard (94.140.14.14)", "94.140.14.14 94.140.15.15")
-        self.dns_combo.addItem("System Default (DHCP)", "auto")
+        self.dns_combo.addItem(self.tr("Cloudflare (1.1.1.1)"), "1.1.1.1 1.0.0.1")
+        self.dns_combo.addItem(self.tr("Google (8.8.8.8)"), "8.8.8.8 8.8.4.4")
+        self.dns_combo.addItem(self.tr("Quad9 (9.9.9.9)"), "9.9.9.9 149.112.112.112")
+        self.dns_combo.addItem(self.tr("AdGuard (94.140.14.14)"), "94.140.14.14 94.140.15.15")
+        self.dns_combo.addItem(self.tr("System Default (DHCP)"), "auto")
         dns_layout.addWidget(self.dns_combo)
         
-        btn_apply_dns = QPushButton("Apply DNS")
+        btn_apply_dns = QPushButton(self.tr("Apply DNS"))
         btn_apply_dns.clicked.connect(self.apply_dns)
         dns_layout.addWidget(btn_apply_dns)
         
         layout.addWidget(dns_group)
         
         # MAC Randomization Group
-        mac_group = QGroupBox("Wi-Fi Privacy")
+        mac_group = QGroupBox(self.tr("Wi-Fi Privacy"))
         mac_layout = QVBoxLayout()
         mac_group.setLayout(mac_layout)
         
-        self.lbl_mac_status = QLabel("MAC Randomization: Unknown")
+        self.lbl_mac_status = QLabel(self.tr("MAC Randomization: Unknown"))
         mac_layout.addWidget(self.lbl_mac_status)
         
-        btn_enable_mac = QPushButton("Enable MAC Randomization")
+        btn_enable_mac = QPushButton(self.tr("Enable MAC Randomization"))
         btn_enable_mac.clicked.connect(lambda: self.toggle_mac_randomization(True))
         mac_layout.addWidget(btn_enable_mac)
         
-        btn_disable_mac = QPushButton("Disable MAC Randomization")
+        btn_disable_mac = QPushButton(self.tr("Disable MAC Randomization"))
         btn_disable_mac.clicked.connect(lambda: self.toggle_mac_randomization(False))
         mac_layout.addWidget(btn_disable_mac)
         
@@ -82,7 +82,7 @@ class NetworkTab(QWidget):
         conn_name = self.get_active_connection()
         
         if not conn_name:
-            QMessageBox.warning(self, "Error", "No active Wi-Fi or Ethernet connection found.")
+            QMessageBox.warning(self, self.tr("Error"), self.tr("No active Wi-Fi or Ethernet connection found."))
             return
 
         if dns_servers == "auto":
@@ -98,7 +98,7 @@ class NetworkTab(QWidget):
             
         # Reapply
         subprocess.run(["nmcli", "con", "up", conn_name])
-        QMessageBox.information(self, "Success", f"DNS settings applied to '{conn_name}'.")
+        QMessageBox.information(self, self.tr("Success"), self.tr("DNS settings applied to '{}'.").format(conn_name))
 
     def toggle_mac_randomization(self, enable):
         config_file = "/etc/NetworkManager/conf.d/00-mac-randomization.conf"
@@ -120,31 +120,31 @@ ethernet.cloned-mac-address=random
                 f.write(content)
             
             self.runner.run_command("pkexec", ["mv", tmp_file, config_file])
-            QMessageBox.information(self, "Enabled", "MAC Randomization enabled. Restart NetworkManager/Reboot to apply.")
+            QMessageBox.information(self, self.tr("Enabled"), self.tr("MAC Randomization enabled. Restart NetworkManager/Reboot to apply."))
             
             # Log Undo: Remove the file
             self.history.log_change(
-                "Enabled MAC Randomization", 
+                self.tr("Enabled MAC Randomization"), 
                 ["pkexec", "rm", "-f", config_file]
             )
             
         else:
             self.runner.run_command("pkexec", ["rm", "-f", config_file])
-            QMessageBox.information(self, "Disabled", "MAC Randomization disabled. Restart NetworkManager/Reboot to apply.")
+            QMessageBox.information(self, self.tr("Disabled"), self.tr("MAC Randomization disabled. Restart NetworkManager/Reboot to apply."))
             # Undo for disable is hard without backup. Skipping log for implementation simplicity in v4.7.
 
     def undo_last(self):
         success, msg = self.history.undo_last_action()
         if success:
-             QMessageBox.information(self, "Undo Successful", msg)
+             QMessageBox.information(self, self.tr("Undo Successful"), msg)
              # Refresh UI state
              self.check_mac_status()
         else:
-             QMessageBox.warning(self, "Undo Failed", msg)
+             QMessageBox.warning(self, self.tr("Undo Failed"), msg)
 
     def check_mac_status(self):
         import os
         if os.path.exists("/etc/NetworkManager/conf.d/00-mac-randomization.conf"):
-            self.lbl_mac_status.setText("MAC Randomization: ✅ Enabled")
+            self.lbl_mac_status.setText(self.tr("MAC Randomization: ✅ Enabled"))
         else:
-             self.lbl_mac_status.setText("MAC Randomization: ❌ Disabled")
+             self.lbl_mac_status.setText(self.tr("MAC Randomization: ❌ Disabled"))

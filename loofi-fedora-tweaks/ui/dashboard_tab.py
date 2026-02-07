@@ -18,21 +18,21 @@ class DashboardTab(QWidget):
         self.setLayout(layout)
         
         # Welcome Header
-        header = QLabel("Welcome back, Loofi! 👋")
+        header = QLabel(self.tr("Welcome back, Loofi! 👋"))
         header.setObjectName("header") # Styled in modern.qss
         layout.addWidget(header)
         
         # System Health Card
-        health_card = self.create_card("System Health")
+        health_card = self.create_card(self.tr("System Health"))
         h_layout = QHBoxLayout()
         health_card.setLayout(h_layout)
         
         # Snapshot Status
-        self.lbl_snapshot = QLabel("🛡️ Snapshots: Checking...")
+        self.lbl_snapshot = QLabel(self.tr("🛡️ Snapshots: Checking..."))
         h_layout.addWidget(self.lbl_snapshot)
         
         # Update Status
-        self.lbl_updates = QLabel("📦 Updates: Checking...")
+        self.lbl_updates = QLabel(self.tr("📦 Updates: Checking..."))
         h_layout.addWidget(self.lbl_updates)
         
         # System Type (Atomic/Workstation)
@@ -54,11 +54,11 @@ class DashboardTab(QWidget):
             }
         """)
         reboot_layout = QHBoxLayout(self.reboot_banner)
-        reboot_label = QLabel("⚠️ Pending changes require reboot!")
+        reboot_label = QLabel(self.tr("⚠️ Pending changes require reboot!"))
         reboot_label.setStyleSheet("color: #1e1e2e; font-weight: bold;")
         reboot_layout.addWidget(reboot_label)
         reboot_layout.addStretch()
-        reboot_btn = QPushButton("🔁 Reboot Now")
+        reboot_btn = QPushButton(self.tr("🔁 Reboot Now"))
         reboot_btn.setStyleSheet("background-color: #1e1e2e; color: #f9e2af; padding: 5px 10px; border-radius: 5px;")
         reboot_btn.clicked.connect(self.reboot_system)
         reboot_layout.addWidget(reboot_btn)
@@ -66,23 +66,23 @@ class DashboardTab(QWidget):
         self.reboot_banner.setVisible(SystemManager.has_pending_deployment())
         
         # Quick Actions Grid
-        actions_label = QLabel("Quick Actions")
+        actions_label = QLabel(self.tr("Quick Actions"))
         actions_label.setStyleSheet("font-size: 18px; font-weight: bold; margin-top: 20px;")
         layout.addWidget(actions_label)
 
         grid = QGridLayout()
         grid.setSpacing(15)
         
-        self.btn_clean = self.create_action_button("Clean Cache", "🧹", "#f9e2af", self.go_to_cleanup)
+        self.btn_clean = self.create_action_button(self.tr("Clean Cache"), "🧹", "#f9e2af", self.go_to_cleanup)
         grid.addWidget(self.btn_clean, 0, 0)
         
-        self.btn_update = self.create_action_button("Update All", "🔄", "#89b4fa", self.go_to_updates)
+        self.btn_update = self.create_action_button(self.tr("Update All"), "🔄", "#89b4fa", self.go_to_updates)
         grid.addWidget(self.btn_update, 0, 1)
         
-        self.btn_profile = self.create_action_button("Power Profile", "🔋", "#a6e3a1", self.toggle_power_profile)
+        self.btn_profile = self.create_action_button(self.tr("Power Profile"), "🔋", "#a6e3a1", self.toggle_power_profile)
         grid.addWidget(self.btn_profile, 1, 0)
         
-        self.btn_gaming = self.create_action_button("Gaming Mode", "🎮", "#f38ba8", self.go_to_gaming)
+        self.btn_gaming = self.create_action_button(self.tr("Gaming Mode"), "🎮", "#f38ba8", self.go_to_gaming)
         grid.addWidget(self.btn_gaming, 1, 1)
         
         layout.addLayout(grid)
@@ -128,14 +128,14 @@ class DashboardTab(QWidget):
     def check_status(self):
         # Check Timeshift
         if shutil.which("timeshift"):
-            self.lbl_snapshot.setText("🛡️ Snapshots: Ready")
+            self.lbl_snapshot.setText(self.tr("🛡️ Snapshots: Ready"))
             self.lbl_snapshot.setStyleSheet("color: #a6e3a1;") # Green
         else:
-            self.lbl_snapshot.setText("🛡️ Snapshots: Missing!")
+            self.lbl_snapshot.setText(self.tr("🛡️ Snapshots: Missing!"))
             self.lbl_snapshot.setStyleSheet("color: #f38ba8;") # Red
 
         # Simple updates check (just existence of dnf)
-        self.lbl_updates.setText("📦 Updates: Idle")
+        self.lbl_updates.setText(self.tr("📦 Updates: Idle"))
         
     def go_to_cleanup(self):
         # Switch to Cleanup Tab (index 6, roughly)
@@ -161,8 +161,8 @@ class DashboardTab(QWidget):
         """Reboot the system to apply pending changes."""
         from PyQt6.QtWidgets import QMessageBox
         reply = QMessageBox.question(
-            self, "Reboot Now?",
-            "Reboot now to apply pending changes?",
+            self, self.tr("Reboot Now?"),
+            self.tr("Reboot now to apply pending changes?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:

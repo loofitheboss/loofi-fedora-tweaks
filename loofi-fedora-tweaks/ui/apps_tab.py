@@ -12,9 +12,9 @@ class AppsTab(QWidget):
         
         # Header with Refresh Button
         header_layout = QHBoxLayout()
-        header_layout.addWidget(QLabel("Essential Applications"))
+        header_layout.addWidget(QLabel(self.tr("Essential Applications")))
         header_layout.addStretch()
-        btn_refresh = QPushButton("Refresh Status")
+        btn_refresh = QPushButton(self.tr("Refresh Status"))
         btn_refresh.clicked.connect(self.refresh_list)
         header_layout.addWidget(btn_refresh)
         layout.addLayout(header_layout)
@@ -42,7 +42,7 @@ class AppsTab(QWidget):
         self.apps = self.load_apps()
         self.refresh_list()
 
-        layout.addWidget(QLabel("Output Log:"))
+        layout.addWidget(QLabel(self.tr("Output Log:")))
         layout.addWidget(self.output_area)
 
     def load_apps(self):
@@ -57,10 +57,10 @@ class AppsTab(QWidget):
     def on_apps_loaded(self, apps):
         self.apps = apps
         self.refresh_list()
-        self.append_output("Apps list updated from remote/cache.\n")
+        self.append_output(self.tr("Apps list updated from remote/cache.\n"))
 
     def on_apps_error(self, error):
-        self.append_output(f"Error loading apps: {error}\n")
+        self.append_output(self.tr("Error loading apps: {}\n").format(error))
 
     def refresh_list(self):
         # Clear existing items
@@ -87,7 +87,7 @@ class AppsTab(QWidget):
         lbl_name = QLabel(f"<b>{app_name}</b>")
         lbl_desc = QLabel(app_desc)
         
-        btn_install = QPushButton("Install")
+        btn_install = QPushButton(self.tr("Install"))
         
         # Check if installed
         chk_cmd = app_data.get('check_cmd')
@@ -96,7 +96,7 @@ class AppsTab(QWidget):
             is_installed = self.check_installed(chk_cmd)
             
         if is_installed:
-            btn_install.setText("Installed")
+            btn_install.setText(self.tr("Installed"))
             btn_install.setEnabled(False)
             btn_install.setStyleSheet("background-color: #2ecc71; color: white;") # Green
         else:
@@ -119,7 +119,7 @@ class AppsTab(QWidget):
 
     def install_app(self, app_data):
         self.output_area.clear()
-        self.append_output(f"Installing {app_data['name']}...\n")
+        self.append_output(self.tr("Installing {}...\n").format(app_data['name']))
         self.runner.run_command(app_data['cmd'], app_data['args'])
 
     def append_output(self, text):
@@ -128,7 +128,7 @@ class AppsTab(QWidget):
         self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
 
     def command_finished(self, exit_code):
-        self.append_output(f"\nCommand finished with exit code: {exit_code}")
+        self.append_output(self.tr("\nCommand finished with exit code: {}").format(exit_code))
         # Refresh list to update status if installation succeeded
         if exit_code == 0:
             self.refresh_list()

@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v6.0.0 "Autonomy Update" ⏰
+# Loofi Fedora Tweaks v6.1.0 "Polyglot Update" 🌐
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v6.0.0">
-    <img src="https://img.shields.io/badge/Release-v6.0.0-blue?style=for-the-badge&logo=github" alt="Release v6.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v6.1.0">
+    <img src="https://img.shields.io/badge/Release-v6.1.0-blue?style=for-the-badge&logo=github" alt="Release v6.1.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,16 +20,16 @@
 
 ---
 
-## 🚀 What's New in v6.0?
+## 🚀 What's New in v6.1?
 
-### ⏰ Autonomy Update
+### 🌐 Polyglot Update
 
-Automate your system maintenance with scheduled tasks and a background service!
+Full localization infrastructure for international users!
 
-* **Scheduler Tab**: Create scheduled tasks for cleanup, updates, and more.
-* **Background Service**: Lightweight systemd user service runs tasks automatically.
-* **Power Triggers**: Execute actions when plugging in or unplugging AC.
-* **Notifications**: Desktop toast alerts when tasks complete.
+* **Internationalization Ready**: All 414 UI strings wrapped with `self.tr()` for translation.
+* **Translation Files**: `.ts` files for English and Swedish included.
+* **System Locale Detection**: Automatically loads translations based on system language.
+* **Translator Tools**: Ready for community translations via Qt Linguist.
 
 ---
 
@@ -37,35 +37,48 @@ Automate your system maintenance with scheduled tasks and a background service!
 
 ### 🎨 Modern UI (v5.0)
 
-- **Glassmorphism Design**: Dark theme with blur effects and rounded corners.
+* **Glassmorphism Design**: Dark theme with blur effects and rounded corners.
+
 * **Sidebar Navigation**: Clean, organized interface.
 * **Dashboard**: System health at a glance with quick actions.
 
 ### 🧬 Atomic Support (v5.1)
 
-- **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` systems automatically.
+* **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` systems automatically.
+
 * **System Overlays Tab**: Manage layered packages on Atomic variants.
 * **Flatpak First**: Prioritizes Flatpak for app installations.
 
 ### ⚡ Hardware Control (v5.2)
 
-- **CPU Governor**: Switch between powersave/schedutil/performance.
+* **CPU Governor**: Switch between powersave/schedutil/performance.
+
 * **Power Profiles**: Quick toggle for power-saver/balanced/performance.
 * **GPU Mode Switching**: Integrated/Hybrid/NVIDIA modes (via envycontrol).
 * **Fan Control**: Manual speed slider or auto mode (via nbfc-linux).
 
 ### ☁️ Cloud Sync (v5.5)
 
-- **Export/Import Config**: Backup all settings to JSON.
+* **Export/Import Config**: Backup all settings to JSON.
+
 * **GitHub Gist Sync**: Push/pull config across machines.
 * **Community Presets**: Browse and download shared configurations.
 
 ### ⏰ Automation (v6.0)
 
-- **Scheduled Tasks**: Hourly, daily, weekly automation.
+* **Scheduled Tasks**: Hourly, daily, weekly automation.
+
 * **Boot Actions**: Run tasks on login.
 * **Power Triggers**: On-battery / On-AC event handling.
 * **System Cleanup, Update Checks, Preset Application**.
+
+### 🌐 Localization (v6.1)
+
+* **17 UI Files Localized**: All tabs wrapped with `self.tr()`.
+
+* **414 Translatable Strings**: Extracted to `.ts` files.
+* **Swedish Translation**: Template included for community contribution.
+* **Auto-Detection**: Loads translations based on system locale.
 
 ---
 
@@ -83,7 +96,7 @@ sudo dnf install loofi-fedora-tweaks --refresh
 Download from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases):
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-6.0.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-6.1.0-1.fc43.noarch.rpm
 ```
 
 ### Option 3: Run from Source

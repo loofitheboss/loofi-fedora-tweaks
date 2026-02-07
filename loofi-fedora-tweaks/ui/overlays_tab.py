@@ -28,7 +28,7 @@ class OverlaysTab(QWidget):
         self.setLayout(layout)
         
         # Header
-        header = QLabel("System Overlays (rpm-ostree)")
+        header = QLabel(self.tr("System Overlays (rpm-ostree)"))
         header.setObjectName("header")
         layout.addWidget(header)
         
@@ -44,19 +44,19 @@ class OverlaysTab(QWidget):
         info_layout = QVBoxLayout(info_frame)
         
         variant = SystemManager.get_variant_name()
-        info_label = QLabel(f"📦 System: Fedora {variant} (Immutable)")
+        info_label = QLabel(self.tr("📦 System: Fedora {} (Immutable)").format(variant))
         info_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         info_layout.addWidget(info_label)
         
-        desc_label = QLabel(
+        desc_label = QLabel(self.tr(
             "Layered packages are RPMs installed on top of the base OS image.\n"
             "Changes require a reboot to fully apply."
-        )
+        ))
         desc_label.setStyleSheet("color: #a6adc8;")
         info_layout.addWidget(desc_label)
         
         # Pending Reboot Warning
-        self.reboot_warning = QLabel("⚠️ Pending changes require reboot!")
+        self.reboot_warning = QLabel(self.tr("⚠️ Pending changes require reboot!"))
         self.reboot_warning.setStyleSheet("color: #f9e2af; font-weight: bold;")
         self.reboot_warning.setVisible(False)
         info_layout.addWidget(self.reboot_warning)
@@ -64,7 +64,7 @@ class OverlaysTab(QWidget):
         layout.addWidget(info_frame)
         
         # Layered Packages List
-        packages_group = QGroupBox("Layered Packages")
+        packages_group = QGroupBox(self.tr("Layered Packages"))
         packages_layout = QVBoxLayout(packages_group)
         
         self.packages_list = QListWidget()
@@ -74,18 +74,18 @@ class OverlaysTab(QWidget):
         # Buttons
         btn_layout = QHBoxLayout()
         
-        self.btn_refresh = QPushButton("🔄 Refresh")
+        self.btn_refresh = QPushButton(self.tr("🔄 Refresh"))
         self.btn_refresh.clicked.connect(self.refresh_list)
         btn_layout.addWidget(self.btn_refresh)
         
-        self.btn_remove = QPushButton("➖ Remove Selected")
+        self.btn_remove = QPushButton(self.tr("➖ Remove Selected"))
         self.btn_remove.setObjectName("dangerAction")
         self.btn_remove.clicked.connect(self.remove_selected)
         btn_layout.addWidget(self.btn_remove)
         
         btn_layout.addStretch()
         
-        self.btn_reset = QPushButton("🗑️ Reset to Base Image")
+        self.btn_reset = QPushButton(self.tr("🗑️ Reset to Base Image"))
         self.btn_reset.setObjectName("dangerAction")
         self.btn_reset.clicked.connect(self.reset_to_base)
         btn_layout.addWidget(self.btn_reset)
@@ -94,7 +94,7 @@ class OverlaysTab(QWidget):
         layout.addWidget(packages_group)
         
         # Reboot Button
-        self.btn_reboot = QPushButton("🔁 Reboot to Apply Changes")
+        self.btn_reboot = QPushButton(self.tr("🔁 Reboot to Apply Changes"))
         self.btn_reboot.setStyleSheet("""
             QPushButton {
                 background-color: #f38ba8;
@@ -124,7 +124,7 @@ class OverlaysTab(QWidget):
                 item = QListWidgetItem(f"📦 {pkg}")
                 self.packages_list.addItem(item)
         else:
-            item = QListWidgetItem("No layered packages (clean base image)")
+            item = QListWidgetItem(self.tr("No layered packages (clean base image)"))
             item.setForeground(Qt.GlobalColor.darkGray)
             self.packages_list.addItem(item)
         
@@ -137,7 +137,7 @@ class OverlaysTab(QWidget):
         """Remove the selected layered package."""
         selected = self.packages_list.currentItem()
         if not selected:
-            QMessageBox.warning(self, "No Selection", "Please select a package to remove.")
+            QMessageBox.warning(self, self.tr("No Selection"), self.tr("Please select a package to remove."))
             return
         
         # Extract package name (remove emoji prefix)
@@ -147,25 +147,25 @@ class OverlaysTab(QWidget):
             return
         
         reply = QMessageBox.question(
-            self, "Confirm Removal",
-            f"Remove '{pkg_name}' from system overlays?\n\nThis requires a reboot.",
+            self, self.tr("Confirm Removal"),
+            self.tr("Remove '{}' from system overlays?\n\nThis requires a reboot.").format(pkg_name),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         
         if reply == QMessageBox.StandardButton.Yes:
             result = self.pkg_manager.remove([pkg_name])
             if result.success:
-                QMessageBox.information(self, "Success", result.message)
+                QMessageBox.information(self, self.tr("Success"), result.message)
                 self.refresh_list()
             else:
-                QMessageBox.critical(self, "Error", result.message)
+                QMessageBox.critical(self, self.tr("Error"), result.message)
     
     def reset_to_base(self):
         """Reset to base image, removing all layered packages."""
         reply = QMessageBox.warning(
-            self, "⚠️ Reset to Base Image",
-            "This will REMOVE ALL layered packages and reset to the clean base image.\n\n"
-            "Are you absolutely sure?",
+            self, self.tr("⚠️ Reset to Base Image"),
+            self.tr("This will REMOVE ALL layered packages and reset to the clean base image.\n\n"
+            "Are you absolutely sure?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No
         )
@@ -174,18 +174,18 @@ class OverlaysTab(QWidget):
             result = self.pkg_manager.reset_to_base()
             if result.success:
                 QMessageBox.information(
-                    self, "Reset Complete",
-                    "System reset to base image.\n\nPlease reboot to apply changes."
+                    self, self.tr("Reset Complete"),
+                    self.tr("System reset to base image.\n\nPlease reboot to apply changes.")
                 )
                 self.refresh_list()
             else:
-                QMessageBox.critical(self, "Error", result.message)
+                QMessageBox.critical(self, self.tr("Error"), result.message)
     
     def reboot_system(self):
         """Offer to reboot the system."""
         reply = QMessageBox.question(
-            self, "Reboot Now?",
-            "Reboot now to apply pending changes?",
+            self, self.tr("Reboot Now?"),
+            self.tr("Reboot now to apply pending changes?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         

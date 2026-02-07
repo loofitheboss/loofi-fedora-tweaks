@@ -28,7 +28,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v6.0.0")
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v6.1.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme
@@ -59,26 +59,26 @@ class MainWindow(QMainWindow):
         # Initialize Pages
         self.pages = {}
         
-        self.add_page("Home", "🏠", DashboardTab(self))
-        self.add_page("System Info", "ℹ️", SystemInfoTab())
-        self.add_page("Updates", "📦", UpdatesTab())
-        self.add_page("Cleanup", "🧹", CleanupTab())
-        self.add_page("Hardware", "⚡", HardwareTab())  # v5.2: Consolidated hardware controls
-        self.add_page("HP Tweaks", "💻", TweaksTab())  # Legacy, kept for battery/fingerprint
-        self.add_page("Apps", "🚀", AppsTab())
-        self.add_page("Advanced", "⚙️", AdvancedTab())
-        self.add_page("Gaming", "🎮", GamingTab())
-        self.add_page("Network", "🌐", NetworkTab())
-        self.add_page("Presets", "💾", PresetsTab())
-        self.add_page("Scheduler", "⏰", SchedulerTab())  # v6.0: Task automation
+        self.add_page(self.tr("Home"), "🏠", DashboardTab(self))
+        self.add_page(self.tr("System Info"), "ℹ️", SystemInfoTab())
+        self.add_page(self.tr("Updates"), "📦", UpdatesTab())
+        self.add_page(self.tr("Cleanup"), "🧹", CleanupTab())
+        self.add_page(self.tr("Hardware"), "⚡", HardwareTab())
+        self.add_page(self.tr("HP Tweaks"), "💻", TweaksTab())
+        self.add_page(self.tr("Apps"), "🚀", AppsTab())
+        self.add_page(self.tr("Advanced"), "⚙️", AdvancedTab())
+        self.add_page(self.tr("Gaming"), "🎮", GamingTab())
+        self.add_page(self.tr("Network"), "🌐", NetworkTab())
+        self.add_page(self.tr("Presets"), "💾", PresetsTab())
+        self.add_page(self.tr("Scheduler"), "⏰", SchedulerTab())
         # Atomic-only: Overlays tab
         if SystemManager.is_atomic():
-            self.add_page("Overlays", "📦", OverlaysTab())
+            self.add_page(self.tr("Overlays"), "📦", OverlaysTab())
         
         # Group less used ones
-        self.add_page("Repos", "📂", ReposTab())
-        self.add_page("Privacy", "🔒", PrivacyTab())
-        self.add_page("Theming", "🎨", ThemingTab())
+        self.add_page(self.tr("Repos"), "📂", ReposTab())
+        self.add_page(self.tr("Privacy"), "🔒", PrivacyTab())
+        self.add_page(self.tr("Theming"), "🎨", ThemingTab())
         
         # Select first item
         self.sidebar.setCurrentRow(0)
@@ -126,9 +126,9 @@ class MainWindow(QMainWindow):
                  self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
              
             tray_menu = QMenu()
-            show_action = QAction("Show", self)
+            show_action = QAction(self.tr("Show"), self)
             show_action.triggered.connect(self.show)
-            quit_action = QAction("Quit", self)
+            quit_action = QAction(self.tr("Quit"), self)
             quit_action.triggered.connect(self.quit_app)
             
             tray_menu.addAction(show_action)
@@ -148,8 +148,8 @@ class MainWindow(QMainWindow):
         if self.tray_icon and self.tray_icon.isVisible():
             self.hide()
             self.tray_icon.showMessage(
-                "Loofi Fedora Tweaks",
-                "Minimized to tray.",
+                self.tr("Loofi Fedora Tweaks"),
+                self.tr("Minimized to tray."),
                 self.tray_icon.MessageIcon.Information,
                 2000
             )

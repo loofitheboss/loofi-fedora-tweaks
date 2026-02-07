@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.1.0] - 2026-02-07 "Polyglot Update"
+
+### Added
+
+- **Internationalization (i18n)**: Full localization infrastructure.
+- **Translation Files**: `.ts` files for English (`en.ts`) and Swedish (`sv.ts`).
+- **414 Translatable Strings**: All UI text wrapped with `self.tr()`.
+- **Auto Locale Detection**: `QTranslator` loads translations based on system language.
+
+### Changed
+
+- `main.py`: Added `QTranslator` and `QLocale` integration.
+- All 17 UI tab files updated with `self.tr()` wrappers.
+
+### New Files
+
+- `resources/translations/en.ts` - English source strings.
+- `resources/translations/sv.ts` - Swedish translation template.
+- `resources/translations/README.md` - Translator documentation.
+
+---
+
 ## [6.0.0] - 2026-02-07 "Autonomy Update"
 
 ### Added

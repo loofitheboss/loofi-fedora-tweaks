@@ -10,25 +10,25 @@ class SystemInfoTab(QWidget):
         self.setLayout(layout)
         
         # System Info Group
-        info_group = QGroupBox("System Information")
+        info_group = QGroupBox(self.tr("System Information"))
         info_layout = QGridLayout()
         info_group.setLayout(info_layout)
         
         self.labels = {}
         fields = [
-            ("Hostname", "hostname"),
-            ("Kernel", "kernel"),
-            ("Fedora Version", "fedora"),
-            ("CPU", "cpu"),
-            ("RAM", "ram"),
-            ("Disk Usage (/)", "disk"),
-            ("Uptime", "uptime"),
-            ("Battery", "battery")
+            (self.tr("Hostname"), "hostname"),
+            (self.tr("Kernel"), "kernel"),
+            (self.tr("Fedora Version"), "fedora"),
+            (self.tr("CPU"), "cpu"),
+            (self.tr("RAM"), "ram"),
+            (self.tr("Disk Usage (/)"), "disk"),
+            (self.tr("Uptime"), "uptime"),
+            (self.tr("Battery"), "battery")
         ]
         
         for i, (label, key) in enumerate(fields):
             lbl = QLabel(f"<b>{label}:</b>")
-            val = QLabel("Loading...")
+            val = QLabel(self.tr("Loading..."))
             self.labels[key] = val
             info_layout.addWidget(lbl, i, 0)
             info_layout.addWidget(val, i, 1)
@@ -63,6 +63,6 @@ class SystemInfoTab(QWidget):
                 status = subprocess.getoutput("cat /sys/class/power_supply/BAT0/status")
                 self.labels["battery"].setText(f"{capacity}% ({status})")
             else:
-                self.labels["battery"].setText("No battery detected")
+                self.labels["battery"].setText(self.tr("No battery detected"))
         except Exception as e:
             pass

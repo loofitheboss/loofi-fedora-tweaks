@@ -2,7 +2,7 @@
 Name=Loofi Fedora Tweaks
 Comment=System tweaks and maintenance for HP Elitebook 840 G8
 Exec=loofi-fedora-tweaks
-Icon=org.loofi.FedoraTweaks
+Icon=loofi-fedora-tweaks
 Terminal=false
 Type=Application
 Categories=System;Settings;
