@@ -51,6 +51,18 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 7.0.0-1
+- Community Update: Marketplace and Drift Detection
+- Preset Marketplace for community presets
+- Configuration drift detection
+- New marketplace tab UI
+
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 6.5.0-1
+- Architect Update: CLI and Plugin System
+- Full CLI mode with subcommands
+- Plugin system for extensions
+- Operations layer refactoring
+
 * Fri Feb 07 2026 Loofi <loofi@example.com> - 6.2.0-1
 - Engine Room Update: Boot management features
 - Kernel parameter editor with grubby wrapper
