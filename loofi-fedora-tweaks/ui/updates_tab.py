@@ -71,8 +71,15 @@ class UpdatesTab(QWidget):
         self.current_update_index = 0
 
     def update_progress(self, percent, status):
-        self.progress_bar.setValue(percent)
-        self.progress_bar.setFormat(f"{percent}% - {status}")
+        if percent == -1:
+            # Indeterminate state or just status text update
+            if self.progress_bar.value() == 0 or self.progress_bar.value() == 100:
+                 self.progress_bar.setRange(0, 0) # Indeterminate
+            self.progress_bar.setFormat(f"{status}")
+        else:
+            self.progress_bar.setRange(0, 100)
+            self.progress_bar.setValue(percent)
+            self.progress_bar.setFormat(f"{percent}% - {status}")
 
     def run_dnf_update(self):
         self.start_process()

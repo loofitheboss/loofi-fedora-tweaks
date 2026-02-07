@@ -73,13 +73,53 @@ QLabel {
     color: #2c3e50;
 }
 
+/* Progress Bar Styling */
 QProgressBar {
     border: 1px solid #bdc3c7;
     border-radius: 4px;
+    background-color: #ecf0f1;
     text-align: center;
+    color: #2c3e50;
+    font-weight: bold;
 }
 
 QProgressBar::chunk {
     background-color: #3daee9;
+    border-radius: 3px;
     width: 20px;
+}
+
+/* Scrollbars - for a cleaner look */
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+    background: #bdc3c7;
+    min-height: 20px;
+    border-radius: 5px;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    border: none;
+    background: none;
+}
+
+/* GroupBox tweaks */
+QGroupBox {
+    font-weight: bold;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    margin-top: 24px; /* More space for title */
+    background-color: #ffffff;
+    padding-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left; /* Move title to left */
+    padding: 0 5px;
+    left: 10px;
+    color: #2c3e50;
 }

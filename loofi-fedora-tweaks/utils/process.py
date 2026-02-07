@@ -39,30 +39,45 @@ class CommandRunner(QObject):
         self.output_received.emit(output) # Treat stderr as output for now
 
     def parse_progress(self, text):
-        # DNF Progress: [===                 ] ---  B/s |   0  B     --:-- ETA
-        # Flatpak Progress: 45%
-        
-        # Simple DNF Regex (detecting the bar roughly)
-        if "[" in text and "]" in text and ("ETA" in text or "B/s" in text):
+        # DNF regex for progress bar: [===       ]
+        dnf_bar_match = re.search(r'\[(=+)( *)\]', text)
+        if dnf_bar_match:
+            equals = len(dnf_bar_match.group(1))
+            spaces = len(dnf_bar_match.group(2))
+            total = equals + spaces
+            if total > 0:
+                percent = int((equals / total) * 100)
+                self.progress_update.emit(percent, "Processing...")
+                return
+
+        # DNF regex for text state (Downloading/Installing)
+        if "Downloading" in text:
+            self.progress_update.emit(-1, "Downloading Packages...") # -1 can mean indeterminate or just status update
+            return
+        if "Installing" in text:
+             self.progress_update.emit(-1, "Installing...")
+             return
+        if "Verifying" in text:
+             self.progress_update.emit(-1, "Verifying...")
+             return
+             
+        # DNF/General Percentage: ( 45%)
+        paren_percent = re.search(r'\(\s*(\d+)%\)', text)
+        if paren_percent:
             try:
-                # Count '=' to guess percentage (max 20 chars usually)
-                bar_content = text.split("[")[1].split("]")[0]
-                equals = bar_content.count("=")
-                spaces = bar_content.count(" ")
-                total = equals + spaces
-                if total > 0:
-                    percent = int((equals / total) * 100)
-                    self.progress_update.emit(percent, "Downloading/Installing...")
+                percent = int(paren_percent.group(1))
+                self.progress_update.emit(percent, "Processing...")
+                return
             except:
                 pass
-                
-        # Flatpak Percentage Rule
-        # looking for number% pattern at start or end of line
-        match = re.search(r'(\d+)%', text)
-        if match:
+
+        # Flatpak Percentage: 45% (often at start of line or standalone)
+        flatpak_match = re.search(r'^\s*(\d+)%', text)
+        if flatpak_match:
             try:
-                percent = int(match.group(1))
+                percent = int(flatpak_match.group(1))
                 self.progress_update.emit(percent, "Processing...")
+                return
             except:
                 pass
 
