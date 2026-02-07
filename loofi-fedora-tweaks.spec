@@ -1,7 +1,7 @@
 Name:           loofi-fedora-tweaks
-Version:        8.0.0
+Version:        9.0.0
 Release:        1%{?dist}
-Summary:        System tweaks, developer tools, and IaC exports for Fedora
+Summary:        Complete Fedora system management with AI, security, and window management
 
 License:        MIT
 URL:            https://github.com/loofitheboss/loofi-fedora-tweaks
@@ -14,9 +14,9 @@ Requires:       polkit
 Requires:       libnotify
 
 %description
-A GUI application for Fedora 43+ (KDE Plasma) with system maintenance,
-developer tooling, diagnostics, and Infrastructure as Code exports.
-Features: Containers, Developer tools, Watchtower diagnostics, Replicator IaC.
+A comprehensive GUI application for Fedora 43+ (KDE Plasma) with system maintenance,
+developer tooling, AI integration, security hardening, and window management.
+Features: AI Lab, Security Center, Director, Containers, Watchtower diagnostics, Replicator IaC.
 
 %prep
 %setup -q
@@ -52,13 +52,24 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 9.0.0-1
+- Director Update: Window management for KDE, Hyprland, Sway
+- Director tab: Tiling presets, workspace templates, dotfile sync
+- KWin script installer for advanced KDE tiling
+
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.5.0-1
+- Sentinel Update: Proactive security hardening
+- Security Center tab: Port auditor with security scoring
+- USB Guard integration for BadUSB protection
+- Firejail sandbox manager for application isolation
+
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.1.0-1
+- Neural Update: AI-ready foundation
+- AI Lab tab: Hardware detection, Ollama management
+- Model downloads for Llama, Mistral, CodeLlama
+
 * Fri Feb 07 2026 Loofi <loofi@example.com> - 8.0.0-1
 - Replicator Update: Developer tools, diagnostics, and IaC exports
-- Containers tab: Distrobox GUI management
-- Developer tab: PyEnv, NVM, Rustup + VS Code profiles
-- Watchtower tab: Services, boot analyzer, journal viewer
-- Replicator tab: Ansible playbook and Kickstart export
-- Lazy tab loading for faster startup
 
 * Fri Feb 07 2026 Loofi <loofi@example.com> - 7.0.0-1
 - Community Update: Marketplace and Drift Detection

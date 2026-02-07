@@ -1,17 +1,17 @@
-# Loofi Fedora Tweaks v8.0.0 "Replicator Update" 🔄
+# Loofi Fedora Tweaks v9.0.0 "Director Update" 🎬
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
 </p>
 
 <p align="center">
-  <strong>The Ultimate System Management & Developer Tooling for Fedora 43+ KDE</strong><br>
+  <strong>Complete Fedora System Management with AI, Security & Window Management</strong><br>
   <em>Optimized for HP Elitebook 840 G8 | Supports Atomic Variants | Developer-Focused</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v8.0.0">
-    <img src="https://img.shields.io/badge/Release-v8.0.0-blue?style=for-the-badge&logo=github" alt="Release v8.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v9.0.0">
+    <img src="https://img.shields.io/badge/Release-v9.0.0-blue?style=for-the-badge&logo=github" alt="Release v9.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,31 +20,34 @@
 
 ---
 
-## 🚀 What's New in v8.0?
+## 🚀 What's New in v9.0?
 
-### 🔄 Replicator Update - Infrastructure as Code
+### 🎬 Director Update - Window Management (v9.0)
 
-Export your entire system configuration and replicate it anywhere!
+Take control of your desktop with tiling and workspace management!
 
-* **Ansible Playbook Export**: Generate standard Ansible playbooks from your installed packages, Flatpaks, and GNOME settings.
-* **Kickstart Generator**: Create Anaconda-compatible .ks files for automated Fedora reinstalls.
-* **No Loofi Required**: Exported configs work with standard tools—use them anywhere.
+* **Compositor Detection**: Auto-detect KDE Plasma, Hyprland, or Sway
+* **Tiling Presets**: Vim-style or arrow key keybindings for quick tiling
+* **Workspace Templates**: Pre-configured layouts for development, gaming, creative work
+* **Dotfile Sync**: Backup and sync your configs to a git repo
+* **KWin Scripts**: Install custom tiling scripts for KDE Plasma
 
-### 🔭 Watchtower Update (v7.5) - System Diagnostics
+### 🛡️ Sentinel Update - Security Center (v8.5)
 
-* **Gaming-Focused Service Manager**: Filter services by gaming, failed, or active states.
-* **Boot Analyzer**: Visualize boot time breakdown with optimization suggestions.
-* **Panic Button**: One-click log export ready for support forums.
+Proactive security hardening for your system!
 
-### 🛠️ Developer Update (v7.1) - Containers & Dev Tools
+* **Security Score**: Real-time security health assessment (0-100)
+* **Port Auditor**: Scan open ports, identify risks, manage firewall
+* **USB Guard**: Block unauthorized USB devices (BadUSB protection)
+* **Application Sandbox**: Launch apps in Firejail with one click
 
-* **Distrobox GUI**: Create, enter, and manage containers graphically.
-* **Language Version Managers**: One-click install for PyEnv, NVM, Rustup.
-* **VS Code Extension Profiles**: Install curated extension packs for Python, C++, Rust, Web, Containers.
+### 🧠 Neural Update - AI Ready (v8.1)
 
-### ⚡ Performance Enhancement
+Local AI with hardware-accelerated inference!
 
-* **Lazy Tab Loading**: Tabs load on-demand for instant startup.
+* **AI Hardware Detection**: CUDA, ROCm, Intel NPU, AMD Ryzen AI
+* **Ollama Management**: Install Ollama, download models, manage AI locally
+* **Model Library**: Llama 3, Mistral, CodeLlama, Phi-3 and more
 
 ---
 
@@ -56,37 +59,42 @@ Export your entire system configuration and replicate it anywhere!
 
 ## ✨ Feature Overview
 
-### 🔄 Replicator - IaC Export (v8.0)
+### 🎬 Director - Window Management (v9.0)
 
 | Feature | Description |
 |---------|-------------|
-| **Ansible Export** | Generate playbooks with packages, Flatpaks, settings |
-| **Kickstart Export** | Create .ks files for automated installs |
-| **Preview Mode** | View generated config before export |
+| **Compositor Detection** | KDE/Hyprland/Sway auto-detection |
+| **Tiling Presets** | Vim (H/J/K/L) or Arrow key bindings |
+| **Workspace Templates** | Development, Gaming, Creative layouts |
+| **Dotfile Sync** | Git-based config backup |
 
-### 🔭 Watchtower - Diagnostics (v7.5)
-
-| Feature | Description |
-|---------|-------------|
-| **Service Manager** | Start/stop/mask services with gaming filter |
-| **Boot Analyzer** | Identify slow services, get optimization tips |
-| **Journal Viewer** | Quick error view + Panic Button export |
-
-### 🛠️ Developer Tools (v7.1)
+### 🛡️ Security Center (v8.5)
 
 | Feature | Description |
 |---------|-------------|
-| **Containers** | Distrobox GUI for development environments |
-| **Version Managers** | PyEnv, NVM, Rustup installers |
-| **VS Code Setup** | Extension profiles for Python, C++, Rust, Web |
+| **Security Score** | 0-100 health rating with recommendations |
+| **Port Auditor** | Find risky open ports, block with firewall |
+| **USB Guard** | Whitelist/blacklist USB devices |
+| **Sandbox** | Firejail/Bubblewrap app isolation |
+
+### 🧠 AI Lab (v8.1)
+
+| Feature | Description |
+|---------|-------------|
+| **Hardware Detection** | CUDA, ROCm, Intel/AMD NPU support |
+| **Ollama Manager** | Install, manage, and run local AI |
+| **Model Downloads** | One-click download for popular models |
 
 ### Previous Features
 
-* **🌐 Marketplace**: Browse/download community presets
-* **🔧 Boot Management**: Kernel params, ZRAM, Secure Boot
-* **⚡ Hardware Control**: CPU, GPU, Fan, Power profiles
-* **🧬 Atomic Support**: Silverblue/Kinoite compatible
-* **⏰ Automation**: Scheduled tasks, power triggers
+* **🔄 Replicator**: Ansible/Kickstart export
+* **🔭 Watchtower**: System diagnostics
+* **📦 Containers**: Distrobox GUI
+* **🛠️ Developer**: PyEnv, NVM, Rustup
+* **🌐 Marketplace**: Community presets
+* **🔧 Boot Management**: Kernel params, ZRAM
+* **⚡ Hardware Control**: CPU, GPU, Fan, Power
+* **⏰ Automation**: Scheduled tasks
 * **🖥️ CLI Mode**: Full command-line interface
 
 ---
@@ -102,7 +110,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### 📥 Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v8.0.0/loofi-fedora-tweaks-8.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v9.0.0/loofi-fedora-tweaks-9.0.0-1.fc43.noarch.rpm
 ```
 
 ### 🖥️ Run from Source
@@ -134,7 +142,7 @@ loofi --version
 
 ---
 
-## 📋 Tabs Overview
+## 📋 Tabs Overview (20 Tabs)
 
 | Tab | Description |
 |:----|:------------|
@@ -152,10 +160,13 @@ loofi --version
 | **🌐 Marketplace** | Community presets + drift detection |
 | **⏰ Scheduler** | Automated task management |
 | **🔧 Boot** | Kernel params, ZRAM, Secure Boot |
-| **📦 Containers** | Distrobox GUI **(v7.1 NEW!)** |
-| **🛠️ Developer** | Language managers, VS Code **(v7.1 NEW!)** |
-| **🔭 Watchtower** | Services, Boot, Journal **(v7.5 NEW!)** |
-| **🔄 Replicator** | Ansible/Kickstart export **(v8.0 NEW!)** |
+| **📦 Containers** | Distrobox GUI |
+| **🛠️ Developer** | Language managers, VS Code |
+| **🔭 Watchtower** | Services, Boot, Journal |
+| **🔄 Replicator** | Ansible/Kickstart export |
+| **🧠 AI Lab** | Local AI setup **(v8.1 NEW!)** |
+| **🛡️ Security** | Port audit, USB Guard **(v8.5 NEW!)** |
+| **🎬 Director** | Window management **(v9.0 NEW!)** |
 | **🎨 Theming** | GTK/Qt theme settings |
 | **🔒 Privacy** | Telemetry and privacy tweaks |
 | **📦 Overlays** | rpm-ostree packages (Atomic only) |
@@ -170,6 +181,13 @@ loofi --version
 * **PyQt6**
 * **polkit**
 * **libnotify** (for notifications)
+
+### Optional (for new features)
+
+* **Ollama** - Local AI inference
+* **Firejail** - Application sandboxing
+* **USBGuard** - USB device control
+* **Hyprland/Sway** - Tiling compositor support
 
 ---
 

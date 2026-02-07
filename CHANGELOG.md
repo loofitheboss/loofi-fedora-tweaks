@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.0.0] - 2026-02-07 "Director Update"
+
+### Added
+
+- **Director Tab**: Window management for KDE, Hyprland, and Sway.
+- **TilingManager**: Configuration helpers for Hyprland and Sway with workspace templates.
+- **KWinManager**: KDE Plasma tiling scripts and keybinding presets.
+- **DotfileManager**: Backup and sync configs to a git repository.
+- **Workspace Templates**: Pre-configured layouts for development, gaming, creative work.
+
+### New Files
+
+- `utils/tiling.py` - Hyprland/Sway configuration management
+- `utils/kwin_tiling.py` - KDE KWin scripts and window rules
+- `ui/director_tab.py` - Window management UI
+
+---
+
+## [8.5.0] - 2026-02-07 "Sentinel Update"
+
+### Added
+
+- **Security Tab**: Complete security hardening center with scoring.
+- **Port Auditor**: Scan open ports, identify risks, manage firewall rules.
+- **USB Guard Integration**: Block unauthorized USB devices (BadUSB protection).
+- **Sandbox Manager**: Launch applications in Firejail/Bubblewrap sandboxes.
+- **Security Score**: Real-time 0-100 security health assessment.
+
+### New Files
+
+- `utils/sandbox.py` - Firejail and Bubblewrap wrappers
+- `utils/usbguard.py` - USBGuard integration
+- `utils/ports.py` - Port scanning and firewall management
+- `ui/security_tab.py` - Security Center UI
+
+---
+
+## [8.1.0] - 2026-02-07 "Neural Update"
+
+### Added
+
+- **AI Lab Tab**: Local AI setup and model management interface.
+- **AI Hardware Detection**: CUDA, ROCm, Intel NPU, AMD Ryzen AI detection.
+- **Ollama Management**: Install Ollama, download and manage models.
+- **Model Library**: Support for Llama3, Mistral, CodeLlama, Phi-3, Gemma.
+- **Ansible Safety Disclaimer**: Added prominent warning header to exported playbooks.
+
+### New Files
+
+- `utils/ai.py` - Ollama manager and AI configuration
+- `utils/hardware.py` - Extended with AI capabilities detection
+- `ui/ai_tab.py` - AI Lab UI
+
+---
+
 ## [8.0.0] - 2026-02-07 "Replicator Update"
 
 ### Added
