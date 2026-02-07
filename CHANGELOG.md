@@ -2,6 +2,77 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.0.0] - 2026-02-07 "Autonomy Update"
+
+### Added
+
+- **Scheduler Tab**: New tab for managing scheduled automation tasks.
+- **Background Service**: Systemd user service (`loofi-fedora-tweaks.service`) for running tasks automatically.
+- **Notifications**: Desktop toast notifications via `notify-send` when tasks complete.
+- **Power Triggers**: Execute tasks when switching to battery or AC power.
+- **CLI Daemon Mode**: `--daemon` flag to run as background process.
+
+### New Files
+
+- `utils/scheduler.py` - Task scheduling engine with time and power triggers.
+- `utils/notifications.py` - Desktop notification wrapper.
+- `utils/daemon.py` - Background service daemon.
+- `ui/scheduler_tab.py` - Scheduler management UI.
+- `config/loofi-fedora-tweaks.service` - Systemd unit file.
+
+---
+
+## [5.5.0] - 2026-02-07 "Ecosystem Update"
+
+### Added
+
+- **Cloud Sync**: Sync configuration to GitHub Gist.
+- **Config Export/Import**: Backup and restore all settings to JSON.
+- **Community Presets**: Browse and download presets from GitHub.
+- **Redesigned Presets Tab**: Three sub-tabs (My Presets, Community, Backup & Sync).
+
+### New Files
+
+- `utils/config_manager.py` - Full config export/import.
+- `utils/cloud_sync.py` - GitHub Gist sync and community presets.
+
+---
+
+## [5.2.0] - 2026-02-07 "Silicon Update"
+
+### Added
+
+- **Hardware Tab**: New consolidated hardware control tab.
+- **CPU Governor Switching**: Toggle powersave/schedutil/performance.
+- **Power Profile Management**: Quick switch power-saver/balanced/performance.
+- **GPU Mode Switching**: Integrated/Hybrid/Dedicated modes via envycontrol.
+- **Fan Control**: Manual slider and auto mode via nbfc-linux.
+
+### New Files
+
+- `utils/hardware.py` - HardwareManager for CPU, GPU, Fan, Power controls.
+- `ui/hardware_tab.py` - Consolidated hardware control UI.
+
+---
+
+## [5.1.0] - 2026-02-07 "Atomic Update"
+
+### Added
+
+- **Atomic/Silverblue Support**: Automatic detection of rpm-ostree systems.
+- **System Overlays Tab**: Manage layered packages on Atomic variants.
+- **Polkit Policy**: Professional authorization dialogs.
+- **Unified Package Manager**: Abstracts dnf and rpm-ostree operations.
+
+### New Files
+
+- `utils/system.py` - SystemManager for system detection.
+- `utils/package_manager.py` - Unified package management.
+- `ui/overlays_tab.py` - Layered package management UI.
+- `config/org.loofi.fedora-tweaks.policy` - Polkit policy file.
+
+---
+
 ## [5.0.0] - 2026-02-07 "Visual Revolution"
 
 ### Added

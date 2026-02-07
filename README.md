@@ -1,17 +1,17 @@
-# Loofi Fedora Tweaks v5.0.0 "Visual Revolution" 🎨
+# Loofi Fedora Tweaks v6.0.0 "Autonomy Update" ⏰
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
 </p>
 
 <p align="center">
-  <strong>The Ultimate Post-Install Utility for Fedora 43 KDE</strong><br>
-  <em>Optimized for HP Elitebook 840 G8</em>
+  <strong>The Ultimate System Management Utility for Fedora 43+ KDE</strong><br>
+  <em>Optimized for HP Elitebook 840 G8 | Supports Atomic Variants</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v5.0.0">
-    <img src="https://img.shields.io/badge/Release-v5.0.0-blue?style=for-the-badge&logo=github" alt="Release v5.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v6.0.0">
+    <img src="https://img.shields.io/badge/Release-v6.0.0-blue?style=for-the-badge&logo=github" alt="Release v6.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -20,51 +20,58 @@
 
 ---
 
-## 🚀 What's New in v5.0?
+## 🚀 What's New in v6.0?
 
-### 🎨 Visual Revolution
+### ⏰ Autonomy Update
 
-We've completely redesigned the UI to feel like a modern, premium desktop app.
+Automate your system maintenance with scheduled tasks and a background service!
 
-* **Modern Sidebar**: Replaced cluttered tabs with a sleek, vertical navigation menu.
-* **Dashboard**: A new "Home" screen with **System Health Checks** (Snapshots, Updates) and **Quick Action** buttons.
-* **Dark Glass Theme**: A custom-built `modern.qss` theme brings rounded corners, subtle animations, and a cohesive dark mode without external dependencies.
+* **Scheduler Tab**: Create scheduled tasks for cleanup, updates, and more.
+* **Background Service**: Lightweight systemd user service runs tasks automatically.
+* **Power Triggers**: Execute actions when plugging in or unplugging AC.
+* **Notifications**: Desktop toast alerts when tasks complete.
 
 ---
 
-## ✨ Key Features
+## ✨ Feature Overview
 
-### 🛡️ Safety Net (New in v4.7)
+### 🎨 Modern UI (v5.0)
 
-* **Snapshot Integration**: Automatically prompts you to create a **Timeshift** snapshot before running risky operations like System Updates or Cleanup.
-* **Undo System**: Made a mistake? The new **Undo** button in the Network tab lets you revert changes (like MAC Randomization) instantly.
-* **Smart Locks**: Gracefully handles DNF locks—no more frozen windows if an update is running in the background.
+- **Glassmorphism Design**: Dark theme with blur effects and rounded corners.
+* **Sidebar Navigation**: Clean, organized interface.
+* **Dashboard**: System health at a glance with quick actions.
 
-### ⚡ Hardware Mastery (Optimized for HP Elitebook)
+### 🧬 Atomic Support (v5.1)
 
-* **Persistent Battery Limits**: Set your charge threshold to **80%** or **100%** and have it persist across reboots via a dedicated Systemd service.
-* **Fingerprint Wizard**: Enroll your biometrics using a simplified GUI (wraps `fprintd`).
-* **Fan Control Profiles**: Switch between **Quiet**, **Balanced**, and **Performance** modes using `nbfc-linux`.
+- **Silverblue/Kinoite Compatible**: Detects `rpm-ostree` systems automatically.
+* **System Overlays Tab**: Manage layered packages on Atomic variants.
+* **Flatpak First**: Prioritizes Flatpak for app installations.
 
-### 🎮 Gaming & Performance
+### ⚡ Hardware Control (v5.2)
 
-* **GameMode & MangoHud**: Toggle performance overlays and optimizations with one click.
-* **ProtonUp-Qt**: Easily install compatibility tools for Steam.
-* **DNS Switcher**: Fast switching between Google (8.8.8.8), Cloudflare (1.1.1.1), and Quad9.
+- **CPU Governor**: Switch between powersave/schedutil/performance.
+* **Power Profiles**: Quick toggle for power-saver/balanced/performance.
+* **GPU Mode Switching**: Integrated/Hybrid/NVIDIA modes (via envycontrol).
+* **Fan Control**: Manual speed slider or auto mode (via nbfc-linux).
 
-### 📦 System Management
+### ☁️ Cloud Sync (v5.5)
 
-* **Repositories**: Enable **RPM Fusion** (Free/Non-Free), Multimedia Codecs, and Flathub with a single click.
-* **Essential Apps**: Bulk install VS Code, Chrome, Discord, Spotify, and more.
-* **Cleanup**: One-click system cleaning (dnf autoremove, cache cleaning) with built-in safety checks.
+- **Export/Import Config**: Backup all settings to JSON.
+* **GitHub Gist Sync**: Push/pull config across machines.
+* **Community Presets**: Browse and download shared configurations.
+
+### ⏰ Automation (v6.0)
+
+- **Scheduled Tasks**: Hourly, daily, weekly automation.
+* **Boot Actions**: Run tasks on login.
+* **Power Triggers**: On-battery / On-AC event handling.
+* **System Cleanup, Update Checks, Preset Application**.
 
 ---
 
 ## 📦 Installation
 
 ### Option 1: DNF Repository (Recommended)
-
-Add the repo to receive automatic updates:
 
 ```bash
 sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo/loofi-fedora-tweaks.repo
@@ -73,40 +80,96 @@ sudo dnf install loofi-fedora-tweaks --refresh
 
 ### Option 2: Manual RPM Install
 
-Download the latest `.rpm` from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases) and install:
+Download from [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases):
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.0.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-6.0.0-1.fc43.noarch.rpm
 ```
 
 ### Option 3: Run from Source
 
-Requirements: `python3-pyqt6`, `polkit`, `dnf`.
-
 ```bash
 git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
 cd loofi-fedora-tweaks
-./run.sh
+pip install -r requirements.txt
+python3 loofi-fedora-tweaks/main.py
 ```
 
 ---
 
-## 📸 Screenshots
+## 🔧 Background Service
 
-| Dashboard | Dark Theme |
-|:---:|:---:|
-| *New Home Screen with Health Checks* | *Glassmorphism UI* |
-| *(Screenshot Placeholder)* | *(Screenshot Placeholder)* |
+Enable automated task execution:
+
+```bash
+# Enable and start the service
+systemctl --user enable --now loofi-fedora-tweaks
+
+# Check status
+systemctl --user status loofi-fedora-tweaks
+
+# Disable
+systemctl --user disable --now loofi-fedora-tweaks
+```
+
+Or manage it from the **Scheduler** tab in the app.
+
+---
+
+## 🖥️ CLI Usage
+
+```bash
+# Launch GUI
+loofi-fedora-tweaks
+
+# Run as background daemon
+loofi-fedora-tweaks --daemon
+
+# Show version
+loofi-fedora-tweaks --version
+```
+
+---
+
+## 📋 Tabs Overview
+
+| Tab | Description |
+|:----|:------------|
+| **🏠 Home** | Dashboard with system health and quick actions |
+| **ℹ️ System Info** | Hardware and OS information |
+| **📦 Updates** | System update management |
+| **🧹 Cleanup** | Cache cleaning and orphan removal |
+| **⚡ Hardware** | CPU, GPU, Fan, Power controls |
+| **💻 HP Tweaks** | Battery limit, Fingerprint (HP specific) |
+| **🚀 Apps** | One-click app installation |
+| **⚙️ Advanced** | Kernel, Boot, System tweaks |
+| **🎮 Gaming** | GameMode, MangoHud, ProtonUp |
+| **🌐 Network** | DNS, Firewall, MAC management |
+| **💾 Presets** | Save/Load configs, Cloud sync |
+| **⏰ Scheduler** | Automated task management |
+| **🎨 Theming** | GTK/Qt theme settings |
+| **🔒 Privacy** | Telemetry and privacy tweaks |
+| **📦 Overlays** | rpm-ostree layered packages (Atomic only) |
+| **🩺 Doctor** | Dependency checker |
+| **📁 Repos** | Repository management |
+
+---
+
+## 🛡️ Requirements
+
+* **Fedora 43+** (or Atomic variant: Silverblue, Kinoite)
+* **Python 3.12+**
+* **PyQt6**
+* **polkit**
+* **libnotify** (for notifications)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+3. Commit your Changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
@@ -114,7 +177,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📜 License
 
-Values user privacy and freedom. Open Source. MIT License.
+MIT License - Open Source, respects user privacy and freedom.
 
 ---
 
