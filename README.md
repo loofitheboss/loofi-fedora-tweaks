@@ -23,7 +23,7 @@
 
 ### 📊 System Info
 
-# Loofi Fedora Tweaks v3.0.0
+# Loofi Fedora Tweaks v4.0.0
 
 ![Python](https://img.shields.io/badge/Python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -31,25 +31,21 @@
 
 **Loofi Fedora Tweaks** is a post-install configuration tool specifically designed for **Fedora 43 KDE**, optimized for the **HP Elitebook 840 G8**.
 
-## 🚀 Key Features (v3.0.0)
+## 🚀 Key Features (v4.0.0)
 
+* **Gaming Optimizations 🎮**:
+  * **Feral GameMode** & **MangoHud** (FPS Overlay) manager.
+  * **ProtonUp-Qt**: Easy install for Steam compatibility tools.
+  * **Steam Devices**: Fix controller support.
+* **Network & Privacy 🌐**:
+  * **DNS Switcher**: Toggle Google (8.8.8.8), Cloudflare (1.1.1.1), or Quad9.
+  * **MAC Randomization**: Randomize Wi-Fi MAC address for privacy.
 * **System Info**: View detailed specs, battery health, and uptime.
-* **Updates Manager**:
-  * Real-time progress bars for DNF and Flatpak updates.
-  * Update Firmware (`fwupdmgr`) and managing Kernels.
-* **Repository Management**:
-  * One-click **RPM Fusion** (Free & Non-Free) enablement.
-  * Install Multimedia Codecs (`ffmpeg`, `gstreamer`).
-  * Enable Flathub.
-* **Cleanup & Safety**:
-  * Safe cleanup (DNF cache, Journal vacuum).
-  * **Timeshift Integration**: Warns before risky operations if no snapshot exists.
-* **HP Elitebook Tweaks**:
-  * **Battery Limits**: Set 80% or 100% charge threshold (Persistent via systemd).
-  * **Fan Control**: Easy install for `nbfc-linux`.
-  * **Audio**: One-click Pipewire restart.
+* **Updates Manager**: Real-time progress bars for DNF/Flatpak.
+* **Repository Management**: One-click **RPM Fusion**, Multimedia Codecs, Flathub.
+* **Cleanup & Safety**: Safe cleanup with **Timeshift** integration.
+* **HP Elitebook Tweaks**: Battery Limits (80%/100%), Fan Control (`nbfc`), Audio fixes.
 * **Essential Apps**: Install VS Code, Chrome, Discord, Spotify, and more.
-* **Privacy & Theming**: Remove telemetry, toggle Firewall, and install fonts/themes.
 * **Modern UI**: Polished interface with KDE Breeze styling and System Tray support.
 
 ## 📦 Installation

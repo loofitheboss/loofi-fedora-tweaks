@@ -1,17 +1,20 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget
+from ui.system_info_tab import SystemInfoTab
 from ui.updates_tab import UpdatesTab
 from ui.cleanup_tab import CleanupTab
 from ui.tweaks_tab import TweaksTab
 from ui.apps_tab import AppsTab
-from ui.advanced_tab import AdvancedTweaksTab
-from ui.system_info_tab import SystemInfoTab
+from ui.advanced_tab import AdvancedTab # Changed from AdvancedTweaksTab
 from ui.privacy_tab import PrivacyTab
 from ui.theming_tab import ThemingTab
+from ui.repos_tab import ReposTab # Moved import here
+from ui.gaming_tab import GamingTab # New import
+from ui.network_tab import NetworkTab # New import
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v3.0.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.0.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -32,18 +35,22 @@ class MainWindow(QMainWindow):
         self.cleanup_tab = CleanupTab()
         self.tweaks_tab = TweaksTab()
         self.apps_tab = AppsTab()
-        self.advanced_tab = AdvancedTweaksTab()
+        self.advanced_tab = AdvancedTab() # Changed from AdvancedTweaksTab
         self.privacy_tab = PrivacyTab()
         self.theming_tab = ThemingTab()
+        self.repos_tab = ReposTab() # Moved initialization here
+        self.gaming_tab = GamingTab() # New tab
+        self.network_tab = NetworkTab() # New tab
         
-        # Add Tabs
         # Add Tabs
         self.tabs.addTab(self.system_info_tab, "System Info")
         self.tabs.addTab(self.updates_tab, "Updates")
         self.tabs.addTab(self.cleanup_tab, "Cleanup & Maintenance")
         self.tabs.addTab(self.tweaks_tab, "HP Tweaks")
         self.tabs.addTab(self.apps_tab, "Essential Apps")
-        self.tabs.addTab(self.advanced_tab, "Advanced Tweaks")
+        self.tabs.addTab(self.repos_tab, "Repositories") # Moved tab addition here
+        self.tabs.addTab(self.gaming_tab, "Gaming") # New tab
+        self.tabs.addTab(self.network_tab, "Network") # New tab
         self.tabs.addTab(self.privacy_tab, "Privacy & Security")
         self.tabs.addTab(self.theming_tab, "Theming")
         
