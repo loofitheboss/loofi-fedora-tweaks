@@ -6,7 +6,7 @@
     <message>
         <location filename="../../ui/scheduler_tab.py" line="22" />
         <source>Add Scheduled Task</source>
-        <translation type="unfinished" />
+        <translation>Lägg till schemalagd uppgift</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="29" />
@@ -16,7 +16,7 @@
     <message>
         <location filename="../../ui/scheduler_tab.py" line="30" />
         <source>Task Name:</source>
-        <translation type="unfinished" />
+        <translation>Uppgiftsnamn:</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="34" />
@@ -41,7 +41,7 @@
     <message>
         <location filename="../../ui/scheduler_tab.py" line="39" />
         <source>Action:</source>
-        <translation type="unfinished" />
+        <translation>Åtgärd:</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="45" />
@@ -81,17 +81,17 @@
     <message>
         <location filename="../../ui/scheduler_tab.py" line="58" />
         <source>Schedule:</source>
-        <translation type="unfinished" />
+        <translation>Schema:</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="63" />
         <source>Cancel</source>
-        <translation type="unfinished" />
+        <translation>Avbryt</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="66" />
         <source>Add Task</source>
-        <translation type="unfinished" />
+        <translation>Lägg till uppgift</translation>
     </message>
 </context><context>
     <name>AdvancedTab</name>
@@ -198,12 +198,12 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/apps_tab.py" line="90" />
         <source>Install</source>
-        <translation type="unfinished" />
+        <translation>Installera</translation>
     </message>
     <message>
         <location filename="../../ui/apps_tab.py" line="99" />
         <source>Installed</source>
-        <translation type="unfinished" />
+        <translation>Installerad</translation>
     </message>
     <message>
         <location filename="../../ui/apps_tab.py" line="122" />
@@ -222,7 +222,7 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/cleanup_tab.py" line="22" />
         <source>Cleanup</source>
-        <translation type="unfinished" />
+        <translation>Rensning</translation>
     </message>
     <message>
         <location filename="../../ui/cleanup_tab.py" line="26" />
@@ -327,7 +327,7 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="26" />
         <source>System Health</source>
-        <translation type="unfinished" />
+        <translation>Systemhälsa</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="31" />
@@ -352,27 +352,27 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="69" />
         <source>Quick Actions</source>
-        <translation type="unfinished" />
+        <translation>Snabbåtgärder</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="76" />
         <source>Clean Cache</source>
-        <translation type="unfinished" />
+        <translation>Rensa cache</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="79" />
         <source>Update All</source>
-        <translation type="unfinished" />
+        <translation>Uppdatera alla</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="82" />
         <source>Power Profile</source>
-        <translation type="unfinished" />
+        <translation>Energiprofil</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="85" />
         <source>Gaming Mode</source>
-        <translation type="unfinished" />
+        <translation>Spelläge</translation>
     </message>
     <message>
         <location filename="../../ui/dashboard_tab.py" line="131" />
@@ -509,7 +509,7 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/hardware_tab.py" line="80" />
         <source>CPU Governor</source>
-        <translation type="unfinished" />
+        <translation>CPU-styrning</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="91" />
@@ -532,7 +532,7 @@ Command finished with exit code: {}</source>
         <location filename="../../ui/hardware_tab.py" line="178" />
         <location filename="../../ui/hardware_tab.py" line="119" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Fel</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="119" />
@@ -542,7 +542,7 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/hardware_tab.py" line="129" />
         <source>Power Profile</source>
-        <translation type="unfinished" />
+        <translation>Energiprofil</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="133" />
@@ -567,7 +567,7 @@ Command finished with exit code: {}</source>
     <message>
         <location filename="../../ui/hardware_tab.py" line="183" />
         <source>GPU Mode</source>
-        <translation type="unfinished" />
+        <translation>GPU-läge</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="187" />
@@ -609,7 +609,7 @@ This requires a logout or reboot.</source>
     <message>
         <location filename="../../ui/hardware_tab.py" line="251" />
         <source>Success</source>
-        <translation type="unfinished" />
+        <translation>Lyckades</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="258" />
@@ -628,7 +628,7 @@ Or visit: https://github.com/bayasdev/envycontrol</source>
     <message>
         <location filename="../../ui/hardware_tab.py" line="267" />
         <source>Fan Control</source>
-        <translation type="unfinished" />
+        <translation>Fläktkontroll</translation>
     </message>
     <message>
         <location filename="../../ui/hardware_tab.py" line="271" />
@@ -695,92 +695,92 @@ Or visit: https://github.com/bayasdev/envycontrol</source>
     <message>
         <location filename="../../ui/main_window.py" line="62" />
         <source>Home</source>
-        <translation type="unfinished" />
+        <translation>Hem</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="63" />
         <source>System Info</source>
-        <translation type="unfinished" />
+        <translation>Systeminformation</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="64" />
         <source>Updates</source>
-        <translation type="unfinished" />
+        <translation>Uppdateringar</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="65" />
         <source>Cleanup</source>
-        <translation type="unfinished" />
+        <translation>Rensning</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="66" />
         <source>Hardware</source>
-        <translation type="unfinished" />
+        <translation>Hårdvara</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="67" />
         <source>HP Tweaks</source>
-        <translation type="unfinished" />
+        <translation>HP-inställningar</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="68" />
         <source>Apps</source>
-        <translation type="unfinished" />
+        <translation>Appar</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="69" />
         <source>Advanced</source>
-        <translation type="unfinished" />
+        <translation>Avancerat</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="70" />
         <source>Gaming</source>
-        <translation type="unfinished" />
+        <translation>Spel</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="71" />
         <source>Network</source>
-        <translation type="unfinished" />
+        <translation>Nätverk</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="72" />
         <source>Presets</source>
-        <translation type="unfinished" />
+        <translation>Profiler</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="73" />
         <source>Scheduler</source>
-        <translation type="unfinished" />
+        <translation>Schemaläggare</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="76" />
         <source>Overlays</source>
-        <translation type="unfinished" />
+        <translation>Överlagringar</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="79" />
         <source>Repos</source>
-        <translation type="unfinished" />
+        <translation>Förråd</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="80" />
         <source>Privacy</source>
-        <translation type="unfinished" />
+        <translation>Integritet</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="81" />
         <source>Theming</source>
-        <translation type="unfinished" />
+        <translation>Teman</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="129" />
         <source>Show</source>
-        <translation type="unfinished" />
+        <translation>Visa</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="131" />
         <source>Quit</source>
-        <translation type="unfinished" />
+        <translation>Avsluta</translation>
     </message>
     <message>
         <location filename="../../ui/main_window.py" line="151" />
@@ -790,7 +790,7 @@ Or visit: https://github.com/bayasdev/envycontrol</source>
     <message>
         <location filename="../../ui/main_window.py" line="152" />
         <source>Minimized to tray.</source>
-        <translation type="unfinished" />
+        <translation>Minimerad till systemfältet.</translation>
     </message>
 </context><context>
     <name>NetworkTab</name>
@@ -867,7 +867,7 @@ Or visit: https://github.com/bayasdev/envycontrol</source>
     <message>
         <location filename="../../ui/network_tab.py" line="85" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Fel</translation>
     </message>
     <message>
         <location filename="../../ui/network_tab.py" line="85" />
@@ -877,7 +877,7 @@ Or visit: https://github.com/bayasdev/envycontrol</source>
     <message>
         <location filename="../../ui/network_tab.py" line="101" />
         <source>Success</source>
-        <translation type="unfinished" />
+        <translation>Lyckades</translation>
     </message>
     <message>
         <location filename="../../ui/network_tab.py" line="101" />
@@ -1007,13 +1007,13 @@ This requires a reboot.</source>
     <message>
         <location filename="../../ui/overlays_tab.py" line="158" />
         <source>Success</source>
-        <translation type="unfinished" />
+        <translation>Lyckades</translation>
     </message>
     <message>
         <location filename="../../ui/overlays_tab.py" line="182" />
         <location filename="../../ui/overlays_tab.py" line="161" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Fel</translation>
     </message>
     <message>
         <location filename="../../ui/overlays_tab.py" line="166" />
@@ -1108,7 +1108,7 @@ Please reboot to apply changes.</source>
         <location filename="../../ui/presets_tab.py" line="111" />
         <location filename="../../ui/presets_tab.py" line="98" />
         <source>Success</source>
-        <translation type="unfinished" />
+        <translation>Lyckades</translation>
     </message>
     <message>
         <location filename="../../ui/presets_tab.py" line="98" />
@@ -1123,7 +1123,7 @@ Please reboot to apply changes.</source>
         <location filename="../../ui/presets_tab.py" line="113" />
         <location filename="../../ui/presets_tab.py" line="100" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Fel</translation>
     </message>
     <message>
         <location filename="../../ui/presets_tab.py" line="100" />
@@ -1267,7 +1267,7 @@ Settings applied.</source>
     <message>
         <location filename="../../ui/presets_tab.py" line="255" />
         <source>Save</source>
-        <translation type="unfinished" />
+        <translation>Spara</translation>
     </message>
     <message>
         <location filename="../../ui/presets_tab.py" line="264" />
@@ -1660,7 +1660,7 @@ Command finished with exit code: {}</source>
         <location filename="../../ui/scheduler_tab.py" line="250" />
         <location filename="../../ui/scheduler_tab.py" line="245" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Fel</translation>
     </message>
     <message>
         <location filename="../../ui/scheduler_tab.py" line="245" />

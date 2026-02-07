@@ -42,11 +42,11 @@ chmod +x "%{buildroot}/usr/bin/%{name}"
 # Desktop file
 install -m 644 %{name}.desktop "%{buildroot}/usr/share/applications/"
 
-# Polkit policy
-install -m 644 config/org.loofi.fedora-tweaks.policy "%{buildroot}/usr/share/polkit-1/actions/"
+# Polkit policy (from inside loofi-fedora-tweaks/config/)
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.policy "%{buildroot}/usr/share/polkit-1/actions/"
 
 # Systemd user service
-install -m 644 config/loofi-fedora-tweaks.service "%{buildroot}/usr/lib/systemd/user/"
+install -m 644 loofi-fedora-tweaks/config/loofi-fedora-tweaks.service "%{buildroot}/usr/lib/systemd/user/"
 
 # Icon
 install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/usr/share/icons/hicolor/128x128/apps/"
