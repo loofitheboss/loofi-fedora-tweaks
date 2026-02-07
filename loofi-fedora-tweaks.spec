@@ -1,7 +1,7 @@
 Name:           loofi-fedora-tweaks
-Version:        7.0.0
+Version:        8.0.0
 Release:        1%{?dist}
-Summary:        System tweaks and maintenance for HP Elitebook 840 G8 (Supports Atomic)
+Summary:        System tweaks, developer tools, and IaC exports for Fedora
 
 License:        MIT
 URL:            https://github.com/loofitheboss/loofi-fedora-tweaks
@@ -14,8 +14,9 @@ Requires:       polkit
 Requires:       libnotify
 
 %description
-A GUI application for Fedora 43 (KDE Plasma) tailored for the HP Elitebook 840 G8.
-Provides system updates, cleanup, maintenance, and specific hardware optimizations.
+A GUI application for Fedora 43+ (KDE Plasma) with system maintenance,
+developer tooling, diagnostics, and Infrastructure as Code exports.
+Features: Containers, Developer tools, Watchtower diagnostics, Replicator IaC.
 
 %prep
 %setup -q
@@ -51,6 +52,14 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.0.0-1
+- Replicator Update: Developer tools, diagnostics, and IaC exports
+- Containers tab: Distrobox GUI management
+- Developer tab: PyEnv, NVM, Rustup + VS Code profiles
+- Watchtower tab: Services, boot analyzer, journal viewer
+- Replicator tab: Ansible playbook and Kickstart export
+- Lazy tab loading for faster startup
+
 * Fri Feb 07 2026 Loofi <loofi@example.com> - 7.0.0-1
 - Community Update: Marketplace and Drift Detection
 - Preset Marketplace for community presets
