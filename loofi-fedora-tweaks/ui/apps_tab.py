@@ -80,8 +80,12 @@ class AppsTab(QWidget):
         row_layout = QHBoxLayout()
         row_widget.setLayout(row_layout)
         
-        lbl_name = QLabel(f"<b>{app_data['name']}</b>")
-        lbl_desc = QLabel(app_data['desc'])
+        # Use .get() for defensive access in case keys are missing
+        app_name = app_data.get('name', 'Unknown App')
+        app_desc = app_data.get('desc', app_data.get('description', ''))
+        
+        lbl_name = QLabel(f"<b>{app_name}</b>")
+        lbl_desc = QLabel(app_desc)
         
         btn_install = QPushButton("Install")
         
