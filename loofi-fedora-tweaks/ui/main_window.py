@@ -16,7 +16,7 @@ import os
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v7.1.0"))
+        self.setWindowTitle(self.tr("Loofi Fedora Tweaks v8.0.0"))
         self.resize(1100, 700)
         
         # Load Modern Theme

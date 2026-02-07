@@ -22,8 +22,11 @@ class ContainersTab(QWidget):
     
     def __init__(self):
         super().__init__()
+        self.container_list = None  # Initialize to None
         self.init_ui()
-        self.refresh_containers()
+        # Only refresh if distrobox is available
+        if ContainerManager.is_available() and self.container_list:
+            self.refresh_containers()
     
     def init_ui(self):
         """Initialize the UI components."""
@@ -182,6 +185,9 @@ class ContainersTab(QWidget):
     
     def refresh_containers(self):
         """Refresh the container list."""
+        if self.container_list is None:
+            return
+        
         self.container_list.clear()
         
         containers = ContainerManager.list_containers()
