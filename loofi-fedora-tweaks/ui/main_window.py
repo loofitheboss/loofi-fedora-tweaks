@@ -14,7 +14,7 @@ from ui.network_tab import NetworkTab # New import
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.2.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.3.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget

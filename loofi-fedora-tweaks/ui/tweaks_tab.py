@@ -103,61 +103,36 @@ class TweaksTab(QWidget):
         self.check_nbfc_status()
 
     def install_nbfc(self):
-        # Using a COPR for nbfc-linux is common, or building from source.
-        # For simplicity and safety, we'll try to find a COPR or Git install method.
-        # Let's assume we use a known COPR for Fedora.
-        cmd = """
-        dnf copr enable -y ublue-os/staging;
-        dnf install -y nbfc-linux;
-        systemctl enable --now nbfc_service;
-        """
-        self.run_command("pkexec", ["sh", "-c", cmd], "Installing nbfc-linux for Fan Control...")
+        # We can also add a check here to see if service is running
+        self.run_command("pkexec", ["sh", "-c", "dnf install -y nbfc-linux && systemctl enable --now nbfc_service"], "Installing and enabling nbfc-linux...")
 
     def check_nbfc_status(self):
         import shutil
         if shutil.which("nbfc"):
-            self.btn_install_nbfc.setText("NBFC Installed (Service Active)")
+            self.btn_install_nbfc.setText("NBFC Installed")
             self.btn_install_nbfc.setEnabled(False)
+            
+            # Add simple controls or status if easy
+            # But nbfc-linux is quite automatic. 
+            # We could add a button to "Set Quiet Profile"
+            self.btn_quiet = QPushButton("Set Quiet Profile")
+            self.btn_quiet.clicked.connect(lambda: self.run_command("nbfc", ["config", "-a", "quiet"], "Setting NBFC profile to Quiet..."))
+            self.layout().addWidget(self.btn_quiet)
 
     def enroll_fingerprint(self):
-        # Calling KDE's fingerprint enrollment directly or using fprintd
-        # KDE System Settings is the best GUI.
-        self.run_command("systemsettings", ["kcm_users"], "Opening User Settings for Fingerprint Enrollment...")
+        from ui.fingerprint_dialog import FingerprintDialog
+        dialog = FingerprintDialog(self)
+        dialog.exec()
 
     def set_battery_limit(self, limit):
-        # Create a temporary script to handle the privileged operations safely
-        script_content = f"""#!/bin/bash
-echo {limit} | tee /sys/class/power_supply/BAT0/charge_control_end_threshold
-mkdir -p /etc/loofi-fedora-tweaks
-echo {limit} > /etc/loofi-fedora-tweaks/battery.conf
-
-cat <<EOF > /etc/systemd/system/loofi-battery.service
-[Unit]
-Description=Restore Loofi Battery Limit
-After=multi-user.target
-
-[Service]
-Type=oneshot
-ExecStart=/bin/sh -c 'if [ -f /etc/loofi-fedora-tweaks/battery.conf ]; then cat /etc/loofi-fedora-tweaks/battery.conf > /sys/class/power_supply/BAT0/charge_control_end_threshold; fi'
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable loofi-battery.service
-# Don't start it immediately to avoid conflict, we just set the value manually above
-"""
-        import os
-        tmp_script = "/tmp/loofi_battery_setup.sh"
-        try:
-            with open(tmp_script, "w") as f:
-                f.write(script_content)
-            os.chmod(tmp_script, 0o755)
-            # Run the script with pkexec
-            self.run_command("pkexec", [tmp_script], f"Setting Battery Limit to {limit}% and enabling persistence...")
-        except Exception as e:
-            self.append_output(f"Error creating setup script: {e}\n")
+        from utils.battery import BatteryManager
+        manager = BatteryManager()
+        cmd, args = manager.set_limit(limit)
+        
+        if cmd:
+            self.run_command(cmd, args, f"Setting Battery Limit to {limit}% (Persistent)...")
+        else:
+            self.append_output("Failed to prepare battery script.\n")
 
 
     def check_current_profile(self):

@@ -1,20 +1,23 @@
-# Loofi Fedora Tweaks v4.2.0 - The Safety & Resilience Update 🛡️
+# Loofi Fedora Tweaks v4.3.0 - The Elitebook Integration Update 💻
 
-This release prioritizes system stability and ensures you have all the necessary tools for a smooth experience.
+This release brings deep integration features specifically for the HP Elitebook 840 G8, making your laptop feel truly supported on Fedora.
 
-## 🛡️ New Safety Features
+## 💻 Elitebook Features
 
-* **Dependency Doctor**:
-  * On startup, the app now checks for critical and optional tools (Gamemode, Mangohud, Timeshift, etc.).
-  * A new "System Doctor" dialog (accessible via Tray Icon) helps you install missing dependencies with one click.
-* **Snapshot Integration**:
-  * Before performing risky operations (like System Updates or removing packages), the app now prompts you to create a **Timeshift** or **Snapper** snapshot.
-  * You can create snapshots directly from the prompt!
+* **Native Fingerprint Enrollment**:
+  * No more command line or hunting in settings! Enroll your fingerprint directly from the app with a beautiful new wizard.
+  * Visual feedback guides you through the process.
+* **Battery Health Management**:
+  * Set a charging limit (80% or 100%) to prolong your battery life.
+  * **New Persistence**: Your limit now automatically reapplies after every reboot!
+* **Enhanced Fan Control**:
+  * Install and manage `nbfc-linux` directly.
+  * Added quick profile switching (Quiet/Balanced) to manage noise.
 
 ## ✨ Improvements
 
-* Refactored `CleanupTab` to use the new Safety Manager.
-* Enhanced internal architecture for better modularity (`utils.safety`, `ui.doctor`).
+* Refactored codebase for better separation of hardware concerns (`utils.battery`, `utils.fan_control`, `utils.fingerprint`).
+* Improved prompt messages for better clarity.
 
 ## 📦 Installation
 
@@ -28,5 +31,5 @@ sudo dnf update loofi-fedora-tweaks --refresh
 Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-4.2.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-4.3.0-1.fc43.noarch.rpm
 ```
