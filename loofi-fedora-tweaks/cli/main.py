@@ -4,6 +4,7 @@ Enables headless operation and scripting.
 """
 
 import sys
+import os
 import argparse
 import subprocess
 from typing import List, Optional
@@ -16,6 +17,8 @@ from utils.operations import (
     OperationResult, CLI_COMMANDS
 )
 from utils.system import SystemManager
+from utils.disk import DiskManager
+from utils.monitor import SystemMonitor
 from utils.plugin_base import PluginLoader
 
 
@@ -109,7 +112,7 @@ def cmd_network(args):
 def cmd_info(args):
     """Show system information."""
     print("═══════════════════════════════════════════")
-    print("   Loofi Fedora Tweaks v7.0.0 CLI")
+    print("   Loofi Fedora Tweaks v9.0.0 CLI")
     print("═══════════════════════════════════════════")
     print(f"🖥️  System: {'Atomic' if SystemManager.is_atomic() else 'Traditional'} Fedora")
     print(f"📦 Package Manager: {SystemManager.get_package_manager()}")
@@ -122,18 +125,105 @@ def cmd_info(args):
     return 0
 
 
+def cmd_health(args):
+    """Show system health overview."""
+    print("═══════════════════════════════════════════")
+    print("   System Health Check")
+    print("═══════════════════════════════════════════")
+
+    health = SystemMonitor.get_system_health()
+    print(f"🖥️  Hostname: {health.hostname}")
+    print(f"⏱️  Uptime: {health.uptime}")
+
+    # Memory
+    if health.memory:
+        mem_icon = "🟢" if health.memory_status == "ok" else ("🟡" if health.memory_status == "warning" else "🔴")
+        print(f"{mem_icon} Memory: {health.memory.used_human} / {health.memory.total_human} ({health.memory.percent_used}%)")
+    else:
+        print("⚪ Memory: Unable to read")
+
+    # CPU
+    if health.cpu:
+        cpu_icon = "🟢" if health.cpu_status == "ok" else ("🟡" if health.cpu_status == "warning" else "🔴")
+        print(f"{cpu_icon} CPU Load: {health.cpu.load_1min} / {health.cpu.load_5min} / {health.cpu.load_15min} ({health.cpu.core_count} cores, {health.cpu.load_percent}%)")
+    else:
+        print("⚪ CPU: Unable to read")
+
+    # Disk
+    disk_level, disk_msg = DiskManager.check_disk_health("/")
+    disk_icon = "🟢" if disk_level == "ok" else ("🟡" if disk_level == "warning" else "🔴")
+    print(f"{disk_icon} {disk_msg}")
+
+    # Power profile
+    print(f"⚡ Power Profile: {TweakOps.get_power_profile()}")
+
+    # System type
+    print(f"💻 System: {'Atomic' if SystemManager.is_atomic() else 'Traditional'} Fedora ({SystemManager.get_variant_name()})")
+
+    return 0
+
+
+def cmd_disk(args):
+    """Show disk usage information."""
+    print("═══════════════════════════════════════════")
+    print("   Disk Usage")
+    print("═══════════════════════════════════════════")
+
+    # Root filesystem
+    usage = DiskManager.get_disk_usage("/")
+    if usage:
+        level, msg = DiskManager.check_disk_health("/")
+        icon = "🟢" if level == "ok" else ("🟡" if level == "warning" else "🔴")
+        print(f"\n{icon} Root (/)")
+        print(f"   Total: {usage.total_human}")
+        print(f"   Used:  {usage.used_human} ({usage.percent_used}%)")
+        print(f"   Free:  {usage.free_human}")
+    else:
+        print("❌ Unable to read root filesystem")
+
+    # Home directory
+    home_usage = DiskManager.get_disk_usage(os.path.expanduser("~"))
+    if home_usage and home_usage.mount_point != "/":
+        level, _ = DiskManager.check_disk_health(home_usage.mount_point)
+        icon = "🟢" if level == "ok" else ("🟡" if level == "warning" else "🔴")
+        print(f"\n{icon} Home ({home_usage.mount_point})")
+        print(f"   Total: {home_usage.total_human}")
+        print(f"   Used:  {home_usage.used_human} ({home_usage.percent_used}%)")
+        print(f"   Free:  {home_usage.free_human}")
+
+    # Large directories (only if --details flag)
+    if getattr(args, "details", False):
+        home_dir = os.path.expanduser("~")
+        print(f"\n📂 Largest directories in {home_dir}:")
+        large_dirs = DiskManager.find_large_directories(home_dir, max_depth=2, top_n=5)
+        if large_dirs:
+            for d in large_dirs:
+                print(f"   {d.size_human:>10}  {d.path}")
+        else:
+            print("   (no results)")
+
+    return 0
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     parser = argparse.ArgumentParser(
         prog="loofi",
         description="Loofi Fedora Tweaks - System management CLI"
     )
-    parser.add_argument("-v", "--version", action="version", version="7.0.0")
+    parser.add_argument("-v", "--version", action="version", version="9.0.0")
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
     # Info command
     info_parser = subparsers.add_parser("info", help="Show system information")
+    
+    # Health command
+    health_parser = subparsers.add_parser("health", help="System health check overview")
+    
+    # Disk command
+    disk_parser = subparsers.add_parser("disk", help="Disk usage information")
+    disk_parser.add_argument("--details", action="store_true", help="Show large directories")
     
     # Cleanup subcommand
     cleanup_parser = subparsers.add_parser("cleanup", help="System cleanup operations")
@@ -180,6 +270,10 @@ def main(argv: Optional[List[str]] = None):
     
     if args.command == "info":
         return cmd_info(args)
+    elif args.command == "health":
+        return cmd_health(args)
+    elif args.command == "disk":
+        return cmd_disk(args)
     elif args.command == "cleanup":
         return cmd_cleanup(args)
     elif args.command == "tweak":

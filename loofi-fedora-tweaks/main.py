@@ -18,17 +18,26 @@ def main():
         help="Run as background daemon for scheduled tasks"
     )
     parser.add_argument(
+        "--cli", "-c",
+        action="store_true",
+        help="Run in command-line mode (pass remaining args to CLI)"
+    )
+    parser.add_argument(
         "--version", "-v",
         action="version",
         version="%(prog)s 9.0.0"
     )
     
-    args = parser.parse_args()
+    args, remaining = parser.parse_known_args()
     
     if args.daemon:
         # Run in daemon mode
         from utils.daemon import Daemon
         Daemon.run()
+    elif args.cli:
+        # Run CLI mode
+        from cli.main import main as cli_main
+        sys.exit(cli_main(remaining))
     else:
         # Run GUI
         from PyQt6.QtWidgets import QApplication

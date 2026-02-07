@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [9.1.0] - 2026-02-07 "Vital Signs Update"
+
+### Added
+
+- **Disk Space Monitoring**: New `utils/disk.py` module with disk usage stats, health checks, and large directory finder.
+- **System Resource Monitor**: New `utils/monitor.py` module with memory usage, CPU load, and uptime tracking.
+- **Dashboard Health Indicators**: Disk usage and memory usage now displayed in the Dashboard health card with color-coded status.
+- **CLI `health` Command**: Quick system health overview showing memory, CPU, disk, and power profile status.
+- **CLI `disk` Command**: Disk usage analysis with optional `--details` flag for large directory listing.
+- **CLI Mode from Main Entry**: New `--cli` / `-c` flag on main entry point to launch CLI mode directly.
+
+### Fixed
+
+- CLI version updated from 7.0.0 to 9.0.0 to match the application version.
+
+### New Files
+
+- `utils/disk.py` - Disk space monitoring and analysis
+- `utils/monitor.py` - System resource monitoring (memory, CPU, uptime)
+- `tests/test_new_features.py` - Tests for disk, monitor, and CLI features
+
+---
+
 ## [9.0.0] - 2026-02-07 "Director Update"
 
 ### Added

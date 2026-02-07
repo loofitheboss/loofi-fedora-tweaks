@@ -6,6 +6,8 @@ from PyQt6.QtGui import QIcon
 import shutil
 import subprocess
 from utils.system import SystemManager
+from utils.disk import DiskManager
+from utils.monitor import SystemMonitor
 
 class DashboardTab(QWidget):
     def __init__(self, main_window):
@@ -34,6 +36,14 @@ class DashboardTab(QWidget):
         # Update Status
         self.lbl_updates = QLabel(self.tr("📦 Updates: Checking..."))
         h_layout.addWidget(self.lbl_updates)
+        
+        # Disk Usage
+        self.lbl_disk = QLabel(self.tr("💿 Disk: Checking..."))
+        h_layout.addWidget(self.lbl_disk)
+        
+        # Memory Usage
+        self.lbl_memory = QLabel(self.tr("🧠 Memory: Checking..."))
+        h_layout.addWidget(self.lbl_memory)
         
         # System Type (Atomic/Workstation)
         variant = SystemManager.get_variant_name()
@@ -136,6 +146,42 @@ class DashboardTab(QWidget):
 
         # Simple updates check (just existence of dnf)
         self.lbl_updates.setText(self.tr("📦 Updates: Idle"))
+        
+        # Disk usage check
+        disk_level, disk_msg = DiskManager.check_disk_health("/")
+        if disk_level == "critical":
+            self.lbl_disk.setText(self.tr("💿 Disk: Critical!"))
+            self.lbl_disk.setStyleSheet("color: #f38ba8; font-weight: bold;")
+        elif disk_level == "warning":
+            self.lbl_disk.setText(self.tr("💿 Disk: Low Space"))
+            self.lbl_disk.setStyleSheet("color: #f9e2af; font-weight: bold;")
+        else:
+            usage = DiskManager.get_disk_usage("/")
+            if usage:
+                self.lbl_disk.setText(f"💿 {usage.free_human} free")
+            else:
+                self.lbl_disk.setText(self.tr("💿 Disk: OK"))
+            self.lbl_disk.setStyleSheet("color: #a6e3a1;")
+        self.lbl_disk.setToolTip(disk_msg)
+        
+        # Memory usage check
+        mem = SystemMonitor.get_memory_info()
+        if mem:
+            if mem.percent_used >= 90:
+                self.lbl_memory.setText(f"🧠 RAM: {mem.percent_used}%")
+                self.lbl_memory.setStyleSheet("color: #f38ba8; font-weight: bold;")
+            elif mem.percent_used >= 75:
+                self.lbl_memory.setText(f"🧠 RAM: {mem.percent_used}%")
+                self.lbl_memory.setStyleSheet("color: #f9e2af; font-weight: bold;")
+            else:
+                self.lbl_memory.setText(f"🧠 RAM: {mem.used_human}/{mem.total_human}")
+                self.lbl_memory.setStyleSheet("color: #a6e3a1;")
+            self.lbl_memory.setToolTip(
+                f"Used: {mem.used_human} / Total: {mem.total_human} ({mem.percent_used}%)"
+            )
+        else:
+            self.lbl_memory.setText(self.tr("🧠 Memory: N/A"))
+            self.lbl_memory.setStyleSheet("color: #6c7086;")
         
     def go_to_cleanup(self):
         # Switch to Cleanup Tab (index 6, roughly)
