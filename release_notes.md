@@ -1,21 +1,18 @@
-# Loofi Fedora Tweaks v4.6.0 - The Hardware Mastery Update 🛠️
+# Loofi Fedora Tweaks v5.0.0 - The "Visual Revolution" Update 🎨
 
-We're going deep on HP Elitebook integration! This release ensures your settings stick and your biometrics just work.
+Welcome to the future! We've ditched the old tabbed interface for a stunning, modern desktop experience.
 
-## 🔋 Persistent Battery Limits
+## 🎨 Modern Dashboard & Sidebar
 
-* **Set it and Forget it**: Your 80% battery limit now survives reboots!
-* **Systemd Service**: We now generate a robust "oneshot" systemd service that reapplies your charge threshold every time your computer starts.
+* **Sidebar Navigation**: A sleek left-side menu replaces the clutter of top tabs.
+* **Dashboard**: Your new home screen! Check system health (Snapshots, Updates) and launch quick actions instantly.
+* **Dark Glass Theme**: A custom `modern.qss` theme gives the app a premium, rounded look inspired by modern design languages.
 
-## 👆 Fingerprint Enrollment Wizard
+## 🛡️ Safety & Recovery (Retained from v4.7)
 
-* **Visual Guide**: A new GUI dialog (`fprintd` integration) walks you through the fingerprint enrollment process.
-* **Progress Bar**: Visual feedback for each successful scan. No more guessing in the terminal!
-
-## ❄️ Enhanced Fan Control
-
-* **Profile Selection**: New Dropdown menu for **NBFC (NoteBook FanControl)**.
-* **Modes**: Easily switch between **Quiet**, **Balanced**, and **Performance** cooling profiles.
+* **Snapshot Check**: Still keeping you safe with Timeshift prompts.
+* **Undo System**: Revert changes with one click.
+* **Smart Locks**: Waiting for DNF locks gracefully.
 
 ## 📦 Installation
 
@@ -29,5 +26,5 @@ sudo dnf update loofi-fedora-tweaks --refresh
 Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-4.6.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-5.0.0-1.fc43.noarch.rpm
 ```

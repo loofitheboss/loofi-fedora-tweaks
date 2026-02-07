@@ -4,6 +4,23 @@ from PyQt6.QtWidgets import QMessageBox
 
 class SafetyManager:
     @staticmethod
+    def check_dnf_lock():
+        """
+        Check if DNF or RPM is currently running.
+        Returns True if locked.
+        """
+        import os
+        if os.path.exists("/var/run/dnf.pid"):
+            return True
+        try:
+            # Also check process list for 'dnf', 'yum', 'rpm'
+            # pgrep returns 0 if found, 1 if not.
+            subprocess.check_call(["pgrep", "-f", "dnf|yum|rpm"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+
+    @staticmethod
     def check_snapshot_tool():
         """Check if Timeshift or Snapper is installed."""
         if shutil.which("timeshift"):

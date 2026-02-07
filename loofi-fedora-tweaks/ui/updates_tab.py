@@ -83,6 +83,12 @@ class UpdatesTab(QWidget):
 
     def run_dnf_update(self):
         from utils.safety import SafetyManager
+        from PyQt6.QtWidgets import QMessageBox
+        
+        if SafetyManager.check_dnf_lock():
+            QMessageBox.warning(self, "Update Locked", "Another package manager (DNF/RPM) is currently running.\nPlease wait for it to finish.")
+            return
+
         if not SafetyManager.confirm_action(self, "System Update (DNF)"):
             return
             
@@ -147,6 +153,12 @@ class UpdatesTab(QWidget):
 
     def run_update_all(self):
         from utils.safety import SafetyManager
+        from PyQt6.QtWidgets import QMessageBox
+
+        if SafetyManager.check_dnf_lock():
+            QMessageBox.warning(self, "Update Locked", "Another package manager is running.\nPlease wait.")
+            return
+
         if not SafetyManager.confirm_action(self, "Full System Update"):
              return
              

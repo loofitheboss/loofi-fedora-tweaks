@@ -1,0 +1,152 @@
+/* Modern Dark Theme - Loofi Fedora Tweaks v5.0 */
+
+/* Global Widget Styling */
+QWidget {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'Segoe UI', 'San Francisco', sans-serif;
+    font-size: 14px;
+}
+
+/* Sidebar Navigation (QListWidget) */
+QListWidget {
+    background-color: #181825;
+    border: none;
+    outline: none;
+    padding-top: 20px;
+    font-size: 16px;
+}
+
+QListWidget::item {
+    height: 50px;
+    padding-left: 15px;
+    margin: 5px 10px;
+    border-radius: 8px;
+    color: #a6adc8;
+}
+
+QListWidget::item:hover {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+QListWidget::item:selected {
+    background-color: #45475a; /* Surface 1 */
+    color: #89b4fa; /* Blue accent */
+    border-left: 4px solid #89b4fa;
+}
+
+/* Main Content Area */
+QStackedWidget {
+    background-color: #1e1e2e;
+    border-top-left-radius: 20px; /* Rounded corner for content area */
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 8px; /* Smooth rounded corners */
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+QPushButton:hover {
+    background-color: #45475a;
+    border-color: #585b70;
+}
+
+QPushButton:pressed {
+    background-color: #585b70;
+}
+
+/* Specific Action Buttons */
+QPushButton[objectName="primaryAction"] {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    font-weight: bold;
+    border: none;
+}
+QPushButton[objectName="primaryAction"]:hover {
+    background-color: #b4befe;
+}
+
+QPushButton[objectName="dangerAction"] {
+    background-color: #f38ba8; /* Red */
+    color: #1e1e2e;
+    border: none;
+}
+QPushButton[objectName="dangerAction"]:hover {
+    background-color: #eba0ac;
+}
+
+/* Group Boxes (Cards) */
+QGroupBox {
+    background-color: #181825; /* Darker card background */
+    border-radius: 12px;
+    margin-top: 24px; /* Leave space for title */
+    font-weight: bold;
+    color: #89b4fa;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 5px;
+    background-color: transparent;
+}
+
+/* Input Fields */
+QLineEdit, QTextEdit, QComboBox {
+    background-color: #313244;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 5px;
+    color: #cdd6f4;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    border: none;
+    background: #181825;
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+    background: #45475a;
+    min-height: 20px;
+    border-radius: 5px;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* Progress Bar */
+QProgressBar {
+    border: none;
+    background-color: #313244;
+    border-radius: 6px;
+    text-align: center;
+    color: white;
+}
+QProgressBar::chunk {
+    background-color: #a6e3a1; /* Green */
+    border-radius: 6px;
+}
+
+/* Labels */
+QLabel {
+    color: #cdd6f4;
+}
+QLabel[objectName="header"] {
+    font-size: 24px;
+    font-weight: bold;
+    color: #cba6f7; /* Mauve */
+    margin-bottom: 10px;
+}

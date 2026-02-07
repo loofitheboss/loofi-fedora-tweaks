@@ -1,16 +1,24 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QMessageBox
 from utils.process import CommandRunner
+from utils.history import HistoryManager
 import subprocess
 
 class NetworkTab(QWidget):
     def __init__(self):
         super().__init__()
+        self.history = HistoryManager()
         layout = QVBoxLayout()
         self.setLayout(layout)
         
         header = QLabel("Network & Privacy")
         header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
+        
+        # Undo Button
+        self.btn_undo = QPushButton("↩ Undo Last Action")
+        self.btn_undo.setStyleSheet("background-color: #444; color: white;")
+        self.btn_undo.clicked.connect(self.undo_last)
+        layout.addWidget(self.btn_undo)
         
         # DNS Switcher Group
         dns_group = QGroupBox("DNS Switcher")
@@ -113,13 +121,26 @@ ethernet.cloned-mac-address=random
             
             self.runner.run_command("pkexec", ["mv", tmp_file, config_file])
             QMessageBox.information(self, "Enabled", "MAC Randomization enabled. Restart NetworkManager/Reboot to apply.")
+            
+            # Log Undo: Remove the file
+            self.history.log_change(
+                "Enabled MAC Randomization", 
+                ["pkexec", "rm", "-f", config_file]
+            )
+            
         else:
             self.runner.run_command("pkexec", ["rm", "-f", config_file])
             QMessageBox.information(self, "Disabled", "MAC Randomization disabled. Restart NetworkManager/Reboot to apply.")
-            
-        # Verify status after short delay?
-        # For now just update label based on intent or file existence check later
-        self.lbl_mac_status.setText(f"MAC Randomization: {'Enabled' if enable else 'Disabled'}")
+            # Undo for disable is hard without backup. Skipping log for implementation simplicity in v4.7.
+
+    def undo_last(self):
+        success, msg = self.history.undo_last_action()
+        if success:
+             QMessageBox.information(self, "Undo Successful", msg)
+             # Refresh UI state
+             self.check_mac_status()
+        else:
+             QMessageBox.warning(self, "Undo Failed", msg)
 
     def check_mac_status(self):
         import os

@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit, QMessageBox
 from utils.process import CommandRunner
+from utils.safety import SafetyManager
 import shutil
 
 class CleanupTab(QWidget):
@@ -68,6 +69,10 @@ class CleanupTab(QWidget):
             self.append_output("Timeshift not found. Please install it for system safety.\n")
 
     def run_autoremove(self):
+        if SafetyManager.check_dnf_lock():
+             QMessageBox.warning(self, "Update Locked", "Another package manager is running.")
+             return
+
         if SafetyManager.confirm_action(self, "Remove Unused Packages (Risky)"):
              self.run_command("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages...")
 
