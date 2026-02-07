@@ -1,37 +1,33 @@
-# Loofi Fedora Tweaks v5.2.0 - The "Silicon" Update ⚡
+# Loofi Fedora Tweaks v5.5.0 - The "Ecosystem" Update 🌐
 
-This update brings advanced hardware control for power users, gamers, and developers!
+This update introduces cloud sync and community preset sharing!
 
-## ⚡ New Hardware Tab
+## 🌐 New Presets & Sync Tab
 
-A brand new consolidated hardware control interface:
+The Presets tab has been completely redesigned with three sub-tabs:
 
-### CPU Governor
+### 📁 My Presets
 
-* **Real-time frequency display**: See your current CPU frequency.
-* **Governor selector**: Switch between `powersave`, `schedutil`, and `performance` instantly.
+* Save and restore your system configuration locally.
 
-### Power Profiles
+### 🌐 Community Presets
 
-* **One-click switching**: Power Saver, Balanced, or Performance modes via `power-profiles-daemon`.
+* **Browse**: Discover presets shared by other Fedora users.
+* **Download**: One-click download and apply community presets.
+* **Categories**: Gaming, Productivity, Privacy, and more.
 
-### GPU Mode Switching (Hybrid Laptops)
+### ☁️ Backup & Sync
 
-* **Automatic detection**: Detects NVIDIA Optimus laptops.
-* **Mode toggle**: Switch between Integrated, Hybrid, and Dedicated GPU modes (via `envycontrol`).
-* **Logout warning**: Clear indication that a logout/reboot is required.
+* **Export/Import**: Backup all settings to a JSON file.
+* **GitHub Gist Sync**: Sync your config to a private Gist.
+  * Push your config to the cloud.
+  * Pull config from Gist on any machine.
+  * Secure: Uses your personal GitHub token.
 
-### Fan Control
+## 🏗️ New Utilities
 
-* **NBFC integration**: Works with `nbfc-linux` for notebook fan control.
-* **Manual slider**: Set fan speed from 0-100%.
-* **Auto mode**: Let the system manage fan speed automatically.
-
-## 🏗️ Architecture
-
-* **`utils/hardware.py`**: New `HardwareManager` class centralizing all hardware controls.
-* **`ui/hardware_tab.py`**: New consolidated UI with card-based layout.
-* **Auto-refresh**: Dynamic values (CPU freq, fan speed) update every 5 seconds.
+* **`utils/config_manager.py`**: `ConfigManager` for full config export/import.
+* **`utils/cloud_sync.py`**: `CloudSyncManager` for Gist sync and community presets.
 
 ## 📦 Installation
 
@@ -44,5 +40,11 @@ sudo dnf update loofi-fedora-tweaks --refresh
 **Manual:**
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-5.2.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-5.5.0-1.fc43.noarch.rpm
 ```
+
+## 🔐 Privacy Note
+
+* All cloud features are **optional**.
+* GitHub tokens are stored locally with restrictive permissions.
+* Community presets are read-only from a public GitHub repo.

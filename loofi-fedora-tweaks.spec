@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        5.2.0
+Version:        5.5.0
 Release:        1%{?dist}
 Summary:        System tweaks and maintenance for HP Elitebook 840 G8 (Supports Atomic)
 

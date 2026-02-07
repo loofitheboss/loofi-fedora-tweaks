@@ -61,6 +61,16 @@ class PresetManager:
             os.remove(path)
             return True
         return False
+    
+    def save_preset_data(self, name, data):
+        """Save preset from provided data (for community presets)."""
+        path = os.path.join(self.PRESETS_DIR, f"{name.lower().replace(' ', '_')}.json")
+        try:
+            with open(path, 'w') as f:
+                json.dump({"name": name, **data}, f, indent=4)
+            return True
+        except Exception:
+            return False
 
     # --- Helpers ---
     def _get_gsettings(self, schema, key):
