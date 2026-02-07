@@ -1,22 +1,20 @@
-# Loofi Fedora Tweaks v4.1.0 - The Polish Update ✨
+# Loofi Fedora Tweaks v4.2.0 - The Safety & Resilience Update 🛡️
 
-Welcome to v4.1.0! This release focuses on refining the user experience and making the app feel more native and professional.
+This release prioritizes system stability and ensures you have all the necessary tools for a smooth experience.
 
-## ✨ New Features
+## 🛡️ New Safety Features
 
-* **Visual Progress Bars**:
-  * Say goodbye to scrolling text logs! We now have a proper progress bar that shows download and installation status for DNF and Flatpak operations.
-  * Cleaner, more focused UI during updates.
-* **System Tray Integration**:
-  * The app now minimizes to the system tray instead of quitting.
-  * Look for the Loofi icon in your panel!
-* **Modern Styling**:
-  * Refined look for progress bars and group boxes to match the modern Fedora aesthetic.
+* **Dependency Doctor**:
+  * On startup, the app now checks for critical and optional tools (Gamemode, Mangohud, Timeshift, etc.).
+  * A new "System Doctor" dialog (accessible via Tray Icon) helps you install missing dependencies with one click.
+* **Snapshot Integration**:
+  * Before performing risky operations (like System Updates or removing packages), the app now prompts you to create a **Timeshift** or **Snapper** snapshot.
+  * You can create snapshots directly from the prompt!
 
-## 🐛 Bug Fixes
+## ✨ Improvements
 
-* Fixed a potential crash on startup related to dependency checking.
-* Improved robustness of internal command handling.
+* Refactored `CleanupTab` to use the new Safety Manager.
+* Enhanced internal architecture for better modularity (`utils.safety`, `ui.doctor`).
 
 ## 📦 Installation
 
@@ -30,5 +28,5 @@ sudo dnf update loofi-fedora-tweaks --refresh
 Download the attached `.rpm` and install:
 
 ```bash
-sudo dnf install ./loofi-fedora-tweaks-4.1.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-4.2.0-1.fc43.noarch.rpm
 ```

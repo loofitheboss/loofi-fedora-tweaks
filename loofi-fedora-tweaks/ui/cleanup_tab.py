@@ -28,7 +28,7 @@ class CleanupTab(QWidget):
         
         btn_autoremove = QPushButton("Remove Unused Packages (Risky)")
         btn_autoremove.setStyleSheet("color: red;")
-        btn_autoremove.clicked.connect(lambda: self.confirm_and_run("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages...", risky=True))
+        btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
         
         btn_journal = QPushButton("Vacuum Journal (2 weeks)")
@@ -67,19 +67,9 @@ class CleanupTab(QWidget):
         else:
             self.append_output("Timeshift not found. Please install it for system safety.\n")
 
-    def confirm_and_run(self, cmd, args, description, risky=False):
-        
-        if risky:
-            reply = QMessageBox.question(self, "Risky Operation", 
-                                       f"You are about to run: {description}\n\nThis can potentially break your system if essential packages are removed.\n\nHave you created a system snapshot (Timeshift)?",
-                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
-                                       QMessageBox.StandardButton.No)
-            
-            if reply == QMessageBox.StandardButton.No:
-                self.append_output("Operation cancelled by user (No snapshot).\n")
-                return
-
-        self.run_command(cmd, args, description)
+    def run_autoremove(self):
+        if SafetyManager.confirm_action(self, "Remove Unused Packages (Risky)"):
+             self.run_command("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages...")
 
     def run_command(self, cmd, args, description):
         self.output_area.clear()

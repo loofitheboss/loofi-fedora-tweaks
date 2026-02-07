@@ -82,6 +82,10 @@ class UpdatesTab(QWidget):
             self.progress_bar.setFormat(f"{percent}% - {status}")
 
     def run_dnf_update(self):
+        from utils.safety import SafetyManager
+        if not SafetyManager.confirm_action(self, "System Update (DNF)"):
+            return
+            
         self.start_process()
         self.append_output("Starting System Update...\n")
         # pkexec allows running dnf with root privileges
@@ -89,6 +93,8 @@ class UpdatesTab(QWidget):
         self.runner.run_command("pkexec", ["dnf", "update", "-y"])
         
     def run_flatpak_update(self):
+        # Flatpak updates are generally safe(r), but maybe still worth a prompt?
+        # Let's skip for now unless user asks, or maybe just a simple confirm without snapshot.
         self.start_process()
         self.append_output("Starting Flatpak Update...\n")
         # Flatpak updates might run without root for user installs, but system-wide needs root/polkit
@@ -96,6 +102,10 @@ class UpdatesTab(QWidget):
         self.runner.run_command("flatpak", ["update", "-y"])
 
     def run_fw_update(self):
+        from utils.safety import SafetyManager
+        if not SafetyManager.confirm_action(self, "Firmware Update"):
+             return
+
         self.start_process()
         self.append_output("Starting Firmware Update...\n")
         self.runner.run_command("pkexec", ["fwupdmgr", "update", "-y"])
@@ -136,6 +146,10 @@ class UpdatesTab(QWidget):
             self.progress_bar.setFormat("100% - Done")
 
     def run_update_all(self):
+        from utils.safety import SafetyManager
+        if not SafetyManager.confirm_action(self, "Full System Update"):
+             return
+             
         self.start_process()
         
         # Queue up all updates

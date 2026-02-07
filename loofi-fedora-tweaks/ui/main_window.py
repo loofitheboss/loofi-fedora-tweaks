@@ -14,7 +14,7 @@ from ui.network_tab import NetworkTab # New import
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.1.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.2.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -74,12 +74,18 @@ class MainWindow(QMainWindow):
              
         # Tray Menu
         tray_menu = QMenu()
+        
         show_action = QAction("Show", self)
         show_action.triggered.connect(self.show)
+        
+        doctor_action = QAction("System Doctor", self)
+        doctor_action.triggered.connect(self.show_doctor)
+        
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(self.quit_app)
         
         tray_menu.addAction(show_action)
+        tray_menu.addAction(doctor_action)
         tray_menu.addAction(quit_action)
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.show()
@@ -107,17 +113,27 @@ class MainWindow(QMainWindow):
         QApplication.quit()
 
     def check_dependencies(self):
-        import shutil
-        from PyQt6.QtWidgets import QMessageBox
+        from ui.doctor import DependencyDoctor
         
-        required = ["dnf", "pkexec"]
-        missing = [tool for tool in required if not shutil.which(tool)]
+        # We only check for critical missing tools to decide whether to show the doctor automatically
+        # The doctor itself will check everything
+        import shutil
+        critical = ["dnf", "pkexec"]
+        missing = [tool for tool in critical if not shutil.which(tool)]
+        
+        # Also show if optional tools like flatpak/timeshift are missing?
+        # Let's just run the doctor check and see if ANY are missing, IF so, show it.
+        # But we need to be careful not to annoy user every time if they intentionally don't want something.
+        # For now, let's show it if CRITICAL are missing, or if it's the first run (maybe too complex for now).
+        
+        # Simple logic: Check for critical tools. If missing, show doctor.
+        # For optional tools, we won't force show it on startup to avoid annoyance, 
+        # but we should add a menu option to open "System Doctor".
         
         if missing:
-            QMessageBox.critical(self, "Missing Dependencies", f"Critical tools missing: {', '.join(missing)}\nThe application may not function correctly.")
-            
-        optional = ["flatpak", "fwupdmgr"]
-        missing_opt = [tool for tool in optional if not shutil.which(tool)]
-        
-        if missing_opt:
-            QMessageBox.warning(self, "Missing Optional Tools", f"Optional tools missing: {', '.join(missing_opt)}\nSome features (Flatpak/Firmware updates) may not work.")
+             self.show_doctor()
+
+    def show_doctor(self):
+        from ui.doctor import DependencyDoctor
+        doctor = DependencyDoctor(self)
+        doctor.exec()
