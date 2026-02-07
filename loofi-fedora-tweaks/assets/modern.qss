@@ -1,4 +1,4 @@
-/* Modern Dark Theme - Loofi Fedora Tweaks v5.0 */
+/* Modern Dark Theme - Loofi Fedora Tweaks v10.0 "Zenith" */
 
 /* Global Widget Styling */
 QWidget {
@@ -150,3 +150,164 @@ QLabel[objectName="header"] {
     color: #cba6f7; /* Mauve */
     margin-bottom: 10px;
 }
+
+/* ===== v10.0 Consolidated Tab Sub-Navigation ===== */
+
+QTabWidget {
+    background-color: #1e1e2e;
+    border: none;
+}
+
+QTabWidget::pane {
+    background-color: #1e1e2e;
+    border: 1px solid #313244;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+}
+
+QTabBar {
+    background-color: #181825;
+    qproperty-drawBase: 0;
+}
+
+QTabBar::tab {
+    background-color: #181825;
+    color: #a6adc8;
+    padding: 10px 20px;
+    margin-right: 2px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+}
+
+QTabBar::tab:selected {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    border-bottom: 2px solid #89b4fa;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #313244;
+    color: #cdd6f4;
+}
+
+/* Horizontal scrollbar (for wide content areas) */
+QScrollBar:horizontal {
+    border: none;
+    background: #181825;
+    height: 10px;
+}
+QScrollBar::handle:horizontal {
+    background: #45475a;
+    min-width: 20px;
+    border-radius: 5px;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* Checkboxes & Radio Buttons */
+QCheckBox, QRadioButton {
+    color: #cdd6f4;
+    spacing: 8px;
+}
+QCheckBox::indicator, QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #585b70;
+    border-radius: 4px;
+    background-color: #313244;
+}
+QCheckBox::indicator:checked, QRadioButton::indicator:checked {
+    background-color: #89b4fa;
+    border-color: #89b4fa;
+}
+QRadioButton::indicator {
+    border-radius: 9px;
+}
+
+/* Sliders */
+QSlider::groove:horizontal {
+    height: 6px;
+    background: #313244;
+    border-radius: 3px;
+}
+QSlider::handle:horizontal {
+    background: #89b4fa;
+    width: 16px;
+    height: 16px;
+    margin: -5px 0;
+    border-radius: 8px;
+}
+QSlider::sub-page:horizontal {
+    background: #89b4fa;
+    border-radius: 3px;
+}
+
+/* Spin Boxes */
+QSpinBox, QDoubleSpinBox {
+    background-color: #313244;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #cdd6f4;
+}
+
+/* Tooltips */
+QToolTip {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+/* Table / Tree Views (Process Manager, Services, etc.) */
+QTableWidget, QTreeWidget, QTableView, QTreeView {
+    background-color: #1e1e2e;
+    alternate-background-color: #181825;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+    border-radius: 6px;
+    gridline-color: #313244;
+    selection-background-color: #45475a;
+    selection-color: #cdd6f4;
+}
+
+QHeaderView::section {
+    background-color: #181825;
+    color: #a6adc8;
+    border: none;
+    border-bottom: 1px solid #313244;
+    border-right: 1px solid #313244;
+    padding: 6px 10px;
+    font-weight: bold;
+}
+
+/* Menu / Context Menu */
+QMenu {
+    background-color: #1e1e2e;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 6px 24px;
+    border-radius: 4px;
+    color: #cdd6f4;
+}
+QMenu::item:selected {
+    background-color: #45475a;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: #313244;
+    margin: 4px 8px;
+}
+
+/* Dialog Styling */
+QDialog {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
