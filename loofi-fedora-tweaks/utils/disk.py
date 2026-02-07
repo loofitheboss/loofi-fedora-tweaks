@@ -108,7 +108,8 @@ class DiskManager:
                 parts = line.split()
                 if len(parts) >= 6:
                     mount = parts[0]
-                    # Skip virtual filesystems
+                    # Skip virtual filesystem mount points (not device sources)
+                    # e.g., /dev (devtmpfs), /run (tmpfs), /sys, /proc
                     if mount.startswith(("/dev", "/run", "/sys", "/proc")):
                         continue
                     if mount in ("/boot", "/boot/efi"):
