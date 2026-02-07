@@ -9,6 +9,13 @@ from ui.main_window import MainWindow
 
 def main():
     app = QApplication(sys.argv)
+    
+    # Load QSS Stylesheet
+    style_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "style.qss")
+    if os.path.exists(style_file):
+        with open(style_file, "r") as f:
+            app.setStyleSheet(f.read())
+            
     window = MainWindow()
     window.show()
     sys.exit(app.exec())

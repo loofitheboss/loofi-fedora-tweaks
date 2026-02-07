@@ -1,0 +1,120 @@
+[
+    {
+        "name": "Google Chrome",
+        "desc": "Web Browser",
+        "cmd": "pkexec",
+        "args": [
+            "dnf",
+            "install",
+            "-y",
+            "https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"
+        ],
+        "check_cmd": "rpm -q google-chrome-stable"
+    },
+    {
+        "name": "Visual Studio Code",
+        "desc": "Code Editor (Flatpak)",
+        "cmd": "flatpak",
+        "args": [
+            "install",
+            "-y",
+            "flathub",
+            "com.visualstudio.code"
+        ],
+        "check_cmd": "flatpak list | grep com.visualstudio.code"
+    },
+    {
+        "name": "Steam",
+        "desc": "Gaming Platform",
+        "cmd": "pkexec",
+        "args": [
+            "sh",
+            "-c",
+            "dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && dnf install -y steam"
+        ],
+        "check_cmd": "rpm -q steam"
+    },
+    {
+        "name": "VLC Media Player",
+        "desc": "Media Player",
+        "cmd": "pkexec",
+        "args": [
+            "dnf",
+            "install",
+            "-y",
+            "vlc"
+        ],
+        "check_cmd": "rpm -q vlc"
+    },
+    {
+        "name": "Discord",
+        "desc": "Chat & Voice (Flatpak)",
+        "cmd": "flatpak",
+        "args": [
+            "install",
+            "-y",
+            "flathub",
+            "com.discordapp.Discord"
+        ],
+        "check_cmd": "flatpak list | grep com.discordapp.Discord"
+    },
+    {
+        "name": "Spotify",
+        "desc": "Music Streaming (Flatpak)",
+        "cmd": "flatpak",
+        "args": [
+            "install",
+            "-y",
+            "flathub",
+            "com.spotify.Client"
+        ],
+        "check_cmd": "flatpak list | grep com.spotify.Client"
+    },
+    {
+        "name": "OBS Studio",
+        "desc": "Streaming & Recording (Flatpak)",
+        "cmd": "flatpak",
+        "args": [
+            "install",
+            "-y",
+            "flathub",
+            "com.obsproject.Studio"
+        ],
+        "check_cmd": "flatpak list | grep com.obsproject.Studio"
+    },
+    {
+        "name": "GIMP",
+        "desc": "Image Editor",
+        "cmd": "pkexec",
+        "args": [
+            "dnf",
+            "install",
+            "-y",
+            "gimp"
+        ],
+        "check_cmd": "rpm -q gimp"
+    },
+    {
+        "name": "LibreOffice",
+        "desc": "Office Suite",
+        "cmd": "pkexec",
+        "args": [
+            "dnf",
+            "install",
+            "-y",
+            "libreoffice"
+        ],
+        "check_cmd": "rpm -q libreoffice-core"
+    },
+    {
+        "name": "Brave Browser",
+        "desc": "Privacy Browser",
+        "cmd": "pkexec",
+        "args": [
+            "sh",
+            "-c",
+            "dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && dnf install -y brave-browser"
+        ],
+        "check_cmd": "rpm -q brave-browser"
+    }
+]

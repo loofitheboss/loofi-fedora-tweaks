@@ -1,0 +1,85 @@
+/* Loofi Fedora Tweaks - Modern QSS */
+
+QMainWindow {
+    background-color: #eff0f1;
+}
+
+QTabWidget::pane {
+    border: 1px solid #c0c0c0;
+    top: -1px;
+}
+
+QTabBar::tab {
+    background: #e0e0e0;
+    border: 1px solid #c0c0c0;
+    padding: 8px 16px;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #ffffff;
+    border-bottom-color: #ffffff;
+    font-weight: bold;
+}
+
+QPushButton {
+    background-color: #3daee9;
+    color: white;
+    border: 1px solid #3daee9;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #4dbfff;
+}
+
+QPushButton:pressed {
+    background-color: #3298cc;
+}
+
+QPushButton:disabled {
+    background-color: #bdc3c7;
+    border-color: #bdc3c7;
+}
+
+QGroupBox {
+    font-weight: bold;
+    border: 1px solid #bdc3c7;
+    border-radius: 6px;
+    margin-top: 12px;
+    background-color: #ffffff;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 0 5px;
+    color: #2c3e50;
+}
+
+QTextEdit {
+    background-color: #232629;
+    color: #eff0f1;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+QLabel {
+    color: #2c3e50;
+}
+
+QProgressBar {
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #3daee9;
+    width: 20px;
+}

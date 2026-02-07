@@ -11,7 +11,7 @@ from ui.theming_tab import ThemingTab
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v2.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v3.0.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.theming_tab = ThemingTab()
         
         # Add Tabs
+        # Add Tabs
         self.tabs.addTab(self.system_info_tab, "System Info")
         self.tabs.addTab(self.updates_tab, "Updates")
         self.tabs.addTab(self.cleanup_tab, "Cleanup & Maintenance")
@@ -45,4 +46,28 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.advanced_tab, "Advanced Tweaks")
         self.tabs.addTab(self.privacy_tab, "Privacy & Security")
         self.tabs.addTab(self.theming_tab, "Theming")
+        
+        # New Repos Tab (Phase 2)
+        from ui.repos_tab import ReposTab
+        self.repos_tab = ReposTab()
+        self.tabs.addTab(self.repos_tab, "Repositories")
 
+        
+        # Check dependencies
+        self.check_dependencies()
+
+    def check_dependencies(self):
+        import shutil
+        from PyQt6.QtWidgets import QMessageBox
+        
+        required = ["dnf", "pkexec"]
+        missing = [tool for tool in required if not shutil.which(tool)]
+        
+        if missing:
+            QMessageBox.critical(self, "Missing Dependencies", f"Critical tools missing: {', '.join(missing)}\nThe application may not function correctly.")
+            
+        optional = ["flatpak", "fwupdmgr"]
+        missing_opt = [tool for tool in optional if not shutil.which(tool)]
+        
+        if missing_opt:
+            QMessageBox.warning(self, "Missing Optional Tools", f"Optional tools missing: {', '.join(missing_opt)}\nSome features (Flatpak/Firmware updates) may not work.")

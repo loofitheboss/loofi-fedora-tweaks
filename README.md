@@ -23,70 +23,41 @@
 
 ### 📊 System Info
 
-- View hostname, kernel, Fedora version, CPU, RAM, disk usage, uptime, and battery status
+# Loofi Fedora Tweaks v3.0.0
 
-### 🔄 Updates
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Fedora](https://img.shields.io/badge/Fedora-43-blue)
 
-- **Update All**: One-click DNF + Flatpak + Firmware updates
-- **Kernel Management**: List installed kernels and remove old ones
-- Individual update buttons for DNF, Flatpak, and Firmware
+**Loofi Fedora Tweaks** is a post-install configuration tool specifically designed for **Fedora 43 KDE**, optimized for the **HP Elitebook 840 G8**.
 
-### 🧹 Cleanup & Maintenance
+## 🚀 Key Features (v3.0.0)
 
-- Clean DNF cache
-- Remove unused packages (autoremove)
-- Vacuum system journal
-- SSD Trim (fstrim)
-- Rebuild RPM database
+* **System Info**: View detailed specs, battery health, and uptime.
+* **Updates Manager**:
+  * Real-time progress bars for DNF and Flatpak updates.
+  * Update Firmware (`fwupdmgr`) and managing Kernels.
+* **Repository Management**:
+  * One-click **RPM Fusion** (Free & Non-Free) enablement.
+  * Install Multimedia Codecs (`ffmpeg`, `gstreamer`).
+  * Enable Flathub.
+* **Cleanup & Safety**:
+  * Safe cleanup (DNF cache, Journal vacuum).
+  * **Timeshift Integration**: Warns before risky operations if no snapshot exists.
+* **HP Elitebook Tweaks**:
+  * **Battery Limits**: Set 80% or 100% charge threshold (Persistent via systemd).
+  * **Fan Control**: Easy install for `nbfc-linux`.
+  * **Audio**: One-click Pipewire restart.
+* **Essential Apps**: Install VS Code, Chrome, Discord, Spotify, and more.
+* **Privacy & Theming**: Remove telemetry, toggle Firewall, and install fonts/themes.
+* **Modern UI**: Polished interface with KDE Breeze styling and System Tray support.
 
-### 💻 HP Elitebook 840 G8 Tweaks
-
-- Power profile switching (Performance/Balanced/Power Saver)
-- Audio service optimization (Pipewire restart)
-- Battery charge limit control (80% / 100%)
-
-### 📦 Essential Apps
-
-One-click installers for:
-
-- Google Chrome, Visual Studio Code, Steam
-- VLC, Discord, Spotify, OBS Studio
-- GIMP, LibreOffice, Brave Browser
-
-### ⚡ Advanced Tweaks
-
-- DNF speed optimization (parallel downloads, fastest mirror)
-- TCP BBR network optimization
-- GameMode for gaming performance
-- Swappiness reduction for SSDs
-
-### 🔒 Privacy & Security
-
-- Firewall (firewalld) controls
-- Remove telemetry packages
-- Security update checker
-
-### 🎨 Theming
-
-- Apply KDE themes (Breeze Dark/Light, Oxygen)
-- Install icon themes (Papirus, Tela)
-- Install developer fonts (FiraCode, JetBrains Mono)
-
----
-
-## 📥 Installation
+## 📦 Installation
 
 ### Option 1: DNF Repository (Recommended)
 
 ```bash
-sudo tee /etc/yum.repos.d/loofi-fedora-tweaks.repo << EOF
-[loofi-fedora-tweaks]
-name=Loofi Fedora Tweaks
-baseurl=https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo
-enabled=1
-gpgcheck=0
-EOF
-
+sudo dnf config-manager --add-repo https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/repo/loofi-fedora-tweaks.repo
 sudo dnf install loofi-fedora-tweaks --refresh
 ```
 
@@ -115,10 +86,10 @@ cd loofi-fedora-tweaks
 
 ## 📋 Requirements
 
-- Fedora 43 (KDE Plasma recommended)
-- Python 3.12+
-- PyQt6
-- polkit (for pkexec)
+* Fedora 43 (KDE Plasma recommended)
+* Python 3.12+
+* PyQt6
+* polkit (for pkexec)
 
 ---
 

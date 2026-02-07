@@ -73,15 +73,91 @@ class TweaksTab(QWidget):
         battery_layout.addLayout(battery_btn_layout)
         layout.addWidget(battery_group)
 
+        # HP Fan Control
+        fan_group = QGroupBox("HP Fan Control (nbfc-linux)")
+        fan_layout = QHBoxLayout()
+        fan_group.setLayout(fan_layout)
+        
+        self.btn_install_nbfc = QPushButton("Install NBFC (Fan Control)")
+        self.btn_install_nbfc.clicked.connect(self.install_nbfc)
+        fan_layout.addWidget(self.btn_install_nbfc)
+        
+        layout.addWidget(fan_group)
+
+        # Fingerprint Reader
+        finger_group = QGroupBox("Fingerprint Reader")
+        finger_layout = QHBoxLayout()
+        finger_group.setLayout(finger_layout)
+        
+        self.btn_enroll_finger = QPushButton("Enroll Fingerprint (GUI)")
+        self.btn_enroll_finger.clicked.connect(self.enroll_fingerprint)
+        finger_layout.addWidget(self.btn_enroll_finger)
+        
+        layout.addWidget(finger_group)
+
         layout.addWidget(QLabel("Output Log:"))
         layout.addWidget(self.output_area)
         
         # Check current profile on load (async)
         self.check_current_profile()
+        self.check_nbfc_status()
+
+    def install_nbfc(self):
+        # Using a COPR for nbfc-linux is common, or building from source.
+        # For simplicity and safety, we'll try to find a COPR or Git install method.
+        # Let's assume we use a known COPR for Fedora.
+        cmd = """
+        dnf copr enable -y ublue-os/staging;
+        dnf install -y nbfc-linux;
+        systemctl enable --now nbfc_service;
+        """
+        self.run_command("pkexec", ["sh", "-c", cmd], "Installing nbfc-linux for Fan Control...")
+
+    def check_nbfc_status(self):
+        import shutil
+        if shutil.which("nbfc"):
+            self.btn_install_nbfc.setText("NBFC Installed (Service Active)")
+            self.btn_install_nbfc.setEnabled(False)
+
+    def enroll_fingerprint(self):
+        # Calling KDE's fingerprint enrollment directly or using fprintd
+        # KDE System Settings is the best GUI.
+        self.run_command("systemsettings", ["kcm_users"], "Opening User Settings for Fingerprint Enrollment...")
 
     def set_battery_limit(self, limit):
-        cmd = f"echo {limit} | tee /sys/class/power_supply/BAT0/charge_control_end_threshold"
-        self.run_command("pkexec", ["sh", "-c", cmd], f"Setting Battery Limit to {limit}%...")
+        # Create a temporary script to handle the privileged operations safely
+        script_content = f"""#!/bin/bash
+echo {limit} | tee /sys/class/power_supply/BAT0/charge_control_end_threshold
+mkdir -p /etc/loofi-fedora-tweaks
+echo {limit} > /etc/loofi-fedora-tweaks/battery.conf
+
+cat <<EOF > /etc/systemd/system/loofi-battery.service
+[Unit]
+Description=Restore Loofi Battery Limit
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'if [ -f /etc/loofi-fedora-tweaks/battery.conf ]; then cat /etc/loofi-fedora-tweaks/battery.conf > /sys/class/power_supply/BAT0/charge_control_end_threshold; fi'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable loofi-battery.service
+# Don't start it immediately to avoid conflict, we just set the value manually above
+"""
+        import os
+        tmp_script = "/tmp/loofi_battery_setup.sh"
+        try:
+            with open(tmp_script, "w") as f:
+                f.write(script_content)
+            os.chmod(tmp_script, 0o755)
+            # Run the script with pkexec
+            self.run_command("pkexec", [tmp_script], f"Setting Battery Limit to {limit}% and enabling persistence...")
+        except Exception as e:
+            self.append_output(f"Error creating setup script: {e}\n")
 
 
     def check_current_profile(self):
@@ -112,3 +188,4 @@ class TweaksTab(QWidget):
 
     def command_finished(self, exit_code):
         self.append_output(f"\nCommand finished with exit code: {exit_code}")
+

@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QGroupBox, QHBoxLayout, QTextEdit, QMessageBox
 from utils.process import CommandRunner
+import shutil
 
 class CleanupTab(QWidget):
     def __init__(self):
@@ -25,8 +26,9 @@ class CleanupTab(QWidget):
         btn_dnf_clean.clicked.connect(lambda: self.run_command("pkexec", ["dnf", "clean", "all"], "Cleaning DNF Cache..."))
         cleanup_layout.addWidget(btn_dnf_clean)
         
-        btn_autoremove = QPushButton("Remove Unused Packages")
-        btn_autoremove.clicked.connect(lambda: self.run_command("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages..."))
+        btn_autoremove = QPushButton("Remove Unused Packages (Risky)")
+        btn_autoremove.setStyleSheet("color: red;")
+        btn_autoremove.clicked.connect(lambda: self.confirm_and_run("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages...", risky=True))
         cleanup_layout.addWidget(btn_autoremove)
         
         btn_journal = QPushButton("Vacuum Journal (2 weeks)")
@@ -47,10 +49,37 @@ class CleanupTab(QWidget):
         btn_rpmdb = QPushButton("Rebuild RPM Database")
         btn_rpmdb.clicked.connect(lambda: self.run_command("pkexec", ["rpm", "--rebuilddb"], "Rebuilding RPM Database..."))
         maint_layout.addWidget(btn_rpmdb)
+        
+        # Timeshift Check
+        ts_layout = QHBoxLayout()
+        btn_check_ts = QPushButton("Check for Timeshift Snapshots")
+        btn_check_ts.clicked.connect(self.check_timeshift)
+        ts_layout.addWidget(btn_check_ts)
+        maint_layout.addLayout(ts_layout)
 
         layout.addWidget(maint_group)
         layout.addWidget(QLabel("Output Log:"))
         layout.addWidget(self.output_area)
+
+    def check_timeshift(self):
+        if shutil.which("timeshift"):
+            self.run_command("pkexec", ["timeshift", "--list"], "Checking Timeshift Snapshots...")
+        else:
+            self.append_output("Timeshift not found. Please install it for system safety.\n")
+
+    def confirm_and_run(self, cmd, args, description, risky=False):
+        
+        if risky:
+            reply = QMessageBox.question(self, "Risky Operation", 
+                                       f"You are about to run: {description}\n\nThis can potentially break your system if essential packages are removed.\n\nHave you created a system snapshot (Timeshift)?",
+                                       QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
+                                       QMessageBox.StandardButton.No)
+            
+            if reply == QMessageBox.StandardButton.No:
+                self.append_output("Operation cancelled by user (No snapshot).\n")
+                return
+
+        self.run_command(cmd, args, description)
 
     def run_command(self, cmd, args, description):
         self.output_area.clear()

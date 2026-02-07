@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTextEdit, QScrollArea, QFrame
 from utils.process import CommandRunner
+import json
+import subprocess
+import os
 
 class AppsTab(QWidget):
     def __init__(self):
@@ -7,13 +10,22 @@ class AppsTab(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
+        # Header with Refresh Button
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(QLabel("Essential Applications"))
+        header_layout.addStretch()
+        btn_refresh = QPushButton("Refresh Status")
+        btn_refresh.clicked.connect(self.refresh_list)
+        header_layout.addWidget(btn_refresh)
+        layout.addLayout(header_layout)
+        
         # Scroll Area for apps list if it gets long
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll_content = QWidget()
-        scroll_layout = QVBoxLayout()
-        scroll_content.setLayout(scroll_layout)
-        scroll.setWidget(scroll_content)
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        self.scroll_content.setLayout(self.scroll_layout)
+        scroll.setWidget(self.scroll_content)
         
         layout.addWidget(scroll)
         
@@ -26,76 +38,40 @@ class AppsTab(QWidget):
         self.runner.output_received.connect(self.append_output)
         self.runner.finished.connect(self.command_finished)
 
-        # App List definition (v2.0 - Fixed and expanded)
-        self.apps = [
-            {
-                "name": "Google Chrome",
-                "desc": "Web Browser",
-                "cmd": "pkexec",
-                "args": ["dnf", "install", "-y", "https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"]
-            },
-            {
-                "name": "Visual Studio Code",
-                "desc": "Code Editor (Flatpak)",
-                "cmd": "flatpak",
-                "args": ["install", "-y", "flathub", "com.visualstudio.code"]
-            },
-            {
-                "name": "Steam",
-                "desc": "Gaming Platform",
-                "cmd": "pkexec",
-                "args": ["sh", "-c", "dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && dnf install -y steam"]
-            },
-            {
-                "name": "VLC Media Player",
-                "desc": "Media Player",
-                "cmd": "pkexec",
-                "args": ["dnf", "install", "-y", "vlc"]
-            },
-            {
-                "name": "Discord",
-                "desc": "Chat & Voice (Flatpak)",
-                "cmd": "flatpak",
-                "args": ["install", "-y", "flathub", "com.discordapp.Discord"]
-            },
-            {
-                "name": "Spotify",
-                "desc": "Music Streaming (Flatpak)",
-                "cmd": "flatpak",
-                "args": ["install", "-y", "flathub", "com.spotify.Client"]
-            },
-            {
-                "name": "OBS Studio",
-                "desc": "Streaming & Recording (Flatpak)",
-                "cmd": "flatpak",
-                "args": ["install", "-y", "flathub", "com.obsproject.Studio"]
-            },
-            {
-                "name": "GIMP",
-                "desc": "Image Editor",
-                "cmd": "pkexec",
-                "args": ["dnf", "install", "-y", "gimp"]
-            },
-            {
-                "name": "LibreOffice",
-                "desc": "Office Suite",
-                "cmd": "pkexec",
-                "args": ["dnf", "install", "-y", "libreoffice"]
-            },
-            {
-                "name": "Brave Browser",
-                "desc": "Privacy Browser",
-                "cmd": "pkexec",
-                "args": ["sh", "-c", "dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo && dnf install -y brave-browser"]
-            }
-        ]
+        # Load Apps
+        self.apps = self.load_apps()
+        self.refresh_list()
 
-        for app in self.apps:
-            self.add_app_row(scroll_layout, app)
-
-        scroll_layout.addStretch()
         layout.addWidget(QLabel("Output Log:"))
         layout.addWidget(self.output_area)
+
+    def load_apps(self):
+        try:
+            # Locate apps.json relative to this file
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            config_path = os.path.join(base_dir, 'config', 'apps.json')
+            
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    return json.load(f)
+            else:
+                self.append_output(f"Error: Config file not found at {config_path}\n")
+                return []
+        except Exception as e:
+            self.append_output(f"Error loading apps config: {str(e)}\n")
+            return []
+
+    def refresh_list(self):
+        # Clear existing items
+        while self.scroll_layout.count():
+            item = self.scroll_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+        
+        for app in self.apps:
+            self.add_app_row(self.scroll_layout, app)
+        self.scroll_layout.addStretch()
 
     def add_app_row(self, layout, app_data):
         row_widget = QFrame()
@@ -107,7 +83,19 @@ class AppsTab(QWidget):
         lbl_desc = QLabel(app_data['desc'])
         
         btn_install = QPushButton("Install")
-        btn_install.clicked.connect(lambda checked, app=app_data: self.install_app(app))
+        
+        # Check if installed
+        chk_cmd = app_data.get('check_cmd')
+        is_installed = False
+        if chk_cmd:
+            is_installed = self.check_installed(chk_cmd)
+            
+        if is_installed:
+            btn_install.setText("Installed")
+            btn_install.setEnabled(False)
+            btn_install.setStyleSheet("background-color: #2ecc71; color: white;") # Green
+        else:
+            btn_install.clicked.connect(lambda checked, app=app_data: self.install_app(app))
         
         row_layout.addWidget(lbl_name)
         row_layout.addWidget(lbl_desc)
@@ -115,6 +103,14 @@ class AppsTab(QWidget):
         row_layout.addWidget(btn_install)
         
         layout.addWidget(row_widget)
+
+    def check_installed(self, cmd):
+        try:
+            # Run the check command silently
+            subprocess.run(cmd, shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except subprocess.CalledProcessError:
+            return False
 
     def install_app(self, app_data):
         self.output_area.clear()
@@ -128,3 +124,7 @@ class AppsTab(QWidget):
 
     def command_finished(self, exit_code):
         self.append_output(f"\nCommand finished with exit code: {exit_code}")
+        # Refresh list to update status if installation succeeded
+        if exit_code == 0:
+            self.refresh_list()
+
