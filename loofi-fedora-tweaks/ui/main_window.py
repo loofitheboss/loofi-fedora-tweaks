@@ -10,11 +10,12 @@ from ui.theming_tab import ThemingTab
 from ui.repos_tab import ReposTab # Moved import here
 from ui.gaming_tab import GamingTab # New import
 from ui.network_tab import NetworkTab # New import
+from ui.presets_tab import PresetsTab
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loofi Fedora Tweaks v4.3.0 - HP Elitebook 840 G8")
+        self.setWindowTitle("Loofi Fedora Tweaks v4.4.0 - HP Elitebook 840 G8")
         self.setGeometry(100, 100, 950, 800)
         
         # Central Widget
@@ -49,8 +50,9 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.tweaks_tab, "HP Tweaks")
         self.tabs.addTab(self.apps_tab, "Essential Apps")
         self.tabs.addTab(self.repos_tab, "Repositories") # Moved tab addition here
-        self.tabs.addTab(self.gaming_tab, "Gaming") # New tab
-        self.tabs.addTab(self.network_tab, "Network") # New tab
+        self.tabs.addTab(GamingTab(), "Gaming")
+        self.tabs.addTab(NetworkTab(), "Network")
+        self.tabs.addTab(PresetsTab(), "Presets") # New tab
         self.tabs.addTab(self.privacy_tab, "Privacy & Security")
         self.tabs.addTab(self.theming_tab, "Theming")
         

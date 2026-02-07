@@ -46,20 +46,21 @@ class AppsTab(QWidget):
         layout.addWidget(self.output_area)
 
     def load_apps(self):
-        try:
-            # Locate apps.json relative to this file
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            config_path = os.path.join(base_dir, 'config', 'apps.json')
-            
-            if os.path.exists(config_path):
-                with open(config_path, 'r') as f:
-                    return json.load(f)
-            else:
-                self.append_output(f"Error: Config file not found at {config_path}\n")
-                return []
-        except Exception as e:
-            self.append_output(f"Error loading apps config: {str(e)}\n")
-            return []
+        # Initial load from cache or local
+        from utils.remote_config import AppConfigFetcher
+        self.fetcher = AppConfigFetcher()
+        self.fetcher.config_ready.connect(self.on_apps_loaded)
+        self.fetcher.config_error.connect(self.on_apps_error)
+        self.fetcher.start()
+        return [] # Return empty initially, populated async
+
+    def on_apps_loaded(self, apps):
+        self.apps = apps
+        self.refresh_list()
+        self.append_output("Apps list updated from remote/cache.\n")
+
+    def on_apps_error(self, error):
+        self.append_output(f"Error loading apps: {error}\n")
 
     def refresh_list(self):
         # Clear existing items
