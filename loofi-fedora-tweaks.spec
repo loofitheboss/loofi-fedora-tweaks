@@ -10,6 +10,9 @@ Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       python3-pyqt6
+Requires:       qt6-qtbase-gui
+Requires:       mesa-libGL
+Requires:       mesa-libEGL
 Requires:       polkit
 Requires:       libnotify
 
@@ -35,8 +38,9 @@ cp -r loofi-fedora-tweaks/* "%{buildroot}/usr/lib/%{name}/"
 
 cat > "%{buildroot}/usr/bin/%{name}" << 'EOF'
 #!/bin/bash
+export PYTHONPATH=/usr/lib/loofi-fedora-tweaks${PYTHONPATH:+:$PYTHONPATH}
 cd /usr/lib/loofi-fedora-tweaks
-exec python3 main.py "$@"
+exec python3 main.py "$@" 2>>${HOME}/.local/share/loofi-fedora-tweaks/startup.log
 EOF
 chmod +x "%{buildroot}/usr/bin/%{name}"
 
@@ -54,6 +58,14 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 15.0.0-1
+- v15.0 Nebula: Auto-Tuner, Snapshot Timeline, Smart Logs, Quick Actions Bar
+- Startup crash resilience: file logging, error dialogs, desktop notifications
+- Fixed launcher script: PYTHONPATH, stderr logging, Qt dependency requirements
+- Added RPM deps: qt6-qtbase-gui, mesa-libGL, mesa-libEGL
+- Bug fixes: voice.py return, safety.py lazy import, drift.py exception handling
+- Fixed sys.modules test pollution, updated stale version assertions
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 13.5.0-1
 - UX Polish: Settings system, light theme, keyboard shortcuts, notification center
 - Settings tab with Appearance, Behavior, and Advanced sub-tabs
