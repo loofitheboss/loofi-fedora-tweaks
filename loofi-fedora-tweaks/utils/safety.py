@@ -1,6 +1,6 @@
 import shutil
 import subprocess
-from PyQt6.QtWidgets import QMessageBox
+
 
 class SafetyManager:
     @staticmethod
@@ -54,6 +54,8 @@ class SafetyManager:
         Prompt the user to confirm an action, offering to take a snapshot first.
         Returns True if the action should proceed, False otherwise.
         """
+        from PyQt6.QtWidgets import QMessageBox
+
         tool = SafetyManager.check_snapshot_tool()
         
         msg = QMessageBox(parent)

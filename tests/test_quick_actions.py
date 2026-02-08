@@ -7,12 +7,25 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 # Mock PyQt6 before importing the module under test
+_orig_pyqt6 = sys.modules.get("PyQt6")
+_orig_qtwidgets = sys.modules.get("PyQt6.QtWidgets")
+_orig_qtcore = sys.modules.get("PyQt6.QtCore")
+_orig_qtgui = sys.modules.get("PyQt6.QtGui")
+
 sys.modules["PyQt6"] = MagicMock()
 sys.modules["PyQt6.QtWidgets"] = MagicMock()
 sys.modules["PyQt6.QtCore"] = MagicMock()
 sys.modules["PyQt6.QtGui"] = MagicMock()
 
 from ui.quick_actions import QuickAction, QuickActionRegistry, register_default_actions
+
+# Restore originals so other tests are not polluted
+for _mod, _orig in [("PyQt6", _orig_pyqt6), ("PyQt6.QtWidgets", _orig_qtwidgets),
+                     ("PyQt6.QtCore", _orig_qtcore), ("PyQt6.QtGui", _orig_qtgui)]:
+    if _orig is not None:
+        sys.modules[_mod] = _orig
+    else:
+        sys.modules.pop(_mod, None)
 
 
 class TestQuickAction(unittest.TestCase):

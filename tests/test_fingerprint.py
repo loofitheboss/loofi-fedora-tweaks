@@ -30,10 +30,20 @@ class _MockQThread:
 
 _mock_qtcore.QThread = _MockQThread
 
+_orig_pyqt6_fp = sys.modules.get('PyQt6')
+_orig_qtcore_fp = sys.modules.get('PyQt6.QtCore')
+
 sys.modules['PyQt6'] = MagicMock()
 sys.modules['PyQt6.QtCore'] = _mock_qtcore
 
 from utils.fingerprint import FingerprintWorker
+
+# Restore originals so other tests are not polluted
+for _mod, _orig in [('PyQt6', _orig_pyqt6_fp), ('PyQt6.QtCore', _orig_qtcore_fp)]:
+    if _orig is not None:
+        sys.modules[_mod] = _orig
+    else:
+        sys.modules.pop(_mod, None)
 
 
 # ---------------------------------------------------------------------------

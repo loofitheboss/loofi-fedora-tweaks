@@ -52,8 +52,8 @@ class TestHistory(unittest.TestCase):
         
         # Undo
         with patch('subprocess.run') as mock_run:
-            success, msg = self.history_mgr.undo_last_action()
-            self.assertTrue(success)
+            result = self.history_mgr.undo_last_action()
+            self.assertTrue(result.success)
             mock_run.assert_called_with(["echo", "undo"], check=True)
             
         self.assertIsNone(self.history_mgr.get_last_action())

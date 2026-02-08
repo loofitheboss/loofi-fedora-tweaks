@@ -243,7 +243,7 @@ class DriftDetector:
         try:
             with open("/proc/cmdline", "r") as f:
                 return f.read().strip().split()
-        except OSError as e:
+        except Exception as e:
             logger.debug("Failed to read kernel params: %s", e)
             return []
     

@@ -149,6 +149,8 @@ class VoiceManager:
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("arecord device detection failed: %s", e)
 
+        return info
+
     @staticmethod
     def get_recommended_model(available_ram_mb: int) -> str:
         """
