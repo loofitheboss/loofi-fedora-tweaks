@@ -5,6 +5,10 @@ Enables modular, third-party feature extensions.
 v13.0 additions:
 - Plugin Permissions Model (VALID_PERMISSIONS, check_permissions)
 - Plugin Update Checking (check_for_updates)
+
+v14.0 additions:
+- Plugin Lifecycle Events (on_app_start, on_app_quit, on_tab_switch,
+  on_settings_changed, get_settings_schema)
 """
 
 from abc import ABC, abstractmethod
