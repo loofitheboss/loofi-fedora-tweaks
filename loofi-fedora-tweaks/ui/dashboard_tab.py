@@ -212,24 +212,20 @@ class DashboardTab(QWidget):
             self.lbl_cpu.setStyleSheet("color: #6c7086;")
         
     def go_to_cleanup(self):
-        # Switch to Cleanup Tab (index 6, roughly)
-        # We need a way to switch tabs in main window
         if hasattr(self.main_window, "switch_to_tab"):
-            self.main_window.switch_to_tab("Cleanup")
-            
+            self.main_window.switch_to_tab("Maintenance")
+
     def go_to_updates(self):
         if hasattr(self.main_window, "switch_to_tab"):
-            self.main_window.switch_to_tab("Updates")
+            self.main_window.switch_to_tab("Maintenance")
 
     def go_to_gaming(self):
         if hasattr(self.main_window, "switch_to_tab"):
             self.main_window.switch_to_tab("Gaming")
-            
+
     def toggle_power_profile(self):
-        # Logic to toggle performance/balanced
-        # For now just print or show message
         if hasattr(self.main_window, "switch_to_tab"):
-            self.main_window.switch_to_tab("Presets")
+            self.main_window.switch_to_tab("Hardware")
     
     def reboot_system(self):
         """Reboot the system to apply pending changes."""

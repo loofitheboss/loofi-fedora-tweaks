@@ -35,6 +35,11 @@ class VirtualizationTab(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(10)
 
+        # ---- Output log (created early so sub-tab builders can call self.log()) ----
+        self.output_text = QTextEdit()
+        self.output_text.setReadOnly(True)
+        self.output_text.setMaximumHeight(120)
+
         # ---- Top banner: virt status summary ----
         self.banner_label = QLabel(self.tr("Loading virtualization status..."))
         self.banner_label.setStyleSheet(
@@ -51,12 +56,9 @@ class VirtualizationTab(QWidget):
         self.tabs.addTab(self._create_disposable_tab(), self.tr("Disposable"))
         main_layout.addWidget(self.tabs)
 
-        # ---- Output log ----
+        # ---- Output log (add to layout) ----
         log_group = QGroupBox(self.tr("Output Log:"))
         log_layout = QVBoxLayout(log_group)
-        self.output_text = QTextEdit()
-        self.output_text.setReadOnly(True)
-        self.output_text.setMaximumHeight(120)
         log_layout.addWidget(self.output_text)
         main_layout.addWidget(log_group)
 
