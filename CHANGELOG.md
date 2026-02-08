@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [11.0.0] - 2026-02-08 "Aurora Update"
+
+### Added
+
+- **Plugin Manifests**: `plugin.json` metadata with version gating and enable/disable state.
+- **Plugin Manager UI**: Manage plugins from the Community tab.
+- **Support Bundle Export**: ZIP with logs and system info (Diagnostics + CLI).
+- **Automation Validation**: Rule validation and dry-run simulation.
+- **Release Checklist**: New `docs/RELEASE_CHECKLIST.md`.
+
+### Changed
+
+- **Theme Loading**: Unified stylesheet loading via `modern.qss`.
+- **Logging**: Structured error logging for Pulse, remote config, and command runner.
+- **CI**: Added CLI smoke checks to CI workflow.
+
 ## [10.0.0] - 2026-02-07 "Zenith Update"
 
 ### Major Changes

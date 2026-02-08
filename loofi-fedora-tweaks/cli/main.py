@@ -1,7 +1,7 @@
 """
 Loofi CLI - Command-line interface for Loofi Fedora Tweaks.
 Enables headless operation and scripting.
-v10.0.0 "Zenith Update"
+v11.0.0 "Aurora Update"
 """
 
 import sys
@@ -27,6 +27,7 @@ from utils.performance import PerformanceCollector
 from utils.processes import ProcessManager
 from utils.temperature import TemperatureManager
 from utils.network_monitor import NetworkMonitor
+from utils.journal import JournalManager
 
 from version import __version__, __version_codename__
 
@@ -506,6 +507,58 @@ def cmd_hardware(args):
     return 0
 
 
+def cmd_plugins(args):
+    """Manage plugins."""
+    loader = PluginLoader()
+
+    if args.action == "list":
+        plugins = loader.list_plugins()
+        if _json_output:
+            _output_json({"plugins": plugins})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Plugins")
+            _print("═══════════════════════════════════════════")
+            if not plugins:
+                _print("\n(no plugins found)")
+                return 0
+            for plugin in plugins:
+                name = plugin["name"]
+                enabled = plugin["enabled"]
+                manifest = plugin.get("manifest") or {}
+                status = "✅" if enabled else "❌"
+                version = manifest.get("version", "unknown")
+                desc = manifest.get("description", "")
+                _print(f"{status} {name} v{version}")
+                if desc:
+                    _print(f"   {desc}")
+        return 0
+
+    if args.action in ("enable", "disable"):
+        if not args.name:
+            _print("❌ Plugin name required")
+            return 1
+        enabled = args.action == "enable"
+        loader.set_enabled(args.name, enabled)
+        if _json_output:
+            _output_json({"plugin": args.name, "enabled": enabled})
+        else:
+            _print(f"{'✅' if enabled else '❌'} {args.name} {'enabled' if enabled else 'disabled'}")
+        return 0
+
+    return 1
+
+
+def cmd_support_bundle(args):
+    """Export support bundle ZIP."""
+    result = JournalManager.export_support_bundle()
+    if _json_output:
+        _output_json({"success": result.success, "message": result.message, "data": result.data})
+    else:
+        _print(f"{'✅' if result.success else '❌'} {result.message}")
+    return 0 if result.success else 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -582,6 +635,14 @@ def main(argv: Optional[List[str]] = None):
     subparsers.add_parser("doctor", help="Check system dependencies and diagnostics")
     subparsers.add_parser("hardware", help="Show detected hardware profile")
 
+    # Plugin management
+    plugin_parser = subparsers.add_parser("plugins", help="Manage plugins")
+    plugin_parser.add_argument("action", choices=["list", "enable", "disable"], help="Plugin action")
+    plugin_parser.add_argument("name", nargs="?", help="Plugin name for enable/disable")
+
+    # Support bundle
+    subparsers.add_parser("support-bundle", help="Export support bundle ZIP")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -604,6 +665,8 @@ def main(argv: Optional[List[str]] = None):
         "network": cmd_network,
         "doctor": cmd_doctor,
         "hardware": cmd_hardware,
+        "plugins": cmd_plugins,
+        "support-bundle": cmd_support_bundle,
     }
 
     handler = commands.get(args.command)

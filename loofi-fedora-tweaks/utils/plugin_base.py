@@ -9,6 +9,12 @@ from typing import Dict, List, Optional, Type, Any
 from pathlib import Path
 import importlib.util
 import os
+import json
+
+from utils.log import get_logger
+from version import __version__ as APP_VERSION
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -18,6 +24,19 @@ class PluginInfo:
     version: str
     author: str
     description: str
+    icon: str = "🔌"
+
+
+@dataclass
+class PluginManifest:
+    """plugin.json manifest data."""
+    name: str
+    version: str
+    author: str
+    description: str
+    entry: Optional[str] = None
+    min_app_version: Optional[str] = None
+    permissions: Optional[List[str]] = None
     icon: str = "🔌"
 
 
@@ -76,10 +95,13 @@ class PluginLoader:
     """
     
     PLUGINS_DIR = Path(__file__).parent.parent / "plugins"
+    CONFIG_DIR = Path.home() / ".config" / "loofi-fedora-tweaks"
+    STATE_FILE = CONFIG_DIR / "plugins.json"
     
     def __init__(self):
         self.plugins: Dict[str, LoofiPlugin] = {}
         self._ensure_plugins_dir()
+        self._ensure_state()
     
     def _ensure_plugins_dir(self):
         """Create plugins directory if it doesn't exist."""
@@ -89,6 +111,87 @@ class PluginLoader:
         init_file = self.PLUGINS_DIR / "__init__.py"
         if not init_file.exists():
             init_file.write_text("# Loofi plugins directory\n")
+
+    def _ensure_state(self):
+        """Ensure plugin state file exists."""
+        self.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        if not self.STATE_FILE.exists():
+            state = {"enabled": {}}
+            self.STATE_FILE.write_text(json.dumps(state, indent=2))
+
+    def _load_state(self) -> Dict[str, Any]:
+        try:
+            return json.loads(self.STATE_FILE.read_text())
+        except Exception:
+            return {"enabled": {}}
+
+    def _save_state(self, state: Dict[str, Any]) -> None:
+        self.STATE_FILE.write_text(json.dumps(state, indent=2))
+
+    def set_enabled(self, plugin_name: str, enabled: bool) -> None:
+        state = self._load_state()
+        if "enabled" not in state:
+            state["enabled"] = {}
+        state["enabled"][plugin_name] = bool(enabled)
+        self._save_state(state)
+
+    def is_enabled(self, plugin_name: str) -> bool:
+        state = self._load_state()
+        enabled_map = state.get("enabled", {})
+        if plugin_name in enabled_map:
+            return bool(enabled_map[plugin_name])
+        return True
+
+    def _parse_version(self, version: str) -> tuple:
+        parts = []
+        for token in version.split("."):
+            try:
+                parts.append(int(token))
+            except ValueError:
+                parts.append(0)
+        return tuple(parts)
+
+    def _is_version_compatible(self, min_version: Optional[str]) -> bool:
+        if not min_version:
+            return True
+        return self._parse_version(APP_VERSION) >= self._parse_version(min_version)
+
+    def _load_manifest(self, plugin_dir: Path) -> Optional[PluginManifest]:
+        manifest_path = plugin_dir / "plugin.json"
+        if not manifest_path.exists():
+            return None
+        try:
+            raw = json.loads(manifest_path.read_text())
+            manifest = PluginManifest(
+                name=raw.get("name", plugin_dir.name),
+                version=raw.get("version", "0.0.0"),
+                author=raw.get("author", "Unknown"),
+                description=raw.get("description", ""),
+                entry=raw.get("entry"),
+                min_app_version=raw.get("min_app_version"),
+                permissions=raw.get("permissions", []),
+                icon=raw.get("icon", "🔌"),
+            )
+            if not self._is_version_compatible(manifest.min_app_version):
+                logger.warning("Plugin %s requires app >= %s", plugin_dir.name, manifest.min_app_version)
+                return None
+            return manifest
+        except Exception as e:
+            logger.warning("Failed to load manifest for %s: %s", plugin_dir.name, e)
+            return None
+
+    def list_plugins(self) -> List[Dict[str, Any]]:
+        """List discovered plugins with manifest data and enabled state."""
+        plugins = []
+        for name in self.discover_plugins():
+            plugin_dir = self.PLUGINS_DIR / name
+            manifest = self._load_manifest(plugin_dir)
+            plugins.append({
+                "name": name,
+                "enabled": self.is_enabled(name),
+                "manifest": manifest.__dict__ if manifest else None,
+            })
+        return plugins
     
     def discover_plugins(self) -> List[str]:
         """
@@ -125,8 +228,20 @@ class PluginLoader:
         if not plugin_dir.exists():
             return None
         
-        # Try plugin.py first, then __init__.py
-        plugin_file = plugin_dir / "plugin.py"
+        if not self.is_enabled(plugin_name):
+            return None
+
+        manifest = self._load_manifest(plugin_dir)
+        if manifest is None and (plugin_dir / "plugin.json").exists():
+            return None
+
+        # Try manifest entry, then plugin.py, then __init__.py
+        plugin_file = None
+        if manifest and manifest.entry:
+            plugin_file = plugin_dir / manifest.entry
+
+        if plugin_file is None or not plugin_file.exists():
+            plugin_file = plugin_dir / "plugin.py"
         if not plugin_file.exists():
             plugin_file = plugin_dir / "__init__.py"
         
@@ -159,7 +274,7 @@ class PluginLoader:
                     return plugin
             
         except Exception as e:
-            print(f"Failed to load plugin {plugin_name}: {e}")
+            logger.warning("Failed to load plugin %s: %s", plugin_name, e)
         
         return None
     

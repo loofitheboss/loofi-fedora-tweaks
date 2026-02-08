@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-export PYTHONPATH=$PYTHONPATH:/usr/lib/loofi-fedora-tweaks
-python3 /usr/lib/loofi-fedora-tweaks/main.py "$@"

@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 # DBus imports with graceful fallback
 try:
@@ -89,7 +92,7 @@ class SystemPulse(QObject):
     def start(self):
         """Start the DBus listener loop. Call from QThread."""
         if not DBUS_AVAILABLE:
-            print("[Pulse] DBus not available, falling back to polling")
+            logger.info("[Pulse] DBus not available, falling back to polling")
             self._run_polling_fallback()
             return
         
@@ -103,14 +106,14 @@ class SystemPulse(QObject):
             self._register_networkmanager_signals()
             self._register_monitor_signals()
             
-            print("[Pulse] Event listeners registered, starting main loop")
+            logger.info("[Pulse] Event listeners registered, starting main loop")
             
             # Start GLib main loop
             self._loop = GLib.MainLoop()
             self._loop.run()
             
         except Exception as e:
-            print(f"[Pulse] Error starting DBus listener: {e}")
+            logger.warning("[Pulse] Error starting DBus listener: %s", e)
             self._run_polling_fallback()
     
     def stop(self):
@@ -146,9 +149,9 @@ class SystemPulse(QObject):
                 signal_name="PropertiesChanged"
             )
             
-            print("[Pulse] UPower signals registered")
+            logger.info("[Pulse] UPower signals registered")
         except dbus.exceptions.DBusException as e:
-            print(f"[Pulse] Could not register UPower signals: {e}")
+            logger.warning("[Pulse] Could not register UPower signals: %s", e)
     
     def _on_upower_properties_changed(self, interface, changed, invalidated):
         """Handle UPower property changes."""
@@ -158,7 +161,7 @@ class SystemPulse(QObject):
             
             if new_state != self._last_power_state:
                 self._last_power_state = new_state
-                print(f"[Pulse] Power state changed: {new_state}")
+                logger.info("[Pulse] Power state changed: %s", new_state)
                 self.power_state_changed.emit(new_state)
                 self.event_triggered.emit("power_state", {"state": new_state})
     
@@ -186,8 +189,8 @@ class SystemPulse(QObject):
                 return PowerState.AC.value
             elif "online: no" in result.stdout.lower():
                 return PowerState.BATTERY.value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed power state via upower: %s", e)
         
         # Fallback to sysfs
         try:
@@ -197,8 +200,8 @@ class SystemPulse(QObject):
                 if os.path.exists(ac_path):
                     with open(ac_path, "r") as f:
                         return PowerState.AC.value if f.read().strip() == "1" else PowerState.BATTERY.value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed power state via sysfs: %s", e)
         
         return PowerState.UNKNOWN.value
     
@@ -218,8 +221,8 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if "percentage:" in line.lower():
                     return int(line.split(":")[1].strip().rstrip("%"))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed battery level via upower: %s", e)
         
         # Fallback to sysfs
         try:
@@ -228,8 +231,8 @@ class SystemPulse(QObject):
                 if os.path.exists(bat_path):
                     with open(bat_path, "r") as f:
                         return int(f.read().strip())
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed battery level via sysfs: %s", e)
         
         return -1
     
@@ -259,9 +262,9 @@ class SystemPulse(QObject):
                 signal_name="PropertiesChanged"
             )
             
-            print("[Pulse] NetworkManager signals registered")
+            logger.info("[Pulse] NetworkManager signals registered")
         except dbus.exceptions.DBusException as e:
-            print(f"[Pulse] Could not register NetworkManager signals: {e}")
+            logger.warning("[Pulse] Could not register NetworkManager signals: %s", e)
     
     def _on_nm_state_changed(self, state):
         """Handle NetworkManager state changes."""
@@ -275,7 +278,7 @@ class SystemPulse(QObject):
         
         if new_state != self._last_network_state:
             self._last_network_state = new_state
-            print(f"[Pulse] Network state changed: {new_state}")
+            logger.info("[Pulse] Network state changed: %s", new_state)
             self.network_state_changed.emit(new_state)
             self.event_triggered.emit("network_state", {"state": new_state})
             
@@ -303,8 +306,8 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if "vpn" in line.lower() and "activated" in line.lower():
                     return True
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed VPN check: %s", e)
         return False
     
     @classmethod
@@ -327,8 +330,8 @@ class SystemPulse(QObject):
                 return NetworkState.CONNECTING.value
             elif "connected" in state:
                 return NetworkState.CONNECTED.value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed network state via nmcli: %s", e)
         return NetworkState.DISCONNECTED.value
     
     @classmethod
@@ -347,8 +350,8 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if line.startswith("yes:"):
                     return line.split(":", 1)[1]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed Wi-Fi SSID via nmcli: %s", e)
         return ""
     
     @classmethod
@@ -386,10 +389,10 @@ class SystemPulse(QObject):
                 dbus_interface="org.kde.KScreen.Backend",
                 signal_name="configChanged"
             )
-            print("[Pulse] KDE monitor signals registered")
+            logger.info("[Pulse] KDE monitor signals registered")
             return
         except Exception:
-            pass
+            logger.debug("[Pulse] KDE monitor signals not available")
         
         try:
             # GNOME/Mutter uses org.gnome.Mutter.DisplayConfig
@@ -400,9 +403,9 @@ class SystemPulse(QObject):
                 dbus_interface="org.gnome.Mutter.DisplayConfig",
                 signal_name="MonitorsChanged"
             )
-            print("[Pulse] GNOME/Mutter monitor signals registered")
+            logger.info("[Pulse] GNOME/Mutter monitor signals registered")
         except Exception as e:
-            print(f"[Pulse] Could not register monitor signals: {e}")
+            logger.warning("[Pulse] Could not register monitor signals: %s", e)
     
     def _on_monitor_changed(self, *args):
         """Handle monitor configuration changes."""
@@ -410,7 +413,7 @@ class SystemPulse(QObject):
         count = len(monitors)
         
         if count != self._last_monitor_count:
-            print(f"[Pulse] Monitor count changed: {self._last_monitor_count} -> {count}")
+            logger.info("[Pulse] Monitor count changed: %s -> %s", self._last_monitor_count, count)
             self._last_monitor_count = count
             self.monitor_count_changed.emit(count)
             
@@ -465,8 +468,8 @@ class SystemPulse(QObject):
                         "is_primary": is_primary,
                         "is_ultrawide": is_ultrawide
                     })
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("[Pulse] Failed monitor scan via xrandr: %s", e)
         
         # Fallback: try kscreen-doctor for KDE Wayland
         if not monitors:
@@ -504,8 +507,8 @@ class SystemPulse(QObject):
                 
                 if current_output:
                     monitors.append(current_output)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("[Pulse] Failed monitor scan via kscreen-doctor: %s", e)
         
         return monitors
     
@@ -517,7 +520,7 @@ class SystemPulse(QObject):
         """Fallback polling mode when DBus is unavailable."""
         import time
         
-        print("[Pulse] Running in polling fallback mode")
+        logger.info("[Pulse] Running in polling fallback mode")
         self._running = True
         
         while self._running:
@@ -543,7 +546,7 @@ class SystemPulse(QObject):
                 time.sleep(5)  # Poll every 5 seconds
                 
             except Exception as e:
-                print(f"[Pulse] Polling error: {e}")
+                logger.warning("[Pulse] Polling error: %s", e)
                 time.sleep(10)
 
 

@@ -1,6 +1,6 @@
 """
 Shared formatting utilities for Loofi Fedora Tweaks.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Consolidates duplicate bytes_to_human() and other formatters
 found across 4+ files.

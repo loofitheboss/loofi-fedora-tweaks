@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v10.0.0 "Zenith Update"
+# Loofi Fedora Tweaks v11.0.0 "Aurora Update"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v10.0.0">
-    <img src="https://img.shields.io/badge/Release-v10.0.0-blue?style=for-the-badge&logo=github" alt="Release v10.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v11.0.0">
+    <img src="https://img.shields.io/badge/Release-v11.0.0-blue?style=for-the-badge&logo=github" alt="Release v11.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,38 +21,23 @@
 
 ---
 
-## What's New in v10.0.0?
+## What's New in v11.0.0?
 
-### Zenith Update — Major Consolidation & Modernization
+### Aurora Update — Extensibility & Diagnostics
 
-The biggest release yet: 25 tabs consolidated to 15, new architecture foundations, and powerful new features.
-
-**Architecture**
-* **Tab Consolidation**: 25 tabs reduced to 15 with QTabWidget sub-navigation
-* **BaseTab Class**: Shared base eliminates command-execution boilerplate across all tabs
-* **PrivilegedCommand Builder**: Safe pkexec operations using argument arrays (no shell strings)
-* **Error Framework**: Typed exceptions (DnfLockedError, PrivilegeError, etc.) with recovery hints
-* **Hardware Profiles**: Auto-detect HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS via DMI sysfs
+This release hardens the platform and unlocks extensibility without sacrificing stability.
 
 **New Features**
-* **First-Run Wizard**: Hardware auto-detection, use-case selection, profile persistence
-* **Command Palette**: Ctrl+K opens fuzzy-search palette with 60+ entries
-* **CI/CD Pipeline**: GitHub Actions for lint, test, build, and tag-triggered releases
-* **CLI `--json` Flag**: Machine-readable output for scripting
-* **CLI `doctor` Command**: Dependency health check
-* **CLI `hardware` Command**: Show detected hardware profile
+* **Plugin Manifest Support**: `plugin.json` with version gating and permissions metadata
+* **Plugin Manager UI**: Enable/disable plugins from the Community tab
+* **Support Bundle Export**: One-click ZIP with logs and system info (Diagnostics + CLI)
+* **Automation Validation**: Rule validation and dry-run simulation before execution
+* **CLI Enhancements**: `loofi plugins` and `loofi support-bundle`
 
-**Consolidated Tabs**
-* **Maintenance** = Updates + Cleanup + Overlays
-* **Software** = Apps + Repos
-* **System Monitor** = Performance + Processes
-* **Hardware** = Hardware Control + HP Tweaks (now hardware-agnostic)
-* **Security & Privacy** = Security Center + Privacy
-* **Desktop** = Director + Theming
-* **Development** = Containers + Developer Tools
-* **Community** = Presets + Marketplace
-* **Automation** = Scheduler + Replicator + Pulse
-* **Diagnostics** = Watchtower + Boot
+**Quality Improvements**
+* **Unified Theme Loading**: Single source of truth for QSS styling
+* **Improved Logging**: Structured error logging in Pulse, remote config, command runner
+* **CI Smoke Checks**: CLI sanity checks added to CI pipeline
 
 ---
 
@@ -61,12 +46,13 @@ The biggest release yet: 25 tabs consolidated to 15, new architecture foundation
 * **[User Guide](docs/USER_GUIDE.md)** — Complete documentation for all features
 * **[Contributing](docs/CONTRIBUTING.md)** — Development setup, code style, PR workflow
 * **[Changelog](CHANGELOG.md)** — Full version history
+* **[Plugin SDK](docs/PLUGIN_SDK.md)** — Build third-party plugins
 
 ---
 
 ## Feature Overview
 
-### Consolidated Tabs (v10.0)
+### Consolidated Tabs (v11.0)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
@@ -86,17 +72,15 @@ The biggest release yet: 25 tabs consolidated to 15, new architecture foundation
 | **Community** | Presets + Marketplace | Save/load presets, browse community presets |
 | **Diagnostics** | Watchtower + Boot | Services, boot analyzer, journal viewer |
 
-### New in v10.0
+### New in v11.0
 
 | Feature | Description |
 |---------|-------------|
-| **First-Run Wizard** | Auto-detects hardware, asks use case, saves profile |
-| **Command Palette** | Ctrl+K fuzzy search across 60+ features |
-| **Hardware Profiles** | HP EliteBook, ThinkPad, Dell XPS, Framework, ASUS, generic |
-| **BaseTab** | Shared base class with CommandRunner wiring |
-| **PrivilegedCommand** | Safe pkexec builder (no shell injection) |
-| **Error Framework** | Typed exceptions with codes, hints, recovery |
-| **CI/CD** | GitHub Actions: lint, test, build, release |
+| **Plugin Manager** | Enable/disable plugins in Community tab |
+| **Plugin Manifests** | `plugin.json` metadata with version gating |
+| **Support Bundle** | Export logs and system info as ZIP |
+| **Automation Validation** | Validate and simulate rules before execution |
+| **CLI Additions** | `plugins` and `support-bundle` commands |
 
 ### Previous Feature Highlights
 
@@ -122,7 +106,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v10.0.0/loofi-fedora-tweaks-10.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v11.0.0/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
 ```
 
 ### Run from Source
@@ -138,7 +122,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-10.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
 ```
 
 ---
@@ -165,6 +149,8 @@ loofi netmon                  # Network interface stats
 loofi cleanup                 # Run full cleanup
 loofi tweak power --profile performance
 loofi network dns --provider cloudflare
+loofi plugins list            # List available plugins
+loofi support-bundle          # Export support bundle ZIP
 
 # JSON output (for scripting)
 loofi --json info

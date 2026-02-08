@@ -4,6 +4,10 @@ import urllib.request
 import urllib.error
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from utils.log import get_logger
+
+logger = get_logger(__name__)
+
 class AppConfigFetcher(QThread):
     config_ready = pyqtSignal(list)
     config_error = pyqtSignal(str)
@@ -28,7 +32,7 @@ class AppConfigFetcher(QThread):
                         self.config_ready.emit(data)
                         return
             except Exception as e:
-                print(f"Remote fetch failed: {e}")
+                logger.warning("Remote fetch failed: %s", e)
         
         # 2. Try Cache
         if os.path.exists(self.CACHE_FILE):
@@ -38,7 +42,7 @@ class AppConfigFetcher(QThread):
                     self.config_ready.emit(data)
                     return
             except Exception as e:
-                print(f"Cache load failed: {e}")
+                logger.warning("Cache load failed: %s", e)
 
         # 3. Fallback to Local Package
         if os.path.exists(self.LOCAL_FALLBACK):
@@ -58,4 +62,4 @@ class AppConfigFetcher(QThread):
             with open(self.CACHE_FILE, 'w') as f:
                 json.dump(data, f, indent=4)
         except Exception as e:
-            print(f"Failed to save cache: {e}")
+            logger.warning("Failed to save cache: %s", e)

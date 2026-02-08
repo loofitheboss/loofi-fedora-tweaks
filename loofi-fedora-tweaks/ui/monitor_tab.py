@@ -1,6 +1,6 @@
 """
 Monitor Tab - Consolidated tab merging Performance and Processes.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Uses QTabWidget for sub-navigation to preserve all features from the
 original PerformanceTab and ProcessesTab.

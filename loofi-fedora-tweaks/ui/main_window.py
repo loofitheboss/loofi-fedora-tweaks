@@ -1,5 +1,5 @@
 """
-Main Window - v10.0 "Zenith Update"
+Main Window - v11.0 "Aurora Update"
 Consolidated 15-tab layout with sidebar navigation.
 """
 
@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QStackedWidget, QLabel, QFrame
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QFont, QColor, QShortcut, QKeySequence
+from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
 
 # Only import essential tabs eagerly (Dashboard is always shown first)
 from ui.dashboard_tab import DashboardTab
@@ -31,9 +31,6 @@ class MainWindow(QMainWindow):
         self.pulse = None
         self.pulse_thread = None
         self._start_pulse_listener()
-
-        # Load Modern Theme
-        self.load_theme()
 
         # Central Widget
         central_widget = QWidget()
@@ -146,12 +143,6 @@ class MainWindow(QMainWindow):
             self.pulse_thread.start()
         except Exception:
             pass
-
-    def load_theme(self):
-        theme_path = os.path.join(os.path.dirname(__file__), "..", "assets", "modern.qss")
-        if os.path.exists(theme_path):
-            with open(theme_path, "r") as f:
-                self.setStyleSheet(f.read())
 
     def add_page(self, name, icon, widget):
         item = QListWidgetItem(f"{icon}   {name}")

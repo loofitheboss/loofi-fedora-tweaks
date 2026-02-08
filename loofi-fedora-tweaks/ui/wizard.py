@@ -1,6 +1,6 @@
 """
 First-Run Wizard - Guided onboarding experience.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Detects hardware, lets user pick a use-case profile, and saves
 the selection to ~/.config/loofi-fedora-tweaks/profile.json.

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        10.0.0
+Version:        11.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -52,6 +52,14 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 11.0.0-1
+- Aurora Update: Extensibility and diagnostics upgrades
+- Plugin manifest support with enable/disable state and CLI management
+- Plugin Manager UI under Community tab
+- Support bundle ZIP export (Diagnostics + CLI)
+- Automation rule validation and dry-run simulation
+- Unified stylesheet loading and improved logging visibility
+
 * Sat Feb 07 2026 Loofi <loofi@example.com> - 10.0.0-1
 - Zenith Update: Major consolidation and modernization release
 - Tab consolidation: 25 tabs reduced to 15 with sub-navigation
@@ -77,38 +85,38 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 - Dashboard auto-refresh with CPU load indicator
 - CLI commands: processes, temperature, netmon
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 9.0.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 9.0.0-1
 - Director Update: Window management for KDE, Hyprland, Sway
 - Director tab: Tiling presets, workspace templates, dotfile sync
 - KWin script installer for advanced KDE tiling
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.5.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 8.5.0-1
 - Sentinel Update: Proactive security hardening
 - Security Center tab: Port auditor with security scoring
 - USB Guard integration for BadUSB protection
 - Firejail sandbox manager for application isolation
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.1.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 8.1.0-1
 - Neural Update: AI-ready foundation
 - AI Lab tab: Hardware detection, Ollama management
 - Model downloads for Llama, Mistral, CodeLlama
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 8.0.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 8.0.0-1
 - Replicator Update: Developer tools, diagnostics, and IaC exports
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 7.0.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 7.0.0-1
 - Community Update: Marketplace and Drift Detection
 - Preset Marketplace for community presets
 - Configuration drift detection
 - New marketplace tab UI
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 6.5.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 6.5.0-1
 - Architect Update: CLI and Plugin System
 - Full CLI mode with subcommands
 - Plugin system for extensions
 - Operations layer refactoring
 
-* Fri Feb 07 2026 Loofi <loofi@example.com> - 6.2.0-1
+* Sat Feb 07 2026 Loofi <loofi@example.com> - 6.2.0-1
 - Engine Room Update: Boot management features
 - Kernel parameter editor with grubby wrapper
 - ZRAM tuner for memory compression

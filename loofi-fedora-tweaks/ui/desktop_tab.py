@@ -1,6 +1,6 @@
 """
 Desktop Tab - Consolidated Window Management + Theming interface.
-Part of v10.0 "Zenith Update" - merges Director and Theming tabs.
+Part of v11.0 "Aurora Update" - merges Director and Theming tabs.
 
 Sub-tabs:
 - Window Manager: Compositor detection, tiling config, workspace templates, dotfile sync

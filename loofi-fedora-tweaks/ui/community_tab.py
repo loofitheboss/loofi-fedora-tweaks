@@ -1,6 +1,6 @@
 """
 Community Tab - Consolidated Presets + Marketplace interface.
-Part of v10.0 "Zenith Update" - merges Presets and Marketplace tabs.
+Part of v11.0 "Aurora Update" - merges Presets and Marketplace tabs.
 
 Sub-tabs:
 - Presets: Local presets, community presets, backup/sync
@@ -22,6 +22,7 @@ from utils.config_manager import ConfigManager
 from utils.cloud_sync import CloudSyncManager
 from utils.marketplace import PresetMarketplace, CommunityPreset, MarketplaceResult
 from utils.drift import DriftDetector
+from utils.plugin_base import PluginLoader
 
 
 class FetchPresetsThread(QThread):
@@ -84,6 +85,11 @@ class CommunityTab(QWidget):
             self._create_marketplace_tab(), self.tr("Marketplace")
         )
 
+        # Sub-tab 3: Plugins
+        self.sub_tabs.addTab(
+            self._create_plugins_tab(), self.tr("Plugins")
+        )
+
     # ================================================================
     # PRESETS SUB-TAB (from PresetsTab)
     # ================================================================
@@ -114,6 +120,119 @@ class CommunityTab(QWidget):
         preset_tabs.addTab(self._create_sync_tab(), self.tr("Backup & Sync"))
 
         return widget
+
+    # ================================================================
+    # PLUGINS SUB-TAB
+    # ================================================================
+
+    def _create_plugins_tab(self) -> QWidget:
+        """Create the plugins sub-tab."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
+
+        header = QLabel(self.tr("Plugin Manager"))
+        header.setObjectName("header")
+        layout.addWidget(header)
+
+        desc = QLabel(self.tr("Enable or disable installed plugins."))
+        layout.addWidget(desc)
+
+        self.plugins_list = QListWidget()
+        self.plugins_list.currentItemChanged.connect(self._on_plugin_selected)
+        layout.addWidget(self.plugins_list)
+
+        self.plugin_details = QTextEdit()
+        self.plugin_details.setReadOnly(True)
+        self.plugin_details.setMinimumHeight(120)
+        layout.addWidget(self.plugin_details)
+
+        btn_layout = QHBoxLayout()
+
+        refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.clicked.connect(self.refresh_plugins)
+        btn_layout.addWidget(refresh_btn)
+
+        self.enable_btn = QPushButton(self.tr("Enable"))
+        self.enable_btn.clicked.connect(lambda: self._set_selected_plugin(True))
+        btn_layout.addWidget(self.enable_btn)
+
+        self.disable_btn = QPushButton(self.tr("Disable"))
+        self.disable_btn.clicked.connect(lambda: self._set_selected_plugin(False))
+        btn_layout.addWidget(self.disable_btn)
+
+        btn_layout.addStretch()
+        layout.addLayout(btn_layout)
+
+        self.refresh_plugins()
+        return widget
+
+    def refresh_plugins(self):
+        """Reload the plugin list."""
+        self.plugins_list.clear()
+        loader = PluginLoader()
+        plugins = loader.list_plugins()
+
+        if not plugins:
+            self.plugin_details.setText(self.tr("No plugins found."))
+            self.enable_btn.setEnabled(False)
+            self.disable_btn.setEnabled(False)
+            return
+
+        for plugin in plugins:
+            name = plugin["name"]
+            enabled = plugin.get("enabled", True)
+            status = "✅" if enabled else "❌"
+            item = QListWidgetItem(f"{status} {name}")
+            item.setData(Qt.ItemDataRole.UserRole, plugin)
+            self.plugins_list.addItem(item)
+
+        self.plugins_list.setCurrentRow(0)
+
+    def _on_plugin_selected(self, current, previous):
+        """Show selected plugin details."""
+        if not current:
+            self.plugin_details.clear()
+            return
+
+        plugin = current.data(Qt.ItemDataRole.UserRole) or {}
+        manifest = plugin.get("manifest") or {}
+        enabled = plugin.get("enabled", True)
+
+        lines = [
+            f"Name: {manifest.get('name', plugin.get('name', 'unknown'))}",
+            f"Version: {manifest.get('version', 'unknown')}",
+            f"Author: {manifest.get('author', 'unknown')}",
+            f"Enabled: {'Yes' if enabled else 'No'}",
+            f"Description: {manifest.get('description', '')}",
+        ]
+
+        perms = manifest.get("permissions") or []
+        if perms:
+            lines.append(f"Permissions: {', '.join(perms)}")
+
+        min_version = manifest.get("min_app_version")
+        if min_version:
+            lines.append(f"Min App Version: {min_version}")
+
+        self.plugin_details.setText("\n".join(lines).strip())
+        self.enable_btn.setEnabled(not enabled)
+        self.disable_btn.setEnabled(enabled)
+
+    def _set_selected_plugin(self, enabled: bool):
+        """Enable or disable the selected plugin."""
+        item = self.plugins_list.currentItem()
+        if not item:
+            return
+        plugin = item.data(Qt.ItemDataRole.UserRole) or {}
+        name = plugin.get("name")
+        if not name:
+            return
+
+        loader = PluginLoader()
+        loader.set_enabled(name, enabled)
+        self.refresh_plugins()
 
     # -- Local Presets --
 

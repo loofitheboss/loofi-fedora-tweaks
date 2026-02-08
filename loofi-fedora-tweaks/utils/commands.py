@@ -1,6 +1,6 @@
 """
 Centralized command builder for privileged operations.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Replaces inconsistent pkexec command construction across multiple files.
 Ensures all privileged commands use argument arrays (never shell strings)

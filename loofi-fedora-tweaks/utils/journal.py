@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
+import tempfile
+import zipfile
 
 
 @dataclass
@@ -247,6 +249,62 @@ class JournalManager:
             
         except Exception as e:
             return Result(False, f"Failed to export log: {e}")
+
+    @classmethod
+    def export_support_bundle(cls, output_path: Optional[Path] = None) -> Result:
+        """
+        Export a support bundle ZIP with key diagnostics.
+        
+        Includes:
+        - panic log
+        - recent journal errors
+        - failed services
+        - basic system info
+        """
+        if output_path is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = Path.home() / f"loofi-support-bundle-{timestamp}.zip"
+        
+        try:
+            with tempfile.TemporaryDirectory(prefix="loofi-support-") as tmpdir:
+                tmp = Path(tmpdir)
+                
+                # Panic log
+                panic_path = tmp / "panic-log.txt"
+                panic_result = cls.export_panic_log(panic_path)
+                
+                # Recent errors
+                recent_errors = cls.get_recent_errors("6 hours ago")
+                (tmp / "recent-errors.txt").write_text(recent_errors or "No recent errors")
+                
+                # Failed services
+                try:
+                    result = subprocess.run(
+                        ["systemctl", "--failed", "--no-pager", "--plain"],
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                    (tmp / "failed-services.txt").write_text(result.stdout or "No failed services")
+                except Exception:
+                    (tmp / "failed-services.txt").write_text("Unable to query failed services")
+                
+                # System info
+                (tmp / "system-info.txt").write_text(cls._get_system_info() or "No system info")
+                
+                # Create ZIP
+                with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+                    for file in tmp.iterdir():
+                        zf.write(file, arcname=file.name)
+                
+                size = output_path.stat().st_size if output_path.exists() else 0
+                return Result(
+                    True,
+                    f"Support bundle exported to: {output_path}",
+                    {"path": str(output_path), "size": size, "panic_log_ok": panic_result.success}
+                )
+        except Exception as e:
+            return Result(False, f"Failed to export support bundle: {e}")
     
     @classmethod
     def get_quick_diagnostic(cls) -> dict:

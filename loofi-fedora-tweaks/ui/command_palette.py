@@ -1,6 +1,6 @@
 """
 Command Palette - Global fuzzy search across all features.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Provides a Ctrl+K searchable overlay that lets users jump to any
 feature or tab in the application.  The palette uses simple

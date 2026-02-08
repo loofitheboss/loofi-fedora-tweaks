@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 10.0.0 "Zenith Update"**
+> **Version 11.0.0 "Aurora Update"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -391,6 +391,13 @@ The **Community** tab consolidates Presets and Marketplace.
 | **Download** | Save presets locally |
 | **Drift Detection** | Track configuration changes from baseline |
 
+### Plugins Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **List Plugins** | View installed plugins and metadata |
+| **Enable/Disable** | Toggle plugins without uninstalling |
+
 ---
 
 ## Diagnostics
@@ -528,6 +535,10 @@ The `doctor` command checks for all critical and optional tools and reports what
 
 Use **Diagnostics** > **Journal** > **Export Panic Log** to generate a forum-ready diagnostic file.
 
+### Support Bundle
+
+Use **Diagnostics** > **Journal** > **Export Support Bundle** to generate a ZIP with logs and system info.
+
 ### Reset First-Run Wizard
 
 ```bash
@@ -545,4 +556,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v10.0.0 - February 2026*
+*Documentation last updated: v11.0.0 - February 2026*

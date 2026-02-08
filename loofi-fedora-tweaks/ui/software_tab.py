@@ -1,6 +1,6 @@
 """
 Software Tab - Consolidated tab merging Applications and Repositories.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Uses QTabWidget for sub-navigation to preserve all features from the
 original AppsTab and ReposTab.

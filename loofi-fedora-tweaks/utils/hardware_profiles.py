@@ -1,6 +1,6 @@
 """
 Hardware profile detection and configuration.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Auto-detects laptop/desktop model via DMI data and returns
 hardware-specific capabilities (battery control, fan control, etc.).

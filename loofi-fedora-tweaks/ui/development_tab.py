@@ -1,6 +1,6 @@
 """
 Development Tab - Consolidated Containers + Developer Tools interface.
-Part of v10.0 "Zenith Update" - merges Containers and Developer tabs.
+Part of v11.0 "Aurora Update" - merges Containers and Developer tabs.
 
 Sub-tabs:
 - Containers: Distrobox container management

@@ -22,13 +22,13 @@ class TestVersionModule(unittest.TestCase):
         from version import __version__
         self.assertIsNotNone(__version__)
 
-    def test_version_is_1000(self):
+    def test_version_is_1100(self):
         from version import __version__
-        self.assertEqual(__version__, "10.0.0")
+        self.assertEqual(__version__, "11.0.0")
 
     def test_version_codename(self):
         from version import __version_codename__
-        self.assertEqual(__version_codename__, "Zenith Update")
+        self.assertEqual(__version_codename__, "Aurora Update")
 
     def test_app_name(self):
         from version import __app_name__

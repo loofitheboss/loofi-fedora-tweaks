@@ -85,6 +85,7 @@ loofi-fedora-tweaks/
 │   └── ...
 ├── docs/                     # Documentation
 │   ├── USER_GUIDE.md
+│   ├── RELEASE_CHECKLIST.md
 │   └── CONTRIBUTING.md       # This file
 ├── .github/
 │   ├── workflows/ci.yml      # CI pipeline (lint, test, build)
@@ -149,7 +150,7 @@ PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-10.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
 ```
 
 ## CI/CD

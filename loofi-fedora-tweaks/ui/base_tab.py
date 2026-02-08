@@ -1,6 +1,6 @@
 """
 Base Tab - Common base class for all tabs with command execution.
-Part of v10.0 "Zenith Update" - kills code duplication across 15+ tabs.
+Part of v11.0 "Aurora Update" - kills code duplication across 15+ tabs.
 
 Provides:
 - CommandRunner wiring (output_received, finished, error_occurred, progress_update)

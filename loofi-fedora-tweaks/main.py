@@ -59,8 +59,8 @@ def main():
         elif translator.load(f"loofi_{locale.split('_')[0]}", translations_path):
             app.installTranslator(translator)
         
-        # Load QSS Stylesheet
-        style_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "style.qss")
+        # Load QSS Stylesheet (single source of truth)
+        style_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "modern.qss")
         if os.path.exists(style_file):
             with open(style_file, "r") as f:
                 app.setStyleSheet(f.read())

@@ -1,6 +1,6 @@
 """
 Maintenance Tab - Consolidated tab merging Updates, Cleanup, and Overlays.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Uses QTabWidget for sub-navigation to preserve all features from the
 original UpdatesTab, CleanupTab, and OverlaysTab.

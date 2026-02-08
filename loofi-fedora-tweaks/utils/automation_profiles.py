@@ -143,6 +143,9 @@ class AutomationProfiles:
             Dict with 'success' and 'message'
         """
         try:
+            validation = cls.validate_rule(rule)
+            if not validation["success"]:
+                return validation
             config = cls.load_config()
             if "rules" not in config:
                 config["rules"] = []
@@ -171,6 +174,11 @@ class AutomationProfiles:
             config = cls.load_config()
             for i, rule in enumerate(config.get("rules", [])):
                 if rule.get("id") == rule_id:
+                    merged = dict(rule)
+                    merged.update(updates)
+                    validation = cls.validate_rule(merged)
+                    if not validation["success"]:
+                        return validation
                     config["rules"][i].update(updates)
                     cls.save_config(config)
                     return {"success": True, "message": "Rule updated"}
@@ -231,6 +239,97 @@ class AutomationProfiles:
     def get_home_wifi_ssids(cls) -> List[str]:
         """Get list of home Wi-Fi network SSIDs."""
         return cls.load_config().get("home_wifi_ssids", [])
+
+    # -------------------------------------------------------------------------
+    # Validation & Simulation
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def validate_rule(cls, rule: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate a rule definition without executing it."""
+        errors = []
+        warnings = []
+
+        trigger = rule.get("trigger")
+        action = rule.get("action")
+        params = rule.get("action_params", {})
+
+        if trigger not in [t.value for t in TriggerType]:
+            errors.append(f"Invalid trigger: {trigger}")
+
+        if action not in [a.value for a in ActionType]:
+            errors.append(f"Invalid action: {action}")
+
+        if action == ActionType.SET_POWER_PROFILE.value:
+            if params.get("profile") not in ("power-saver", "balanced", "performance"):
+                warnings.append("Power profile should be one of: power-saver, balanced, performance")
+        if action == ActionType.SET_CPU_GOVERNOR.value and not params.get("governor"):
+            errors.append("Missing action_params.governor")
+        if action in (ActionType.ENABLE_VPN.value, ActionType.DISABLE_VPN.value):
+            if params.get("vpn_name") is None:
+                warnings.append("vpn_name not set; first available VPN will be used")
+        if action in (ActionType.ENABLE_TILING.value, ActionType.DISABLE_TILING.value):
+            if not params.get("script"):
+                warnings.append("script not set; default 'polonium' will be used")
+        if action == ActionType.SET_THEME.value:
+            if params.get("theme") not in ("light", "dark"):
+                warnings.append("Theme should be 'light' or 'dark'")
+        if action == ActionType.RUN_COMMAND.value and not params.get("command"):
+            errors.append("Missing action_params.command")
+
+        if errors:
+            return {"success": False, "message": "Validation failed", "errors": errors, "warnings": warnings}
+        return {"success": True, "message": "Validation OK", "errors": [], "warnings": warnings}
+
+    @classmethod
+    def dry_run_action(cls, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Describe what an action would do without executing it."""
+        if action == ActionType.SET_POWER_PROFILE.value:
+            profile = params.get("profile", "balanced")
+            return {"success": True, "message": f"Would set power profile to '{profile}'"}
+        if action == ActionType.SET_CPU_GOVERNOR.value:
+            governor = params.get("governor", "schedutil")
+            return {"success": True, "message": f"Would set CPU governor to '{governor}'"}
+        if action == ActionType.ENABLE_VPN.value:
+            name = params.get("vpn_name", "<auto>")
+            return {"success": True, "message": f"Would enable VPN '{name}'"}
+        if action == ActionType.DISABLE_VPN.value:
+            return {"success": True, "message": "Would disable active VPN connections"}
+        if action == ActionType.ENABLE_TILING.value:
+            script = params.get("script", "polonium")
+            return {"success": True, "message": f"Would enable tiling script '{script}'"}
+        if action == ActionType.DISABLE_TILING.value:
+            script = params.get("script", "polonium")
+            return {"success": True, "message": f"Would disable tiling script '{script}'"}
+        if action == ActionType.SET_THEME.value:
+            theme = params.get("theme", "dark")
+            return {"success": True, "message": f"Would set theme to '{theme}'"}
+        if action == ActionType.RUN_COMMAND.value:
+            cmd = params.get("command", "")
+            return {"success": True, "message": f"Would run command: {cmd}"}
+        if action == ActionType.ENABLE_FOCUS_MODE.value:
+            profile = params.get("profile", "default")
+            return {"success": True, "message": f"Would enable Focus Mode (profile: {profile})"}
+        if action == ActionType.DISABLE_FOCUS_MODE.value:
+            return {"success": True, "message": "Would disable Focus Mode"}
+        return {"success": False, "message": f"Unknown action: {action}"}
+
+    @classmethod
+    def simulate_rules_for_trigger(cls, trigger: str, context: Optional[Dict] = None) -> Dict[str, Any]:
+        """Dry-run all rules for a trigger."""
+        rules = cls.get_rules_for_trigger(trigger)
+        results = []
+        for rule in rules:
+            results.append({
+                "rule_id": rule.get("id"),
+                "rule_name": rule.get("name"),
+                "result": cls.dry_run_action(rule.get("action"), rule.get("action_params", {}))
+            })
+        return {
+            "success": True,
+            "message": f"Simulated {len(results)} rules for trigger '{trigger}'",
+            "results": results
+        }
     
     # -------------------------------------------------------------------------
     # Action Execution

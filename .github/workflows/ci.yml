@@ -24,6 +24,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pytest pytest-cov PyQt6
+      - run: python loofi-fedora-tweaks/main.py --version
+      - run: python loofi-fedora-tweaks/main.py --cli --version
       - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
 
   build:

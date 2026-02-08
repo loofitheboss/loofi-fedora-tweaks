@@ -1,6 +1,6 @@
 """
 Centralized error hierarchy for Loofi Fedora Tweaks.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 All custom exceptions derive from LoofiError which includes:
 - error code (machine-readable)

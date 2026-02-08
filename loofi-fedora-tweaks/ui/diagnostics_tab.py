@@ -1,6 +1,6 @@
 """
 Diagnostics Tab - Consolidated tab merging Watchtower and Boot.
-Part of v10.0 "Zenith Update".
+Part of v11.0 "Aurora Update".
 
 Uses QTabWidget for sub-navigation to preserve all features from the
 original WatchtowerTab (services, boot analysis, journal) and
@@ -239,6 +239,10 @@ class _WatchtowerSubTab(QWidget):
         panic_btn.clicked.connect(self._export_panic_log)
         btn_layout.addWidget(panic_btn)
 
+        bundle_btn = QPushButton(self.tr("\U0001f4e6 Export Support Bundle"))
+        bundle_btn.clicked.connect(self._export_support_bundle)
+        btn_layout.addWidget(bundle_btn)
+
         layout.addLayout(btn_layout)
 
         self._refresh_journal()
@@ -428,6 +432,24 @@ class _WatchtowerSubTab(QWidget):
                 self.tr(
                     "Log saved to:\n{path}\n\n"
                     "You can share this file when asking for help online."
+                ).format(path=result.data["path"]),
+            )
+        else:
+            QMessageBox.warning(
+                self, self.tr("Export Failed"), result.message
+            )
+
+    def _export_support_bundle(self):
+        """Export support bundle ZIP."""
+        result = JournalManager.export_support_bundle()
+
+        if result.success:
+            QMessageBox.information(
+                self,
+                self.tr("Support Bundle Exported"),
+                self.tr(
+                    "Bundle saved to:\n{path}\n\n"
+                    "Share this ZIP file when reporting issues."
                 ).format(path=result.data["path"]),
             )
         else:

@@ -1,6 +1,10 @@
 from PyQt6.QtCore import QProcess, pyqtSignal, QObject
 import re
 
+from utils.log import get_logger
+
+logger = get_logger(__name__)
+
 class CommandRunner(QObject):
     output_received = pyqtSignal(str)
     finished = pyqtSignal(int)
@@ -82,9 +86,12 @@ class CommandRunner(QObject):
                 pass
 
     def handle_finished(self, exit_code, exit_status):
+        if exit_code != 0:
+            logger.debug("Command finished with non-zero exit: %s", exit_code)
         self.finished.emit(exit_code)
 
     def handle_error(self, error):
+        logger.warning("Command runner error: %s", error)
         self.error_occurred.emit(str(error))
 
     def stop(self):

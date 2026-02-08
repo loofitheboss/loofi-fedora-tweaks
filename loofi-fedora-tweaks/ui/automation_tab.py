@@ -1,6 +1,6 @@
 """
 Automation Tab - Consolidated Scheduler + Replicator interface.
-Part of v10.0 "Zenith Update" - merges Scheduler and Replicator tabs.
+Part of v11.0 "Aurora Update" - merges Scheduler and Replicator tabs.
 
 Sub-tabs:
 - Scheduler: Manage scheduled automation tasks (cleanup, updates, sync, presets)
