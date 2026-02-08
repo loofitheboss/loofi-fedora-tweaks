@@ -144,7 +144,7 @@ class HardwareTab(QWidget):
         
         # Current frequency display
         freq = HardwareManager.get_cpu_frequency()
-        self.lbl_cpu_freq = QLabel(f"Current: {freq['current']} MHz / {freq['max']} MHz")
+        self.lbl_cpu_freq = QLabel(self.tr("Current: {} MHz / {} MHz").format(freq['current'], freq['max']))
         self.lbl_cpu_freq.setStyleSheet("color: #a6adc8;")
         layout.addWidget(self.lbl_cpu_freq)
         
@@ -197,7 +197,7 @@ class HardwareTab(QWidget):
         
         # Current profile
         current = HardwareManager.get_power_profile()
-        self.lbl_power_profile = QLabel(f"Current: {current.title()}")
+        self.lbl_power_profile = QLabel(self.tr("Current: {}").format(current.title()))
         self.lbl_power_profile.setStyleSheet("color: #a6adc8;")
         layout.addWidget(self.lbl_power_profile)
         
@@ -259,7 +259,7 @@ class HardwareTab(QWidget):
         
         # Current mode
         current = HardwareManager.get_gpu_mode()
-        self.lbl_gpu_mode = QLabel(f"Current: {current.title()}")
+        self.lbl_gpu_mode = QLabel(self.tr("Current: {}").format(current.title()))
         self.lbl_gpu_mode.setStyleSheet("color: #a6adc8;")
         layout.addWidget(self.lbl_gpu_mode)
         
@@ -338,7 +338,7 @@ class HardwareTab(QWidget):
         
         # Current status
         status = HardwareManager.get_fan_status()
-        self.lbl_fan_status = QLabel(f"Speed: {status['speed']:.0f}% | Temp: {status['temperature']:.0f}°C")
+        self.lbl_fan_status = QLabel(self.tr("Speed: {}% | Temp: {}°C").format(int(status['speed']), int(status['temperature'])))
         self.lbl_fan_status.setStyleSheet("color: #a6adc8;")
         layout.addWidget(self.lbl_fan_status)
         
@@ -489,12 +489,12 @@ class HardwareTab(QWidget):
         try:
             # CPU frequency
             freq = HardwareManager.get_cpu_frequency()
-            self.lbl_cpu_freq.setText(f"Current: {freq['current']} MHz / {freq['max']} MHz")
+            self.lbl_cpu_freq.setText(self.tr("Current: {} MHz / {} MHz").format(freq['current'], freq['max']))
             
             # Fan status
             if HardwareManager.is_nbfc_available():
                 status = HardwareManager.get_fan_status()
-                self.lbl_fan_status.setText(f"Speed: {status['speed']:.0f}% | Temp: {status['temperature']:.0f}°C")
+                self.lbl_fan_status.setText(self.tr("Speed: {}% | Temp: {}°C").format(int(status['speed']), int(status['temperature'])))
         except Exception:
             pass
     

@@ -1,6 +1,6 @@
 """
-Main Window - v13.0 "Nexus Update"
-20-tab layout with sidebar navigation.
+Main Window - v13.5 "UX Polish"
+21-tab layout with sidebar navigation.
 """
 
 from PyQt6.QtWidgets import (
@@ -42,12 +42,32 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(0)
         central_widget.setLayout(main_layout)
 
-        # Sidebar
+        # Sidebar container with search
+        sidebar_container = QWidget()
+        sidebar_container.setFixedWidth(240)
+        sidebar_layout = QVBoxLayout(sidebar_container)
+        sidebar_layout.setContentsMargins(0, 10, 0, 0)
+        sidebar_layout.setSpacing(0)
+
+        # Search box
+        from PyQt6.QtWidgets import QLineEdit
+        self.sidebar_search = QLineEdit()
+        self.sidebar_search.setPlaceholderText(self.tr("Search tabs..."))
+        self.sidebar_search.setClearButtonEnabled(True)
+        self.sidebar_search.setFixedHeight(36)
+        self.sidebar_search.setStyleSheet(
+            "QLineEdit { margin: 5px 10px; border-radius: 8px; padding: 4px 10px; }"
+        )
+        self.sidebar_search.textChanged.connect(self._filter_sidebar)
+        sidebar_layout.addWidget(self.sidebar_search)
+
+        # Sidebar list
         self.sidebar = QListWidget()
-        self.sidebar.setFixedWidth(240)
         self.sidebar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.sidebar.currentRowChanged.connect(self.change_page)
-        main_layout.addWidget(self.sidebar)
+        sidebar_layout.addWidget(self.sidebar)
+
+        main_layout.addWidget(sidebar_container)
 
         # Content Area
         self.content_area = QStackedWidget()
@@ -112,6 +132,9 @@ class MainWindow(QMainWindow):
         self.add_page(self.tr("Profiles"), "\U0001f464", self._lazy_tab("profiles"))
         self.add_page(self.tr("Health"), "\U0001f4c8", self._lazy_tab("health"))
 
+        # v13.5 UX Polish
+        self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"))
+
         # Select first item
         self.sidebar.setCurrentRow(0)
 
@@ -121,6 +144,12 @@ class MainWindow(QMainWindow):
 
         # Ctrl+K Command Palette shortcut
         self._setup_command_palette_shortcut()
+
+        # v13.5 UX Polish - keyboard shortcuts
+        self._setup_keyboard_shortcuts()
+
+        # v13.5 UX Polish - notification bell
+        self._setup_notification_bell()
 
         # First-run wizard
         self._check_first_run()
@@ -149,6 +178,8 @@ class MainWindow(QMainWindow):
             # v13.0 Nexus Update tabs
             "profiles": lambda: __import__("ui.profiles_tab", fromlist=["ProfilesTab"]).ProfilesTab(),
             "health": lambda: __import__("ui.health_timeline_tab", fromlist=["HealthTimelineTab"]).HealthTimelineTab(),
+            # v13.5 UX Polish
+            "settings": lambda: __import__("ui.settings_tab", fromlist=["SettingsTab"]).SettingsTab(self),
         }
         return LazyWidget(loaders[tab_name])
 
@@ -193,6 +224,82 @@ class MainWindow(QMainWindow):
             palette.exec()
         except ImportError:
             pass
+
+    def _filter_sidebar(self, text: str):
+        """Filter sidebar items by search text."""
+        search = text.lower()
+        for i in range(self.sidebar.count()):
+            item = self.sidebar.item(i)
+            item.setHidden(search not in item.text().lower())
+
+    def _setup_keyboard_shortcuts(self):
+        """Register keyboard shortcuts for tab navigation."""
+        # Ctrl+1 through Ctrl+9 - switch to tab 1-9
+        for i in range(1, 10):
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
+            shortcut.activated.connect(lambda idx=i-1: self.sidebar.setCurrentRow(idx))
+
+        # Ctrl+Tab - next tab
+        next_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
+        next_tab.activated.connect(lambda: self.sidebar.setCurrentRow(
+            (self.sidebar.currentRow() + 1) % self.sidebar.count()
+        ))
+
+        # Ctrl+Shift+Tab - previous tab
+        prev_tab = QShortcut(QKeySequence("Ctrl+Shift+Tab"), self)
+        prev_tab.activated.connect(lambda: self.sidebar.setCurrentRow(
+            (self.sidebar.currentRow() - 1) % self.sidebar.count()
+        ))
+
+        # Ctrl+Q - Quit
+        quit_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self)
+        quit_shortcut.activated.connect(self.quit_app)
+
+        # F1 - Show shortcut help
+        help_shortcut = QShortcut(QKeySequence("F1"), self)
+        help_shortcut.activated.connect(self._show_shortcut_help)
+
+    def _show_shortcut_help(self):
+        """Show keyboard shortcuts help dialog."""
+        from PyQt6.QtWidgets import QMessageBox
+        shortcuts = (
+            "Ctrl+K — Command Palette\n"
+            "Ctrl+1..9 — Switch to tab 1-9\n"
+            "Ctrl+Tab — Next tab\n"
+            "Ctrl+Shift+Tab — Previous tab\n"
+            "Ctrl+Q — Quit\n"
+            "F1 — This help"
+        )
+        QMessageBox.information(self, self.tr("Keyboard Shortcuts"), shortcuts)
+
+    def _setup_notification_bell(self):
+        """Add notification bell to the header area."""
+        from PyQt6.QtWidgets import QToolButton
+        self.notif_panel = None
+        self.notif_bell = QToolButton()
+        self.notif_bell.setText("\U0001f514")  # Bell emoji
+        self.notif_bell.setStyleSheet(
+            "QToolButton { border: none; font-size: 20px; padding: 5px; }"
+            "QToolButton:hover { background-color: #313244; border-radius: 6px; }"
+        )
+        self.notif_bell.clicked.connect(self._toggle_notification_panel)
+
+    def _toggle_notification_panel(self):
+        """Toggle the notification panel."""
+        if self.notif_panel is None:
+            from ui.notification_panel import NotificationPanel
+            self.notif_panel = NotificationPanel(self)
+
+        if self.notif_panel.isVisible():
+            self.notif_panel.hide()
+        else:
+            self.notif_panel.refresh()
+            # Position at top-right
+            x = self.width() - self.notif_panel.width() - 10
+            y = 40
+            self.notif_panel.move(x, y)
+            self.notif_panel.show()
+            self.notif_panel.raise_()
 
     def _check_first_run(self):
         """Show first-run wizard if this is the first launch."""
@@ -290,3 +397,51 @@ class MainWindow(QMainWindow):
         from ui.doctor import DependencyDoctor
         doctor = DependencyDoctor(self)
         doctor.exec()
+
+    # ==================== v13.5 Theme Management ====================
+
+    def load_theme(self, name: str = "dark") -> None:
+        """
+        Load and apply a QSS theme by name.
+
+        Supported names: ``"dark"`` (modern.qss) and ``"light"`` (light.qss).
+        Falls back silently to no stylesheet if the file is missing.
+        """
+        theme_map = {
+            "dark": "modern.qss",
+            "light": "light.qss",
+        }
+        filename = theme_map.get(name, "modern.qss")
+        assets_dir = os.path.join(os.path.dirname(__file__), "..", "assets")
+        qss_path = os.path.join(assets_dir, filename)
+
+        try:
+            with open(qss_path, "r") as fh:
+                stylesheet = fh.read()
+            from PyQt6.QtWidgets import QApplication
+            app = QApplication.instance()
+            if app:
+                app.setStyleSheet(stylesheet)
+        except OSError:
+            pass
+
+    @staticmethod
+    def detect_system_theme() -> str:
+        """
+        Detect the system colour-scheme preference via
+        ``gsettings`` (GNOME / GTK) and return ``"dark"`` or ``"light"``.
+
+        Returns ``"dark"`` when detection fails.
+        """
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                capture_output=True, text=True, timeout=3,
+            )
+            value = result.stdout.strip().strip("'\"")
+            if "light" in value:
+                return "light"
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        return "dark"

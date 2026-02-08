@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [13.5.0] - 2026-02-08 "Nexus Update" (UX Polish)
+
+### Added
+
+- **Settings Tab**: New tab (#21) with Appearance, Behavior, and Advanced sub-tabs.
+  - `SettingsManager` singleton with JSON persistence and atomic writes (`utils/settings.py`).
+  - `AppSettings` dataclass with 9 configurable preferences.
+  - Theme ComboBox (dark/light), Follow System Theme checkbox.
+  - Start Minimized, Show Notifications, Confirm Dangerous Actions toggles.
+  - Log Level selector and Factory Reset button in Advanced.
+- **Light Theme**: Catppuccin Latte light theme (`assets/light.qss`) with full selector coverage mirroring `modern.qss`.
+- **Sidebar Search**: Filter tabs by name with `QLineEdit` search box above sidebar.
+- **Keyboard Shortcuts**: `Ctrl+1-9` tab switch, `Ctrl+Tab`/`Ctrl+Shift+Tab` cycling, `Ctrl+Q` quit, `F1` help dialog.
+- **Notification Center**: Slide-out panel with FIFO eviction (max 100), JSON persistence, unread badge, mark-all-read.
+  - `utils/notification_center.py` - Notification dataclass + singleton center.
+  - `ui/notification_panel.py` - NotificationCard + NotificationPanel widgets.
+- **Tooltip Constants**: Centralised `ui/tooltips.py` module with 28 tooltip strings for consistent UI text.
+- **82 New Tests**: `test_settings.py` (26), `test_notification_center.py` (20), `test_tooltips.py` (5), `test_settings_extended.py` (13), `test_notification_extended.py` (18).
+
+### Changed
+
+- **Main Window**: Sidebar container with search, notification bell, keyboard shortcuts, theme management methods (`load_theme()`, `detect_system_theme()`).
+- **i18n**: Wrapped 6 hardcoded English strings in `hardware_tab.py` with `self.tr()`.
+- **Test coverage**: 1060+ tests (up from 988).
+
+### New Files
+
+- `utils/settings.py` - Settings manager with AppSettings dataclass
+- `ui/settings_tab.py` - Settings UI with 3 sub-tabs
+- `assets/light.qss` - Catppuccin Latte light theme
+- `utils/notification_center.py` - Notification center singleton
+- `ui/notification_panel.py` - Slide-out notification panel
+- `ui/tooltips.py` - Centralised tooltip constants
+- `tests/test_settings.py` - Settings unit tests
+- `tests/test_notification_center.py` - Notification center unit tests
+- `tests/test_tooltips.py` - Tooltip constants tests
+- `tests/test_settings_extended.py` - Extended settings tests
+- `tests/test_notification_extended.py` - Extended notification tests
+
 ## [13.1.0] - 2026-02-08 "Nexus Update" (Stability)
 
 ### Changed

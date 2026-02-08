@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        13.1.0
+Version:        13.5.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -54,6 +54,18 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 13.5.0-1
+- UX Polish: Settings system, light theme, keyboard shortcuts, notification center
+- Settings tab with Appearance, Behavior, and Advanced sub-tabs
+- SettingsManager singleton with JSON persistence and atomic writes
+- Catppuccin Latte light theme (light.qss) with full selector coverage
+- Sidebar search/filter for tab navigation
+- Keyboard shortcuts: Ctrl+1-9 tab switch, Ctrl+Tab/Shift+Tab cycling, F1 help
+- Notification center with FIFO eviction, persistence, slide-out panel
+- Centralised tooltip constants module for all UI elements
+- i18n fixes: wrapped remaining hardcoded strings in hardware_tab
+- 82 new tests (settings, notification center, tooltips, extended coverage)
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 13.1.0-1
 - Stability update: exception cleanup, security hardening, test coverage
 - Replaced ~50 bare/broad exceptions with specific types + logging across 20 files
