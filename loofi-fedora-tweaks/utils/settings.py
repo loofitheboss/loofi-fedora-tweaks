@@ -41,6 +41,9 @@ class AppSettings:
     log_level: str = "INFO"
     check_updates_on_start: bool = True
 
+    # Version tracking
+    last_seen_version: str = "0.0.0"
+
 
 # Canonical set of known setting keys (derived from the dataclass).
 _DEFAULTS = AppSettings()
