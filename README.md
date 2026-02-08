@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v13.0.0 "Nexus Update"
+# Loofi Fedora Tweaks v14.0.0 "Quantum Leap" (Development)
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,18 +10,38 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.0.0">
-    <img src="https://img.shields.io/badge/Release-v13.0.0-blue?style=for-the-badge&logo=github" alt="Release v13.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.5.0">
+    <img src="https://img.shields.io/badge/Release-v13.5.0-blue?style=for-the-badge&logo=github" alt="Release v13.5.0"/>
+  </a>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks">
+    <img src="https://img.shields.io/badge/Development-v14.0.0--dev-orange?style=for-the-badge&logo=github" alt="Development v14.0.0-dev"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-839%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1060%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v13.0.0?
+## 🚧 Development Version - v14.0.0 "Quantum Leap"
+
+**⚠️ This is the development branch for v14.0.0**
+
+This branch contains in-development features for the next major release. For the stable version, see the [v13.5.0 release](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.5.0).
+
+### Planned for v14.0.0
+
+- Enhanced AI capabilities and integrations
+- Performance optimizations across all modules
+- Extended hardware support
+- Cloud integration features
+- Advanced automation workflows
+- Improved plugin system
+
+---
+
+## What's New in v13.5.0 (Latest Stable)?
 
 ### Nexus Update — System Profiles, Health Timeline & Plugin SDK v2
 
