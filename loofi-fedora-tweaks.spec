@@ -38,9 +38,11 @@ cp -r loofi-fedora-tweaks/* "%{buildroot}/usr/lib/%{name}/"
 
 cat > "%{buildroot}/usr/bin/%{name}" << 'EOF'
 #!/bin/bash
-export PYTHONPATH=/usr/lib/loofi-fedora-tweaks${PYTHONPATH:+:$PYTHONPATH}
-cd /usr/lib/loofi-fedora-tweaks
-exec python3 main.py "$@" 2>>${HOME}/.local/share/loofi-fedora-tweaks/startup.log
+APP_DIR=/usr/lib/loofi-fedora-tweaks
+LOG_DIR="${HOME}/.local/share/loofi-fedora-tweaks"
+mkdir -p "${LOG_DIR}"
+export PYTHONPATH="${APP_DIR}${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 "${APP_DIR}/main.py" "$@" 2>>"${LOG_DIR}/startup.log"
 EOF
 chmod +x "%{buildroot}/usr/bin/%{name}"
 
