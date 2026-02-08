@@ -1,71 +1,62 @@
-# Loofi Fedora Tweaks v14.0.0 - The "Quantum Leap" Update
+# Loofi Fedora Tweaks v15.0.0 - The "Nebula" Update
 
-A reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.
+A system intelligence release that makes Loofi smarter about the system it manages. Auto-tune performance based on workload, manage snapshots from a unified timeline, analyze logs with pattern detection, and execute common operations instantly from a quick-action bar.
 
 ## Highlights
 
-* **Update Checker**: Automatic update notifications from GitHub releases API.
-* **What's New Dialog**: Post-upgrade dialog showing release highlights.
-* **Factory Reset**: Full backup/restore/reset management for all config files.
-* **Plugin Lifecycle Events**: `on_app_start`, `on_app_quit`, `on_tab_switch` hooks for plugins.
+* **Performance Auto-Tuner**: Workload detection + CPU/memory/IO optimization recommendations.
+* **System Snapshot Timeline**: Unified Timeshift/Snapper/BTRFS snapshot management.
+* **Smart Log Viewer**: Journal analysis with 10 built-in error pattern detectors.
+* **Quick Actions Bar**: `Ctrl+Shift+K` floating command palette for power users.
+* **4 New Dev Agents**: Planner, Builder, Sculptor, Guardian for AI-assisted development.
 
 ## New Features
 
-### Update Checker
-* Fetches latest release from GitHub releases API
-* Compares installed version against latest release tag
-* `UpdateInfo` dataclass with version comparison and download URL
-* Configurable timeout for network requests
+### Performance Auto-Tuner
+* Classifies workload into 6 profiles: idle, light, compilation, gaming, server, heavy
+* Reads from /proc/stat, /proc/meminfo, /sys/ for real-time system analysis
+* Recommends governor, swappiness, I/O scheduler, THP per workload
+* One-click apply with pkexec privilege escalation
+* Tuning history persisted to JSON (max 50 entries)
 
-### What's New Dialog
-* Shows after every version upgrade
-* Remembers last-seen version via `SettingsManager`
-* Scrollable view with current + previous version notes
-* "Don't show again" checkbox
+### System Snapshot Timeline
+* Auto-detects Timeshift, Snapper, and BTRFS backends
+* Unified list/create/delete operations across all backends
+* Retention policy with automated cleanup
+* Backend version detection and health reporting
 
-### Factory Reset & Backup Management
-* `create_backup()` — snapshot all JSON config files with manifest
-* `list_backups()` — enumerate available backups with metadata
-* `restore_backup()` — restore config from a named backup
-* `delete_backup()` — remove old backups
-* `reset_config()` — factory reset with automatic pre-reset backup
-* Preserves plugins by default during reset
+### Smart Log Viewer
+* 10 compiled patterns: OOM, segfault, disk full, auth failure, service failed, USB disconnect, kernel panic, NetworkManager, thermal throttle, firmware error
+* Structured journalctl JSON parsing with severity labels
+* Error summary with top units and pattern frequency
+* Text and JSON export
 
-### Plugin Lifecycle Events
-* `on_app_start` — called when the application starts
-* `on_app_quit` — called before application exits
-* `on_tab_switch` — called when user switches tabs
-* `on_settings_changed` — notified when settings change
-* `get_settings_schema` — plugins can declare configurable settings
+### Quick Actions Bar
+* Searchable action palette triggered by Ctrl+Shift+K
+* 15+ default actions: Update System, Clean Cache, Security Scan, Auto-Tune, etc.
+* Fuzzy search across name, description, and keywords
+* Recent actions tracked (last 10) and promoted in search
+* Plugin-extensible via QuickActionRegistry
 
-## New Files
-
-| File | Description |
-|------|-------------|
-| `utils/update_checker.py` | GitHub releases API update checker |
-| `utils/factory_reset.py` | Backup/restore/reset management |
-| `ui/whats_new_dialog.py` | Post-upgrade What's New dialog |
-| `tests/test_factory_reset.py` | Factory reset unit tests (22 tests) |
-| `tests/test_update_checker.py` | Update checker unit tests (8 tests) |
-
-## Test Coverage
-
-* **1130+ tests** passing (up from 1060 in v13.5.0)
-* 72 new tests for factory reset and update checker
-
-## Installation
+## New CLI Commands
 
 ```bash
-# From RPM (Fedora)
-sudo dnf install loofi-fedora-tweaks-14.0.0-1.fc43.noarch.rpm
+# Performance tuner
+loofi tuner analyze       # Detect workload and recommend settings
+loofi tuner apply         # Apply recommended settings
+loofi tuner history       # Show tuning history
 
-# From source
-./run.sh
+# Snapshot management
+loofi snapshot list       # List all snapshots
+loofi snapshot create     # Create a new snapshot
+loofi snapshot delete ID  # Delete a snapshot
+loofi snapshot backends   # Show available backends
+
+# Smart log viewer
+loofi logs show           # Show recent journal entries
+loofi logs errors         # Error summary with pattern detection
+loofi logs export FILE    # Export logs to file
 ```
-
-## Full Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
 loofi ai-models recommend     # Get RAM-based model recommendation
 ```
 

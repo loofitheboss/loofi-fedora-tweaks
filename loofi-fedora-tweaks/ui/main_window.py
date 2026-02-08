@@ -135,6 +135,9 @@ class MainWindow(QMainWindow):
         # v13.5 UX Polish
         self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"))
 
+        # v15.0 Nebula - Quick Actions Bar (Ctrl+Shift+K)
+        self._setup_quick_actions()
+
         # Select first item
         self.sidebar.setCurrentRow(0)
 
@@ -264,6 +267,7 @@ class MainWindow(QMainWindow):
         from PyQt6.QtWidgets import QMessageBox
         shortcuts = (
             "Ctrl+K — Command Palette\n"
+            "Ctrl+Shift+K — Quick Actions\n"
             "Ctrl+1..9 — Switch to tab 1-9\n"
             "Ctrl+Tab — Next tab\n"
             "Ctrl+Shift+Tab — Previous tab\n"
@@ -300,6 +304,23 @@ class MainWindow(QMainWindow):
             self.notif_panel.move(x, y)
             self.notif_panel.show()
             self.notif_panel.raise_()
+
+    def _setup_quick_actions(self):
+        """Register Ctrl+Shift+K shortcut for Quick Actions bar."""
+        shortcut = QShortcut(QKeySequence("Ctrl+Shift+K"), self)
+        shortcut.activated.connect(self._show_quick_actions)
+
+    def _show_quick_actions(self):
+        """Show the Quick Actions bar."""
+        try:
+            from ui.quick_actions import QuickActionsBar, QuickActionRegistry, register_default_actions
+            registry = QuickActionRegistry.instance()
+            if not registry.get_all():
+                register_default_actions(registry)
+            bar = QuickActionsBar(self)
+            bar.exec()
+        except ImportError:
+            pass
 
     def _check_first_run(self):
         """Show first-run wizard if this is the first launch."""

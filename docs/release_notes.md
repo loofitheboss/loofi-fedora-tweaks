@@ -1,5 +1,70 @@
 # Release Notes
 
+## v15.0.0 "Nebula" - February 2026
+
+The Nebula update is a system intelligence release that makes Loofi smarter about the system it manages. It introduces a performance auto-tuner, a unified snapshot timeline, an intelligent log viewer, and a quick-action command bar.
+
+### Highlights
+
+- **Performance Auto-Tuner**: Workload detection and system optimization recommendations
+- **System Snapshot Timeline**: Unified Timeshift/Snapper/BTRFS snapshot management
+- **Smart Log Viewer**: Journal analysis with 10 built-in error pattern detectors
+- **Quick Actions Bar**: `Ctrl+Shift+K` floating command palette for power users
+- **1290+ Tests**: Comprehensive test coverage
+
+### New Features
+
+#### Performance Auto-Tuner
+
+Intelligent system optimizer that analyzes workload and recommends settings:
+
+| Workload | Governor | Swappiness | I/O Scheduler | THP |
+|----------|----------|-----------|---------------|-----|
+| **Idle** | powersave | 60 | mq-deadline | always |
+| **Compilation** | performance | 10 | none | madvise |
+| **Gaming** | performance | 10 | none | never |
+| **Server** | schedutil | 30 | mq-deadline | madvise |
+
+- CLI: `loofi tuner analyze`, `loofi tuner apply`, `loofi tuner history`
+
+#### System Snapshot Timeline
+
+Unified snapshot management across multiple backends:
+
+| Backend | Detection | Operations |
+|---------|-----------|-----------|
+| **Snapper** | `shutil.which("snapper")` | list, create, delete |
+| **Timeshift** | `shutil.which("timeshift")` | list, create, delete |
+| **BTRFS** | `shutil.which("btrfs")` | list subvolumes |
+
+- CLI: `loofi snapshot list`, `loofi snapshot create`, `loofi snapshot backends`
+
+#### Smart Log Viewer
+
+10 built-in patterns with plain-English explanations:
+
+- OOM Killer, Segfault, Disk Full, Auth Failure, Service Failed
+- USB Disconnect, Kernel Panic, NetworkManager Down, Thermal Throttle, Firmware Error
+- CLI: `loofi logs show`, `loofi logs errors`, `loofi logs export`
+
+#### Quick Actions Bar
+
+- Triggered by `Ctrl+Shift+K`
+- 15+ default actions across 5 categories
+- Fuzzy search with recent actions tracking
+- Plugin-extensible via `QuickActionRegistry`
+
+### New Files
+
+- `utils/auto_tuner.py` — Performance auto-tuner
+- `utils/snapshot_manager.py` — Unified snapshot management
+- `utils/smart_logs.py` — Smart log viewer
+- `ui/quick_actions.py` — Quick Actions Bar
+- `.github/agents/Planner.agent.md` — Release planning agent
+- `.github/agents/Builder.agent.md` — Backend implementation agent
+- `.github/agents/Sculptor.agent.md` — Frontend/integration agent
+- `.github/agents/Guardian.agent.md` — Quality assurance agent
+
 ## v14.0.0 "Quantum Leap" - February 2026
 
 The Quantum Leap update is a reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.

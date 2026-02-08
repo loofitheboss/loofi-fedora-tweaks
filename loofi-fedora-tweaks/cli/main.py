@@ -1101,6 +1101,176 @@ def cmd_health_history(args):
     return 1
 
 
+# ==================== v15.0 Nebula CLI commands ====================
+
+
+def cmd_tuner(args):
+    """Handle tuner subcommand."""
+    from utils.auto_tuner import AutoTuner
+
+    if args.action == "analyze":
+        workload = AutoTuner.detect_workload()
+        rec = AutoTuner.recommend(workload)
+        current = AutoTuner.get_current_settings()
+        if _json_output:
+            _output_json({
+                "workload": vars(workload),
+                "recommendation": vars(rec),
+                "current_settings": current,
+            })
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Performance Auto-Tuner")
+            _print("═══════════════════════════════════════════")
+            _print(f"\n  Workload Detected: {workload.name}")
+            _print(f"  CPU: {workload.cpu_percent:.1f}%  Memory: {workload.memory_percent:.1f}%")
+            _print(f"  Description: {workload.description}")
+            _print(f"\n  Current Settings:")
+            for k, v in current.items():
+                _print(f"    {k}: {v}")
+            _print(f"\n  Recommendations:")
+            _print(f"    Governor: {rec.governor}")
+            _print(f"    Swappiness: {rec.swappiness}")
+            _print(f"    I/O Scheduler: {rec.io_scheduler}")
+            _print(f"    THP: {rec.thp}")
+            _print(f"    Reason: {rec.reason}")
+        return 0
+
+    elif args.action == "apply":
+        rec = AutoTuner.recommend()
+        _print(f"🔄 Applying: governor={rec.governor}, swappiness={rec.swappiness}")
+        success = run_operation(AutoTuner.apply_recommendation(rec))
+        if success:
+            run_operation(AutoTuner.apply_swappiness(rec.swappiness))
+        return 0 if success else 1
+
+    elif args.action == "history":
+        history = AutoTuner.get_tuning_history()
+        if _json_output:
+            _output_json([vars(h) for h in history])
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Tuning History")
+            _print("═══════════════════════════════════════════")
+            if not history:
+                _print("\n  (no tuning history)")
+            else:
+                import time
+                for entry in history[-10:]:
+                    ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(entry.timestamp))
+                    _print(f"\n  {ts} — {entry.workload} (applied: {entry.applied})")
+        return 0
+
+    return 1
+
+
+def cmd_snapshot(args):
+    """Handle snapshot subcommand."""
+    from utils.snapshot_manager import SnapshotManager
+
+    if args.action == "list":
+        snapshots = SnapshotManager.list_snapshots()
+        if _json_output:
+            _output_json([vars(s) for s in snapshots])
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   System Snapshots")
+            _print("═══════════════════════════════════════════")
+            if not snapshots:
+                _print("\n  (no snapshots found)")
+            else:
+                import time
+                for s in snapshots[:20]:
+                    ts = time.strftime("%Y-%m-%d %H:%M", time.localtime(s.timestamp)) if s.timestamp else "unknown"
+                    _print(f"  [{s.backend}] {s.id}: {s.label or '(no label)'} — {ts}")
+        return 0
+
+    elif args.action == "create":
+        label = args.label or "manual-snapshot"
+        _print(f"🔄 Creating snapshot: {label}")
+        success = run_operation(SnapshotManager.create_snapshot(label))
+        return 0 if success else 1
+
+    elif args.action == "delete":
+        if not args.snapshot_id:
+            _print("❌ Snapshot ID required")
+            return 1
+        success = run_operation(SnapshotManager.delete_snapshot(args.snapshot_id))
+        return 0 if success else 1
+
+    elif args.action == "backends":
+        backends = SnapshotManager.detect_backends()
+        if _json_output:
+            _output_json([vars(b) for b in backends])
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Snapshot Backends")
+            _print("═══════════════════════════════════════════")
+            for b in backends:
+                status = "✅" if b.available else "❌"
+                _print(f"  {status} {b.name}: {b.version if b.available else 'not installed'}")
+        return 0
+
+    return 1
+
+
+def cmd_logs(args):
+    """Handle logs subcommand."""
+    from utils.smart_logs import SmartLogViewer
+
+    if args.action == "show":
+        entries = SmartLogViewer.get_logs(
+            unit=args.unit,
+            priority=args.priority,
+            since=args.since,
+            lines=args.lines,
+        )
+        if _json_output:
+            _output_json([vars(e) for e in entries])
+        else:
+            for e in entries:
+                marker = "⚠️ " if e.pattern_match else ""
+                _print(f"  {e.timestamp} [{e.priority_label}] {e.unit}: {marker}{e.message[:120]}")
+                if e.pattern_match:
+                    _print(f"    ↳ {e.pattern_match}")
+        return 0
+
+    elif args.action == "errors":
+        summary = SmartLogViewer.get_error_summary(since=args.since or "24h ago")
+        if _json_output:
+            _output_json(vars(summary))
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Log Error Summary")
+            _print("═══════════════════════════════════════════")
+            _print(f"  Total entries: {summary.total_entries}")
+            _print(f"  Critical: {summary.critical_count}")
+            _print(f"  Errors: {summary.error_count}")
+            _print(f"  Warnings: {summary.warning_count}")
+            if summary.top_units:
+                _print("\n  Top Units:")
+                for unit, count in summary.top_units:
+                    _print(f"    {unit}: {count}")
+            if summary.detected_patterns:
+                _print("\n  Detected Patterns:")
+                for pattern, count in summary.detected_patterns:
+                    _print(f"    {pattern}: {count}")
+        return 0
+
+    elif args.action == "export":
+        if not args.path:
+            _print("❌ Export path required")
+            return 1
+        entries = SmartLogViewer.get_logs(since=args.since, lines=args.lines or 500)
+        fmt = "json" if args.path.endswith(".json") else "text"
+        success = SmartLogViewer.export_logs(entries, args.path, format=fmt)
+        icon = "✅" if success else "❌"
+        _print(f"{icon} Exported {len(entries)} entries to {args.path}")
+        return 0 if success else 1
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -1237,6 +1407,30 @@ def main(argv: Optional[List[str]] = None):
                                        help="Health history action")
     health_history_parser.add_argument("path", nargs="?", help="Export path (for export)")
 
+    # ==================== v15.0 Nebula subparsers ====================
+
+    # Performance auto-tuner
+    tuner_parser = subparsers.add_parser("tuner", help="Performance auto-tuner")
+    tuner_parser.add_argument("action", choices=["analyze", "apply", "history"],
+                              help="Tuner action")
+
+    # Snapshot management
+    snapshot_parser = subparsers.add_parser("snapshot", help="System snapshot management")
+    snapshot_parser.add_argument("action", choices=["list", "create", "delete", "backends"],
+                                 help="Snapshot action")
+    snapshot_parser.add_argument("--label", help="Snapshot label (for create)")
+    snapshot_parser.add_argument("snapshot_id", nargs="?", help="Snapshot ID (for delete)")
+
+    # Smart log viewer
+    logs_parser = subparsers.add_parser("logs", help="Smart log viewer with pattern detection")
+    logs_parser.add_argument("action", choices=["show", "errors", "export"],
+                             help="Logs action")
+    logs_parser.add_argument("--unit", help="Filter by systemd unit")
+    logs_parser.add_argument("--priority", type=int, help="Max priority level (0-7)")
+    logs_parser.add_argument("--since", help="Time filter (e.g. '1h ago', '2024-01-01')")
+    logs_parser.add_argument("--lines", type=int, default=100, help="Number of lines")
+    logs_parser.add_argument("path", nargs="?", help="Export path (for export)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -1274,6 +1468,10 @@ def main(argv: Optional[List[str]] = None):
         # v13.0 Nexus Update
         "profile": cmd_profile,
         "health-history": cmd_health_history,
+        # v15.0 Nebula
+        "tuner": cmd_tuner,
+        "snapshot": cmd_snapshot,
+        "logs": cmd_logs,
     }
 
     handler = commands.get(args.command)

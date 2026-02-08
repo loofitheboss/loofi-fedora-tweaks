@@ -29,25 +29,59 @@ A reliability and polish release introducing automatic update checking, a What's
 
 **Update Checker**
 * Automatic update notifications from GitHub releases API
-* Compares installed version against latest GitHub release
-* Clean `UpdateInfo` dataclass with version comparison
+**Performance Auto-Tuner**
+* Detects current workload profile (idle, compilation, gaming, server, heavy)
+* Recommends CPU governor, swappiness, I/O scheduler, and THP settings
+* One-click "Optimize Now" with tuning history and rollback
+* CLI: `loofi tuner analyze`, `loofi tuner apply`, `loofi tuner history`
+
+**System Snapshot Timeline**
+* Unified interface for Timeshift, Snapper, and BTRFS snapshots
+* Auto-detect available backends with version reporting
+* Create, list, delete snapshots with retention policies
+* CLI: `loofi snapshot list`, `loofi snapshot create`, `loofi snapshot backends`
+
+**Smart Log Viewer**
+* Intelligent journal viewer with 10 built-in error patterns
+* OOM killer, segfault, disk full, auth failure, service failed detection
+* Severity filtering, unit filtering, time range, and pattern matching
+* CLI: `loofi logs show`, `loofi logs errors`, `loofi logs export`
+
+**Quick Actions Bar**
+* `Ctrl+Shift+K` floating searchable action palette
+* 15+ default actions across Maintenance, Security, Hardware, Network
+* Fuzzy search with recent actions history
+* Plugin-extensible via `QuickActionRegistry`
+
+**1290+ Tests** — up from 1130
+
+---
+
+## Previous: v14.0.0 "Quantum Leap"
+
+**Update Checker**
+* Automatic update notifications from GitHub releases API
 
 **What's New Dialog**
 * Post-upgrade dialog showing release highlights
-* Remembers last-seen version — only shows after upgrades
-* Scrollable view of current and previous release notes
 
 **Factory Reset**
-* Create named backups of all JSON configuration
-* List, restore, and delete backups with manifest metadata
-* One-click factory reset with automatic pre-reset backup
-* Preserves plugins by default during reset
+* Full backup/restore/reset management for all config files
 
 **Plugin Lifecycle Events**
 * `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
-* `on_settings_changed`, `get_settings_schema` for settings integration
 
-**1130+ Tests** — up from 1060
+---
+
+## Previous: v14.0.0 "Quantum Leap"
+
+**Update Checker** — Automatic update notifications from GitHub releases API
+
+**What's New Dialog** — Post-upgrade dialog showing release highlights
+
+**Factory Reset** — Full backup/restore/reset management for all config files
+
+**Plugin Lifecycle Events** — `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
 
 ---
 

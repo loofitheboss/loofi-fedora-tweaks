@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file.
 
+## [15.0.0] - 2026-02-08 "Nebula"
+
+### Added
+
+- **Performance Auto-Tuner**: Intelligent workload detection and system optimization (`utils/auto_tuner.py`).
+  - `detect_workload()` — classifies CPU/memory into 6 workload profiles (idle, light, compilation, gaming, server, heavy).
+  - `recommend()` — suggests governor, swappiness, I/O scheduler, and THP settings per workload.
+  - `apply_recommendation()` / `apply_swappiness()` / `apply_io_scheduler()` / `apply_thp()` — operation tuples for pkexec.
+  - Tuning history with JSON persistence (max 50 entries).
+  - CLI: `loofi tuner analyze`, `loofi tuner apply`, `loofi tuner history`.
+- **System Snapshot Timeline**: Unified snapshot management for Timeshift, Snapper, and BTRFS (`utils/snapshot_manager.py`).
+  - `detect_backends()` — auto-detect available snapshot tools.
+  - `list_snapshots()` — chronological timeline with backend-agnostic parsing.
+  - `create_snapshot()` / `delete_snapshot()` — operation tuples per backend.
+  - `apply_retention()` — automated cleanup of old snapshots.
+  - CLI: `loofi snapshot list`, `loofi snapshot create`, `loofi snapshot delete`, `loofi snapshot backends`.
+- **Smart Log Viewer**: Intelligent journal viewer with pattern detection (`utils/smart_logs.py`).
+  - 10 built-in log patterns: OOM, segfault, disk full, auth failure, service failed, kernel panic, etc.
+  - `get_logs()` — structured journal parsing with severity color-coding and pattern matching.
+  - `get_error_summary()` — aggregated error analysis with top units and detected patterns.
+  - `export_logs()` — text and JSON export.
+  - CLI: `loofi logs show`, `loofi logs errors`, `loofi logs export`.
+- **Quick Actions Bar**: Searchable floating action palette (`ui/quick_actions.py`).
+  - `Ctrl+Shift+K` shortcut opens searchable action bar.
+  - `QuickActionRegistry` singleton with fuzzy search, category filtering, recent actions.
+  - 15+ default actions across Maintenance, Security, Hardware, Network, System categories.
+  - Plugin-extensible: plugins can register custom quick actions.
+- **4 New Development Agents**: Planner, Builder, Sculptor, Guardian for v15.0+ workflow.
+- **166 New Tests**: `test_auto_tuner.py` (53), `test_snapshot_manager.py` (41), `test_smart_logs.py` (45), `test_quick_actions.py` (27).
+
+### Changed
+
+- **MainWindow**: Added Quick Actions shortcut (`Ctrl+Shift+K`), updated shortcut help dialog.
+- **CLI**: 3 new subcommands (`tuner`, `snapshot`, `logs`) with `--json` support.
+- **Test coverage**: 1290+ tests (up from 1130).
+
+### New Files
+
+- `utils/auto_tuner.py` — Performance auto-tuner with workload detection
+- `utils/snapshot_manager.py` — Unified snapshot management (Timeshift/Snapper/BTRFS)
+- `utils/smart_logs.py` — Smart log viewer with pattern detection
+- `ui/quick_actions.py` — Quick Actions Bar with registry and fuzzy search
+- `.github/agents/Planner.agent.md` — Release planning agent
+- `.github/agents/Builder.agent.md` — Backend implementation agent
+- `.github/agents/Sculptor.agent.md` — Frontend/integration agent
+- `.github/agents/Guardian.agent.md` — Quality assurance agent
+- `tests/test_auto_tuner.py` — Auto-tuner tests (53)
+- `tests/test_snapshot_manager.py` — Snapshot manager tests (41)
+- `tests/test_smart_logs.py` — Smart log viewer tests (45)
+- `tests/test_quick_actions.py` — Quick actions tests (27)
+- `ROADMAP_V15.md` — v15.0 feature roadmap
+
 ## [14.0.0] - 2026-02-08 "Quantum Leap"
 
 ### Added
