@@ -22,13 +22,15 @@ jobs:
 
       - name: Get version from tag
         id: version
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v4
         with:
           name: rpm-package-${{ steps.version.outputs.tag }}
-          path: rpmbuild/RPMS/noarch/*.rpm
+          path: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.version.outputs.version }}*.rpm
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -46,6 +48,6 @@ jobs:
             See [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
           draft: false
           prerelease: ${{ contains(steps.version.outputs.tag, '-rc') || contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-alpha') }}
-          files: rpmbuild/RPMS/noarch/*.rpm
+          files: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.version.outputs.version }}*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
