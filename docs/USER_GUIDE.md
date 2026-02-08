@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 13.0.0 "Nexus Update"**
+> **Version 15.0.0 "Nebula"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -29,9 +29,13 @@
 20. [State Teleport](#state-teleport)
 21. [Profiles](#profiles)
 22. [Health Timeline](#health-timeline)
-23. [CLI Reference](#cli-reference)
-24. [All Tabs Overview](#all-tabs-overview)
-25. [Troubleshooting](#troubleshooting)
+23. [Performance Auto-Tuner](#performance-auto-tuner)
+24. [System Snapshot Timeline](#system-snapshot-timeline)
+25. [Smart Log Viewer](#smart-log-viewer)
+26. [Quick Actions Bar](#quick-actions-bar)
+27. [CLI Reference](#cli-reference)
+28. [All Tabs Overview](#all-tabs-overview)
+29. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -81,6 +85,17 @@ Press **Ctrl+K** anywhere in the application to open the Command Palette.
 | **Keyboard Navigation** | Up/Down arrows to browse, Enter to activate, Escape to close |
 | **Scored Results** | Results ranked by relevance (exact > starts-with > contains > fuzzy) |
 | **Tab Switching** | Select any entry to jump directly to the corresponding tab |
+
+### Quick Actions Bar (v15.0)
+
+Press **Ctrl+Shift+K** to open the Quick Actions Bar — a floating searchable palette for power users.
+
+| Feature | Description |
+|---------|-------------|
+| **15+ Actions** | Across 5 categories: System, Package, Service, Monitor, Tools |
+| **Fuzzy Search** | Type to filter actions instantly |
+| **Recent Actions** | Recently used actions appear at the top (max 10) |
+| **Plugin-Extensible** | Plugins can register custom actions via `QuickActionRegistry` |
 
 ---
 
@@ -671,6 +686,197 @@ loofi --json health-history show      # JSON output for scripting
 
 ---
 
+## Performance Auto-Tuner
+
+The **Performance Auto-Tuner** (v15.0) analyzes system workload and recommends optimal kernel and hardware settings.
+
+### Workload Detection
+
+The tuner reads CPU load, memory pressure, and I/O wait to classify the current workload:
+
+| Workload | Detection Criteria | Description |
+|----------|-------------------|-------------|
+| **Idle** | CPU < 10%, Mem < 30% | System is mostly idle |
+| **Desktop** | CPU < 50%, Mem < 60% | Normal desktop usage |
+| **Compilation** | CPU > 70%, I/O wait high | Heavy compilation or build tasks |
+| **Gaming** | CPU > 60%, Mem > 50% | Gaming or GPU-intensive workload |
+| **Server** | Mem > 70%, I/O > 40% | Server or database workload |
+
+### Recommended Settings
+
+| Setting | Description | Range |
+|---------|-------------|-------|
+| **CPU Governor** | Kernel frequency scaling policy | powersave, schedutil, performance |
+| **Swappiness** | How aggressively the kernel swaps | 0-100 |
+| **I/O Scheduler** | Block device scheduling algorithm | mq-deadline, none, bfq |
+| **THP (Transparent Huge Pages)** | Large memory page allocation | always, madvise, never |
+
+### Tuning Presets
+
+| Workload | Governor | Swappiness | I/O Scheduler | THP |
+|----------|----------|-----------|---------------|-----|
+| **Idle** | powersave | 60 | mq-deadline | always |
+| **Desktop** | schedutil | 45 | mq-deadline | always |
+| **Compilation** | performance | 10 | none | madvise |
+| **Gaming** | performance | 10 | none | never |
+| **Server** | schedutil | 30 | mq-deadline | madvise |
+
+### Actions
+
+| Feature | Description |
+|---------|-------------|
+| **Analyze** | Detect current workload and show recommendations |
+| **Apply** | Apply recommendations with pkexec privilege escalation |
+| **History** | View past tuning actions with timestamps |
+
+### CLI Usage
+
+```bash
+loofi tuner analyze           # Detect workload and show recommendations
+loofi tuner apply             # Apply recommended optimizations
+loofi tuner history           # View tuning history
+loofi --json tuner analyze    # JSON output for scripting
+```
+
+---
+
+## System Snapshot Timeline
+
+The **System Snapshot Timeline** (v15.0) provides unified snapshot management across multiple backends.
+
+### Supported Backends
+
+| Backend | Detection | Operations |
+|---------|-----------|-----------|
+| **Snapper** | `shutil.which("snapper")` | list, create, delete, retention |
+| **Timeshift** | `shutil.which("timeshift")` | list, create, delete, retention |
+| **BTRFS** | `shutil.which("btrfs")` | list subvolumes |
+
+### Snapshot Information
+
+Each snapshot displays:
+
+| Field | Description |
+|-------|-------------|
+| **ID** | Unique snapshot identifier |
+| **Description** | User-provided or auto-generated description |
+| **Timestamp** | When the snapshot was created |
+| **Backend** | Which tool created it (snapper/timeshift/btrfs) |
+| **Cleanup** | Retention policy (timeline, number, manual) |
+
+### Actions
+
+| Feature | Description |
+|---------|-------------|
+| **List** | View all snapshots across all backends |
+| **Create** | Create a new snapshot with description |
+| **Delete** | Remove a snapshot by ID |
+| **Backends** | Show detected backends and their status |
+| **Retention** | Apply retention policies to trim old snapshots |
+
+### CLI Usage
+
+```bash
+loofi snapshot list            # List all snapshots
+loofi snapshot create          # Create a new snapshot
+loofi snapshot delete <id>     # Delete a snapshot
+loofi snapshot backends        # List available backends
+loofi --json snapshot list     # JSON output for scripting
+```
+
+---
+
+## Smart Log Viewer
+
+The **Smart Log Viewer** (v15.0) analyzes systemd journal entries and detects common error patterns.
+
+### Built-in Error Patterns
+
+| Pattern | Severity | Description |
+|---------|----------|-------------|
+| **OOM Killer** | critical | Out-of-memory events killing processes |
+| **Segfault** | error | Segmentation faults in applications |
+| **Disk Full** | critical | Filesystem out of space |
+| **Auth Failure** | warning | Failed login or authentication attempts |
+| **Service Failed** | error | Systemd services failing to start |
+| **USB Disconnect** | info | USB device unexpected disconnections |
+| **Kernel Panic** | critical | Kernel panic or oops events |
+| **NetworkManager** | warning | Network connectivity issues |
+| **Thermal Throttle** | warning | CPU thermal throttling events |
+| **Firmware Error** | error | Firmware/BIOS errors in dmesg |
+
+### Filters
+
+| Filter | Description |
+|--------|-------------|
+| **Unit** | Filter by systemd unit name (e.g., `sshd`, `docker`) |
+| **Priority** | Filter by syslog priority (0=emergency to 7=debug) |
+| **Since** | Time range (e.g., `1h`, `24h`, `7d`, `today`) |
+| **Lines** | Maximum number of log entries to return |
+
+### Actions
+
+| Feature | Description |
+|---------|-------------|
+| **Show Logs** | View journal entries with optional filters |
+| **Error Summary** | Get pattern-matched error overview with counts |
+| **Export** | Export filtered logs to a text file |
+| **Unit List** | Browse available systemd units |
+
+### CLI Usage
+
+```bash
+loofi logs show                        # Show recent journal entries
+loofi logs show --unit sshd --lines 50 # Filter by unit and limit
+loofi logs show --priority 3           # Show errors and above
+loofi logs show --since 1h             # Entries from last hour
+loofi logs errors                      # Show error summary with patterns
+loofi logs export /tmp/logs.txt        # Export filtered logs
+loofi --json logs errors               # JSON output for scripting
+```
+
+---
+
+## Quick Actions Bar
+
+The **Quick Actions Bar** (v15.0) is a floating command palette triggered by **Ctrl+Shift+K**.
+
+### Default Actions (15+)
+
+| Category | Actions |
+|----------|---------|
+| **System** | System Update, System Cleanup, System Info |
+| **Package** | Install Package, Remove Package, Search Packages |
+| **Service** | Restart Service, Stop Service, Service Status |
+| **Monitor** | CPU Monitor, Memory Monitor, Disk Usage |
+| **Tools** | Open Terminal, File Manager, System Settings |
+
+### Features
+
+| Feature | Description |
+|---------|-------------|
+| **Fuzzy Search** | Type to filter actions by name, category, or keyword |
+| **Recent Actions** | Recently used actions appear first (max 10) |
+| **Category Filter** | Filter by action category |
+| **Plugin Actions** | Plugins can register custom actions via `QuickActionRegistry` |
+
+### Extending with Plugins
+
+```python
+from ui.quick_actions import QuickActionRegistry, QuickAction
+
+registry = QuickActionRegistry()
+registry.register(QuickAction(
+    name="My Custom Action",
+    description="Does something useful",
+    category="My Plugin",
+    callback=my_function,
+    icon="🔧"
+))
+```
+
+---
+
 ## CLI Reference
 
 ### Info & Health
@@ -727,6 +933,29 @@ loofi teleport list           # List saved packages
 loofi teleport restore <id>   # Restore a package
 loofi ai-models list          # List AI models
 loofi ai-models recommend     # RAM-based model recommendation
+```
+
+### Performance & Diagnostics (v15.0)
+
+```bash
+# Performance Tuner
+loofi tuner analyze           # Detect workload and recommend settings
+loofi tuner apply             # Apply recommended optimizations
+loofi tuner history           # View tuning history
+
+# Snapshot Management
+loofi snapshot list            # List all snapshots
+loofi snapshot create          # Create a new snapshot
+loofi snapshot delete <id>     # Delete a snapshot
+loofi snapshot backends        # List available backends
+
+# Smart Logs
+loofi logs show               # Show recent journal entries
+loofi logs show --unit sshd   # Filter by systemd unit
+loofi logs show --priority 3  # Filter by syslog priority
+loofi logs show --since 1h    # Entries from last hour
+loofi logs errors             # Show error summary with patterns
+loofi logs export log.txt     # Export filtered logs
 ```
 
 ### JSON Output (v10.0)
@@ -821,4 +1050,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v13.0.0 - February 2026*
+*Documentation last updated: v15.0.0 - February 2026*

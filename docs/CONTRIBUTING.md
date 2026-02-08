@@ -36,7 +36,7 @@ Open an issue with the **enhancement** label. Describe:
 * New tabs should inherit from `BaseTab` (see `ui/base_tab.py`).
 * System commands go in `utils/` modules, never directly in UI code.
 
-## Project Structure (v12.0)
+## Project Structure (v15.0)
 
 ```
 loofi-fedora-tweaks/
@@ -44,7 +44,7 @@ loofi-fedora-tweaks/
 │   ├── main.py               # Entry point (GUI/CLI/Daemon)
 │   ├── version.py            # Version source of truth
 │   ├── ui/                   # PyQt6 UI components
-│   │   ├── main_window.py    # Main window with sidebar (18 tabs)
+│   │   ├── main_window.py    # Main window with sidebar (20 tabs)
 │   │   ├── base_tab.py       # BaseTab class (shared by all tabs)
 │   │   ├── dashboard_tab.py  # Dashboard (Home)
 │   │   ├── monitor_tab.py    # System Monitor (Performance + Processes)
@@ -61,6 +61,7 @@ loofi-fedora-tweaks/
 │   │   ├── mesh_tab.py         # Loofi Link (Mesh + Clipboard + File Drop)
 │   │   ├── teleport_tab.py     # State Teleport (Capture/Restore)
 │   │   ├── ai_enhanced_tab.py  # AI Lab Enhanced (Models + Voice + RAG)
+│   │   ├── quick_actions.py    # Quick Actions Bar (Ctrl+Shift+K) [v15.0]
 │   │   ├── wizard.py         # First-run wizard
 │   │   ├── command_palette.py # Ctrl+K command palette
 │   │   └── lazy_widget.py    # Lazy tab loading
@@ -79,6 +80,9 @@ loofi-fedora-tweaks/
 │   │   ├── state_teleport.py # Workspace state capture/restore
 │   │   ├── ai_models.py      # AI lite model library
 │   │   ├── focus_mode.py     # Focus mode / distraction blocking
+│   │   ├── auto_tuner.py     # Performance auto-tuner [v15.0]
+│   │   ├── snapshot_manager.py # Unified snapshot management [v15.0]
+│   │   ├── smart_logs.py     # Smart log viewer [v15.0]
 │   │   └── ...               # Other utility modules
 │   ├── cli/                  # CLI entry point
 │   │   └── main.py           # CLI with --json support
@@ -87,10 +91,12 @@ loofi-fedora-tweaks/
 │   │   └── loofi-fedora-tweaks.png
 │   ├── config/               # Default configs
 │   └── plugins/              # Third-party extensions
-├── tests/                    # Unit tests (564 tests)
+├── tests/                    # Unit tests (1290+ tests)
 │   ├── conftest.py           # Shared fixtures
-│   ├── test_v10_features.py  # v10 foundation module tests
-│   ├── test_cli_enhanced.py  # CLI tests
+│   ├── test_auto_tuner.py    # Auto-tuner tests [v15.0]
+│   ├── test_snapshot_manager.py # Snapshot tests [v15.0]
+│   ├── test_smart_logs.py    # Smart logs tests [v15.0]
+│   ├── test_quick_actions.py # Quick actions tests [v15.0]
 │   └── ...
 ├── docs/                     # Documentation
 │   ├── USER_GUIDE.md
@@ -99,6 +105,7 @@ loofi-fedora-tweaks/
 ├── .github/
 │   ├── workflows/ci.yml      # CI pipeline (lint, test, build)
 │   ├── workflows/release.yml # Tag-triggered releases
+│   ├── agents/               # Development agents [v15.0]
 │   └── copilot-instructions.md
 ├── build_rpm.sh              # Build script
 ├── loofi-fedora-tweaks.spec  # RPM spec file
@@ -152,14 +159,14 @@ Register new tabs in `MainWindow._lazy_tab()` loaders dict:
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 564 tests passing
+# 1290+ tests passing
 ```
 
 ## Building the RPM
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-15.0.0-1.noarch.rpm
 ```
 
 ## CI/CD

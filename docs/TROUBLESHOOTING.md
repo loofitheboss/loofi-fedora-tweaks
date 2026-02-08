@@ -328,6 +328,181 @@ sudo firewall-cmd --reload
 
 ---
 
+## Performance Auto-Tuner Issues (v15.0)
+
+### Tuner shows "unknown" workload
+
+**Symptom:** `loofi tuner analyze` reports workload as "unknown" or always "idle".
+
+**Fix:**
+```bash
+# Check if /proc/stat and /proc/meminfo are readable
+cat /proc/stat | head -5
+cat /proc/meminfo | head -5
+
+# Run with verbose output
+loofi --json tuner analyze
+```
+
+### Cannot apply tuning recommendations
+
+**Symptom:** "Permission denied" when applying tuner settings.
+
+**Fix:**
+```bash
+# Tuner settings require root via pkexec
+# Verify pkexec is working
+pkexec echo "test"
+
+# Check if sysfs paths are writable
+ls -la /sys/kernel/mm/transparent_hugepage/enabled
+ls -la /proc/sys/vm/swappiness
+```
+
+### Governor not changing
+
+**Symptom:** CPU governor stays the same after applying.
+
+**Fix:**
+```bash
+# Check current governor
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Check available governors
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+
+# Some systems lock governors via power-profiles-daemon
+systemctl status power-profiles-daemon
+```
+
+---
+
+## Snapshot Manager Issues (v15.0)
+
+### No backends detected
+
+**Symptom:** `loofi snapshot backends` returns empty list.
+
+**Fix:**
+```bash
+# Install at least one snapshot tool
+sudo dnf install snapper        # For BTRFS/LVM snapshots
+sudo dnf install timeshift      # For rsync/BTRFS snapshots
+
+# Verify installation
+which snapper
+which timeshift
+which btrfs
+```
+
+### Cannot create snapshots
+
+**Symptom:** "Failed to create snapshot" error.
+
+**Fix:**
+```bash
+# For Snapper: ensure config exists
+sudo snapper list-configs
+# If empty, create one:
+sudo snapper -c root create-config /
+
+# For Timeshift: ensure it's configured
+sudo timeshift --list
+
+# For BTRFS: check filesystem type
+df -T / | awk '{print $2}'
+# Must show 'btrfs' for BTRFS snapshots
+```
+
+### Snapshot deletion fails
+
+**Symptom:** Cannot delete snapshots, permission error.
+
+**Fix:**
+```bash
+# Snapshot operations require root
+# Verify polkit policy is installed
+ls /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
+```
+
+---
+
+## Smart Log Viewer Issues (v15.0)
+
+### No logs returned
+
+**Symptom:** `loofi logs show` returns empty output.
+
+**Fix:**
+```bash
+# Check if journalctl works
+journalctl --no-pager -n 5
+
+# Check if journal persistent storage is enabled
+ls /var/log/journal/
+# If empty, enable persistent logging:
+sudo mkdir -p /var/log/journal
+sudo systemd-tmpfiles --create --prefix /var/log/journal
+sudo systemctl restart systemd-journald
+```
+
+### Pattern matching not finding errors
+
+**Symptom:** `loofi logs errors` reports no patterns matched even when errors exist.
+
+**Fix:**
+```bash
+# Check if errors exist in journal
+journalctl -p err --no-pager -n 20
+
+# Smart logs searches for specific regex patterns
+# Some patterns require kernel messages:
+journalctl -k --no-pager -n 10
+```
+
+### Export fails
+
+**Symptom:** `loofi logs export` gives "Permission denied".
+
+**Fix:**
+```bash
+# Ensure the target directory is writable
+loofi logs export /tmp/my-logs.txt
+
+# Check disk space
+df -h /tmp
+```
+
+---
+
+## Quick Actions Bar Issues (v15.0)
+
+### Ctrl+Shift+K doesn't open
+
+**Symptom:** Keyboard shortcut doesn't trigger the Quick Actions palette.
+
+**Fix:**
+- Ensure the main window has focus
+- Check for shortcut conflicts with other applications
+- Try using the menu bar to trigger Quick Actions if available
+
+### Custom plugin actions not showing
+
+**Symptom:** Plugin-registered actions don't appear in Quick Actions.
+
+**Fix:**
+```bash
+# Verify plugin is loaded
+loofi plugins list
+
+# Plugin must register actions in on_load():
+# from ui.quick_actions import QuickActionRegistry, QuickAction
+# registry = QuickActionRegistry()
+# registry.register(QuickAction(...))
+```
+
+---
+
 ## Performance Issues
 
 ### App is slow to start

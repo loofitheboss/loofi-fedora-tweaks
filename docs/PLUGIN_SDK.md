@@ -49,7 +49,7 @@ Every plugin must have a `plugin.json` in its root directory:
     "author": "Your Name",
     "description": "A short description of what your plugin does.",
     "entry": "plugin.py",
-    "min_app_version": "13.0.0",
+    "min_app_version": "15.0.0",
     "permissions": ["network", "notifications"],
     "update_url": "https://example.com/my-plugin/latest.json",
     "icon": "\ud83d\udd0c"
@@ -156,6 +156,26 @@ def on_load(self) -> None:
 def on_unload(self) -> None:
     logger.info("Plugin unloading, cleaning up")
 ```
+
+### Optional: Quick Actions (v15.0)
+
+Plugins can register custom actions in the Quick Actions Bar (`Ctrl+Shift+K`):
+
+```python
+def on_load(self) -> None:
+    from ui.quick_actions import QuickActionRegistry, QuickAction
+    
+    registry = QuickActionRegistry()
+    registry.register(QuickAction(
+        name="My Plugin Action",
+        description="Run my plugin's main feature",
+        category="My Plugin",
+        callback=self._run_feature,
+        icon="🔧"
+    ))
+```
+
+Actions appear in the Quick Actions palette alongside built-in actions and support fuzzy search.
 
 ---
 
@@ -271,7 +291,7 @@ Run tests with: `python -m pytest tests/ -v`
     "version": "1.0.0",
     "author": "Loofi Team",
     "description": "Example plugin demonstrating the Loofi Plugin SDK",
-    "min_app_version": "13.0.0",
+    "min_app_version": "15.0.0",
     "permissions": ["notifications"],
     "update_url": ""
 }

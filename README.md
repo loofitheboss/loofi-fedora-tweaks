@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v14.0.0 "Quantum Leap"
+# Loofi Fedora Tweaks v15.0.0 "Nebula"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,27 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v14.0.0">
-    <img src="https://img.shields.io/badge/Release-v14.0.0-blue?style=for-the-badge&logo=github" alt="Release v14.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v15.0.0">
+    <img src="https://img.shields.io/badge/Release-v15.0.0-blue?style=for-the-badge&logo=github" alt="Release v15.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1130%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1290%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v14.0.0 "Quantum Leap"
+## What's New in v15.0.0 "Nebula"
 
-### Quantum Leap — Update Checker, What's New Dialog, Factory Reset & Plugin Lifecycle
+### Nebula — System Intelligence Release
 
-A reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.
+Loofi learns your hardware, guards your snapshots, reads your logs, and puts every action one keystroke away.
 
-**Update Checker**
-* Automatic update notifications from GitHub releases API
 **Performance Auto-Tuner**
-* Detects current workload profile (idle, compilation, gaming, server, heavy)
+* Detects current workload profile (idle, desktop, compilation, gaming, server)
 * Recommends CPU governor, swappiness, I/O scheduler, and THP settings
 * One-click "Optimize Now" with tuning history and rollback
 * CLI: `loofi tuner analyze`, `loofi tuner apply`, `loofi tuner history`
@@ -49,27 +47,11 @@ A reliability and polish release introducing automatic update checking, a What's
 
 **Quick Actions Bar**
 * `Ctrl+Shift+K` floating searchable action palette
-* 15+ default actions across Maintenance, Security, Hardware, Network
-* Fuzzy search with recent actions history
+* 15+ default actions across Maintenance, Security, Hardware, Network, Tools
+* Fuzzy search with recent actions history (max 10)
 * Plugin-extensible via `QuickActionRegistry`
 
-**1290+ Tests** — up from 1130
-
----
-
-## Previous: v14.0.0 "Quantum Leap"
-
-**Update Checker**
-* Automatic update notifications from GitHub releases API
-
-**What's New Dialog**
-* Post-upgrade dialog showing release highlights
-
-**Factory Reset**
-* Full backup/restore/reset management for all config files
-
-**Plugin Lifecycle Events**
-* `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
+**1290+ Tests** — 166 new tests across 4 test files
 
 ---
 
@@ -131,7 +113,7 @@ A reliability and polish release introducing automatic update checking, a What's
 
 ## Feature Overview
 
-### Tabs (v13.0)
+### Tabs (v15.0)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
@@ -156,23 +138,26 @@ A reliability and polish release introducing automatic update checking, a What's
 | **Profiles** | System Profiles | Quick-switch between gaming, dev, battery saver, etc. |
 | **Health** | Health Timeline | Track and analyze system metrics over time |
 
-### New in v13.0
+### New in v15.0
 
 | Feature | Description |
 |---------|-------------|
-| **System Profiles** | 5 built-in profiles (Gaming, Development, Battery Saver, Presentation, Server) |
-| **Custom Profiles** | Create your own profiles with CPU governor, compositor, notifications |
-| **Profile Capture** | Capture current system state as a new profile |
-| **Health Timeline** | SQLite-based metrics tracking (CPU temp, RAM, disk, load) |
-| **Anomaly Detection** | Flag metrics that deviate 2+ standard deviations from the mean |
-| **Metrics Export** | Export health data to JSON or CSV |
-| **Plugin SDK v2** | Permissions model, update checking, dependency validation |
-| **Shell Completions** | Bash, Zsh, and Fish auto-completion scripts |
-| **CLI: profile** | Manage system profiles from the command line |
-| **CLI: health-history** | View, record, and export health metrics |
+| **Performance Auto-Tuner** | Workload detection + CPU governor, swappiness, I/O scheduler, THP optimization |
+| **Snapshot Timeline** | Unified Timeshift / Snapper / BTRFS snapshot management with retention |
+| **Smart Log Viewer** | Journal analysis with 10 built-in error patterns and suggested fixes |
+| **Quick Actions Bar** | `Ctrl+Shift+K` floating command palette with 15+ actions |
+| **CLI: tuner** | `analyze`, `apply`, `history` subcommands |
+| **CLI: snapshot** | `list`, `create`, `delete`, `backends` subcommands |
+| **CLI: logs** | `show`, `errors`, `export` with `--unit`, `--priority`, `--since` filters |
 
 ### Previous Feature Highlights
 
+* **System Profiles** (v13.0): 5 built-in profiles with quick-switch
+* **Health Timeline** (v13.0): SQLite-based metrics tracking with anomaly detection
+* **Update Checker** (v14.0): Automatic update notifications from GitHub releases API
+* **What's New Dialog** (v14.0): Post-upgrade dialog showing release highlights
+* **Factory Reset** (v14.0): Full backup/restore/reset management
+* **Plugin Lifecycle** (v14.0): `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
 * **Pulse Engine** (v9.1): Event-driven automation with DBus listener
 * **Focus Mode** (v9.1): Distraction blocking with domain blocking and DND
 * **Live Graphs** (v9.2): Real-time CPU, RAM, Disk I/O, Network I/O
@@ -195,7 +180,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v13.0.0/loofi-fedora-tweaks-13.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v15.0.0/loofi-fedora-tweaks-15.0.0-1.fc43.noarch.rpm
 ```
 
 ### Run from Source
@@ -211,7 +196,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-13.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-15.0.0-1.noarch.rpm
 ```
 
 ---
@@ -272,6 +257,22 @@ loofi health-history record   # Record current metrics
 loofi health-history export health.json  # Export to JSON
 loofi health-history prune    # Delete old data
 
+# Performance Tuning (v15.0)
+loofi tuner analyze           # Detect workload and recommend settings
+loofi tuner apply             # Apply recommended optimizations
+loofi tuner history           # View tuning history
+
+# Snapshot Management (v15.0)
+loofi snapshot list            # List all snapshots
+loofi snapshot create          # Create a new snapshot
+loofi snapshot delete <id>     # Delete a snapshot
+loofi snapshot backends        # List available backends
+
+# Smart Logs (v15.0)
+loofi logs show               # Show recent journal entries
+loofi logs errors             # Show error summary with patterns
+loofi logs export log.txt     # Export filtered logs
+
 # JSON output (for scripting)
 loofi --json info
 loofi --json health
@@ -305,7 +306,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 839+ tests passing
+# 1290+ tests passing
 ```
 
 ---
