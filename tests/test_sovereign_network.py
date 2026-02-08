@@ -352,10 +352,15 @@ class TestClipboardSyncEncryption(unittest.TestCase):
         self.assertNotEqual(enc1, enc2)
 
     def test_encrypt_empty_data(self):
-        """Encrypting empty data returns empty bytes."""
-        key = b"anykey"
-        result = ClipboardSync.encrypt_payload(b"", key)
-        self.assertEqual(result, b"")
+        """Encrypting empty data round-trips correctly and produces minimum 48 bytes."""
+        key = b"supersecretkey1234567890abcdefgh"
+        # Encrypt empty data
+        encrypted = ClipboardSync.encrypt_payload(b"", key)
+        # HMAC-CTR produces: nonce(16) + ciphertext + HMAC(32) = minimum 48 bytes
+        self.assertGreaterEqual(len(encrypted), 48)
+        # Verify round-trip: decrypting should return empty bytes
+        decrypted = ClipboardSync.decrypt_payload(encrypted, key)
+        self.assertEqual(decrypted, b"")
 
 
 class TestClipboardSyncPairing(unittest.TestCase):

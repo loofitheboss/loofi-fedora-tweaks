@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v12.0.0 "Sovereign Update"
+# Loofi Fedora Tweaks v13.0.0 "Nexus Update"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,42 +10,53 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v12.0.0">
-    <img src="https://img.shields.io/badge/Release-v12.0.0-blue?style=for-the-badge&logo=github" alt="Release v12.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.0.0">
+    <img src="https://img.shields.io/badge/Release-v13.0.0-blue?style=for-the-badge&logo=github" alt="Release v13.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-564%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-839%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v12.0.0?
+## What's New in v13.0.0?
 
-### Sovereign Update — Virtualization, Mesh Networking & State Teleport
+### Nexus Update — System Profiles, Health Timeline & Plugin SDK v2
 
-The biggest release yet: full KVM/QEMU virtualization management, LAN mesh networking, and workspace state teleportation across devices.
+A major integration update bringing system profiles for quick-switching configurations, health timeline for tracking metrics over time, and an enhanced plugin SDK.
 
-**v11.5 Hypervisor Update**
-* **VM Quick-Create Wizard**: One-click VMs for Windows 11, Fedora, Ubuntu, Kali, Arch with preset flavors
-* **VFIO GPU Passthrough Assistant**: Step-by-step IOMMU group analysis and kernel cmdline generation
-* **Disposable VMs**: QCOW2 overlay-based throwaway VMs for untrusted software
+**System Profiles**
+* **5 Built-in Profiles**: Gaming, Development, Battery Saver, Presentation, Server
+* **Quick-Switch**: One-click profile application with CPU governor, services, and notifications
+* **Custom Profiles**: Create and save your own configurations
+* **Profile Capture**: Capture current system state as a new profile
 
-**v12.0 Sovereign Networking**
-* **Loofi Link Mesh**: mDNS device discovery on LAN via Avahi
-* **Clipboard Sync**: Encrypted clipboard sharing between paired devices
-* **File Drop**: Local HTTP file transfer with checksum verification
-* **State Teleport**: Capture VS Code, git, and terminal state; restore on another machine
+**Health Timeline**
+* **Metrics Tracking**: SQLite-based logging of CPU temp, RAM, disk usage, load average
+* **Anomaly Detection**: Flag values that deviate from the norm (2+ std devs)
+* **Export Options**: JSON and CSV export for external analysis
+* **Data Pruning**: Configurable retention with automatic cleanup
 
-**v11.1-v11.3 AI Polish**
-* **Lite Model Library**: Curated GGUF models (Llama 3.2 1B/3B, Mistral 7B, Gemma 2B, Phi-3)
-* **Voice Mode**: whisper.cpp integration for voice commands
-* **Context RAG**: TF-IDF local file indexing for AI-assisted system help
+**Plugin SDK v2**
+* **Permissions Model**: Plugins declare required permissions (network, filesystem, etc.)
+* **Update Checking**: Plugins can check for updates via remote manifest
+* **Dependency Validation**: Manifest-based dependency resolution
+
+**Mesh Networking Enhancements**
+* **Improved Peer Discovery**: Better mDNS integration
+* **Clipboard Sync**: Enhanced encrypted clipboard sharing
+* **File Drop**: Improved file transfer reliability
+
+**CLI Enhancements**
+* **profile**: list, apply, create, delete system profiles
+* **health-history**: show, record, export, prune health metrics
+* **Shell Completions**: Bash, Zsh, and Fish completion scripts
 
 **Architecture**
-* **Plugin Refactor**: Virtualization and AI Lab now ship as first-party plugins with manifests
-* **18-Tab Layout**: Three new sidebar tabs (Virtualization, Loofi Link, State Teleport)
+* **20-Tab Layout**: Added Profiles and Health tabs
+* **839+ Tests**: Comprehensive test coverage
 
 ---
 
@@ -60,7 +71,7 @@ The biggest release yet: full KVM/QEMU virtualization management, LAN mesh netwo
 
 ## Feature Overview
 
-### Tabs (v12.0)
+### Tabs (v13.0)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
@@ -82,22 +93,23 @@ The biggest release yet: full KVM/QEMU virtualization management, LAN mesh netwo
 | **Virtualization** | VMs + VFIO + Disposable | VM wizard, GPU passthrough, disposable VMs |
 | **Loofi Link** | Mesh + Clipboard + File Drop | Device discovery, clipboard sync, file transfer |
 | **State Teleport** | Workspace Capture/Restore | Save and restore workspace state across devices |
+| **Profiles** | System Profiles | Quick-switch between gaming, dev, battery saver, etc. |
+| **Health** | Health Timeline | Track and analyze system metrics over time |
 
-### New in v12.0
+### New in v13.0
 
 | Feature | Description |
 |---------|-------------|
-| **VM Quick-Create** | One-click VMs with preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch) |
-| **VFIO Assistant** | Step-by-step GPU passthrough with IOMMU analysis |
-| **Disposable VMs** | QCOW2 overlay snapshots for throwaway environments |
-| **Loofi Link Mesh** | mDNS LAN device discovery via Avahi |
-| **Clipboard Sync** | Encrypted clipboard sharing between devices |
-| **File Drop** | Local HTTP file transfer with checksum verification |
-| **State Teleport** | Capture and restore VS Code, git, terminal state across machines |
-| **AI Lite Models** | Curated GGUF models with RAM-based recommendations |
-| **Voice Mode** | whisper.cpp voice commands |
-| **Context RAG** | TF-IDF local file indexing for AI assistance |
-| **Plugin Refactor** | VM and AI Lab as first-party manifest-based plugins |
+| **System Profiles** | 5 built-in profiles (Gaming, Development, Battery Saver, Presentation, Server) |
+| **Custom Profiles** | Create your own profiles with CPU governor, compositor, notifications |
+| **Profile Capture** | Capture current system state as a new profile |
+| **Health Timeline** | SQLite-based metrics tracking (CPU temp, RAM, disk, load) |
+| **Anomaly Detection** | Flag metrics that deviate 2+ standard deviations from the mean |
+| **Metrics Export** | Export health data to JSON or CSV |
+| **Plugin SDK v2** | Permissions model, update checking, dependency validation |
+| **Shell Completions** | Bash, Zsh, and Fish auto-completion scripts |
+| **CLI: profile** | Manage system profiles from the command line |
+| **CLI: health-history** | View, record, and export health metrics |
 
 ### Previous Feature Highlights
 
@@ -123,7 +135,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v12.0.0/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v13.0.0/loofi-fedora-tweaks-13.0.0-1.fc43.noarch.rpm
 ```
 
 ### Run from Source
@@ -139,7 +151,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-13.0.0-1.fc43.noarch.rpm
 ```
 
 ---
@@ -188,6 +200,18 @@ loofi teleport restore <id>   # Restore a package
 loofi ai-models list          # List installed and recommended models
 loofi ai-models recommend     # Get RAM-based model recommendation
 
+# Profiles (v13.0)
+loofi profile list            # List all profiles
+loofi profile apply gaming    # Apply a profile
+loofi profile create myprofile  # Create from current state
+loofi profile delete myprofile  # Delete a custom profile
+
+# Health History (v13.0)
+loofi health-history show     # Show 24h metrics summary
+loofi health-history record   # Record current metrics
+loofi health-history export health.json  # Export to JSON
+loofi health-history prune    # Delete old data
+
 # JSON output (for scripting)
 loofi --json info
 loofi --json health
@@ -221,7 +245,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 564 tests passing
+# 839+ tests passing
 ```
 
 ---

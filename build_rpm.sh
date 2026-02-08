@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="12.0.0"
+VERSION=$(python3 -c "exec(open('loofi-fedora-tweaks/version.py').read()); print(__version__)")
 
 # Setup build directories in /tmp to avoid spaces in path
 BUILD_DIR="/tmp/loofi-fedora-tweaks-build"

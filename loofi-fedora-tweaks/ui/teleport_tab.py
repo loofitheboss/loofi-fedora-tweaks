@@ -17,6 +17,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from utils.state_teleport import StateTeleportManager, TeleportPackage
+from utils.file_drop import FileDropManager
+from utils.mesh_discovery import MeshDiscovery
 
 import os
 import time
@@ -307,10 +309,50 @@ class TeleportTab(QWidget):
 
     def _send_to_device(self):
         """Send a package to a discovered device on the mesh network."""
-        self.log(self.tr(
-            "Mesh device discovery is not yet connected. "
-            "Use 'Export to File' for manual transfer."
-        ))
+        # Check if we have a current package
+        if not self._current_package:
+            self.log(self.tr("No package to send. Capture or import a package first."))
+            return
+
+        # Discover mesh devices
+        self.log(self.tr("Discovering mesh devices..."))
+        peers = MeshDiscovery.discover_peers(timeout=3)
+
+        if not peers:
+            self.log(self.tr(
+                "No mesh devices found. "
+                "Use 'Export to File' for manual transfer."
+            ))
+            return
+
+        # For now, use the first peer found (could add a device selector dialog)
+        peer = peers[0]
+
+        try:
+            # Get the package file path
+            pkg_dir = StateTeleportManager.get_package_dir()
+            filename = f"teleport_{self._current_package.package_id[:8]}.json"
+            package_path = os.path.join(pkg_dir, filename)
+
+            # If the package file doesn't exist, save it first
+            if not os.path.isfile(package_path):
+                StateTeleportManager.save_package_to_file(self._current_package, package_path)
+
+            # Send the file to the peer
+            self.log(self.tr("Sending package to {}...").format(peer.name))
+            result = FileDropManager.send_file(
+                peer.address,
+                peer.port,
+                package_path
+            )
+
+            if result.success:
+                self.log(self.tr("Package sent to {} successfully.").format(peer.name))
+            else:
+                self.log(self.tr("Failed to send package: {}").format(result.message))
+
+        except Exception as e:
+            self.log(self.tr("Error sending package: {}").format(str(e)))
 
     def _import_package(self):
         """Import a teleport package from a file."""

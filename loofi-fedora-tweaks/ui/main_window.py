@@ -1,6 +1,6 @@
 """
-Main Window - v12.0 "Sovereign Update"
-18-tab layout with sidebar navigation.
+Main Window - v13.0 "Nexus Update"
+20-tab layout with sidebar navigation.
 """
 
 from PyQt6.QtWidgets import (
@@ -108,6 +108,10 @@ class MainWindow(QMainWindow):
         self.add_page(self.tr("Loofi Link"), "\U0001f517", self._lazy_tab("mesh"))
         self.add_page(self.tr("State Teleport"), "\U0001f4e1", self._lazy_tab("teleport"))
 
+        # v13.0 Nexus Update
+        self.add_page(self.tr("Profiles"), "\U0001f464", self._lazy_tab("profiles"))
+        self.add_page(self.tr("Health"), "\U0001f4c8", self._lazy_tab("health"))
+
         # Select first item
         self.sidebar.setCurrentRow(0)
 
@@ -142,6 +146,9 @@ class MainWindow(QMainWindow):
             "virtualization": lambda: __import__("ui.virtualization_tab", fromlist=["VirtualizationTab"]).VirtualizationTab(),
             "mesh": lambda: __import__("ui.mesh_tab", fromlist=["MeshTab"]).MeshTab(),
             "teleport": lambda: __import__("ui.teleport_tab", fromlist=["TeleportTab"]).TeleportTab(),
+            # v13.0 Nexus Update tabs
+            "profiles": lambda: __import__("ui.profiles_tab", fromlist=["ProfilesTab"]).ProfilesTab(),
+            "health": lambda: __import__("ui.health_timeline_tab", fromlist=["HealthTimelineTab"]).HealthTimelineTab(),
         }
         return LazyWidget(loaders[tab_name])
 

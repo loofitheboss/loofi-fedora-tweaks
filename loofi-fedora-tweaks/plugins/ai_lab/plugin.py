@@ -29,16 +29,16 @@ class AILabPlugin(LoofiPlugin):
         )
 
     def create_widget(self):
-        """Lazily import and return the AITab widget.
+        """Lazily import and return the AIEnhancedTab widget.
 
         Uses __import__ to avoid importing PyQt6 at module load time,
         keeping the plugin lightweight when loaded only for CLI commands.
         """
         mod = __import__(
-            "ui.ai_tab",
-            fromlist=["AITab"],
+            "ui.ai_enhanced_tab",
+            fromlist=["AIEnhancedTab"],
         )
-        return mod.AITab()
+        return mod.AIEnhancedTab()
 
     def get_cli_commands(self) -> dict:
         """Return CLI commands provided by this plugin."""
@@ -88,9 +88,19 @@ class AILabPlugin(LoofiPlugin):
     @staticmethod
     def _cmd_rag_index() -> str:
         """Trigger RAG knowledge indexing."""
-        return "RAG indexing is not yet implemented. Coming in a future update."
+        from utils.context_rag import ContextRAGManager
+        result = ContextRAGManager.build_index()
+        return result.message
 
     @staticmethod
     def _cmd_rag_search() -> str:
         """Search indexed knowledge base."""
-        return "RAG search is not yet implemented. Coming in a future update."
+        from utils.context_rag import ContextRAGManager
+        if not ContextRAGManager.is_indexed():
+            return "No index found. Run 'rag-index' first to build the knowledge base."
+        stats = ContextRAGManager.get_index_stats()
+        return (
+            f"RAG index ready: {stats['total_files']} files, "
+            f"{stats['total_chunks']} chunks indexed.\n"
+            "Use the AI Lab tab to search interactively."
+        )

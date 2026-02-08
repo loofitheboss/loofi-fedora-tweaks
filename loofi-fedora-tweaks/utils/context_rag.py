@@ -13,17 +13,10 @@ import os
 import json
 import math
 import time
-from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
 
-
-@dataclass
-class Result:
-    """Operation result."""
-    success: bool
-    message: str
-    data: Optional[dict] = None
+from utils.containers import Result
 
 
 # Paths to consider indexing (relative to user home)

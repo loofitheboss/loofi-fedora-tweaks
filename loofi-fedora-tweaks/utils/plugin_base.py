@@ -1,20 +1,29 @@
 """
 Plugin Base - Abstract base class for Loofi plugins.
 Enables modular, third-party feature extensions.
+
+v13.0 additions:
+- Plugin Permissions Model (VALID_PERMISSIONS, check_permissions)
+- Plugin Update Checking (check_for_updates)
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Type, Any
 from pathlib import Path
 import importlib.util
 import os
 import json
+import urllib.request
+import urllib.error
 
 from utils.log import get_logger
 from version import __version__ as APP_VERSION
 
 logger = get_logger(__name__)
+
+# Valid permissions that plugins can request
+VALID_PERMISSIONS = {"network", "filesystem", "sudo", "clipboard", "notifications"}
 
 
 @dataclass
@@ -36,7 +45,8 @@ class PluginManifest:
     description: str
     entry: Optional[str] = None
     min_app_version: Optional[str] = None
-    permissions: Optional[List[str]] = None
+    permissions: list[str] = field(default_factory=list)
+    update_url: str = ""
     icon: str = "🔌"
 
 
@@ -170,6 +180,7 @@ class PluginLoader:
                 entry=raw.get("entry"),
                 min_app_version=raw.get("min_app_version"),
                 permissions=raw.get("permissions", []),
+                update_url=raw.get("update_url", ""),
                 icon=raw.get("icon", "🔌"),
             )
             if not self._is_version_compatible(manifest.min_app_version):
@@ -309,6 +320,74 @@ class PluginLoader:
                 pass
         return False
     
+    def check_permissions(self, plugin_name: str) -> dict:
+        """
+        Check which permissions a plugin requests and classify them.
+
+        Returns a dict with "granted" (valid permissions) and "denied"
+        (unrecognized permissions) lists based on the manifest.
+        """
+        plugin_dir = self.PLUGINS_DIR / plugin_name
+        manifest = self._load_manifest(plugin_dir)
+        if manifest is None:
+            return {"granted": [], "denied": []}
+
+        requested = manifest.permissions if manifest.permissions else []
+        granted = [p for p in requested if p in VALID_PERMISSIONS]
+        denied = [p for p in requested if p not in VALID_PERMISSIONS]
+        return {"granted": granted, "denied": denied}
+
+    def check_for_updates(self, plugin_name: str = None) -> list[dict]:
+        """
+        Check for plugin updates by fetching update_url metadata.
+
+        If plugin_name is given, check only that plugin. Otherwise check
+        all loaded plugins that have an update_url set.
+
+        Returns a list of dicts with keys:
+          name, current_version, latest_version, update_available
+        """
+        results = []
+
+        if plugin_name:
+            names_to_check = [plugin_name]
+        else:
+            names_to_check = list(self.plugins.keys())
+
+        for name in names_to_check:
+            plugin_dir = self.PLUGINS_DIR / name
+            manifest = self._load_manifest(plugin_dir)
+            if manifest is None or not manifest.update_url:
+                continue
+
+            current_version = manifest.version
+            latest_version = current_version
+            update_available = False
+
+            try:
+                req = urllib.request.Request(
+                    manifest.update_url,
+                    headers={"User-Agent": f"Loofi-Fedora-Tweaks/{APP_VERSION}"},
+                )
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    latest_version = data.get("version", current_version)
+                    update_available = (
+                        self._parse_version(latest_version)
+                        > self._parse_version(current_version)
+                    )
+            except (urllib.error.URLError, json.JSONDecodeError, OSError, KeyError) as e:
+                logger.warning("Update check failed for %s: %s", name, e)
+
+            results.append({
+                "name": name,
+                "current_version": current_version,
+                "latest_version": latest_version,
+                "update_available": update_available,
+            })
+
+        return results
+
     def get_all_cli_commands(self) -> Dict[str, callable]:
         """
         Get CLI commands from all loaded plugins.

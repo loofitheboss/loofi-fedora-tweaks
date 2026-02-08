@@ -1,7 +1,7 @@
 """
 Loofi CLI - Command-line interface for Loofi Fedora Tweaks.
 Enables headless operation and scripting.
-v12.0.0 "Sovereign Update"
+v13.0.0 "Nexus Update"
 """
 
 import sys
@@ -28,6 +28,11 @@ from utils.processes import ProcessManager
 from utils.temperature import TemperatureManager
 from utils.network_monitor import NetworkMonitor
 from utils.journal import JournalManager
+from utils.presets import PresetManager
+from utils.focus_mode import FocusMode
+from utils.ports import PortAuditor
+from utils.profiles import ProfileManager
+from utils.health_timeline import HealthTimeline
 
 from version import __version__, __version_codename__
 
@@ -790,6 +795,312 @@ def cmd_ai_models(args):
     return 1
 
 
+def cmd_preset(args):
+    """Handle preset subcommand."""
+    manager = PresetManager()
+
+    if args.action == "list":
+        presets = manager.list_presets()
+        if _json_output:
+            _output_json({"presets": presets})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Available Presets")
+            _print("═══════════════════════════════════════════")
+            if not presets:
+                _print("\n(no presets found)")
+            else:
+                for name in presets:
+                    _print(f"  📋 {name}")
+        return 0
+
+    elif args.action == "apply":
+        if not args.name:
+            _print("❌ Preset name required")
+            return 1
+        result = manager.load_preset(args.name)
+        if result:
+            if _json_output:
+                _output_json({"success": True, "applied": args.name, "settings": result})
+            else:
+                _print(f"✅ Applied preset: {args.name}")
+            return 0
+        else:
+            if _json_output:
+                _output_json({"success": False, "error": f"Preset '{args.name}' not found"})
+            else:
+                _print(f"❌ Preset '{args.name}' not found")
+            return 1
+
+    elif args.action == "export":
+        if not args.name or not args.path:
+            _print("❌ Preset name and path required")
+            return 1
+        # First load the preset to get its data
+        result = manager.load_preset(args.name)
+        if not result:
+            _print(f"❌ Preset '{args.name}' not found")
+            return 1
+        # Write to file
+        try:
+            with open(args.path, "w") as f:
+                json_module.dump(result, f, indent=2)
+            if _json_output:
+                _output_json({"success": True, "exported": args.name, "path": args.path})
+            else:
+                _print(f"✅ Exported preset '{args.name}' to {args.path}")
+            return 0
+        except Exception as e:
+            _print(f"❌ Export failed: {e}")
+            return 1
+
+    return 1
+
+
+def cmd_focus_mode(args):
+    """Handle focus-mode subcommand."""
+    if args.action == "on":
+        profile = getattr(args, "profile", "default")
+        result = FocusMode.enable(profile)
+        if _json_output:
+            _output_json(result)
+        else:
+            icon = "✅" if result["success"] else "❌"
+            _print(f"{icon} {result['message']}")
+            if result.get("hosts_modified"):
+                _print("   🌐 Domains blocked via /etc/hosts")
+            if result.get("dnd_enabled"):
+                _print("   🔕 Do Not Disturb enabled")
+            if result.get("processes_killed"):
+                _print(f"   💀 Killed processes: {', '.join(result['processes_killed'])}")
+        return 0 if result["success"] else 1
+
+    elif args.action == "off":
+        result = FocusMode.disable()
+        if _json_output:
+            _output_json(result)
+        else:
+            icon = "✅" if result["success"] else "❌"
+            _print(f"{icon} {result['message']}")
+        return 0 if result["success"] else 1
+
+    elif args.action == "status":
+        is_active = FocusMode.is_active()
+        active_profile = FocusMode.get_active_profile()
+        profiles = FocusMode.list_profiles()
+
+        if _json_output:
+            _output_json({
+                "active": is_active,
+                "active_profile": active_profile,
+                "profiles": profiles
+            })
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Focus Mode Status")
+            _print("═══════════════════════════════════════════")
+            status_icon = "🟢 Active" if is_active else "⚪ Inactive"
+            _print(f"\nStatus: {status_icon}")
+            if active_profile:
+                _print(f"Profile: {active_profile}")
+            _print(f"\nAvailable profiles: {', '.join(profiles)}")
+        return 0
+
+    return 1
+
+
+def cmd_security_audit(args):
+    """Handle security-audit subcommand."""
+    score_data = PortAuditor.get_security_score()
+
+    if _json_output:
+        _output_json(score_data)
+    else:
+        score = score_data["score"]
+        rating = score_data["rating"]
+
+        # Color based on score
+        if score >= 90:
+            icon = "🟢"
+        elif score >= 70:
+            icon = "🟡"
+        elif score >= 50:
+            icon = "🟠"
+        else:
+            icon = "🔴"
+
+        _print("═══════════════════════════════════════════")
+        _print("   Security Audit")
+        _print("═══════════════════════════════════════════")
+        _print(f"\n{icon} Security Score: {score}/100 ({rating})")
+        _print(f"\n📊 Open Ports: {score_data['open_ports']}")
+        _print(f"⚠️  Risky Ports: {score_data['risky_ports']}")
+
+        fw_status = "Running" if PortAuditor.is_firewalld_running() else "Not Running"
+        fw_icon = "✅" if PortAuditor.is_firewalld_running() else "❌"
+        _print(f"{fw_icon} Firewall: {fw_status}")
+
+        if score_data["recommendations"]:
+            _print("\n📋 Recommendations:")
+            for rec in score_data["recommendations"]:
+                _print(f"   • {rec}")
+
+    return 0
+
+
+def cmd_profile(args):
+    """Handle profile subcommand."""
+    if args.action == "list":
+        profiles = ProfileManager.list_profiles()
+        if _json_output:
+            _output_json({"profiles": profiles})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   System Profiles")
+            _print("═══════════════════════════════════════════")
+            if not profiles:
+                _print("\n(no profiles found)")
+            else:
+                active = ProfileManager.get_active_profile()
+                for p in profiles:
+                    badge = " [ACTIVE]" if p["key"] == active else ""
+                    ptype = "built-in" if p["builtin"] else "custom"
+                    _print(f"\n  {p['icon']}  {p['name']}{badge}")
+                    _print(f"      Key: {p['key']} ({ptype})")
+                    _print(f"      {p['description']}")
+        return 0
+
+    elif args.action == "apply":
+        if not args.name:
+            _print("❌ Profile name required")
+            return 1
+        result = ProfileManager.apply_profile(args.name)
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "create":
+        if not args.name:
+            _print("❌ Profile name required")
+            return 1
+        result = ProfileManager.capture_current_as_profile(args.name)
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "delete":
+        if not args.name:
+            _print("❌ Profile name required")
+            return 1
+        result = ProfileManager.delete_custom_profile(args.name)
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    return 1
+
+
+def cmd_health_history(args):
+    """Handle health-history subcommand."""
+    timeline = HealthTimeline()
+
+    if args.action == "show":
+        summary = timeline.get_summary(hours=24)
+        if _json_output:
+            _output_json({"summary": summary})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Health Timeline (24h Summary)")
+            _print("═══════════════════════════════════════════")
+            if not summary:
+                _print("\n(no metrics recorded)")
+                _print("Run 'loofi health-history record' to capture a snapshot.")
+            else:
+                metric_labels = {
+                    "cpu_temp": ("CPU Temp", "C"),
+                    "ram_usage": ("RAM Usage", "%"),
+                    "disk_usage": ("Disk Usage", "%"),
+                    "load_avg": ("Load Avg", ""),
+                }
+                for metric_type, data in summary.items():
+                    label, unit = metric_labels.get(metric_type, (metric_type, ""))
+                    _print(f"\n  {label}:")
+                    _print(f"      Min: {data['min']:.1f}{unit}")
+                    _print(f"      Max: {data['max']:.1f}{unit}")
+                    _print(f"      Avg: {data['avg']:.1f}{unit}")
+                    _print(f"      Samples: {data['count']}")
+        return 0
+
+    elif args.action == "record":
+        result = timeline.record_snapshot()
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "export":
+        if not args.path:
+            _print("❌ Export path required")
+            return 1
+        # Determine format from extension
+        if args.path.lower().endswith(".csv"):
+            format_type = "csv"
+        else:
+            format_type = "json"
+        result = timeline.export_metrics(args.path, format=format_type)
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "prune":
+        result = timeline.prune_old_data()
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -900,6 +1211,32 @@ def main(argv: Optional[List[str]] = None):
     ai_models_parser = subparsers.add_parser("ai-models", help="AI model management")
     ai_models_parser.add_argument("action", choices=["list", "recommend"], help="AI models action")
 
+    # Preset management
+    preset_parser = subparsers.add_parser("preset", help="Manage system presets")
+    preset_parser.add_argument("action", choices=["list", "apply", "export"], help="Preset action")
+    preset_parser.add_argument("name", nargs="?", help="Preset name (for apply/export)")
+    preset_parser.add_argument("path", nargs="?", help="Export path (for export)")
+
+    # Focus mode
+    focus_parser = subparsers.add_parser("focus-mode", help="Focus mode distraction blocking")
+    focus_parser.add_argument("action", choices=["on", "off", "status"], help="Focus mode action")
+    focus_parser.add_argument("--profile", default="default", help="Profile to use (default: default)")
+
+    # Security audit
+    subparsers.add_parser("security-audit", help="Run security audit and show score")
+
+    # v13.0 Nexus Update - Profile management
+    profile_parser = subparsers.add_parser("profile", help="System profile management")
+    profile_parser.add_argument("action", choices=["list", "apply", "create", "delete"],
+                                help="Profile action")
+    profile_parser.add_argument("name", nargs="?", help="Profile name (for apply/create/delete)")
+
+    # v13.0 Nexus Update - Health history
+    health_history_parser = subparsers.add_parser("health-history", help="Health timeline metrics")
+    health_history_parser.add_argument("action", choices=["show", "record", "export", "prune"],
+                                       help="Health history action")
+    health_history_parser.add_argument("path", nargs="?", help="Export path (for export)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -930,6 +1267,13 @@ def main(argv: Optional[List[str]] = None):
         "mesh": cmd_mesh,
         "teleport": cmd_teleport,
         "ai-models": cmd_ai_models,
+        # New commands
+        "preset": cmd_preset,
+        "focus-mode": cmd_focus_mode,
+        "security-audit": cmd_security_audit,
+        # v13.0 Nexus Update
+        "profile": cmd_profile,
+        "health-history": cmd_health_history,
     }
 
     handler = commands.get(args.command)

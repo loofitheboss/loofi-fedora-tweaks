@@ -5,15 +5,19 @@ Part of v12.0 "Sovereign Update".
 Handles file metadata, checksum verification, filename sanitisation,
 transfer safety checks, and download directory management.
 Compatible with LocalSend protocol concepts.
+Includes HTTP server for receiving files and client for sending.
 """
 
 import hashlib
 import mimetypes
 import os
 import re
+import threading
 import uuid
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 
 from utils.containers import Result
 
@@ -304,3 +308,190 @@ class FileDropManager:
             return Result(success=False, message=f"Transfer is not pending (status: {transfer.status}).")
         transfer.status = "cancelled"
         return Result(success=True, message="Transfer rejected.")
+
+    # ------------------------------------------------------------------
+    # HTTP File Transfer Server/Client
+    # ------------------------------------------------------------------
+
+    # Class-level server state
+    _http_server = None
+    _http_server_thread = None
+    _http_save_dir = None
+    _http_shared_key = None
+
+    @classmethod
+    def start_receive_server(cls, port: int, save_dir: str, shared_key: bytes = None) -> bool:
+        """Start an HTTP server for receiving file uploads.
+
+        Accepts POST requests to /upload with file data. The file is saved
+        to save_dir after optional checksum verification.
+
+        Headers:
+            X-Filename: Original filename
+            X-Checksum-SHA256: Expected SHA-256 checksum (optional)
+
+        Args:
+            port: TCP port to listen on.
+            save_dir: Directory to save received files.
+            shared_key: Optional shared key (reserved for future encryption).
+
+        Returns:
+            True if server started successfully.
+        """
+        if cls._http_server is not None:
+            return False  # Already running
+
+        # Ensure save directory exists
+        os.makedirs(save_dir, exist_ok=True)
+        cls._http_save_dir = save_dir
+        cls._http_shared_key = shared_key
+
+        class FileUploadHandler(BaseHTTPRequestHandler):
+            """HTTP request handler for file uploads."""
+
+            def log_message(self, format, *args):
+                """Suppress default logging."""
+                pass
+
+            def do_POST(self):
+                """Handle POST /upload requests."""
+                if self.path != "/upload":
+                    self.send_error(404, "Not Found")
+                    return
+
+                # Get headers
+                filename = self.headers.get("X-Filename", "uploaded_file")
+                expected_checksum = self.headers.get("X-Checksum-SHA256", "")
+                content_length = int(self.headers.get("Content-Length", 0))
+
+                if content_length <= 0:
+                    self.send_error(400, "No content")
+                    return
+
+                # Sanity check size (10GB max)
+                if content_length > MAX_FILE_SIZE:
+                    self.send_error(413, "File too large")
+                    return
+
+                # Sanitize filename
+                safe_filename = FileDropManager.validate_filename(filename)
+
+                # Read file data
+                file_data = b""
+                remaining = content_length
+                while remaining > 0:
+                    chunk_size = min(CHUNK_SIZE, remaining)
+                    chunk = self.rfile.read(chunk_size)
+                    if not chunk:
+                        break
+                    file_data += chunk
+                    remaining -= len(chunk)
+
+                # Verify checksum if provided
+                if expected_checksum:
+                    actual_checksum = hashlib.sha256(file_data).hexdigest()
+                    if actual_checksum != expected_checksum:
+                        self.send_error(400, "Checksum mismatch")
+                        return
+
+                # Save file
+                save_path = os.path.join(cls._http_save_dir, safe_filename)
+
+                # Handle filename conflicts
+                base, ext = os.path.splitext(save_path)
+                counter = 1
+                while os.path.exists(save_path):
+                    save_path = f"{base}_{counter}{ext}"
+                    counter += 1
+
+                with open(save_path, "wb") as f:
+                    f.write(file_data)
+
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"status": "ok"}')
+
+        try:
+            cls._http_server = HTTPServer(("0.0.0.0", port), FileUploadHandler)
+        except OSError:
+            cls._http_server = None
+            return False
+
+        def server_loop():
+            cls._http_server.serve_forever()
+
+        cls._http_server_thread = threading.Thread(target=server_loop, daemon=True)
+        cls._http_server_thread.start()
+        return True
+
+    @classmethod
+    def stop_receive_server(cls) -> bool:
+        """Stop the HTTP receive server.
+
+        Returns:
+            True if server was stopped, False if not running.
+        """
+        if cls._http_server is None:
+            return False
+
+        cls._http_server.shutdown()
+
+        if cls._http_server_thread is not None:
+            cls._http_server_thread.join(timeout=5.0)
+            cls._http_server_thread = None
+
+        cls._http_server = None
+        cls._http_save_dir = None
+        cls._http_shared_key = None
+        return True
+
+    @staticmethod
+    def send_file(host: str, port: int, file_path: str, shared_key: bytes = None) -> Result:
+        """Send a file to a peer via HTTP POST.
+
+        Uploads the file to http://host:port/upload with filename and
+        checksum headers.
+
+        Args:
+            host: Peer hostname or IP address.
+            port: Peer HTTP port.
+            file_path: Path to the file to send.
+            shared_key: Optional shared key (reserved for future encryption).
+
+        Returns:
+            Result with success/failure.
+        """
+        if not os.path.isfile(file_path):
+            return Result(success=False, message=f"File not found: {file_path}")
+
+        try:
+            filename = os.path.basename(file_path)
+            checksum = FileDropManager.calculate_checksum(file_path)
+            file_size = os.path.getsize(file_path)
+
+            with open(file_path, "rb") as f:
+                file_data = f.read()
+
+            url = f"http://{host}:{port}/upload"
+            headers = {
+                "X-Filename": filename,
+                "X-Checksum-SHA256": checksum,
+                "Content-Type": "application/octet-stream",
+                "Content-Length": str(file_size),
+            }
+
+            request = Request(url, data=file_data, headers=headers, method="POST")
+
+            with urlopen(request, timeout=60) as response:
+                if response.status == 200:
+                    return Result(success=True, message=f"File sent successfully: {filename}")
+                else:
+                    return Result(success=False, message=f"Server returned status {response.status}")
+
+        except HTTPError as e:
+            return Result(success=False, message=f"HTTP error: {e.code} {e.reason}")
+        except URLError as e:
+            return Result(success=False, message=f"Connection error: {e.reason}")
+        except OSError as e:
+            return Result(success=False, message=f"File error: {e}")

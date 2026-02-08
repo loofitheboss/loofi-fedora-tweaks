@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file.
 
+## [13.0.0] - 2026-02-08 "Nexus Update"
+
+### Added
+
+- **System Profiles (v13.0)**: Quick-switch system configurations with 5 built-in profiles via `utils/profiles.py`.
+  - Gaming: Performance governor, compositor disabled, DND notifications, gamemode
+  - Development: Schedutil governor, docker/podman services enabled
+  - Battery Saver: Powersave governor, reduced compositor, critical notifications only
+  - Presentation: Performance governor, screen timeout disabled, DND mode
+  - Server: Performance governor, headless optimization
+- **Custom Profiles**: Create, save, and manage user-defined profiles with custom settings.
+- **Profile Capture**: Capture current system state (governor, swappiness) as a new profile.
+- **Health Timeline (v13.0)**: SQLite-based metrics tracking via `utils/health_timeline.py`.
+  - CPU temperature, RAM usage, disk usage, load average monitoring
+  - Anomaly detection (2+ standard deviations from mean)
+  - Export to JSON or CSV format
+  - Configurable data retention and pruning
+- **Profiles Tab (v13.0)**: New UI tab for profile management via `ui/profiles_tab.py`.
+- **Health Tab (v13.0)**: New UI tab for health timeline via `ui/health_timeline_tab.py`.
+- **Plugin SDK v2**: Enhanced plugin system with permissions model and update checking.
+  - Plugins declare required permissions (network, filesystem, system)
+  - Plugins can check for updates via remote manifest URL
+  - Dependency validation before plugin load
+- **Mesh Networking Enhancements**: Improved peer discovery and clipboard sync reliability.
+- **Shell Completions**: Bash, Zsh, and Fish completion scripts in `completions/`.
+- **CLI Commands**:
+  - `profile list|apply|create|delete`: Manage system profiles from CLI
+  - `health-history show|record|export|prune`: View and manage health metrics
+  - `preset list|apply|export`: Manage system presets
+  - `focus-mode on|off|status`: Control focus mode
+  - `security-audit`: Run security audit and show score
+
+### Changed
+
+- **Tab count**: 18 tabs expanded to 20 with Profiles and Health tabs.
+- **Test coverage**: 839+ tests passing (up from 564).
+
+### New Files
+
+- `utils/profiles.py` - System profile manager with built-in and custom profiles
+- `utils/health_timeline.py` - SQLite-based health metrics tracking
+- `ui/profiles_tab.py` - System profiles management UI
+- `ui/health_timeline_tab.py` - Health timeline visualization UI
+- `completions/loofi.bash` - Bash completion script
+- `completions/loofi.zsh` - Zsh completion script
+- `completions/loofi.fish` - Fish completion script
+- `docs/PLUGIN_SDK.md` - Expanded plugin SDK documentation
+- `docs/TROUBLESHOOTING.md` - Troubleshooting guide
+- `tests/test_profiles.py` - 53 profile tests
+- `tests/test_health_timeline.py` - 46 health timeline tests
+- `tests/test_ui_smoke.py` - 37 UI smoke tests
+
 ## [12.0.0] - 2026-02-08 "Sovereign Update"
 
 ### Added

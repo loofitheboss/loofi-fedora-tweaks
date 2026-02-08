@@ -35,10 +35,10 @@ class VirtualizationPlugin(LoofiPlugin):
         keeping the plugin lightweight when loaded only for CLI commands.
         """
         mod = __import__(
-            "ui.advanced_tab",
-            fromlist=["AdvancedTab"],
+            "ui.virtualization_tab",
+            fromlist=["VirtualizationTab"],
         )
-        return mod.AdvancedTab()
+        return mod.VirtualizationTab()
 
     def get_cli_commands(self) -> dict:
         """Return CLI commands provided by this plugin."""

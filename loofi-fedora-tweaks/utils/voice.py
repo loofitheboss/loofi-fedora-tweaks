@@ -14,16 +14,9 @@ import subprocess
 import shutil
 import os
 import tempfile
-from dataclasses import dataclass
 from typing import Optional
 
-
-@dataclass
-class Result:
-    """Operation result."""
-    success: bool
-    message: str
-    data: Optional[dict] = None
+from utils.containers import Result
 
 
 # Whisper model sizes and their RAM requirements in MB

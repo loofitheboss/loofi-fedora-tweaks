@@ -13,16 +13,9 @@ import re
 import shutil
 import subprocess
 import uuid
-from dataclasses import dataclass
 from typing import Optional
 
-
-@dataclass
-class Result:
-    """Operation result with message."""
-    success: bool
-    message: str
-    data: Optional[dict] = None
+from utils.containers import Result
 
 
 # Name validation: alphanumeric, dash, underscore only

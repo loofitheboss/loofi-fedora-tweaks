@@ -16,6 +16,31 @@ jobs:
       - run: pip install flake8
       - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install mypy PyQt6-stubs
+      - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any || true
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install bandit
+      - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +51,7 @@ jobs:
       - run: pip install pytest pytest-cov PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
       - run: python loofi-fedora-tweaks/main.py --cli --version
-      - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
+      - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short --cov=loofi-fedora-tweaks --cov-report=term-missing --cov-fail-under=80
 
   build:
     runs-on: ubuntu-latest
@@ -39,4 +64,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: rpm-package
-          path: "*.rpm"
+          path: rpmbuild/RPMS/noarch/*.rpm

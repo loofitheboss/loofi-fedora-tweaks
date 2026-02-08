@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        12.0.0
+Version:        13.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -54,6 +54,19 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 13.0.0-1
+- Nexus Update: System profiles, health timeline, plugin SDK v2
+- System Profiles: 5 built-in profiles (Gaming, Development, Battery Saver, Presentation, Server)
+- Custom profile creation with CPU governor, compositor, and notification settings
+- Health Timeline: SQLite-based metrics tracking for CPU temp, RAM, disk, load
+- Health Timeline export to JSON/CSV with anomaly detection
+- Mesh networking enhancements with peer discovery and clipboard sync
+- Plugin SDK v2 with permissions model, update checking, and dependency validation
+- Shell completions for bash, zsh, and fish
+- New CLI commands: profile, health-history, preset, focus-mode, security-audit
+- 20-tab sidebar layout with Profiles and Health tabs
+- 839+ tests passing
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 12.0.0-1
 - Sovereign Update: Virtualization, mesh networking, and state teleportation
 - VM Quick-Create wizard with 5 preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch)

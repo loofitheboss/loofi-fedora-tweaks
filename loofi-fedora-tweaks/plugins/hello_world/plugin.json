@@ -1,0 +1,9 @@
+{
+    "name": "Hello World",
+    "version": "1.0.0",
+    "author": "Loofi Team",
+    "description": "Example plugin demonstrating the Loofi Plugin SDK",
+    "min_app_version": "13.0.0",
+    "permissions": ["notifications"],
+    "update_url": ""
+}

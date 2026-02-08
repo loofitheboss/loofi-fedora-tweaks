@@ -24,6 +24,9 @@ from utils.file_drop import FileDropManager
 class MeshTab(QWidget):
     """Loofi Link tab with Devices, Clipboard, and File Drop sub-tabs."""
 
+    # Default shared key for mesh network encryption (should be set during pairing)
+    _shared_key = b"loofi-mesh-default-key"
+
     def __init__(self):
         super().__init__()
         self._peers: list = []
@@ -286,13 +289,36 @@ class MeshTab(QWidget):
         self.clipboard_preview.setPlainText(content or self.tr("(empty clipboard)"))
 
     def on_send_clipboard(self):
-        """Send clipboard content to the selected peer (stub)."""
+        """Send clipboard content to the selected peer."""
         idx = self.device_combo.currentIndex()
         if idx < 0 or not self._peers:
             self.log(self.tr("No peer selected for clipboard sync."))
             return
+
         peer = self._peers[idx]
-        self.log(self.tr("Clipboard sync to {} requested (not yet implemented).").format(peer.name))
+
+        # Get clipboard content
+        content = ClipboardSync.get_clipboard_content()
+        if not content:
+            self.log(self.tr("Clipboard is empty."))
+            return
+
+        try:
+            # Send clipboard to peer
+            success = ClipboardSync.send_clipboard_to_peer(
+                peer.address,
+                peer.port,
+                content.encode("utf-8"),
+                self._shared_key
+            )
+
+            if success:
+                self.log(self.tr("Clipboard synced to {} successfully.").format(peer.name))
+            else:
+                self.log(self.tr("Failed to sync clipboard to {}.").format(peer.name))
+
+        except Exception as e:
+            self.log(self.tr("Error syncing clipboard: {}").format(str(e)))
 
     def on_generate_pairing_code(self):
         """Generate and display a new 6-digit pairing code."""

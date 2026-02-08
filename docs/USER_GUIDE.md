@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 12.0.0 "Sovereign Update"**
+> **Version 13.0.0 "Nexus Update"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -27,9 +27,11 @@
 18. [Virtualization](#virtualization)
 19. [Loofi Link](#loofi-link)
 20. [State Teleport](#state-teleport)
-21. [CLI Reference](#cli-reference)
-22. [All Tabs Overview](#all-tabs-overview)
-23. [Troubleshooting](#troubleshooting)
+21. [Profiles](#profiles)
+22. [Health Timeline](#health-timeline)
+23. [CLI Reference](#cli-reference)
+24. [All Tabs Overview](#all-tabs-overview)
+25. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -560,6 +562,115 @@ The **State Teleport** tab (v12.0) captures and restores workspace state across 
 
 ---
 
+## Profiles
+
+The **Profiles** tab (v13.0) enables quick-switching between system configurations.
+
+### Available Profiles
+
+| Profile | Description |
+|---------|-------------|
+| **Gaming** | Performance governor, compositor disabled, DND notifications, gamemode enabled |
+| **Development** | Schedutil governor, Docker/Podman services enabled, all notifications |
+| **Battery Saver** | Powersave governor, reduced compositor, critical notifications only, Bluetooth disabled |
+| **Presentation** | Performance governor, screen timeout disabled, DND mode |
+| **Server** | Performance governor, headless optimization, critical notifications |
+
+### Profile Actions
+
+| Feature | Description |
+|---------|-------------|
+| **View Profiles** | See all built-in and custom profiles with icons and descriptions |
+| **Apply Profile** | One-click profile activation with confirmation |
+| **Create Custom** | Define your own profile with custom CPU governor, compositor, and notification settings |
+| **Capture Current** | Save current system state as a new profile |
+| **Delete Custom** | Remove user-created profiles (built-in profiles cannot be deleted) |
+
+### Profile Settings
+
+When creating or applying a profile, the following settings can be configured:
+
+| Setting | Options |
+|---------|---------|
+| **CPU Governor** | performance, powersave, schedutil, ondemand, conservative |
+| **Compositor** | enabled, disabled, reduced |
+| **Notifications** | all, critical, dnd (Do Not Disturb) |
+| **Swappiness** | 0-100 (lower = less swap usage) |
+| **Services** | Enable/disable specific systemd services |
+
+### CLI Usage
+
+```bash
+loofi profile list              # List all profiles
+loofi profile apply gaming      # Apply the gaming profile
+loofi profile create myprofile  # Capture current state as "myprofile"
+loofi profile delete myprofile  # Delete a custom profile
+loofi --json profile list       # JSON output for scripting
+```
+
+---
+
+## Health Timeline
+
+The **Health Timeline** tab (v13.0) tracks system health metrics over time.
+
+### Tracked Metrics
+
+| Metric | Source | Unit |
+|--------|--------|------|
+| **CPU Temperature** | `/sys/class/thermal` or `sensors` | Degrees Celsius |
+| **RAM Usage** | `/proc/meminfo` | Percentage |
+| **Disk Usage** | `os.statvfs("/")` | Percentage |
+| **Load Average** | `os.getloadavg()` | 1-minute average |
+
+### Summary View
+
+The summary shows min/max/avg statistics for each metric over the last 24 hours.
+
+### Actions
+
+| Feature | Description |
+|---------|-------------|
+| **Record Snapshot** | Capture current system metrics immediately |
+| **Export Data** | Export all metrics to JSON or CSV file |
+| **Prune Old Data** | Delete metrics older than 30 days |
+| **Refresh** | Update summary and table displays |
+
+### Anomaly Detection
+
+The timeline can detect anomalies - values that deviate more than 2 standard deviations from the mean:
+
+| Field | Description |
+|-------|-------------|
+| **Timestamp** | When the anomaly occurred |
+| **Value** | The anomalous metric value |
+| **Deviation** | How many standard deviations from the mean |
+| **Mean** | The average value for this metric type |
+
+### Table View
+
+Filter metrics by type and time range:
+
+| Column | Description |
+|--------|-------------|
+| **Timestamp** | When the metric was recorded |
+| **Value** | Metric value |
+| **Unit** | Unit of measurement |
+| **ID** | Database row ID |
+
+### CLI Usage
+
+```bash
+loofi health-history show             # Show 24h summary
+loofi health-history record           # Record current metrics
+loofi health-history export data.json # Export to JSON
+loofi health-history export data.csv  # Export to CSV
+loofi health-history prune            # Delete old data
+loofi --json health-history show      # JSON output for scripting
+```
+
+---
+
 ## CLI Reference
 
 ### Info & Health
@@ -657,6 +768,8 @@ loofi-fedora-tweaks --daemon  # Run as background service
 | **Virtualization** | Desktop | VM wizard + VFIO + disposable VMs |
 | **Loofi Link** | Link | Mesh discovery + clipboard + file drop |
 | **State Teleport** | Satellite | Workspace capture + restore |
+| **Profiles** | Person | System configuration quick-switch |
+| **Health** | Chart | Health timeline metrics tracking |
 
 ---
 
@@ -708,4 +821,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v12.0.0 - February 2026*
+*Documentation last updated: v13.0.0 - February 2026*

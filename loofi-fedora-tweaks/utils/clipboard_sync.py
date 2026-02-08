@@ -4,6 +4,7 @@ Part of v12.0 "Sovereign Update".
 
 Provides clipboard read/write for both X11 and Wayland sessions,
 plus a simple symmetric encryption layer for transit security.
+Includes TCP server/client for mesh network clipboard sync.
 """
 
 import hashlib
@@ -11,7 +12,10 @@ import hmac
 import os
 import random
 import shutil
+import socket
+import struct
 import subprocess
+import threading
 
 
 class ClipboardSync:
@@ -159,35 +163,70 @@ class ClipboardSync:
 
     @staticmethod
     def encrypt_payload(data: bytes, shared_key: bytes) -> bytes:
-        """Encrypt data with a simple XOR pad derived from the shared key.
+        """Encrypt data with HMAC-CTR stream cipher and authenticate with HMAC tag.
 
-        This is a **placeholder** for production-grade NaCl/WireGuard encryption.
-        NOT suitable for real adversarial security in its current form.
+        Uses stdlib-only cryptography: HMAC-SHA256 in counter mode for
+        encryption, plus a separate HMAC-SHA256 tag for authentication.
+
+        Wire format: nonce (16 bytes) || ciphertext || HMAC tag (32 bytes)
 
         Args:
             data: Plaintext bytes to encrypt.
-            shared_key: Symmetric key bytes.
+            shared_key: Symmetric key bytes (32 bytes recommended).
 
         Returns:
-            Ciphertext bytes (same length as data).
+            Authenticated ciphertext bytes.
         """
-        pad = ClipboardSync._derive_pad(shared_key, len(data))
-        return bytes(a ^ b for a, b in zip(data, pad))
+        nonce = os.urandom(16)
+
+        # Derive separate encryption and authentication keys via HKDF-like expand
+        enc_key = hmac.new(shared_key, b"enc" + nonce, hashlib.sha256).digest()
+        auth_key = hmac.new(shared_key, b"auth" + nonce, hashlib.sha256).digest()
+
+        # HMAC-CTR stream cipher
+        pad = ClipboardSync._derive_pad(enc_key, len(data))
+        ciphertext = bytes(a ^ b for a, b in zip(data, pad))
+
+        # Authenticate: HMAC-SHA256(auth_key, nonce || ciphertext)
+        tag = hmac.new(auth_key, nonce + ciphertext, hashlib.sha256).digest()
+
+        return nonce + ciphertext + tag
 
     @staticmethod
     def decrypt_payload(data: bytes, shared_key: bytes) -> bytes:
-        """Decrypt data previously encrypted with :meth:`encrypt_payload`.
+        """Decrypt and verify data encrypted with :meth:`encrypt_payload`.
 
-        XOR encryption is symmetric so this is identical to encrypt.
+        Raises ValueError if the authentication tag does not match.
 
         Args:
-            data: Ciphertext bytes.
+            data: Authenticated ciphertext (nonce + ciphertext + tag).
             shared_key: The same symmetric key used for encryption.
 
         Returns:
             Plaintext bytes.
+
+        Raises:
+            ValueError: If the data is too short or the HMAC tag is invalid.
         """
-        return ClipboardSync.encrypt_payload(data, shared_key)
+        if len(data) < 48:  # 16 nonce + 0 ciphertext + 32 tag minimum
+            raise ValueError("Ciphertext too short")
+
+        nonce = data[:16]
+        tag = data[-32:]
+        ciphertext = data[16:-32]
+
+        # Re-derive keys
+        enc_key = hmac.new(shared_key, b"enc" + nonce, hashlib.sha256).digest()
+        auth_key = hmac.new(shared_key, b"auth" + nonce, hashlib.sha256).digest()
+
+        # Verify tag first (constant-time comparison)
+        expected_tag = hmac.new(auth_key, nonce + ciphertext, hashlib.sha256).digest()
+        if not hmac.compare_digest(tag, expected_tag):
+            raise ValueError("Authentication failed: invalid HMAC tag")
+
+        # Decrypt
+        pad = ClipboardSync._derive_pad(enc_key, len(ciphertext))
+        return bytes(a ^ b for a, b in zip(ciphertext, pad))
 
     @staticmethod
     def generate_pairing_key() -> str:
@@ -248,3 +287,160 @@ class ClipboardSync:
             pad += block
             counter += 1
         return pad[:length]
+
+    # ------------------------------------------------------------------
+    # TCP Network Clipboard Sync
+    # ------------------------------------------------------------------
+
+    # Class-level attributes for server state
+    _server_socket = None
+    _server_thread = None
+    _server_shutdown = False
+
+    @classmethod
+    def start_clipboard_server(cls, port: int, shared_key: bytes, on_receive=None) -> bool:
+        """Start a TCP server for receiving clipboard data from peers.
+
+        Listens on the specified port for encrypted clipboard payloads.
+        When data is received, decrypts with shared_key and calls the
+        on_receive callback with the decrypted bytes.
+
+        Wire format: 4-byte big-endian length prefix, then encrypted payload.
+
+        Args:
+            port: TCP port to listen on.
+            shared_key: Symmetric key for decryption.
+            on_receive: Callback function(data: bytes) called when data arrives.
+
+        Returns:
+            True if server started successfully.
+        """
+        if cls._server_socket is not None:
+            return False  # Already running
+
+        cls._server_shutdown = False
+
+        try:
+            cls._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            cls._server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            cls._server_socket.bind(("0.0.0.0", port))
+            cls._server_socket.listen(5)
+            cls._server_socket.settimeout(1.0)  # Allow periodic shutdown checks
+        except OSError:
+            cls._server_socket = None
+            return False
+
+        def server_loop():
+            while not cls._server_shutdown:
+                try:
+                    conn, addr = cls._server_socket.accept()
+                except socket.timeout:
+                    continue
+                except OSError:
+                    break
+
+                try:
+                    conn.settimeout(10.0)
+                    # Read 4-byte length prefix
+                    length_data = b""
+                    while len(length_data) < 4:
+                        chunk = conn.recv(4 - len(length_data))
+                        if not chunk:
+                            break
+                        length_data += chunk
+
+                    if len(length_data) < 4:
+                        conn.close()
+                        continue
+
+                    payload_length = struct.unpack(">I", length_data)[0]
+
+                    # Sanity check: limit payload size to 10MB
+                    if payload_length > 10 * 1024 * 1024:
+                        conn.close()
+                        continue
+
+                    # Read encrypted payload
+                    encrypted_data = b""
+                    while len(encrypted_data) < payload_length:
+                        chunk = conn.recv(min(65536, payload_length - len(encrypted_data)))
+                        if not chunk:
+                            break
+                        encrypted_data += chunk
+
+                    if len(encrypted_data) == payload_length:
+                        try:
+                            decrypted = cls.decrypt_payload(encrypted_data, shared_key)
+                            if on_receive is not None:
+                                on_receive(decrypted)
+                        except ValueError:
+                            pass  # Decryption failed, ignore
+
+                except (socket.timeout, OSError):
+                    pass
+                finally:
+                    try:
+                        conn.close()
+                    except OSError:
+                        pass
+
+        cls._server_thread = threading.Thread(target=server_loop, daemon=True)
+        cls._server_thread.start()
+        return True
+
+    @classmethod
+    def stop_clipboard_server(cls) -> bool:
+        """Stop the TCP clipboard server.
+
+        Sets the shutdown flag and closes the server socket, then waits
+        for the server thread to finish.
+
+        Returns:
+            True if server was stopped, False if not running.
+        """
+        if cls._server_socket is None:
+            return False
+
+        cls._server_shutdown = True
+
+        try:
+            cls._server_socket.close()
+        except OSError:
+            pass
+
+        if cls._server_thread is not None:
+            cls._server_thread.join(timeout=5.0)
+            cls._server_thread = None
+
+        cls._server_socket = None
+        return True
+
+    @staticmethod
+    def send_clipboard_to_peer(host: str, port: int, data: bytes, shared_key: bytes) -> bool:
+        """Send clipboard data to a peer over TCP.
+
+        Encrypts the data with shared_key and sends it with a 4-byte
+        big-endian length prefix.
+
+        Args:
+            host: Peer hostname or IP address.
+            port: Peer TCP port.
+            data: Raw clipboard data bytes to send.
+            shared_key: Symmetric key for encryption.
+
+        Returns:
+            True if data was sent successfully.
+        """
+        try:
+            encrypted = ClipboardSync.encrypt_payload(data, shared_key)
+            length_prefix = struct.pack(">I", len(encrypted))
+
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(10.0)
+            sock.connect((host, port))
+
+            sock.sendall(length_prefix + encrypted)
+            sock.close()
+            return True
+        except (OSError, socket.timeout):
+            return False
