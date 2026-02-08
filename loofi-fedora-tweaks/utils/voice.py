@@ -10,6 +10,7 @@ Provides:
 - Hardware-aware model recommendation
 """
 
+import logging
 import subprocess
 import shutil
 import os
@@ -17,6 +18,8 @@ import tempfile
 from typing import Optional
 
 from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 
 # Whisper model sizes and their RAM requirements in MB
@@ -143,10 +146,8 @@ class VoiceManager:
                     if info["devices"]:
                         info["available"] = True
                         info["default"] = info["devices"][0]
-            except (subprocess.TimeoutExpired, Exception):
-                pass
-
-        return info
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("arecord device detection failed: %s", e)
 
     @staticmethod
     def get_recommended_model(available_ram_mb: int) -> str:
@@ -222,7 +223,7 @@ class VoiceManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Transcription timed out after 120 seconds")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Transcription error: {e}")
 
     @staticmethod
@@ -262,8 +263,8 @@ class VoiceManager:
                 )
                 if result.returncode == 0 and os.path.isfile(output_path):
                     return output_path
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("arecord failed: %s", e)
 
         # Fallback: parecord (PulseAudio)
         if shutil.which("parecord"):
@@ -283,8 +284,8 @@ class VoiceManager:
                 )
                 if result.returncode == 0 and os.path.isfile(output_path):
                     return output_path
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("parecord failed: %s", e)
 
         return ""
 

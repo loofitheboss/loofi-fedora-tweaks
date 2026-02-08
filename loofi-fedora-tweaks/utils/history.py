@@ -1,8 +1,14 @@
 import json
+import logging
 import os
 import shutil
 import subprocess
 from datetime import datetime
+
+from utils.containers import Result
+
+logger = logging.getLogger(__name__)
+
 
 class HistoryManager:
     HISTORY_FILE = os.path.expanduser("~/.config/loofi-fedora-tweaks/history.json")
@@ -40,28 +46,29 @@ class HistoryManager:
     def undo_last_action(self):
         """
         Executes the undo command for the last action and removes it from history.
-        Returns (success, message).
+        Returns Result.
         """
         history = self._load_history()
         if not history:
-            return False, "No actions to undo."
-            
+            return Result(False, "No actions to undo.")
+
         last_action = history.pop()
         cmd = last_action["undo_command"]
-        
+
         try:
             # Determine if we need pkexec (simple heuristic or explicitness in command)
             # ideally, the command stored should be complete.
             subprocess.run(cmd, check=True)
             self._save_history(history)
-            return True, f"Undid: {last_action['description']}"
+            return Result(True, f"Undid: {last_action['description']}")
         except subprocess.CalledProcessError as e:
             # Don't pop if failed? Or pop and log error?
             # Standard undo: if it fails, we might still want to keep it?
             # For now, let's keep it in history so user can retry manual fix
-            return False, f"Undo failed: {e}"
-        except Exception as e:
-             return False, f"Error: {e}"
+            return Result(False, f"Undo failed: {e}")
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to undo action: %s", e)
+            return Result(False, f"Error: {e}")
 
     def _load_history(self):
         if not os.path.exists(self.HISTORY_FILE):

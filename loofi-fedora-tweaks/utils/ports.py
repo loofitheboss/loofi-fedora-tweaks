@@ -6,11 +6,14 @@ Scans open ports, identifies listening services,
 and provides firewall management via firewall-cmd.
 """
 
+import logging
 import subprocess
 import shutil
 import re
 from dataclasses import dataclass
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -133,8 +136,9 @@ class PortAuditor:
             cls._enhance_with_process_info(ports)
             
             return ports
-            
-        except Exception:
+
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Port scan failed: %s", e)
             return []
     
     @classmethod
@@ -175,9 +179,9 @@ class PortAuditor:
                                         break
                             except ValueError:
                                 pass
-                                
-        except Exception:
-            pass
+
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to enhance port info: %s", e)
     
     @classmethod
     def get_risky_ports(cls) -> list[OpenPort]:
@@ -195,7 +199,8 @@ class PortAuditor:
                 timeout=5
             )
             return result.returncode == 0
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to check firewalld status: %s", e)
             return False
     
     @classmethod
@@ -232,8 +237,8 @@ class PortAuditor:
             )
             
             return Result(True, f"Port {port}/{protocol} blocked")
-            
-        except Exception as e:
+
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
     
     @classmethod
@@ -272,8 +277,8 @@ class PortAuditor:
             )
             
             return Result(True, f"Port {port}/{protocol} allowed")
-            
-        except Exception as e:
+
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
     
     @classmethod
@@ -321,9 +326,9 @@ class PortAuditor:
             )
             if result.returncode == 0:
                 status["allowed_services"] = result.stdout.strip().split()
-                
-        except Exception:
-            pass
+
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get firewall status: %s", e)
         
         return status
     

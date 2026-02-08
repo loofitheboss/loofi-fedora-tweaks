@@ -1,7 +1,11 @@
+import logging
+import subprocess
+
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QMessageBox
 from utils.command_runner import CommandRunner
 from utils.history import HistoryManager
-import subprocess
+
+logger = logging.getLogger(__name__)
 
 class NetworkTab(QWidget):
     def __init__(self):
@@ -73,8 +77,8 @@ class NetworkTab(QWidget):
             for line in res.stdout.splitlines():
                 if "wifi" in line or "ethernet" in line:
                     return line.split(":")[0]
-        except:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get active connection: %s", e)
         return None
 
     def apply_dns(self):

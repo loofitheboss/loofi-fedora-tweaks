@@ -5,12 +5,15 @@ Tracks system state and alerts when it deviates from applied presets.
 
 import json
 import hashlib
+import logging
 import subprocess
 import os
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional, Any
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -111,9 +114,10 @@ class DriftDetector:
             with open(self.CURRENT_SNAPSHOT, "w") as f:
                 json.dump(asdict(snapshot), f, indent=2)
             return True
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to save snapshot: %s", e)
             return False
-    
+
     def load_snapshot(self) -> Optional[SystemSnapshot]:
         """Load the current baseline snapshot."""
         if not self.CURRENT_SNAPSHOT.exists():
@@ -123,7 +127,8 @@ class DriftDetector:
             with open(self.CURRENT_SNAPSHOT, "r") as f:
                 data = json.load(f)
             return SystemSnapshot(**data)
-        except Exception:
+        except (OSError, json.JSONDecodeError, TypeError) as e:
+            logger.debug("Failed to load snapshot: %s", e)
             return None
     
     def check_drift(self) -> Optional[DriftReport]:
@@ -227,7 +232,8 @@ class DriftDetector:
             if self.CURRENT_SNAPSHOT.exists():
                 self.CURRENT_SNAPSHOT.unlink()
             return True
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to clear baseline: %s", e)
             return False
     
     # System state gathering methods
@@ -237,7 +243,8 @@ class DriftDetector:
         try:
             with open("/proc/cmdline", "r") as f:
                 return f.read().strip().split()
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to read kernel params: %s", e)
             return []
     
     def _get_layered_packages(self) -> List[str]:
@@ -262,9 +269,9 @@ class DriftDetector:
             )
             if result.returncode == 0:
                 return result.stdout.strip().split("\n")[:100]  # Limit
-                
-        except Exception:
-            pass
+
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get layered packages: %s", e)
         return []
     
     def _get_user_services(self) -> List[str]:
@@ -280,8 +287,8 @@ class DriftDetector:
                     if line.strip():
                         services.append(line.split()[0])
                 return services
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get user services: %s", e)
         return []
     
     def _get_dnf_config(self) -> str:
@@ -289,7 +296,8 @@ class DriftDetector:
         try:
             with open("/etc/dnf/dnf.conf", "r") as f:
                 return f.read()
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to read dnf config: %s", e)
             return ""
     
     def _get_sysctl_values(self) -> str:
@@ -309,8 +317,8 @@ class DriftDetector:
                 )
                 if result.returncode == 0:
                     values.append(f"{key}={result.stdout.strip()}")
-            except Exception:
-                pass
+            except (subprocess.SubprocessError, OSError) as e:
+                logger.debug("Failed to read sysctl %s: %s", key, e)
         
         return "\n".join(values)
     

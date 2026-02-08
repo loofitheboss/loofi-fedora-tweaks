@@ -3,6 +3,7 @@ Cloud Sync Manager - Handles cloud sync and community presets.
 Integrates with GitHub Gist and community preset repository.
 """
 
+import logging
 import os
 import json
 import urllib.request
@@ -10,6 +11,8 @@ import urllib.error
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 class CloudSyncManager:
@@ -60,7 +63,8 @@ class CloudSyncManager:
             # Set restrictive permissions
             os.chmod(cls.TOKEN_FILE, 0o600)
             return True
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to save gist token: %s", e)
             return False
     
     @classmethod
@@ -70,7 +74,8 @@ class CloudSyncManager:
             cls.TOKEN_FILE.unlink(missing_ok=True)
             cls.GIST_ID_FILE.unlink(missing_ok=True)
             return True
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to clear gist token: %s", e)
             return False
     
     @classmethod
@@ -90,7 +95,8 @@ class CloudSyncManager:
             with open(cls.GIST_ID_FILE, "w") as f:
                 f.write(gist_id)
             return True
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to save gist ID: %s", e)
             return False
     
     # ==================== GIST SYNC ====================
@@ -157,7 +163,7 @@ class CloudSyncManager:
                 return cls.sync_to_gist(config)  # Retry
             else:
                 return (False, f"GitHub API error: {e.code}")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             return (False, f"Sync failed: {str(e)}")
     
     @classmethod
@@ -202,9 +208,9 @@ class CloudSyncManager:
                 return (False, "Gist not found. Check the Gist ID.")
             else:
                 return (False, f"GitHub API error: {e.code}")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             return (False, f"Download failed: {str(e)}")
-    
+
     # ==================== COMMUNITY PRESETS ====================
     
     @classmethod
@@ -230,8 +236,8 @@ class CloudSyncManager:
                 age_hours = (datetime.now() - cached_time).total_seconds() / 3600
                 if age_hours < 1:
                     return (True, cached.get("presets", []))
-            except Exception:
-                pass
+            except (OSError, json.JSONDecodeError, ValueError) as e:
+                logger.debug("Failed to read preset cache: %s", e)
         
         # Fetch from GitHub
         try:
@@ -248,8 +254,8 @@ class CloudSyncManager:
                             "cached_at": datetime.now().isoformat(),
                             "presets": presets
                         }, f)
-                except Exception:
-                    pass
+                except OSError as e:
+                    logger.debug("Failed to write preset cache: %s", e)
                 
                 return (True, presets)
         
@@ -258,15 +264,15 @@ class CloudSyncManager:
                 # Return empty list if repo doesn't exist yet
                 return (True, [])
             return (False, f"Failed to fetch presets: HTTP {e.code}")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             # Try returning cache even if stale
             if cache_file.exists():
                 try:
                     with open(cache_file, "r") as f:
                         cached = json.load(f)
                     return (True, cached.get("presets", []))
-                except Exception:
-                    pass
+                except (OSError, json.JSONDecodeError) as cache_e:
+                    logger.debug("Failed to read stale cache: %s", cache_e)
             return (False, f"Failed to fetch presets: {str(e)}")
     
     @classmethod
@@ -293,14 +299,15 @@ class CloudSyncManager:
             if e.code == 404:
                 return (False, f"Preset '{preset_id}' not found.")
             return (False, f"Download failed: HTTP {e.code}")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             return (False, f"Download failed: {str(e)}")
-    
+
     @classmethod
     def is_online(cls) -> bool:
         """Quick check if we have internet connectivity."""
         try:
             urllib.request.urlopen("https://github.com", timeout=5)
             return True
-        except Exception:
+        except (urllib.error.URLError, OSError) as e:
+            logger.debug("Online check failed: %s", e)
             return False

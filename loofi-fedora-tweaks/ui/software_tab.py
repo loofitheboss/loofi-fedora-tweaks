@@ -15,6 +15,7 @@ from ui.base_tab import BaseTab
 from utils.command_runner import CommandRunner
 
 import json
+import shlex
 import subprocess
 import os
 
@@ -148,11 +149,11 @@ class _ApplicationsSubTab(QWidget):
         """Run a check command silently to determine installation status."""
         try:
             subprocess.run(
-                cmd, shell=True, check=True,
+                shlex.split(cmd), check=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             )
             return True
-        except subprocess.CalledProcessError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
     def install_app(self, app_data):

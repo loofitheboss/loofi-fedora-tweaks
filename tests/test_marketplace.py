@@ -254,7 +254,7 @@ class TestDownloadPreset(unittest.TestCase):
     @patch('urllib.request.urlopen')
     def test_download_preset_handles_error(self, mock_urlopen):
         """download_preset handles download errors."""
-        mock_urlopen.side_effect = Exception("Download failed")
+        mock_urlopen.side_effect = urllib.error.URLError("Download failed")
 
         preset = CommunityPreset.from_dict({
             "id": "test",

@@ -427,7 +427,7 @@ class TestIsOnline(unittest.TestCase):
     @patch('urllib.request.urlopen')
     def test_is_online_returns_false_on_error(self, mock_urlopen):
         """is_online returns False when network is unavailable."""
-        mock_urlopen.side_effect = Exception("Network error")
+        mock_urlopen.side_effect = urllib.error.URLError("Network error")
 
         result = CloudSyncManager.is_online()
         self.assertFalse(result)

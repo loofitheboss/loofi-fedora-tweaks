@@ -4,11 +4,15 @@ Manages profiles that react to power, network, and monitor events.
 """
 
 import json
+import logging
+import shlex
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any, Optional
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class TriggerType(Enum):
@@ -84,7 +88,8 @@ class AutomationProfiles:
         try:
             with open(cls.CONFIG_FILE, "r") as f:
                 return json.load(f)
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to load automation config: %s", e)
             return {"enabled": True, "rules": []}
     
     @classmethod
@@ -159,7 +164,8 @@ class AutomationProfiles:
             cls.save_config(config)
             
             return {"success": True, "message": f"Rule '{rule.get('name', 'unnamed')}' added", "id": rule["id"]}
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to add automation rule: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -183,7 +189,8 @@ class AutomationProfiles:
                     cls.save_config(config)
                     return {"success": True, "message": "Rule updated"}
             return {"success": False, "message": "Rule not found"}
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to update automation rule: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -203,7 +210,8 @@ class AutomationProfiles:
                 cls.save_config(config)
                 return {"success": True, "message": "Rule deleted"}
             return {"success": False, "message": "Rule not found"}
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to delete automation rule: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -396,7 +404,8 @@ class AutomationProfiles:
         if handler:
             try:
                 return handler(params)
-            except Exception as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, ImportError) as e:
+                logger.debug("Action execution failed: %s", e)
                 return {"success": False, "message": str(e)}
         
         return {"success": False, "message": f"Unknown action: {action}"}
@@ -419,7 +428,8 @@ class AutomationProfiles:
             return {"success": False, "message": result.stderr or "Command failed"}
         except FileNotFoundError:
             return {"success": False, "message": "power-profiles-daemon not installed"}
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set power profile: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -440,7 +450,8 @@ class AutomationProfiles:
                 if result.returncode == 0:
                     return {"success": True, "message": f"CPU governor set to '{governor}'"}
                 return {"success": False, "message": "Failed to set governor"}
-            except Exception as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("Failed to set CPU governor: %s", e)
                 return {"success": False, "message": str(e)}
     
     @classmethod
@@ -470,7 +481,8 @@ class AutomationProfiles:
             if result.returncode == 0:
                 return {"success": True, "message": f"VPN '{vpn_name}' connected"}
             return {"success": False, "message": result.stderr or "VPN connection failed"}
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, ValueError) as e:
+            logger.debug("Failed to enable VPN: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -495,7 +507,8 @@ class AutomationProfiles:
             if disconnected:
                 return {"success": True, "message": f"Disconnected VPNs: {', '.join(disconnected)}"}
             return {"success": True, "message": "No active VPN connections"}
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to disable VPN: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -518,9 +531,10 @@ class AutomationProfiles:
                               capture_output=True, timeout=10)
                 
                 return {"success": True, "message": f"Tiling script '{script_name}' enabled"}
-            except Exception as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("Failed to enable tiling: %s", e)
                 return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_disable_tiling(cls, params: Dict) -> Dict[str, Any]:
         """Disable tiling window manager scripts."""
@@ -540,9 +554,10 @@ class AutomationProfiles:
                               capture_output=True, timeout=10)
                 
                 return {"success": True, "message": f"Tiling script '{script_name}' disabled"}
-            except Exception as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("Failed to disable tiling: %s", e)
                 return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_set_theme(cls, params: Dict) -> Dict[str, Any]:
         """Set desktop theme (light/dark)."""
@@ -572,7 +587,8 @@ class AutomationProfiles:
                 return {"success": True, "message": f"Theme set to '{theme}'"}
             
             return {"success": False, "message": "Could not set theme"}
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set theme: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod
@@ -584,7 +600,7 @@ class AutomationProfiles:
         
         try:
             result = subprocess.run(
-                command, shell=True,
+                shlex.split(command),
                 capture_output=True, text=True, timeout=60
             )
             return {
@@ -594,7 +610,8 @@ class AutomationProfiles:
             }
         except subprocess.TimeoutExpired:
             return {"success": False, "message": "Command timed out"}
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
+            logger.debug("Failed to run command: %s", e)
             return {"success": False, "message": str(e)}
     
     @classmethod

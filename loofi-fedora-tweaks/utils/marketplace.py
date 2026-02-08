@@ -4,6 +4,7 @@ Browse, download, and share system presets with the community.
 """
 
 import json
+import logging
 import os
 import hashlib
 from pathlib import Path
@@ -12,6 +13,8 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 import urllib.request
 import urllib.error
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -97,8 +100,8 @@ class PresetMarketplace:
                     data = json.load(f)
                 presets = [CommunityPreset.from_dict(p) for p in data.get("presets", [])]
                 return MarketplaceResult(True, "Loaded from cache", presets)
-            except Exception:
-                pass
+            except (OSError, json.JSONDecodeError) as e:
+                logger.debug("Failed to read marketplace cache: %s", e)
         
         # Fetch from GitHub
         try:
@@ -122,7 +125,7 @@ class PresetMarketplace:
             return MarketplaceResult(False, f"HTTP Error: {e.code}")
         except urllib.error.URLError as e:
             return MarketplaceResult(False, f"Network error: {e.reason}")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             return MarketplaceResult(False, f"Error: {str(e)}")
     
     def download_preset(self, preset: CommunityPreset) -> MarketplaceResult:
@@ -159,7 +162,7 @@ class PresetMarketplace:
                 {"path": str(preset_file), "data": data}
             )
             
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             return MarketplaceResult(False, f"Download failed: {str(e)}")
     
     def search_presets(self, query: str = "", category: str = "") -> MarketplaceResult:

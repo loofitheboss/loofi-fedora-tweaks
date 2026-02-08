@@ -7,12 +7,15 @@ Presentation, and Server. Each profile adjusts power governor,
 compositor settings, notification rules, and services.
 """
 
+import logging
 import os
 import json
 import subprocess
 import shutil
 
 from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileManager:
@@ -138,10 +141,11 @@ class ProfileManager:
                             "builtin": False,
                             "settings": data.get("settings", {}),
                         })
-                    except (json.JSONDecodeError, OSError):
+                    except (json.JSONDecodeError, OSError) as e:
+                        logger.debug("Failed to load custom profile %s: %s", filepath, e)
                         continue
-            except OSError:
-                pass
+            except OSError as e:
+                logger.debug("Failed to list profiles directory: %s", e)
 
         return profiles
 
@@ -185,8 +189,8 @@ class ProfileManager:
                     "builtin": False,
                     "settings": data.get("settings", {}),
                 }
-            except (json.JSONDecodeError, OSError):
-                pass
+            except (json.JSONDecodeError, OSError) as e:
+                logger.debug("Failed to load profile %s: %s", safe_name, e)
 
         return {}
 
@@ -342,10 +346,8 @@ class ProfileManager:
             os.makedirs(state_dir, exist_ok=True)
             with open(cls.STATE_FILE, "w") as f:
                 json.dump({"active_profile": name}, f)
-        except OSError:
-            pass
-
-    # ==================== CAPTURE CURRENT STATE ====================
+        except OSError as e:
+            logger.debug("Failed to save active profile: %s", e)
 
     @classmethod
     def capture_current_as_profile(cls, name: str) -> Result:
@@ -374,15 +376,15 @@ class ProfileManager:
             )
             if result.returncode == 0 and result.stdout.strip():
                 settings["governor"] = result.stdout.strip()
-        except (subprocess.TimeoutExpired, OSError):
-            pass
+        except (subprocess.TimeoutExpired, OSError) as e:
+            logger.debug("Failed to read current governor: %s", e)
 
         # Read current swappiness
         try:
             with open("/proc/sys/vm/swappiness", "r") as f:
                 settings["swappiness"] = int(f.read().strip())
-        except (FileNotFoundError, ValueError, OSError):
-            pass
+        except (FileNotFoundError, ValueError, OSError) as e:
+            logger.debug("Failed to read swappiness: %s", e)
 
         return cls.create_custom_profile(name, settings)
 
@@ -435,8 +437,8 @@ class ProfileManager:
                     ["systemctl", "start", service],
                     capture_output=True, text=True, timeout=30,
                 )
-            except (subprocess.TimeoutExpired, OSError):
-                pass
+            except (subprocess.TimeoutExpired, OSError) as e:
+                logger.debug("Failed to start service %s: %s", service, e)
 
         for service in disable:
             try:
@@ -444,8 +446,8 @@ class ProfileManager:
                     ["systemctl", "stop", service],
                     capture_output=True, text=True, timeout=30,
                 )
-            except (subprocess.TimeoutExpired, OSError):
-                pass
+            except (subprocess.TimeoutExpired, OSError) as e:
+                logger.debug("Failed to stop service %s: %s", service, e)
 
     @staticmethod
     def _set_swappiness(value: int) -> bool:

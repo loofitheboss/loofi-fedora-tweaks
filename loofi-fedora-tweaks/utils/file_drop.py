@@ -20,6 +20,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 from utils.containers import Result
+from utils.rate_limiter import TokenBucketRateLimiter
 
 
 DEFAULT_PORT = 53317
@@ -320,7 +321,7 @@ class FileDropManager:
     _http_shared_key = None
 
     @classmethod
-    def start_receive_server(cls, port: int, save_dir: str, shared_key: bytes = None) -> bool:
+    def start_receive_server(cls, port: int, save_dir: str, shared_key: bytes = None, bind_address: str = "127.0.0.1") -> bool:
         """Start an HTTP server for receiving file uploads.
 
         Accepts POST requests to /upload with file data. The file is saved
@@ -346,6 +347,9 @@ class FileDropManager:
         cls._http_save_dir = save_dir
         cls._http_shared_key = shared_key
 
+        # Rate limiter: 10 requests/sec, burst of 20
+        upload_rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20)
+
         class FileUploadHandler(BaseHTTPRequestHandler):
             """HTTP request handler for file uploads."""
 
@@ -355,6 +359,10 @@ class FileDropManager:
 
             def do_POST(self):
                 """Handle POST /upload requests."""
+                if not upload_rate_limiter.acquire():
+                    self.send_error(429, "Too Many Requests")
+                    return
+
                 if self.path != "/upload":
                     self.send_error(404, "Not Found")
                     return
@@ -413,7 +421,7 @@ class FileDropManager:
                 self.wfile.write(b'{"status": "ok"}')
 
         try:
-            cls._http_server = HTTPServer(("0.0.0.0", port), FileUploadHandler)
+            cls._http_server = HTTPServer((bind_address, port), FileUploadHandler)
         except OSError:
             cls._http_server = None
             return False

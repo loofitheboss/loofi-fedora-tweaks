@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        13.0.0
+Version:        13.1.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -54,6 +54,15 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 13.1.0-1
+- Stability update: exception cleanup, security hardening, test coverage
+- Replaced ~50 bare/broad exceptions with specific types + logging across 20 files
+- Error return standardization with Result dataclass in config_manager and history
+- Removed all shell=True subprocess calls (4 instances)
+- Rate limiter for clipboard sync and file drop servers
+- Clipboard server now binds to 127.0.0.1 by default (configurable)
+- 188 new tests across 11 test files (988+ tests total)
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 13.0.0-1
 - Nexus Update: System profiles, health timeline, plugin SDK v2
 - System Profiles: 5 built-in profiles (Gaming, Development, Battery Saver, Presentation, Server)

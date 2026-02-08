@@ -8,6 +8,7 @@ session is gone, making it ideal for malware analysis, testing, or
 one-off browsing.
 """
 
+import logging
 import os
 import re
 import shutil
@@ -16,6 +17,8 @@ import uuid
 from typing import Optional
 
 from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 
 # Name validation: alphanumeric, dash, underscore only
@@ -90,7 +93,8 @@ class DisposableVMManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Base image creation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Error creating base image: %s", e)
             return Result(False, f"Error creating base image: {e}")
 
     # ==================== OVERLAY / SNAPSHOT ====================
@@ -122,8 +126,8 @@ class DisposableVMManager:
             )
             if result.returncode == 0:
                 return overlay_path
-        except (subprocess.TimeoutExpired, Exception):
-            pass
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to create snapshot overlay: %s", e)
         return ""
 
     # ==================== LAUNCH ====================
@@ -205,7 +209,8 @@ class DisposableVMManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Disposable VM launch timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Error launching disposable VM: %s", e)
             return Result(False, f"Error launching disposable VM: {e}")
 
     # ==================== CLEANUP ====================
@@ -259,5 +264,6 @@ class DisposableVMManager:
                     names.append(line)
             return names
 
-        except (subprocess.TimeoutExpired, Exception):
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to list active disposables: %s", e)
             return []

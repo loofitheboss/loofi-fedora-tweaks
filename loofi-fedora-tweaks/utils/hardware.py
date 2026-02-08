@@ -3,11 +3,14 @@ Hardware Manager - Central hardware control abstraction.
 Handles CPU governors, GPU modes, fan control, and thermal management.
 """
 
+import logging
 import os
 import glob
 import subprocess
 import shutil
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class HardwareManager:
@@ -39,7 +42,8 @@ class HardwareManager:
         try:
             with open(path, "r") as f:
                 return f.read().strip()
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to read CPU governor: %s", e)
             return "unknown"
     
     @classmethod
@@ -63,9 +67,10 @@ done
                 capture_output=True, text=True, check=False
             )
             return result.returncode == 0
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set governor: %s", e)
             return False
-    
+
     @classmethod
     def get_cpu_frequency(cls) -> dict:
         """Get current and max CPU frequency in MHz."""
@@ -75,8 +80,8 @@ done
                 result["current"] = int(f.read().strip()) // 1000  # kHz to MHz
             with open(f"{cls.CPU_GOVERNOR_PATH}/scaling_max_freq", "r") as f:
                 result["max"] = int(f.read().strip()) // 1000
-        except Exception:
-            pass
+        except (OSError, ValueError) as e:
+            logger.debug("Failed to read CPU frequency: %s", e)
         return result
     
     # ==================== GPU MODE ====================
@@ -114,8 +119,8 @@ done
                     return "hybrid"
                 elif "nvidia" in output:
                     return "nvidia"
-            except Exception:
-                pass
+            except (subprocess.SubprocessError, OSError) as e:
+                logger.debug("envycontrol query failed: %s", e)
         
         # Check supergfxctl (ASUS)
         if shutil.which("supergfxctl"):
@@ -125,8 +130,8 @@ done
                     capture_output=True, text=True, check=False
                 )
                 return result.stdout.strip().lower()
-            except Exception:
-                pass
+            except (subprocess.SubprocessError, OSError) as e:
+                logger.debug("supergfxctl query failed: %s", e)
         
         return "unknown"
     
@@ -156,9 +161,9 @@ done
                     return (True, f"GPU mode set to '{mode}'. Logout/reboot required.")
                 else:
                     return (False, result.stderr)
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 return (False, str(e))
-        
+
         # Try supergfxctl
         if shutil.which("supergfxctl"):
             mode_map = {"integrated": "Integrated", "hybrid": "Hybrid", "nvidia": "Dedicated"}
@@ -171,9 +176,9 @@ done
                     return (True, f"GPU mode set to '{mode}'. Logout/reboot required.")
                 else:
                     return (False, result.stderr)
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 return (False, str(e))
-        
+
         return (False, "No GPU switching tool found. Install 'envycontrol' or 'supergfxctl'.")
     
     @classmethod
@@ -206,8 +211,8 @@ done
             )
             if result.returncode == 0:
                 return [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to list NBFC profiles: %s", e)
         return []
     
     @classmethod
@@ -224,8 +229,8 @@ done
             for line in result.stdout.split("\n"):
                 if "Selected Config" in line or "Config" in line:
                     return line.split(":")[-1].strip()
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get NBFC config: %s", e)
         return None
     
     @classmethod
@@ -240,9 +245,10 @@ done
                 capture_output=True, text=True, check=False
             )
             return result.returncode == 0
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set NBFC profile: %s", e)
             return False
-    
+
     @classmethod
     def set_fan_speed(cls, speed: int) -> bool:
         """
@@ -266,9 +272,10 @@ done
                     capture_output=True, text=True, check=False
                 )
             return result.returncode == 0
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set fan speed: %s", e)
             return False
-    
+
     @classmethod
     def get_fan_status(cls) -> dict:
         """Get current fan status (speed, temperature)."""
@@ -293,8 +300,8 @@ done
                         status["temperature"] = float(line.split(":")[-1].strip().replace("°C", "").replace("C", ""))
                     except ValueError:
                         pass
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get fan status: %s", e)
         
         return status
     
@@ -317,7 +324,8 @@ done
                 capture_output=True, text=True, check=False
             )
             return result.stdout.strip()
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get power profile: %s", e)
             return "unknown"
     
     @classmethod
@@ -339,7 +347,8 @@ done
                 capture_output=True, text=True, check=False
             )
             return result.returncode == 0
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to set power profile: %s", e)
             return False
     
     @classmethod
@@ -363,7 +372,8 @@ done
                     elif line in ["power-saver", "balanced", "performance"]:
                         profiles.append(line)
             return profiles if profiles else ["power-saver", "balanced", "performance"]
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to list power profiles: %s", e)
             return ["power-saver", "balanced", "performance"]
     
     # ==================== AI HARDWARE ACCELERATION ====================
@@ -403,8 +413,8 @@ done
                     lines = result.stdout.strip().split("\n")
                     if lines:
                         caps["details"]["nvidia_gpu"] = lines[0].strip()
-            except Exception:
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("nvidia-smi check failed: %s", e)
         
         # 2. Check AMD ROCm
         if shutil.which("rocminfo"):
@@ -418,8 +428,8 @@ done
                 if result.returncode == 0 and "Agent" in result.stdout:
                     caps["rocm"] = True
                     caps["details"]["rocm_available"] = True
-            except Exception:
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("rocminfo check failed: %s", e)
         
         # Alternative AMD check via hip
         if not caps["rocm"] and shutil.which("hipconfig"):
@@ -432,23 +442,18 @@ done
                 )
                 if result.returncode == 0 and "amd" in result.stdout.lower():
                     caps["rocm"] = True
-            except Exception:
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("hipconfig check failed: %s", e)
         
         # 3. Check Intel NPU (Core Ultra / Meteor Lake)
         # NPUs appear in /dev/accel/ on newer kernels (6.5+)
         try:
-            result = subprocess.run(
-                "ls /dev/accel/* 2>/dev/null",
-                shell=True,
-                capture_output=True,
-                text=True
-            )
-            if result.returncode == 0 and result.stdout.strip():
+            accel_devices = glob.glob("/dev/accel/*")
+            if accel_devices:
                 caps["npu_intel"] = True
-                caps["details"]["npu_devices"] = result.stdout.strip().split("\n")
-        except Exception:
-            pass
+                caps["details"]["npu_devices"] = accel_devices
+        except OSError as e:
+            logger.debug("NPU device check failed: %s", e)
         
         # Alternative Intel NPU check via sysfs
         npu_path = "/sys/class/misc/intel_vpu"
@@ -473,8 +478,8 @@ done
                 caps["npu_intel"] = True
             if "amdxdna" in result.stdout:
                 caps["npu_amd"] = True
-        except Exception:
-            pass
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("lsmod NPU check failed: %s", e)
         
         return caps
     

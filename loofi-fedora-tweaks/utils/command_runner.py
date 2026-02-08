@@ -72,8 +72,8 @@ class CommandRunner(QObject):
                 percent = int(paren_percent.group(1))
                 self.progress_update.emit(percent, "Processing...")
                 return
-            except:
-                pass
+            except (ValueError, IndexError) as e:
+                logger.debug("Progress parse error (paren percent): %s", e)
 
         # Flatpak Percentage: 45% (often at start of line or standalone)
         flatpak_match = re.search(r'^\s*(\d+)%', text)
@@ -82,8 +82,8 @@ class CommandRunner(QObject):
                 percent = int(flatpak_match.group(1))
                 self.progress_update.emit(percent, "Processing...")
                 return
-            except:
-                pass
+            except (ValueError, IndexError) as e:
+                logger.debug("Progress parse error (flatpak percent): %s", e)
 
     def handle_finished(self, exit_code, exit_status):
         if exit_code != 0:

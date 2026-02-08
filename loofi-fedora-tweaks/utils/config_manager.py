@@ -3,13 +3,18 @@ Config Manager - Central configuration export/import.
 Handles backup and restore of all app settings.
 """
 
-import os
 import json
+import logging
+import os
 import platform
 import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigManager:
@@ -46,14 +51,16 @@ class ConfigManager:
                     if line.startswith("PRETTY_NAME="):
                         info["os"] = line.split("=")[1].strip().strip('"')
                         break
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to read /etc/os-release: %s", e)
             info["os"] = "Fedora Linux"
-        
+
         # Get hardware model
         try:
             with open("/sys/class/dmi/id/product_name", "r") as f:
                 info["hardware"] = f.read().strip()
-        except Exception:
+        except OSError as e:
+            logger.debug("Failed to read hardware model: %s", e)
             info["hardware"] = "Unknown"
         
         return info
@@ -83,11 +90,11 @@ class ConfigManager:
                 if line.strip():
                     repo_id = line.split()[0]
                     repos["enabled"].append(repo_id)
-        except Exception:
-            pass
-        
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to list repos: %s", e)
+
         return repos
-    
+
     @classmethod
     def gather_flatpak_apps(cls) -> list:
         """Get list of installed Flatpak apps."""
@@ -98,8 +105,8 @@ class ConfigManager:
                 capture_output=True, text=True, check=False
             )
             apps = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to list flatpak apps: %s", e)
         return apps
     
     @classmethod
@@ -130,75 +137,77 @@ class ConfigManager:
                 try:
                     with open(preset_file, "r") as f:
                         presets.append(json.load(f))
-                except Exception:
-                    pass
+                except (OSError, json.JSONDecodeError) as e:
+                    logger.debug("Failed to load preset %s: %s", preset_file, e)
         config["presets"] = presets
         
         return config
     
     @classmethod
-    def export_to_file(cls, path: str) -> tuple:
+    def export_to_file(cls, path: str) -> Result:
         """
         Export config to a JSON file.
-        
+
         Args:
             path: Destination file path.
-        
+
         Returns:
-            (success: bool, message: str)
+            Result with success status and message.
         """
         try:
             config = cls.export_all()
             with open(path, "w") as f:
                 json.dump(config, f, indent=2)
-            return (True, f"Config exported to {path}")
-        except Exception as e:
-            return (False, str(e))
+            return Result(True, f"Config exported to {path}")
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to export config: %s", e)
+            return Result(False, str(e))
     
     @classmethod
-    def import_from_file(cls, path: str) -> tuple:
+    def import_from_file(cls, path: str) -> Result:
         """
         Import config from a JSON file.
-        
+
         Args:
             path: Source file path.
-        
+
         Returns:
-            (success: bool, message: str)
+            Result with success status and message.
         """
         try:
             with open(path, "r") as f:
                 config = json.load(f)
             return cls.import_all(config)
         except FileNotFoundError:
-            return (False, "File not found")
+            return Result(False, "File not found")
         except json.JSONDecodeError:
-            return (False, "Invalid JSON file")
-        except Exception as e:
-            return (False, str(e))
+            return Result(False, "Invalid JSON file")
+        except OSError as e:
+            logger.debug("Failed to import config from file: %s", e)
+            return Result(False, str(e))
     
     @classmethod
-    def import_all(cls, config: dict) -> tuple:
+    def import_all(cls, config: dict) -> Result:
         """
         Apply all settings from a config dict.
-        
+
         Args:
             config: Configuration dictionary.
-        
+
         Returns:
-            (success: bool, message: str)
+            Result with success status and message.
         """
         cls.ensure_dirs()
-        
+
         applied = []
         errors = []
-        
+
         # Validate version
         if "version" not in config:
-            return (False, "Invalid config: missing version")
-        
+            return Result(False, "Invalid config: missing version")
+
         settings = config.get("settings", {})
-        
+
         # Apply hardware settings
         hardware = settings.get("hardware", {})
         if hardware.get("cpu_governor"):
@@ -208,9 +217,10 @@ class ConfigManager:
                     applied.append("CPU Governor")
                 else:
                     errors.append("CPU Governor (failed)")
-            except Exception:
+            except (ImportError, OSError) as e:
+                logger.debug("Failed to set CPU governor: %s", e)
                 errors.append("CPU Governor (error)")
-        
+
         if hardware.get("power_profile"):
             try:
                 from utils.hardware import HardwareManager
@@ -218,9 +228,10 @@ class ConfigManager:
                     applied.append("Power Profile")
                 else:
                     errors.append("Power Profile (failed)")
-            except Exception:
+            except (ImportError, OSError) as e:
+                logger.debug("Failed to set power profile: %s", e)
                 errors.append("Power Profile (error)")
-        
+
         # Import presets
         presets = config.get("presets", [])
         for preset in presets:
@@ -230,13 +241,14 @@ class ConfigManager:
                     with open(preset_path, "w") as f:
                         json.dump(preset, f, indent=2)
                     applied.append(f"Preset: {preset['name']}")
-                except Exception:
+                except (OSError, json.JSONDecodeError) as e:
+                    logger.debug("Failed to import preset %s: %s", preset.get('name', 'unknown'), e)
                     errors.append(f"Preset: {preset.get('name', 'unknown')}")
-        
+
         if errors:
-            return (True, f"Imported: {', '.join(applied)}. Errors: {', '.join(errors)}")
+            return Result(True, f"Imported: {', '.join(applied)}. Errors: {', '.join(errors)}")
         else:
-            return (True, f"Successfully imported: {', '.join(applied) if applied else 'No settings changed'}")
+            return Result(True, f"Successfully imported: {', '.join(applied) if applied else 'No settings changed'}")
     
     @classmethod
     def save_config(cls, config: dict) -> bool:
@@ -246,7 +258,8 @@ class ConfigManager:
             with open(cls.CONFIG_FILE, "w") as f:
                 json.dump(config, f, indent=2)
             return True
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to save config: %s", e)
             return False
     
     @classmethod
@@ -255,5 +268,6 @@ class ConfigManager:
         try:
             with open(cls.CONFIG_FILE, "r") as f:
                 return json.load(f)
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to load config: %s", e)
             return None

@@ -6,6 +6,7 @@ Provides focused journalctl access with a "Panic Button" for
 exporting logs ready for support forums.
 """
 
+import logging
 import subprocess
 import os
 from datetime import datetime
@@ -14,6 +15,8 @@ from dataclasses import dataclass
 from typing import Optional
 import tempfile
 import zipfile
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -53,9 +56,10 @@ class JournalManager:
                 timeout=30
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get boot errors: %s", e)
             return ""
-    
+
     @classmethod
     def get_recent_errors(cls, since: str = "1 hour ago") -> str:
         """
@@ -75,9 +79,10 @@ class JournalManager:
                 timeout=30
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get recent errors: %s", e)
             return ""
-    
+
     @classmethod
     def get_service_logs(cls, service: str, lines: int = 50) -> str:
         """
@@ -99,9 +104,10 @@ class JournalManager:
                 timeout=30
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get service logs for %s: %s", service, e)
             return ""
-    
+
     @classmethod
     def get_kernel_messages(cls, lines: int = 100) -> str:
         """
@@ -118,9 +124,10 @@ class JournalManager:
                 timeout=30
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get kernel messages: %s", e)
             return ""
-    
+
     @classmethod
     def _get_system_info(cls) -> str:
         """Gather system info for forum post."""
@@ -132,16 +139,16 @@ class JournalManager:
                 for line in f:
                     if line.startswith(("NAME=", "VERSION_ID=", "VARIANT=")):
                         info_lines.append(line.strip())
-        except Exception:
-            pass
+        except OSError as e:
+            logger.debug("Failed to read os-release: %s", e)
         
         # Kernel version
         try:
             result = subprocess.run(["uname", "-r"], capture_output=True, text=True)
             if result.returncode == 0:
                 info_lines.append(f"KERNEL={result.stdout.strip()}")
-        except Exception:
-            pass
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get kernel version: %s", e)
         
         # Desktop environment
         de = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
@@ -160,8 +167,8 @@ class JournalManager:
                     if "VGA" in line or "3D" in line:
                         info_lines.append(f"GPU={line.split(': ')[-1][:80]}")
                         break
-        except Exception:
-            pass
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get GPU info: %s", e)
         
         return "\n".join(info_lines)
     
@@ -213,7 +220,8 @@ class JournalManager:
                     timeout=10
                 )
                 sections.append(result.stdout.strip() if result.returncode == 0 else "Unable to query")
-            except Exception:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("Failed to query failed services: %s", e)
                 sections.append("Unable to query failed services")
             sections.append("")
             
@@ -247,7 +255,8 @@ class JournalManager:
                 {"path": str(output_path), "size": len(content)}
             )
             
-        except Exception as e:
+        except OSError as e:
+            logger.debug("Failed to export panic log: %s", e)
             return Result(False, f"Failed to export log: {e}")
 
     @classmethod
@@ -286,7 +295,8 @@ class JournalManager:
                         timeout=10
                     )
                     (tmp / "failed-services.txt").write_text(result.stdout or "No failed services")
-                except Exception:
+                except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                    logger.debug("Failed to query failed services for bundle: %s", e)
                     (tmp / "failed-services.txt").write_text("Unable to query failed services")
                 
                 # System info
@@ -303,7 +313,8 @@ class JournalManager:
                     f"Support bundle exported to: {output_path}",
                     {"path": str(output_path), "size": size, "panic_log_ok": panic_result.success}
                 )
-        except Exception as e:
+        except OSError as e:
+            logger.debug("Failed to export support bundle: %s", e)
             return Result(False, f"Failed to export support bundle: {e}")
     
     @classmethod
@@ -344,7 +355,7 @@ class JournalManager:
                         parts = line.split()
                         if parts:
                             diagnostic["failed_services"].append(parts[0])
-        except Exception:
-            pass
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to get quick diagnostic: %s", e)
         
         return diagnostic

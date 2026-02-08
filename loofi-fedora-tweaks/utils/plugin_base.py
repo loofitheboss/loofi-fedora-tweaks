@@ -132,7 +132,8 @@ class PluginLoader:
     def _load_state(self) -> Dict[str, Any]:
         try:
             return json.loads(self.STATE_FILE.read_text())
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to load plugin state: %s", e)
             return {"enabled": {}}
 
     def _save_state(self, state: Dict[str, Any]) -> None:
@@ -187,7 +188,7 @@ class PluginLoader:
                 logger.warning("Plugin %s requires app >= %s", plugin_dir.name, manifest.min_app_version)
                 return None
             return manifest
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, KeyError) as e:
             logger.warning("Failed to load manifest for %s: %s", plugin_dir.name, e)
             return None
 
@@ -284,9 +285,9 @@ class PluginLoader:
                     self.plugins[plugin_name] = plugin
                     return plugin
             
-        except Exception as e:
+        except (OSError, ImportError, AttributeError, TypeError) as e:
             logger.warning("Failed to load plugin %s: %s", plugin_name, e)
-        
+
         return None
     
     def load_all_plugins(self) -> Dict[str, LoofiPlugin]:
@@ -316,8 +317,8 @@ class PluginLoader:
                 self.plugins[plugin_name].on_unload()
                 del self.plugins[plugin_name]
                 return True
-            except Exception:
-                pass
+            except (OSError, RuntimeError) as e:
+                logger.debug("Failed to unload plugin %s: %s", plugin_name, e)
         return False
     
     def check_permissions(self, plugin_name: str) -> dict:

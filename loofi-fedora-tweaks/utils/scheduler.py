@@ -3,6 +3,7 @@ Task Scheduler - Manages scheduled automation tasks.
 Supports time-based and power-state triggers.
 """
 
+import logging
 import os
 import json
 import subprocess
@@ -11,6 +12,8 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict, field
 from typing import Optional
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class TaskAction(Enum):
@@ -75,9 +78,10 @@ class ScheduledTask:
                 return (now - last) >= timedelta(days=1)
             elif self.schedule == TaskSchedule.WEEKLY.value:
                 return (now - last) >= timedelta(weeks=1)
-        except Exception:
+        except ValueError as e:
+            logger.debug("Failed to parse last_run timestamp: %s", e)
             return True
-        
+
         return False
 
 
@@ -104,7 +108,8 @@ class TaskScheduler:
             with open(cls.CONFIG_FILE, "r") as f:
                 data = json.load(f)
             return [ScheduledTask.from_dict(t) for t in data.get("tasks", [])]
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to load tasks: %s", e)
             return []
     
     @classmethod
@@ -116,7 +121,8 @@ class TaskScheduler:
             with open(cls.CONFIG_FILE, "w") as f:
                 json.dump({"tasks": [t.to_dict() for t in tasks]}, f, indent=2)
             return True
-        except Exception:
+        except (OSError, json.JSONDecodeError) as e:
+            logger.debug("Failed to save tasks: %s", e)
             return False
     
     @classmethod
@@ -212,8 +218,9 @@ class TaskScheduler:
             NotificationManager.notify_task_complete(task.name, result[0])
             
             return result
-        
-        except Exception as e:
+
+        except (ImportError, OSError) as e:
+            logger.debug("Failed to execute task %s: %s", task.name, e)
             return (False, str(e))
     
     @classmethod
@@ -253,7 +260,8 @@ class TaskScheduler:
             NotificationManager.notify_cleanup_complete(50.0)  # Approximate
             
             return (True, "Cleanup completed")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Cleanup task failed: %s", e)
             return (False, str(e))
     
     @classmethod
@@ -276,8 +284,9 @@ class TaskScheduler:
                 return (True, f"{count} updates available")
             else:
                 return (True, "System is up to date")
-        
-        except Exception as e:
+
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Update check failed: %s", e)
             return (False, str(e))
     
     @classmethod
@@ -295,7 +304,8 @@ class TaskScheduler:
                 NotificationManager.notify_sync_complete()
             
             return (success, message)
-        except Exception as e:
+        except (ImportError, OSError) as e:
+            logger.debug("Config sync failed: %s", e)
             return (False, str(e))
     
     @classmethod
@@ -316,8 +326,9 @@ class TaskScheduler:
                 return (True, f"Preset '{preset_name}' applied")
             else:
                 return (False, f"Preset '{preset_name}' not found")
-        
-        except Exception as e:
+
+        except (ImportError, OSError) as e:
+            logger.debug("Apply preset failed: %s", e)
             return (False, str(e))
     
     # ==================== SERVICE MANAGEMENT ====================
@@ -331,9 +342,10 @@ class TaskScheduler:
                 capture_output=True, text=True, check=False
             )
             return result.stdout.strip() == "enabled"
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to check service enabled status: %s", e)
             return False
-    
+
     @classmethod
     def is_service_running(cls) -> bool:
         """Check if the systemd user service is running."""
@@ -343,9 +355,10 @@ class TaskScheduler:
                 capture_output=True, text=True, check=False
             )
             return result.stdout.strip() == "active"
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to check service running status: %s", e)
             return False
-    
+
     @classmethod
     def enable_service(cls) -> bool:
         """Enable and start the systemd user service."""
@@ -355,9 +368,10 @@ class TaskScheduler:
                 check=True
             )
             return True
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to enable service: %s", e)
             return False
-    
+
     @classmethod
     def disable_service(cls) -> bool:
         """Disable and stop the systemd user service."""
@@ -367,5 +381,6 @@ class TaskScheduler:
                 check=True
             )
             return True
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to disable service: %s", e)
             return False

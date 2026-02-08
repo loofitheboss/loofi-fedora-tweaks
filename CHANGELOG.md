@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [13.1.0] - 2026-02-08 "Nexus Update" (Stability)
+
+### Changed
+
+- **Exception Cleanup**: Replaced ~50 bare/broad `except Exception:` blocks with specific exception types (`OSError`, `json.JSONDecodeError`, `subprocess.SubprocessError`, `sqlite3.Error`, etc.) across 20 files.
+- **Structured Logging**: Added `logging.getLogger(__name__)` to all utils modules for consistent debug logging.
+- **Error Return Standardization**: `config_manager.py` and `history.py` now return `Result` dataclass instead of `(bool, str)` tuples.
+
+### Security
+
+- **Removed `shell=True`**: Eliminated all 4 instances of `shell=True` in subprocess calls (`automation_profiles.py`, `hardware.py`, `apps_tab.py`, `software_tab.py`), replacing with `shlex.split()` or argument lists.
+- **Localhost Binding**: Clipboard sync server and file drop server now bind to `127.0.0.1` by default instead of `0.0.0.0`, with configurable `bind_address` parameter.
+- **Rate Limiting**: New `utils/rate_limiter.py` token bucket rate limiter integrated into clipboard sync server (10 conn/sec) and file drop server.
+
+### Added
+
+- **188 New Tests**: 11 new test files covering previously untested utils modules.
+  - `test_config_manager.py` (20), `test_history.py` (11), `test_notifications_util.py` (10)
+  - `test_kernel.py` (21), `test_services.py` (19), `test_sandbox.py` (18)
+  - `test_ports.py` (16), `test_fingerprint.py` (9), `test_package_manager.py` (18)
+  - `test_zram.py` (16), `test_clipboard_unit.py` (30)
+- **Test coverage**: 988+ tests passing (up from 839).
+
+### New Files
+
+- `utils/rate_limiter.py` - Token bucket rate limiter for network services
+- `tests/test_config_manager.py` - Config manager tests
+- `tests/test_history.py` - History/undo system tests
+- `tests/test_notifications_util.py` - Notification utility tests
+- `tests/test_kernel.py` - Kernel parameter management tests
+- `tests/test_services.py` - Systemd service manager tests
+- `tests/test_sandbox.py` - Firejail/Bubblewrap sandbox tests
+- `tests/test_ports.py` - Port auditor and firewall tests
+- `tests/test_fingerprint.py` - Fingerprint enrollment tests
+- `tests/test_package_manager.py` - DNF/rpm-ostree/Flatpak tests
+- `tests/test_zram.py` - ZRAM configuration tests
+- `tests/test_clipboard_unit.py` - Clipboard sync unit tests
+
 ## [13.0.0] - 2026-02-08 "Nexus Update"
 
 ### Added

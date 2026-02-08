@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTextEdit, QScrollArea, QFrame
 from utils.command_runner import CommandRunner
 import json
+import shlex
 import subprocess
 import os
 
@@ -112,9 +113,9 @@ class AppsTab(QWidget):
     def check_installed(self, cmd):
         try:
             # Run the check command silently
-            subprocess.run(cmd, shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(shlex.split(cmd), check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return True
-        except subprocess.CalledProcessError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
     def install_app(self, app_data):

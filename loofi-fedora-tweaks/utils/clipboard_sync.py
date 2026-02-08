@@ -9,6 +9,7 @@ Includes TCP server/client for mesh network clipboard sync.
 
 import hashlib
 import hmac
+import logging
 import os
 import random
 import shutil
@@ -16,6 +17,10 @@ import socket
 import struct
 import subprocess
 import threading
+
+from utils.rate_limiter import TokenBucketRateLimiter
+
+logger = logging.getLogger(__name__)
 
 
 class ClipboardSync:
@@ -44,8 +49,8 @@ class ClipboardSync:
                     )
                     if result.returncode == 0:
                         return result.stdout
-                except (subprocess.TimeoutExpired, Exception):
-                    pass
+                except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                    logger.debug("wl-paste failed: %s", e)
 
         # X11 / fallback
         if shutil.which("xclip"):
@@ -58,8 +63,8 @@ class ClipboardSync:
                 )
                 if result.returncode == 0:
                     return result.stdout
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("xclip read failed: %s", e)
 
         if shutil.which("xsel"):
             try:
@@ -71,8 +76,8 @@ class ClipboardSync:
                 )
                 if result.returncode == 0:
                     return result.stdout
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("xsel read failed: %s", e)
 
         return ""
 
@@ -98,8 +103,8 @@ class ClipboardSync:
                     timeout=5,
                 )
                 return result.returncode == 0
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("wl-copy failed: %s", e)
 
         if shutil.which("xclip"):
             try:
@@ -111,8 +116,8 @@ class ClipboardSync:
                     timeout=5,
                 )
                 return result.returncode == 0
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("xclip write failed: %s", e)
 
         if shutil.which("xsel"):
             try:
@@ -124,8 +129,8 @@ class ClipboardSync:
                     timeout=5,
                 )
                 return result.returncode == 0
-            except (subprocess.TimeoutExpired, Exception):
-                pass
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+                logger.debug("xsel write failed: %s", e)
 
         return False
 
@@ -298,7 +303,7 @@ class ClipboardSync:
     _server_shutdown = False
 
     @classmethod
-    def start_clipboard_server(cls, port: int, shared_key: bytes, on_receive=None) -> bool:
+    def start_clipboard_server(cls, port: int, shared_key: bytes, on_receive=None, bind_address: str = "127.0.0.1") -> bool:
         """Start a TCP server for receiving clipboard data from peers.
 
         Listens on the specified port for encrypted clipboard payloads.
@@ -323,12 +328,15 @@ class ClipboardSync:
         try:
             cls._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             cls._server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            cls._server_socket.bind(("0.0.0.0", port))
+            cls._server_socket.bind((bind_address, port))
             cls._server_socket.listen(5)
             cls._server_socket.settimeout(1.0)  # Allow periodic shutdown checks
         except OSError:
             cls._server_socket = None
             return False
+
+        # Rate limiter: 10 connections/sec, burst of 20
+        rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20)
 
         def server_loop():
             while not cls._server_shutdown:
@@ -338,6 +346,13 @@ class ClipboardSync:
                     continue
                 except OSError:
                     break
+
+                if not rate_limiter.acquire():
+                    try:
+                        conn.close()
+                    except OSError as e:
+                        logger.debug("Error closing rate-limited connection: %s", e)
+                    continue
 
                 try:
                     conn.settimeout(10.0)
@@ -376,13 +391,13 @@ class ClipboardSync:
                         except ValueError:
                             pass  # Decryption failed, ignore
 
-                except (socket.timeout, OSError):
-                    pass
+                except (socket.timeout, OSError) as e:
+                    logger.debug("Clipboard server connection error: %s", e)
                 finally:
                     try:
                         conn.close()
-                    except OSError:
-                        pass
+                    except OSError as e:
+                        logger.debug("Error closing connection in finally: %s", e)
 
         cls._server_thread = threading.Thread(target=server_loop, daemon=True)
         cls._server_thread.start()
@@ -405,8 +420,8 @@ class ClipboardSync:
 
         try:
             cls._server_socket.close()
-        except OSError:
-            pass
+        except OSError as e:
+            logger.debug("Error closing server socket: %s", e)
 
         if cls._server_thread is not None:
             cls._server_thread.join(timeout=5.0)

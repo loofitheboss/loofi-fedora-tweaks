@@ -24,7 +24,7 @@ class TestVersionModule(unittest.TestCase):
 
     def test_version_is_1200(self):
         from version import __version__
-        self.assertEqual(__version__, "13.0.0")
+        self.assertEqual(__version__, "13.1.0")
 
     def test_version_codename(self):
         from version import __version_codename__

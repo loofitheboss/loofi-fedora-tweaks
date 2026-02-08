@@ -3,9 +3,12 @@ Notification Manager - Desktop notifications for background tasks.
 Uses notify-send for maximum compatibility.
 """
 
+import logging
 import subprocess
 import shutil
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationManager:
@@ -57,7 +60,8 @@ class NotificationManager:
             
             subprocess.run(cmd, check=False, capture_output=True)
             return True
-        except Exception:
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to send notification: %s", e)
             return False
     
     @classmethod

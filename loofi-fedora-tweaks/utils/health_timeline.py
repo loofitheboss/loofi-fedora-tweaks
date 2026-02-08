@@ -8,16 +8,19 @@ and load average. Supports anomaly detection via standard
 deviation thresholds and export to JSON or CSV.
 """
 
-import os
+import csv
 import json
+import logging
+import os
 import shutil
 import sqlite3
+import statistics
 import subprocess
 import time
-import statistics
-import csv
 
 from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 
 class HealthTimeline:
@@ -148,7 +151,8 @@ class HealthTimeline:
                 recorded.append(f"cpu_temp={cpu_temp}C")
             else:
                 errors.append(result.message)
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
+            logger.debug("cpu_temp snapshot error: %s", e)
             errors.append(f"cpu_temp: {e}")
 
         # RAM usage
@@ -159,7 +163,8 @@ class HealthTimeline:
                 recorded.append(f"ram={ram}%")
             else:
                 errors.append(result.message)
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
+            logger.debug("ram_usage snapshot error: %s", e)
             errors.append(f"ram_usage: {e}")
 
         # Disk usage
@@ -170,7 +175,8 @@ class HealthTimeline:
                 recorded.append(f"disk={disk}%")
             else:
                 errors.append(result.message)
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
+            logger.debug("disk_usage snapshot error: %s", e)
             errors.append(f"disk_usage: {e}")
 
         # Load average
@@ -181,7 +187,8 @@ class HealthTimeline:
                 recorded.append(f"load_avg={load}")
             else:
                 errors.append(result.message)
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
+            logger.debug("load_avg snapshot error: %s", e)
             errors.append(f"load_avg: {e}")
 
         if errors and not recorded:
@@ -274,8 +281,8 @@ class HealthTimeline:
                     }
             finally:
                 self._close_conn(conn)
-        except sqlite3.Error:
-            pass
+        except sqlite3.Error as e:
+            logger.debug("get_summary query error: %s", e)
         return summary
 
     # ==================== MAINTENANCE ====================
@@ -434,8 +441,8 @@ class HealthTimeline:
                         temp = int(raw) / 1000.0
                         if temp > 0:
                             return round(temp, 1)
-        except (OSError, ValueError):
-            pass
+        except (OSError, ValueError) as e:
+            logger.debug("Failed to read thermal zone: %s", e)
 
         # Fallback: sensors command
         if shutil.which("sensors"):
@@ -451,8 +458,8 @@ class HealthTimeline:
                             if len(parts) > 1:
                                 temp_str = parts[1].split("\u00b0")[0].split("C")[0].strip()
                                 return round(float(temp_str), 1)
-            except (subprocess.TimeoutExpired, OSError, ValueError):
-                pass
+            except (subprocess.TimeoutExpired, OSError, ValueError) as e:
+                logger.debug("sensors command failed: %s", e)
 
         raise RuntimeError("No CPU temperature source available.")
 
@@ -510,7 +517,8 @@ class HealthTimeline:
                 return 0.0
             used_pct = ((total - free) / total) * 100
             return round(used_pct, 1)
-        except OSError:
+        except OSError as e:
+            logger.debug("Failed to read disk usage: %s", e)
             return 0.0
 
     @staticmethod
@@ -524,5 +532,6 @@ class HealthTimeline:
         try:
             load1, _, _ = os.getloadavg()
             return round(load1, 2)
-        except OSError:
+        except OSError as e:
+            logger.debug("Failed to read load average: %s", e)
             return 0.0
