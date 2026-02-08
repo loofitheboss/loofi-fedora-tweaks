@@ -36,6 +36,10 @@ mkdir -p "%{buildroot}/usr/share/icons/hicolor/128x128/apps"
 
 cp -r loofi-fedora-tweaks/* "%{buildroot}/usr/lib/%{name}/"
 
+# Ensure all installed files are world-readable
+find "%{buildroot}/usr/lib/%{name}" -type f -exec chmod 644 {} +
+find "%{buildroot}/usr/lib/%{name}" -type d -exec chmod 755 {} +
+
 cat > "%{buildroot}/usr/bin/%{name}" << 'EOF'
 #!/bin/bash
 APP_DIR=/usr/lib/loofi-fedora-tweaks
@@ -52,8 +56,9 @@ install -m 644 loofi-fedora-tweaks/config/loofi-fedora-tweaks.service "%{buildro
 install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/usr/share/icons/hicolor/128x128/apps/"
 
 %files
+%defattr(-,root,root,-)
 /usr/lib/%{name}
-/usr/bin/%{name}
+%attr(755,root,root) /usr/bin/%{name}
 /usr/share/applications/%{name}.desktop
 /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
 /usr/lib/systemd/user/loofi-fedora-tweaks.service
