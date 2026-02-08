@@ -2,19 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
-## [14.0.0] - TBD "Quantum Leap"
+## [14.0.0] - 2026-02-08 "Quantum Leap"
 
-### Planned Features
+### Added
 
-- Major version bump for new feature development
-- Enhanced AI capabilities and integrations
-- Performance optimizations
-- Extended hardware support
-- Cloud integration features
+- **Update Checker**: Automatic update notifications from GitHub releases API (`utils/update_checker.py`).
+  - `UpdateChecker.check_for_updates()` fetches latest release via GitHub API.
+  - `UpdateInfo` dataclass with version comparison and download URL.
+- **What's New Dialog**: Post-upgrade dialog showing release highlights (`ui/whats_new_dialog.py`).
+  - Remembers last-seen version via `SettingsManager`.
+  - Shows current + previous version notes in a scrollable view.
+- **Factory Reset**: Full backup/restore/reset management (`utils/factory_reset.py`).
+  - `create_backup()` — snapshot all JSON config files with manifest.
+  - `list_backups()` — enumerate available backups with metadata.
+  - `restore_backup()` — restore config from a named backup.
+  - `delete_backup()` — remove old backups.
+  - `reset_config()` — factory reset with auto-backup before deletion.
+- **Plugin Lifecycle Events**: Added `on_app_start`, `on_app_quit`, `on_tab_switch`, `on_settings_changed`, `get_settings_schema` hooks to `LoofiPlugin` ABC.
+- **Version Tracking**: `last_seen_version` field in `AppSettings` for What's New dialog tracking.
+- **72 New Tests**: `test_factory_reset.py` (22), `test_update_checker.py` (8) — plus existing test base.
 
-### In Development
+### Changed
 
-_This is a development version. Features will be added as development progresses._
+- **Test coverage**: 1130+ tests (up from 1060).
+- **Spec file**: Updated to v14.0.0 with expanded description.
+- **Agent instructions**: Enhanced test and architecture agent docs.
+
+### New Files
+
+- `utils/update_checker.py` — GitHub releases API update checker
+- `utils/factory_reset.py` — Backup/restore/reset management
+- `ui/whats_new_dialog.py` — Post-upgrade What's New dialog
+- `tests/test_factory_reset.py` — Factory reset unit tests
+- `tests/test_update_checker.py` — Update checker unit tests
 
 ## [13.5.0] - 2026-02-08 "Nexus Update" (UX Polish)
 

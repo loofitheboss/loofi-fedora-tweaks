@@ -1,63 +1,71 @@
-# Loofi Fedora Tweaks v12.0.0 - The "Sovereign" Update
+# Loofi Fedora Tweaks v14.0.0 - The "Quantum Leap" Update
 
-The biggest release yet: full KVM/QEMU virtualization, LAN mesh networking, and workspace state teleportation across devices.
+A reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.
 
 ## Highlights
 
-* **VM Quick-Create Wizard**: One-click VMs for Windows 11, Fedora, Ubuntu, Kali, Arch with auto-TPM and virtio drivers.
-* **VFIO GPU Passthrough**: Step-by-step IOMMU analysis, kernel cmdline generation, and dracut config.
-* **Loofi Link Mesh**: Discover devices on LAN via mDNS, share clipboard, and drop files.
-* **State Teleport**: Capture VS Code, git, and terminal workspace state; restore on another machine.
+* **Update Checker**: Automatic update notifications from GitHub releases API.
+* **What's New Dialog**: Post-upgrade dialog showing release highlights.
+* **Factory Reset**: Full backup/restore/reset management for all config files.
+* **Plugin Lifecycle Events**: `on_app_start`, `on_app_quit`, `on_tab_switch` hooks for plugins.
 
 ## New Features
 
-### v11.5 Hypervisor Update
-* VM Quick-Create with 5 preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch)
-* VFIO GPU Passthrough Assistant with prerequisites check and step-by-step plan
-* Disposable VMs using QCOW2 overlay snapshots for untrusted software
-* New **Virtualization** tab with VMs, GPU Passthrough, and Disposable sub-tabs
+### Update Checker
+* Fetches latest release from GitHub releases API
+* Compares installed version against latest release tag
+* `UpdateInfo` dataclass with version comparison and download URL
+* Configurable timeout for network requests
 
-### v12.0 Sovereign Networking
-* Loofi Link mesh device discovery via Avahi mDNS
-* Encrypted clipboard sync between paired devices
-* File Drop with local HTTP transfer and checksum verification
-* State Teleport workspace capture and cross-device restore
-* New **Loofi Link** tab with Devices, Clipboard, and File Drop sub-tabs
-* New **State Teleport** tab with Capture, Saved States, and Restore sections
+### What's New Dialog
+* Shows after every version upgrade
+* Remembers last-seen version via `SettingsManager`
+* Scrollable view with current + previous version notes
+* "Don't show again" checkbox
 
-### v11.1-v11.3 AI Polish
-* Lite Model Library with 6 curated GGUF models and RAM-based recommendations
-* Voice Mode with whisper.cpp transcription
-* Context RAG with TF-IDF local file indexing (security-filtered)
-* Enhanced **AI Lab** tab with Models, Voice, and Knowledge sub-tabs
+### Factory Reset & Backup Management
+* `create_backup()` — snapshot all JSON config files with manifest
+* `list_backups()` — enumerate available backups with metadata
+* `restore_backup()` — restore config from a named backup
+* `delete_backup()` — remove old backups
+* `reset_config()` — factory reset with automatic pre-reset backup
+* Preserves plugins by default during reset
 
-### Architecture
-* Virtualization and AI Lab refactored as first-party plugins with JSON manifests
-* 18-tab sidebar layout (up from 15)
-* 564 tests passing (up from 225)
+### Plugin Lifecycle Events
+* `on_app_start` — called when the application starts
+* `on_app_quit` — called before application exits
+* `on_tab_switch` — called when user switches tabs
+* `on_settings_changed` — notified when settings change
+* `get_settings_schema` — plugins can declare configurable settings
 
-## New CLI Commands
+## New Files
+
+| File | Description |
+|------|-------------|
+| `utils/update_checker.py` | GitHub releases API update checker |
+| `utils/factory_reset.py` | Backup/restore/reset management |
+| `ui/whats_new_dialog.py` | Post-upgrade What's New dialog |
+| `tests/test_factory_reset.py` | Factory reset unit tests (22 tests) |
+| `tests/test_update_checker.py` | Update checker unit tests (8 tests) |
+
+## Test Coverage
+
+* **1130+ tests** passing (up from 1060 in v13.5.0)
+* 72 new tests for factory reset and update checker
+
+## Installation
 
 ```bash
-# Virtualization
-loofi vm list                 # List virtual machines
-loofi vm start <name>         # Start a VM
-loofi vm stop <name>          # Stop a VM
-loofi vfio check              # Check VFIO prerequisites
-loofi vfio gpus               # List GPU passthrough candidates
-loofi vfio plan               # Generate step-by-step VFIO setup plan
+# From RPM (Fedora)
+sudo dnf install loofi-fedora-tweaks-14.0.0-1.fc43.noarch.rpm
 
-# Mesh Networking
-loofi mesh discover           # Discover LAN devices
-loofi mesh status             # Show device ID and local IPs
+# From source
+./run.sh
+```
 
-# State Teleport
-loofi teleport capture        # Capture workspace state
-loofi teleport list           # List saved packages
-loofi teleport restore <id>   # Restore a package
+## Full Changelog
 
-# AI Models
-loofi ai-models list          # List installed and recommended models
+See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
 loofi ai-models recommend     # Get RAM-based model recommendation
 ```
 

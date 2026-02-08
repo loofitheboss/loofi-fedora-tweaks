@@ -1,63 +1,65 @@
 # Release Notes
 
-## v13.0.0 "Nexus Update" - February 2026
+## v14.0.0 "Quantum Leap" - February 2026
 
-The Nexus Update is a major integration release that brings system profiles for quick-switching configurations, health timeline for tracking metrics over time, and an enhanced plugin SDK.
+The Quantum Leap update is a reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.
 
 ### Highlights
 
-- **System Profiles**: 5 built-in profiles (Gaming, Development, Battery Saver, Presentation, Server) for one-click system configuration
-- **Health Timeline**: SQLite-based metrics tracking with anomaly detection and export capabilities
-- **Plugin SDK v2**: Enhanced plugin system with permissions model, update checking, and dependency validation
-- **20 Tabs**: New Profiles and Health tabs in the sidebar
-- **839+ Tests**: Comprehensive test coverage
+- **Update Checker**: Automatic update notifications from GitHub releases API
+- **What's New Dialog**: Post-upgrade dialog showing release highlights
+- **Factory Reset**: Full backup/restore/reset management for all config files
+- **Plugin Lifecycle Events**: `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
+- **1130+ Tests**: Comprehensive test coverage
 
 ### New Features
 
-#### System Profiles
+#### Update Checker
 
-Quick-switch between optimized system configurations:
+Check for app updates via GitHub releases API:
 
-| Profile | Description |
-|---------|-------------|
-| **Gaming** | Performance governor, compositor disabled, DND notifications, gamemode |
-| **Development** | Schedutil governor, Docker/Podman services enabled |
-| **Battery Saver** | Powersave governor, reduced compositor, critical notifications only |
-| **Presentation** | Performance governor, screen timeout disabled, DND mode |
-| **Server** | Performance governor, headless optimization |
+- Fetches latest release tag and compares with installed version
+- `UpdateInfo` dataclass with version comparison and download URL
+- Configurable timeout for network requests
 
-Features:
-- Create custom profiles with your preferred settings
-- Capture current system state as a new profile
-- One-click profile application with confirmation
-- Active profile indicator
+#### What's New Dialog
 
-#### Health Timeline
+Post-upgrade highlights dialog:
 
-Track system health metrics over time:
+- Shows automatically after version upgrades
+- Remembers last-seen version via `SettingsManager`
+- Scrollable view with current and previous release notes
+- "Don't show again" checkbox
 
-- **Metrics**: CPU temperature, RAM usage, disk usage, load average
-- **Storage**: SQLite database with 30-day default retention
-- **Anomaly Detection**: Flag values 2+ standard deviations from mean
-- **Export**: JSON and CSV export for external analysis
-- **Summary**: Min/max/avg statistics per metric type
+#### Factory Reset & Backup Management
 
-#### Plugin SDK v2
+Full configuration backup and restore:
 
-Enhanced plugin development capabilities:
+| Operation | Description |
+|-----------|-------------|
+| **Create Backup** | Snapshot all JSON config files with manifest |
+| **List Backups** | Enumerate available backups with metadata |
+| **Restore Backup** | Restore config from a named backup |
+| **Delete Backup** | Remove old backups |
+| **Factory Reset** | Reset to defaults with automatic pre-reset backup |
 
-- **Permissions Model**: Plugins declare required permissions (network, filesystem, system)
-- **Update Checking**: Plugins can check for updates via remote manifest URL
-- **Dependency Validation**: Manifest-based dependency resolution before load
-- **Hello World Example**: Complete example plugin in `plugins/hello_world/`
+#### Plugin Lifecycle Events
 
-### CLI Enhancements
+New hooks for plugin developers:
 
-New commands for v13.0:
+- `on_app_start` — called when the application starts
+- `on_app_quit` — called before application exits
+- `on_tab_switch` — called when user switches tabs
+- `on_settings_changed` — notified when settings change
+- `get_settings_schema` — plugins can declare configurable settings
 
-```bash
-# Profile management
-loofi profile list              # List all profiles
+### New Files
+
+- `utils/update_checker.py` — GitHub releases API update checker
+- `utils/factory_reset.py` — Backup/restore/reset management
+- `ui/whats_new_dialog.py` — Post-upgrade What's New dialog
+- `tests/test_factory_reset.py` — Factory reset unit tests
+- `tests/test_update_checker.py` — Update checker unit tests
 loofi profile apply gaming      # Apply a profile
 loofi profile create myprofile  # Create from current state
 loofi profile delete myprofile  # Delete a custom profile

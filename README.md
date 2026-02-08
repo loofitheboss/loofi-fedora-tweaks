@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v14.0.0 "Quantum Leap" (Development)
+# Loofi Fedora Tweaks v14.0.0 "Quantum Leap"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,42 +10,48 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.5.0">
-    <img src="https://img.shields.io/badge/Release-v13.5.0-blue?style=for-the-badge&logo=github" alt="Release v13.5.0"/>
-  </a>
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks">
-    <img src="https://img.shields.io/badge/Development-v14.0.0--dev-orange?style=for-the-badge&logo=github" alt="Development v14.0.0-dev"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v14.0.0">
+    <img src="https://img.shields.io/badge/Release-v14.0.0-blue?style=for-the-badge&logo=github" alt="Release v14.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1060%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1130%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## 🚧 Development Version - v14.0.0 "Quantum Leap"
+## What's New in v14.0.0 "Quantum Leap"
 
-**⚠️ This is the development branch for v14.0.0**
+### Quantum Leap — Update Checker, What's New Dialog, Factory Reset & Plugin Lifecycle
 
-This branch contains in-development features for the next major release. For the stable version, see the [v13.5.0 release](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v13.5.0).
+A reliability and polish release introducing automatic update checking, a What's New dialog for post-upgrade highlights, full configuration backup/restore/factory-reset management, and plugin lifecycle events.
 
-### Planned for v14.0.0
+**Update Checker**
+* Automatic update notifications from GitHub releases API
+* Compares installed version against latest GitHub release
+* Clean `UpdateInfo` dataclass with version comparison
 
-- Enhanced AI capabilities and integrations
-- Performance optimizations across all modules
-- Extended hardware support
-- Cloud integration features
-- Advanced automation workflows
-- Improved plugin system
+**What's New Dialog**
+* Post-upgrade dialog showing release highlights
+* Remembers last-seen version — only shows after upgrades
+* Scrollable view of current and previous release notes
+
+**Factory Reset**
+* Create named backups of all JSON configuration
+* List, restore, and delete backups with manifest metadata
+* One-click factory reset with automatic pre-reset backup
+* Preserves plugins by default during reset
+
+**Plugin Lifecycle Events**
+* `on_app_start`, `on_app_quit`, `on_tab_switch` hooks
+* `on_settings_changed`, `get_settings_schema` for settings integration
+
+**1130+ Tests** — up from 1060
 
 ---
 
-## What's New in v13.5.0 (Latest Stable)?
-
-### Nexus Update — System Profiles, Health Timeline & Plugin SDK v2
-
-A major integration update bringing system profiles for quick-switching configurations, health timeline for tracking metrics over time, and an enhanced plugin SDK.
+## Previous: v13.5.0 "Nexus Update" (UX Polish)
 
 **System Profiles**
 * **5 Built-in Profiles**: Gaming, Development, Battery Saver, Presentation, Server
