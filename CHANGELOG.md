@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file.
 
+## [12.0.0] - 2026-02-08 "Sovereign Update"
+
+### Added
+
+- **VM Quick-Create Wizard**: One-click VMs with preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch) via `utils/vm_manager.py`.
+- **VFIO GPU Passthrough Assistant**: Step-by-step IOMMU group analysis, kernel cmdline generation, dracut/modprobe config via `utils/vfio.py`.
+- **Disposable VMs**: QCOW2 overlay-based throwaway VMs for untrusted software via `utils/disposable_vm.py`.
+- **Loofi Link Mesh**: mDNS LAN device discovery via Avahi (`utils/mesh_discovery.py`).
+- **Clipboard Sync**: Encrypted clipboard content sharing between paired devices (`utils/clipboard_sync.py`).
+- **File Drop**: Local HTTP file transfer with checksum verification and filename sanitization (`utils/file_drop.py`).
+- **State Teleport**: Capture and restore VS Code, git, and terminal workspace state across devices (`utils/state_teleport.py`).
+- **AI Lite Model Library**: Curated GGUF models with RAM-based recommendations (`utils/ai_models.py`).
+- **Voice Mode**: whisper.cpp integration for voice commands (`utils/voice.py`).
+- **Context RAG**: TF-IDF local file indexing for AI-assisted system help (`utils/context_rag.py`).
+- **Virtualization Tab**: VM management, VFIO checklist, and disposable VM UI (`ui/virtualization_tab.py`).
+- **Loofi Link Tab**: Device discovery, clipboard sync, and file drop UI (`ui/mesh_tab.py`).
+- **State Teleport Tab**: Workspace capture, saved states, and restore UI (`ui/teleport_tab.py`).
+- **Enhanced AI Lab Tab**: Three sub-tabs for models, voice, and knowledge (`ui/ai_enhanced_tab.py`).
+- **Plugin Refactor**: Virtualization and AI Lab as first-party plugins with JSON manifests.
+- **CLI Commands**: `vm`, `vfio`, `mesh`, `teleport`, `ai-models` subcommands with `--json` support.
+
+### Changed
+
+- **Tab count**: 15 tabs expanded to 18 with Virtualization, Loofi Link, and State Teleport.
+- **AI Lab tab**: Now uses `AIEnhancedTab` with lite models, voice mode, and context RAG sub-tabs.
+- **Test coverage**: 564 tests passing (up from 225).
+
+### New Files
+
+- `utils/vm_manager.py` - VM creation, lifecycle management with libvirt
+- `utils/vfio.py` - VFIO GPU passthrough assistant
+- `utils/disposable_vm.py` - QCOW2 overlay disposable VMs
+- `utils/mesh_discovery.py` - mDNS LAN device discovery
+- `utils/clipboard_sync.py` - Encrypted clipboard sharing
+- `utils/file_drop.py` - Local HTTP file transfer
+- `utils/state_teleport.py` - Workspace state capture/restore
+- `utils/ai_models.py` - AI lite model library
+- `utils/voice.py` - whisper.cpp voice mode
+- `utils/context_rag.py` - TF-IDF local file indexing
+- `ui/virtualization_tab.py` - Virtualization management UI
+- `ui/mesh_tab.py` - Loofi Link mesh networking UI
+- `ui/teleport_tab.py` - State Teleport UI
+- `ui/ai_enhanced_tab.py` - Enhanced AI Lab UI
+- `plugins/virtualization/` - First-party virtualization plugin
+- `plugins/ai_lab/` - First-party AI Lab plugin
+- `tests/test_virtualization.py` - 32 virtualization tests
+- `tests/test_hypervisor.py` - 76 hypervisor tests
+- `tests/test_ai_polish.py` - 62 AI polish tests
+- `tests/test_sovereign_network.py` - Mesh networking tests
+- `tests/test_teleport.py` - 35 teleport tests
+- `tests/test_plugins_v2.py` - 31 plugin v2 tests
+
 ## [11.0.0] - 2026-02-08 "Aurora Update"
 
 ### Added

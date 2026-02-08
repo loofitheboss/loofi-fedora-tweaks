@@ -20,7 +20,7 @@ plugins/
   "author": "You",
   "description": "What the plugin does.",
   "entry": "plugin.py",
-  "min_app_version": "11.0.0",
+  "min_app_version": "12.0.0",
   "permissions": ["network", "system"],
   "icon": "🔌"
 }

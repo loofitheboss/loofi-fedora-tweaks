@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        11.0.0
+Version:        12.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -15,8 +15,10 @@ Requires:       libnotify
 
 %description
 A comprehensive GUI application for Fedora 43+ (KDE Plasma) with system maintenance,
-developer tooling, AI integration, security hardening, and window management.
-Features: AI Lab, Security Center, Director, Containers, Watchtower diagnostics, Replicator IaC.
+developer tooling, AI integration, security hardening, window management, virtualization,
+mesh networking, and workspace state teleportation.
+Features: VM Quick-Create, VFIO GPU Passthrough, Loofi Link Mesh, State Teleport,
+AI Lab, Security Center, Director, Containers, Watchtower diagnostics, Replicator IaC.
 
 %prep
 %setup -q
@@ -52,6 +54,21 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 12.0.0-1
+- Sovereign Update: Virtualization, mesh networking, and state teleportation
+- VM Quick-Create wizard with 5 preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch)
+- VFIO GPU Passthrough Assistant with IOMMU analysis and kernel cmdline generation
+- Disposable VMs using QCOW2 overlay snapshots
+- Loofi Link mesh device discovery via Avahi mDNS
+- Encrypted clipboard sync and File Drop with checksum verification
+- State Teleport workspace capture and cross-device restore
+- AI Lite Model Library with RAM-based recommendations
+- Voice Mode with whisper.cpp transcription
+- Context RAG with TF-IDF local file indexing
+- Virtualization and AI Lab refactored as first-party plugins
+- 18-tab sidebar layout, 564 tests passing
+- New CLI commands: vm, vfio, mesh, teleport, ai-models
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 11.0.0-1
 - Aurora Update: Extensibility and diagnostics upgrades
 - Plugin manifest support with enable/disable state and CLI management

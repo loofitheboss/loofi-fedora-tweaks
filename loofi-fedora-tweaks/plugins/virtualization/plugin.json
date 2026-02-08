@@ -1,0 +1,9 @@
+{
+    "name": "Virtualization",
+    "version": "1.0.0",
+    "author": "Loofi Team",
+    "description": "VM management, GPU passthrough, and disposable VMs",
+    "entry": "plugin.py",
+    "min_app_version": "11.5.0",
+    "permissions": ["subprocess", "filesystem", "privileged"]
+}

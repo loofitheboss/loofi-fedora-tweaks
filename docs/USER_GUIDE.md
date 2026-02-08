@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 11.0.0 "Aurora Update"**
+> **Version 12.0.0 "Sovereign Update"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -24,9 +24,12 @@
 15. [Automation](#automation)
 16. [Community](#community)
 17. [Diagnostics](#diagnostics)
-18. [CLI Reference](#cli-reference)
-19. [All Tabs Overview](#all-tabs-overview)
-20. [Troubleshooting](#troubleshooting)
+18. [Virtualization](#virtualization)
+19. [Loofi Link](#loofi-link)
+20. [State Teleport](#state-teleport)
+21. [CLI Reference](#cli-reference)
+22. [All Tabs Overview](#all-tabs-overview)
+23. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -334,11 +337,35 @@ The **Development** tab consolidates Containers and Developer Tools.
 
 ## AI Lab
 
+The **AI Lab** tab has been enhanced with three sub-tabs in v12.0.
+
+### Models Sub-Tab
+
 | Feature | Description |
 |---------|-------------|
 | **Hardware Detection** | CUDA, ROCm, Intel/AMD NPU support |
 | **Ollama Manager** | Install, manage, and run local AI |
-| **Model Downloads** | One-click download for Llama 3, Mistral, CodeLlama, Phi-3 |
+| **Lite Model Library** | Curated GGUF models (Llama 3.2, Mistral, Gemma, Phi-3) |
+| **RAM Recommendations** | Auto-suggest models based on available system RAM |
+| **One-Click Download** | Download models with progress tracking |
+
+### Voice Sub-Tab (v11.2)
+
+| Feature | Description |
+|---------|-------------|
+| **whisper.cpp** | Local speech-to-text transcription |
+| **Model Selection** | tiny/base/small/medium whisper models |
+| **Microphone Check** | Verify recording device availability |
+| **Record & Transcribe** | Record audio and get text transcription |
+
+### Knowledge Sub-Tab (v11.3)
+
+| Feature | Description |
+|---------|-------------|
+| **Context RAG** | TF-IDF local file indexing for AI assistance |
+| **Indexable Paths** | Scans bash_history, bashrc, zshrc, config directories |
+| **Security Filtering** | Skips sensitive files, binary files, enforces size limits |
+| **Keyword Search** | Search your indexed files with relevance scoring |
 
 ---
 
@@ -430,6 +457,109 @@ The **Diagnostics** tab consolidates Watchtower and Boot management.
 
 ---
 
+## Virtualization
+
+The **Virtualization** tab (v11.5) provides full KVM/QEMU virtual machine management.
+
+### VMs Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **VM List** | View all VMs with state, RAM, and vCPU info |
+| **Quick-Create Wizard** | One-click VMs from preset flavors |
+| **Start/Stop Controls** | Manage VM lifecycle |
+| **Delete** | Remove VMs with storage cleanup |
+
+**Preset Flavors:**
+
+| Flavor | Description |
+|--------|-------------|
+| **Windows 11** | Auto-TPM, virtio drivers, 4GB RAM, 2 vCPUs |
+| **Fedora** | Latest Fedora with virtio, 2GB RAM |
+| **Ubuntu** | Ubuntu LTS with virtio, 2GB RAM |
+| **Kali** | Kali Linux for security testing, 2GB RAM |
+| **Arch** | Minimal Arch Linux, 1GB RAM |
+
+### GPU Passthrough Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Prerequisites Check** | CPU virt extensions, KVM, IOMMU verification |
+| **GPU Candidates** | List GPUs available for passthrough with IOMMU groups |
+| **Step-by-Step Plan** | Generated kernel args, dracut config, modprobe config |
+
+### Disposable Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Base Images** | Create QCOW2 base images for disposable VMs |
+| **Snapshot Overlays** | Launch throwaway VMs from overlay snapshots |
+| **Auto-Cleanup** | Destroy overlay on VM shutdown |
+
+---
+
+## Loofi Link
+
+The **Loofi Link** tab (v12.0) enables mesh networking between devices on the same LAN.
+
+### Devices Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Device Discovery** | Find nearby devices via Avahi mDNS |
+| **Device ID** | Unique identifier for this machine |
+| **Peer Status** | Check if discovered peers are online |
+
+### Clipboard Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Clipboard Sync** | Share clipboard content between paired devices |
+| **Encryption** | AES-encrypted payload with shared pairing key |
+| **Display Server** | Auto-detects X11 (xclip/xsel) or Wayland (wl-copy) |
+
+### File Drop Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **File Transfer** | Send files to nearby devices via local HTTP |
+| **Checksum Verification** | SHA-256 integrity check on received files |
+| **Filename Sanitization** | Security filtering of transferred filenames |
+| **Size Limits** | Configurable transfer size limits |
+
+---
+
+## State Teleport
+
+The **State Teleport** tab (v12.0) captures and restores workspace state across machines.
+
+### Capture Section
+
+| Feature | Description |
+|---------|-------------|
+| **VS Code State** | Open files, extensions, workspace settings |
+| **Git State** | Branch, remote, recent commits, uncommitted changes |
+| **Terminal State** | Working directory, environment variables (security-filtered) |
+| **Full Capture** | One-click capture of all workspace state |
+
+### Saved States Section
+
+| Feature | Description |
+|---------|-------------|
+| **Package List** | View saved teleport packages with metadata |
+| **Size Info** | Package size in bytes |
+| **Source Device** | Which machine the state was captured from |
+
+### Restore Section
+
+| Feature | Description |
+|---------|-------------|
+| **Apply Teleport** | Restore workspace state from a package |
+| **Security Filtering** | Filters env vars with KEY/SECRET/TOKEN/PASSWORD |
+| **Selective Restore** | Choose which state components to restore |
+
+---
+
 ## CLI Reference
 
 ### Info & Health
@@ -469,6 +599,25 @@ loofi advanced bbr            # Enable TCP BBR
 loofi advanced swappiness 10  # Set swappiness
 ```
 
+### Virtualization & Networking (v12.0)
+
+```bash
+loofi vm list                 # List virtual machines
+loofi vm status myvm          # Show VM details
+loofi vm start myvm           # Start a VM
+loofi vm stop myvm            # Stop a VM
+loofi vfio check              # Check VFIO prerequisites
+loofi vfio gpus               # List GPU passthrough candidates
+loofi vfio plan               # Generate VFIO setup plan
+loofi mesh discover           # Discover LAN devices
+loofi mesh status             # Show device ID and local IPs
+loofi teleport capture        # Capture workspace state
+loofi teleport list           # List saved packages
+loofi teleport restore <id>   # Restore a package
+loofi ai-models list          # List AI models
+loofi ai-models recommend     # RAM-based model recommendation
+```
+
 ### JSON Output (v10.0)
 
 ```bash
@@ -505,6 +654,9 @@ loofi-fedora-tweaks --daemon  # Run as background service
 | **Automation** | Clock | Scheduler + replicator + pulse events |
 | **Community** | Globe | Presets + marketplace |
 | **Diagnostics** | Telescope | Services + boot + journal |
+| **Virtualization** | Desktop | VM wizard + VFIO + disposable VMs |
+| **Loofi Link** | Link | Mesh discovery + clipboard + file drop |
+| **State Teleport** | Satellite | Workspace capture + restore |
 
 ---
 
@@ -556,4 +708,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v11.0.0 - February 2026*
+*Documentation last updated: v12.0.0 - February 2026*

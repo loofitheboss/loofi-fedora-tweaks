@@ -36,7 +36,7 @@ Open an issue with the **enhancement** label. Describe:
 * New tabs should inherit from `BaseTab` (see `ui/base_tab.py`).
 * System commands go in `utils/` modules, never directly in UI code.
 
-## Project Structure (v10.0)
+## Project Structure (v12.0)
 
 ```
 loofi-fedora-tweaks/
@@ -44,7 +44,7 @@ loofi-fedora-tweaks/
 │   ├── main.py               # Entry point (GUI/CLI/Daemon)
 │   ├── version.py            # Version source of truth
 │   ├── ui/                   # PyQt6 UI components
-│   │   ├── main_window.py    # Main window with sidebar (15 tabs)
+│   │   ├── main_window.py    # Main window with sidebar (18 tabs)
 │   │   ├── base_tab.py       # BaseTab class (shared by all tabs)
 │   │   ├── dashboard_tab.py  # Dashboard (Home)
 │   │   ├── monitor_tab.py    # System Monitor (Performance + Processes)
@@ -57,6 +57,10 @@ loofi-fedora-tweaks/
 │   │   ├── automation_tab.py # Automation (Scheduler + Replicator)
 │   │   ├── community_tab.py  # Community (Presets + Marketplace)
 │   │   ├── diagnostics_tab.py # Diagnostics (Watchtower + Boot)
+│   │   ├── virtualization_tab.py # Virtualization (VMs + VFIO + Disposable)
+│   │   ├── mesh_tab.py         # Loofi Link (Mesh + Clipboard + File Drop)
+│   │   ├── teleport_tab.py     # State Teleport (Capture/Restore)
+│   │   ├── ai_enhanced_tab.py  # AI Lab Enhanced (Models + Voice + RAG)
 │   │   ├── wizard.py         # First-run wizard
 │   │   ├── command_palette.py # Ctrl+K command palette
 │   │   └── lazy_widget.py    # Lazy tab loading
@@ -69,6 +73,11 @@ loofi-fedora-tweaks/
 │   │   ├── operations.py     # Shared operations layer
 │   │   ├── system.py         # System detection (Atomic/Traditional)
 │   │   ├── pulse.py          # Event-driven automation engine
+│   │   ├── vm_manager.py     # VM creation and lifecycle
+│   │   ├── vfio.py           # VFIO GPU passthrough assistant
+│   │   ├── mesh_discovery.py # mDNS LAN device discovery
+│   │   ├── state_teleport.py # Workspace state capture/restore
+│   │   ├── ai_models.py      # AI lite model library
 │   │   ├── focus_mode.py     # Focus mode / distraction blocking
 │   │   └── ...               # Other utility modules
 │   ├── cli/                  # CLI entry point
@@ -78,7 +87,7 @@ loofi-fedora-tweaks/
 │   │   └── loofi-fedora-tweaks.png
 │   ├── config/               # Default configs
 │   └── plugins/              # Third-party extensions
-├── tests/                    # Unit tests (225+ tests)
+├── tests/                    # Unit tests (564 tests)
 │   ├── conftest.py           # Shared fixtures
 │   ├── test_v10_features.py  # v10 foundation module tests
 │   ├── test_cli_enhanced.py  # CLI tests
@@ -143,14 +152,14 @@ Register new tabs in `MainWindow._lazy_tab()` loaders dict:
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 225 tests passing
+# 564 tests passing
 ```
 
 ## Building the RPM
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
 ```
 
 ## CI/CD

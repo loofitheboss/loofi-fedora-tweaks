@@ -3,7 +3,7 @@
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
-- **GUI** (default): `MainWindow` sidebar with 15 consolidated lazy-loaded tabs
+- **GUI** (default): `MainWindow` sidebar with 18 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
 
@@ -21,9 +21,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## V10.0 Tab Consolidation (15 tabs)
+## V12.0 Tab Layout (18 tabs)
 
-The app consolidated from 25 to 15 tabs in v10.0:
+The app has 18 tabs as of v12.0:
 
 | Tab | Consolidates | File |
 |-----|-------------|------|
@@ -38,10 +38,13 @@ The app consolidated from 25 to 15 tabs in v10.0:
 | Gaming | Gaming | `gaming_tab.py` |
 | Desktop | Director + Theming | `desktop_tab.py` |
 | Development | Containers + Developer | `development_tab.py` |
-| AI Lab | AI | `ai_tab.py` |
+| AI Lab | AI Enhanced | `ai_enhanced_tab.py` |
 | Automation | Scheduler + Replicator + Pulse | `automation_tab.py` |
 | Community | Presets + Marketplace | `community_tab.py` |
 | Diagnostics | Watchtower + Boot | `diagnostics_tab.py` |
+| Virtualization | VMs + VFIO + Disposable | `virtualization_tab.py` |
+| Loofi Link | Mesh + Clipboard + File Drop | `mesh_tab.py` |
+| State Teleport | Workspace Capture/Restore | `teleport_tab.py` |
 
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
@@ -156,7 +159,7 @@ Three files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (225+ passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (564 passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
@@ -168,7 +171,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (225+ pas
 - Mock targets: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`, `builtins.open`
 - Verify both success and failure paths (e.g., `CalledProcessError`, `FileNotFoundError`)
 - Use `@patch` decorators, not context managers, for consistency with existing tests
-- Test new v10 modules: errors, commands, formatting, hardware_profiles
+- Test new v12 modules: vm_manager, vfio, mesh_discovery, state_teleport, ai_models, voice, context_rag
 
 ## CI/CD
 

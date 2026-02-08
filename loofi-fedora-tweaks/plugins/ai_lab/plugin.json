@@ -1,0 +1,9 @@
+{
+    "name": "AI Lab",
+    "version": "1.0.0",
+    "author": "Loofi Team",
+    "description": "Local AI models, voice control, and knowledge indexing",
+    "entry": "plugin.py",
+    "min_app_version": "11.0.0",
+    "permissions": ["subprocess", "filesystem", "network"]
+}

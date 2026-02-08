@@ -1,7 +1,7 @@
 """
 Loofi CLI - Command-line interface for Loofi Fedora Tweaks.
 Enables headless operation and scripting.
-v11.0.0 "Aurora Update"
+v12.0.0 "Sovereign Update"
 """
 
 import sys
@@ -559,6 +559,237 @@ def cmd_support_bundle(args):
     return 0 if result.success else 1
 
 
+# ==================== v11.5 / v12.0 COMMANDS ====================
+
+
+def cmd_vm(args):
+    """Handle VM subcommand."""
+    from utils.vm_manager import VMManager
+
+    if args.action == "list":
+        vms = VMManager.list_vms()
+        if _json_output:
+            from dataclasses import asdict
+            _output_json({"vms": [asdict(v) for v in vms]})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Virtual Machines")
+            _print("═══════════════════════════════════════════")
+            if not vms:
+                _print("\n(no VMs found)")
+            else:
+                for vm in vms:
+                    icon = "🟢" if vm.state == "running" else "⚪"
+                    _print(f"  {icon} {vm.name} [{vm.state}]  RAM: {vm.memory_mb}MB  vCPUs: {vm.vcpus}")
+        return 0
+
+    elif args.action == "status":
+        status = VMManager.get_vm_info(args.name)
+        if _json_output:
+            _output_json(status if isinstance(status, dict) else {"error": "VM not found"})
+        else:
+            if status:
+                _print(f"VM: {status.get('name', args.name)} [{status.get('state', 'unknown')}]")
+            else:
+                _print(f"❌ VM '{args.name}' not found")
+        return 0
+
+    elif args.action == "start":
+        result = VMManager.start_vm(args.name)
+        _print(f"{'✅' if result.success else '❌'} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "stop":
+        result = VMManager.stop_vm(args.name)
+        _print(f"{'✅' if result.success else '❌'} {result.message}")
+        return 0 if result.success else 1
+
+    return 1
+
+
+def cmd_vfio(args):
+    """Handle VFIO GPU passthrough subcommand."""
+    from utils.vfio import VFIOAssistant
+
+    if args.action == "check":
+        prereqs = VFIOAssistant.check_prerequisites()
+        if _json_output:
+            _output_json(prereqs)
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   VFIO Prerequisites Check")
+            _print("═══════════════════════════════════════════")
+            for key, val in prereqs.items():
+                icon = "✅" if val else "❌"
+                _print(f"  {icon} {key}")
+        return 0
+
+    elif args.action == "gpus":
+        candidates = VFIOAssistant.get_passthrough_candidates()
+        if _json_output:
+            _output_json({"candidates": candidates})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   GPU Passthrough Candidates")
+            _print("═══════════════════════════════════════════")
+            if not candidates:
+                _print("\n(no candidates found)")
+            else:
+                for gpu in candidates:
+                    _print(f"\n  {gpu.get('name', 'Unknown GPU')}")
+                    _print(f"    IOMMU Group: {gpu.get('iommu_group', '?')}")
+                    _print(f"    IDs: {gpu.get('vendor_id', '?')}:{gpu.get('device_id', '?')}")
+        return 0
+
+    elif args.action == "plan":
+        plan = VFIOAssistant.get_step_by_step_plan()
+        if _json_output:
+            _output_json({"steps": plan})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   VFIO Setup Plan")
+            _print("═══════════════════════════════════════════")
+            for i, step in enumerate(plan, 1):
+                _print(f"\n  Step {i}: {step}")
+        return 0
+
+    return 1
+
+
+def cmd_mesh(args):
+    """Handle mesh networking subcommand."""
+    from utils.mesh_discovery import MeshDiscovery
+
+    if args.action == "discover":
+        peers = MeshDiscovery.discover_peers()
+        if _json_output:
+            from dataclasses import asdict
+            _output_json({"peers": [asdict(p) for p in peers]})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Loofi Link - Nearby Devices")
+            _print("═══════════════════════════════════════════")
+            if not peers:
+                _print("\n(no devices found on local network)")
+            else:
+                for peer in peers:
+                    _print(f"  🔗 {peer.hostname} ({peer.ip_address})")
+        return 0
+
+    elif args.action == "status":
+        device_id = MeshDiscovery.get_device_id()
+        local_ips = MeshDiscovery.get_local_ips()
+        if _json_output:
+            _output_json({"device_id": device_id, "local_ips": local_ips})
+        else:
+            _print(f"Device ID: {device_id}")
+            _print(f"Local IPs: {', '.join(local_ips)}")
+        return 0
+
+    return 1
+
+
+def cmd_teleport(args):
+    """Handle state teleport subcommand."""
+    from utils.state_teleport import StateTeleportManager
+
+    if args.action == "capture":
+        workspace_path = getattr(args, "path", None) or os.getcwd()
+        state = StateTeleportManager.capture_full_state(workspace_path)
+        package = StateTeleportManager.create_teleport_package(
+            state, target_device=getattr(args, "target", "unknown")
+        )
+        pkg_dir = StateTeleportManager.get_package_dir()
+        filepath = os.path.join(pkg_dir, f"{package.package_id}.json")
+        result = StateTeleportManager.save_package_to_file(package, filepath)
+
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "package_id": package.package_id,
+                "file": filepath,
+            })
+        else:
+            _print(f"{'✅' if result.success else '❌'} {result.message}")
+            if result.success:
+                _print(f"   Package ID: {package.package_id}")
+                _print(f"   Size: {package.size_bytes} bytes")
+        return 0 if result.success else 1
+
+    elif args.action == "list":
+        packages = StateTeleportManager.list_saved_packages()
+        if _json_output:
+            _output_json({"packages": packages})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Saved Teleport Packages")
+            _print("═══════════════════════════════════════════")
+            if not packages:
+                _print("\n(no packages found)")
+            else:
+                for pkg in packages:
+                    _print(f"  📦 {pkg['package_id'][:8]}... from {pkg['source_device']}")
+                    _print(f"     Size: {pkg['size_bytes']} bytes")
+        return 0
+
+    elif args.action == "restore":
+        if not args.package_id:
+            _print("❌ Package ID required for restore")
+            return 1
+        pkg_dir = StateTeleportManager.get_package_dir()
+        # Find matching package file
+        for filename in os.listdir(pkg_dir):
+            if args.package_id in filename:
+                filepath = os.path.join(pkg_dir, filename)
+                package = StateTeleportManager.load_package_from_file(filepath)
+                result = StateTeleportManager.apply_teleport(package)
+                _print(f"{'✅' if result.success else '❌'} {result.message}")
+                return 0 if result.success else 1
+        _print(f"❌ Package '{args.package_id}' not found")
+        return 1
+
+    return 1
+
+
+def cmd_ai_models(args):
+    """Handle AI models subcommand."""
+    from utils.ai_models import AIModelManager
+
+    if args.action == "list":
+        installed = AIModelManager.get_installed_models()
+        recommended = AIModelManager.RECOMMENDED_MODELS
+        if _json_output:
+            _output_json({"installed": installed, "recommended": list(recommended.keys())})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   AI Models")
+            _print("═══════════════════════════════════════════")
+            _print("\nInstalled:")
+            if not installed:
+                _print("  (none - install Ollama first)")
+            else:
+                for model in installed:
+                    _print(f"  ✅ {model}")
+            _print("\nRecommended:")
+            for name, info in recommended.items():
+                status = "✅" if name in installed else "⚪"
+                _print(f"  {status} {name} - {info.get('description', '')}")
+        return 0
+
+    elif args.action == "recommend":
+        model = AIModelManager.get_recommended_model()
+        if _json_output:
+            _output_json({"recommended": model})
+        else:
+            if model:
+                _print(f"Recommended model for this system: {model}")
+            else:
+                _print("Unable to determine recommended model")
+        return 0
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -643,6 +874,32 @@ def main(argv: Optional[List[str]] = None):
     # Support bundle
     subparsers.add_parser("support-bundle", help="Export support bundle ZIP")
 
+    # ==================== v11.5 / v12.0 subparsers ====================
+
+    # VM management
+    vm_parser = subparsers.add_parser("vm", help="Virtual machine management")
+    vm_parser.add_argument("action", choices=["list", "status", "start", "stop"], help="VM action")
+    vm_parser.add_argument("name", nargs="?", help="VM name (for status/start/stop)")
+
+    # VFIO GPU passthrough
+    vfio_parser = subparsers.add_parser("vfio", help="GPU passthrough assistant")
+    vfio_parser.add_argument("action", choices=["check", "gpus", "plan"], help="VFIO action")
+
+    # Mesh networking
+    mesh_parser = subparsers.add_parser("mesh", help="Loofi Link mesh networking")
+    mesh_parser.add_argument("action", choices=["discover", "status"], help="Mesh action")
+
+    # State Teleport
+    teleport_parser = subparsers.add_parser("teleport", help="State Teleport workspace capture/restore")
+    teleport_parser.add_argument("action", choices=["capture", "list", "restore"], help="Teleport action")
+    teleport_parser.add_argument("--path", help="Workspace path for capture")
+    teleport_parser.add_argument("--target", default="unknown", help="Target device name")
+    teleport_parser.add_argument("package_id", nargs="?", help="Package ID for restore")
+
+    # AI Models
+    ai_models_parser = subparsers.add_parser("ai-models", help="AI model management")
+    ai_models_parser.add_argument("action", choices=["list", "recommend"], help="AI models action")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -667,6 +924,12 @@ def main(argv: Optional[List[str]] = None):
         "hardware": cmd_hardware,
         "plugins": cmd_plugins,
         "support-bundle": cmd_support_bundle,
+        # v11.5 / v12.0
+        "vm": cmd_vm,
+        "vfio": cmd_vfio,
+        "mesh": cmd_mesh,
+        "teleport": cmd_teleport,
+        "ai-models": cmd_ai_models,
     }
 
     handler = commands.get(args.command)

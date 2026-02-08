@@ -1,6 +1,6 @@
 """
-Main Window - v11.0 "Aurora Update"
-Consolidated 15-tab layout with sidebar navigation.
+Main Window - v12.0 "Sovereign Update"
+18-tab layout with sidebar navigation.
 """
 
 from PyQt6.QtWidgets import (
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
         # Initialize Pages
         self.pages = {}
 
-        # ==================== V10.0 CONSOLIDATED TABS (15) ====================
+        # ==================== V12.0 TABS (18) ====================
 
         # Eagerly loaded
         self.add_page(self.tr("Home"), "\U0001f3e0", DashboardTab(self))
@@ -101,6 +101,13 @@ class MainWindow(QMainWindow):
         # Diagnostics (Watchtower + Boot)
         self.add_page(self.tr("Diagnostics"), "\U0001f52d", self._lazy_tab("diagnostics"))
 
+        # v11.5 Hypervisor Update
+        self.add_page(self.tr("Virtualization"), "\U0001f5a5\ufe0f", self._lazy_tab("virtualization"))
+
+        # v12.0 Sovereign Update
+        self.add_page(self.tr("Loofi Link"), "\U0001f517", self._lazy_tab("mesh"))
+        self.add_page(self.tr("State Teleport"), "\U0001f4e1", self._lazy_tab("teleport"))
+
         # Select first item
         self.sidebar.setCurrentRow(0)
 
@@ -127,10 +134,14 @@ class MainWindow(QMainWindow):
             "gaming": lambda: __import__("ui.gaming_tab", fromlist=["GamingTab"]).GamingTab(),
             "desktop": lambda: __import__("ui.desktop_tab", fromlist=["DesktopTab"]).DesktopTab(),
             "development": lambda: __import__("ui.development_tab", fromlist=["DevelopmentTab"]).DevelopmentTab(),
-            "ai": lambda: __import__("ui.ai_tab", fromlist=["AITab"]).AITab(),
+            "ai": lambda: __import__("ui.ai_enhanced_tab", fromlist=["AIEnhancedTab"]).AIEnhancedTab(),
             "automation": lambda: __import__("ui.automation_tab", fromlist=["AutomationTab"]).AutomationTab(),
             "community": lambda: __import__("ui.community_tab", fromlist=["CommunityTab"]).CommunityTab(),
             "diagnostics": lambda: __import__("ui.diagnostics_tab", fromlist=["DiagnosticsTab"]).DiagnosticsTab(),
+            # v11.5 / v12.0 tabs
+            "virtualization": lambda: __import__("ui.virtualization_tab", fromlist=["VirtualizationTab"]).VirtualizationTab(),
+            "mesh": lambda: __import__("ui.mesh_tab", fromlist=["MeshTab"]).MeshTab(),
+            "teleport": lambda: __import__("ui.teleport_tab", fromlist=["TeleportTab"]).TeleportTab(),
         }
         return LazyWidget(loaders[tab_name])
 

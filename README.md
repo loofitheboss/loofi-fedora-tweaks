@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v11.0.0 "Aurora Update"
+# Loofi Fedora Tweaks v12.0.0 "Sovereign Update"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,34 +10,42 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v11.0.0">
-    <img src="https://img.shields.io/badge/Release-v11.0.0-blue?style=for-the-badge&logo=github" alt="Release v11.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v12.0.0">
+    <img src="https://img.shields.io/badge/Release-v12.0.0-blue?style=for-the-badge&logo=github" alt="Release v12.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-225%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-564%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v11.0.0?
+## What's New in v12.0.0?
 
-### Aurora Update — Extensibility & Diagnostics
+### Sovereign Update — Virtualization, Mesh Networking & State Teleport
 
-This release hardens the platform and unlocks extensibility without sacrificing stability.
+The biggest release yet: full KVM/QEMU virtualization management, LAN mesh networking, and workspace state teleportation across devices.
 
-**New Features**
-* **Plugin Manifest Support**: `plugin.json` with version gating and permissions metadata
-* **Plugin Manager UI**: Enable/disable plugins from the Community tab
-* **Support Bundle Export**: One-click ZIP with logs and system info (Diagnostics + CLI)
-* **Automation Validation**: Rule validation and dry-run simulation before execution
-* **CLI Enhancements**: `loofi plugins` and `loofi support-bundle`
+**v11.5 Hypervisor Update**
+* **VM Quick-Create Wizard**: One-click VMs for Windows 11, Fedora, Ubuntu, Kali, Arch with preset flavors
+* **VFIO GPU Passthrough Assistant**: Step-by-step IOMMU group analysis and kernel cmdline generation
+* **Disposable VMs**: QCOW2 overlay-based throwaway VMs for untrusted software
 
-**Quality Improvements**
-* **Unified Theme Loading**: Single source of truth for QSS styling
-* **Improved Logging**: Structured error logging in Pulse, remote config, command runner
-* **CI Smoke Checks**: CLI sanity checks added to CI pipeline
+**v12.0 Sovereign Networking**
+* **Loofi Link Mesh**: mDNS device discovery on LAN via Avahi
+* **Clipboard Sync**: Encrypted clipboard sharing between paired devices
+* **File Drop**: Local HTTP file transfer with checksum verification
+* **State Teleport**: Capture VS Code, git, and terminal state; restore on another machine
+
+**v11.1-v11.3 AI Polish**
+* **Lite Model Library**: Curated GGUF models (Llama 3.2 1B/3B, Mistral 7B, Gemma 2B, Phi-3)
+* **Voice Mode**: whisper.cpp integration for voice commands
+* **Context RAG**: TF-IDF local file indexing for AI-assisted system help
+
+**Architecture**
+* **Plugin Refactor**: Virtualization and AI Lab now ship as first-party plugins with manifests
+* **18-Tab Layout**: Three new sidebar tabs (Virtualization, Loofi Link, State Teleport)
 
 ---
 
@@ -52,7 +60,7 @@ This release hardens the platform and unlocks extensibility without sacrificing 
 
 ## Feature Overview
 
-### Consolidated Tabs (v11.0)
+### Tabs (v12.0)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
@@ -67,20 +75,29 @@ This release hardens the platform and unlocks extensibility without sacrificing 
 | **Gaming** | Gaming | GameMode, MangoHud, ProtonUp, Steam |
 | **Desktop** | Director + Theming | Window management, compositor, GTK/Qt themes |
 | **Development** | Containers + Developer | Distrobox GUI, PyEnv, NVM, Rustup, VS Code |
-| **AI Lab** | AI | Ollama management, hardware detection |
+| **AI Lab** | AI Enhanced | Lite models, voice mode, context RAG |
 | **Automation** | Scheduler + Replicator + Pulse | Task scheduling, IaC export, event-driven automation |
 | **Community** | Presets + Marketplace | Save/load presets, browse community presets |
 | **Diagnostics** | Watchtower + Boot | Services, boot analyzer, journal viewer |
+| **Virtualization** | VMs + VFIO + Disposable | VM wizard, GPU passthrough, disposable VMs |
+| **Loofi Link** | Mesh + Clipboard + File Drop | Device discovery, clipboard sync, file transfer |
+| **State Teleport** | Workspace Capture/Restore | Save and restore workspace state across devices |
 
-### New in v11.0
+### New in v12.0
 
 | Feature | Description |
 |---------|-------------|
-| **Plugin Manager** | Enable/disable plugins in Community tab |
-| **Plugin Manifests** | `plugin.json` metadata with version gating |
-| **Support Bundle** | Export logs and system info as ZIP |
-| **Automation Validation** | Validate and simulate rules before execution |
-| **CLI Additions** | `plugins` and `support-bundle` commands |
+| **VM Quick-Create** | One-click VMs with preset flavors (Windows 11, Fedora, Ubuntu, Kali, Arch) |
+| **VFIO Assistant** | Step-by-step GPU passthrough with IOMMU analysis |
+| **Disposable VMs** | QCOW2 overlay snapshots for throwaway environments |
+| **Loofi Link Mesh** | mDNS LAN device discovery via Avahi |
+| **Clipboard Sync** | Encrypted clipboard sharing between devices |
+| **File Drop** | Local HTTP file transfer with checksum verification |
+| **State Teleport** | Capture and restore VS Code, git, terminal state across machines |
+| **AI Lite Models** | Curated GGUF models with RAM-based recommendations |
+| **Voice Mode** | whisper.cpp voice commands |
+| **Context RAG** | TF-IDF local file indexing for AI assistance |
+| **Plugin Refactor** | VM and AI Lab as first-party manifest-based plugins |
 
 ### Previous Feature Highlights
 
@@ -106,7 +123,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v11.0.0/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v12.0.0/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
 ```
 
 ### Run from Source
@@ -122,7 +139,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-11.0.0-1.fc43.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
 ```
 
 ---
@@ -151,6 +168,25 @@ loofi tweak power --profile performance
 loofi network dns --provider cloudflare
 loofi plugins list            # List available plugins
 loofi support-bundle          # Export support bundle ZIP
+
+# Virtualization (v12.0)
+loofi vm list                 # List virtual machines
+loofi vm start myvm           # Start a VM
+loofi vfio check              # Check VFIO prerequisites
+loofi vfio gpus               # List GPU passthrough candidates
+
+# Mesh Networking (v12.0)
+loofi mesh discover           # Discover LAN devices
+loofi mesh status             # Show device ID and local IPs
+
+# State Teleport (v12.0)
+loofi teleport capture        # Capture workspace state
+loofi teleport list           # List saved packages
+loofi teleport restore <id>   # Restore a package
+
+# AI Models (v12.0)
+loofi ai-models list          # List installed and recommended models
+loofi ai-models recommend     # Get RAM-based model recommendation
 
 # JSON output (for scripting)
 loofi --json info
@@ -185,7 +221,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 225 tests passing
+# 564 tests passing
 ```
 
 ---
