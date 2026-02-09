@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        18.1.0
+Version:        18.1.1
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -65,6 +65,11 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 18.1.1-1
+- v18.1.1 Hotfix: Fix startup crash due to sidebar refactor
+- Fixed AttributeError on startup (setCurrentRow)
+- Stabilized QTreeWidget initialization
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 18.1.0-1
 - v18.1 Navigator: Categorized Sidebar & Enhanced UX
 - UX Overhaul: Refactored sidebar with collapsible categories (System, Hardware, Network, etc.)

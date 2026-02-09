@@ -137,7 +137,10 @@ class MainWindow(QMainWindow):
         self._setup_quick_actions()
 
         # Select first item
-        self.sidebar.setCurrentRow(0)
+        if self.sidebar.topLevelItemCount() > 0:
+            first_category = self.sidebar.topLevelItem(0)
+            if first_category.childCount() > 0:
+                self.sidebar.setCurrentItem(first_category.child(0))
 
         # System Tray
         self.setup_tray()
