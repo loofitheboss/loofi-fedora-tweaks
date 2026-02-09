@@ -3,7 +3,7 @@
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
-- **GUI** (default): `MainWindow` sidebar with 18 lazy-loaded tabs
+- **GUI** (default): `MainWindow` sidebar with 22 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
 
@@ -21,9 +21,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## V12.0 Tab Layout (18 tabs)
+## V16.0 Tab Layout (22 tabs)
 
-The app has 18 tabs as of v12.0:
+The app has 22 tabs as of v16.0:
 
 | Tab | Consolidates | File |
 |-----|-------------|------|
@@ -45,6 +45,10 @@ The app has 18 tabs as of v12.0:
 | Virtualization | VMs + VFIO + Disposable | `virtualization_tab.py` |
 | Loofi Link | Mesh + Clipboard + File Drop | `mesh_tab.py` |
 | State Teleport | Workspace Capture/Restore | `teleport_tab.py` |
+| Performance | Auto-Tuner + Profiles | `performance_tab.py` |
+| Snapshots | Snapshot Timeline | `snapshot_tab.py` |
+| Logs | Smart Log Viewer | `logs_tab.py` |
+| Quick Actions | Command Palette (Ctrl+Shift+K) | `quick_actions_tab.py` |
 
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
@@ -64,17 +68,21 @@ class MyTab(BaseTab):
 ```
 
 ### PrivilegedCommand Builder (v10.0)
-Use `PrivilegedCommand` for safe pkexec operations — argument arrays, not shell strings:
+Use `PrivilegedCommand` for safe pkexec operations — returns a `Tuple[str, List[str], str]` (binary, args, description). **Always unpack before passing to subprocess.run()**:
 ```python
 from utils.commands import PrivilegedCommand
 
-cmd = PrivilegedCommand.dnf("install", "-y", "package")
-# Returns: ["pkexec", "dnf", "install", "-y", "package"]
+# Returns: ("pkexec", ["dnf", "install", "-y", "package"], "Installing package...")
+binary, args, desc = PrivilegedCommand.dnf("install", "package")
+cmd = [binary] + args  # ["pkexec", "dnf", "install", "-y", "package"]
 
-cmd = PrivilegedCommand.systemctl("restart", "service")
-# Returns: ["pkexec", "systemctl", "restart", "service"]
+# Returns: ("pkexec", ["systemctl", "restart", "service"], "Restart system service...")
+binary, args, _ = PrivilegedCommand.systemctl("restart", "service")
+cmd = [binary] + args  # ["pkexec", "systemctl", "restart", "service"]
 ```
+⚠️ **Never pass the raw tuple to subprocess.run()** — it will crash with TypeError.
 Auto-detects Atomic vs Traditional for dnf/rpm-ostree.
+`dnf()` already adds `-y` internally — do not pass `-y` as a package arg.
 
 ### Error Framework (v10.0)
 Use typed exceptions from `utils/errors.py`:
@@ -150,16 +158,17 @@ Only `DashboardTab` and `SystemInfoTab` are eagerly imported.
 
 ## Version Management
 
-Three files must stay in sync when bumping version:
+Two files must stay in sync when bumping version:
 - `loofi-fedora-tweaks/version.py` — `__version__`, `__version_codename__` (source of truth)
-- `build_rpm.sh` — `VERSION=`
 - `loofi-fedora-tweaks.spec` — `Version:`
+
+`build_rpm.sh` reads version dynamically from `version.py`.
 
 ## Build & Run
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (564 passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (1420+ passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
@@ -171,7 +180,9 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (564 pass
 - Mock targets: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`, `builtins.open`
 - Verify both success and failure paths (e.g., `CalledProcessError`, `FileNotFoundError`)
 - Use `@patch` decorators, not context managers, for consistency with existing tests
-- Test new v12 modules: vm_manager, vfio, mesh_discovery, state_teleport, ai_models, voice, context_rag
+- Test new v12+ modules: vm_manager, vfio, mesh_discovery, state_teleport, ai_models, voice, context_rag
+- Test v15 modules: auto_tuner, snapshot_manager, smart_logs, quick_actions
+- Test v16 modules: service_explorer, package_explorer, firewall_manager, dashboard_tab (v2)
 
 ## CI/CD
 
