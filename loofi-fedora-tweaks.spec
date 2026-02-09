@@ -17,7 +17,7 @@ Requires:       polkit
 Requires:       libnotify
 Requires:       python3-fastapi
 Requires:       python3-uvicorn
-Requires:       python3-jose
+Requires:       python3-python-jose
 Requires:       python3-bcrypt
 Requires:       python3-httpx
 
