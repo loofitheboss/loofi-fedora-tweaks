@@ -214,6 +214,27 @@ class NetworkOps:
             return OperationResult(False, str(e))
 
 
+def execute_operation(
+    op_tuple: Tuple[str, List[str], str],
+    *,
+    preview: bool = False,
+) -> "ActionResult":
+    """
+    Execute a tuple-style operation through the centralized ActionExecutor.
+
+    Bridges existing (command, args, status) tuples to v19.0 ActionResult.
+    Use this for CLI and headless execution paths.
+    GUI paths continue using CommandRunner + QProcess.
+    """
+    from utils.action_executor import ActionExecutor
+    command, args, _status = op_tuple
+    pkexec = command == "pkexec"
+    if pkexec:
+        command = args[0]
+        args = args[1:]
+    return ActionExecutor.run(command, args, preview=preview, pkexec=pkexec)
+
+
 # CLI command registry for future use
 CLI_COMMANDS = {
     "cleanup": {

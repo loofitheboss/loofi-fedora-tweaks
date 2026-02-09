@@ -345,6 +345,101 @@ class TestAgentExecutor:
         assert result.success is False
         assert "no operation or command" in result.message
 
+    def test_arbitrator_blocks_action(self):
+        from utils.agents import AgentConfig, AgentAction, AgentState, AgentType, ActionSeverity
+        from utils.agent_runner import AgentExecutor
+
+        agent = AgentConfig(
+            agent_id="test", name="Test", agent_type=AgentType.CUSTOM,
+            description="test",
+        )
+        action = AgentAction(
+            action_id="a1", name="Blocked", description="test",
+            severity=ActionSeverity.LOW, operation="monitor.check_cpu",
+        )
+        state = AgentState(agent_id="test")
+
+        with patch("utils.agent_runner.Arbitrator.can_proceed", return_value=False):
+            result = AgentExecutor.execute_action(agent, action, state)
+            assert result.success is False
+            assert result.data and result.data.get("arbitrator_block") is True
+
+
+class TestAgentArbitrator:
+    """Test agent resource arbitration."""
+
+    def test_cpu_request_blocked_on_thermal(self):
+        from utils.arbitrator import Arbitrator, AgentRequest, Priority
+        from utils.temperature import TemperatureSensor
+
+        hot_cpu = [
+            TemperatureSensor(
+                name="coretemp",
+                label="Core 0",
+                current=95.0,
+                high=90.0,
+                critical=100.0,
+                sensor_type="cpu",
+            )
+        ]
+
+        with patch("utils.arbitrator.TemperatureManager.get_cpu_temps", return_value=hot_cpu):
+            arbitrator = Arbitrator(cpu_thermal_limit_c=90.0)
+            request = AgentRequest(
+                agent_name="Builder",
+                resource="cpu",
+                priority=Priority.BACKGROUND,
+            )
+            assert arbitrator.can_proceed(request) is False
+
+    def test_cpu_request_allows_critical_on_thermal(self):
+        from utils.arbitrator import Arbitrator, AgentRequest, Priority
+        from utils.temperature import TemperatureSensor
+
+        hot_cpu = [
+            TemperatureSensor(
+                name="coretemp",
+                label="Core 0",
+                current=95.0,
+                high=90.0,
+                critical=100.0,
+                sensor_type="cpu",
+            )
+        ]
+
+        with patch("utils.arbitrator.TemperatureManager.get_cpu_temps", return_value=hot_cpu):
+            arbitrator = Arbitrator(cpu_thermal_limit_c=90.0)
+            request = AgentRequest(
+                agent_name="Guardian",
+                resource="cpu",
+                priority=Priority.CRITICAL,
+            )
+            assert arbitrator.can_proceed(request) is True
+
+    def test_background_blocked_on_battery(self):
+        from utils.arbitrator import Arbitrator, AgentRequest, Priority
+
+        with patch("utils.arbitrator.SystemPulse.get_power_state", return_value="battery"):
+            arbitrator = Arbitrator()
+            request = AgentRequest(
+                agent_name="Cleanup",
+                resource="background_process",
+                priority=Priority.BACKGROUND,
+            )
+            assert arbitrator.can_proceed(request) is False
+
+    def test_background_allowed_on_ac(self):
+        from utils.arbitrator import Arbitrator, AgentRequest, Priority
+
+        with patch("utils.arbitrator.SystemPulse.get_power_state", return_value="ac"):
+            arbitrator = Arbitrator()
+            request = AgentRequest(
+                agent_name="Cleanup",
+                resource="background_process",
+                priority=Priority.BACKGROUND,
+            )
+            assert arbitrator.can_proceed(request) is True
+
 
 class TestAgentOperations:
     """Test built-in agent operations."""

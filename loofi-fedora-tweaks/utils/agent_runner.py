@@ -26,6 +26,8 @@ from utils.agents import (
     AgentStatus,
     TriggerType,
 )
+from utils.action_executor import ActionExecutor as CentralExecutor
+from utils.arbitrator import Arbitrator, AgentRequest, Priority
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,8 @@ class AgentExecutor:
     Executes agent actions against the real system.
     Maps operation strings to actual system checks and commands.
     """
+
+    _arbitrator = Arbitrator()
 
     @staticmethod
     def execute_action(
@@ -81,6 +85,20 @@ class AgentExecutor:
                 action_id=action.action_id,
             )
 
+        # Resource arbitration check
+        request = AgentRequest(
+            agent_name=agent.name,
+            resource=AgentExecutor._infer_resource(action),
+            priority=AgentExecutor._infer_priority(action),
+        )
+        if not AgentExecutor._arbitrator.can_proceed(request):
+            return AgentResult(
+                success=False,
+                message=f"Action '{action.name}' deferred by arbitrator",
+                action_id=action.action_id,
+                data={"arbitrator_block": True},
+            )
+
         # Route to appropriate handler
         try:
             if action.operation:
@@ -115,32 +133,13 @@ class AgentExecutor:
 
     @staticmethod
     def _execute_command(cmd: str, args: List[str]) -> AgentResult:
-        """Execute a raw command safely (no shell=True)."""
-        try:
-            result = subprocess.run(
-                [cmd] + args,
-                capture_output=True,
-                text=True,
-                timeout=COMMAND_TIMEOUT_SECONDS,
-            )
-            if result.returncode == 0:
-                return AgentResult(
-                    success=True,
-                    message=result.stdout.strip()[:500] if result.stdout else "OK",
-                    data={"exit_code": 0, "stdout": result.stdout[:1000]},
-                )
-            else:
-                return AgentResult(
-                    success=False,
-                    message=f"Exit code {result.returncode}: {result.stderr.strip()[:300]}",
-                    data={"exit_code": result.returncode},
-                )
-        except subprocess.TimeoutExpired:
-            return AgentResult(success=False, message=f"Command timed out ({COMMAND_TIMEOUT_SECONDS}s)")
-        except FileNotFoundError:
-            return AgentResult(success=False, message=f"Command not found: {cmd}")
-        except OSError as exc:
-            return AgentResult(success=False, message=f"OS error: {exc}")
+        """Execute a raw command via centralized ActionExecutor."""
+        ar = CentralExecutor.run(cmd, args, timeout=COMMAND_TIMEOUT_SECONDS)
+        return AgentResult(
+            success=ar.success,
+            message=ar.message,
+            data={"exit_code": ar.exit_code, "stdout": ar.stdout[:1000]},
+        )
 
     @staticmethod
     def _execute_operation(
@@ -159,6 +158,26 @@ class AgentExecutor:
             success=False,
             message=f"Unknown operation: {operation}",
         )
+
+    @staticmethod
+    def _infer_priority(action: AgentAction) -> Priority:
+        if action.severity == ActionSeverity.CRITICAL:
+            return Priority.CRITICAL
+        if action.severity in (ActionSeverity.HIGH, ActionSeverity.MEDIUM):
+            return Priority.USER_INTERACTION
+        return Priority.BACKGROUND
+
+    @staticmethod
+    def _infer_resource(action: AgentAction) -> str:
+        if action.operation:
+            prefix = action.operation.split(".", 1)[0]
+            if prefix in {"monitor", "tuner"}:
+                return "cpu"
+            if prefix in {"security", "updates"}:
+                return "network"
+            if prefix in {"cleanup"}:
+                return "disk"
+        return "background_process"
 
     @staticmethod
     def _get_operation_handlers() -> Dict[str, Callable]:
