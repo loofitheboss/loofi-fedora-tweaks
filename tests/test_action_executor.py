@@ -92,8 +92,8 @@ class TestActionExecutor:
     def test_preview_mode(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("echo", ["hello"], preview=True)
                 assert result.preview is True
                 assert result.success is True
@@ -103,8 +103,8 @@ class TestActionExecutor:
     def test_global_dry_run(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 ActionExecutor.set_global_dry_run(True)
                 try:
                     result = ActionExecutor.run("echo", ["test"])
@@ -116,8 +116,8 @@ class TestActionExecutor:
     def test_successful_execution(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("echo", ["hello world"])
                 assert result.success is True
                 assert result.exit_code == 0
@@ -126,8 +126,8 @@ class TestActionExecutor:
     def test_failed_execution(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("false")
                 assert result.success is False
                 assert result.exit_code != 0
@@ -135,8 +135,8 @@ class TestActionExecutor:
     def test_command_not_found(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("nonexistent_cmd_xyz_12345")
                 assert result.success is False
                 assert result.exit_code == 127
@@ -145,8 +145,8 @@ class TestActionExecutor:
     def test_timeout(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("sleep", ["10"], timeout=1)
                 assert result.success is False
                 assert "timed out" in result.message.lower()
@@ -176,8 +176,8 @@ class TestActionExecutor:
     def test_action_id_propagation(self):
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = ActionExecutor.run("echo", ["test"], action_id="op-123")
                 assert result.action_id == "op-123"
 
@@ -189,8 +189,8 @@ class TestActionLog:
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
             log_path = os.path.join(tmpdir, "log.jsonl")
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", log_path):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", log_path):
                 ActionExecutor.run("echo", ["logged"], preview=True)
                 assert os.path.exists(log_path)
                 with open(log_path) as fh:
@@ -203,8 +203,8 @@ class TestActionLog:
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
             log_path = os.path.join(tmpdir, "log.jsonl")
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", log_path):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", log_path):
                 ActionExecutor.run("echo", ["one"], preview=True)
                 ActionExecutor.run("echo", ["two"], preview=True)
                 entries = ActionExecutor.get_action_log(limit=10)
@@ -214,8 +214,8 @@ class TestActionLog:
         from utils.action_executor import ActionExecutor, MAX_LOG_ENTRIES
         with tempfile.TemporaryDirectory() as tmpdir:
             log_path = os.path.join(tmpdir, "log.jsonl")
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", log_path):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", log_path):
                 # Write more than MAX_LOG_ENTRIES
                 with open(log_path, "w") as fh:
                     for i in range(MAX_LOG_ENTRIES + 100):
@@ -229,8 +229,8 @@ class TestActionLog:
         from utils.action_executor import ActionExecutor
         with tempfile.TemporaryDirectory() as tmpdir:
             log_path = os.path.join(tmpdir, "log.jsonl")
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", log_path):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", log_path):
                 ActionExecutor.run("echo", ["diag"], preview=True)
                 diag = ActionExecutor.export_diagnostics()
                 assert diag["version"] == "19.0.0"
@@ -239,8 +239,8 @@ class TestActionLog:
 
     def test_log_failure_does_not_crash(self):
         from utils.action_executor import ActionExecutor
-        with patch("utils.action_executor._LOG_DIR", "/nonexistent/path"), \
-             patch("utils.action_executor._ACTION_LOG_FILE", "/nonexistent/path/log.jsonl"):
+        with patch("core.executor.action_executor._LOG_DIR", "/nonexistent/path"), \
+             patch("core.executor.action_executor._ACTION_LOG_FILE", "/nonexistent/path/log.jsonl"):
             # Should not raise — logging failure is non-critical
             result = ActionExecutor.run("echo", ["safe"], preview=True)
             assert result.success is True
@@ -252,8 +252,8 @@ class TestOperationBridge:
     def test_preview_operation(self):
         from utils.operations import execute_operation, CleanupOps
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = execute_operation(CleanupOps.trim_ssd(), preview=True)
                 assert result.preview is True
                 assert result.success is True
@@ -262,8 +262,8 @@ class TestOperationBridge:
     def test_pkexec_extraction(self):
         from utils.operations import execute_operation, CleanupOps
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("utils.action_executor._LOG_DIR", tmpdir), \
-                 patch("utils.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
+            with patch("core.executor.action_executor._LOG_DIR", tmpdir), \
+                 patch("core.executor.action_executor._ACTION_LOG_FILE", os.path.join(tmpdir, "log.jsonl")):
                 result = execute_operation(CleanupOps.clean_dnf_cache(), preview=True)
                 assert result.preview is True
                 # Should have extracted pkexec and the real command
