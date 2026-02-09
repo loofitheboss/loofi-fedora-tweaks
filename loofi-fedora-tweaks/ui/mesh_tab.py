@@ -19,6 +19,7 @@ from PyQt6.QtCore import Qt
 from utils.mesh_discovery import MeshDiscovery, PeerDevice
 from utils.clipboard_sync import ClipboardSync
 from utils.file_drop import FileDropManager
+from ui.tab_utils import configure_top_tabs
 
 
 class MeshTab(QWidget):
@@ -60,6 +61,7 @@ class MeshTab(QWidget):
 
         # ---- Sub-tabs ----
         self.sub_tabs = QTabWidget()
+        configure_top_tabs(self.sub_tabs)
         self.sub_tabs.addTab(self._build_devices_tab(), self.tr("Devices"))
         self.sub_tabs.addTab(self._build_clipboard_tab(), self.tr("Clipboard"))
         self.sub_tabs.addTab(self._build_filedrop_tab(), self.tr("File Drop"))

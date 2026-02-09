@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 
 import json
@@ -348,6 +349,7 @@ class SoftwareTab(BaseTab):
         self.setLayout(layout)
 
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(_ApplicationsSubTab(), self.tr("Applications"))
         self.tabs.addTab(_RepositoriesSubTab(), self.tr("Repositories"))
 

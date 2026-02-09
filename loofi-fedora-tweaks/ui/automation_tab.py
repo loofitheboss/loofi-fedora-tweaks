@@ -18,6 +18,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.scheduler import TaskScheduler, ScheduledTask, TaskAction, TaskSchedule
 from utils.ansible_export import AnsibleExporter
 from utils.kickstart import KickstartGenerator
@@ -127,6 +128,7 @@ class AutomationTab(BaseTab):
 
         # Sub-tab widget
         self.sub_tabs = QTabWidget()
+        configure_top_tabs(self.sub_tabs)
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Scheduler (from SchedulerTab)

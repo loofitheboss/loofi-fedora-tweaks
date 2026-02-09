@@ -18,6 +18,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.services import ServiceManager, UnitScope, UnitState
 from utils.boot_analyzer import BootAnalyzer
 from utils.journal import JournalManager
@@ -62,6 +63,7 @@ class _WatchtowerSubTab(QWidget):
 
         # Internal sub-tabs for different diagnostic areas
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(
             self._create_services_tab(),
             self.tr("\U0001f527 Services"),
@@ -924,6 +926,7 @@ class DiagnosticsTab(BaseTab):
         self.setLayout(layout)
 
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(_WatchtowerSubTab(), self.tr("Watchtower"))
         self.tabs.addTab(_BootSubTab(), self.tr("Boot"))
 

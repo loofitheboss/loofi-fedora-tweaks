@@ -26,6 +26,7 @@ from PyQt6.QtGui import (
 
 from utils.performance import PerformanceCollector
 from utils.processes import ProcessManager
+from ui.tab_utils import configure_top_tabs
 
 
 # ---------------------------------------------------------------------------
@@ -1035,6 +1036,7 @@ class MonitorTab(QWidget):
         self.setLayout(layout)
 
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(_PerformanceSubTab(), self.tr("Performance"))
         self.tabs.addTab(_ProcessesSubTab(), self.tr("Processes"))
 

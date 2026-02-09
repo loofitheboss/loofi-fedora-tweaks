@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from utils.settings import SettingsManager
+from ui.tab_utils import configure_top_tabs
 
 
 class SettingsTab(QWidget):
@@ -58,6 +59,7 @@ class SettingsTab(QWidget):
 
         # Internal sub-tabs
         tabs = QTabWidget()
+        configure_top_tabs(tabs)
         tabs.addTab(self._build_appearance_tab(), self.tr("Appearance"))
         tabs.addTab(self._build_behavior_tab(), self.tr("Behavior"))
         tabs.addTab(self._build_advanced_tab(), self.tr("Advanced"))

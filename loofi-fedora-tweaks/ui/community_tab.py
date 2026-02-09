@@ -23,6 +23,7 @@ from utils.cloud_sync import CloudSyncManager
 from utils.marketplace import PresetMarketplace, CommunityPreset, MarketplaceResult
 from utils.drift import DriftDetector
 from utils.plugin_base import PluginLoader
+from ui.tab_utils import configure_top_tabs
 
 
 class FetchPresetsThread(QThread):
@@ -73,6 +74,7 @@ class CommunityTab(QWidget):
 
         # Sub-tab widget
         self.sub_tabs = QTabWidget()
+        configure_top_tabs(self.sub_tabs)
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Presets (from PresetsTab)
@@ -108,6 +110,7 @@ class CommunityTab(QWidget):
 
         # Inner tab widget for preset sections
         preset_tabs = QTabWidget()
+        configure_top_tabs(preset_tabs)
         layout.addWidget(preset_tabs)
 
         # Inner Tab 1: Local Presets

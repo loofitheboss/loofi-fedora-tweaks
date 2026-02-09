@@ -21,6 +21,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class AgentsTab(BaseTab):
 
         # Sub-tabs
         tabs = QTabWidget()
+        configure_top_tabs(tabs)
         tabs.addTab(self._build_dashboard_tab(), self.tr("Dashboard"))
         tabs.addTab(self._build_agents_tab(), self.tr("My Agents"))
         tabs.addTab(self._build_create_tab(), self.tr("Create Agent"))

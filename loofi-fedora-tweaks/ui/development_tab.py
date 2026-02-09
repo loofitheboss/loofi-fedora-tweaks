@@ -18,6 +18,7 @@ from PyQt6.QtCore import Qt, QProcess, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.containers import ContainerManager, ContainerStatus
 from utils.devtools import DevToolsManager
 from utils.vscode import VSCodeManager
@@ -81,6 +82,7 @@ class DevelopmentTab(BaseTab):
 
         # Sub-tab widget
         self.sub_tabs = QTabWidget()
+        configure_top_tabs(self.sub_tabs)
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Containers (from ContainersTab)

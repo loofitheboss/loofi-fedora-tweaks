@@ -24,6 +24,21 @@ QTabBar::tab:selected {
     font-weight: bold;
 }
 
+QTabBar::scroller {
+    width: 22px;
+}
+QTabBar::scroll-left-button, QTabBar::scroll-right-button {
+    background-color: #e0e0e0;
+    border: 1px solid #c0c0c0;
+    border-radius: 6px;
+    margin: 3px;
+    width: 18px;
+    height: 18px;
+}
+QTabBar::scroll-left-button:hover, QTabBar::scroll-right-button:hover {
+    background-color: #d0d0d0;
+}
+
 QPushButton {
     background-color: #3daee9;
     color: white;

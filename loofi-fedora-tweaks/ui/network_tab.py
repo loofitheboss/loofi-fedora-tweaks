@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.history import HistoryManager
 from utils.network_monitor import NetworkMonitor
 
@@ -43,6 +44,7 @@ class NetworkTab(BaseTab):
 
         # Sub-tab widget
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(self._build_connections_tab(), self.tr("🔗 Connections"))
         self.tabs.addTab(self._build_dns_tab(), self.tr("🌐 DNS"))
         self.tabs.addTab(self._build_privacy_tab(), self.tr("🔒 Privacy"))

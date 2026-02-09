@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from ui.base_tab import BaseTab
+from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 from utils.system import SystemManager
 
@@ -637,6 +638,7 @@ class MaintenanceTab(BaseTab):
         self.setLayout(layout)
 
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(_UpdatesSubTab(), self.tr("Updates"))
         self.tabs.addTab(_CleanupSubTab(), self.tr("Cleanup"))
 

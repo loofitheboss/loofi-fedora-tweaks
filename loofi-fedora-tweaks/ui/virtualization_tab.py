@@ -21,6 +21,7 @@ from utils.virtualization import VirtualizationManager
 from utils.vm_manager import VMManager, VM_FLAVORS
 from utils.vfio import VFIOAssistant
 from utils.disposable_vm import DisposableVMManager
+from ui.tab_utils import configure_top_tabs
 
 
 class VirtualizationTab(QWidget):
@@ -51,6 +52,7 @@ class VirtualizationTab(QWidget):
 
         # ---- Sub-tab widget ----
         self.tabs = QTabWidget()
+        configure_top_tabs(self.tabs)
         self.tabs.addTab(self._create_vms_tab(), self.tr("VMs"))
         self.tabs.addTab(self._create_gpu_passthrough_tab(), self.tr("GPU Passthrough"))
         self.tabs.addTab(self._create_disposable_tab(), self.tr("Disposable"))

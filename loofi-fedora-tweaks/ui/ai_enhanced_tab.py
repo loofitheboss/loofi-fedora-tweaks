@@ -19,6 +19,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 from utils.voice import VoiceManager, WHISPER_MODELS
 from utils.context_rag import ContextRAGManager
+from ui.tab_utils import configure_top_tabs
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +108,7 @@ class AIEnhancedTab(QWidget):
 
         # Sub-tab widget
         self.tab_widget = QTabWidget()
+        configure_top_tabs(self.tab_widget)
         self.tab_widget.setObjectName("aiEnhancedTabs")
         self.tab_widget.addTab(self._create_models_tab(), self.tr("Models"))
         self.tab_widget.addTab(self._create_voice_tab(), self.tr("Voice"))

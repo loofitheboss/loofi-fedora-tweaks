@@ -191,6 +191,21 @@ QTabBar::tab:hover:!selected {
     color: #4c4f69;
 }
 
+QTabBar::scroller {
+    width: 22px;
+}
+QTabBar::scroll-left-button, QTabBar::scroll-right-button {
+    background-color: #e6e9ef;
+    border: 1px solid #ccd0da;
+    border-radius: 6px;
+    margin: 3px;
+    width: 18px;
+    height: 18px;
+}
+QTabBar::scroll-left-button:hover, QTabBar::scroll-right-button:hover {
+    background-color: #ccd0da;
+}
+
 /* Horizontal scrollbar (for wide content areas) */
 QScrollBar:horizontal {
     border: none;
