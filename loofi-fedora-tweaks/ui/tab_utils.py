@@ -5,6 +5,9 @@ Shared helpers for tab widgets.
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTabWidget
 
+# Standard content margins for tab root layouts
+CONTENT_MARGINS = (20, 16, 20, 16)
+
 
 def configure_top_tabs(tab_widget: QTabWidget) -> None:
     """Ensure top tab bars remain usable when many tabs are present."""

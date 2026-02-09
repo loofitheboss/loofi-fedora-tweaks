@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from utils.settings import SettingsManager
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 
 
 class SettingsTab(QWidget):
@@ -32,7 +32,7 @@ class SettingsTab(QWidget):
 
     def _init_ui(self):
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setContentsMargins(*CONTENT_MARGINS)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)

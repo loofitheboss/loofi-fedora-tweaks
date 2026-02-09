@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox,
 )
 
+from ui.tab_utils import CONTENT_MARGINS
 from utils.health_timeline import HealthTimeline
 
 
@@ -158,7 +159,7 @@ class HealthTimelineTab(QWidget):
         scroll.setWidget(container)
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
 
         # Initial data load

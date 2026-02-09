@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.services import ServiceManager, UnitScope, UnitState
 from utils.boot_analyzer import BootAnalyzer
 from utils.journal import JournalManager
@@ -516,7 +516,7 @@ class _BootSubTab(QWidget):
         scroll.setWidget(container)
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
 
     # ==================== Kernel Section ==================================

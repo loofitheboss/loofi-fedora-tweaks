@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt, QProcess, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.containers import ContainerManager, ContainerStatus
 from utils.devtools import DevToolsManager
 from utils.vscode import VSCodeManager
@@ -78,7 +78,7 @@ class DevelopmentTab(BaseTab):
     def init_ui(self):
         """Initialize the UI with sub-tabs."""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(*CONTENT_MARGINS)
 
         # Sub-tab widget
         self.sub_tabs = QTabWidget()

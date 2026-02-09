@@ -18,7 +18,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.scheduler import TaskScheduler, ScheduledTask, TaskAction, TaskSchedule
 from utils.ansible_export import AnsibleExporter
 from utils.kickstart import KickstartGenerator
@@ -124,7 +124,7 @@ class AutomationTab(BaseTab):
     def init_ui(self):
         """Initialize the UI with sub-tabs."""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(*CONTENT_MARGINS)
 
         # Sub-tab widget
         self.sub_tabs = QTabWidget()

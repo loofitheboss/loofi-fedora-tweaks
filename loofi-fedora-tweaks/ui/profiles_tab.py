@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from ui.tab_utils import CONTENT_MARGINS
 from utils.profiles import ProfileManager
 
 
@@ -98,7 +99,7 @@ class ProfilesTab(QWidget):
         scroll.setWidget(container)
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
 
         # Initial data load

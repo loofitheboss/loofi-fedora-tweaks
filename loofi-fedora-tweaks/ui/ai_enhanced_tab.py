@@ -19,7 +19,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 from utils.voice import VoiceManager, WHISPER_MODELS
 from utils.context_rag import ContextRAGManager
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class AIEnhancedTab(QWidget):
     def _init_ui(self):
         """Initialize the UI with sub-tab navigation."""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(*CONTENT_MARGINS)
 
         # Header
         header = QLabel(self.tr("AI Lab - Enhanced"))

@@ -21,7 +21,7 @@ from utils.virtualization import VirtualizationManager
 from utils.vm_manager import VMManager, VM_FLAVORS
 from utils.vfio import VFIOAssistant
 from utils.disposable_vm import DisposableVMManager
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 
 
 class VirtualizationTab(QWidget):
@@ -34,6 +34,7 @@ class VirtualizationTab(QWidget):
     def init_ui(self):
         """Initialize the UI components."""
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.setSpacing(10)
 
         # ---- Output log (created early so sub-tab builders can call self.log()) ----

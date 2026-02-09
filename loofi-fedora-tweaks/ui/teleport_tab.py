@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
+from ui.tab_utils import CONTENT_MARGINS
 from utils.state_teleport import StateTeleportManager, TeleportPackage
 from utils.file_drop import FileDropManager
 from utils.mesh_discovery import MeshDiscovery
@@ -80,7 +81,7 @@ class TeleportTab(QWidget):
         scroll.setWidget(container)
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
 
     # ==================== CAPTURE SECTION ====================

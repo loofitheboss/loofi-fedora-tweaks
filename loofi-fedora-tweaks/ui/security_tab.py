@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
 
+from ui.tab_utils import CONTENT_MARGINS
 from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
 from utils.ports import PortAuditor
@@ -104,7 +105,7 @@ class SecurityTab(QWidget):
         scroll.setWidget(container)
         
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
     
     def _create_score_section(self) -> QGroupBox:

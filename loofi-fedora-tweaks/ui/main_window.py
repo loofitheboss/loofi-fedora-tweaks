@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.CustomizeWindowHint, False)
         self.setWindowTitle(self.tr(f"Loofi Fedora Tweaks v{__version__}"))
         self.resize(1100, 700)
+        self.setMinimumSize(800, 500)
 
         # Initialize Pulse event listener
         self.pulse = None
