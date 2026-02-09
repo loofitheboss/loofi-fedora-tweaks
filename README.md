@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v21.0.0 "UX Stabilization"
+# Loofi Fedora Tweaks v23.0.0 "Architecture Hardening"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,37 +10,40 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v21.0.0">
-    <img src="https://img.shields.io/badge/Release-v21.0.0-blue?style=for-the-badge&logo=github" alt="Release v21.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v23.0.0">
+    <img src="https://img.shields.io/badge/Release-v23.0.0-blue?style=for-the-badge&logo=github" alt="Release v23.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1681%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1715%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v21.0.0 "UX Stabilization"
+## What's New in v23.0.0 "Architecture Hardening"
 
-### UX Stabilization & Layout Integrity
+### Architecture Hardening & Service Layer Refactor
 
-v21.0.0 focuses on foundational layout fixes, HiDPI safety, and theme consistency.
+v23.0.0 introduces major architectural improvements, service layer organization, and privilege escalation support.
 
-**Layout Integrity**
-* Native title bar enforcement (fixes KDE Plasma chrome overlay)
-* Border cleanup and documentMode for all QTabWidget instances
-* Minimum window size (800x500) with consistent margins
-* Scoped QTabBar scroller styling to prevent theme conflicts
+**Executor Layer**
+* BaseActionExecutor ABC with privileged execution support via `privileged=True` parameter
+* pkexec integration for seamless privilege elevation
+* ActionExecutor refactored to subclass BaseActionExecutor
 
-**HiDPI Safety**
-* Font-metrics-based sizing for DPI-independent layouts
-* Switched to `pt` units across all themes
+**Service Layer Organization**
+* System services migrated to `services/system/` (system.py, services.py, processes.py, process.py)
+* Hardware services migrated to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py)
+* Centralized BaseWorker QThread pattern in `core/workers/` for non-blocking operations
+
+**Packaging & Build**
+* Consolidated all build scripts into `scripts/` directory
+* `build_rpm.sh`, `build_flatpak.sh`, `build_appimage.sh`, `build_sdist.sh`
 
 **Quality Assurance**
-* Layout regression tests for window geometry and client area placement
-* Theme-aware inline styles (top-3 critical fixes)
-* Frameless mode feature flag (stubbed for future implementation)
+* 34 comprehensive import validation tests
+* Backward-compatibility shims in `utils/` with deprecation warnings (removal planned for v25.0.0)
 
 ---
 

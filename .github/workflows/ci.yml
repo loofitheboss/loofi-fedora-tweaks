@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: dnf install -y rpm-build python3
-      - run: bash build_rpm.sh
+      - run: bash scripts/build_rpm.sh
       - uses: actions/upload-artifact@v4
         with:
           name: rpm-package

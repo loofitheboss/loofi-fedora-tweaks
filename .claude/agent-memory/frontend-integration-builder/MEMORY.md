@@ -1,5 +1,32 @@
 # Frontend Integration Builder Memory
 
+## Theme System Patterns (GTK/PyQt6)
+
+### Replacing Inline Styles with Theme-Aware Approach
+- **NEVER** use hardcoded hex colors in setStyleSheet() calls
+- **ALWAYS** use setObjectName() + QSS rules in modern.qss/light.qss
+- Pattern: Remove setStyleSheet() → Add setObjectName("uniqueName") → Add QSS rules to both theme files
+
+### Color Mappings (Catppuccin Mocha → Latte)
+- Dark accent blue: #89b4fa → Light accent blue: #1e66f5
+- Dark background: #1e1e2e → Light background: #eff1f5
+- Dark surface: #313244 → Light surface: #ccd0da
+- Dark text: #cdd6f4 → Light text: #4c4f69
+- Dark muted: #a6adc8 → Light muted: #6c6f85
+- Yellow warning: #f9e2af → Orange warning: #df8e1d
+- Red error: #f38ba8 → Red error: #d20f39
+- Green success: #a6e3a1 → Green success: #40a02b
+
+### Component-Specific ObjectNames
+- Dashboard: systemBadge, rebootBanner, rebootLabel, rebootButton, dashboardCard, quickActionButton
+- Notification: notificationPanel
+- Lazy Loading: loadingLabel, errorLabel
+
+### QSS Section Naming Convention
+- Use v-prefixed comments: /* ===== v20.1 Component Name ===== */
+- Group related components under same section
+- Place new sections at end of file before closing
+
 ## Web Dashboard Patterns
 
 ### API Structure

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [23.0.0] - 2026-02-09 "Architecture Hardening"
+
+### Added
+
+- **BaseActionExecutor ABC**: Abstract base class for all executor implementations with privileged execution support via `privileged=True` parameter.
+- **pkexec Integration**: Seamless privilege elevation for system operations through BaseActionExecutor.
+- **BaseWorker QThread Pattern**: Centralized worker thread pattern in `core/workers/` for non-blocking UI operations.
+- **Comprehensive Import Tests**: 34 validation tests ensuring all module imports work correctly and backward compatibility is maintained.
+
+### Changed
+
+- **Service Layer Migration**: Moved system services to `services/system/` (system.py, services.py, processes.py, process.py).
+- **Hardware Services Migration**: Moved hardware services to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py).
+- **Packaging Scripts Consolidation**: Created `scripts/` directory with all build scripts (build_rpm.sh, build_flatpak.sh, build_appimage.sh, build_sdist.sh).
+- **ActionExecutor Refactor**: Refactored ActionExecutor to subclass BaseActionExecutor for better abstraction and testability.
+
+### Deprecated
+
+- **utils/ Backward Compatibility**: Shims added in `utils/` with deprecation warnings for old import paths. Will be removed in v25.0.0.
+
+---
+
 ## [21.0.1] - 2026-02-09
 
 ### Fixed

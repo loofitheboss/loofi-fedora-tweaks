@@ -40,6 +40,14 @@ Use `frozen=True` for immutable value objects. Include `__post_init__` for valid
 
 **API Server Pattern**: Background thread with daemon=True (see `/utils/api_server.py`)
 
+**BaseWorker Pattern (v23.0)**: `/core/workers/base_worker.py`
+- Standardized QThread worker with `started`, `progress(str, int)`, `finished(object)`, `error(str)` signals
+- Subclass and implement `do_work() -> Any` abstract method
+- Metaclass resolution: `_BaseWorkerMeta` combines `wrappertype` (Qt) and `ABCMeta`
+- Built-in cancellation via `cancel()` / `is_cancelled()`
+- Progress reporting via `report_progress(message, percentage)`
+- Result retrieval via `get_result()`
+
 ## Test Patterns
 
 **Import convention**: Tests use direct imports from utils (e.g., `from utils.event_bus import ...`)
@@ -47,6 +55,44 @@ Use `frozen=True` for immutable value objects. Include `__post_init__` for valid
 **Concurrency tests**: Use threading primitives, counters with locks, and sleep delays for async assertions
 
 **Singleton testing pitfall**: When testing singletons with executors, don't call `shutdown()` in fixtures. The singleton persists across tests and shutdown makes the executor unusable.
+
+**QThread testing pitfall**: Qt signals require event loop. For simple tests, test worker completion/results directly via `wait()` and `get_result()`. Avoid signal-based assertions without proper event loop. See `tests/test_base_worker_simple.py`.
+
+## v23.0 Architecture Migration
+
+**System utilities migration** (v23.0 Architecture Hardening):
+- Moved `utils/system.py` → `services/system/system.py`
+- Moved `utils/services.py` → `services/system/services.py`
+- Moved `utils/processes.py` → `services/system/processes.py`
+- Moved `utils/process.py` → `services/system/process.py`
+
+**Hardware utilities migration** (v23.0 Architecture Hardening):
+- Moved `utils/hardware.py` → `services/hardware/hardware.py`
+- Moved `utils/battery.py` → `services/hardware/battery.py`
+- Moved `utils/disk.py` → `services/hardware/disk.py`
+- Moved `utils/temperature.py` → `services/hardware/temperature.py`
+- Moved `utils/bluetooth.py` → `services/hardware/bluetooth.py`
+- Moved `utils/hardware_profiles.py` → `services/hardware/hardware_profiles.py`
+
+**Backward-compat shims**:
+- Shims in `utils/` re-export from `services/system/`
+- Must include `subprocess`, `os` imports for test mock compatibility
+- Tests patch `utils.services.subprocess.run` — shim must have subprocess in namespace
+- Use deprecation warnings with `stacklevel=2` for proper caller context
+
+**services/system/__init__.py** exports:
+- SystemManager
+- ServiceManager, ServiceUnit, UnitScope, UnitState, Result
+- ProcessManager, ProcessInfo
+- CommandRunner (backward compat)
+
+**services/hardware/__init__.py** exports:
+- HardwareManager
+- BatteryManager
+- DiskManager, DiskUsage, LargeDirectory
+- TemperatureManager, TemperatureSensor
+- BluetoothManager, BluetoothDevice, BluetoothDeviceType, BluetoothResult, BluetoothStatus
+- PROFILES, detect_hardware_profile, get_profile_label, get_all_profiles
 
 ## Module Structure
 
@@ -68,6 +114,28 @@ logger = logging.getLogger(__name__)
 
 All public functions: type hints + docstrings.
 All dataclass fields: type annotations.
+
+## Executor Architecture (v19.0 Phase 1)
+
+**BaseActionExecutor ABC** (`core/executor/base_executor.py`):
+- Abstract interface: `execute()`, `preview()`, `set_global_dry_run()`
+- All executors return `ActionResult`
+- `privileged` parameter for pkexec/sudo escalation
+- No Qt/UI dependencies in base or sync implementations
+
+**ActionExecutor** (`core/executor/action_executor.py`):
+- Concrete sync subprocess implementation extending BaseActionExecutor
+- Instance methods: `execute()`, `preview()`
+- Legacy classmethod API: `run()` for backward compat (maps pkexec→privileged)
+- pkexec integration via `privileged=True` parameter
+- Flatpak-aware: auto-wraps with `flatpak-spawn --host`
+- JSON-lines action log at `~/.local/share/loofi-fedora-tweaks/action_log.jsonl`
+
+**Backward Compatibility**:
+- `utils/action_executor.py` shim re-exports from `core/executor/`
+- Legacy `ActionExecutor.run(pkexec=True)` → maps to `privileged=True`
+- Internal methods changed from classmethod to instance methods (_build_command, _trim_log, etc.)
+- Tests must instantiate executor to call internal methods
 
 ## v20 EventBus Topics
 
@@ -167,3 +235,20 @@ Three production agents demonstrating inter-agent communication:
 3. **thermal.json** - Thermal Management Agent: Reduces load on `system.thermal.throttling`, restores on `system.thermal.normal`
 
 All agents use ActionExecutor for system commands (dnf, journalctl, firewall-cmd, cpupower, brightnessctl)
+
+## ConfigManager Integration
+
+**Location**: `/workspaces/loofi-fedora-tweaks/loofi-fedora-tweaks/utils/config_manager.py`
+
+Persistent JSON config at `~/.config/loofi-fedora-tweaks/config.json`:
+- `ConfigManager.load_config() -> Optional[dict]` - Load saved config
+- `ConfigManager.save_config(config: dict) -> bool` - Save runtime config
+- Config structure is flexible (any keys allowed)
+- Use for app-level settings that need persistence between sessions
+
+**UI Feature Flag Pattern**: For UI-specific feature flags:
+1. Check config file first: `config.get("ui", {}).get("feature_name")`
+2. Fallback to environment variable: `os.environ.get("FEATURE_VAR") == "1"`
+3. Default to False/safe behavior if neither is set
+
+Example: Frameless mode flag in MainWindow.__init__ checks `ui.frameless_mode` then `LOOFI_FRAMELESS=1`

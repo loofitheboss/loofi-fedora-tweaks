@@ -1,5 +1,5 @@
 """
-Centralized Action Executor — v19.0 Foundation.
+Centralized Action Executor — v19.0 Foundation (Phase 1 Refactor).
 
 All system-level actions route through this executor.
 Provides: preview mode, dry-run, structured results, action logging.
@@ -8,14 +8,19 @@ Usage:
     from core.executor.action_executor import ActionExecutor
 
     # Preview what would happen:
-    result = ActionExecutor.run("dnf", ["check-update"], preview=True)
+    result = ActionExecutor().preview("dnf", ["check-update"])
 
     # Execute for real:
-    result = ActionExecutor.run("dnf", ["check-update"])
+    result = ActionExecutor().execute("dnf", ["check-update"])
 
     # With privilege escalation:
-    result = ActionExecutor.run("dnf", ["clean", "all"], pkexec=True)
+    result = ActionExecutor().execute("dnf", ["clean", "all"], privileged=True)
+
+    # Legacy classmethod API (backward compatible):
+    result = ActionExecutor.run("dnf", ["check-update"], preview=True)
 """
+
+from __future__ import annotations
 
 import json
 import logging
@@ -26,6 +31,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from core.executor.action_result import ActionResult
+from core.executor.base_executor import BaseActionExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +49,9 @@ _LOG_DIR = os.path.join(
 _ACTION_LOG_FILE = os.path.join(_LOG_DIR, "action_log.jsonl")
 
 
-class ActionExecutor:
+class ActionExecutor(BaseActionExecutor):
     """
-    Centralized executor for all system commands.
+    Synchronous subprocess-based executor (concrete implementation).
 
     Features:
     - Preview mode: returns what would execute, without running.
@@ -53,15 +59,86 @@ class ActionExecutor:
     - Structured ActionResult for every call.
     - JSON-lines action log for diagnostics export.
     - Flatpak-aware: auto-wraps with flatpak-spawn when inside sandbox.
+    - pkexec integration for privilege escalation.
     """
 
     _dry_run_global: bool = False
+
+    def execute(
+        self,
+        command: str,
+        args: Optional[List[str]] = None,
+        *,
+        privileged: bool = False,
+        timeout: int = COMMAND_TIMEOUT,
+        action_id: str = "",
+        env: Optional[Dict[str, str]] = None,
+    ) -> ActionResult:
+        """
+        Execute a system command and return a structured result.
+
+        Args:
+            command: The executable name or path.
+            args: Command arguments.
+            privileged: If True, use pkexec for privilege escalation.
+            timeout: Max seconds to wait.
+            action_id: Optional ID for correlating with action definitions.
+            env: Optional extra environment variables.
+
+        Returns:
+            ActionResult containing success status, output, and metadata.
+        """
+        args = args or []
+
+        # Global dry-run intercept
+        if self._dry_run_global:
+            return self.preview(
+                command, args, privileged=privileged, action_id=action_id
+            )
+
+        # Build final command list
+        cmd = self._build_command(command, args, privileged=privileged)
+
+        # Execute
+        result = self._execute_subprocess(
+            cmd, timeout=timeout, action_id=action_id, env=env
+        )
+        self._log_action(cmd, result)
+        return result
+
+    def preview(
+        self,
+        command: str,
+        args: Optional[List[str]] = None,
+        *,
+        privileged: bool = False,
+        action_id: str = "",
+    ) -> ActionResult:
+        """
+        Preview what would be executed without running the command.
+
+        Args:
+            command: The executable name or path.
+            args: Command arguments.
+            privileged: If True, would use pkexec for privilege escalation.
+            action_id: Optional ID for correlating with action definitions.
+
+        Returns:
+            ActionResult with preview=True and command details in data field.
+        """
+        args = args or []
+        cmd = self._build_command(command, args, privileged=privileged)
+
+        result = ActionResult.previewed(cmd[0], cmd[1:], action_id=action_id)
+        self._log_action(cmd, result)
+        return result
 
     @classmethod
     def set_global_dry_run(cls, enabled: bool):
         """Enable/disable global dry-run mode."""
         cls._dry_run_global = enabled
 
+    # ========== Legacy classmethod API (backward compatible) ==========
     @classmethod
     def run(
         cls,
@@ -75,7 +152,9 @@ class ActionExecutor:
         env: Optional[Dict[str, str]] = None,
     ) -> ActionResult:
         """
-        Execute a system command and return a structured result.
+        Legacy classmethod API for backward compatibility.
+
+        DEPRECATED: Use ActionExecutor().execute() or .preview() instead.
 
         Args:
             command: The executable name or path.
@@ -86,32 +165,29 @@ class ActionExecutor:
             action_id: Optional ID for correlating with action definitions.
             env: Optional extra environment variables.
         """
-        args = args or []
-
-        # Build final command list
-        cmd = cls._build_command(command, args, pkexec=pkexec)
-
-        # Preview mode — return immediately
-        if preview or cls._dry_run_global:
-            result = ActionResult.previewed(
-                cmd[0], cmd[1:], action_id=action_id
+        executor = cls()
+        if preview:
+            return executor.preview(
+                command, args, privileged=pkexec, action_id=action_id
             )
-            cls._log_action(cmd, result)
-            return result
+        else:
+            return executor.execute(
+                command,
+                args,
+                privileged=pkexec,
+                timeout=timeout,
+                action_id=action_id,
+                env=env,
+            )
 
-        # Execute
-        result = cls._execute(cmd, timeout=timeout, action_id=action_id, env=env)
-        cls._log_action(cmd, result)
-        return result
-
-    @classmethod
     def _build_command(
-        cls, command: str, args: List[str], *, pkexec: bool = False
+        self, command: str, args: List[str], *, privileged: bool = False
     ) -> List[str]:
-        """Build the final command list, handling Flatpak and pkexec."""
+        """Build the final command list, handling Flatpak and privilege escalation."""
         cmd = [command] + args
 
-        if pkexec:
+        # Privilege escalation via pkexec
+        if privileged:
             cmd = ["pkexec"] + cmd
 
         # Flatpak sandbox detection
@@ -120,9 +196,8 @@ class ActionExecutor:
 
         return cmd
 
-    @classmethod
-    def _execute(
-        cls,
+    def _execute_subprocess(
+        self,
         cmd: List[str],
         *,
         timeout: int,
@@ -184,8 +259,7 @@ class ActionExecutor:
                 action_id=action_id,
             )
 
-    @classmethod
-    def _log_action(cls, cmd: List[str], result: ActionResult):
+    def _log_action(self, cmd: List[str], result: ActionResult):
         """Append action to JSON-lines log file."""
         try:
             os.makedirs(_LOG_DIR, exist_ok=True)
@@ -201,12 +275,11 @@ class ActionExecutor:
                 fh.write(json.dumps(entry) + "\n")
 
             # Trim log if too large
-            cls._trim_log()
+            self._trim_log()
         except OSError:
             pass  # Non-critical — don't fail actions over logging
 
-    @classmethod
-    def _trim_log(cls):
+    def _trim_log(self):
         """Keep log file bounded to MAX_LOG_ENTRIES lines."""
         try:
             path = Path(_ACTION_LOG_FILE)

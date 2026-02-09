@@ -13,6 +13,10 @@ mkdir -p "$BUILD_DIR"/temp_build/loofi-fedora-tweaks-$VERSION/loofi-fedora-tweak
 cp -r loofi-fedora-tweaks/* "$BUILD_DIR"/temp_build/loofi-fedora-tweaks-$VERSION/loofi-fedora-tweaks/
 cp loofi-fedora-tweaks.desktop "$BUILD_DIR"/temp_build/loofi-fedora-tweaks-$VERSION/
 
+# Ensure Python cache artifacts are never packaged
+find "$BUILD_DIR"/temp_build/loofi-fedora-tweaks-$VERSION -type d -name "__pycache__" -prune -exec rm -rf {} +
+find "$BUILD_DIR"/temp_build/loofi-fedora-tweaks-$VERSION -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete
+
 tar -czf "$BUILD_DIR"/rpmbuild/SOURCES/loofi-fedora-tweaks-$VERSION.tar.gz -C "$BUILD_DIR"/temp_build loofi-fedora-tweaks-$VERSION
 
 # Copy spec file

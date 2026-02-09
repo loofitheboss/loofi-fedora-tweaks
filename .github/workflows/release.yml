@@ -18,7 +18,7 @@ jobs:
         run: dnf install -y rpm-build python3
 
       - name: Build RPM
-        run: bash build_rpm.sh
+        run: bash scripts/build_rpm.sh
 
       - name: Get version from tag
         id: version

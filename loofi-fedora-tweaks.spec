@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        21.0.1
+Version:        23.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,16 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 23.0.0-1
+- v23.0 Architecture Hardening
+- Created BaseActionExecutor ABC with privileged execution support (pkexec integration)
+- Centralized BaseWorker QThread pattern in core/workers/
+- Migrated system services to services/system/ (system.py, services.py, processes.py, process.py)
+- Migrated hardware services to services/hardware/ (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py)
+- Created scripts/ directory with packaging scripts (build_rpm.sh, build_flatpak.sh, build_appimage.sh, build_sdist.sh)
+- Added comprehensive import validation tests (34 tests)
+- Backward-compatibility shims in utils/ with deprecation warnings
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 21.0.1-1
 - Packaging: Remove python-jose test dependency (fixes RPM install on Fedora)
 - Use PyJWT's ExpiredSignatureError instead of python-jose in tests

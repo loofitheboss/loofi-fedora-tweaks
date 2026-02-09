@@ -1,5 +1,26 @@
 # Release Notes
 
+## v20.0.2-2 "Synapse" - February 2026 (RPM Hotfix)
+
+This packaging hotfix resolves a top title/header rendering glitch reported on Fedora KDE Plasma (Wayland/X11) after recent UI polish work.
+
+### Highlights
+
+- **Native Title-Bar Guard**: Main window now explicitly disables frameless/custom title flags to keep native chrome behavior
+- **Top-Edge Stability**: Prevents client area visuals from appearing to overlap into top window chrome
+- **Regression Test**: Added `tests/test_main_window_geometry.py` for client-area geometry sanity
+
+### Updates Included
+
+- `ui/main_window.py`: enforce native window flags (`FramelessWindowHint=False`, `CustomizeWindowHint=False`)
+- `tests/test_main_window_geometry.py`: basic central/root widget geometry assertions
+- `loofi-fedora-tweaks.spec`: release bump to `20.0.2-2` with changelog entry
+
+### Upgrade Notes
+
+- No breaking changes from v20.0.2
+- Native dragging, resizing, and title-bar controls are preserved
+
 ## v20.0.2 "Synapse" - February 2026
 
 The Synapse 20.0.2 update focuses on UI usability for sub-tabs and dependency updates.

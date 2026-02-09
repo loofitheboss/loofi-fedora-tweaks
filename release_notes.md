@@ -1,12 +1,27 @@
-# Release Notes — v20.0.2 "Synapse"
+# Release Notes — v20.0.2-2 "Synapse" (RPM Hotfix)
 
-## UI & Dependency Refresh
+## KDE Top-Bar Hotfix
 
-v20.0.2 "Synapse" focuses on usability fixes for tabbed navigation and refreshes core Python dependencies.
+This RPM hotfix addresses a top title/header rendering glitch seen on Fedora KDE Plasma (Wayland/X11) after recent UI polish.
 
 ---
 
-### Headline Features
+### Headline Fixes
+
+#### KDE Top Chrome Stability
+- Main window now explicitly enforces native window decorations (no frameless/custom title hints)
+- Prevents client-area visuals from appearing to overlap into the title/top chrome region
+- Preserves native drag/resize behavior and native window buttons
+
+#### Regression Guard
+- Added a lightweight UI geometry sanity test:
+  - `tests/test_main_window_geometry.py`
+  - Asserts `centralWidget().geometry().y() >= 0`
+  - Confirms first visible root widget is not clipped (`y() >= 0`)
+
+---
+
+### Also Included (from v20.0.2)
 
 #### Tab Scroller Fixes
 - Scroll buttons enabled on all top sub-tab bars
@@ -33,5 +48,7 @@ v20.0.2 "Synapse" focuses on usability fixes for tabbed navigation and refreshes
 
 ### Summary
 
+- Fixes KDE top-bar/title-area overlap artifacts safely via native window flags
+- Adds regression coverage for main-window client-area geometry
 - Fixes top sub-tab usability regressions
 - Refreshes core dependencies to their latest versions

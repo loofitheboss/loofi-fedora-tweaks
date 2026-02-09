@@ -153,22 +153,25 @@ class TestActionExecutor:
 
     def test_pkexec_prepend(self):
         from utils.action_executor import ActionExecutor
-        cmd = ActionExecutor._build_command("dnf", ["clean", "all"], pkexec=True)
+        executor = ActionExecutor()
+        cmd = executor._build_command("dnf", ["clean", "all"], privileged=True)
         assert cmd[0] == "pkexec"
         assert cmd[1] == "dnf"
         assert cmd[2:] == ["clean", "all"]
 
     def test_flatpak_wrapping(self):
         from utils.action_executor import ActionExecutor
+        executor = ActionExecutor()
         with patch("os.path.exists", return_value=True):
-            cmd = ActionExecutor._build_command("dnf", ["check-update"])
+            cmd = executor._build_command("dnf", ["check-update"])
             assert cmd[0] == "flatpak-spawn"
             assert cmd[1] == "--host"
 
     def test_flatpak_no_double_wrap(self):
         from utils.action_executor import ActionExecutor
+        executor = ActionExecutor()
         with patch("os.path.exists", return_value=True):
-            cmd = ActionExecutor._build_command("flatpak-spawn", ["--host", "echo"])
+            cmd = executor._build_command("flatpak-spawn", ["--host", "echo"])
             assert cmd[0] == "flatpak-spawn"
             # Should not double-wrap
             assert cmd.count("flatpak-spawn") == 1
@@ -220,7 +223,8 @@ class TestActionLog:
                 with open(log_path, "w") as fh:
                     for i in range(MAX_LOG_ENTRIES + 100):
                         fh.write(json.dumps({"ts": i, "cmd": ["test"], "success": True}) + "\n")
-                ActionExecutor._trim_log()
+                executor = ActionExecutor()
+                executor._trim_log()
                 with open(log_path) as fh:
                     lines = fh.readlines()
                 assert len(lines) == MAX_LOG_ENTRIES

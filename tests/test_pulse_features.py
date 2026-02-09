@@ -282,9 +282,9 @@ class TestProcessManager(unittest.TestCase):
 class TestTemperatureMonitor(unittest.TestCase):
     """Tests for the TemperatureManager hardware temperature module."""
 
-    @patch('utils.temperature._read_millidegree')
-    @patch('utils.temperature._read_sysfs_value')
-    @patch('utils.temperature.glob.glob')
+    @patch('services.hardware.temperature._read_millidegree')
+    @patch('services.hardware.temperature._read_sysfs_value')
+    @patch('services.hardware.temperature.glob.glob')
     def test_get_all_temperatures(self, mock_glob, mock_sysfs, mock_millideg):
         """Mock /sys/class/hwmon directory structure with temp files."""
         # glob is called twice: once for hwmon dirs, once for temp*_input
@@ -311,7 +311,7 @@ class TestTemperatureMonitor(unittest.TestCase):
         self.assertEqual(sensors[1].label, "Core 1")
         self.assertEqual(sensors[1].current, 60.0)
 
-    @patch('utils.temperature.glob.glob', return_value=[])
+    @patch('services.hardware.temperature.glob.glob', return_value=[])
     def test_no_sensors_found(self, mock_glob):
         """Mock empty hwmon directory -- should return empty list."""
         sensors = TemperatureManager.get_all_sensors()

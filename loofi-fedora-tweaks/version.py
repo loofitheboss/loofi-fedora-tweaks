@@ -3,6 +3,6 @@ Centralized version information for Loofi Fedora Tweaks.
 All version references should import from this module.
 """
 
-__version__ = "21.0.1"
-__version_codename__ = "UX Stabilization"
+__version__ = "23.0.0"
+__version_codename__ = "Architecture Hardening"
 __app_name__ = "Loofi Fedora Tweaks"

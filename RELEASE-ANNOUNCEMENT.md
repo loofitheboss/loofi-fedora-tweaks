@@ -1,8 +1,8 @@
-# Loofi Fedora Tweaks v20.0.2 "Synapse" Release Announcement
+# Loofi Fedora Tweaks v20.0.2-2 "Synapse" Release Announcement
 
 ## TL;DR
 
-Loofi Fedora Tweaks v20.0.2 "Synapse" is now available! This update focuses on **tab navigation usability** and refreshed dependency pins for stability.
+Loofi Fedora Tweaks v20.0.2-2 "Synapse" is now available! This hotfix focuses on a **KDE top-bar/title-area rendering glitch** while keeping all native window behavior intact.
 
 **Install now:** `sudo dnf copr enable loofitheboss/loofi-fedora-tweaks && sudo dnf install loofi-fedora-tweaks`
 
@@ -10,7 +10,24 @@ Loofi Fedora Tweaks v20.0.2 "Synapse" is now available! This update focuses on *
 
 ---
 
-## What's New in v20.0.2 "Synapse"
+## What's New in v20.0.2-2 "Synapse"
+
+### 🪟 KDE Top-Bar Rendering Hotfix
+
+Fixed a visual glitch where top client-area content could appear too close to or overlapping the window title/header region on some Fedora KDE Plasma setups (Wayland/X11).
+
+- Main window now explicitly keeps native title-bar flags enabled
+- No frameless/custom title-bar behavior is used for the main app window
+- Native drag, resize, and system window buttons remain unchanged
+
+### 🧪 Regression Guard Added
+
+- New lightweight geometry sanity test: `tests/test_main_window_geometry.py`
+- Verifies central widget and first visible root widget are positioned in valid client-space (`y() >= 0`)
+
+---
+
+### Previous v20.0.2 Improvements (still included)
 
 ### 🧭 Tab Navigation Usability Fix
 
