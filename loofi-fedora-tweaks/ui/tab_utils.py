@@ -12,4 +12,9 @@ def configure_top_tabs(tab_widget: QTabWidget) -> None:
     tab_bar.setUsesScrollButtons(True)
     tab_bar.setElideMode(Qt.TextElideMode.ElideRight)
     tab_bar.setExpanding(False)
-    tab_bar.setDocumentMode(True)
+    # NOTE:
+    # Document-mode tab bars can render with visual artifacts on some
+    # platforms/themes when combined with custom QSS pane borders.
+    # Keep document mode disabled for stable, consistent rendering.
+    tab_widget.setDocumentMode(False)
+    tab_bar.setDocumentMode(False)

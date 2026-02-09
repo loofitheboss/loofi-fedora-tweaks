@@ -58,6 +58,11 @@ _TAB_META = {
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        # Keep native title-bar decorations enabled.
+        # This avoids KDE/Wayland/X11 edge-cases where client content can
+        # appear to bleed into the top chrome when frameless/custom hints are used.
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint, False)
+        self.setWindowFlag(Qt.WindowType.CustomizeWindowHint, False)
         self.setWindowTitle(self.tr(f"Loofi Fedora Tweaks v{__version__}"))
         self.resize(1100, 700)
 

@@ -160,8 +160,7 @@ QTabWidget {
 
 QTabWidget::pane {
     background-color: #eff1f5;
-    border: 1px solid #ccd0da;
-    border-top: none;
+    border: none;
     border-radius: 0 0 8px 8px;
 }
 
@@ -176,14 +175,14 @@ QTabBar::tab {
     padding: 10px 20px;
     margin-right: 2px;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: none;
     font-weight: 500;
 }
 
 QTabBar::tab:selected {
     background-color: #eff1f5;
     color: #4c4f69;
-    border-bottom: 2px solid #1e66f5;
+    border-bottom: none;
 }
 
 QTabBar::tab:hover:!selected {
@@ -329,7 +328,7 @@ QDialog {
 /* ===== v19.0 Breadcrumb Bar ===== */
 QFrame#breadcrumbBar {
     background-color: #e6e9ef;
-    border-bottom: 1px solid #ccd0da;
+    border-bottom: none;
 }
 QLabel#bcCategory {
     color: #6c6f85;
@@ -354,7 +353,7 @@ QLabel#bcDesc {
 /* ===== v19.0 Status Bar ===== */
 QFrame#statusBar {
     background-color: #e6e9ef;
-    border-top: 1px solid #ccd0da;
+    border-top: none;
 }
 QLabel#statusText {
     color: #6c6f85;
@@ -376,5 +375,5 @@ QLabel#sidebarFooter {
     color: #acb0be;
     font-size: 11px;
     background-color: #e6e9ef;
-    border-top: 1px solid #ccd0da;
+    border-top: none;
 }

@@ -66,7 +66,8 @@ class SecurityTab(QWidget):
         
         # Header
         header = QLabel(self.tr("🛡️ Security Center"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #e74c3c;")
+        # Keep header color theme-driven to avoid hardcoded red accents.
+        header.setStyleSheet("font-size: 18px; font-weight: bold;")
         layout.addWidget(header)
         
         # Security Score
