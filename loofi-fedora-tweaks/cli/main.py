@@ -33,6 +33,9 @@ from utils.focus_mode import FocusMode
 from utils.ports import PortAuditor
 from utils.profiles import ProfileManager
 from utils.health_timeline import HealthTimeline
+from utils.service_explorer import ServiceExplorer, ServiceScope
+from utils.package_explorer import PackageExplorer
+from utils.firewall_manager import FirewallManager
 
 from version import __version__, __version_codename__
 
@@ -1271,6 +1274,241 @@ def cmd_logs(args):
     return 1
 
 
+# ===== v16.0 Horizon commands =====
+
+def cmd_service(args):
+    """Handle service subcommand."""
+    scope = ServiceScope.USER if args.user else ServiceScope.SYSTEM
+
+    if args.action == "list":
+        services = ServiceExplorer.list_services(
+            scope=scope, filter_state=args.filter, search=args.search or ""
+        )
+        if _json_output:
+            _output_json([s.to_dict() for s in services])
+        else:
+            _print(f"{'Name':<35} {'State':<12} {'Enabled':<10} Description")
+            _print("─" * 90)
+            for s in services:
+                color = "✅" if s.is_running else "❌" if s.is_failed else "⬜"
+                _print(f"{color} {s.name:<33} {s.state.value:<12} {s.enabled:<10} {s.description[:40]}")
+            _print(f"\nTotal: {len(services)} services")
+        return 0
+
+    elif args.action in ("start", "stop", "restart", "enable", "disable", "mask", "unmask"):
+        name = args.name
+        if not name:
+            _print("❌ Service name required")
+            return 1
+        action_map = {
+            "start": ServiceExplorer.start_service,
+            "stop": ServiceExplorer.stop_service,
+            "restart": ServiceExplorer.restart_service,
+            "enable": ServiceExplorer.enable_service,
+            "disable": ServiceExplorer.disable_service,
+            "mask": ServiceExplorer.mask_service,
+            "unmask": ServiceExplorer.unmask_service,
+        }
+        result = action_map[args.action](name, scope)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        if _json_output:
+            _output_json({"success": result.success, "message": result.message})
+        return 0 if result.success else 1
+
+    elif args.action == "logs":
+        name = args.name
+        if not name:
+            _print("❌ Service name required")
+            return 1
+        logs = ServiceExplorer.get_service_logs(name, scope, lines=args.lines)
+        if _json_output:
+            _output_json({"service": name, "logs": logs})
+        else:
+            _print(logs)
+        return 0
+
+    elif args.action == "status":
+        name = args.name
+        if not name:
+            _print("❌ Service name required")
+            return 1
+        info = ServiceExplorer.get_service_details(name, scope)
+        if _json_output:
+            _output_json(info.to_dict())
+        else:
+            _print(f"Service: {info.name}")
+            _print(f"Description: {info.description}")
+            _print(f"State: {info.state.value} ({info.sub_state})")
+            _print(f"Enabled: {info.enabled}")
+            _print(f"Memory: {info.memory_human}")
+            _print(f"PID: {info.main_pid}")
+            _print(f"Active since: {info.active_enter}")
+        return 0
+
+    return 1
+
+
+def cmd_package(args):
+    """Handle package subcommand."""
+    if args.action == "search":
+        query = args.query
+        if not query:
+            _print("❌ Search query required")
+            return 1
+        results = PackageExplorer.search(query)
+        if _json_output:
+            _output_json([p.to_dict() for p in results])
+        else:
+            _print(f"{'Name':<40} {'Ver':<15} {'Source':<12} {'Inst':<6} Summary")
+            _print("─" * 100)
+            for p in results[:30]:
+                inst = "✅" if p.installed else "  "
+                _print(f"{p.name:<40} {p.version:<15} {p.source:<12} {inst:<6} {p.summary[:35]}")
+            _print(f"\nShowing {min(len(results), 30)} of {len(results)} results")
+        return 0
+
+    elif args.action == "install":
+        name = args.name
+        if not name:
+            _print("❌ Package name required")
+            return 1
+        _print(f"🔄 Installing {name}...")
+        result = PackageExplorer.install(name)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        if _json_output:
+            _output_json({"success": result.success, "message": result.message})
+        return 0 if result.success else 1
+
+    elif args.action == "remove":
+        name = args.name
+        if not name:
+            _print("❌ Package name required")
+            return 1
+        _print(f"🔄 Removing {name}...")
+        result = PackageExplorer.remove(name)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        if _json_output:
+            _output_json({"success": result.success, "message": result.message})
+        return 0 if result.success else 1
+
+    elif args.action == "list":
+        source = args.source or "all"
+        packages = PackageExplorer.list_installed(source=source, search=args.search or "")
+        if _json_output:
+            _output_json([p.to_dict() for p in packages])
+        else:
+            _print(f"Installed packages ({source}): {len(packages)}")
+            for p in packages[:50]:
+                _print(f"  {p.name:<40} {p.version:<20} [{p.source}]")
+            if len(packages) > 50:
+                _print(f"  ... and {len(packages) - 50} more")
+        return 0
+
+    elif args.action == "recent":
+        packages = PackageExplorer.recently_installed(days=args.days)
+        if _json_output:
+            _output_json([p.to_dict() for p in packages])
+        else:
+            _print(f"Recently installed (last {args.days} days): {len(packages)}")
+            for p in packages:
+                _print(f"  {p.name:<40} {p.summary}")
+        return 0
+
+    return 1
+
+
+def cmd_firewall(args):
+    """Handle firewall subcommand."""
+    if not FirewallManager.is_available():
+        _print("❌ firewall-cmd not found. Install firewalld.")
+        return 1
+
+    if args.action == "status":
+        info = FirewallManager.get_status()
+        if _json_output:
+            _output_json(info.to_dict())
+        else:
+            state = "🟢 Running" if info.running else "🔴 Stopped"
+            _print(f"Firewall: {state}")
+            _print(f"Default zone: {info.default_zone}")
+            _print(f"Active zones: {info.active_zones}")
+            _print(f"Open ports: {', '.join(info.ports) or 'none'}")
+            _print(f"Services: {', '.join(info.services) or 'none'}")
+            if info.rich_rules:
+                _print(f"Rich rules:")
+                for r in info.rich_rules:
+                    _print(f"  {r}")
+        return 0
+
+    elif args.action == "ports":
+        ports = FirewallManager.list_ports()
+        if _json_output:
+            _output_json({"ports": ports})
+        else:
+            if ports:
+                _print("Open ports:")
+                for p in ports:
+                    _print(f"  {p}")
+            else:
+                _print("No ports open.")
+        return 0
+
+    elif args.action == "open-port":
+        spec = args.spec
+        if not spec:
+            _print("❌ Port spec required (e.g. 8080/tcp)")
+            return 1
+        if "/" in spec:
+            port, proto = spec.split("/", 1)
+        else:
+            port, proto = spec, "tcp"
+        result = FirewallManager.open_port(port, proto)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "close-port":
+        spec = args.spec
+        if not spec:
+            _print("❌ Port spec required (e.g. 8080/tcp)")
+            return 1
+        if "/" in spec:
+            port, proto = spec.split("/", 1)
+        else:
+            port, proto = spec, "tcp"
+        result = FirewallManager.close_port(port, proto)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "services":
+        services = FirewallManager.list_services()
+        if _json_output:
+            _output_json({"services": services})
+        else:
+            _print("Allowed services:")
+            for s in services:
+                _print(f"  {s}")
+        return 0
+
+    elif args.action == "zones":
+        zones = FirewallManager.get_zones()
+        active = FirewallManager.get_active_zones()
+        if _json_output:
+            _output_json({"zones": zones, "active": active})
+        else:
+            _print("Available zones:")
+            for z in zones:
+                marker = " (active)" if z in active else ""
+                _print(f"  {z}{marker}")
+        return 0
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -1431,6 +1669,46 @@ def main(argv: Optional[List[str]] = None):
     logs_parser.add_argument("--lines", type=int, default=100, help="Number of lines")
     logs_parser.add_argument("path", nargs="?", help="Export path (for export)")
 
+    # ==================== v16.0 Horizon subparsers ====================
+
+    # Service management
+    service_parser = subparsers.add_parser("service", help="Systemd service management")
+    service_parser.add_argument(
+        "action",
+        choices=["list", "start", "stop", "restart", "enable", "disable",
+                 "mask", "unmask", "logs", "status"],
+        help="Service action"
+    )
+    service_parser.add_argument("name", nargs="?", help="Service name")
+    service_parser.add_argument("--user", action="store_true", help="User scope (default: system)")
+    service_parser.add_argument("--filter", choices=["active", "inactive", "failed"],
+                                help="Filter by state (for list)")
+    service_parser.add_argument("--search", help="Search filter (for list)")
+    service_parser.add_argument("--lines", type=int, default=50, help="Log lines (for logs)")
+
+    # Package management
+    package_parser = subparsers.add_parser("package", help="Package search and management")
+    package_parser.add_argument(
+        "action",
+        choices=["search", "install", "remove", "list", "recent"],
+        help="Package action"
+    )
+    package_parser.add_argument("name", nargs="?", help="Package name (for install/remove)")
+    package_parser.add_argument("--query", help="Search query (for search)")
+    package_parser.add_argument("--source", choices=["dnf", "flatpak", "all"],
+                                help="Package source filter")
+    package_parser.add_argument("--search", help="Filter installed packages")
+    package_parser.add_argument("--days", type=int, default=30, help="Days for recent")
+
+    # Firewall management
+    firewall_parser = subparsers.add_parser("firewall", help="Firewall management")
+    firewall_parser.add_argument(
+        "action",
+        choices=["status", "ports", "open-port", "close-port", "services", "zones"],
+        help="Firewall action"
+    )
+    firewall_parser.add_argument("spec", nargs="?", help="Port spec (e.g. 8080/tcp)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -1472,6 +1750,10 @@ def main(argv: Optional[List[str]] = None):
         "tuner": cmd_tuner,
         "snapshot": cmd_snapshot,
         "logs": cmd_logs,
+        # v16.0 Horizon
+        "service": cmd_service,
+        "package": cmd_package,
+        "firewall": cmd_firewall,
     }
 
     handler = commands.get(args.command)

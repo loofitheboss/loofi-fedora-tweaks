@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [16.0.0] - 2025-07-23 "Horizon"
+
+### Added
+
+- **Service Explorer**: Full systemd service browser and controller (`utils/service_explorer.py`).
+  - `list_services()` — browse all system/user services with state, enabled, and description.
+  - `get_service_details()` — rich info via `systemctl show` (memory, PID, timestamps, unit path).
+  - `get_service_logs()` — journal logs per service with configurable line count.
+  - `start/stop/restart/enable/disable/mask/unmask_service()` — full lifecycle control.
+  - `get_summary()` — quick active/failed/inactive counts.
+  - System scope uses pkexec via PrivilegedCommand; user scope runs unprivileged.
+  - CLI: `loofi service list`, `loofi service start/stop/restart/enable/disable <name>`, `loofi service logs <name>`, `loofi service status <name>`.
+
+- **Package Explorer**: Unified package search and management across DNF, rpm-ostree, and Flatpak (`utils/package_explorer.py`).
+  - `search()` — combined search across DNF and Flatpak remotes with installed status.
+  - `install()/remove()` — auto-detects package source (DNF/rpm-ostree/Flatpak) or accepts explicit source.
+  - `list_installed()` — unified listing of RPM and Flatpak packages with search filter.
+  - `recently_installed()` — packages installed in the last N days via DNF history.
+  - `get_package_info()` — detailed info via `dnf info`.
+  - `get_counts()` — quick summary of RPM and Flatpak package counts.
+  - CLI: `loofi package search --query <term>`, `loofi package install/remove <name>`, `loofi package list`, `loofi package recent`.
+
+- **Firewall Manager**: Full firewalld GUI backend (`utils/firewall_manager.py`).
+  - `get_status()` — comprehensive snapshot (running, zones, ports, services, rich rules).
+  - `get_zones()/get_active_zones()/set_default_zone()` — zone management.
+  - `list_ports()/open_port()/close_port()` — port management with permanent/runtime modes.
+  - `list_services()/add_service()/remove_service()` — service allowlist management.
+  - `list_rich_rules()/add_rich_rule()/remove_rich_rule()` — rich rule management.
+  - `start_firewall()/stop_firewall()` — toggle firewalld via pkexec.
+  - CLI: `loofi firewall status`, `loofi firewall ports`, `loofi firewall open-port/close-port <spec>`, `loofi firewall services`, `loofi firewall zones`.
+
+- **Dashboard v2**: Complete dashboard overhaul with live metrics.
+  - Real-time CPU and RAM sparkline graphs (30-point area charts, 2s refresh).
+  - Network speed indicator (↓/↑ bytes/sec from `/proc/net/dev`).
+  - Per-mount-point storage breakdown with color-coded progress bars.
+  - Top 5 processes by CPU usage.
+  - Recent actions feed from HistoryManager.
+  - Quick Actions grid with correct tab navigation.
+
+### Tests
+
+- 148 new tests across `test_service_explorer.py`, `test_package_explorer.py`, and `test_firewall_manager.py`.
+- Full suite: **1420 passed**, 22 skipped.
+
 ## [15.0.0] - 2026-02-08 "Nebula"
 
 ### Added
