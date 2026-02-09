@@ -37,7 +37,7 @@ class LazyWidget(QWidget):
         # Loading indicator (shown briefly)
         self._loading_label = QLabel(loading_text)
         self._loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._loading_label.setStyleSheet("color: #888; font-size: 14px;")
+        self._loading_label.setObjectName("loadingLabel")
         self._layout.addWidget(self._loading_label)
     
     def showEvent(self, event):
@@ -57,7 +57,7 @@ class LazyWidget(QWidget):
             except Exception as e:
                 # Show error if loading fails
                 error_label = QLabel(f"Failed to load: {e}")
-                error_label.setStyleSheet("color: #ff6b6b; padding: 20px;")
+                error_label.setObjectName("errorLabel")
                 error_label.setWordWrap(True)
                 self._layout.addWidget(error_label)
         

@@ -378,3 +378,71 @@ QLabel#sidebarFooter {
     background-color: #181825;
     border-top: none;
 }
+
+/* ===== v20.1 Dashboard Components ===== */
+QLabel#systemBadge {
+    color: #89b4fa;
+    font-weight: bold;
+    font-size: 13px;
+    background: #313244;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+QFrame#rebootBanner {
+    background-color: #f9e2af;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+QLabel#rebootLabel {
+    color: #1e1e2e;
+    font-weight: bold;
+}
+
+QPushButton#rebootButton {
+    background-color: #1e1e2e;
+    color: #f9e2af;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+QPushButton#rebootButton:hover {
+    background-color: #313244;
+}
+
+QFrame#dashboardCard {
+    background-color: #313244;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+QPushButton#quickActionButton {
+    background-color: #1e1e2e;
+    border: 2px solid #89b4fa;
+    color: #89b4fa;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+}
+QPushButton#quickActionButton:hover {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+/* ===== v20.1 Notification Panel ===== */
+QWidget#notificationPanel {
+    background-color: #1e1e2e;
+}
+
+/* ===== v20.1 Lazy Loading ===== */
+QLabel#loadingLabel {
+    color: #a6adc8;
+    font-size: 14px;
+}
+
+QLabel#errorLabel {
+    color: #f38ba8;
+    padding: 20px;
+}

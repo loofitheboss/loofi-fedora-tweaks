@@ -66,7 +66,7 @@ class NotificationPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedWidth(350)
-        self.setStyleSheet("background-color: #1e1e2e;")
+        self.setObjectName("notificationPanel")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)

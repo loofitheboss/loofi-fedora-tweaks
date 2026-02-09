@@ -172,27 +172,20 @@ class DashboardTab(QWidget):
         variant = SystemManager.get_variant_name()
         pkg_mgr = SystemManager.get_package_manager()
         badge = QLabel(f"💻 {variant} ({pkg_mgr})")
-        badge.setStyleSheet(
-            "color: #89b4fa; font-weight: bold; font-size: 13px; "
-            "background: #1e1e2e; padding: 4px 10px; border-radius: 8px;"
-        )
+        badge.setObjectName("systemBadge")
         row.addWidget(badge)
         self._inner.addLayout(row)
 
         # Reboot banner (Atomic only)
         self.reboot_banner = QFrame()
-        self.reboot_banner.setStyleSheet(
-            "QFrame { background-color: #f9e2af; border-radius: 8px; padding: 10px; }"
-        )
+        self.reboot_banner.setObjectName("rebootBanner")
         rb_layout = QHBoxLayout(self.reboot_banner)
         lbl = QLabel(self.tr("⚠️ Pending changes require reboot!"))
-        lbl.setStyleSheet("color: #1e1e2e; font-weight: bold;")
+        lbl.setObjectName("rebootLabel")
         rb_layout.addWidget(lbl)
         rb_layout.addStretch()
         reboot_btn = QPushButton(self.tr("🔁 Reboot Now"))
-        reboot_btn.setStyleSheet(
-            "background-color: #1e1e2e; color: #f9e2af; padding: 5px 10px; border-radius: 5px;"
-        )
+        reboot_btn.setObjectName("rebootButton")
         reboot_btn.clicked.connect(self._reboot)
         rb_layout.addWidget(reboot_btn)
         self._inner.addWidget(self.reboot_banner)
@@ -513,30 +506,14 @@ class DashboardTab(QWidget):
     @staticmethod
     def _card() -> QFrame:
         card = QFrame()
-        card.setStyleSheet(
-            "QFrame { background-color: #313244; border-radius: 12px; padding: 12px; }"
-        )
+        card.setObjectName("dashboardCard")
         return card
 
     @staticmethod
     def _action_btn(text: str, icon: str, color: str, callback) -> QPushButton:
         btn = QPushButton(f"{icon}  {text}")
-        btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: #1e1e2e;
-                border: 2px solid {color};
-                color: {color};
-                border-radius: 12px;
-                padding: 15px;
-                font-size: 16px;
-                font-weight: bold;
-                text-align: left;
-            }}
-            QPushButton:hover {{
-                background-color: {color};
-                color: #1e1e2e;
-            }}
-        """)
+        btn.setObjectName("quickActionButton")
+        btn.setProperty("accentColor", color)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(callback)
         return btn
