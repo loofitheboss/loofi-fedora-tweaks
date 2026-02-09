@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        20.0.2
+Version:        21.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,20 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 21.0.0-1
+- v21.0 UX Stabilization & Layout Integrity
+- Baseline layout fixes: native title bar, border cleanup, documentMode
+- Scoped QTabBar scroller styling
+- Minimum window size (800x500) with consistent margins
+- HiDPI safety: font-metrics-based sizing, pt units
+- Frameless mode feature flag (stub)
+- Layout regression tests
+- Theme-aware inline styles (top-3 fixes)
+
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.2-2
+- UI hotfix: force native title-bar flags in MainWindow to prevent top chrome overlap on KDE Plasma (Wayland/X11)
+- Tests: add main-window geometry sanity test for central client-area placement
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.2-1
 - UI: Fix top tab overflow by enabling scroll buttons and styling scrollers
 - Dependencies: refresh Python dependencies to latest versions

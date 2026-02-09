@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v20.0.2 "Synapse"
+# Loofi Fedora Tweaks v21.0.0 "UX Stabilization"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2">
-    <img src="https://img.shields.io/badge/Release-v20.0.2-blue?style=for-the-badge&logo=github" alt="Release v20.0.2"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v21.0.0">
+    <img src="https://img.shields.io/badge/Release-v21.0.0-blue?style=for-the-badge&logo=github" alt="Release v21.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,20 +21,26 @@
 
 ---
 
-## What's New in v20.0.2 "Synapse"
+## What's New in v21.0.0 "UX Stabilization"
 
-### Synapse — UI & Dependency Refresh
+### UX Stabilization & Layout Integrity
 
-v20.0.2 focuses on UI polish and dependency hygiene.
+v21.0.0 focuses on foundational layout fixes, HiDPI safety, and theme consistency.
 
-**Top Sub-Tab Usability**
-* Enables scroll buttons on QTabWidget sub-tabs
-* Prevents tabs from expanding off-screen
-* Elides long labels to keep the tab bar usable
-* Adds themed styling for tab scroller buttons
+**Layout Integrity**
+* Native title bar enforcement (fixes KDE Plasma chrome overlay)
+* Border cleanup and documentMode for all QTabWidget instances
+* Minimum window size (800x500) with consistent margins
+* Scoped QTabBar scroller styling to prevent theme conflicts
 
-**Dependency Refresh**
-* Pinned Python dependencies to the latest stable releases
+**HiDPI Safety**
+* Font-metrics-based sizing for DPI-independent layouts
+* Switched to `pt` units across all themes
+
+**Quality Assurance**
+* Layout regression tests for window geometry and client area placement
+* Theme-aware inline styles (top-3 critical fixes)
+* Frameless mode feature flag (stubbed for future implementation)
 
 ---
 
@@ -291,7 +297,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v20.0.2/loofi-fedora-tweaks-20.0.2-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v21.0.0/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -307,7 +313,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-20.0.2-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
 ```
 
 ---

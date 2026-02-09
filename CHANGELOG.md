@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [21.0.0] - 2026-02-09 "UX Stabilization & Layout Integrity"
+
+### Changed
+
+- **Baseline Layout Integrity**: Fixed window chrome overlay issues on KDE Plasma by enforcing native title bar rendering, removing custom window hints, and setting `documentMode()` on all QTabWidget instances.
+- **QTabBar Scroller Styling**: Scoped scroller button styles to prevent theme conflicts, ensuring clean scroll navigation for sub-tabs.
+- **Minimum Window Dimensions**: Enforced 800x500 minimum window size with consistent 16px margins for proper content layout.
+- **HiDPI Rendering Safety**: Switched to font-metrics-based sizing and `pt` units for DPI-independent layouts across all themes.
+- **Frameless Mode Feature Flag**: Added stubbed-out feature flag for frameless window mode (future implementation).
+- **Layout Regression Tests**: Added test suite for main window geometry, title bar visibility, and client area placement.
+- **Theme-Aware Inline Styles**: Top-3 critical inline style fixes for theme compatibility (tabs, scrollers, margins).
+
+---
+
 ## [20.0.2] - 2026-02-09 "Synapse"
 
 ### Changed
