@@ -1,0 +1,60 @@
+# Test Writer Memory — Loofi Fedora Tweaks
+
+## Project Test Structure
+- Test directory: `/workspaces/loofi-fedora-tweaks/tests/`
+- Naming convention: `test_<module_name>.py`
+- Test runner: pytest with `-v` flag for verbose output
+- No root/sudo required — all tests mock system calls
+
+## Mocking Patterns
+
+### ActionExecutor Mocking
+- Mock at `utils.action_executor.ActionExecutor.run`
+- Return `ActionResult` objects with structured fields
+- ActionResult must include: success, message, exit_code, stdout, stderr, preview, action_id
+- Use `@patch` decorator or context manager with `unittest.mock.patch`
+
+### FastAPI Testing
+- Use `fastapi.testclient.TestClient` for HTTP testing
+- Create pytest fixtures for test client, auth tokens, mocks
+- Exception handling: FastAPI lets unhandled exceptions propagate (test with `pytest.raises`)
+- Token endpoint returns 200 with `{"error": "..."}` for validation errors (not 422)
+
+### Authentication Testing
+- `AuthManager.generate_api_key()` creates new API keys
+- Token flow: generate key → POST /api/token → get JWT → use in Bearer header
+- Mock `jose.jwt.encode/decode` for expired token tests
+- Auth failures return 401 with `{"detail": "..."}` in response
+
+## Security Test Coverage Areas
+1. **Authentication**: Missing/invalid/expired tokens, wrong API keys
+2. **Input Validation**: Command injection, path traversal, malformed JSON, extremely long inputs
+3. **Authorization**: pkexec requires auth, read-only endpoints (/api/health, /api/info) don't
+4. **Error Handling**: Invalid commands, executor exceptions, timeouts
+
+## Common System Call Boundaries
+- `ActionExecutor.run()` — centralized command execution (v19.0)
+- `subprocess.run()` — underlying system call wrapper
+- `SystemMonitor.get_system_health()` — system metrics
+- `ConfigManager` — file I/O for config storage
+- `AuthManager` — JWT and bcrypt operations
+
+## Test Fixtures Best Practices
+- `test_client`: FastAPI test client instance
+- `valid_api_key`: Generated API key for auth tests
+- `valid_token`: JWT token from valid_api_key
+- `mock_action_executor`: Mocked ActionExecutor.run with default ActionResult
+- Fixtures should be independent and reusable across test classes
+
+## Edge Cases to Always Test
+- Empty strings, None values, missing required fields
+- Extremely long inputs (DoS protection)
+- Unicode and special characters
+- Malformed JSON payloads
+- Exception propagation through the API layer
+
+## Lessons Learned
+- FastAPI's test client raises exceptions when endpoints raise unhandled exceptions
+- API validation errors may return 200 with error payload instead of HTTP error codes
+- Always verify mock call arguments, not just return values
+- Token expiration requires mocking `jwt.decode` to raise `ExpiredSignatureError`
