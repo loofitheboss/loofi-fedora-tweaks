@@ -1,79 +1,476 @@
+"""
+Network Tab - Comprehensive network management with sub-tabs.
+Part of v17.0 "Atlas" — overhauled from v4.7 thin DNS/MAC tab.
+
+Sub-tabs:
+  - Connections: Active interfaces, WiFi networks, VPN profiles
+  - DNS: Provider switching (Cloudflare/Google/Quad9/AdGuard/OpenDNS)
+  - Privacy: MAC randomization, hostname privacy
+  - Monitoring: Real-time traffic, active connections
+"""
+
 import logging
+import os
 import subprocess
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QGroupBox, QComboBox, QMessageBox
-from utils.command_runner import CommandRunner
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import (
+    QComboBox, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QMessageBox, QPushButton, QTabWidget, QTableWidget,
+    QTableWidgetItem, QVBoxLayout,
+)
+
+from ui.base_tab import BaseTab
 from utils.history import HistoryManager
+from utils.network_monitor import NetworkMonitor
 
 logger = logging.getLogger(__name__)
 
-class NetworkTab(QWidget):
+
+class NetworkTab(BaseTab):
+    """Network management with Connections, DNS, Privacy, and Monitoring sub-tabs."""
+
     def __init__(self):
         super().__init__()
         self.history = HistoryManager()
+
         layout = QVBoxLayout()
         self.setLayout(layout)
-        
-        header = QLabel(self.tr("Network & Privacy"))
+
+        header = QLabel(self.tr("Network"))
         header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
-        
-        # Undo Button
-        self.btn_undo = QPushButton(self.tr("↩ Undo Last Action"))
-        self.btn_undo.setStyleSheet("background-color: #444; color: white;")
-        self.btn_undo.clicked.connect(self.undo_last)
-        layout.addWidget(self.btn_undo)
-        
-        # DNS Switcher Group
+
+        # Sub-tab widget
+        self.tabs = QTabWidget()
+        self.tabs.addTab(self._build_connections_tab(), self.tr("🔗 Connections"))
+        self.tabs.addTab(self._build_dns_tab(), self.tr("🌐 DNS"))
+        self.tabs.addTab(self._build_privacy_tab(), self.tr("🔒 Privacy"))
+        self.tabs.addTab(self._build_monitoring_tab(), self.tr("📊 Monitoring"))
+        layout.addWidget(self.tabs)
+
+        # Output area
+        self.add_output_section(layout)
+
+        # Auto-refresh timer for monitoring
+        self._monitor_timer = QTimer(self)
+        self._monitor_timer.timeout.connect(self._refresh_monitoring)
+        self.tabs.currentChanged.connect(self._on_tab_changed)
+
+        QTimer.singleShot(200, self._initial_load)
+
+    # ------------------------------------------------------------------ #
+    #  Sub-tab builders
+    # ------------------------------------------------------------------ #
+
+    def _build_connections_tab(self):
+        """Interfaces + WiFi + VPN overview."""
+        container = QVBoxLayout()
+
+        # Active Interfaces
+        iface_group = QGroupBox(self.tr("Active Interfaces"))
+        iface_layout = QVBoxLayout(iface_group)
+
+        self.iface_table = QTableWidget(0, 5)
+        self.iface_table.setHorizontalHeaderLabels([
+            self.tr("Interface"), self.tr("Type"), self.tr("Status"),
+            self.tr("IP Address"), self.tr("MAC"),
+        ])
+        self.iface_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.iface_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        iface_layout.addWidget(self.iface_table)
+
+        btn_row = QHBoxLayout()
+        btn_refresh_iface = QPushButton(self.tr("Refresh"))
+        btn_refresh_iface.clicked.connect(self._load_interfaces)
+        btn_row.addWidget(btn_refresh_iface)
+        btn_row.addStretch()
+        iface_layout.addLayout(btn_row)
+        container.addWidget(iface_group)
+
+        # WiFi Networks
+        wifi_group = QGroupBox(self.tr("Wi-Fi Networks"))
+        wifi_layout = QVBoxLayout(wifi_group)
+
+        self.wifi_table = QTableWidget(0, 4)
+        self.wifi_table.setHorizontalHeaderLabels([
+            self.tr("SSID"), self.tr("Signal"), self.tr("Security"), self.tr("Status"),
+        ])
+        self.wifi_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        wifi_layout.addWidget(self.wifi_table)
+
+        wifi_btn_row = QHBoxLayout()
+        btn_scan_wifi = QPushButton(self.tr("Scan Wi-Fi"))
+        btn_scan_wifi.clicked.connect(self._scan_wifi)
+        wifi_btn_row.addWidget(btn_scan_wifi)
+
+        btn_connect_wifi = QPushButton(self.tr("Connect"))
+        btn_connect_wifi.clicked.connect(self._connect_wifi)
+        wifi_btn_row.addWidget(btn_connect_wifi)
+
+        btn_disconnect_wifi = QPushButton(self.tr("Disconnect"))
+        btn_disconnect_wifi.clicked.connect(self._disconnect_wifi)
+        wifi_btn_row.addWidget(btn_disconnect_wifi)
+        wifi_btn_row.addStretch()
+        wifi_layout.addLayout(wifi_btn_row)
+        container.addWidget(wifi_group)
+
+        # VPN Connections
+        vpn_group = QGroupBox(self.tr("VPN Connections"))
+        vpn_layout = QVBoxLayout(vpn_group)
+
+        self.vpn_table = QTableWidget(0, 3)
+        self.vpn_table.setHorizontalHeaderLabels([
+            self.tr("Name"), self.tr("Type"), self.tr("Status"),
+        ])
+        self.vpn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        vpn_layout.addWidget(self.vpn_table)
+
+        vpn_btn_row = QHBoxLayout()
+        btn_refresh_vpn = QPushButton(self.tr("Refresh VPN"))
+        btn_refresh_vpn.clicked.connect(self._load_vpn)
+        vpn_btn_row.addWidget(btn_refresh_vpn)
+        vpn_btn_row.addStretch()
+        vpn_layout.addLayout(vpn_btn_row)
+        container.addWidget(vpn_group)
+
+        container.addStretch()
+        return self._make_container(container)
+
+    def _build_dns_tab(self):
+        """DNS provider switching."""
+        container = QVBoxLayout()
+
         dns_group = QGroupBox(self.tr("DNS Switcher"))
-        dns_layout = QVBoxLayout()
-        dns_group.setLayout(dns_layout)
-        
-        dns_desc = QLabel(self.tr("Change DNS for the current active connection."))
+        dns_layout = QVBoxLayout(dns_group)
+
+        dns_desc = QLabel(self.tr(
+            "Change DNS for the current active connection. "
+            "Applies instantly via NetworkManager."
+        ))
+        dns_desc.setWordWrap(True)
         dns_layout.addWidget(dns_desc)
-        
+
+        # Current DNS display
+        self.lbl_current_dns = QLabel(self.tr("Current DNS: detecting..."))
+        self.lbl_current_dns.setStyleSheet("font-weight: bold;")
+        dns_layout.addWidget(self.lbl_current_dns)
+
         self.dns_combo = QComboBox()
         self.dns_combo.addItem(self.tr("Cloudflare (1.1.1.1)"), "1.1.1.1 1.0.0.1")
         self.dns_combo.addItem(self.tr("Google (8.8.8.8)"), "8.8.8.8 8.8.4.4")
         self.dns_combo.addItem(self.tr("Quad9 (9.9.9.9)"), "9.9.9.9 149.112.112.112")
         self.dns_combo.addItem(self.tr("AdGuard (94.140.14.14)"), "94.140.14.14 94.140.15.15")
+        self.dns_combo.addItem(self.tr("OpenDNS (208.67.222.222)"), "208.67.222.222 208.67.220.220")
         self.dns_combo.addItem(self.tr("System Default (DHCP)"), "auto")
         dns_layout.addWidget(self.dns_combo)
-        
+
         btn_apply_dns = QPushButton(self.tr("Apply DNS"))
         btn_apply_dns.clicked.connect(self.apply_dns)
         dns_layout.addWidget(btn_apply_dns)
-        
-        layout.addWidget(dns_group)
-        
-        # MAC Randomization Group
-        mac_group = QGroupBox(self.tr("Wi-Fi Privacy"))
-        mac_layout = QVBoxLayout()
-        mac_group.setLayout(mac_layout)
-        
-        self.lbl_mac_status = QLabel(self.tr("MAC Randomization: Unknown"))
+
+        container.addWidget(dns_group)
+
+        # DNS test group
+        test_group = QGroupBox(self.tr("DNS Test"))
+        test_layout = QVBoxLayout(test_group)
+        self.lbl_dns_test = QLabel(self.tr("Test DNS resolution speed after applying."))
+        test_layout.addWidget(self.lbl_dns_test)
+
+        btn_test_dns = QPushButton(self.tr("Test DNS Resolution"))
+        btn_test_dns.clicked.connect(self._test_dns)
+        test_layout.addWidget(btn_test_dns)
+        container.addWidget(test_group)
+
+        container.addStretch()
+        return self._make_container(container)
+
+    def _build_privacy_tab(self):
+        """MAC randomization and hostname privacy."""
+        container = QVBoxLayout()
+
+        # MAC Randomization
+        mac_group = QGroupBox(self.tr("MAC Randomization"))
+        mac_layout = QVBoxLayout(mac_group)
+
+        mac_desc = QLabel(self.tr(
+            "Randomize your MAC address on WiFi and Ethernet connections "
+            "to prevent network tracking. Requires NetworkManager restart."
+        ))
+        mac_desc.setWordWrap(True)
+        mac_layout.addWidget(mac_desc)
+
+        self.lbl_mac_status = QLabel(self.tr("MAC Randomization: detecting..."))
+        self.lbl_mac_status.setStyleSheet("font-weight: bold;")
         mac_layout.addWidget(self.lbl_mac_status)
-        
-        btn_enable_mac = QPushButton(self.tr("Enable MAC Randomization"))
+
+        mac_btn_row = QHBoxLayout()
+        btn_enable_mac = QPushButton(self.tr("Enable"))
         btn_enable_mac.clicked.connect(lambda: self.toggle_mac_randomization(True))
-        mac_layout.addWidget(btn_enable_mac)
-        
-        btn_disable_mac = QPushButton(self.tr("Disable MAC Randomization"))
+        mac_btn_row.addWidget(btn_enable_mac)
+
+        btn_disable_mac = QPushButton(self.tr("Disable"))
         btn_disable_mac.clicked.connect(lambda: self.toggle_mac_randomization(False))
-        mac_layout.addWidget(btn_disable_mac)
-        
-        layout.addWidget(mac_group)
-        layout.addStretch()
-        
-        self.runner = CommandRunner()
+        mac_btn_row.addWidget(btn_disable_mac)
+        mac_btn_row.addStretch()
+        mac_layout.addLayout(mac_btn_row)
+        container.addWidget(mac_group)
+
+        # Hostname Privacy
+        hostname_group = QGroupBox(self.tr("Hostname Privacy"))
+        hostname_layout = QVBoxLayout(hostname_group)
+
+        hostname_desc = QLabel(self.tr(
+            "Prevent your hostname from being broadcast on the network via DHCP. "
+            "Sets send-hostname=false for active connections."
+        ))
+        hostname_desc.setWordWrap(True)
+        hostname_layout.addWidget(hostname_desc)
+
+        self.lbl_hostname_status = QLabel(self.tr("Hostname broadcast: detecting..."))
+        self.lbl_hostname_status.setStyleSheet("font-weight: bold;")
+        hostname_layout.addWidget(self.lbl_hostname_status)
+
+        hostname_btn_row = QHBoxLayout()
+        btn_hide_hostname = QPushButton(self.tr("Hide Hostname"))
+        btn_hide_hostname.clicked.connect(lambda: self._toggle_hostname_privacy(True))
+        hostname_btn_row.addWidget(btn_hide_hostname)
+
+        btn_show_hostname = QPushButton(self.tr("Show Hostname"))
+        btn_show_hostname.clicked.connect(lambda: self._toggle_hostname_privacy(False))
+        hostname_btn_row.addWidget(btn_show_hostname)
+        hostname_btn_row.addStretch()
+        hostname_layout.addLayout(hostname_btn_row)
+        container.addWidget(hostname_group)
+
+        # Undo
+        undo_group = QGroupBox(self.tr("History"))
+        undo_layout = QVBoxLayout(undo_group)
+        btn_undo = QPushButton(self.tr("↩ Undo Last Action"))
+        btn_undo.clicked.connect(self.undo_last)
+        undo_layout.addWidget(btn_undo)
+        container.addWidget(undo_group)
+
+        container.addStretch()
+        return self._make_container(container)
+
+    def _build_monitoring_tab(self):
+        """Real-time traffic and active connections."""
+        container = QVBoxLayout()
+
+        # Bandwidth summary
+        bw_group = QGroupBox(self.tr("Bandwidth Summary"))
+        bw_layout = QVBoxLayout(bw_group)
+
+        self.lbl_total_sent = QLabel(self.tr("Total Sent: —"))
+        self.lbl_total_recv = QLabel(self.tr("Total Received: —"))
+        self.lbl_send_rate = QLabel(self.tr("Upload Rate: —"))
+        self.lbl_recv_rate = QLabel(self.tr("Download Rate: —"))
+        for lbl in (self.lbl_total_sent, self.lbl_total_recv,
+                    self.lbl_send_rate, self.lbl_recv_rate):
+            lbl.setStyleSheet("font-size: 13px;")
+            bw_layout.addWidget(lbl)
+        container.addWidget(bw_group)
+
+        # Per-interface traffic
+        traffic_group = QGroupBox(self.tr("Interface Traffic"))
+        traffic_layout = QVBoxLayout(traffic_group)
+
+        self.traffic_table = QTableWidget(0, 6)
+        self.traffic_table.setHorizontalHeaderLabels([
+            self.tr("Interface"), self.tr("Type"), self.tr("Sent"),
+            self.tr("Received"), self.tr("↑ Rate"), self.tr("↓ Rate"),
+        ])
+        self.traffic_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.traffic_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        traffic_layout.addWidget(self.traffic_table)
+        container.addWidget(traffic_group)
+
+        # Active connections
+        conn_group = QGroupBox(self.tr("Active Connections"))
+        conn_layout = QVBoxLayout(conn_group)
+
+        self.conn_table = QTableWidget(0, 6)
+        self.conn_table.setHorizontalHeaderLabels([
+            self.tr("Protocol"), self.tr("Local"), self.tr("Remote"),
+            self.tr("State"), self.tr("PID"), self.tr("Process"),
+        ])
+        self.conn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.conn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        conn_layout.addWidget(self.conn_table)
+
+        conn_btn_row = QHBoxLayout()
+        btn_refresh_conn = QPushButton(self.tr("Refresh"))
+        btn_refresh_conn.clicked.connect(self._refresh_monitoring)
+        conn_btn_row.addWidget(btn_refresh_conn)
+        conn_btn_row.addStretch()
+        conn_layout.addLayout(conn_btn_row)
+        container.addWidget(conn_group)
+
+        container.addStretch()
+        return self._make_container(container)
+
+    # ------------------------------------------------------------------ #
+    #  Helpers
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _make_container(layout):
+        """Wrap a QVBoxLayout into a plain QWidget for use as a tab page."""
+        from PyQt6.QtWidgets import QWidget, QScrollArea
+        inner = QWidget()
+        inner.setLayout(layout)
+        scroll = QScrollArea()
+        scroll.setWidget(inner)
+        scroll.setWidgetResizable(True)
+        return scroll
+
+    def _initial_load(self):
+        """Load initial data for all sub-tabs."""
+        self._load_interfaces()
+        self._load_vpn()
+        self._detect_current_dns()
         self.check_mac_status()
+        self._check_hostname_privacy()
+
+    def _on_tab_changed(self, index):
+        """Start/stop monitoring timer based on active sub-tab."""
+        if index == 3:  # Monitoring tab
+            self._refresh_monitoring()
+            self._monitor_timer.start(3000)
+        else:
+            self._monitor_timer.stop()
+
+    # ------------------------------------------------------------------ #
+    #  Connections sub-tab
+    # ------------------------------------------------------------------ #
+
+    def _load_interfaces(self):
+        """Load network interfaces from NetworkMonitor."""
+        try:
+            interfaces = NetworkMonitor.get_all_interfaces()
+            self.iface_table.setRowCount(len(interfaces))
+            for i, iface in enumerate(interfaces):
+                self.iface_table.setItem(i, 0, QTableWidgetItem(iface.name))
+                self.iface_table.setItem(i, 1, QTableWidgetItem(iface.type.capitalize()))
+                status = "🟢 Up" if iface.is_up else "🔴 Down"
+                self.iface_table.setItem(i, 2, QTableWidgetItem(status))
+                self.iface_table.setItem(i, 3, QTableWidgetItem(iface.ip_address or "—"))
+                mac = self._get_mac_address(iface.name)
+                self.iface_table.setItem(i, 4, QTableWidgetItem(mac))
+        except Exception as e:
+            logger.error("Failed to load interfaces: %s", e)
+
+    @staticmethod
+    def _get_mac_address(iface_name):
+        """Read MAC address from /sys/class/net/<iface>/address."""
+        try:
+            with open(f"/sys/class/net/{iface_name}/address", "r") as f:
+                return f.read().strip()
+        except Exception:
+            return "—"
+
+    def _scan_wifi(self):
+        """Scan for available WiFi networks via nmcli."""
+        try:
+            result = subprocess.run(
+                ["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY,ACTIVE", "device", "wifi", "list", "--rescan", "yes"],
+                capture_output=True, text=True, timeout=15
+            )
+            lines = [l for l in result.stdout.strip().splitlines() if l.strip()]
+            self.wifi_table.setRowCount(len(lines))
+            for i, line in enumerate(lines):
+                parts = line.split(":")
+                if len(parts) >= 4:
+                    ssid = parts[0] or "(Hidden)"
+                    signal = f"{parts[1]}%"
+                    security = parts[2] or "Open"
+                    active = "Connected" if parts[3] == "yes" else ""
+                    self.wifi_table.setItem(i, 0, QTableWidgetItem(ssid))
+                    self.wifi_table.setItem(i, 1, QTableWidgetItem(signal))
+                    self.wifi_table.setItem(i, 2, QTableWidgetItem(security))
+                    self.wifi_table.setItem(i, 3, QTableWidgetItem(active))
+            self.append_output(self.tr("WiFi scan complete. {} networks found.\n").format(len(lines)))
+        except Exception as e:
+            self.append_output(self.tr("WiFi scan failed: {}\n").format(e))
+
+    def _connect_wifi(self):
+        """Connect to selected WiFi network."""
+        row = self.wifi_table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, self.tr("Error"), self.tr("Select a WiFi network first."))
+            return
+        ssid = self.wifi_table.item(row, 0).text()
+        if ssid == "(Hidden)":
+            QMessageBox.warning(self, self.tr("Error"), self.tr("Cannot connect to a hidden network from here."))
+            return
+        self.run_command("nmcli", ["device", "wifi", "connect", ssid],
+                         self.tr("Connecting to {}...").format(ssid))
+
+    def _disconnect_wifi(self):
+        """Disconnect WiFi."""
+        self.run_command("nmcli", ["device", "disconnect", "wlan0"],
+                         self.tr("Disconnecting WiFi..."))
+
+    def _load_vpn(self):
+        """Load VPN connections from NetworkManager."""
+        try:
+            result = subprocess.run(
+                ["nmcli", "-t", "-f", "NAME,TYPE,ACTIVE", "connection", "show"],
+                capture_output=True, text=True, timeout=5
+            )
+            vpn_lines = [l for l in result.stdout.strip().splitlines()
+                         if "vpn" in l.lower() or "wireguard" in l.lower()
+                         or "openvpn" in l.lower()]
+            self.vpn_table.setRowCount(len(vpn_lines))
+            for i, line in enumerate(vpn_lines):
+                parts = line.split(":")
+                if len(parts) >= 3:
+                    self.vpn_table.setItem(i, 0, QTableWidgetItem(parts[0]))
+                    self.vpn_table.setItem(i, 1, QTableWidgetItem(parts[1]))
+                    status = "🟢 Active" if parts[2] == "yes" else "Inactive"
+                    self.vpn_table.setItem(i, 2, QTableWidgetItem(status))
+            if not vpn_lines:
+                self.vpn_table.setRowCount(1)
+                self.vpn_table.setItem(0, 0, QTableWidgetItem(self.tr("No VPN connections configured")))
+        except Exception as e:
+            logger.debug("Failed to load VPN: %s", e)
+
+    # ------------------------------------------------------------------ #
+    #  DNS sub-tab
+    # ------------------------------------------------------------------ #
+
+    def _detect_current_dns(self):
+        """Detect and display the current DNS servers."""
+        try:
+            result = subprocess.run(
+                ["nmcli", "-t", "-f", "IP4.DNS", "device", "show"],
+                capture_output=True, text=True, timeout=5
+            )
+            dns_servers = set()
+            for line in result.stdout.splitlines():
+                if ":" in line:
+                    val = line.split(":", 1)[1].strip()
+                    if val:
+                        dns_servers.add(val)
+            if dns_servers:
+                self.lbl_current_dns.setText(
+                    self.tr("Current DNS: {}").format(", ".join(sorted(dns_servers)))
+                )
+            else:
+                self.lbl_current_dns.setText(self.tr("Current DNS: (DHCP default)"))
+        except Exception:
+            self.lbl_current_dns.setText(self.tr("Current DNS: unknown"))
 
     def get_active_connection(self):
-        # returns the connection name of the active connection
+        """Return the connection name of the active WiFi or Ethernet connection."""
         try:
-            # nmcli -t -f NAME,DEVICE,TYPE connection show --active
-            # We want likely the wifi or ethernet one
-            res = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"], capture_output=True, text=True)
+            res = subprocess.run(
+                ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"],
+                capture_output=True, text=True, timeout=5
+            )
             for line in res.stdout.splitlines():
                 if "wifi" in line or "ethernet" in line:
                     return line.split(":")[0]
@@ -82,73 +479,212 @@ class NetworkTab(QWidget):
         return None
 
     def apply_dns(self):
+        """Apply selected DNS provider to active connection."""
         dns_servers = self.dns_combo.currentData()
         conn_name = self.get_active_connection()
-        
+
         if not conn_name:
-            QMessageBox.warning(self, self.tr("Error"), self.tr("No active Wi-Fi or Ethernet connection found."))
+            QMessageBox.warning(self, self.tr("Error"),
+                                self.tr("No active Wi-Fi or Ethernet connection found."))
             return
 
         if dns_servers == "auto":
-            # ignore ipv4.dns
-             self.runner.run_command("nmcli", ["con", "mod", conn_name, "ipv4.ignore-auto-dns", "no", "ipv6.ignore-auto-dns", "no"])
-             # Clear dns
-             subprocess.run(["nmcli", "con", "mod", conn_name, "ipv4.dns", ""])
+            self.run_command("nmcli", [
+                "con", "mod", conn_name,
+                "ipv4.ignore-auto-dns", "no",
+                "ipv6.ignore-auto-dns", "no",
+                "ipv4.dns", "",
+            ], self.tr("Resetting DNS to DHCP default..."))
         else:
-            # set ipv4.dns
-            # We assume ipv4 for now
-            # nmcli con mod <conn> ipv4.dns "1.1.1.1 1.0.0.1" ipv4.ignore-auto-dns yes
-            self.runner.run_command("nmcli", ["con", "mod", conn_name, "ipv4.dns", dns_servers, "ipv4.ignore-auto-dns", "yes"])
-            
-        # Reapply
-        subprocess.run(["nmcli", "con", "up", conn_name])
-        QMessageBox.information(self, self.tr("Success"), self.tr("DNS settings applied to '{}'.").format(conn_name))
+            self.run_command("nmcli", [
+                "con", "mod", conn_name,
+                "ipv4.dns", dns_servers,
+                "ipv4.ignore-auto-dns", "yes",
+            ], self.tr("Applying DNS: {}").format(dns_servers))
 
-    def toggle_mac_randomization(self, enable):
-        config_file = "/etc/NetworkManager/conf.d/00-mac-randomization.conf"
-        content = """[device]
-wifi.scan-rand-mac-address=yes
+        # Reapply connection in background
+        try:
+            subprocess.run(["nmcli", "con", "up", conn_name],
+                           capture_output=True, timeout=10)
+        except Exception:
+            pass
 
-[connection]
-wifi.cloned-mac-address=random
-ethernet.cloned-mac-address=random
-"""
-        import os
-        if enable:
-            # We need root to write this file.
-            # echo content | sudo tee file
-            # command runner might be tricky with multiline echo.
-            # simpler: write to tmp then move
-            tmp_file = "/tmp/00-mac-randomization.conf"
-            with open(tmp_file, "w") as f:
-                f.write(content)
-            
-            self.runner.run_command("pkexec", ["mv", tmp_file, config_file])
-            QMessageBox.information(self, self.tr("Enabled"), self.tr("MAC Randomization enabled. Restart NetworkManager/Reboot to apply."))
-            
-            # Log Undo: Remove the file
-            self.history.log_change(
-                self.tr("Enabled MAC Randomization"), 
-                ["pkexec", "rm", "-f", config_file]
-            )
-            
-        else:
-            self.runner.run_command("pkexec", ["rm", "-f", config_file])
-            QMessageBox.information(self, self.tr("Disabled"), self.tr("MAC Randomization disabled. Restart NetworkManager/Reboot to apply."))
-            # Undo for disable is hard without backup. Skipping log for implementation simplicity in v4.7.
+        QTimer.singleShot(1000, self._detect_current_dns)
+        QMessageBox.information(self, self.tr("Success"),
+                                self.tr("DNS settings applied to '{}'.").format(conn_name))
 
-    def undo_last(self):
-        success, msg = self.history.undo_last_action()
-        if success:
-             QMessageBox.information(self, self.tr("Undo Successful"), msg)
-             # Refresh UI state
-             self.check_mac_status()
-        else:
-             QMessageBox.warning(self, self.tr("Undo Failed"), msg)
+    def _test_dns(self):
+        """Test DNS resolution speed."""
+        self.run_command("bash", [
+            "-c",
+            "echo 'Testing DNS resolution...' && "
+            "for domain in google.com github.com fedoraproject.org; do "
+            "    start=$(date +%s%N); "
+            "    nslookup $domain >/dev/null 2>&1; "
+            "    end=$(date +%s%N); "
+            "    ms=$(( (end - start) / 1000000 )); "
+            "    echo \"  $domain: ${ms}ms\"; "
+            "done"
+        ], self.tr("Testing DNS resolution speed..."))
+
+    # ------------------------------------------------------------------ #
+    #  Privacy sub-tab
+    # ------------------------------------------------------------------ #
 
     def check_mac_status(self):
-        import os
-        if os.path.exists("/etc/NetworkManager/conf.d/00-mac-randomization.conf"):
+        """Check whether MAC randomization is enabled."""
+        config_file = "/etc/NetworkManager/conf.d/00-mac-randomization.conf"
+        if os.path.exists(config_file):
             self.lbl_mac_status.setText(self.tr("MAC Randomization: ✅ Enabled"))
         else:
-             self.lbl_mac_status.setText(self.tr("MAC Randomization: ❌ Disabled"))
+            self.lbl_mac_status.setText(self.tr("MAC Randomization: ❌ Disabled"))
+
+    def toggle_mac_randomization(self, enable):
+        """Enable or disable MAC randomization via NetworkManager config."""
+        config_file = "/etc/NetworkManager/conf.d/00-mac-randomization.conf"
+        content = (
+            "[device]\n"
+            "wifi.scan-rand-mac-address=yes\n\n"
+            "[connection]\n"
+            "wifi.cloned-mac-address=random\n"
+            "ethernet.cloned-mac-address=random\n"
+        )
+
+        if enable:
+            tmp_file = "/tmp/00-mac-randomization.conf"
+            try:
+                with open(tmp_file, "w") as f:
+                    f.write(content)
+            except OSError as e:
+                self.append_output(self.tr("Failed to write temp file: {}\n").format(e))
+                return
+
+            self.run_command("pkexec", ["mv", tmp_file, config_file],
+                             self.tr("Enabling MAC randomization..."))
+            self.history.log_change(
+                self.tr("Enabled MAC Randomization"),
+                ["pkexec", "rm", "-f", config_file]
+            )
+            QMessageBox.information(self, self.tr("Enabled"),
+                                    self.tr("MAC Randomization enabled. Restart NetworkManager to apply."))
+        else:
+            self.run_command("pkexec", ["rm", "-f", config_file],
+                             self.tr("Disabling MAC randomization..."))
+            QMessageBox.information(self, self.tr("Disabled"),
+                                    self.tr("MAC Randomization disabled. Restart NetworkManager to apply."))
+
+        QTimer.singleShot(500, self.check_mac_status)
+
+    def _check_hostname_privacy(self):
+        """Check if hostname is hidden from DHCP broadcasts."""
+        conn = self.get_active_connection()
+        if not conn:
+            self.lbl_hostname_status.setText(self.tr("Hostname broadcast: no active connection"))
+            return
+        try:
+            result = subprocess.run(
+                ["nmcli", "-t", "-f", "ipv4.dhcp-send-hostname", "connection", "show", conn],
+                capture_output=True, text=True, timeout=5
+            )
+            val = result.stdout.strip().split(":")[-1].strip() if result.stdout.strip() else ""
+            if val == "no":
+                self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ✅ Hidden"))
+            else:
+                self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ⚠️ Visible"))
+        except Exception:
+            self.lbl_hostname_status.setText(self.tr("Hostname broadcast: unknown"))
+
+    def _toggle_hostname_privacy(self, hide):
+        """Hide or show hostname in DHCP requests."""
+        conn = self.get_active_connection()
+        if not conn:
+            QMessageBox.warning(self, self.tr("Error"),
+                                self.tr("No active connection found."))
+            return
+
+        value = "no" if hide else "yes"
+        self.run_command("nmcli", [
+            "connection", "modify", conn,
+            "ipv4.dhcp-send-hostname", value,
+        ], self.tr("Setting hostname visibility to {}...").format(
+            "hidden" if hide else "visible"
+        ))
+
+        action = self.tr("Hidden hostname from DHCP") if hide else self.tr("Restored hostname to DHCP")
+        undo_value = "yes" if hide else "no"
+        self.history.log_change(action, [
+            "nmcli", "connection", "modify", conn,
+            "ipv4.dhcp-send-hostname", undo_value,
+        ])
+
+        QTimer.singleShot(500, self._check_hostname_privacy)
+        QMessageBox.information(self, self.tr("Done"),
+                                self.tr("Hostname privacy updated. Reconnect to apply."))
+
+    def undo_last(self):
+        """Undo the last network privacy action."""
+        success, msg = self.history.undo_last_action()
+        if success:
+            QMessageBox.information(self, self.tr("Undo Successful"), msg)
+            self.check_mac_status()
+            self._check_hostname_privacy()
+        else:
+            QMessageBox.warning(self, self.tr("Undo Failed"), msg)
+
+    # ------------------------------------------------------------------ #
+    #  Monitoring sub-tab
+    # ------------------------------------------------------------------ #
+
+    def _refresh_monitoring(self):
+        """Refresh bandwidth and connection data from NetworkMonitor."""
+        try:
+            # Bandwidth summary
+            summary = NetworkMonitor.get_bandwidth_summary()
+            self.lbl_total_sent.setText(
+                self.tr("Total Sent: {}").format(NetworkMonitor.bytes_to_human(summary["total_sent"]))
+            )
+            self.lbl_total_recv.setText(
+                self.tr("Total Received: {}").format(NetworkMonitor.bytes_to_human(summary["total_recv"]))
+            )
+            self.lbl_send_rate.setText(
+                self.tr("Upload Rate: {}/s").format(NetworkMonitor.bytes_to_human(summary["total_send_rate"]))
+            )
+            self.lbl_recv_rate.setText(
+                self.tr("Download Rate: {}/s").format(NetworkMonitor.bytes_to_human(summary["total_recv_rate"]))
+            )
+
+            # Per-interface traffic
+            interfaces = NetworkMonitor.get_all_interfaces()
+            non_lo = [i for i in interfaces if i.type != "loopback"]
+            self.traffic_table.setRowCount(len(non_lo))
+            for i, iface in enumerate(non_lo):
+                self.traffic_table.setItem(i, 0, QTableWidgetItem(iface.name))
+                self.traffic_table.setItem(i, 1, QTableWidgetItem(iface.type.capitalize()))
+                self.traffic_table.setItem(i, 2, QTableWidgetItem(iface.bytes_sent_human))
+                self.traffic_table.setItem(i, 3, QTableWidgetItem(iface.bytes_recv_human))
+                self.traffic_table.setItem(i, 4, QTableWidgetItem(iface.send_rate_human))
+                self.traffic_table.setItem(i, 5, QTableWidgetItem(iface.recv_rate_human))
+
+            # Active connections
+            connections = NetworkMonitor.get_active_connections()
+            # Show only ESTABLISHED and LISTEN, limit to 100
+            filtered = [c for c in connections
+                        if c.state in ("ESTABLISHED", "LISTEN")][:100]
+            self.conn_table.setRowCount(len(filtered))
+            for i, conn in enumerate(filtered):
+                self.conn_table.setItem(i, 0, QTableWidgetItem(conn.protocol))
+                self.conn_table.setItem(i, 1, QTableWidgetItem(
+                    f"{conn.local_addr}:{conn.local_port}"
+                ))
+                self.conn_table.setItem(i, 2, QTableWidgetItem(
+                    f"{conn.remote_addr}:{conn.remote_port}"
+                ))
+                self.conn_table.setItem(i, 3, QTableWidgetItem(conn.state))
+                self.conn_table.setItem(i, 4, QTableWidgetItem(
+                    str(conn.pid) if conn.pid else "—"
+                ))
+                self.conn_table.setItem(i, 5, QTableWidgetItem(
+                    conn.process_name or "—"
+                ))
+        except Exception as e:
+            logger.error("Monitoring refresh failed: %s", e)

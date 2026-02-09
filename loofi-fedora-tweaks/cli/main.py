@@ -36,6 +36,8 @@ from utils.health_timeline import HealthTimeline
 from utils.service_explorer import ServiceExplorer, ServiceScope
 from utils.package_explorer import PackageExplorer
 from utils.firewall_manager import FirewallManager
+from utils.bluetooth import BluetoothManager
+from utils.storage import StorageManager
 
 from version import __version__, __version_codename__
 
@@ -1509,6 +1511,184 @@ def cmd_firewall(args):
     return 1
 
 
+# ==================== v17.0 Atlas ====================
+
+
+def cmd_bluetooth(args):
+    """Handle bluetooth subcommand."""
+    if args.action == "status":
+        status = BluetoothManager.get_adapter_status()
+        if _json_output:
+            _output_json({
+                "available": bool(status.adapter_name),
+                "powered": status.powered,
+                "discoverable": status.discoverable,
+                "adapter_name": status.adapter_name,
+                "adapter_address": status.adapter_address,
+            })
+        else:
+            if not status.adapter_name:
+                _print("❌ No Bluetooth adapter found")
+                return 1
+            power = "🟢 On" if status.powered else "🔴 Off"
+            _print(f"Bluetooth: {power}")
+            _print(f"Adapter: {status.adapter_name} ({status.adapter_address})")
+            _print(f"Discoverable: {'yes' if status.discoverable else 'no'}")
+        return 0
+
+    elif args.action == "devices":
+        paired_only = getattr(args, "paired", False)
+        devices = BluetoothManager.list_devices(paired_only=paired_only)
+        if _json_output:
+            _output_json({"devices": [
+                {"address": d.address, "name": d.name, "paired": d.paired,
+                 "connected": d.connected, "trusted": d.trusted,
+                 "device_type": d.device_type.value}
+                for d in devices
+            ]})
+        else:
+            if not devices:
+                _print("No devices found.")
+                return 0
+            for d in devices:
+                status_icons = []
+                if d.connected:
+                    status_icons.append("connected")
+                if d.paired:
+                    status_icons.append("paired")
+                if d.trusted:
+                    status_icons.append("trusted")
+                status_str = ", ".join(status_icons) if status_icons else "available"
+                _print(f"  {d.name} ({d.address}) [{status_str}]")
+        return 0
+
+    elif args.action == "scan":
+        timeout = getattr(args, "timeout", 10)
+        _print(f"Scanning for {timeout} seconds...")
+        devices = BluetoothManager.scan(timeout=timeout)
+        if _json_output:
+            _output_json({"devices": [
+                {"address": d.address, "name": d.name, "device_type": d.device_type.value}
+                for d in devices
+            ]})
+        else:
+            _print(f"Found {len(devices)} devices:")
+            for d in devices:
+                _print(f"  {d.name} ({d.address}) [{d.device_type.value}]")
+        return 0
+
+    elif args.action in ("power-on", "power-off"):
+        result = BluetoothManager.power_on() if args.action == "power-on" else BluetoothManager.power_off()
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action in ("connect", "disconnect", "pair", "unpair", "trust"):
+        address = getattr(args, "address", None)
+        if not address:
+            _print("❌ Device address required")
+            return 1
+        action_map = {
+            "connect": BluetoothManager.connect,
+            "disconnect": BluetoothManager.disconnect,
+            "pair": BluetoothManager.pair,
+            "unpair": BluetoothManager.unpair,
+            "trust": BluetoothManager.trust,
+        }
+        result = action_map[args.action](address)
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    return 1
+
+
+def cmd_storage(args):
+    """Handle storage subcommand."""
+    if args.action == "disks":
+        disks = StorageManager.list_disks()
+        if _json_output:
+            _output_json({"disks": [
+                {"name": d.name, "size": d.size, "type": d.device_type,
+                 "model": d.model, "mountpoint": d.mountpoint,
+                 "removable": d.rm}
+                for d in disks
+            ]})
+        else:
+            if not disks:
+                _print("No disks found.")
+                return 0
+            _print("Physical Disks:")
+            for d in disks:
+                rm = " [removable]" if d.rm else ""
+                _print(f"  {d.name}: {d.model or 'Unknown'} ({d.size}){rm}")
+        return 0
+
+    elif args.action == "mounts":
+        mounts = StorageManager.list_mounts()
+        if _json_output:
+            _output_json({"mounts": [
+                {"device": m.source, "mountpoint": m.target,
+                 "fstype": m.fstype, "size": m.size,
+                 "used": m.used, "available": m.avail,
+                 "use_percent": m.use_percent}
+                for m in mounts
+            ]})
+        else:
+            _print("Mount Points:")
+            for m in mounts:
+                _print(f"  {m.source} -> {m.target} ({m.fstype}) "
+                       f"[{m.used}/{m.size} = {m.use_percent}]")
+        return 0
+
+    elif args.action == "smart":
+        device = getattr(args, "device", None)
+        if not device:
+            _print("❌ Device path required (e.g. /dev/sda)")
+            return 1
+        health = StorageManager.get_smart_health(device)
+        if _json_output:
+            _output_json({
+                "device": device,
+                "model": health.model,
+                "serial": health.serial,
+                "health": "PASSED" if health.health_passed else "FAILED",
+                "temperature_c": health.temperature_c,
+                "power_on_hours": health.power_on_hours,
+                "reallocated_sectors": health.reallocated_sectors,
+                "raw_output": health.raw_output,
+            })
+        else:
+            _print(f"SMART Health for {device}:")
+            _print(f"  Model: {health.model}")
+            _print(f"  Serial: {health.serial}")
+            _print(f"  Health: {'PASSED' if health.health_passed else 'FAILED'}")
+            _print(f"  Temperature: {health.temperature_c}°C")
+            _print(f"  Power-on hours: {health.power_on_hours}")
+            _print(f"  Reallocated sectors: {health.reallocated_sectors}")
+        return 0
+
+    elif args.action == "usage":
+        summary = StorageManager.get_usage_summary()
+        if _json_output:
+            _output_json(summary)
+        else:
+            _print(f"Total: {summary.get('total_size', 'N/A')}")
+            _print(f"Used:  {summary.get('total_used', 'N/A')}")
+            _print(f"Free:  {summary.get('total_available', 'N/A')}")
+            _print(f"Disks: {summary.get('disk_count', 0)}")
+            _print(f"Mounts: {summary.get('mount_count', 0)}")
+        return 0
+
+    elif args.action == "trim":
+        result = StorageManager.trim_ssd()
+        icon = "✅" if result.success else "❌"
+        _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -1709,6 +1889,27 @@ def main(argv: Optional[List[str]] = None):
     )
     firewall_parser.add_argument("spec", nargs="?", help="Port spec (e.g. 8080/tcp)")
 
+    # v17.0 Atlas - Bluetooth management
+    bt_parser = subparsers.add_parser("bluetooth", help="Bluetooth management")
+    bt_parser.add_argument(
+        "action",
+        choices=["status", "devices", "scan", "power-on", "power-off",
+                 "connect", "disconnect", "pair", "unpair", "trust"],
+        help="Bluetooth action"
+    )
+    bt_parser.add_argument("address", nargs="?", help="Device MAC address")
+    bt_parser.add_argument("--paired", action="store_true", help="Show paired only")
+    bt_parser.add_argument("--timeout", type=int, default=10, help="Scan timeout")
+
+    # v17.0 Atlas - Storage management
+    storage_parser = subparsers.add_parser("storage", help="Storage & disk management")
+    storage_parser.add_argument(
+        "action",
+        choices=["disks", "mounts", "smart", "usage", "trim"],
+        help="Storage action"
+    )
+    storage_parser.add_argument("device", nargs="?", help="Device path (e.g. /dev/sda)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -1754,6 +1955,9 @@ def main(argv: Optional[List[str]] = None):
         "service": cmd_service,
         "package": cmd_package,
         "firewall": cmd_firewall,
+        # v17.0 Atlas
+        "bluetooth": cmd_bluetooth,
+        "storage": cmd_storage,
     }
 
     handler = commands.get(args.command)

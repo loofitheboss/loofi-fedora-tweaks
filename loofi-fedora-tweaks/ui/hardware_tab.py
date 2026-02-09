@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer
 from utils.hardware import HardwareManager
 from utils.command_runner import CommandRunner
+from utils.bluetooth import BluetoothManager
 
 
 class HardwareTab(QWidget):
@@ -107,6 +108,10 @@ class HardwareTab(QWidget):
         # Fingerprint Card (from Tweaks tab, row 3, col 0)
         fingerprint_card = self.create_fingerprint_card()
         grid.addWidget(fingerprint_card, 3, 0)
+
+        # Bluetooth Card (v17.0 Atlas)
+        bluetooth_card = self.create_bluetooth_card()
+        grid.addWidget(bluetooth_card, 3, 1)
 
         layout.addLayout(grid)
 
@@ -482,6 +487,95 @@ class HardwareTab(QWidget):
         dialog = FingerprintDialog(self)
         dialog.exec()
     
+    # ==================== BLUETOOTH (v17.0 Atlas) ====================
+
+    def create_bluetooth_card(self) -> QGroupBox:
+        """Create Bluetooth management card."""
+        card = self.create_card(self.tr("Bluetooth"), "📶")
+        layout = QVBoxLayout(card)
+
+        # Adapter status
+        self.lbl_bt_status = QLabel(self.tr("Bluetooth: detecting..."))
+        self.lbl_bt_status.setStyleSheet("color: #a6adc8;")
+        layout.addWidget(self.lbl_bt_status)
+
+        # Device list (compact)
+        self.lbl_bt_devices = QLabel(self.tr("Paired devices: —"))
+        self.lbl_bt_devices.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        self.lbl_bt_devices.setWordWrap(True)
+        layout.addWidget(self.lbl_bt_devices)
+
+        # Buttons
+        btn_layout = QHBoxLayout()
+
+        btn_power_on = QPushButton(self.tr("Power On"))
+        btn_power_on.clicked.connect(self._bt_power_on)
+        btn_layout.addWidget(btn_power_on)
+
+        btn_power_off = QPushButton(self.tr("Power Off"))
+        btn_power_off.clicked.connect(self._bt_power_off)
+        btn_layout.addWidget(btn_power_off)
+
+        btn_scan = QPushButton(self.tr("Scan"))
+        btn_scan.clicked.connect(self._bt_scan)
+        btn_layout.addWidget(btn_scan)
+
+        layout.addLayout(btn_layout)
+
+        # Initial status check
+        QTimer.singleShot(500, self._bt_refresh_status)
+
+        return card
+
+    def _bt_refresh_status(self):
+        """Refresh Bluetooth adapter and device status."""
+        try:
+            status = BluetoothManager.get_adapter_status()
+            if status.adapter_name:
+                power = "🟢 On" if status.powered else "🔴 Off"
+                self.lbl_bt_status.setText(
+                    self.tr("Bluetooth: {} | Adapter: {}").format(power, status.adapter_name)
+                )
+            else:
+                self.lbl_bt_status.setText(self.tr("Bluetooth: ❌ No adapter found"))
+                return
+
+            devices = BluetoothManager.list_devices(paired_only=True)
+            if devices:
+                names = [f"{d.name} ({'connected' if d.connected else 'paired'})"
+                         for d in devices[:5]]
+                self.lbl_bt_devices.setText(
+                    self.tr("Paired devices: {}").format(", ".join(names))
+                )
+            else:
+                self.lbl_bt_devices.setText(self.tr("Paired devices: none"))
+        except Exception:
+            self.lbl_bt_status.setText(self.tr("Bluetooth: ❌ bluetoothctl not available"))
+
+    def _bt_power_on(self):
+        """Turn Bluetooth adapter on."""
+        result = BluetoothManager.power_on()
+        if result.success:
+            self.show_toast(self.tr("Bluetooth powered on"))
+        else:
+            QMessageBox.warning(self, self.tr("Error"), result.message)
+        QTimer.singleShot(500, self._bt_refresh_status)
+
+    def _bt_power_off(self):
+        """Turn Bluetooth adapter off."""
+        result = BluetoothManager.power_off()
+        if result.success:
+            self.show_toast(self.tr("Bluetooth powered off"))
+        else:
+            QMessageBox.warning(self, self.tr("Error"), result.message)
+        QTimer.singleShot(500, self._bt_refresh_status)
+
+    def _bt_scan(self):
+        """Scan for nearby Bluetooth devices."""
+        self._run_hw_command("bluetoothctl", ["--timeout", "10", "scan", "on"],
+                             self.tr("Scanning for Bluetooth devices..."))
+        QTimer.singleShot(12000, self._bt_refresh_status)
+
     # ==================== UTILITIES ====================
     
     def refresh_status(self):

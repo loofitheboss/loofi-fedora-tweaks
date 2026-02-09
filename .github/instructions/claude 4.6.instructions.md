@@ -8,14 +8,26 @@ Project overview:
 - Loofi Fedora Tweaks is a PyQt6-based desktop application for Fedora Linux (v16.0.0 "Horizon").
 - 22 UI tabs, 51 test files (1420+ tests), 50+ utils modules.
 - Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`).
-- The project has a stable, modular architecture and does not use AI agents, planners, or external orchestration systems.
-- All design, implementation, refactoring, testing, and review should be handled directly by you in conversation.
+- The project has a stable, modular architecture with an Agent-based workflow defined in `.github/agents/`.
+
+Workflow & Architecture:
+- The project adopts the **Agent System** defined in `.github/agents/`.
+- For complex, multi-step features, use `Manager.agent.md` as the entry point — it handles task decomposition, dependency ordering, and agent delegation.
+- Delegate to specialized agents for their respective domains:
+  - **Arkitekt** — architectural design and module structure decisions.
+  - **Test** — test file creation, mock strategies, and coverage.
+  - **CodeGen** — code generation and implementation.
+  - **Builder** — build pipeline, RPM/Flatpak packaging.
+  - **Guardian** — security review, privilege escalation audits.
+  - **Sculptor** — UI/UX refinement and PyQt6 widget work.
+  - **Planner** — roadmap and release planning.
+- For simple, single-file changes you may act directly without invoking an agent.
+- Agent files live in `.github/agents/` — consult them for each agent's scope and invocation pattern.
 
 Expectations:
 - Propose concrete code changes, not abstract plans.
 - Prefer direct edits, diffs, or file-level suggestions.
 - Follow existing project structure and naming conventions.
-- Do not introduce agent systems, .agent files, planners, or task graphs.
 - Avoid overengineering and unnecessary abstractions.
 
 Code quality:

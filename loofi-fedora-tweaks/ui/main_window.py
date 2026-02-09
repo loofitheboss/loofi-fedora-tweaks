@@ -1,6 +1,6 @@
 """
-Main Window - v13.5 "UX Polish"
-21-tab layout with sidebar navigation.
+Main Window - v17.0 "Atlas"
+25-tab layout with sidebar navigation.
 """
 
 from PyQt6.QtWidgets import (
@@ -135,6 +135,12 @@ class MainWindow(QMainWindow):
         # v13.5 UX Polish
         self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"))
 
+        # v17.0 Atlas — New tabs for v15 features + Storage
+        self.add_page(self.tr("Performance"), "\u26a1", self._lazy_tab("performance"))
+        self.add_page(self.tr("Snapshots"), "\U0001f4f8", self._lazy_tab("snapshots"))
+        self.add_page(self.tr("Logs"), "\U0001f4cb", self._lazy_tab("logs"))
+        self.add_page(self.tr("Storage"), "\U0001f4be", self._lazy_tab("storage"))
+
         # v15.0 Nebula - Quick Actions Bar (Ctrl+Shift+K)
         self._setup_quick_actions()
 
@@ -183,6 +189,11 @@ class MainWindow(QMainWindow):
             "health": lambda: __import__("ui.health_timeline_tab", fromlist=["HealthTimelineTab"]).HealthTimelineTab(),
             # v13.5 UX Polish
             "settings": lambda: __import__("ui.settings_tab", fromlist=["SettingsTab"]).SettingsTab(self),
+            # v17.0 Atlas — New tabs
+            "performance": lambda: __import__("ui.performance_tab", fromlist=["PerformanceTab"]).PerformanceTab(),
+            "snapshots": lambda: __import__("ui.snapshot_tab", fromlist=["SnapshotTab"]).SnapshotTab(),
+            "logs": lambda: __import__("ui.logs_tab", fromlist=["LogsTab"]).LogsTab(),
+            "storage": lambda: __import__("ui.storage_tab", fromlist=["StorageTab"]).StorageTab(),
         }
         return LazyWidget(loaders[tab_name])
 
