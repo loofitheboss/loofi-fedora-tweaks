@@ -5,7 +5,7 @@ QWidget {
     background-color: #eff1f5;
     color: #4c4f69;
     font-family: 'Segoe UI', 'San Francisco', sans-serif;
-    font-size: 14px;
+    font-size: 10.5pt; /* HiDPI: was 14px, now 10.5pt (14/1.333) */
 }
 
 /* Sidebar Navigation (QListWidget) */
@@ -14,7 +14,7 @@ QListWidget {
     border: none;
     outline: none;
     padding-top: 20px;
-    font-size: 16px;
+    font-size: 12pt; /* HiDPI: was 16px, now 12pt (16/1.333) */
 }
 
 QListWidget::item {
@@ -111,16 +111,16 @@ QComboBox::drop-down {
     width: 20px;
 }
 
-/* Scrollbars */
+/* Scrollbars - pixel widths/heights intentionally kept for consistent thin scrollbars */
 QScrollBar:vertical {
     border: none;
     background: #e6e9ef;
-    width: 10px;
+    width: 10px; /* Intentional: thin scrollbar at all DPI */
     margin: 0px 0px 0px 0px;
 }
 QScrollBar::handle:vertical {
     background: #bcc0cc;
-    min-height: 20px;
+    min-height: 20px; /* Intentional: minimum grab size at all DPI */
     border-radius: 5px;
 }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
@@ -145,7 +145,7 @@ QLabel {
     color: #4c4f69;
 }
 QLabel[objectName="header"] {
-    font-size: 24px;
+    font-size: 18pt; /* HiDPI: was 24px, now 18pt (24/1.333) */
     font-weight: bold;
     color: #8839ef; /* Mauve */
     margin-bottom: 10px;
@@ -190,30 +190,31 @@ QTabBar::tab:hover:!selected {
     color: #4c4f69;
 }
 
+/* Tab scroller buttons - pixel dimensions intentional for consistent touch targets */
 QTabWidget#contentTabs QTabBar::scroller {
-    width: 22px;
+    width: 22px; /* Intentional: fixed scroller width at all DPI */
 }
 QTabWidget#contentTabs QTabBar::scroll-left-button, QTabWidget#contentTabs QTabBar::scroll-right-button {
     background-color: #e6e9ef;
     border: 1px solid #ccd0da;
     border-radius: 6px;
     margin: 3px;
-    width: 18px;
-    height: 18px;
+    width: 18px; /* Intentional: fixed button size at all DPI */
+    height: 18px; /* Intentional: fixed button size at all DPI */
 }
 QTabWidget#contentTabs QTabBar::scroll-left-button:hover, QTabWidget#contentTabs QTabBar::scroll-right-button:hover {
     background-color: #ccd0da;
 }
 
-/* Horizontal scrollbar (for wide content areas) */
+/* Horizontal scrollbar (for wide content areas) - pixel dimensions intentional */
 QScrollBar:horizontal {
     border: none;
     background: #e6e9ef;
-    height: 10px;
+    height: 10px; /* Intentional: thin scrollbar at all DPI */
 }
 QScrollBar::handle:horizontal {
     background: #bcc0cc;
-    min-width: 20px;
+    min-width: 20px; /* Intentional: minimum grab size at all DPI */
     border-radius: 5px;
 }
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
@@ -332,21 +333,21 @@ QFrame#breadcrumbBar {
 }
 QLabel#bcCategory {
     color: #6c6f85;
-    font-size: 13px;
+    font-size: 9.75pt; /* HiDPI: was 13px, now 9.75pt (13/1.333) */
     font-weight: 500;
 }
 QLabel#bcSep {
     color: #acb0be;
-    font-size: 13px;
+    font-size: 9.75pt; /* HiDPI: was 13px, now 9.75pt (13/1.333) */
 }
 QLabel#bcPage {
     color: #1e66f5;
-    font-size: 13px;
+    font-size: 9.75pt; /* HiDPI: was 13px, now 9.75pt (13/1.333) */
     font-weight: bold;
 }
 QLabel#bcDesc {
     color: #8c8fa1;
-    font-size: 12px;
+    font-size: 9pt; /* HiDPI: was 12px, now 9pt (12/1.333) */
     font-style: italic;
 }
 
@@ -357,15 +358,15 @@ QFrame#statusBar {
 }
 QLabel#statusText {
     color: #6c6f85;
-    font-size: 11px;
+    font-size: 8.25pt; /* HiDPI: was 11px, now 8.25pt (11/1.333) */
 }
 QLabel#statusHints {
     color: #acb0be;
-    font-size: 11px;
+    font-size: 8.25pt; /* HiDPI: was 11px, now 8.25pt (11/1.333) */
 }
 QLabel#statusVersion {
     color: #1e66f5;
-    font-size: 11px;
+    font-size: 8.25pt; /* HiDPI: was 11px, now 8.25pt (11/1.333) */
     font-weight: bold;
     padding-left: 8px;
 }
@@ -373,7 +374,7 @@ QLabel#statusVersion {
 /* ===== v19.0 Sidebar Footer ===== */
 QLabel#sidebarFooter {
     color: #acb0be;
-    font-size: 11px;
+    font-size: 8.25pt; /* HiDPI: was 11px, now 8.25pt (11/1.333) */
     background-color: #e6e9ef;
     border-top: none;
 }
