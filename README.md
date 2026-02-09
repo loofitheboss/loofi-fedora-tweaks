@@ -48,6 +48,17 @@ v19.0 introduces a **centralized action executor** with preview mode, structured
 
 ---
 
+## Early Preview: v20.0.0 "Synapse" (Phase 1)
+
+**Loofi Web API (Headless Mode)**
+
+* **Run headless API server:** `loofi-fedora-tweaks --web`
+* **Endpoints:** `GET /api/health`, `GET /api/info`, `GET /api/agents`, `POST /api/execute`
+* **Auth:** `POST /api/key` (generate API key) → `POST /api/token` (JWT)
+* **Safety:** `/api/execute` always performs preview first; real execution is opt-in
+
+---
+
 ## Previous: v18.0.0 "Sentinel"
 
 ### Sentinel — Autonomous Agent Framework
@@ -430,6 +441,26 @@ loofi --json doctor
 
 # Version
 loofi --version
+```
+
+## Loofi Web API (v20.0 Preview)
+
+```bash
+# Start the API server
+loofi-fedora-tweaks --web
+
+# Generate API key
+curl -X POST http://localhost:8000/api/key
+
+# Exchange API key for JWT
+curl -X POST http://localhost:8000/api/token -H "Content-Type: application/json" \
+  -d '{"api_key": "YOUR_KEY"}'
+
+# Run a previewed command via ActionExecutor
+curl -X POST http://localhost:8000/api/execute \
+  -H "Authorization: Bearer YOUR_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"command": "echo", "args": ["hello"], "preview": true}'
 ```
 
 ---

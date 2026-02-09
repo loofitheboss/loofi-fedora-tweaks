@@ -1,0 +1,60 @@
+{
+  "agent_id": "event-security",
+  "name": "Network Security Agent",
+  "agent_type": "security_guard",
+  "description": "Automatically adjusts firewall profile when connecting to public Wi-Fi networks",
+  "enabled": true,
+  "subscriptions": [
+    "network.connection.public",
+    "network.connection.trusted"
+  ],
+  "triggers": [
+    {
+      "trigger_type": "event",
+      "config": {
+        "event_types": ["network.connection.public", "network.connection.trusted"]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "enable_strict_firewall",
+      "name": "Enable Strict Firewall",
+      "description": "Switch to public firewall zone for untrusted networks",
+      "severity": "medium",
+      "command": "firewall-cmd",
+      "args": ["--zone=public", "--change-interface=wlan0"],
+      "operation": "firewall.set_zone_public"
+    },
+    {
+      "action_id": "restore_normal_firewall",
+      "name": "Restore Normal Firewall",
+      "description": "Switch back to home/trusted firewall zone",
+      "severity": "medium",
+      "command": "firewall-cmd",
+      "args": ["--zone=home", "--change-interface=wlan0"],
+      "operation": "firewall.set_zone_home"
+    },
+    {
+      "action_id": "notify_security_change",
+      "name": "Notify Security Change",
+      "description": "Inform user of firewall profile change",
+      "severity": "info",
+      "operation": "notify.security_posture_change"
+    }
+  ],
+  "settings": {
+    "public_zone": "public",
+    "trusted_zone": "home",
+    "auto_adjust": true,
+    "notify_user": true
+  },
+  "require_confirmation": false,
+  "max_actions_per_hour": 10,
+  "dry_run": false,
+  "notification_config": {
+    "enabled": true,
+    "urgency": "normal",
+    "title": "Network Security Profile Updated"
+  }
+}

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        19.0.0
+Version:        20.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -15,6 +15,11 @@ Requires:       mesa-libGL
 Requires:       mesa-libEGL
 Requires:       polkit
 Requires:       libnotify
+Requires:       python3-fastapi
+Requires:       python3-uvicorn
+Requires:       python3-jose
+Requires:       python3-bcrypt
+Requires:       python3-httpx
 
 %description
 A comprehensive GUI application for Fedora 43+ (KDE Plasma) with system maintenance,
@@ -65,6 +70,15 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sun Feb 09 2026 Loofi <loofi@example.com> - 20.0.0-1
+- v20.0 Synapse Phase 1: Remote Management & EventBus Hive Mind
+- Loofi Web API: Headless FastAPI server with JWT auth (--web flag)
+- EventBus: Thread-safe pub/sub system for inter-agent communication
+- AgentScheduler: Event-driven agent execution with rate limiting
+- Web Dashboard: Mobile-responsive dark-theme UI for remote management
+- Real agents: cleanup.json, security.json, thermal.json with event subscriptions
+- 66 new tests: API security, EventBus thread safety, agent integration
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 19.0.0-1
 - v19.0 Vanguard Phase 1: Centralized ActionExecutor with preview and dry-run
 - Unified ActionResult schema for all system actions

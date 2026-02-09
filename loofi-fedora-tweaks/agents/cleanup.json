@@ -1,0 +1,67 @@
+{
+  "agent_id": "event-cleanup",
+  "name": "Storage Cleanup Agent",
+  "agent_type": "cleanup_bot",
+  "description": "Automatically cleans system when storage is low by clearing caches, old journals, and temporary files",
+  "enabled": true,
+  "subscriptions": [
+    "system.storage.low"
+  ],
+  "triggers": [
+    {
+      "trigger_type": "event",
+      "config": {
+        "event_types": ["system.storage.low"]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "clean_package_cache",
+      "name": "Clean Package Cache",
+      "description": "Clear DNF package cache to free up space",
+      "severity": "low",
+      "command": "dnf",
+      "args": ["clean", "all"],
+      "operation": "cleanup.package_cache"
+    },
+    {
+      "action_id": "clean_journal_logs",
+      "name": "Clean Old Journal Logs",
+      "description": "Remove journald logs older than 7 days",
+      "severity": "low",
+      "command": "journalctl",
+      "args": ["--vacuum-time=7d"],
+      "operation": "cleanup.journal_vacuum"
+    },
+    {
+      "action_id": "clean_tmp_files",
+      "name": "Clean Temporary Files",
+      "description": "Remove /tmp files older than 3 days",
+      "severity": "low",
+      "command": "find",
+      "args": ["/tmp", "-type", "f", "-mtime", "+3", "-delete"],
+      "operation": "cleanup.tmp_files"
+    },
+    {
+      "action_id": "notify_space_recovered",
+      "name": "Notify User",
+      "description": "Send notification of space recovered",
+      "severity": "info",
+      "operation": "notify.cleanup_complete"
+    }
+  ],
+  "settings": {
+    "journal_retain_days": 7,
+    "tmp_file_age_days": 3,
+    "notify_on_completion": true
+  },
+  "require_confirmation": false,
+  "max_actions_per_hour": 3,
+  "dry_run": false,
+  "notification_config": {
+    "enabled": true,
+    "urgency": "normal",
+    "title": "Storage Cleanup Complete"
+  }
+}

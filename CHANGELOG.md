@@ -2,6 +2,114 @@
 
 All notable changes to this project will be documented in this file.
 
+## [20.0.0] - 2026-02-09 "Synapse" (Phase 1: Remote Management)
+
+### Added
+
+- **Loofi Web API**: Headless FastAPI server for remote system management (`utils/api_server.py`).
+  - `--web` flag to run headless: `loofi-fedora-tweaks --web`
+  - Endpoints: `GET /api/health`, `GET /api/info`, `GET /api/agents`, `POST /api/execute`
+  - JWT authentication with bcrypt-hashed API key storage
+  - Mandatory preview mode: `/api/execute` always previews first, real execution is opt-in
+  - CORS middleware for cross-origin access
+  - Static file serving for web dashboard
+
+- **JWT Authentication System**: Secure token-based auth (`utils/auth.py`).
+  - `POST /api/key` generates API key (bcrypt-hashed storage)
+  - `POST /api/token` exchanges API key for JWT (1-hour expiry)
+  - Bearer token verification via FastAPI dependency injection
+  - `~/.config/loofi-fedora-tweaks/api_keys.json` storage
+
+- **Web Dashboard**: Mobile-responsive dark-theme UI (`loofi-fedora-tweaks/web/`).
+  - Login screen with API key authentication
+  - System health panel (CPU, memory, uptime, hostname)
+  - Agent status list with enabled/disabled states
+  - Command executor interface with preview/execute toggle
+  - Auto-refresh system stats every 10 seconds
+  - Vanilla JavaScript (no framework dependencies)
+
+- **EventBus (Hive Mind)**: Thread-safe pub/sub system for inter-agent communication (`utils/event_bus.py`).
+  - Singleton EventBus with topic-based subscriptions
+  - Async callback execution via ThreadPoolExecutor
+  - Error isolation: one failing subscriber doesn't crash others
+  - Event types: `system.storage.low`, `network.connection.public`, `system.thermal.throttling`, etc.
+  - `get_events()` returns last 100 events for debugging
+
+- **AgentScheduler**: Event-driven agent execution system (`utils/agent_scheduler.py`).
+  - Agents subscribe to event topics via `subscriptions: ["topic.name"]`
+  - Automatic execution when subscribed events are published
+  - Rate limiting via `max_actions_per_hour` enforcement
+  - Publishes `agent.{id}.success` and `agent.{id}.failure` events
+  - ActionExecutor integration for real command execution
+  - Notification support via `notify.cleanup_complete` operations
+
+- **Agent Implementations**: Three real-world agents demonstrating EventBus (`loofi-fedora-tweaks/agents/`).
+  - **cleanup.json**: Storage cleanup on `system.storage.low` (DNF cache, journal vacuum, /tmp cleanup)
+  - **security.json**: Firewall profile adjustment on `network.connection.public` / `network.connection.trusted`
+  - **thermal.json**: CPU governor and brightness adjustment on `system.thermal.throttling` / `system.thermal.normal`
+
+- **Event Simulator**: Testing utility for triggering events without system changes (`utils/event_simulator.py`).
+  - `simulate_low_storage()`, `simulate_public_wifi()`, `simulate_thermal_throttling()`
+  - Dry-run demonstrations and integration testing
+
+- **API Routes**: Modular FastAPI route structure (`loofi-fedora-tweaks/api/routes/`).
+  - `system.py`: Health, info, agent listing endpoints
+  - `executor.py`: ActionExecutor execution endpoint with auth
+
+### Changed
+
+- **AgentConfig**: Added `subscriptions: List[str]` field for event-based triggers.
+- **AgentRegistry**: Added `load_from_directory()` for dynamic agent loading from JSON files.
+- **main.py**: Added `--web` CLI flag for headless API server mode.
+- **requirements.txt**: Added fastapi, uvicorn, python-jose, bcrypt, httpx, python-multipart.
+- **loofi-fedora-tweaks.spec**: Added Python dependencies for web API.
+
+### Tests
+
+- **28 API security tests** in `test_api_server.py`:
+  - Authentication: bearer token, invalid tokens, expired tokens, malformed headers
+  - Input validation: command injection, path traversal, malformed JSON, extremely long inputs
+  - Authorization: pkexec enforcement, preview mode auth, read-only endpoints
+  - Error handling: invalid commands, executor exceptions, ActionResult serialization
+- **18 EventBus tests** in `test_event_bus.py`:
+  - Thread safety, singleton pattern, pub/sub flow, error isolation, callback execution
+- **10 agent integration tests** in `test_agent_events.py`:
+  - Event subscription, agent triggering, scheduler execution, notification publishing
+- **10 agent implementation tests** in `test_agent_implementations.py`:
+  - cleanup.json, security.json, thermal.json behavior
+  - Rate limiting, event triggers, command execution, dry-run mode
+
+**Total: 66 new tests passing**
+
+### New Files
+
+- `loofi-fedora-tweaks/utils/api_server.py` — FastAPI server
+- `loofi-fedora-tweaks/utils/auth.py` — JWT authentication
+- `loofi-fedora-tweaks/utils/event_bus.py` — EventBus pub/sub system
+- `loofi-fedora-tweaks/utils/agent_scheduler.py` — Event-driven agent scheduler
+- `loofi-fedora-tweaks/utils/event_simulator.py` — Event testing utility
+- `loofi-fedora-tweaks/api/routes/system.py` — System endpoints
+- `loofi-fedora-tweaks/api/routes/executor.py` — Executor endpoints
+- `loofi-fedora-tweaks/web/index.html` — Web dashboard UI
+- `loofi-fedora-tweaks/web/assets/app.js` — Dashboard JavaScript
+- `loofi-fedora-tweaks/web/assets/style.css` — Dark theme styles
+- `loofi-fedora-tweaks/agents/cleanup.json` — Storage cleanup agent
+- `loofi-fedora-tweaks/agents/security.json` — Network security agent
+- `loofi-fedora-tweaks/agents/thermal.json` — Thermal management agent
+- `examples/loofi_api_demo.py` — API usage demonstration
+- `examples/simulate_events.py` — Event simulator demo
+- `tests/test_api_server.py` — API security test suite
+- `tests/test_event_bus.py` — EventBus test suite
+- `tests/test_agent_events.py` — Agent integration tests
+- `tests/test_agent_implementations.py` — Agent behavior tests
+
+### Documentation
+
+- Updated README.md with v20.0 preview section and API usage examples
+- Updated USER_GUIDE.md with `--web` mode documentation
+
+---
+
 ## [19.0.0] - 2026-02-09 "Vanguard"
 
 ### Added

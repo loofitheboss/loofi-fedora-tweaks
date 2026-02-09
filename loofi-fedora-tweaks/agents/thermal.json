@@ -1,0 +1,79 @@
+{
+  "agent_id": "event-thermal",
+  "name": "Thermal Management Agent",
+  "agent_type": "performance_optimizer",
+  "description": "Responds to thermal throttling by reducing system load and restoring performance when cool",
+  "enabled": true,
+  "subscriptions": [
+    "system.thermal.throttling",
+    "system.thermal.normal"
+  ],
+  "triggers": [
+    {
+      "trigger_type": "event",
+      "config": {
+        "event_types": ["system.thermal.throttling", "system.thermal.normal"]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "set_powersave_governor",
+      "name": "Set Powersave Governor",
+      "description": "Reduce CPU frequency to powersave mode",
+      "severity": "medium",
+      "command": "cpupower",
+      "args": ["frequency-set", "-g", "powersave"],
+      "operation": "tuner.set_governor_powersave"
+    },
+    {
+      "action_id": "reduce_screen_brightness",
+      "name": "Reduce Screen Brightness",
+      "description": "Lower display brightness to reduce heat",
+      "severity": "low",
+      "command": "brightnessctl",
+      "args": ["set", "50%"],
+      "operation": "display.set_brightness_low"
+    },
+    {
+      "action_id": "restore_performance",
+      "name": "Restore Performance Settings",
+      "description": "Return CPU governor to performance mode",
+      "severity": "medium",
+      "command": "cpupower",
+      "args": ["frequency-set", "-g", "schedutil"],
+      "operation": "tuner.set_governor_schedutil"
+    },
+    {
+      "action_id": "restore_brightness",
+      "name": "Restore Screen Brightness",
+      "description": "Return display brightness to normal",
+      "severity": "low",
+      "command": "brightnessctl",
+      "args": ["set", "100%"],
+      "operation": "display.set_brightness_normal"
+    },
+    {
+      "action_id": "notify_thermal_state",
+      "name": "Notify Thermal State",
+      "description": "Inform user of thermal state changes",
+      "severity": "info",
+      "operation": "notify.thermal_state_change"
+    }
+  ],
+  "settings": {
+    "throttle_governor": "powersave",
+    "normal_governor": "schedutil",
+    "throttle_brightness": 50,
+    "normal_brightness": 100,
+    "notify_user": true
+  },
+  "require_confirmation": false,
+  "max_actions_per_hour": 5,
+  "dry_run": false,
+  "notification_config": {
+    "enabled": true,
+    "urgency": "normal",
+    "title": "Thermal State Changed"
+  }
+}

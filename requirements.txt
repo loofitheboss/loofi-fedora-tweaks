@@ -1,2 +1,8 @@
 PyQt6
 requests
+fastapi
+uvicorn
+python-jose
+bcrypt
+httpx
+python-multipart

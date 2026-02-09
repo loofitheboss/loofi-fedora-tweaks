@@ -78,6 +78,11 @@ def main():
         help="Run in command-line mode (pass remaining args to CLI)"
     )
     parser.add_argument(
+        "--web",
+        action="store_true",
+        help="Run headless Loofi Web API server"
+    )
+    parser.add_argument(
         "--version", "-v",
         action="version",
         version=f"%(prog)s {__version__}"
@@ -89,6 +94,16 @@ def main():
         # Run in daemon mode
         from utils.daemon import Daemon
         Daemon.run()
+    elif args.web:
+        from utils.api_server import APIServer
+        server = APIServer()
+        server.start()
+        _log.info("Loofi Web API started on %s:%s", server.host, server.port)
+        try:
+            while True:
+                __import__("time").sleep(1)
+        except KeyboardInterrupt:
+            _log.info("Loofi Web API shutting down")
     elif args.cli:
         # Run CLI mode
         from cli.main import main as cli_main

@@ -163,6 +163,8 @@ class AgentConfig:
     dry_run: bool = False
     created_at: float = 0.0
     notification_config: Dict[str, Any] = field(default_factory=dict)
+    # Event subscriptions (v19.0 Phase 2)
+    subscriptions: List[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.created_at == 0.0:
@@ -185,6 +187,7 @@ class AgentConfig:
             "dry_run": self.dry_run,
             "created_at": self.created_at,
             "notification_config": self.notification_config,
+            "subscriptions": self.subscriptions,
         }
 
     @classmethod
@@ -203,6 +206,7 @@ class AgentConfig:
             dry_run=data.get("dry_run", False),
             created_at=data.get("created_at", 0.0),
             notification_config=data.get("notification_config", {}),
+            subscriptions=data.get("subscriptions", []),
         )
 
 
@@ -687,3 +691,57 @@ class AgentRegistry:
             settings=settings or {},
         )
         return self.register_agent(config)
+
+    def load_from_directory(self, directory: str) -> int:
+        """
+        Load agent definitions from JSON files in a directory.
+
+        Args:
+            directory: Path to directory containing .json agent definition files
+
+        Returns:
+            Number of agents successfully loaded
+        """
+        loaded_count = 0
+
+        if not os.path.isdir(directory):
+            logger.warning("Agent directory not found: %s", directory)
+            return loaded_count
+
+        for filename in os.listdir(directory):
+            if not filename.endswith(".json"):
+                continue
+
+            filepath = os.path.join(directory, filename)
+            try:
+                with open(filepath, "r") as fh:
+                    agent_data = json.load(fh)
+
+                # Load as AgentConfig
+                agent_config = AgentConfig.from_dict(agent_data)
+
+                # Register (or update if already exists)
+                self._agents[agent_config.agent_id] = agent_config
+
+                # Create state if doesn't exist
+                if agent_config.agent_id not in self._states:
+                    self._states[agent_config.agent_id] = AgentState(
+                        agent_id=agent_config.agent_id
+                    )
+
+                loaded_count += 1
+                logger.info(
+                    "Loaded agent '%s' (%s) from %s",
+                    agent_config.name,
+                    agent_config.agent_id,
+                    filename
+                )
+
+            except (json.JSONDecodeError, OSError, KeyError, TypeError) as exc:
+                logger.error("Failed to load agent from %s: %s", filepath, exc)
+
+        if loaded_count > 0:
+            self.save()
+            logger.info("Loaded %d agents from %s", loaded_count, directory)
+
+        return loaded_count

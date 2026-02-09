@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loofi Web Dashboard</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+        <div class="login-container">
+            <h1>🔐 Loofi Dashboard</h1>
+            <p class="subtitle">Enter your API key to continue</p>
+            <form id="login-form">
+                <input type="password" id="api-key-input" placeholder="API Key" required autocomplete="off">
+                <button type="submit">Login</button>
+            </form>
+            <div id="login-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-screen" class="screen hidden">
+        <header>
+            <h1>Loofi Dashboard</h1>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+        </header>
+
+        <div class="dashboard-content">
+            <!-- System Info Section -->
+            <section class="card">
+                <h2>System Information</h2>
+                <div id="system-info" class="info-grid">
+                    <div class="loading">Loading system info...</div>
+                </div>
+                <div class="last-updated">Last updated: <span id="system-info-time">Never</span></div>
+            </section>
+
+            <!-- Agent Status Section -->
+            <section class="card">
+                <h2>Agent Status</h2>
+                <div id="agent-status" class="agent-grid">
+                    <div class="loading">Loading agent status...</div>
+                </div>
+            </section>
+
+            <!-- Action Executor Section -->
+            <section class="card">
+                <h2>Action Executor</h2>
+                <form id="execute-form">
+                    <div class="form-group">
+                        <label for="command-input">Command</label>
+                        <input type="text" id="command-input" placeholder="e.g., dnf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="args-input">Arguments (comma-separated)</label>
+                        <input type="text" id="args-input" placeholder="e.g., list, --installed">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="pkexec-checkbox">
+                            Run with pkexec (elevated privileges)
+                        </label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="preview-checkbox" checked>
+                            Preview before executing
+                        </label>
+                    </div>
+                    <button type="submit" class="execute-btn">Execute</button>
+                </form>
+                <div id="execute-result" class="result-container hidden">
+                    <h3>Result</h3>
+                    <pre id="execute-output"></pre>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="/assets/app.js"></script>
+</body>
+</html>
