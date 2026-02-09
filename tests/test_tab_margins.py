@@ -1,0 +1,153 @@
+"""Tab margin regression tests - verify content margins are properly set."""
+
+import importlib
+import os
+import sys
+import unittest
+from unittest.mock import patch, MagicMock
+
+
+# Allow Qt to initialize in headless CI/dev environments.
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+# Add source path so that 'ui.*' imports resolve
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
+
+try:
+    from PyQt6.QtWidgets import QApplication
+    _HAS_QT_WIDGETS = True
+except ImportError:
+    _HAS_QT_WIDGETS = False
+
+
+@unittest.skipUnless(_HAS_QT_WIDGETS, "PyQt6.QtWidgets not available (headless environment)")
+class TestTabMargins(unittest.TestCase):
+    """Verify that tab root layouts have proper content margins set."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
+
+    def _get_root_layout_margins(self, tab_widget):
+        """Helper to extract content margins from a tab's root layout."""
+        layout = tab_widget.layout()
+        if layout is None:
+            return None
+        margins = layout.getContentsMargins()
+        return margins  # Returns (left, top, right, bottom)
+
+    def test_diagnostics_tab_margins(self):
+        """Verify diagnostics tab has positive content margins."""
+        mod = importlib.import_module("ui.diagnostics_tab")
+        DiagnosticsTab = mod.DiagnosticsTab
+
+        tab = DiagnosticsTab()
+        tab.show()
+        self.app.processEvents()
+
+        margins = self._get_root_layout_margins(tab)
+        self.assertIsNotNone(margins, "DiagnosticsTab should have a root layout")
+
+        left, top, right, bottom = margins
+        self.assertGreater(left, 0, "Left margin should be > 0")
+        self.assertGreater(top, 0, "Top margin should be > 0")
+        self.assertGreater(right, 0, "Right margin should be > 0")
+        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+        tab.close()
+
+    def test_desktop_tab_margins(self):
+        """Verify desktop tab has positive content margins."""
+        mod = importlib.import_module("ui.desktop_tab")
+        DesktopTab = mod.DesktopTab
+
+        tab = DesktopTab()
+        tab.show()
+        self.app.processEvents()
+
+        margins = self._get_root_layout_margins(tab)
+        self.assertIsNotNone(margins, "DesktopTab should have a root layout")
+
+        left, top, right, bottom = margins
+        self.assertGreater(left, 0, "Left margin should be > 0")
+        self.assertGreater(top, 0, "Top margin should be > 0")
+        self.assertGreater(right, 0, "Right margin should be > 0")
+        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+        tab.close()
+
+    def test_security_tab_margins(self):
+        """Verify security tab has positive content margins."""
+        mod = importlib.import_module("ui.security_tab")
+        SecurityTab = mod.SecurityTab
+
+        tab = SecurityTab()
+        tab.show()
+        self.app.processEvents()
+
+        margins = self._get_root_layout_margins(tab)
+        self.assertIsNotNone(margins, "SecurityTab should have a root layout")
+
+        left, top, right, bottom = margins
+        self.assertGreater(left, 0, "Left margin should be > 0")
+        self.assertGreater(top, 0, "Top margin should be > 0")
+        self.assertGreater(right, 0, "Right margin should be > 0")
+        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+        tab.close()
+
+    def test_ai_enhanced_tab_margins(self):
+        """Verify AI Lab tab has positive content margins."""
+        # Mock the AI-related managers to avoid import errors
+        sys.modules['utils.ai_models'] = MagicMock()
+        sys.modules['utils.voice'] = MagicMock()
+        sys.modules['utils.context_rag'] = MagicMock()
+
+        mod = importlib.import_module("ui.ai_enhanced_tab")
+        AIEnhancedTab = mod.AIEnhancedTab
+
+        tab = AIEnhancedTab()
+        tab.show()
+        self.app.processEvents()
+
+        margins = self._get_root_layout_margins(tab)
+        self.assertIsNotNone(margins, "AIEnhancedTab should have a root layout")
+
+        left, top, right, bottom = margins
+        self.assertGreater(left, 0, "Left margin should be > 0")
+        self.assertGreater(top, 0, "Top margin should be > 0")
+        self.assertGreater(right, 0, "Right margin should be > 0")
+        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+        tab.close()
+
+    def test_settings_tab_margins(self):
+        """Verify settings tab has positive content margins."""
+        # Mock SettingsManager
+        mock_settings_mgr = MagicMock()
+        mock_settings_mgr.get.return_value = "modern"
+
+        with patch("ui.settings_tab.SettingsManager") as mock_mgr_class:
+            mock_mgr_class.instance.return_value = mock_settings_mgr
+
+            mod = importlib.import_module("ui.settings_tab")
+            SettingsTab = mod.SettingsTab
+
+            tab = SettingsTab()
+            tab.show()
+            self.app.processEvents()
+
+            margins = self._get_root_layout_margins(tab)
+            self.assertIsNotNone(margins, "SettingsTab should have a root layout")
+
+            left, top, right, bottom = margins
+            self.assertGreater(left, 0, "Left margin should be > 0")
+            self.assertGreater(top, 0, "Top margin should be > 0")
+            self.assertGreater(right, 0, "Right margin should be > 0")
+            self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+            tab.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
