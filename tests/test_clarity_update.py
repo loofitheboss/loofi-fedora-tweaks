@@ -24,11 +24,11 @@ class TestVersionModule(unittest.TestCase):
 
     def test_version_is_1200(self):
         from version import __version__
-        self.assertEqual(__version__, "15.0.0")
+        self.assertEqual(__version__, "16.0.0")
 
     def test_version_codename(self):
         from version import __version_codename__
-        self.assertEqual(__version_codename__, "Nebula")
+        self.assertEqual(__version_codename__, "Horizon")
 
     def test_app_name(self):
         from version import __app_name__

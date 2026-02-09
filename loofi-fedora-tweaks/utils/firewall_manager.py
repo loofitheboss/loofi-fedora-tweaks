@@ -380,9 +380,9 @@ class FirewallManager:
     def start_firewall(cls) -> FirewallResult:
         """Start firewalld."""
         try:
-            cmd = PrivilegedCommand.systemctl("start", "firewalld")
+            binary, args, _ = PrivilegedCommand.systemctl("start", "firewalld")
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=15
+                [binary] + args, capture_output=True, text=True, timeout=15
             )
             if result.returncode == 0:
                 return FirewallResult(True, "Firewall started")
@@ -394,9 +394,9 @@ class FirewallManager:
     def stop_firewall(cls) -> FirewallResult:
         """Stop firewalld."""
         try:
-            cmd = PrivilegedCommand.systemctl("stop", "firewalld")
+            binary, args, _ = PrivilegedCommand.systemctl("stop", "firewalld")
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=15
+                [binary] + args, capture_output=True, text=True, timeout=15
             )
             if result.returncode == 0:
                 return FirewallResult(True, "Firewall stopped")

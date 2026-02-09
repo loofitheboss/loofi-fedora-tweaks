@@ -342,7 +342,8 @@ class ServiceExplorer:
         try:
             cmd: list[str] = []
             if scope == ServiceScope.SYSTEM:
-                cmd = PrivilegedCommand.systemctl(action, f"{name}.service")
+                binary, args, _ = PrivilegedCommand.systemctl(action, f"{name}.service")
+                cmd = [binary] + args
             else:
                 cmd = ["systemctl", "--user", action, f"{name}.service"]
 

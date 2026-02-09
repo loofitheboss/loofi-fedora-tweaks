@@ -352,7 +352,8 @@ class DashboardTab(QWidget):
 
     def _refresh_history(self):
         try:
-            history = HistoryManager.get_history()
+            hm = HistoryManager()
+            history = hm._load_history()
             entries = history[:5] if history else []
             for i, lbl in enumerate(self.history_labels):
                 if i < len(entries):

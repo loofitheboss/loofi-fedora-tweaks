@@ -183,7 +183,8 @@ class PackageExplorer:
             elif source == "rpm-ostree":
                 cmd = ["pkexec", "rpm-ostree", "install", name]
             else:
-                cmd = PrivilegedCommand.dnf("install", "-y", name)
+                binary, args, _ = PrivilegedCommand.dnf("install", name)
+                cmd = [binary] + args
 
             result = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=300
@@ -217,7 +218,8 @@ class PackageExplorer:
             elif source == "rpm-ostree":
                 cmd = ["pkexec", "rpm-ostree", "uninstall", name]
             else:
-                cmd = PrivilegedCommand.dnf("remove", "-y", name)
+                binary, args, _ = PrivilegedCommand.dnf("remove", name)
+                cmd = [binary] + args
 
             result = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=300

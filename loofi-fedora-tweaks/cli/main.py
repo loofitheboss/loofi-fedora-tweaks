@@ -1352,7 +1352,7 @@ def cmd_service(args):
 def cmd_package(args):
     """Handle package subcommand."""
     if args.action == "search":
-        query = args.query
+        query = args.query or args.name
         if not query:
             _print("❌ Search query required")
             return 1
