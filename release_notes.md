@@ -1,104 +1,100 @@
-# Loofi Fedora Tweaks v17.0.0 - The "Atlas" Update
+# Release Notes — v18.0.0 "Sentinel"
 
-A hardware & visibility release that brings four new dedicated tabs for v15 features, a Bluetooth manager, storage & disk health tools, and a completely overhauled Network tab — 25 tabs, 1514 tests.
+## 🤖 Autonomous System Agents
 
-## Highlights
+v18.0 "Sentinel" introduces a complete **agent framework** that transforms Loofi Fedora Tweaks from a reactive tool into a proactive, agent-driven platform. Define your goals in plain English and let Sentinel agents autonomously monitor, maintain, and optimize your system.
 
-* **Performance Tab**: AutoTuner GUI with workload detection & kernel tuning
-* **Snapshots Tab**: Create/restore/delete across Timeshift/Snapper/BTRFS
-* **Smart Logs Tab**: Color-coded journal viewer with 10 error patterns
-* **Storage & Disks Tab**: Block devices, SMART health, mounts, fsck, TRIM
-* **Network Overhaul**: 4 sub-tabs — Connections, DNS, Privacy, Monitoring
-* **Bluetooth Manager**: Scan, pair, connect, trust, block via bluetoothctl
+---
 
-## New Features
+### ✨ Headline Features
 
-### Performance Tab (AutoTuner GUI)
-* Real-time workload detection (idle, desktop, compilation, gaming, server)
-* Kernel settings display: governor, swappiness, I/O scheduler, THP
-* One-click "Apply Recommendations" with pkexec privilege escalation
-* Tuning history table with timestamps
-* 30-second auto-refresh timer
+#### Agent Framework
+- **5 built-in agents** ready to go: System Monitor, Security Guard, Update Watcher, Cleanup Bot, Performance Optimizer
+- **AgentRegistry** with JSON persistence, enable/disable, and per-agent settings
+- **AgentState** tracking with bounded history, rate limiting, and status monitoring
 
-### Snapshots Tab
-* Create, restore, and delete snapshots across multiple backends
-* Auto-detects Timeshift, Snapper, and BTRFS subvolumes
-* Retention policy management
-* Snapshot timeline table with type, description, and timestamp
+#### AI-Powered Agent Creation
+- Describe what you want in natural language: _"Keep my system healthy"_
+- **Template matching** for 5 common goals with high-confidence plans
+- **Ollama LLM fallback** for interpreting custom goals into agent configs
+- **14 built-in operations**: CPU, memory, disk, temperature, ports, logins, firewall, DNF/Flatpak updates, cache cleanup, journal vacuum, temp files, workload detection, tuning
 
-### Smart Logs Tab
-* Color-coded log entries by severity (emergency=red through debug=gray)
-* 10 built-in error patterns: OOM, segfault, disk full, auth failure, etc.
-* Pattern analysis table showing matched count and suggested fixes
-* Filters: unit, priority, time range
-* Export to text or JSON
+#### Agent Execution Engine
+- **AgentScheduler** with background thread-based interval scheduling
+- **AgentExecutor** maps operations to real system checks
+- **Dry-run mode** by default — new agents log what they _would_ do without acting
+- **Rate limiting** — configurable max actions per hour (default: 10)
+- **Severity gating** — CRITICAL actions are blocked from automation, requiring manual trigger
 
-### Storage & Disks Tab
-* Block device inventory via lsblk (name, size, type, mountpoint, removable)
-* SMART health monitoring via smartctl (health status, temperature)
-* Mount point listing with usage stats (total, used, available, use%)
-* Filesystem check (fsck) via pkexec
-* SSD TRIM optimization via fstrim
-* Disk usage summary
+#### New Agents Tab (26th tab)
+- **Dashboard**: Live stat cards, scheduler controls, recent activity feed
+- **My Agents**: Table with enable/disable/run controls per agent
+- **Create Agent**: Goal input with template buttons, AI plan generation, safety config
+- **Activity Log**: Full history of all agent actions
 
-### Network Tab Overhaul
-* **Connections**: WiFi network scanning, VPN status via nmcli
-* **DNS**: One-click switching (Cloudflare, Google, Quad9, AdGuard, DHCP default)
-* **Privacy**: Per-connection MAC address randomization
-* **Monitoring**: Interface stats + active connections with auto-refresh
-
-### Bluetooth Manager (Hardware Tab)
-* Adapter status (powered, discoverable, pairable, adapter address)
-* Device scanning with configurable timeout
-* Pair, unpair, connect, disconnect, trust, block, unblock
-* Battery level and device type classification
-* Device types: audio, computer, input, phone, network, imaging
-
-## New CLI Commands
-
+#### CLI Agent Management
 ```bash
-# Bluetooth management (v17.0)
-loofi bluetooth status         # Adapter info
-loofi bluetooth devices        # List paired devices
-loofi bluetooth scan           # Scan for nearby devices
-loofi bluetooth pair <address> # Pair a device
-loofi bluetooth connect <addr> # Connect to a device
-loofi bluetooth disconnect <a> # Disconnect a device
-loofi bluetooth trust <addr>   # Trust a device
-loofi bluetooth power-on       # Turn adapter on
-loofi bluetooth power-off      # Turn adapter off
-
-# Storage & disks (v17.0)
-loofi storage disks            # List block devices
-loofi storage mounts           # List mount points with usage
-loofi storage smart /dev/sda   # SMART health for a device
-loofi storage trim             # Run SSD TRIM
-loofi storage usage            # Disk usage summary
+loofi agent list              # Show all agents
+loofi agent status            # Summary statistics  
+loofi agent create --goal "Keep my system healthy"
+loofi agent enable <id>       # Activate an agent
+loofi agent run <id>          # Run immediately
+loofi agent logs              # View activity
+loofi agent templates         # Browse goal templates
 ```
 
-## Installation
+---
 
-**Via DNF:**
+### 🛡️ Safety First
 
-```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v17.0.0/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
-```
+| Safety Feature | Description |
+|---------------|-------------|
+| Dry-run default | New agents start in simulation mode |
+| Rate limiting | Max 10 actions/hour (configurable) |
+| Severity gating | INFO/LOW auto, MEDIUM conditional, HIGH prompt, CRITICAL manual only |
+| No privilege escalation | Agents read state but never `pkexec` |
+| Bounded history | 100 entries max per agent |
 
-**Build from source:**
+---
 
-```bash
-./build_rpm.sh
-sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
-```
+### 📊 Built-in Agents
 
-## Quick Start
+| Agent | Monitors | Default Interval |
+|-------|----------|-----------------|
+| 🏥 System Monitor | CPU, memory, disk, temperature | 60s |
+| 🛡️ Security Guard | Open ports, failed logins, firewall | 5 min |
+| 📦 Update Watcher | DNF packages, Flatpak apps | 1 hour |
+| 🧹 Cleanup Bot | DNF cache, journal, temp files | 24 hours |
+| ⚡ Performance Optimizer | Workload detection, tuning | 2 min |
 
-```bash
-# GUI
-loofi-fedora-tweaks
+---
 
-# CLI
-loofi info
-loofi bluetooth status
-loofi storage disks
-```
+### 🧪 Tests
+
+- **60+ new tests** covering agent dataclasses, registry, executor, planner, scheduler, and CLI
+- Full serialization/deserialization roundtrip tests
+- Safety tests for dry-run, rate limiting, and severity gating
+
+---
+
+### 📁 New Files
+
+| File | Purpose |
+|------|---------|
+| `utils/agents.py` | Agent framework, registry, built-in definitions |
+| `utils/agent_runner.py` | Executor and background scheduler |
+| `utils/agent_planner.py` | AI-powered natural language planning |
+| `ui/agents_tab.py` | Agents management GUI |
+| `tests/test_agents.py` | Comprehensive test suite |
+| `docs/ROADMAP_V18.md` | Architecture and roadmap |
+
+---
+
+### 🔮 What's Next (v18.x)
+
+- Agent-to-agent communication
+- Webhook/notification integration (Telegram, email)
+- CRON-style scheduling
+- Agent export/import and marketplace
+- SystemPulse event-driven triggers
+- AI-powered anomaly detection

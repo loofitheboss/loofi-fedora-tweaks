@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v17.0.0 "Atlas"
+# Loofi Fedora Tweaks v18.0.0 "Sentinel"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,51 +10,58 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v17.0.0">
-    <img src="https://img.shields.io/badge/Release-v17.0.0-blue?style=for-the-badge&logo=github" alt="Release v17.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v18.0.0">
+    <img src="https://img.shields.io/badge/Release-v18.0.0-blue?style=for-the-badge&logo=github" alt="Release v18.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1514%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1574%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v17.0.0 "Atlas"
+## What's New in v18.0.0 "Sentinel"
 
-### Atlas — Hardware & Visibility Release
+### Sentinel — Autonomous Agent Framework
 
-Four new dedicated tabs bring v15 features to the GUI, plus a Bluetooth manager, storage & disk health tools, and a completely overhauled Network tab.
+A complete autonomous agent system for proactive system management, with AI planning, background execution, and a dedicated management UI.
 
-**Performance Tab** (AutoTuner GUI)
-* Workload detection with real-time CPU/memory classification
-* Kernel settings display (governor, swappiness, I/O scheduler, THP)
-* One-click apply with pkexec, tuning history table, 30s auto-refresh
+**Autonomous Agent Framework**
+* **5 Built-in Agents**: System Monitor, Security Guard, Update Watcher, Cleanup Bot, Performance Optimizer.
+* **Agent Registry**: CRUD operations, persistence, and state management.
+* **Agent Runner**: Background execution engine with rate limiting and scheduling.
 
-**Snapshots Tab**
-* Create, restore, and delete snapshots across Timeshift/Snapper/BTRFS
-* Backend auto-detection, retention policies, timeline view
+**AI-Powered Agent Planner**
+* **Natural Language Goals**: "Keep my system clean" -> auto-configures Cleanup Bot.
+* **Template Matching**: 5 common goals (health, security, updates, cleanup, performance).
+* **Ollama Integration**: Fallback to LLM for custom goal interpretation.
 
-**Smart Logs Tab**
-* Color-coded journal viewer with 10 built-in error patterns
-* Pattern analysis table, unit/priority/time filters, export
+**Agents Tab** (🤖 icon)
+* **Dashboard**: Stat cards (active agents, runs, errors), scheduler control.
+* **My Agents**: Table with enable/disable/run controls.
+* **Create Agent**: Goal input with AI planning and dry-run configuration.
+* **Activity Log**: Timestamped history of all agent actions.
 
-**Storage & Disks Tab**
-* Block device inventory (lsblk), SMART health monitoring
-* Mount point listing with usage stats, filesystem check (fsck), SSD TRIM
+**CLI: agent** — `list`, `status`, `enable`, `disable`, `run`, `create`, `logs` commands.
 
-**Network Tab Overhaul**
-* 4 sub-tabs: Connections (WiFi/VPN), DNS, Privacy (MAC), Monitoring
-* WiFi scanning, VPN status, interface stats with auto-refresh
+**1574 Tests** — 60 new tests covering the entire agent framework.
 
-**Bluetooth Manager** (Hardware tab)
-* Adapter status, device scanning, pair/connect/trust/block
-* Battery level display, device type classification
+---
 
-**CLI: bluetooth & storage** — 2 new subcommands with full action support
+## Previous: v17.0.0 "Atlas"
 
-**1514 Tests** — 94 new tests across 4 test files, 25 total tabs
+**Performance Tab** (AutoTuner GUI) — Workload detection + kernel tuning
+
+**Snapshots Tab** — Unified Timeshift/Snapper/BTRFS snapshot management
+
+**Smart Logs Tab** — Journal analysis with error patterns
+
+**Storage & Disks Tab** — Disk health, mounts, fsck, TRIM
+
+**Network Tab Overhaul** — WiFi/VPN, DNS, Privacy, Monitoring
+
+**Bluetooth Manager** — Device scanning, pairing, connection management
 
 ---
 
@@ -140,11 +147,12 @@ Four new dedicated tabs bring v15 features to the GUI, plus a Bluetooth manager,
 
 ## Feature Overview
 
-### Tabs (v17.0 — 25 tabs)
+### Tabs (v18.0 — 26 tabs)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
 | **Home** | Dashboard | System health overview with quick actions |
+| **Agents** | Agent Management | AI-powered autonomous system agents |
 | **System Info** | Hardware/OS | CPU, RAM, disk, battery, OS information |
 | **System Monitor** | Performance + Processes | Live graphs, process manager with kill/renice |
 | **Maintenance** | Updates + Cleanup + Overlays | DNF/Flatpak updates, cache cleaning, rpm-ostree layers |
@@ -181,6 +189,15 @@ Four new dedicated tabs bring v15 features to the GUI, plus a Bluetooth manager,
 | **CLI: tuner** | `analyze`, `apply`, `history` subcommands |
 | **CLI: snapshot** | `list`, `create`, `delete`, `backends` subcommands |
 | **CLI: logs** | `show`, `errors`, `export` with `--unit`, `--priority`, `--since` filters |
+
+### New in v18.0
+
+| Feature | Description |
+|---------|-------------|
+| **Autonomous Agents** | Proactive system management agents (Monitor, Security, Cleanup, etc.) |
+| **Agent Planner** | AI-powered natural language goal to agent configuration |
+| **Agents Tab** | Dashboard, management, creation, and activity logging |
+| **CLI: agent** | `list`, `status`, `enable`, `disable`, `run`, `create`, `logs` |
 
 ### New in v17.0
 
@@ -234,7 +251,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v17.0.0/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v18.0.0/loofi-fedora-tweaks-18.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -250,7 +267,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-18.0.0-1.noarch.rpm
 ```
 
 ---

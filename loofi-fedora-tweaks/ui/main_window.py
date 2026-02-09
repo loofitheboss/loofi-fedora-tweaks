@@ -1,6 +1,6 @@
 """
-Main Window - v17.0 "Atlas"
-25-tab layout with sidebar navigation.
+Main Window - v18.0 "Sentinel"
+26-tab layout with sidebar navigation.
 """
 
 from PyQt6.QtWidgets import (
@@ -136,10 +136,13 @@ class MainWindow(QMainWindow):
         self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"))
 
         # v17.0 Atlas — New tabs for v15 features + Storage
-        self.add_page(self.tr("Performance"), "\u26a1", self._lazy_tab("performance"))
+        self.add_page(self.tr("Performance"), "", self._lazy_tab("performance"))
         self.add_page(self.tr("Snapshots"), "\U0001f4f8", self._lazy_tab("snapshots"))
         self.add_page(self.tr("Logs"), "\U0001f4cb", self._lazy_tab("logs"))
         self.add_page(self.tr("Storage"), "\U0001f4be", self._lazy_tab("storage"))
+
+        # v18.0 Sentinel — Autonomous System Agents
+        self.add_page(self.tr("Agents"), "\U0001f916", self._lazy_tab("agents"))
 
         # v15.0 Nebula - Quick Actions Bar (Ctrl+Shift+K)
         self._setup_quick_actions()
@@ -194,6 +197,8 @@ class MainWindow(QMainWindow):
             "snapshots": lambda: __import__("ui.snapshot_tab", fromlist=["SnapshotTab"]).SnapshotTab(),
             "logs": lambda: __import__("ui.logs_tab", fromlist=["LogsTab"]).LogsTab(),
             "storage": lambda: __import__("ui.storage_tab", fromlist=["StorageTab"]).StorageTab(),
+            # v18.0 Sentinel — Agents
+            "agents": lambda: __import__("ui.agents_tab", fromlist=["AgentsTab"]).AgentsTab(),
         }
         return LazyWidget(loaders[tab_name])
 
@@ -416,6 +421,13 @@ class MainWindow(QMainWindow):
             )
             event.ignore()
         else:
+            # Clean up page resources (timers, schedulers)
+            for page in self.pages.values():
+                if hasattr(page, "cleanup"):
+                    try:
+                        page.cleanup()
+                    except Exception:
+                        pass
             event.accept()
 
     def check_dependencies(self):

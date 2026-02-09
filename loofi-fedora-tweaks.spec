@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        17.0.0
+Version:        18.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -65,6 +65,24 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 18.0.0-1
+- v18.0 Sentinel: Autonomous Agent Framework, AI Agent Planner
+- Agent Framework: Configurable agents for system monitoring, security, cleanup
+- Agent Runner: Background execution engine with rate limiting and scheduling
+- AI-Powered Planner: Natural language goal to agent configuration
+- Agents Tab: Dashboard, management, and creation UI
+- CLI agent commands: list, status, enable, disable, run, create
+
+* Sun Feb 08 2026 Loofi <loofi@example.com> - 17.0.0-1
+- v17.0 Atlas: Performance, Snapshots, Smart Logs, Storage, Network Overhaul
+- Performance Tab: AutoTuner GUI with workload detection and kernel tuning
+- Snapshots Tab: Unified snapshot management for Timeshift/Snapper/BTRFS
+- Smart Logs Tab: Journal viewer with pattern detection and filtering
+- Storage Tab: Disk health, mount points, and usage analysis
+- Network Tab: Complete overhaul with DNS, Privacy, and Monitoring sub-tabs
+- Bluetooth Manager: Full bluetoothctl wrapper with device management
+- 94 new tests across 4 new modules
+
 * Sun Feb 08 2026 Loofi <loofi@example.com> - 15.0.0-1
 - v15.0 Nebula: Auto-Tuner, Snapshot Timeline, Smart Logs, Quick Actions Bar
 - Startup crash resilience: file logging, error dialogs, desktop notifications

@@ -1,7 +1,7 @@
 """
 Loofi CLI - Command-line interface for Loofi Fedora Tweaks.
 Enables headless operation and scripting.
-v13.0.0 "Nexus Update"
+v18.0.0 "Sentinel"
 """
 
 import sys
@@ -1603,6 +1603,245 @@ def cmd_bluetooth(args):
     return 1
 
 
+# ==================== v18.0 Sentinel ====================
+
+def cmd_agent(args):
+    """Handle agent subcommand."""
+    import time as time_mod
+    from utils.agents import AgentRegistry, AgentType
+
+    registry = AgentRegistry.instance()
+
+    if args.action == "list":
+        agents = registry.list_agents()
+        if _json_output:
+            _output_json({"agents": [a.to_dict() for a in agents]})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   System Agents")
+            _print("═══════════════════════════════════════════")
+            if not agents:
+                _print("\n(no agents found)")
+            else:
+                for a in agents:
+                    state = registry.get_state(a.agent_id)
+                    enabled = "✅" if a.enabled else "❌"
+                    _print(f"\n  {enabled} {a.name} ({a.agent_id})")
+                    _print(f"      Type: {a.agent_type.value} | Status: {state.status.value}")
+                    _print(f"      Runs: {state.run_count} | Errors: {state.error_count}")
+                    _print(f"      {a.description}")
+        return 0
+
+    elif args.action == "status":
+        summary = registry.get_agent_summary()
+        if _json_output:
+            _output_json(summary)
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Agent Status")
+            _print("═══════════════════════════════════════════")
+            _print(f"\n  Total: {summary['total_agents']}")
+            _print(f"  Enabled: {summary['enabled']}")
+            _print(f"  Running: {summary['running']}")
+            _print(f"  Errors: {summary['errors']}")
+            _print(f"  Total Runs: {summary['total_runs']}")
+        return 0
+
+    elif args.action == "enable":
+        if not args.agent_id:
+            _print("❌ Agent ID required")
+            return 1
+        success = registry.enable_agent(args.agent_id)
+        icon = "✅" if success else "❌"
+        msg = f"Agent '{args.agent_id}' enabled" if success else f"Agent '{args.agent_id}' not found"
+        _print(f"{icon} {msg}")
+        if _json_output:
+            _output_json({"success": success, "message": msg})
+        return 0 if success else 1
+
+    elif args.action == "disable":
+        if not args.agent_id:
+            _print("❌ Agent ID required")
+            return 1
+        success = registry.disable_agent(args.agent_id)
+        icon = "✅" if success else "❌"
+        msg = f"Agent '{args.agent_id}' disabled" if success else f"Agent '{args.agent_id}' not found"
+        _print(f"{icon} {msg}")
+        if _json_output:
+            _output_json({"success": success, "message": msg})
+        return 0 if success else 1
+
+    elif args.action == "run":
+        if not args.agent_id:
+            _print("❌ Agent ID required")
+            return 1
+        from utils.agent_runner import AgentScheduler
+        scheduler = AgentScheduler()
+        _print(f"🔄 Running agent '{args.agent_id}'...")
+        results = scheduler.run_agent_now(args.agent_id)
+        if _json_output:
+            _output_json({"results": [r.to_dict() for r in results]})
+        else:
+            for r in results:
+                icon = "✅" if r.success else "❌"
+                _print(f"  {icon} [{r.action_id}] {r.message}")
+        return 0
+
+    elif args.action == "create":
+        goal = args.goal
+        if not goal:
+            _print("❌ Goal required (use --goal 'description')")
+            return 1
+        from utils.agent_planner import AgentPlanner
+        plan = AgentPlanner.plan_from_goal(goal)
+        config = plan.to_agent_config()
+        registered = registry.register_agent(config)
+
+        if _json_output:
+            _output_json({
+                "success": True,
+                "agent_id": registered.agent_id,
+                "name": registered.name,
+                "plan": plan.to_dict(),
+            })
+        else:
+            _print(f"✅ Created agent: {registered.name} (ID: {registered.agent_id})")
+            _print(f"   Type: {plan.agent_type.value}")
+            _print(f"   Confidence: {plan.confidence:.0%}")
+            _print(f"   Steps:")
+            for step in plan.steps:
+                _print(f"     {step.step_number}. {step.description}")
+            _print(f"\n   Agent starts in dry-run mode. Use 'agent enable {registered.agent_id}' to activate.")
+        return 0
+
+    elif args.action == "remove":
+        if not args.agent_id:
+            _print("❌ Agent ID required")
+            return 1
+        success = registry.remove_agent(args.agent_id)
+        icon = "✅" if success else "❌"
+        msg = f"Agent '{args.agent_id}' removed" if success else f"Cannot remove agent '{args.agent_id}' (built-in or not found)"
+        _print(f"{icon} {msg}")
+        if _json_output:
+            _output_json({"success": success, "message": msg})
+        return 0 if success else 1
+
+    elif args.action == "logs":
+        if not args.agent_id:
+            # Show all recent activity
+            activity = registry.get_recent_activity(limit=30)
+            if _json_output:
+                _output_json({"activity": activity})
+            else:
+                _print("═══════════════════════════════════════════")
+                _print("   Recent Agent Activity")
+                _print("═══════════════════════════════════════════")
+                if not activity:
+                    _print("\n(no activity)")
+                else:
+                    for item in activity:
+                        ts = time_mod.strftime("%Y-%m-%d %H:%M:%S", time_mod.localtime(item["timestamp"]))
+                        icon = "✅" if item["success"] else "❌"
+                        _print(f"  {ts} {icon} [{item['agent_name']}] {item['message'][:80]}")
+        else:
+            state = registry.get_state(args.agent_id)
+            if _json_output:
+                _output_json({"history": [h.to_dict() for h in state.history]})
+            else:
+                agent = registry.get_agent(args.agent_id)
+                name = agent.name if agent else args.agent_id
+                _print(f"Agent: {name} (runs: {state.run_count}, errors: {state.error_count})")
+                if not state.history:
+                    _print("  (no history)")
+                else:
+                    for h in state.history[-20:]:
+                        ts = time_mod.strftime("%H:%M:%S", time_mod.localtime(h.timestamp))
+                        icon = "✅" if h.success else "❌"
+                        _print(f"  {ts} {icon} [{h.action_id}] {h.message[:80]}")
+        return 0
+
+    elif args.action == "templates":
+        from utils.agent_planner import AgentPlanner
+        templates = AgentPlanner.list_goal_templates()
+        if _json_output:
+            _output_json({"templates": templates})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Agent Goal Templates")
+            _print("═══════════════════════════════════════════")
+            for t in templates:
+                _print(f"\n  📋 {t['name']}")
+                _print(f"     Goal: \"{t['goal']}\"")
+                _print(f"     Type: {t['type']}")
+                _print(f"     {t['description']}")
+        return 0
+
+    elif args.action == "notify":
+        if not args.agent_id:
+            # Show notification config for all agents
+            agents = registry.list_agents()
+            if _json_output:
+                configs = {
+                    a.agent_id: a.notification_config for a in agents
+                }
+                _output_json({"notification_configs": configs})
+            else:
+                _print("═══════════════════════════════════════════")
+                _print("   Agent Notification Settings")
+                _print("═══════════════════════════════════════════")
+                for a in agents:
+                    nc = a.notification_config
+                    enabled = nc.get("enabled", False)
+                    icon = "🔔" if enabled else "🔕"
+                    _print(f"\n  {icon} {a.name} ({a.agent_id})")
+                    _print(f"      Enabled: {enabled}")
+                    if enabled:
+                        _print(f"      Min severity: {nc.get('min_severity', 'high')}")
+                        _print(f"      Channels: {', '.join(nc.get('channels', ['desktop', 'in_app']))}")
+                        webhook = nc.get("webhook_url", "")
+                        if webhook:
+                            _print(f"      Webhook: {webhook}")
+            return 0
+        else:
+            agent = registry.get_agent(args.agent_id)
+            if not agent:
+                _print(f"❌ Agent '{args.agent_id}' not found")
+                return 1
+            # Update notification config
+            nc = dict(agent.notification_config)
+            updated = False
+            if args.webhook is not None:
+                from utils.agent_notifications import AgentNotifier
+                if args.webhook and not AgentNotifier.validate_webhook_url(args.webhook):
+                    _print("❌ Invalid webhook URL (must start with http:// or https://)")
+                    return 1
+                nc["webhook_url"] = args.webhook or None
+                if args.webhook:
+                    if "webhook" not in nc.get("channels", []):
+                        nc.setdefault("channels", ["desktop", "in_app"]).append("webhook")
+                updated = True
+            if args.min_severity is not None:
+                valid = ["info", "low", "medium", "high", "critical"]
+                if args.min_severity not in valid:
+                    _print(f"❌ Invalid severity. Choose from: {', '.join(valid)}")
+                    return 1
+                nc["min_severity"] = args.min_severity
+                updated = True
+            if not updated:
+                # Toggle enable/disable
+                nc["enabled"] = not nc.get("enabled", False)
+            else:
+                nc["enabled"] = True
+            agent.notification_config = nc
+            registry.save()
+            icon = "🔔" if nc.get("enabled") else "🔕"
+            _print(f"{icon} Notifications {'enabled' if nc.get('enabled') else 'disabled'} for '{agent.name}'")
+            if _json_output:
+                _output_json({"success": True, "notification_config": nc})
+            return 0
+
+    return 1
+
 def cmd_storage(args):
     """Handle storage subcommand."""
     if args.action == "disks":
@@ -1910,6 +2149,19 @@ def main(argv: Optional[List[str]] = None):
     )
     storage_parser.add_argument("device", nargs="?", help="Device path (e.g. /dev/sda)")
 
+    # v18.0 Sentinel - Agent management
+    agent_parser = subparsers.add_parser("agent", help="Autonomous system agent management")
+    agent_parser.add_argument(
+        "action",
+        choices=["list", "status", "enable", "disable", "run", "create",
+                 "remove", "logs", "templates", "notify"],
+        help="Agent action"
+    )
+    agent_parser.add_argument("agent_id", nargs="?", help="Agent ID (for enable/disable/run/remove/logs/notify)")
+    agent_parser.add_argument("--goal", help="Natural language goal (for create)")
+    agent_parser.add_argument("--webhook", help="Webhook URL for notifications (for notify)")
+    agent_parser.add_argument("--min-severity", help="Minimum severity to notify: info/low/medium/high/critical")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -1958,6 +2210,8 @@ def main(argv: Optional[List[str]] = None):
         # v17.0 Atlas
         "bluetooth": cmd_bluetooth,
         "storage": cmd_storage,
+        # v18.0 Sentinel
+        "agent": cmd_agent,
     }
 
     handler = commands.get(args.command)

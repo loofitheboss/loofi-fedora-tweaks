@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file.
 
+## [18.0.0] - 2026-02-09 "Sentinel"
+
+### Added
+
+- **Autonomous Agent Framework**: Full agent system for proactive system management (`utils/agents.py`).
+  - `AgentConfig` declarative agent definition with type, triggers, actions, settings.
+  - `AgentState` runtime state with bounded history, rate limiting, status tracking.
+  - `AgentRegistry` singleton for agent CRUD, JSON persistence, and querying.
+  - `AgentResult`, `AgentTrigger`, `AgentAction` dataclasses with full serialization.
+  - 5 built-in agents: System Monitor, Security Guard, Update Watcher, Cleanup Bot, Performance Optimizer.
+  - 8 agent types: `system_monitor`, `security_guard`, `update_watcher`, `cleanup_bot`, `performance_optimizer`, `custom`, `composite`, `scheduled_task`.
+
+- **Agent Runner & Executor**: Background execution engine (`utils/agent_runner.py`).
+  - `AgentExecutor` maps 14 built-in operations to real system checks (CPU, memory, disk, temperature, ports, failed logins, firewall, DNF/Flatpak updates, cache cleanup, journal vacuum, temp files, workload detection, tuning).
+  - `AgentScheduler` background thread-based scheduling with interval triggers, result callbacks.
+  - Safety: rate limiting (configurable max actions/hour), dry-run mode, severity gating (CRITICAL blocked from automation).
+
+- **AI-Powered Agent Planner**: Natural language goal → agent configuration (`utils/agent_planner.py`).
+  - Template matching for 5 common goals (health, security, updates, cleanup, performance).
+  - Ollama LLM fallback for custom goal interpretation with JSON response parsing.
+  - Operation catalog with 14 entries and severity metadata.
+  - `AgentPlan` dataclass with confidence scoring and `to_agent_config()` conversion.
+
+- **Agents Tab**: New GUI tab (#26) for agent management (`ui/agents_tab.py`).
+  - Dashboard: 5 stat cards (total, enabled, running, errors, total runs), scheduler start/stop, recent activity.
+  - My Agents: Table with enable/disable/run controls per agent.
+  - Create Agent: Goal input with 5 template buttons, AI plan generation, dry-run/rate-limit config.
+  - Activity Log: Timestamped history of all agent actions.
+
+- **CLI Agent Commands**: `loofi agent` subcommand with 9 actions.
+  - `list`, `status`, `enable`, `disable`, `run`, `create --goal "…"`, `remove`, `logs`, `templates`.
+  - Full `--json` support for scripting.
+
+### Changed
+
+- **Main Window**: Updated to v18.0 "Sentinel", 26-tab count with Agents tab (🤖 icon).
+- **CLI**: Updated header to v18.0.0, added `agent` subparser and command handler.
+
+### Tests
+
+- 60+ new tests in `test_agents.py` covering:
+  - Agent dataclass serialization/deserialization roundtrips
+  - AgentRegistry CRUD, persistence, enable/disable, settings update
+  - AgentExecutor dry-run, rate limiting, severity gating, operation execution
+  - Built-in operations (CPU, memory, disk, temperature, workload detection)
+  - AgentPlanner template matching, fallback, plan-to-config conversion
+  - AgentScheduler start/stop, run-now, result callbacks
+  - CLI agent commands (list, status, templates, create, enable/disable, logs)
+
+### New Files
+
+- `utils/agents.py` — Agent framework, registry, and built-in agent definitions
+- `utils/agent_runner.py` — Agent executor and background scheduler
+- `utils/agent_planner.py` — AI-powered natural language agent planning
+- `ui/agents_tab.py` — Agents management GUI tab
+- `tests/test_agents.py` — Agent framework test suite
+- `docs/ROADMAP_V18.md` — v18.0 "Sentinel" roadmap and architecture
+
 ## [17.0.0] - 2026-02-09 "Atlas"
 
 ### Added

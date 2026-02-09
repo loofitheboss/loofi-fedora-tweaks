@@ -9,6 +9,9 @@ _loofi_fedora_tweaks() {
     local -a cleanup_actions tweak_actions advanced_actions network_actions
     local -a plugins_actions vm_actions vfio_actions mesh_actions
     local -a teleport_actions ai_models_actions preset_actions focus_mode_actions
+    local -a profile_actions health_history_actions tuner_actions snapshot_actions
+    local -a logs_actions service_actions package_actions firewall_actions
+    local -a bluetooth_actions storage_actions agent_actions
 
     commands=(
         'info:Show system information'
@@ -33,6 +36,17 @@ _loofi_fedora_tweaks() {
         'preset:Manage system presets'
         'focus-mode:Focus mode distraction blocking'
         'security-audit:Run security audit and show score'
+        'profile:System profile management'
+        'health-history:Health timeline metrics'
+        'tuner:Performance auto-tuning'
+        'snapshot:Snapshot management'
+        'logs:Smart log viewer'
+        'service:Systemd service management'
+        'package:Unified package management'
+        'firewall:Firewall management'
+        'bluetooth:Bluetooth device management'
+        'storage:Storage and disk management'
+        'agent:Autonomous agent management'
     )
 
     cleanup_actions=(
@@ -107,6 +121,100 @@ _loofi_fedora_tweaks() {
         'on:Enable focus mode'
         'off:Disable focus mode'
         'status:Show focus mode status'
+    )
+
+    profile_actions=(
+        'list:List system profiles'
+        'apply:Apply a profile'
+        'create:Create a new profile'
+        'delete:Delete a profile'
+    )
+
+    health_history_actions=(
+        'show:Show health history'
+        'record:Record a metric'
+        'export:Export history'
+        'prune:Remove old records'
+    )
+
+    tuner_actions=(
+        'analyze:Analyze current workload'
+        'apply:Apply tuning recommendation'
+        'history:Show tuning history'
+    )
+
+    snapshot_actions=(
+        'list:List snapshots'
+        'create:Create a snapshot'
+        'delete:Delete a snapshot'
+        'backends:Show available backends'
+    )
+
+    logs_actions=(
+        'show:Show recent logs'
+        'errors:Show error logs'
+        'export:Export logs to file'
+    )
+
+    service_actions=(
+        'list:List services'
+        'start:Start a service'
+        'stop:Stop a service'
+        'restart:Restart a service'
+        'enable:Enable a service'
+        'disable:Disable a service'
+        'logs:View service logs'
+        'status:Show service status'
+    )
+
+    package_actions=(
+        'search:Search for packages'
+        'install:Install a package'
+        'remove:Remove a package'
+        'list:List installed packages'
+        'recent:Show recently installed'
+    )
+
+    firewall_actions=(
+        'status:Show firewall status'
+        'ports:List open ports'
+        'open-port:Open a port'
+        'close-port:Close a port'
+        'services:List allowed services'
+        'zones:Show firewall zones'
+    )
+
+    bluetooth_actions=(
+        'status:Show Bluetooth status'
+        'devices:List paired devices'
+        'scan:Scan for devices'
+        'pair:Pair a device'
+        'connect:Connect to a device'
+        'disconnect:Disconnect a device'
+        'trust:Trust a device'
+        'power-on:Turn Bluetooth on'
+        'power-off:Turn Bluetooth off'
+    )
+
+    storage_actions=(
+        'disks:List physical disks'
+        'mounts:Show mount points'
+        'smart:Show SMART health'
+        'trim:Trim SSD'
+        'usage:Show disk usage'
+    )
+
+    agent_actions=(
+        'list:Show all agents'
+        'status:Agent summary statistics'
+        'enable:Enable an agent'
+        'disable:Disable an agent'
+        'run:Run an agent immediately'
+        'create:Create agent from goal'
+        'remove:Remove a custom agent'
+        'logs:View agent activity logs'
+        'templates:Show goal templates'
+        'notify:Configure agent notifications'
     )
 
     _arguments -C \
@@ -214,6 +322,77 @@ _loofi_fedora_tweaks() {
                         _arguments \
                             '--profile[Focus profile]:profile:' \
                             '*::'
+                    fi
+                    ;;
+                profile)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'profile action' profile_actions
+                    else
+                        _arguments '*:profile name:'
+                    fi
+                    ;;
+                health-history)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'health-history action' health_history_actions
+                    fi
+                    ;;
+                tuner)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'tuner action' tuner_actions
+                    fi
+                    ;;
+                snapshot)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'snapshot action' snapshot_actions
+                    fi
+                    ;;
+                logs)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'logs action' logs_actions
+                    fi
+                    ;;
+                service)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'service action' service_actions
+                    else
+                        _arguments '*:service name:'
+                    fi
+                    ;;
+                package)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'package action' package_actions
+                    else
+                        _arguments '*:package name:'
+                    fi
+                    ;;
+                firewall)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'firewall action' firewall_actions
+                    fi
+                    ;;
+                bluetooth)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'bluetooth action' bluetooth_actions
+                    else
+                        _arguments '*:device address:'
+                    fi
+                    ;;
+                storage)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'storage action' storage_actions
+                    else
+                        _arguments '*:device path:_files'
+                    fi
+                    ;;
+                agent)
+                    if (( CURRENT == 2 )); then
+                        _describe -t actions 'agent action' agent_actions
+                    else
+                        _arguments \
+                            '--goal[Natural language goal]:goal:' \
+                            '--webhook[Webhook URL]:url:' \
+                            '--min-severity[Min notification severity]:severity:(info low medium high critical)' \
+                            '*:agent ID:'
                     fi
                     ;;
                 disk)

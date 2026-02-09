@@ -5,7 +5,7 @@ _loofi_fedora_tweaks() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="info health disk processes temperature netmon cleanup tweak advanced network doctor hardware plugins support-bundle vm vfio mesh teleport ai-models preset focus-mode security-audit"
+    local commands="info health disk processes temperature netmon cleanup tweak advanced network doctor hardware plugins support-bundle vm vfio mesh teleport ai-models preset focus-mode security-audit profile health-history tuner snapshot logs service package firewall bluetooth storage agent"
 
     # Subcommand completions
     local cleanup_actions="all dnf journal trim autoremove rpmdb"
@@ -20,11 +20,23 @@ _loofi_fedora_tweaks() {
     local ai_models_actions="list recommend"
     local preset_actions="list apply export"
     local focus_mode_actions="on off status"
+    local profile_actions="list apply create delete"
+    local health_history_actions="show record export prune"
+    local tuner_actions="analyze apply history"
+    local snapshot_actions="list create delete backends"
+    local logs_actions="show errors export"
+    local service_actions="list start stop restart enable disable logs status"
+    local package_actions="search install remove list recent"
+    local firewall_actions="status ports open-port close-port services zones"
+    local bluetooth_actions="status devices scan pair connect disconnect trust power-on power-off"
+    local storage_actions="disks mounts smart trim usage"
+    local agent_actions="list status enable disable run create remove logs templates notify"
 
     # Power profiles
     local power_profiles="performance balanced power-saver"
     local dns_providers="cloudflare google quad9 opendns"
     local sort_options="cpu memory"
+    local severity_levels="info low medium high critical"
 
     case "${cword}" in
         1)
@@ -81,6 +93,50 @@ _loofi_fedora_tweaks() {
                     COMPREPLY=($(compgen -W "${focus_mode_actions}" -- "${cur}"))
                     return 0
                     ;;
+                profile)
+                    COMPREPLY=($(compgen -W "${profile_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                health-history)
+                    COMPREPLY=($(compgen -W "${health_history_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                tuner)
+                    COMPREPLY=($(compgen -W "${tuner_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                snapshot)
+                    COMPREPLY=($(compgen -W "${snapshot_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                logs)
+                    COMPREPLY=($(compgen -W "${logs_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                service)
+                    COMPREPLY=($(compgen -W "${service_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                package)
+                    COMPREPLY=($(compgen -W "${package_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                firewall)
+                    COMPREPLY=($(compgen -W "${firewall_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                bluetooth)
+                    COMPREPLY=($(compgen -W "${bluetooth_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                storage)
+                    COMPREPLY=($(compgen -W "${storage_actions}" -- "${cur}"))
+                    return 0
+                    ;;
+                agent)
+                    COMPREPLY=($(compgen -W "${agent_actions}" -- "${cur}"))
+                    return 0
+                    ;;
             esac
             ;;
     esac
@@ -99,12 +155,16 @@ _loofi_fedora_tweaks() {
             COMPREPLY=($(compgen -W "${sort_options}" -- "${cur}"))
             return 0
             ;;
+        --min-severity)
+            COMPREPLY=($(compgen -W "${severity_levels}" -- "${cur}"))
+            return 0
+            ;;
         --days|--limit|-n|--count|--value)
             # Numeric arguments - no completion
             return 0
             ;;
-        --path)
-            # File path completion
+        --path|--webhook)
+            # File path / URL completion
             _filedir
             return 0
             ;;
@@ -144,6 +204,9 @@ _loofi_fedora_tweaks() {
                 ;;
             focus-mode)
                 opts+=" --profile"
+                ;;
+            agent)
+                opts+=" --goal --webhook --min-severity"
                 ;;
         esac
         COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
