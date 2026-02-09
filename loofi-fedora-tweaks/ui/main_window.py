@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QStackedWidget, QLabel, QFrame, QHeaderView, QTreeWidgetItemIterator
 )
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
+from PyQt6.QtGui import QIcon, QShortcut, QKeySequence, QFontMetrics
 
 # Only import essential tabs eagerly (Dashboard is always shown first)
 from ui.dashboard_tab import DashboardTab
@@ -17,8 +17,10 @@ from ui.lazy_widget import LazyWidget
 from utils.system import SystemManager
 from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
+from utils.config_manager import ConfigManager
 from version import __version__
 import os
+import logging
 
 # Custom data roles for sidebar items
 _ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
@@ -58,6 +60,22 @@ _TAB_META = {
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # Initialize logger for this class
+        self.logger = logging.getLogger(__name__)
+
+        # Check frameless mode feature flag
+        frameless_enabled = self._get_frameless_mode_flag()
+
+        if frameless_enabled:
+            self.logger.warning(
+                "Frameless mode requested but not yet fully implemented. "
+                "Using native title bar. Set ui.frameless_mode=false or "
+                "unset LOOFI_FRAMELESS to disable this warning."
+            )
+            # Stub: future frameless implementation would go here
+            # For now, keep native title bar even when flag is True
+
         # Keep native title-bar decorations enabled.
         # This avoids KDE/Wayland/X11 edge-cases where client content can
         # appear to bleed into the top chrome when frameless/custom hints are used.
@@ -66,6 +84,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self.tr(f"Loofi Fedora Tweaks v{__version__}"))
         self.resize(1100, 700)
         self.setMinimumSize(800, 500)
+
+        # HiDPI safety: compute scalable dimensions from font metrics
+        fm = QFontMetrics(self.font())
+        self._line_height = fm.height()
 
         # Initialize Pulse event listener
         self.pulse = None
@@ -84,7 +106,9 @@ class MainWindow(QMainWindow):
 
         # Sidebar container with search
         sidebar_container = QWidget()
-        sidebar_container.setFixedWidth(240)
+        # HiDPI: 15*line_height = approx 240px at 1x DPI
+        sidebar_width = int(self._line_height * 15)
+        sidebar_container.setFixedWidth(sidebar_width)
         sidebar_layout = QVBoxLayout(sidebar_container)
         sidebar_layout.setContentsMargins(0, 10, 0, 0)
         sidebar_layout.setSpacing(0)
@@ -94,7 +118,9 @@ class MainWindow(QMainWindow):
         self.sidebar_search = QLineEdit()
         self.sidebar_search.setPlaceholderText(self.tr("Search tabs..."))
         self.sidebar_search.setClearButtonEnabled(True)
-        self.sidebar_search.setFixedHeight(36)
+        # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
+        search_height = int(self._line_height * 2 + 28)
+        self.sidebar_search.setFixedHeight(search_height)
         self.sidebar_search.setStyleSheet(
             "QLineEdit { margin: 5px 10px; border-radius: 8px; padding: 4px 10px; }"
         )
@@ -117,7 +143,9 @@ class MainWindow(QMainWindow):
         sidebar_footer = QLabel(f"v{__version__}")
         sidebar_footer.setObjectName("sidebarFooter")
         sidebar_footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        sidebar_footer.setFixedHeight(28)
+        # HiDPI: 2*line_height = approx 28px at 1x DPI
+        footer_height = int(self._line_height * 2)
+        sidebar_footer.setFixedHeight(footer_height)
         sidebar_layout.addWidget(sidebar_footer)
 
         main_layout.addWidget(sidebar_container)
@@ -130,7 +158,9 @@ class MainWindow(QMainWindow):
         # Breadcrumb bar
         self._breadcrumb_frame = QFrame()
         self._breadcrumb_frame.setObjectName("breadcrumbBar")
-        self._breadcrumb_frame.setFixedHeight(44)
+        # HiDPI: 3*line_height = approx 44px at 1x DPI
+        breadcrumb_height = int(self._line_height * 3)
+        self._breadcrumb_frame.setFixedHeight(breadcrumb_height)
         bc_layout = QHBoxLayout(self._breadcrumb_frame)
         bc_layout.setContentsMargins(16, 0, 16, 0)
         self._bc_category = QLabel("")
@@ -156,7 +186,9 @@ class MainWindow(QMainWindow):
         # Status bar
         self._status_frame = QFrame()
         self._status_frame.setObjectName("statusBar")
-        self._status_frame.setFixedHeight(28)
+        # HiDPI: 2*line_height = approx 28px at 1x DPI
+        status_height = int(self._line_height * 2)
+        self._status_frame.setFixedHeight(status_height)
         sb_layout = QHBoxLayout(self._status_frame)
         sb_layout.setContentsMargins(12, 0, 12, 0)
         self._status_label = QLabel("")
@@ -692,3 +724,25 @@ class MainWindow(QMainWindow):
         except (OSError, subprocess.TimeoutExpired):
             pass
         return "dark"
+
+    def _get_frameless_mode_flag(self) -> bool:
+        """
+        Check if frameless window mode is requested.
+
+        Priority:
+        1. Config file: ui.frameless_mode key
+        2. Environment variable: LOOFI_FRAMELESS=1
+
+        Returns:
+            True if frameless mode is enabled, False otherwise (default).
+        """
+        # Check config file first
+        config = ConfigManager.load_config()
+        if config is not None:
+            ui_settings = config.get("ui", {})
+            if "frameless_mode" in ui_settings:
+                return bool(ui_settings["frameless_mode"])
+
+        # Fallback to environment variable
+        env_value = os.environ.get("LOOFI_FRAMELESS", "").strip()
+        return env_value == "1"
