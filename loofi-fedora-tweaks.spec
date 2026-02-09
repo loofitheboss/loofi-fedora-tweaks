@@ -66,12 +66,19 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 
 %changelog
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 19.0.0-1
-- v19.0 Vanguard: Centralized ActionExecutor with preview and dry-run
+- v19.0 Vanguard Phase 1: Centralized ActionExecutor with preview and dry-run
 - Unified ActionResult schema for all system actions
 - Structured JSONL action logging with diagnostics export
 - Agent Arbitrator for thermal/battery-aware scheduling
 - Operations bridge for CLI/headless execution
-- 24 new tests, 1598 total passing
+- v19.0 Vanguard Phase 2: UX enhancements
+- Breadcrumb bar showing Category > Page with description
+- Status bar with keyboard shortcut hints and version badge
+- Sidebar badges: recommended (star) and advanced (gear) labels
+- Tooltips on all 26 sidebar tabs
+- Category auto-select first child on click
+- Dark and light theme styles for all new elements
+- 1593 tests passing
 
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 18.1.1-1
 - v18.1.1 Hotfix: Fix startup crash due to sidebar refactor
