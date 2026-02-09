@@ -125,8 +125,8 @@ class TestAuthenticationSecurity:
 
             # Mock jwt.decode to raise exception for expired token
             with patch("utils.auth.jwt.decode") as mock_decode:
-                from jose import ExpiredSignatureError
-                mock_decode.side_effect = ExpiredSignatureError("Token expired")
+                import jwt
+                mock_decode.side_effect = jwt.ExpiredSignatureError("Token expired")
 
                 response = test_client.post(
                     "/api/execute",
