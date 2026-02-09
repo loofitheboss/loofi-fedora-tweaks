@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [20.0.1] - 2026-02-09 "Synapse"
+
+### Changed
+
+- Packaging: switch JWT dependency to PyJWT to align with Fedora `python3-jwt` package.
+
+---
+
 ## [20.0.0] - 2026-02-09 "Synapse" (Phase 1: Remote Management)
 
 ### Added

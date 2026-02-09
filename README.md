@@ -48,7 +48,7 @@ v19.0 introduces a **centralized action executor** with preview mode, structured
 
 ---
 
-## Early Preview: v20.0.0 "Synapse" (Phase 1)
+## Early Preview: v20.0.1 "Synapse" (Phase 1)
 
 **Loofi Web API (Headless Mode)**
 
@@ -443,7 +443,7 @@ loofi --json doctor
 loofi --version
 ```
 
-## Loofi Web API (v20.0 Preview)
+## Loofi Web API (v20.0.1 Preview)
 
 ```bash
 # Start the API server

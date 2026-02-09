@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        20.0.0
+Version:        20.0.1
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -17,7 +17,7 @@ Requires:       polkit
 Requires:       libnotify
 Requires:       python3-fastapi
 Requires:       python3-uvicorn
-Requires:       python3-python-jose
+Requires:       python3-jwt
 Requires:       python3-bcrypt
 Requires:       python3-httpx
 
@@ -70,7 +70,10 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
-* Sun Feb 09 2026 Loofi <loofi@example.com> - 20.0.0-1
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.1-1
+- Packaging: switch JWT dependency to python3-jwt (PyJWT) for Fedora 43
+
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.0-1
 - v20.0 Synapse Phase 1: Remote Management & EventBus Hive Mind
 - Loofi Web API: Headless FastAPI server with JWT auth (--web flag)
 - EventBus: Thread-safe pub/sub system for inter-agent communication

@@ -2,7 +2,7 @@ PyQt6
 requests
 fastapi
 uvicorn
-python-jose
+PyJWT
 bcrypt
 httpx
 python-multipart

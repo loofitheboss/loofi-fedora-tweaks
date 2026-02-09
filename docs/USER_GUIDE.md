@@ -63,7 +63,7 @@ loofi-fedora-tweaks
 loofi info
 loofi cleanup
 
-# Web API Mode (v20.0 preview)
+# Web API Mode (v20.0.1 preview)
 loofi-fedora-tweaks --web
 ```
 
