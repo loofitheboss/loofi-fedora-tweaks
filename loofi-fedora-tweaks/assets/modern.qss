@@ -311,3 +311,56 @@ QDialog {
     color: #cdd6f4;
 }
 
+/* ===== v19.0 Breadcrumb Bar ===== */
+QFrame#breadcrumbBar {
+    background-color: #181825;
+    border-bottom: 1px solid #313244;
+}
+QLabel#bcCategory {
+    color: #a6adc8;
+    font-size: 13px;
+    font-weight: 500;
+}
+QLabel#bcSep {
+    color: #585b70;
+    font-size: 13px;
+}
+QLabel#bcPage {
+    color: #89b4fa;
+    font-size: 13px;
+    font-weight: bold;
+}
+QLabel#bcDesc {
+    color: #6c7086;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* ===== v19.0 Status Bar ===== */
+QFrame#statusBar {
+    background-color: #181825;
+    border-top: 1px solid #313244;
+}
+QLabel#statusText {
+    color: #a6adc8;
+    font-size: 11px;
+}
+QLabel#statusHints {
+    color: #585b70;
+    font-size: 11px;
+}
+QLabel#statusVersion {
+    color: #89b4fa;
+    font-size: 11px;
+    font-weight: bold;
+    padding-left: 8px;
+}
+
+/* ===== v19.0 Sidebar Footer ===== */
+QLabel#sidebarFooter {
+    color: #585b70;
+    font-size: 11px;
+    background-color: #181825;
+    border-top: 1px solid #313244;
+}
+

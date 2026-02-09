@@ -1,6 +1,6 @@
 """
-Main Window - v18.0 "Sentinel"
-26-tab layout with sidebar navigation.
+Main Window - v19.0 "Vanguard"
+26-tab layout with sidebar navigation, breadcrumb, and status bar.
 """
 
 from PyQt6.QtWidgets import (
@@ -19,6 +19,40 @@ from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
 from version import __version__
 import os
+
+# Custom data roles for sidebar items
+_ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
+_ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
+
+# Tab metadata: (description, badge)
+_TAB_META = {
+    "Home":               ("System overview and quick actions", "recommended"),
+    "Agents":             ("Automated system management agents", ""),
+    "Automation":         ("Scheduled tasks and cron jobs", ""),
+    "System Info":        ("Hardware and OS details", "recommended"),
+    "System Monitor":     ("Live CPU, memory, and process monitoring", "recommended"),
+    "Health":             ("System health timeline and trends", ""),
+    "Logs":               ("Systemd journal and log viewer", "advanced"),
+    "Hardware":           ("CPU, GPU, fan, and power controls", "recommended"),
+    "Performance":        ("Kernel tuning and I/O scheduler", "advanced"),
+    "Storage":            ("Disk usage and mount management", ""),
+    "Software":           ("Package management and repos", "recommended"),
+    "Maintenance":        ("System updates and cache cleanup", "recommended"),
+    "Snapshots":          ("Btrfs/LVM snapshot management", "advanced"),
+    "Virtualization":     ("Virtual machines and containers", "advanced"),
+    "Development":        ("Developer tools and SDKs", ""),
+    "Network":            ("Network interfaces and firewall", "recommended"),
+    "Loofi Link":         ("Device mesh networking", "advanced"),
+    "Security & Privacy": ("Firewall, SELinux, audit tools", "recommended"),
+    "Desktop":            ("GNOME/KDE customization", ""),
+    "Profiles":           ("User profile and workspace management", ""),
+    "Gaming":             ("Game mode and GPU optimization", ""),
+    "AI Lab":             ("AI-powered system suggestions", "advanced"),
+    "State Teleport":     ("System state transfer between machines", "advanced"),
+    "Diagnostics":        ("System diagnostics and health checks", ""),
+    "Community":          ("Community tweaks and shared configs", ""),
+    "Settings":           ("App preferences and theme", ""),
+}
 
 
 class MainWindow(QMainWindow):
@@ -73,11 +107,67 @@ class MainWindow(QMainWindow):
         self.sidebar.currentItemChanged.connect(self.change_page)
         sidebar_layout.addWidget(self.sidebar)
 
+        # Sidebar footer
+        sidebar_footer = QLabel(f"v{__version__}")
+        sidebar_footer.setObjectName("sidebarFooter")
+        sidebar_footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sidebar_footer.setFixedHeight(28)
+        sidebar_layout.addWidget(sidebar_footer)
+
         main_layout.addWidget(sidebar_container)
+
+        # Right side: breadcrumb + content + status bar
+        right_side = QVBoxLayout()
+        right_side.setContentsMargins(0, 0, 0, 0)
+        right_side.setSpacing(0)
+
+        # Breadcrumb bar
+        self._breadcrumb_frame = QFrame()
+        self._breadcrumb_frame.setObjectName("breadcrumbBar")
+        self._breadcrumb_frame.setFixedHeight(44)
+        bc_layout = QHBoxLayout(self._breadcrumb_frame)
+        bc_layout.setContentsMargins(16, 0, 16, 0)
+        self._bc_category = QLabel("")
+        self._bc_category.setObjectName("bcCategory")
+        self._bc_sep = QLabel("  ›  ")
+        self._bc_sep.setObjectName("bcSep")
+        self._bc_page = QLabel("")
+        self._bc_page.setObjectName("bcPage")
+        self._bc_desc = QLabel("")
+        self._bc_desc.setObjectName("bcDesc")
+        bc_layout.addWidget(self._bc_category)
+        bc_layout.addWidget(self._bc_sep)
+        bc_layout.addWidget(self._bc_page)
+        bc_layout.addSpacing(12)
+        bc_layout.addWidget(self._bc_desc)
+        bc_layout.addStretch()
+        right_side.addWidget(self._breadcrumb_frame)
 
         # Content Area
         self.content_area = QStackedWidget()
-        main_layout.addWidget(self.content_area)
+        right_side.addWidget(self.content_area)
+
+        # Status bar
+        self._status_frame = QFrame()
+        self._status_frame.setObjectName("statusBar")
+        self._status_frame.setFixedHeight(28)
+        sb_layout = QHBoxLayout(self._status_frame)
+        sb_layout.setContentsMargins(12, 0, 12, 0)
+        self._status_label = QLabel("")
+        self._status_label.setObjectName("statusText")
+        sb_layout.addWidget(self._status_label)
+        sb_layout.addStretch()
+        shortcuts_hint = QLabel(
+            self.tr("Ctrl+K Search  |  Ctrl+Shift+K Actions  |  F1 Help")
+        )
+        shortcuts_hint.setObjectName("statusHints")
+        sb_layout.addWidget(shortcuts_hint)
+        version_lbl = QLabel(f"v{__version__}")
+        version_lbl.setObjectName("statusVersion")
+        sb_layout.addWidget(version_lbl)
+        right_side.addWidget(self._status_frame)
+
+        main_layout.addLayout(right_side)
 
         # Initialize Pages
         self.pages = {}
@@ -212,36 +302,62 @@ class MainWindow(QMainWindow):
             if item.text(0) == category:
                 category_item = item
                 break
-        
+
         if not category_item:
             category_item = QTreeWidgetItem(self.sidebar)
             category_item.setText(0, category)
-            # Default icons for categories could be added here if desired
             category_item.setExpanded(True)
-            # Make category not selectable if desired, but typically we allow selection and just don't switch page
-            # category_item.setFlags(category_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+
+        # Badge suffix
+        meta = _TAB_META.get(name, ("", ""))
+        desc, badge = meta
+        badge_suffix = ""
+        if badge == "recommended":
+            badge_suffix = "  ★"
+        elif badge == "advanced":
+            badge_suffix = "  ⚙"
 
         item = QTreeWidgetItem(category_item)
-        item.setText(0, f"{icon}  {name}")
-        # Store the widget in the item
+        item.setText(0, f"{icon}  {name}{badge_suffix}")
+        # Store widget, description, and badge type
         item.setData(0, Qt.ItemDataRole.UserRole, widget)
-        
+        item.setData(0, _ROLE_DESC, desc)
+        item.setData(0, _ROLE_BADGE, badge)
+        if desc:
+            item.setToolTip(0, desc)
+
         self.content_area.addWidget(widget)
         self.pages[name] = widget
 
     def change_page(self, current, previous):
         if not current:
             return
-            
+
         widget = current.data(0, Qt.ItemDataRole.UserRole)
         if widget:
             self.content_area.setCurrentWidget(widget)
+            self._update_breadcrumb(current)
         else:
-            # It's a category item, maybe expand/collapse or select first child?
+            # Category item: expand and auto-select first child
             if current.childCount() > 0:
-                current.setExpanded(not current.isExpanded())
-                # Optionally select first child
-                # self.sidebar.setCurrentItem(current.child(0))
+                current.setExpanded(True)
+                self.sidebar.setCurrentItem(current.child(0))
+
+    def _update_breadcrumb(self, item):
+        """Update breadcrumb bar with current category > page."""
+        parent = item.parent()
+        category = parent.text(0) if parent else ""
+        # Strip badge suffixes for display
+        raw = item.text(0)
+        page_name = raw.replace("  ★", "").replace("  ⚙", "")
+        desc = item.data(0, _ROLE_DESC) or ""
+        self._bc_category.setText(category)
+        self._bc_page.setText(page_name)
+        self._bc_desc.setText(desc)
+
+    def set_status(self, text: str):
+        """Set status bar message (can be called from any tab)."""
+        self._status_label.setText(text)
 
     def switch_to_tab(self, name):
         """Helper for Dashboard and Command Palette to switch tabs."""
