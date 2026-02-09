@@ -1,100 +1,79 @@
-# Release Notes — v18.0.0 "Sentinel"
+# Release Notes — v19.0.0 "Vanguard"
 
-## 🤖 Autonomous System Agents
+## Safe Centralized Execution
 
-v18.0 "Sentinel" introduces a complete **agent framework** that transforms Loofi Fedora Tweaks from a reactive tool into a proactive, agent-driven platform. Define your goals in plain English and let Sentinel agents autonomously monitor, maintain, and optimize your system.
-
----
-
-### ✨ Headline Features
-
-#### Agent Framework
-- **5 built-in agents** ready to go: System Monitor, Security Guard, Update Watcher, Cleanup Bot, Performance Optimizer
-- **AgentRegistry** with JSON persistence, enable/disable, and per-agent settings
-- **AgentState** tracking with bounded history, rate limiting, and status monitoring
-
-#### AI-Powered Agent Creation
-- Describe what you want in natural language: _"Keep my system healthy"_
-- **Template matching** for 5 common goals with high-confidence plans
-- **Ollama LLM fallback** for interpreting custom goals into agent configs
-- **14 built-in operations**: CPU, memory, disk, temperature, ports, logins, firewall, DNF/Flatpak updates, cache cleanup, journal vacuum, temp files, workload detection, tuning
-
-#### Agent Execution Engine
-- **AgentScheduler** with background thread-based interval scheduling
-- **AgentExecutor** maps operations to real system checks
-- **Dry-run mode** by default — new agents log what they _would_ do without acting
-- **Rate limiting** — configurable max actions per hour (default: 10)
-- **Severity gating** — CRITICAL actions are blocked from automation, requiring manual trigger
-
-#### New Agents Tab (26th tab)
-- **Dashboard**: Live stat cards, scheduler controls, recent activity feed
-- **My Agents**: Table with enable/disable/run controls per agent
-- **Create Agent**: Goal input with template buttons, AI plan generation, safety config
-- **Activity Log**: Full history of all agent actions
-
-#### CLI Agent Management
-```bash
-loofi agent list              # Show all agents
-loofi agent status            # Summary statistics  
-loofi agent create --goal "Keep my system healthy"
-loofi agent enable <id>       # Activate an agent
-loofi agent run <id>          # Run immediately
-loofi agent logs              # View activity
-loofi agent templates         # Browse goal templates
-```
+v19.0 "Vanguard" establishes a **centralized action executor** — a single auditable path for all system commands with preview mode, structured logging, and resource-aware agent arbitration. This is the foundation for preview-before-apply, undo/restore, and diagnostics export in future releases.
 
 ---
 
-### 🛡️ Safety First
+### Headline Features
 
-| Safety Feature | Description |
-|---------------|-------------|
-| Dry-run default | New agents start in simulation mode |
-| Rate limiting | Max 10 actions/hour (configurable) |
-| Severity gating | INFO/LOW auto, MEDIUM conditional, HIGH prompt, CRITICAL manual only |
-| No privilege escalation | Agents read state but never `pkexec` |
-| Bounded history | 100 entries max per agent |
+#### Centralized ActionExecutor
+- **Preview mode**: See exactly what any action will do before it runs
+- **Global dry-run**: Disable all real execution with a single toggle for testing
+- **Structured JSONL logging**: Every action is logged with timestamp, command, result, and exit code
+- **Flatpak-aware**: Auto-wraps commands with `flatpak-spawn --host` inside sandboxed environments
+- **pkexec support**: Privilege escalation via `pkexec=True` parameter
+
+#### Unified ActionResult
+- Single structured result type replacing ad-hoc `OperationResult` and `AgentResult`
+- Fields: `success`, `message`, `exit_code`, `stdout`, `stderr`, `data`, `preview`, `needs_reboot`, `timestamp`, `action_id`
+- Convenience constructors: `ActionResult.ok()`, `ActionResult.fail()`, `ActionResult.previewed()`
+- Full serialization with output truncation safety
+
+#### Agent Arbitrator
+- Blocks background agents when CPU temperature exceeds thermal limit
+- Blocks background work on battery power
+- Critical actions bypass thermal/power constraints for safety-first response
+
+#### Diagnostics Export
+- `ActionExecutor.export_diagnostics()` returns structured action log + system info
+- `ActionExecutor.get_action_log(limit=50)` reads recent action history
+- JSONL action log auto-trimmed at 500 entries
+
+#### Operations Bridge
+- `execute_operation()` bridges existing operation tuples to ActionExecutor
+- Enables CLI and headless execution paths without touching GUI code
 
 ---
 
-### 📊 Built-in Agents
+### Safety Model
 
-| Agent | Monitors | Default Interval |
-|-------|----------|-----------------|
-| 🏥 System Monitor | CPU, memory, disk, temperature | 60s |
-| 🛡️ Security Guard | Open ports, failed logins, firewall | 5 min |
-| 📦 Update Watcher | DNF packages, Flatpak apps | 1 hour |
-| 🧹 Cleanup Bot | DNF cache, journal, temp files | 24 hours |
-| ⚡ Performance Optimizer | Workload detection, tuning | 2 min |
-
----
-
-### 🧪 Tests
-
-- **60+ new tests** covering agent dataclasses, registry, executor, planner, scheduler, and CLI
-- Full serialization/deserialization roundtrip tests
-- Safety tests for dry-run, rate limiting, and severity gating
+| Feature | Description |
+|---------|-------------|
+| Preview mode | Inspect what would execute without running |
+| Global dry-run | Single toggle disables all real execution |
+| Structured results | Every action returns exit code, stdout, stderr |
+| Action logging | JSONL audit trail with auto-trimming |
+| Arbitrator | Thermal and battery-aware agent gating |
+| Non-critical logging | Log failures never crash actions |
 
 ---
 
-### 📁 New Files
+### Tests
+
+- **24 new tests** covering ActionResult, ActionExecutor, logging, and bridge
+- **4 new arbitrator tests** for thermal blocking, battery blocking, and critical bypass
+- **79 tests passing** across the new modules (1598 total project-wide)
+
+---
+
+### New Files
 
 | File | Purpose |
 |------|---------|
-| `utils/agents.py` | Agent framework, registry, built-in definitions |
-| `utils/agent_runner.py` | Executor and background scheduler |
-| `utils/agent_planner.py` | AI-powered natural language planning |
-| `ui/agents_tab.py` | Agents management GUI |
-| `tests/test_agents.py` | Comprehensive test suite |
-| `docs/ROADMAP_V18.md` | Architecture and roadmap |
+| `utils/action_result.py` | Unified ActionResult schema |
+| `utils/action_executor.py` | Centralized executor with preview, dry-run, logging |
+| `utils/arbitrator.py` | Agent resource arbitrator |
+| `tests/test_action_executor.py` | ActionExecutor + ActionResult test suite |
 
 ---
 
-### 🔮 What's Next (v18.x)
+### What's Next (v19.x — Phase 2 & 3)
 
-- Agent-to-agent communication
-- Webhook/notification integration (Telegram, email)
-- CRON-style scheduling
-- Agent export/import and marketplace
-- SystemPulse event-driven triggers
-- AI-powered anomaly detection
+- Search + Categories + Recommended/Advanced labels in UI
+- Diagnostics export UI with download button
+- Preview UI integration in GUI tabs
+- Undo/restore for reversible tweaks
+- First-run onboarding with safety disclaimers
+- RPM/Flatpak build validation alignment

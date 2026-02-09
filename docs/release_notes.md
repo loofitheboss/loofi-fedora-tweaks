@@ -1,5 +1,62 @@
 # Release Notes
 
+## v19.0.0 "Vanguard" - February 2026
+
+The Vanguard update establishes a centralized action executor — a single auditable path for all system commands with preview mode, structured logging, and resource-aware agent arbitration.
+
+### Highlights
+
+- **ActionResult**: Unified structured result type for all system actions
+- **ActionExecutor**: Centralized command execution with preview, dry-run, Flatpak-aware wrapping
+- **Arbitrator**: Resource-aware agent scheduling based on thermal and battery state
+- **Action Logging**: JSONL audit trail with diagnostics export
+- **Operations Bridge**: CLI/headless execution via `execute_operation()`
+- **1598 Tests**: 24 new tests for the executor layer
+
+### New Features
+
+#### ActionExecutor
+
+| Feature | Description |
+|---------|-------------|
+| **Preview mode** | `preview=True` shows what would execute without running |
+| **Global dry-run** | `set_global_dry_run(True)` disables all real execution |
+| **Structured results** | ActionResult with exit_code, stdout, stderr, preview flag |
+| **Flatpak-aware** | Auto-wraps with `flatpak-spawn --host` in sandbox |
+| **pkexec support** | `pkexec=True` prepends privilege escalation |
+| **Action logging** | JSONL log with auto-trimming at 500 entries |
+| **Diagnostics export** | `export_diagnostics()` returns full action audit |
+
+#### Arbitrator
+
+| Condition | Background | Critical |
+|-----------|-----------|----------|
+| **CPU overheated** | Blocked | Allowed |
+| **On battery** | Blocked | Allowed |
+| **Normal** | Allowed | Allowed |
+
+### New Files
+
+- `utils/action_result.py` — Unified ActionResult schema
+- `utils/action_executor.py` — Centralized executor with preview, dry-run, logging
+- `utils/arbitrator.py` — Agent resource arbitrator
+- `tests/test_action_executor.py` — Executor test suite
+
+### Upgrade Notes
+
+- No breaking changes from v18.x
+- Agent runner now routes commands through centralized executor
+- Operations bridge available for CLI consumers
+- All existing commands and configurations are preserved
+
+---
+
+## v18.0.0 "Sentinel" - February 2026
+
+Autonomous Agent Framework with AI-powered planning, 5 built-in agents, and background execution.
+
+---
+
 ## v17.0.0 "Atlas" - February 2026
 
 The Atlas update is a hardware & visibility release that brings four new dedicated GUI tabs, a Bluetooth manager, storage & disk health tools, and a completely overhauled Network tab.

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        18.1.1
+Version:        19.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -65,6 +65,14 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 19.0.0-1
+- v19.0 Vanguard: Centralized ActionExecutor with preview and dry-run
+- Unified ActionResult schema for all system actions
+- Structured JSONL action logging with diagnostics export
+- Agent Arbitrator for thermal/battery-aware scheduling
+- Operations bridge for CLI/headless execution
+- 24 new tests, 1598 total passing
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 18.1.1-1
 - v18.1.1 Hotfix: Fix startup crash due to sidebar refactor
 - Fixed AttributeError on startup (setCurrentRow)

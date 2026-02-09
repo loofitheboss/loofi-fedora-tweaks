@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v18.0.0 "Sentinel"
+# Loofi Fedora Tweaks v19.0.0 "Vanguard"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,18 +10,45 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v18.0.0">
-    <img src="https://img.shields.io/badge/Release-v18.0.0-blue?style=for-the-badge&logo=github" alt="Release v18.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v19.0.0">
+    <img src="https://img.shields.io/badge/Release-v19.0.0-blue?style=for-the-badge&logo=github" alt="Release v19.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1574%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1598%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v18.0.0 "Sentinel"
+## What's New in v19.0.0 "Vanguard"
+
+### Vanguard — Safe Centralized Execution
+
+v19.0 introduces a **centralized action executor** with preview mode, structured logging, and resource-aware agent arbitration. Every system action now flows through a single, auditable path.
+
+**Centralized ActionExecutor**
+* **Preview mode**: Inspect what any action _would_ do before executing it.
+* **Global dry-run**: Disable all real execution with a single toggle.
+* **Structured JSONL logging**: Every action logged for diagnostics export.
+* **Flatpak-aware**: Auto-wraps commands with `flatpak-spawn` inside sandbox.
+
+**Unified ActionResult**
+* Single structured result type: success, exit_code, stdout, stderr, preview flag, needs_reboot.
+* Replaces ad-hoc result types across operations and agents.
+
+**Agent Arbitrator**
+* Blocks background agents when CPU is thermal-throttled.
+* Blocks background work on battery power.
+* Critical actions bypass constraints for safety-first response.
+
+**Diagnostics Export**
+* `ActionExecutor.export_diagnostics()` returns full action log + system info.
+* JSONL action log auto-trimmed at 500 entries.
+
+---
+
+## Previous: v18.0.0 "Sentinel"
 
 ### Sentinel — Autonomous Agent Framework
 
@@ -147,7 +174,7 @@ A complete autonomous agent system for proactive system management, with AI plan
 
 ## Feature Overview
 
-### Tabs (v18.0 — Organized by Category)
+### Tabs (v19.0 — Organized by Category)
 
 The sidebar is now organized into logical categories for easier navigation:
 
@@ -179,6 +206,16 @@ The sidebar is now organized into logical categories for easier navigation:
 | | **Diagnostics** | Services, boot analyzer, journal viewer |
 | | **Community** | Save/load presets, browse community presets |
 | **Settings** | **Settings** | Application settings, theme, notifications |
+
+### New in v19.0
+
+| Feature | Description |
+|---------|-------------|
+| **ActionResult** | Unified structured result type for all system actions |
+| **ActionExecutor** | Centralized command execution with preview, dry-run, Flatpak-aware |
+| **Arbitrator** | Resource-aware agent scheduling (thermal, battery) |
+| **Action Logging** | JSONL audit trail with diagnostics export |
+| **Operations Bridge** | `execute_operation()` for CLI/headless execution |
 
 ### New in v15.0
 
@@ -253,7 +290,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v18.0.0/loofi-fedora-tweaks-18.0.0-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v19.0.0/loofi-fedora-tweaks-19.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -269,7 +306,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-18.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-19.0.0-1.noarch.rpm
 ```
 
 ---
@@ -419,7 +456,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1514 tests passing
+# 1598 tests passing
 ```
 
 ---

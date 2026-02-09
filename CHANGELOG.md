@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## [19.0.0] - 2026-02-09 "Vanguard"
+
+### Added
+
+- **Unified ActionResult Schema**: Single structured result type for all system actions (`utils/action_result.py`).
+  - `ActionResult` dataclass with success, message, exit_code, stdout, stderr, data, preview flag, needs_reboot, timestamp, action_id.
+  - Convenience constructors: `ok()`, `fail()`, `previewed()`.
+  - Full serialization with `to_dict()` / `from_dict()` and output truncation safety.
+
+- **Centralized ActionExecutor**: Single entry point for all system command execution (`utils/action_executor.py`).
+  - Preview mode: inspect what any action _would_ do without executing.
+  - Global dry-run toggle: disable all real execution for testing.
+  - Flatpak-aware: auto-wraps commands with `flatpak-spawn --host` inside sandbox.
+  - pkexec support: privilege escalation via `pkexec=True` parameter.
+  - Structured JSONL action log with auto-trimming (max 500 entries).
+  - `get_action_log()` and `export_diagnostics()` for diagnostics export.
+
+- **Agent Arbitrator**: Resource-aware agent scheduling (`utils/arbitrator.py`).
+  - Blocks background agents when CPU temperature exceeds thermal limit.
+  - Blocks background work on battery power.
+  - Priority-aware: CRITICAL actions bypass thermal/power constraints.
+
+- **Operations Bridge**: `execute_operation()` function bridges existing operation tuples to ActionExecutor for CLI/headless paths.
+
+### Changed
+
+- **Agent Runner**: `_execute_command()` now routes through centralized ActionExecutor instead of direct subprocess calls.
+- **Agent Runner**: Added arbitrator integration for resource-aware action gating.
+- **Version**: Bumped to 19.0.0 "Vanguard".
+
+### Tests
+
+- 24 new tests in `test_action_executor.py` covering:
+  - ActionResult schema, convenience constructors, serialization roundtrips, truncation.
+  - ActionExecutor preview mode, global dry-run, execution, timeouts, command-not-found.
+  - Flatpak wrapping, pkexec prepend, action_id propagation.
+  - JSONL action logging, log trimming, diagnostics export, logging failure resilience.
+  - Operations bridge preview and pkexec extraction.
+- 4 new tests in `test_agents.py` for arbitrator integration (thermal block, battery block, critical bypass).
+
+### New Files
+
+- `utils/action_result.py` — Unified ActionResult schema
+- `utils/action_executor.py` — Centralized executor with preview, dry-run, logging
+- `utils/arbitrator.py` — Agent resource arbitrator
+- `tests/test_action_executor.py` — ActionExecutor + ActionResult test suite
+
 ## [18.0.0] - 2026-02-09 "Sentinel"
 
 ### Added
