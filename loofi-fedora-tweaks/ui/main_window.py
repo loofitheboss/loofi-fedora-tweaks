@@ -4,8 +4,8 @@ Main Window - v18.0 "Sentinel"
 """
 
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem,
-    QStackedWidget, QLabel, QFrame
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
+    QStackedWidget, QLabel, QFrame, QHeaderView, QTreeWidgetItemIterator
 )
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
@@ -61,10 +61,16 @@ class MainWindow(QMainWindow):
         self.sidebar_search.textChanged.connect(self._filter_sidebar)
         sidebar_layout.addWidget(self.sidebar_search)
 
-        # Sidebar list
-        self.sidebar = QListWidget()
+        # Sidebar tree
+        self.sidebar = QTreeWidget()
+        self.sidebar.setObjectName("sidebar")
         self.sidebar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.sidebar.currentRowChanged.connect(self.change_page)
+        self.sidebar.setHeaderHidden(True)
+        self.sidebar.setIndentation(20)
+        self.sidebar.setRootIsDecorated(True)
+        self.sidebar.setUniformRowHeights(True)
+        self.sidebar.setAnimated(True)
+        self.sidebar.currentItemChanged.connect(self.change_page)
         sidebar_layout.addWidget(self.sidebar)
 
         main_layout.addWidget(sidebar_container)
@@ -76,73 +82,56 @@ class MainWindow(QMainWindow):
         # Initialize Pages
         self.pages = {}
 
-        # ==================== V12.0 TABS (18) ====================
+        # ==================== Dashboard ====================
+        self.add_page(self.tr("Home"), "\U0001f3e0", DashboardTab(self), "Dashboard")
 
-        # Eagerly loaded
-        self.add_page(self.tr("Home"), "\U0001f3e0", DashboardTab(self))
-        self.add_page(self.tr("System Info"), "\u2139\ufe0f", SystemInfoTab())
+        # ==================== Automation ====================
+        self.add_page(self.tr("Agents"), "\U0001f916", self._lazy_tab("agents"), "Automation")
+        self.add_page(self.tr("Automation"), "\u23f0", self._lazy_tab("automation"), "Automation")
 
-        # System monitoring (Performance + Processes)
-        self.add_page(self.tr("System Monitor"), "\U0001f4ca", self._lazy_tab("monitor"))
+        # ==================== System ====================
+        self.add_page(self.tr("System Info"), "\u2139\ufe0f", SystemInfoTab(), "System")
+        self.add_page(self.tr("System Monitor"), "\U0001f4ca", self._lazy_tab("monitor"), "System")
+        self.add_page(self.tr("Health"), "\U0001f4c8", self._lazy_tab("health"), "System")
+        self.add_page(self.tr("Logs"), "\U0001f4cb", self._lazy_tab("logs"), "System")
 
-        # Maintenance (Updates + Cleanup + Overlays)
-        self.add_page(self.tr("Maintenance"), "\U0001f527", self._lazy_tab("maintenance"))
+        # ==================== Hardware ====================
+        self.add_page(self.tr("Hardware"), "\u26a1", self._lazy_tab("hardware"), "Hardware")
+        self.add_page(self.tr("Performance"), "\u2699\ufe0f", self._lazy_tab("performance"), "Hardware")
+        self.add_page(self.tr("Storage"), "\U0001f4be", self._lazy_tab("storage"), "Hardware")
 
-        # Hardware (CPU/GPU/Fan/Battery/Audio/Fingerprint - merged with HP Tweaks)
-        self.add_page(self.tr("Hardware"), "\u26a1", self._lazy_tab("hardware"))
+        # ==================== Software ====================
+        self.add_page(self.tr("Software"), "\U0001f4e6", self._lazy_tab("software"), "Software")
+        self.add_page(self.tr("Maintenance"), "\U0001f527", self._lazy_tab("maintenance"), "Software")
+        self.add_page(self.tr("Snapshots"), "\U0001f4f8", self._lazy_tab("snapshots"), "Software")
+        self.add_page(self.tr("Virtualization"), "\U0001f5a5\ufe0f", self._lazy_tab("virtualization"), "Software")
+        self.add_page(self.tr("Development"), "\U0001f6e0\ufe0f", self._lazy_tab("development"), "Software")
 
-        # Software (Apps + Repos)
-        self.add_page(self.tr("Software"), "\U0001f4e6", self._lazy_tab("software"))
+        # ==================== Network ====================
+        self.add_page(self.tr("Network"), "\U0001f310", self._lazy_tab("network"), "Network")
+        self.add_page(self.tr("Loofi Link"), "\U0001f517", self._lazy_tab("mesh"), "Network")
 
-        # Security & Privacy (merged)
-        self.add_page(self.tr("Security & Privacy"), "\U0001f6e1\ufe0f", self._lazy_tab("security"))
+        # ==================== Security ====================
+        self.add_page(self.tr("Security & Privacy"), "\U0001f6e1\ufe0f", self._lazy_tab("security"), "Security")
 
-        # Network
-        self.add_page(self.tr("Network"), "\U0001f310", self._lazy_tab("network"))
+        # ==================== Desktop ====================
+        self.add_page(self.tr("Desktop"), "\U0001f3a8", self._lazy_tab("desktop"), "Desktop")
+        self.add_page(self.tr("Profiles"), "\U0001f464", self._lazy_tab("profiles"), "Desktop")
+        self.add_page(self.tr("Gaming"), "\U0001f3ae", self._lazy_tab("gaming"), "Desktop")
 
-        # Gaming
-        self.add_page(self.tr("Gaming"), "\U0001f3ae", self._lazy_tab("gaming"))
+        # ==================== Tools ====================
+        self.add_page(self.tr("AI Lab"), "\U0001f9e0", self._lazy_tab("ai"), "Tools")
+        self.add_page(self.tr("State Teleport"), "\U0001f4e1", self._lazy_tab("teleport"), "Tools")
+        self.add_page(self.tr("Diagnostics"), "\U0001f52d", self._lazy_tab("diagnostics"), "Tools")
+        self.add_page(self.tr("Community"), "\U0001f30d", self._lazy_tab("community"), "Tools")
 
-        # Desktop (Director + Theming)
-        self.add_page(self.tr("Desktop"), "\U0001f3a8", self._lazy_tab("desktop"))
+        # ==================== Settings ====================
+        self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"), "Settings")
 
-        # Development (Containers + Developer Tools)
-        self.add_page(self.tr("Development"), "\U0001f6e0\ufe0f", self._lazy_tab("development"))
-
-        # AI Lab
-        self.add_page(self.tr("AI Lab"), "\U0001f9e0", self._lazy_tab("ai"))
-
-        # Automation (Scheduler + Replicator + Pulse)
-        self.add_page(self.tr("Automation"), "\u23f0", self._lazy_tab("automation"))
-
-        # Community (Presets + Marketplace)
-        self.add_page(self.tr("Community"), "\U0001f30d", self._lazy_tab("community"))
-
-        # Diagnostics (Watchtower + Boot)
-        self.add_page(self.tr("Diagnostics"), "\U0001f52d", self._lazy_tab("diagnostics"))
-
-        # v11.5 Hypervisor Update
-        self.add_page(self.tr("Virtualization"), "\U0001f5a5\ufe0f", self._lazy_tab("virtualization"))
-
-        # v12.0 Sovereign Update
-        self.add_page(self.tr("Loofi Link"), "\U0001f517", self._lazy_tab("mesh"))
-        self.add_page(self.tr("State Teleport"), "\U0001f4e1", self._lazy_tab("teleport"))
-
-        # v13.0 Nexus Update
-        self.add_page(self.tr("Profiles"), "\U0001f464", self._lazy_tab("profiles"))
-        self.add_page(self.tr("Health"), "\U0001f4c8", self._lazy_tab("health"))
-
-        # v13.5 UX Polish
-        self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"))
-
-        # v17.0 Atlas — New tabs for v15 features + Storage
-        self.add_page(self.tr("Performance"), "", self._lazy_tab("performance"))
-        self.add_page(self.tr("Snapshots"), "\U0001f4f8", self._lazy_tab("snapshots"))
-        self.add_page(self.tr("Logs"), "\U0001f4cb", self._lazy_tab("logs"))
-        self.add_page(self.tr("Storage"), "\U0001f4be", self._lazy_tab("storage"))
-
-        # v18.0 Sentinel — Autonomous System Agents
-        self.add_page(self.tr("Agents"), "\U0001f916", self._lazy_tab("agents"))
+        # Expand Dashboard by default
+        self.sidebar.topLevelItem(0).setExpanded(True)
+        # Select Home
+        self.sidebar.setCurrentItem(self.sidebar.topLevelItem(0).child(0))
 
         # v15.0 Nebula - Quick Actions Bar (Ctrl+Shift+K)
         self._setup_quick_actions()
@@ -212,23 +201,55 @@ class MainWindow(QMainWindow):
         except Exception:
             pass
 
-    def add_page(self, name, icon, widget):
-        item = QListWidgetItem(f"{icon}   {name}")
-        item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
-        self.sidebar.addItem(item)
+    def add_page(self, name, icon, widget, category="General"):
+        # Find or create category item
+        category_item = None
+        for i in range(self.sidebar.topLevelItemCount()):
+            item = self.sidebar.topLevelItem(i)
+            if item.text(0) == category:
+                category_item = item
+                break
+        
+        if not category_item:
+            category_item = QTreeWidgetItem(self.sidebar)
+            category_item.setText(0, category)
+            # Default icons for categories could be added here if desired
+            category_item.setExpanded(True)
+            # Make category not selectable if desired, but typically we allow selection and just don't switch page
+            # category_item.setFlags(category_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+
+        item = QTreeWidgetItem(category_item)
+        item.setText(0, f"{icon}  {name}")
+        # Store the widget in the item
+        item.setData(0, Qt.ItemDataRole.UserRole, widget)
+        
         self.content_area.addWidget(widget)
         self.pages[name] = widget
 
-    def change_page(self, index):
-        self.content_area.setCurrentIndex(index)
+    def change_page(self, current, previous):
+        if not current:
+            return
+            
+        widget = current.data(0, Qt.ItemDataRole.UserRole)
+        if widget:
+            self.content_area.setCurrentWidget(widget)
+        else:
+            # It's a category item, maybe expand/collapse or select first child?
+            if current.childCount() > 0:
+                current.setExpanded(not current.isExpanded())
+                # Optionally select first child
+                # self.sidebar.setCurrentItem(current.child(0))
 
     def switch_to_tab(self, name):
         """Helper for Dashboard and Command Palette to switch tabs."""
-        for i in range(self.sidebar.count()):
-            item = self.sidebar.item(i)
-            if name in item.text():
-                self.sidebar.setCurrentRow(i)
+        # Search all items
+        iterator = QTreeWidgetItemIterator(self.sidebar)
+        while iterator.value():
+            item = iterator.value()
+            if name in item.text(0):
+                self.sidebar.setCurrentItem(item)
                 return
+            iterator += 1
 
     def _setup_command_palette_shortcut(self):
         """Register Ctrl+K shortcut for the command palette."""
@@ -247,28 +268,47 @@ class MainWindow(QMainWindow):
     def _filter_sidebar(self, text: str):
         """Filter sidebar items by search text."""
         search = text.lower()
-        for i in range(self.sidebar.count()):
-            item = self.sidebar.item(i)
-            item.setHidden(search not in item.text().lower())
+        
+        # Iterate top-level categories
+        for i in range(self.sidebar.topLevelItemCount()):
+            category = self.sidebar.topLevelItem(i)
+            category_visible = False
+            
+            # Check children
+            for j in range(category.childCount()):
+                child = category.child(j)
+                if search in child.text(0).lower():
+                    child.setHidden(False)
+                    category_visible = True
+                else:
+                    child.setHidden(True)
+            
+            # Check category itself
+            if search in category.text(0).lower():
+                category_visible = True
+                # Show all children if category matches? Or just show category?
+                # Let's show all children if category matches
+                for j in range(category.childCount()):
+                    category.child(j).setHidden(False)
+            
+            category.setHidden(not category_visible)
+            if category_visible:
+                category.setExpanded(True)
 
     def _setup_keyboard_shortcuts(self):
         """Register keyboard shortcuts for tab navigation."""
-        # Ctrl+1 through Ctrl+9 - switch to tab 1-9
+        # Ctrl+1 through Ctrl+9 - switch to category 1-9
         for i in range(1, 10):
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
-            shortcut.activated.connect(lambda idx=i-1: self.sidebar.setCurrentRow(idx))
+            shortcut.activated.connect(lambda idx=i-1: self._select_category(idx))
 
         # Ctrl+Tab - next tab
         next_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
-        next_tab.activated.connect(lambda: self.sidebar.setCurrentRow(
-            (self.sidebar.currentRow() + 1) % self.sidebar.count()
-        ))
+        next_tab.activated.connect(self._select_next_item)
 
         # Ctrl+Shift+Tab - previous tab
         prev_tab = QShortcut(QKeySequence("Ctrl+Shift+Tab"), self)
-        prev_tab.activated.connect(lambda: self.sidebar.setCurrentRow(
-            (self.sidebar.currentRow() - 1) % self.sidebar.count()
-        ))
+        prev_tab.activated.connect(self._select_prev_item)
 
         # Ctrl+Q - Quit
         quit_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self)
@@ -277,6 +317,43 @@ class MainWindow(QMainWindow):
         # F1 - Show shortcut help
         help_shortcut = QShortcut(QKeySequence("F1"), self)
         help_shortcut.activated.connect(self._show_shortcut_help)
+
+    def _select_category(self, index: int):
+        if index < self.sidebar.topLevelItemCount():
+            item = self.sidebar.topLevelItem(index)
+            self.sidebar.setCurrentItem(item)
+            item.setExpanded(True)
+
+    def _select_next_item(self):
+        current = self.sidebar.currentItem()
+        if not current:
+            return
+        
+        # Try to find next item below
+        next_item = self.sidebar.itemBelow(current)
+        if next_item:
+            self.sidebar.setCurrentItem(next_item)
+        else:
+            # Wrap around to top
+            if self.sidebar.topLevelItemCount() > 0:
+                self.sidebar.setCurrentItem(self.sidebar.topLevelItem(0))
+
+    def _select_prev_item(self):
+        current = self.sidebar.currentItem()
+        if not current:
+            return
+            
+        # Try to find item above
+        prev_item = self.sidebar.itemAbove(current)
+        if prev_item:
+            self.sidebar.setCurrentItem(prev_item)
+        else:
+            # Wrap around to bottom
+            last_top = self.sidebar.topLevelItem(self.sidebar.topLevelItemCount() - 1)
+            # Find last visible item
+            while last_top.childCount() > 0 and last_top.isExpanded():
+                last_top = last_top.child(last_top.childCount() - 1)
+            self.sidebar.setCurrentItem(last_top)
 
     def _show_shortcut_help(self):
         """Show keyboard shortcuts help dialog."""

@@ -147,36 +147,38 @@ A complete autonomous agent system for proactive system management, with AI plan
 
 ## Feature Overview
 
-### Tabs (v18.0 — 26 tabs)
+### Tabs (v18.0 — Organized by Category)
 
-| Tab | Contains | Description |
-|-----|----------|-------------|
-| **Home** | Dashboard | System health overview with quick actions |
-| **Agents** | Agent Management | AI-powered autonomous system agents |
-| **System Info** | Hardware/OS | CPU, RAM, disk, battery, OS information |
-| **System Monitor** | Performance + Processes | Live graphs, process manager with kill/renice |
-| **Maintenance** | Updates + Cleanup + Overlays | DNF/Flatpak updates, cache cleaning, rpm-ostree layers |
-| **Hardware** | Hardware + Tweaks + Bluetooth | CPU governor, GPU, fan, power, audio, fingerprint, Bluetooth |
-| **Software** | Apps + Repos | One-click app install, repository management |
-| **Security & Privacy** | Security + Privacy | Security score, port audit, USB guard, firewall, telemetry |
-| **Network** | Connections + DNS + Privacy + Monitoring | WiFi/VPN, DNS switcher, MAC randomization, interface stats |
-| **Gaming** | Gaming | GameMode, MangoHud, ProtonUp, Steam |
-| **Desktop** | Director + Theming | Window management, compositor, GTK/Qt themes |
-| **Development** | Containers + Developer | Distrobox GUI, PyEnv, NVM, Rustup, VS Code |
-| **AI Lab** | AI Enhanced | Lite models, voice mode, context RAG |
-| **Automation** | Scheduler + Replicator + Pulse | Task scheduling, IaC export, event-driven automation |
-| **Community** | Presets + Marketplace | Save/load presets, browse community presets |
-| **Diagnostics** | Watchtower + Boot | Services, boot analyzer, journal viewer |
-| **Virtualization** | VMs + VFIO + Disposable | VM wizard, GPU passthrough, disposable VMs |
-| **Loofi Link** | Mesh + Clipboard + File Drop | Device discovery, clipboard sync, file transfer |
-| **State Teleport** | Workspace Capture/Restore | Save and restore workspace state across devices |
-| **Profiles** | System Profiles | Quick-switch between gaming, dev, battery saver, etc. |
-| **Health** | Health Timeline | Track and analyze system metrics over time |
-| **Performance** | Auto-Tuner | Workload detection, kernel tuning, apply & history |
-| **Snapshots** | Snapshot Timeline | Create/restore/delete snapshots (Timeshift/Snapper/BTRFS) |
-| **Smart Logs** | Log Viewer | Color-coded journal with 10 error patterns |
-| **Storage** | Disks + Mounts | Block devices, SMART health, mounts, fsck, TRIM |
-| **Quick Actions** | Command Palette | `Ctrl+Shift+K` floating command palette |
+The sidebar is now organized into logical categories for easier navigation:
+
+| Category | Tab | Description |
+|----------|-----|-------------|
+| **Dashboard** | **Home** | System health overview with quick actions |
+| **Automation** | **Agents** | AI-powered autonomous system agents |
+| | **Automation** | Task scheduling, IaC export, event-driven automation |
+| **System** | **System Info** | CPU, RAM, disk, battery, OS information |
+| | **System Monitor** | Live graphs, process manager with kill/renice |
+| | **Health** | Track and analyze system metrics over time |
+| | **Logs** | Color-coded journal with 10 error patterns |
+| **Hardware** | **Hardware** | CPU governor, GPU, fan, power, audio, fingerprint, Bluetooth |
+| | **Performance** | Auto-Tuner: Workload detection, kernel tuning |
+| | **Storage** | Block devices, SMART health, mounts, fsck, TRIM |
+| **Software** | **Software** | One-click app install, repository management |
+| | **Maintenance** | DNF/Flatpak updates, cache cleaning, rpm-ostree layers |
+| | **Snapshots** | Create/restore/delete snapshots (Timeshift/Snapper/BTRFS) |
+| | **Virtualization** | VM wizard, GPU passthrough, disposable VMs |
+| | **Development** | Distrobox GUI, PyEnv, NVM, Rustup, VS Code |
+| **Network** | **Network** | WiFi/VPN, DNS switcher, MAC randomization, interface stats |
+| | **Loofi Link** | Device discovery, clipboard sync, file transfer |
+| **Security** | **Security** | Security score, port audit, USB guard, firewall, telemetry |
+| **Desktop** | **Desktop** | Window management, compositor, GTK/Qt themes |
+| | **Profiles** | Quick-switch between gaming, dev, battery saver, etc. |
+| | **Gaming** | GameMode, MangoHud, ProtonUp, Steam |
+| **Tools** | **AI Lab** | Lite models, voice mode, context RAG |
+| | **State Teleport** | Save and restore workspace state across devices |
+| | **Diagnostics** | Services, boot analyzer, journal viewer |
+| | **Community** | Save/load presets, browse community presets |
+| **Settings** | **Settings** | Application settings, theme, notifications |
 
 ### New in v15.0
 

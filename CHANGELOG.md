@@ -37,7 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- **Main Window**: Updated to v18.0 "Sentinel", 26-tab count with Agents tab (🤖 icon).
+- **Main Window**: Updated to v18.0 "Sentinel", reorganized 26 tabs into logical categories (System, Hardware, Software, Network, Desktop, Automation, Security, Tools, Settings) with a collapsible sidebar.
 - **CLI**: Updated header to v18.0.0, added `agent` subparser and command handler.
 
 ### Tests
