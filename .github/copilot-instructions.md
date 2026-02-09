@@ -3,7 +3,7 @@
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
-- **GUI** (default): `MainWindow` sidebar with 22 lazy-loaded tabs
+- **GUI** (default): `MainWindow` sidebar with 25 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
 
@@ -21,9 +21,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## V16.0 Tab Layout (22 tabs)
+## V17.0 Tab Layout (25 tabs)
 
-The app has 22 tabs as of v16.0:
+The app has 25 tabs as of v17.0:
 
 | Tab | Consolidates | File |
 |-----|-------------|------|
@@ -31,10 +31,10 @@ The app has 22 tabs as of v16.0:
 | System Info | System info | `system_info_tab.py` |
 | System Monitor | Performance + Processes | `monitor_tab.py` |
 | Maintenance | Updates + Cleanup + Overlays | `maintenance_tab.py` |
-| Hardware | Hardware + HP Tweaks | `hardware_tab.py` |
+| Hardware | Hardware + HP Tweaks + Bluetooth | `hardware_tab.py` |
 | Software | Apps + Repos | `software_tab.py` |
 | Security & Privacy | Security + Privacy | `security_tab.py` |
-| Network | Network | `network_tab.py` |
+| Network | Connections + DNS + Privacy + Monitoring | `network_tab.py` |
 | Gaming | Gaming | `gaming_tab.py` |
 | Desktop | Director + Theming | `desktop_tab.py` |
 | Development | Containers + Developer | `development_tab.py` |
@@ -45,9 +45,10 @@ The app has 22 tabs as of v16.0:
 | Virtualization | VMs + VFIO + Disposable | `virtualization_tab.py` |
 | Loofi Link | Mesh + Clipboard + File Drop | `mesh_tab.py` |
 | State Teleport | Workspace Capture/Restore | `teleport_tab.py` |
-| Performance | Auto-Tuner + Profiles | `performance_tab.py` |
+| Performance | Auto-Tuner | `performance_tab.py` |
 | Snapshots | Snapshot Timeline | `snapshot_tab.py` |
 | Logs | Smart Log Viewer | `logs_tab.py` |
+| Storage | Disks + Mounts + SMART | `storage_tab.py` |
 | Quick Actions | Command Palette (Ctrl+Shift+K) | `quick_actions_tab.py` |
 
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
@@ -168,7 +169,7 @@ Two files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (1420+ passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (1514 passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
@@ -182,7 +183,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (1420+ pa
 - Use `@patch` decorators, not context managers, for consistency with existing tests
 - Test new v12+ modules: vm_manager, vfio, mesh_discovery, state_teleport, ai_models, voice, context_rag
 - Test v15 modules: auto_tuner, snapshot_manager, smart_logs, quick_actions
-- Test v16 modules: service_explorer, package_explorer, firewall_manager, dashboard_tab (v2)
+- Test v17 modules: bluetooth, storage, performance_tab, snapshot_tab, logs_tab, storage_tab, network_tab (overhaul)
 
 ## CI/CD
 

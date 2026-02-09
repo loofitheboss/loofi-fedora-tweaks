@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 16.0.0 "Horizon"**
+> **Version 17.0.0 "Atlas"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -36,9 +36,11 @@
 27. [Service Explorer](#service-explorer)
 28. [Package Explorer](#package-explorer)
 29. [Firewall Manager](#firewall-manager)
-30. [CLI Reference](#cli-reference)
-31. [All Tabs Overview](#all-tabs-overview)
-32. [Troubleshooting](#troubleshooting)
+30. [Bluetooth Manager](#bluetooth-manager)
+31. [Storage & Disks](#storage--disks)
+32. [CLI Reference](#cli-reference)
+33. [All Tabs Overview](#all-tabs-overview)
+34. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -281,11 +283,39 @@ The **Security & Privacy** tab merges the Security Center and Privacy features.
 
 ## Network
 
+The **Network** tab (v17.0 overhaul) provides comprehensive network management with 4 sub-tabs.
+
+### Connections Sub-Tab
+
 | Feature | Description |
 |---------|-------------|
-| **DNS Switcher** | Google, Cloudflare, Quad9 |
-| **MAC Randomization** | Random MAC per connection |
-| **Firewall Rules** | Basic firewalld management |
+| **WiFi Networks** | Scan and view available WiFi networks via nmcli |
+| **VPN Status** | List active VPN connections |
+| **Connect/Disconnect** | Connect to WiFi or VPN from the interface |
+
+### DNS Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Cloudflare** | 1.1.1.1 / 1.0.0.1 |
+| **Google** | 8.8.8.8 / 8.8.4.4 |
+| **Quad9** | 9.9.9.9 / 149.112.112.112 |
+| **AdGuard** | 94.140.14.14 / 94.140.15.15 |
+| **DHCP Default** | Reset to automatic DNS |
+
+### Privacy Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **MAC Randomization** | Per-connection random MAC address |
+
+### Monitoring Sub-Tab
+
+| Feature | Description |
+|---------|-------------|
+| **Interface Stats** | RX/TX bytes, packets per interface |
+| **Active Connections** | Current network connections via nmcli |
+| **Auto-Refresh** | Periodic refresh of stats |
 
 ---
 
@@ -1001,6 +1031,120 @@ All write operations use `pkexec firewall-cmd` with `--permanent` and automatic 
 
 ---
 
+## Bluetooth Manager
+
+The **Bluetooth Manager** (v17.0) is integrated into the Hardware tab and provides full Bluetooth device management via `bluetoothctl`.
+
+### Adapter Status
+
+| Field | Description |
+|-------|-------------|
+| **Powered** | Whether the adapter is on |
+| **Discoverable** | Whether the adapter is visible to other devices |
+| **Pairable** | Whether the adapter accepts pairing requests |
+| **Adapter Name** | Bluetooth adapter identifier |
+| **Adapter Address** | MAC address of the adapter |
+
+### Device Management
+
+| Action | Description |
+|--------|-------------|
+| **Scan** | Discover nearby Bluetooth devices (configurable timeout) |
+| **Pair** | Pair with a new device |
+| **Connect** | Connect to a paired device |
+| **Trust** | Mark a device as trusted (auto-connect) |
+| **Block** | Block a device from connecting |
+| **Unblock** | Remove a device from the block list |
+| **Disconnect** | Disconnect a connected device |
+| **Unpair** | Remove pairing with a device |
+
+### Device Information
+
+Each discovered device shows:
+- **Address**: Bluetooth MAC address
+- **Name**: Device display name
+- **Battery**: Battery percentage (if supported)
+- **Type**: audio, computer, input, phone, network, imaging, or other
+- **State**: Paired, connected, trusted, blocked indicators
+
+### CLI Usage
+
+```bash
+loofi bluetooth status         # Adapter info
+loofi bluetooth devices        # List paired devices
+loofi bluetooth scan           # Scan for nearby devices
+loofi bluetooth pair <address> # Pair a device
+loofi bluetooth connect <addr> # Connect to a device
+loofi bluetooth disconnect <a> # Disconnect a device
+loofi bluetooth trust <addr>   # Trust a device
+loofi bluetooth power-on       # Turn adapter on
+loofi bluetooth power-off      # Turn adapter off
+```
+
+---
+
+## Storage & Disks
+
+The **Storage & Disks** tab (v17.0) provides comprehensive disk management with the `StorageManager` backend.
+
+### Block Devices
+
+Lists all block devices via `lsblk`:
+
+| Field | Description |
+|-------|-------------|
+| **Name** | Device name (e.g., sda, nvme0n1) |
+| **Size** | Device size |
+| **Type** | disk, part, rom, loop, etc. |
+| **Mountpoint** | Where the device is mounted |
+| **Removable** | Whether the device is removable |
+
+### SMART Health
+
+Reads SMART data via `smartctl`:
+
+| Field | Description |
+|-------|-------------|
+| **Health Passed** | Whether the SMART health assessment passed |
+| **Temperature** | Drive temperature in °C |
+| **Model** | Drive model name |
+| **Serial** | Drive serial number |
+| **Firmware** | Firmware version |
+
+### Mount Points
+
+Lists mount points with usage from `df`:
+
+| Field | Description |
+|-------|-------------|
+| **Source** | Device or filesystem source |
+| **Target** | Mount point path |
+| **Filesystem** | Filesystem type (ext4, btrfs, etc.) |
+| **Size** | Total size |
+| **Used** | Space used |
+| **Available** | Space available |
+| **Use%** | Usage percentage |
+
+### Actions
+
+| Action | Description |
+|--------|-------------|
+| **Check Filesystem** | Run fsck via pkexec (requires unmounted partition) |
+| **SSD TRIM** | Run fstrim to optimize SSD performance |
+| **Usage Summary** | Show aggregate disk usage overview |
+
+### CLI Usage
+
+```bash
+loofi storage disks            # List block devices
+loofi storage mounts           # List mount points with usage
+loofi storage smart /dev/sda   # SMART health for a device
+loofi storage trim             # Run SSD TRIM
+loofi storage usage            # Disk usage summary
+```
+
+---
+
 ## CLI Reference
 
 ### Info & Health
@@ -1122,6 +1266,28 @@ loofi firewall services        # List allowed services
 loofi firewall zones           # List zones with active indicator
 ```
 
+### Bluetooth & Storage (v17.0)
+
+```bash
+# Bluetooth
+loofi bluetooth status         # Adapter info
+loofi bluetooth devices        # List paired devices
+loofi bluetooth scan           # Scan for nearby devices
+loofi bluetooth pair <address> # Pair a device
+loofi bluetooth connect <addr> # Connect to a device
+loofi bluetooth disconnect <a> # Disconnect a device
+loofi bluetooth trust <addr>   # Trust a device
+loofi bluetooth power-on       # Turn adapter on
+loofi bluetooth power-off      # Turn adapter off
+
+# Storage & Disks
+loofi storage disks            # List block devices
+loofi storage mounts           # List mount points with usage
+loofi storage smart /dev/sda   # SMART health for a device
+loofi storage trim             # Run SSD TRIM
+loofi storage usage            # Disk usage summary
+```
+
 ### JSON Output (v10.0)
 
 ```bash
@@ -1147,10 +1313,10 @@ loofi-fedora-tweaks --daemon  # Run as background service
 | **System Info** | Info | Hardware specs, OS version |
 | **System Monitor** | Chart | Live performance graphs + process manager |
 | **Maintenance** | Wrench | Updates + cleanup + overlays |
-| **Hardware** | Lightning | CPU, GPU, fan, power, battery, audio, fingerprint |
+| **Hardware** | Lightning | CPU, GPU, fan, power, battery, audio, fingerprint, Bluetooth |
 | **Software** | Package | One-click apps + repository management |
 | **Security & Privacy** | Shield | Security score, ports, USB, firewall, telemetry |
-| **Network** | Globe | DNS, firewall, MAC |
+| **Network** | Globe | DNS, WiFi, VPN, MAC, monitoring (4 sub-tabs) |
 | **Gaming** | Controller | GameMode, MangoHud, ProtonUp |
 | **Desktop** | Palette | Window management + theming |
 | **Development** | Tools | Containers + developer toolchains |
@@ -1163,6 +1329,10 @@ loofi-fedora-tweaks --daemon  # Run as background service
 | **State Teleport** | Satellite | Workspace capture + restore |
 | **Profiles** | Person | System configuration quick-switch |
 | **Health** | Chart | Health timeline metrics tracking |
+| **Performance** | Lightning | AutoTuner: workload detection, kernel tuning |
+| **Snapshots** | Camera | Create/restore/delete snapshots |
+| **Smart Logs** | Clipboard | Color-coded journal with error patterns |
+| **Storage** | Disk | Block devices, SMART health, mounts, TRIM |
 
 ---
 
@@ -1214,4 +1384,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v16.0.0 - February 2026*
+*Documentation last updated: v17.0.0 - February 2026*

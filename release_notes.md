@@ -1,77 +1,79 @@
-# Loofi Fedora Tweaks v16.0.0 - The "Horizon" Update
+# Loofi Fedora Tweaks v17.0.0 - The "Atlas" Update
 
-A system visibility release that gives you full control over systemd services, unified package management across all sources, and firewall configuration — plus a redesigned Dashboard with live sparkline graphs.
+A hardware & visibility release that brings four new dedicated tabs for v15 features, a Bluetooth manager, storage & disk health tools, and a completely overhauled Network tab — 25 tabs, 1514 tests.
 
 ## Highlights
 
-* **Service Explorer**: Full systemd service browser with lifecycle control.
-* **Package Explorer**: Unified DNF/rpm-ostree/Flatpak search, install, and remove.
-* **Firewall Manager**: Complete firewalld backend with zones, ports, services, and rich rules.
-* **Dashboard v2**: Live CPU/RAM sparkline graphs, network speed, storage breakdown, top processes.
+* **Performance Tab**: AutoTuner GUI with workload detection & kernel tuning
+* **Snapshots Tab**: Create/restore/delete across Timeshift/Snapper/BTRFS
+* **Smart Logs Tab**: Color-coded journal viewer with 10 error patterns
+* **Storage & Disks Tab**: Block devices, SMART health, mounts, fsck, TRIM
+* **Network Overhaul**: 4 sub-tabs — Connections, DNS, Privacy, Monitoring
+* **Bluetooth Manager**: Scan, pair, connect, trust, block via bluetoothctl
 
 ## New Features
 
-### Service Explorer
-* Browse all system and user systemd services with state, enabled status, and description
-* Start, stop, restart, enable, disable, mask, and unmask services
-* View detailed service info: memory usage, PID, timestamps, unit file path
-* Read journal logs per service with configurable line count
-* System scope uses pkexec; user scope runs unprivileged
+### Performance Tab (AutoTuner GUI)
+* Real-time workload detection (idle, desktop, compilation, gaming, server)
+* Kernel settings display: governor, swappiness, I/O scheduler, THP
+* One-click "Apply Recommendations" with pkexec privilege escalation
+* Tuning history table with timestamps
+* 30-second auto-refresh timer
 
-### Package Explorer
-* Unified search across DNF and Flatpak remotes with installed indicators
-* Install and remove packages with automatic source detection (DNF/rpm-ostree/Flatpak)
-* List all installed packages (RPM + Flatpak) with search filter
-* Browse recently installed packages via DNF history
-* Full atomic Fedora support (auto-selects rpm-ostree)
+### Snapshots Tab
+* Create, restore, and delete snapshots across multiple backends
+* Auto-detects Timeshift, Snapper, and BTRFS subvolumes
+* Retention policy management
+* Snapshot timeline table with type, description, and timestamp
 
-### Firewall Manager
-* Comprehensive firewall status: running state, zones, ports, services, rich rules
-* Open/close ports with permanent or runtime modes
-* Manage service allowlists (add/remove services)
-* Rich rule management for advanced configurations
-* Zone management: list, set default, view active zones
-* Start/stop firewalld via pkexec
+### Smart Logs Tab
+* Color-coded log entries by severity (emergency=red through debug=gray)
+* 10 built-in error patterns: OOM, segfault, disk full, auth failure, etc.
+* Pattern analysis table showing matched count and suggested fixes
+* Filters: unit, priority, time range
+* Export to text or JSON
 
-### Dashboard v2
-* SparkLine widget: custom QPainter area chart with 30 data points and gradient fill
-* Live CPU and RAM sparklines refreshed every 2 seconds
-* Network speed indicator (↓/↑ bytes/sec from /proc/net/dev)
-* Per-mount-point storage breakdown with color-coded progress bars
-* Top 5 processes by CPU usage
-* Recent actions feed from HistoryManager
-* Quick Actions grid with correct tab navigation
+### Storage & Disks Tab
+* Block device inventory via lsblk (name, size, type, mountpoint, removable)
+* SMART health monitoring via smartctl (health status, temperature)
+* Mount point listing with usage stats (total, used, available, use%)
+* Filesystem check (fsck) via pkexec
+* SSD TRIM optimization via fstrim
+* Disk usage summary
+
+### Network Tab Overhaul
+* **Connections**: WiFi network scanning, VPN status via nmcli
+* **DNS**: One-click switching (Cloudflare, Google, Quad9, AdGuard, DHCP default)
+* **Privacy**: Per-connection MAC address randomization
+* **Monitoring**: Interface stats + active connections with auto-refresh
+
+### Bluetooth Manager (Hardware Tab)
+* Adapter status (powered, discoverable, pairable, adapter address)
+* Device scanning with configurable timeout
+* Pair, unpair, connect, disconnect, trust, block, unblock
+* Battery level and device type classification
+* Device types: audio, computer, input, phone, network, imaging
 
 ## New CLI Commands
 
 ```bash
-# Service management
-loofi service list                   # List all services
-loofi service list --filter active   # Filter by state
-loofi service list --search ssh      # Search by name
-loofi service start sshd             # Start a service
-loofi service stop bluetooth         # Stop a service
-loofi service restart nginx          # Restart a service
-loofi service enable sshd            # Enable on boot
-loofi service disable bluetooth      # Disable on boot
-loofi service logs nginx             # View journal logs
-loofi service status sshd            # Detailed info
+# Bluetooth management (v17.0)
+loofi bluetooth status         # Adapter info
+loofi bluetooth devices        # List paired devices
+loofi bluetooth scan           # Scan for nearby devices
+loofi bluetooth pair <address> # Pair a device
+loofi bluetooth connect <addr> # Connect to a device
+loofi bluetooth disconnect <a> # Disconnect a device
+loofi bluetooth trust <addr>   # Trust a device
+loofi bluetooth power-on       # Turn adapter on
+loofi bluetooth power-off      # Turn adapter off
 
-# Package management
-loofi package search --query vim     # Search all sources
-loofi package install vim            # Install (auto-detect)
-loofi package remove vim             # Remove a package
-loofi package list                   # List installed packages
-loofi package list --source flatpak  # Filter by source
-loofi package recent                 # Recently installed
-
-# Firewall management
-loofi firewall status                # Full firewall status
-loofi firewall ports                 # List open ports
-loofi firewall open-port 8080/tcp    # Open a port
-loofi firewall close-port 8080/tcp   # Close a port
-loofi firewall services              # List allowed services
-loofi firewall zones                 # List available zones
+# Storage & disks (v17.0)
+loofi storage disks            # List block devices
+loofi storage mounts           # List mount points with usage
+loofi storage smart /dev/sda   # SMART health for a device
+loofi storage trim             # Run SSD TRIM
+loofi storage usage            # Disk usage summary
 ```
 
 ## Installation
@@ -79,14 +81,14 @@ loofi firewall zones                 # List available zones
 **Via DNF:**
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v16.0.0/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v17.0.0/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
 ```
 
 **Build from source:**
 
 ```bash
 ./build_rpm.sh
-sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
+sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
 ```
 
 ## Quick Start
@@ -97,7 +99,6 @@ loofi-fedora-tweaks
 
 # CLI
 loofi info
-loofi service list
-loofi package search --query vim
-loofi firewall status
+loofi bluetooth status
+loofi storage disks
 ```

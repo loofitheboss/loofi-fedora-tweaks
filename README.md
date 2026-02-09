@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v16.0.0 "Horizon"
+# Loofi Fedora Tweaks v17.0.0 "Atlas"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,48 +10,63 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v16.0.0">
-    <img src="https://img.shields.io/badge/Release-v16.0.0-blue?style=for-the-badge&logo=github" alt="Release v16.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v17.0.0">
+    <img src="https://img.shields.io/badge/Release-v17.0.0-blue?style=for-the-badge&logo=github" alt="Release v17.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1420%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1514%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v16.0.0 "Horizon"
+## What's New in v17.0.0 "Atlas"
 
-### Horizon — System Visibility Release
+### Atlas — Hardware & Visibility Release
 
-Loofi now gives you full visibility into systemd services, packages across all sources, and your firewall — plus a live Dashboard with sparkline graphs.
+Four new dedicated tabs bring v15 features to the GUI, plus a Bluetooth manager, storage & disk health tools, and a completely overhauled Network tab.
 
-**Service Explorer**
-* Browse all system and user systemd services with state, enabled status, and descriptions
-* Start/stop/restart/enable/disable/mask/unmask services with one click
-* View service details (memory, PID, timestamps, unit file path) and journal logs
-* CLI: `loofi service list`, `loofi service start/stop/restart <name>`, `loofi service logs <name>`
+**Performance Tab** (AutoTuner GUI)
+* Workload detection with real-time CPU/memory classification
+* Kernel settings display (governor, swappiness, I/O scheduler, THP)
+* One-click apply with pkexec, tuning history table, 30s auto-refresh
 
-**Package Explorer**
-* Unified search across DNF/rpm-ostree and Flatpak with installed indicators
-* Install and remove packages with automatic source detection
-* List installed packages with search filter, browse recently installed
-* CLI: `loofi package search --query <term>`, `loofi package install/remove <name>`, `loofi package list`
+**Snapshots Tab**
+* Create, restore, and delete snapshots across Timeshift/Snapper/BTRFS
+* Backend auto-detection, retention policies, timeline view
 
-**Firewall Manager**
-* Full firewalld backend — zones, ports, services, and rich rules
-* Open/close ports with permanent or runtime modes, manage service allowlists
-* Start/stop firewalld, set default zone
-* CLI: `loofi firewall status`, `loofi firewall open-port 8080/tcp`, `loofi firewall services`
+**Smart Logs Tab**
+* Color-coded journal viewer with 10 built-in error patterns
+* Pattern analysis table, unit/priority/time filters, export
 
-**Dashboard v2**
-* Live CPU and RAM sparkline graphs (30-point area charts, 2-second refresh)
-* Network speed indicator (↓/↑ bytes/sec from `/proc/net/dev`)
-* Per-mount-point storage breakdown with color-coded progress bars
-* Top 5 processes by CPU usage, recent actions feed from history
+**Storage & Disks Tab**
+* Block device inventory (lsblk), SMART health monitoring
+* Mount point listing with usage stats, filesystem check (fsck), SSD TRIM
 
-**1420+ Tests** — 148 new tests across 3 test files
+**Network Tab Overhaul**
+* 4 sub-tabs: Connections (WiFi/VPN), DNS, Privacy (MAC), Monitoring
+* WiFi scanning, VPN status, interface stats with auto-refresh
+
+**Bluetooth Manager** (Hardware tab)
+* Adapter status, device scanning, pair/connect/trust/block
+* Battery level display, device type classification
+
+**CLI: bluetooth & storage** — 2 new subcommands with full action support
+
+**1514 Tests** — 94 new tests across 4 test files, 25 total tabs
+
+---
+
+## Previous: v16.0.0 "Horizon"
+
+**Service Explorer** — Full systemd service browser with lifecycle control
+
+**Package Explorer** — Unified DNF/rpm-ostree/Flatpak search, install, remove
+
+**Firewall Manager** — firewalld zones, ports, services, rich rules
+
+**Dashboard v2** — Live sparkline graphs, network speed, storage breakdown
 
 ---
 
@@ -125,7 +140,7 @@ Loofi now gives you full visibility into systemd services, packages across all s
 
 ## Feature Overview
 
-### Tabs (v15.0)
+### Tabs (v17.0 — 25 tabs)
 
 | Tab | Contains | Description |
 |-----|----------|-------------|
@@ -133,10 +148,10 @@ Loofi now gives you full visibility into systemd services, packages across all s
 | **System Info** | Hardware/OS | CPU, RAM, disk, battery, OS information |
 | **System Monitor** | Performance + Processes | Live graphs, process manager with kill/renice |
 | **Maintenance** | Updates + Cleanup + Overlays | DNF/Flatpak updates, cache cleaning, rpm-ostree layers |
-| **Hardware** | Hardware + Tweaks | CPU governor, GPU, fan, power, battery limit, audio, fingerprint |
+| **Hardware** | Hardware + Tweaks + Bluetooth | CPU governor, GPU, fan, power, audio, fingerprint, Bluetooth |
 | **Software** | Apps + Repos | One-click app install, repository management |
 | **Security & Privacy** | Security + Privacy | Security score, port audit, USB guard, firewall, telemetry |
-| **Network** | Network | DNS, firewall, MAC randomization |
+| **Network** | Connections + DNS + Privacy + Monitoring | WiFi/VPN, DNS switcher, MAC randomization, interface stats |
 | **Gaming** | Gaming | GameMode, MangoHud, ProtonUp, Steam |
 | **Desktop** | Director + Theming | Window management, compositor, GTK/Qt themes |
 | **Development** | Containers + Developer | Distrobox GUI, PyEnv, NVM, Rustup, VS Code |
@@ -149,6 +164,11 @@ Loofi now gives you full visibility into systemd services, packages across all s
 | **State Teleport** | Workspace Capture/Restore | Save and restore workspace state across devices |
 | **Profiles** | System Profiles | Quick-switch between gaming, dev, battery saver, etc. |
 | **Health** | Health Timeline | Track and analyze system metrics over time |
+| **Performance** | Auto-Tuner | Workload detection, kernel tuning, apply & history |
+| **Snapshots** | Snapshot Timeline | Create/restore/delete snapshots (Timeshift/Snapper/BTRFS) |
+| **Smart Logs** | Log Viewer | Color-coded journal with 10 error patterns |
+| **Storage** | Disks + Mounts | Block devices, SMART health, mounts, fsck, TRIM |
+| **Quick Actions** | Command Palette | `Ctrl+Shift+K` floating command palette |
 
 ### New in v15.0
 
@@ -162,6 +182,19 @@ Loofi now gives you full visibility into systemd services, packages across all s
 | **CLI: snapshot** | `list`, `create`, `delete`, `backends` subcommands |
 | **CLI: logs** | `show`, `errors`, `export` with `--unit`, `--priority`, `--since` filters |
 
+### New in v17.0
+
+| Feature | Description |
+|---------|-------------|
+| **Performance Tab** | AutoTuner GUI — workload detection, kernel tuning, apply & history |
+| **Snapshots Tab** | SnapshotManager GUI — create/restore/delete across backends |
+| **Smart Logs Tab** | SmartLogViewer GUI — color-coded journal with pattern analysis |
+| **Storage & Disks Tab** | Block devices, SMART health, mounts, fsck, SSD TRIM |
+| **Network Overhaul** | 4 sub-tabs: Connections, DNS, Privacy, Monitoring |
+| **Bluetooth Manager** | Scan, pair, connect, trust, block via bluetoothctl |
+| **CLI: bluetooth** | `status`, `devices`, `scan`, `pair`, `connect`, `power-on/off` |
+| **CLI: storage** | `disks`, `mounts`, `smart`, `trim`, `usage` |
+
 ### New in v16.0
 
 | Feature | Description |
@@ -170,9 +203,6 @@ Loofi now gives you full visibility into systemd services, packages across all s
 | **Package Explorer** | Unified DNF/rpm-ostree/Flatpak search, install, remove |
 | **Firewall Manager** | firewalld zones, ports, services, rich rules management |
 | **Dashboard v2** | Live sparkline graphs, network speed, storage breakdown, top processes |
-| **CLI: service** | `list`, `start`, `stop`, `restart`, `enable`, `disable`, `logs`, `status` |
-| **CLI: package** | `search`, `install`, `remove`, `list`, `recent` |
-| **CLI: firewall** | `status`, `ports`, `open-port`, `close-port`, `services`, `zones` |
 
 ### Previous Feature Highlights
 
@@ -204,7 +234,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v16.0.0/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v17.0.0/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -220,7 +250,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-17.0.0-1.noarch.rpm
 ```
 
 ---
@@ -321,6 +351,22 @@ loofi firewall close-port 8080/tcp  # Close a port
 loofi firewall services        # List allowed services
 loofi firewall zones           # List available zones
 
+# Bluetooth (v17.0)
+loofi bluetooth status         # Adapter info
+loofi bluetooth devices        # List paired devices
+loofi bluetooth scan           # Scan for nearby devices
+loofi bluetooth pair <address> # Pair a device
+loofi bluetooth connect <addr> # Connect to a device
+loofi bluetooth power-on       # Turn adapter on
+loofi bluetooth power-off      # Turn adapter off
+
+# Storage & Disks (v17.0)
+loofi storage disks            # List block devices
+loofi storage mounts           # List mount points with usage
+loofi storage smart /dev/sda   # SMART health for a device
+loofi storage trim             # Run SSD TRIM
+loofi storage usage            # Disk usage summary
+
 # JSON output (for scripting)
 loofi --json info
 loofi --json health
@@ -354,7 +400,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1420+ tests passing
+# 1514 tests passing
 ```
 
 ---

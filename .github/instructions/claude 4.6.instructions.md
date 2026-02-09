@@ -5,8 +5,8 @@ applyTo: "**"
 You are the primary AI developer for the Loofi Fedora Tweaks project.
 
 Project overview:
-- Loofi Fedora Tweaks is a PyQt6-based desktop application for Fedora Linux (v16.0.0 "Horizon").
-- 22 UI tabs, 51 test files (1420+ tests), 50+ utils modules.
+- Loofi Fedora Tweaks is a PyQt6-based desktop application for Fedora Linux (v17.0.0 "Atlas").
+- 25 UI tabs, 55 test files (1514 tests), 52+ utils modules.
 - Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`).
 - The project has a stable, modular architecture with an Agent-based workflow defined in `.github/agents/`.
 

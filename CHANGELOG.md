@@ -2,6 +2,71 @@
 
 All notable changes to this project will be documented in this file.
 
+## [17.0.0] - 2026-02-09 "Atlas"
+
+### Added
+
+- **Performance Tab**: GUI for the v15 AutoTuner (`ui/performance_tab.py`).
+  - Workload detection card with real-time CPU/memory classification.
+  - Kernel settings display (governor, swappiness, I/O scheduler, THP).
+  - One-click "Apply Recommendations" with pkexec privilege escalation.
+  - Tuning history table with timestamps.
+  - 30-second auto-refresh timer.
+
+- **Snapshots Tab**: GUI for the v15 SnapshotManager (`ui/snapshot_tab.py`).
+  - Create, restore, and delete snapshots across Timeshift/Snapper/BTRFS.
+  - Backend auto-detection, snapshot timeline table, retention policies.
+
+- **Smart Logs Tab**: GUI for the v15 SmartLogViewer (`ui/logs_tab.py`).
+  - Color-coded journal viewer with 10 built-in error patterns.
+  - Pattern analysis table, unit/priority/time filters, log export.
+
+- **Storage & Disks Tab**: Full disk management (`ui/storage_tab.py`, `utils/storage.py`).
+  - `StorageManager` with `list_block_devices()`, `list_disks()`, `list_partitions()`.
+  - `get_smart_health()` — SMART health status and temperature via smartctl.
+  - `list_mounts()` — mount points with usage stats from `df`.
+  - `check_filesystem()` — fsck via pkexec, `trim_ssd()` — fstrim SSD optimization.
+  - `get_usage_summary()` — aggregate disk usage overview.
+  - CLI: `loofi storage disks`, `loofi storage mounts`, `loofi storage smart <device>`, `loofi storage trim`, `loofi storage usage`.
+
+- **Bluetooth Manager**: Full bluetoothctl wrapper in Hardware tab (`utils/bluetooth.py`).
+  - `BluetoothManager` classmethods: `get_adapter_status()`, `list_devices()`, `scan()`.
+  - `pair()`, `unpair()`, `connect()`, `disconnect()`, `trust()`, `block()`, `unblock()`.
+  - `power_on()`, `power_off()` — adapter power control.
+  - `BluetoothDevice` dataclass with battery level, device type, paired/connected/trusted/blocked state.
+  - `BluetoothDeviceType` enum (audio, computer, input, phone, network, imaging, other).
+  - CLI: `loofi bluetooth status`, `loofi bluetooth devices`, `loofi bluetooth scan`, `loofi bluetooth pair/connect/disconnect/trust <address>`, `loofi bluetooth power-on/power-off`.
+
+- **Network Tab Overhaul**: Rewritten from 155 lines to full multi-sub-tab layout (`ui/network_tab.py`).
+  - Connections sub-tab: WiFi scanning, VPN status via nmcli.
+  - DNS sub-tab: One-click DNS switching (Cloudflare, Google, Quad9, AdGuard, DHCP default).
+  - Privacy sub-tab: Per-connection MAC address randomization.
+  - Monitoring sub-tab: Interface stats table + active connections with auto-refresh.
+
+### Changed
+
+- **Gaming Tab**: Normalized to inherit `BaseTab` with `PrivilegedCommand.dnf()` instead of hardcoded `pkexec dnf`.
+- **Hardware Tab**: Added Bluetooth card at grid position (3,1) with scan, pair, connect, trust, block UI.
+- **Main Window**: Updated to v17.0 "Atlas", 25-tab count, 4 new `add_page()` calls and lazy loaders.
+
+### Tests
+
+- 94 new tests across `test_bluetooth.py`, `test_storage.py`, `test_v17_atlas.py`, `test_v17_cli.py`.
+- Full suite: **1514 passed**, 22 skipped.
+
+### New Files
+
+- `utils/bluetooth.py` — Bluetooth device management via bluetoothctl
+- `utils/storage.py` — Disk info, SMART health, mounts via lsblk/smartctl/df
+- `ui/performance_tab.py` — Performance Auto-Tuner GUI
+- `ui/snapshot_tab.py` — Snapshot Timeline GUI
+- `ui/logs_tab.py` — Smart Log Viewer GUI
+- `ui/storage_tab.py` — Storage & Disks GUI
+- `tests/test_bluetooth.py` — Bluetooth manager unit tests
+- `tests/test_storage.py` — Storage manager unit tests
+- `tests/test_v17_atlas.py` — GUI tab instantiation tests
+- `tests/test_v17_cli.py` — CLI bluetooth/storage command tests
+
 ## [16.0.0] - 2025-07-23 "Horizon"
 
 ### Added
