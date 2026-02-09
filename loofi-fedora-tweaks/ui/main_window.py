@@ -246,7 +246,8 @@ class MainWindow(QMainWindow):
         iterator = QTreeWidgetItemIterator(self.sidebar)
         while iterator.value():
             item = iterator.value()
-            if name in item.text(0):
+            # Check if it matches and is a page (has widget data)
+            if name in item.text(0) and item.data(0, Qt.ItemDataRole.UserRole):
                 self.sidebar.setCurrentItem(item)
                 return
             iterator += 1
