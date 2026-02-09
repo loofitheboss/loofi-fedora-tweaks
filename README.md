@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v15.0.0 "Nebula"
+# Loofi Fedora Tweaks v16.0.0 "Horizon"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,48 +10,60 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v15.0.0">
-    <img src="https://img.shields.io/badge/Release-v15.0.0-blue?style=for-the-badge&logo=github" alt="Release v15.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v16.0.0">
+    <img src="https://img.shields.io/badge/Release-v16.0.0-blue?style=for-the-badge&logo=github" alt="Release v16.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1290%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1420%2B%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v15.0.0 "Nebula"
+## What's New in v16.0.0 "Horizon"
 
-### Nebula — System Intelligence Release
+### Horizon — System Visibility Release
 
-Loofi learns your hardware, guards your snapshots, reads your logs, and puts every action one keystroke away.
+Loofi now gives you full visibility into systemd services, packages across all sources, and your firewall — plus a live Dashboard with sparkline graphs.
 
-**Performance Auto-Tuner**
-* Detects current workload profile (idle, desktop, compilation, gaming, server)
-* Recommends CPU governor, swappiness, I/O scheduler, and THP settings
-* One-click "Optimize Now" with tuning history and rollback
-* CLI: `loofi tuner analyze`, `loofi tuner apply`, `loofi tuner history`
+**Service Explorer**
+* Browse all system and user systemd services with state, enabled status, and descriptions
+* Start/stop/restart/enable/disable/mask/unmask services with one click
+* View service details (memory, PID, timestamps, unit file path) and journal logs
+* CLI: `loofi service list`, `loofi service start/stop/restart <name>`, `loofi service logs <name>`
 
-**System Snapshot Timeline**
-* Unified interface for Timeshift, Snapper, and BTRFS snapshots
-* Auto-detect available backends with version reporting
-* Create, list, delete snapshots with retention policies
-* CLI: `loofi snapshot list`, `loofi snapshot create`, `loofi snapshot backends`
+**Package Explorer**
+* Unified search across DNF/rpm-ostree and Flatpak with installed indicators
+* Install and remove packages with automatic source detection
+* List installed packages with search filter, browse recently installed
+* CLI: `loofi package search --query <term>`, `loofi package install/remove <name>`, `loofi package list`
 
-**Smart Log Viewer**
-* Intelligent journal viewer with 10 built-in error patterns
-* OOM killer, segfault, disk full, auth failure, service failed detection
-* Severity filtering, unit filtering, time range, and pattern matching
-* CLI: `loofi logs show`, `loofi logs errors`, `loofi logs export`
+**Firewall Manager**
+* Full firewalld backend — zones, ports, services, and rich rules
+* Open/close ports with permanent or runtime modes, manage service allowlists
+* Start/stop firewalld, set default zone
+* CLI: `loofi firewall status`, `loofi firewall open-port 8080/tcp`, `loofi firewall services`
 
-**Quick Actions Bar**
-* `Ctrl+Shift+K` floating searchable action palette
-* 15+ default actions across Maintenance, Security, Hardware, Network, Tools
-* Fuzzy search with recent actions history (max 10)
-* Plugin-extensible via `QuickActionRegistry`
+**Dashboard v2**
+* Live CPU and RAM sparkline graphs (30-point area charts, 2-second refresh)
+* Network speed indicator (↓/↑ bytes/sec from `/proc/net/dev`)
+* Per-mount-point storage breakdown with color-coded progress bars
+* Top 5 processes by CPU usage, recent actions feed from history
 
-**1290+ Tests** — 166 new tests across 4 test files
+**1420+ Tests** — 148 new tests across 3 test files
+
+---
+
+## Previous: v15.0.0 "Nebula"
+
+**Performance Auto-Tuner** — Workload detection + CPU governor, swappiness, I/O scheduler optimization
+
+**System Snapshot Timeline** — Unified Timeshift/Snapper/BTRFS snapshot management
+
+**Smart Log Viewer** — Journal analysis with 10 built-in error patterns
+
+**Quick Actions Bar** — `Ctrl+Shift+K` floating command palette with 15+ actions
 
 ---
 
@@ -150,6 +162,18 @@ Loofi learns your hardware, guards your snapshots, reads your logs, and puts eve
 | **CLI: snapshot** | `list`, `create`, `delete`, `backends` subcommands |
 | **CLI: logs** | `show`, `errors`, `export` with `--unit`, `--priority`, `--since` filters |
 
+### New in v16.0
+
+| Feature | Description |
+|---------|-------------|
+| **Service Explorer** | Full systemd service browser with lifecycle control |
+| **Package Explorer** | Unified DNF/rpm-ostree/Flatpak search, install, remove |
+| **Firewall Manager** | firewalld zones, ports, services, rich rules management |
+| **Dashboard v2** | Live sparkline graphs, network speed, storage breakdown, top processes |
+| **CLI: service** | `list`, `start`, `stop`, `restart`, `enable`, `disable`, `logs`, `status` |
+| **CLI: package** | `search`, `install`, `remove`, `list`, `recent` |
+| **CLI: firewall** | `status`, `ports`, `open-port`, `close-port`, `services`, `zones` |
+
 ### Previous Feature Highlights
 
 * **System Profiles** (v13.0): 5 built-in profiles with quick-switch
@@ -180,7 +204,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v15.0.0/loofi-fedora-tweaks-15.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v16.0.0/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -196,7 +220,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-15.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
 ```
 
 ---
@@ -273,6 +297,30 @@ loofi logs show               # Show recent journal entries
 loofi logs errors             # Show error summary with patterns
 loofi logs export log.txt     # Export filtered logs
 
+# Service Management (v16.0)
+loofi service list             # List all systemd services
+loofi service list --filter active   # Filter by state
+loofi service start sshd       # Start a service
+loofi service stop bluetooth   # Stop a service
+loofi service logs nginx       # View service journal logs
+loofi service status sshd      # Detailed service info
+
+# Package Management (v16.0)
+loofi package search --query vim   # Search DNF + Flatpak
+loofi package install vim          # Install a package
+loofi package remove vim           # Remove a package
+loofi package list                 # List installed packages
+loofi package list --source flatpak  # Filter by source
+loofi package recent               # Recently installed packages
+
+# Firewall Management (v16.0)
+loofi firewall status          # Full firewall status
+loofi firewall ports           # List open ports
+loofi firewall open-port 8080/tcp   # Open a port
+loofi firewall close-port 8080/tcp  # Close a port
+loofi firewall services        # List allowed services
+loofi firewall zones           # List available zones
+
 # JSON output (for scripting)
 loofi --json info
 loofi --json health
@@ -306,7 +354,7 @@ loofi --version
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1290+ tests passing
+# 1420+ tests passing
 ```
 
 ---

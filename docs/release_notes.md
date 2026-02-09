@@ -1,5 +1,96 @@
 # Release Notes
 
+## v16.0.0 "Horizon" - February 2026
+
+The Horizon update is a system visibility release that gives you full control over systemd services, unified package management, and firewall configuration — plus a redesigned Dashboard with live sparkline graphs.
+
+### Highlights
+
+- **Service Explorer**: Full systemd service browser and controller
+- **Package Explorer**: Unified DNF/rpm-ostree/Flatpak package management
+- **Firewall Manager**: Complete firewalld backend with zones, ports, services, and rich rules
+- **Dashboard v2**: Live sparkline graphs, network speed, storage breakdown, top processes
+- **1420+ Tests**: Comprehensive test coverage
+
+### New Features
+
+#### Service Explorer
+
+Full systemd service browser supporting both system and user scopes:
+
+| Operation | Command | Description |
+|-----------|---------|-------------|
+| **List** | `loofi service list` | Browse all services with state and enabled status |
+| **Filter** | `--filter active\|inactive\|failed` | Narrow by state |
+| **Search** | `--search ssh` | Substring match on name or description |
+| **Start/Stop** | `loofi service start\|stop <name>` | Control service lifecycle |
+| **Enable/Disable** | `loofi service enable\|disable <name>` | Boot persistence |
+| **Mask/Unmask** | `loofi service mask\|unmask <name>` | Prevent or allow starting |
+| **Logs** | `loofi service logs <name>` | Journal entries for a service |
+| **Status** | `loofi service status <name>` | Memory, PID, timestamps, unit path |
+
+System scope uses `pkexec` via `PrivilegedCommand`; user scope runs unprivileged with `--user`.
+
+#### Package Explorer
+
+Unified search, install, and remove across all package sources:
+
+| Source | Detection | Install | Remove |
+|--------|-----------|---------|--------|
+| **DNF** | Default on traditional Fedora | `pkexec dnf install -y` | `pkexec dnf remove -y` |
+| **rpm-ostree** | Auto on Atomic variants | `pkexec rpm-ostree install` | `pkexec rpm-ostree uninstall` |
+| **Flatpak** | App IDs with 2+ dots | `flatpak install -y` | `flatpak uninstall -y` |
+
+- `search()` combines DNF and Flatpak search results with installed indicators
+- `list_installed()` merges RPM and Flatpak inventories
+- `recently_installed()` shows packages from the last N days via DNF history
+
+#### Firewall Manager
+
+Complete firewalld management backend:
+
+| Feature | Read | Write |
+|---------|------|-------|
+| **Zones** | `get_zones()`, `get_active_zones()` | `set_default_zone()` |
+| **Ports** | `list_ports()` | `open_port()`, `close_port()` |
+| **Services** | `list_services()`, `get_available_services()` | `add_service()`, `remove_service()` |
+| **Rich Rules** | `list_rich_rules()` | `add_rich_rule()`, `remove_rich_rule()` |
+| **Firewall** | `is_running()`, `get_status()` | `start_firewall()`, `stop_firewall()` |
+
+All write operations use `pkexec firewall-cmd` with `--permanent` and automatic `--reload`.
+
+#### Dashboard v2
+
+Complete dashboard overhaul with live data visualization:
+
+- **SparkLine Widget**: Custom QPainter area chart with 30 data points and gradient fill
+- **CPU & RAM Sparklines**: 2-second refresh cycle with smooth area charts
+- **Network Speed**: Real-time ↓/↑ bytes/sec from `/proc/net/dev`
+- **Storage Breakdown**: Per-mount-point color-coded progress bars
+- **Top Processes**: Top 5 by CPU usage via `ps`
+- **Recent Actions**: Last 5 entries from HistoryManager
+- **Quick Actions**: 4 buttons navigating to correct consolidated tabs
+
+### New Files
+
+- `utils/service_explorer.py` — Systemd service browser and controller
+- `utils/package_explorer.py` — Unified package manager
+- `utils/firewall_manager.py` — Firewalld backend
+- `ui/dashboard_tab.py` — Rewritten Dashboard v2 with SparkLine widget
+- `tests/test_service_explorer.py` — 55 service explorer tests
+- `tests/test_package_explorer.py` — 44 package explorer tests
+- `tests/test_firewall_manager.py` — 49 firewall manager tests
+- `docs/ROADMAP_V16.md` — v16.0 development roadmap
+
+### Upgrade Notes
+
+- No breaking changes from v15.0.0
+- Dashboard is completely rewritten with live graphs
+- 3 new CLI subcommands: `service`, `package`, `firewall`
+- All existing commands and configurations are preserved
+
+---
+
 ## v15.0.0 "Nebula" - February 2026
 
 The Nebula update is a system intelligence release that makes Loofi smarter about the system it manages. It introduces a performance auto-tuner, a unified snapshot timeline, an intelligent log viewer, and a quick-action command bar.

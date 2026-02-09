@@ -1,63 +1,77 @@
-# Loofi Fedora Tweaks v15.0.0 - The "Nebula" Update
+# Loofi Fedora Tweaks v16.0.0 - The "Horizon" Update
 
-A system intelligence release that makes Loofi smarter about the system it manages. Auto-tune performance based on workload, manage snapshots from a unified timeline, analyze logs with pattern detection, and execute common operations instantly from a quick-action bar.
+A system visibility release that gives you full control over systemd services, unified package management across all sources, and firewall configuration — plus a redesigned Dashboard with live sparkline graphs.
 
 ## Highlights
 
-* **Performance Auto-Tuner**: Workload detection + CPU/memory/IO optimization recommendations.
-* **System Snapshot Timeline**: Unified Timeshift/Snapper/BTRFS snapshot management.
-* **Smart Log Viewer**: Journal analysis with 10 built-in error pattern detectors.
-* **Quick Actions Bar**: `Ctrl+Shift+K` floating command palette for power users.
-* **4 New Dev Agents**: Planner, Builder, Sculptor, Guardian for AI-assisted development.
+* **Service Explorer**: Full systemd service browser with lifecycle control.
+* **Package Explorer**: Unified DNF/rpm-ostree/Flatpak search, install, and remove.
+* **Firewall Manager**: Complete firewalld backend with zones, ports, services, and rich rules.
+* **Dashboard v2**: Live CPU/RAM sparkline graphs, network speed, storage breakdown, top processes.
 
 ## New Features
 
-### Performance Auto-Tuner
-* Classifies workload into 6 profiles: idle, light, compilation, gaming, server, heavy
-* Reads from /proc/stat, /proc/meminfo, /sys/ for real-time system analysis
-* Recommends governor, swappiness, I/O scheduler, THP per workload
-* One-click apply with pkexec privilege escalation
-* Tuning history persisted to JSON (max 50 entries)
+### Service Explorer
+* Browse all system and user systemd services with state, enabled status, and description
+* Start, stop, restart, enable, disable, mask, and unmask services
+* View detailed service info: memory usage, PID, timestamps, unit file path
+* Read journal logs per service with configurable line count
+* System scope uses pkexec; user scope runs unprivileged
 
-### System Snapshot Timeline
-* Auto-detects Timeshift, Snapper, and BTRFS backends
-* Unified list/create/delete operations across all backends
-* Retention policy with automated cleanup
-* Backend version detection and health reporting
+### Package Explorer
+* Unified search across DNF and Flatpak remotes with installed indicators
+* Install and remove packages with automatic source detection (DNF/rpm-ostree/Flatpak)
+* List all installed packages (RPM + Flatpak) with search filter
+* Browse recently installed packages via DNF history
+* Full atomic Fedora support (auto-selects rpm-ostree)
 
-### Smart Log Viewer
-* 10 compiled patterns: OOM, segfault, disk full, auth failure, service failed, USB disconnect, kernel panic, NetworkManager, thermal throttle, firmware error
-* Structured journalctl JSON parsing with severity labels
-* Error summary with top units and pattern frequency
-* Text and JSON export
+### Firewall Manager
+* Comprehensive firewall status: running state, zones, ports, services, rich rules
+* Open/close ports with permanent or runtime modes
+* Manage service allowlists (add/remove services)
+* Rich rule management for advanced configurations
+* Zone management: list, set default, view active zones
+* Start/stop firewalld via pkexec
 
-### Quick Actions Bar
-* Searchable action palette triggered by Ctrl+Shift+K
-* 15+ default actions: Update System, Clean Cache, Security Scan, Auto-Tune, etc.
-* Fuzzy search across name, description, and keywords
-* Recent actions tracked (last 10) and promoted in search
-* Plugin-extensible via QuickActionRegistry
+### Dashboard v2
+* SparkLine widget: custom QPainter area chart with 30 data points and gradient fill
+* Live CPU and RAM sparklines refreshed every 2 seconds
+* Network speed indicator (↓/↑ bytes/sec from /proc/net/dev)
+* Per-mount-point storage breakdown with color-coded progress bars
+* Top 5 processes by CPU usage
+* Recent actions feed from HistoryManager
+* Quick Actions grid with correct tab navigation
 
 ## New CLI Commands
 
 ```bash
-# Performance tuner
-loofi tuner analyze       # Detect workload and recommend settings
-loofi tuner apply         # Apply recommended settings
-loofi tuner history       # Show tuning history
+# Service management
+loofi service list                   # List all services
+loofi service list --filter active   # Filter by state
+loofi service list --search ssh      # Search by name
+loofi service start sshd             # Start a service
+loofi service stop bluetooth         # Stop a service
+loofi service restart nginx          # Restart a service
+loofi service enable sshd            # Enable on boot
+loofi service disable bluetooth      # Disable on boot
+loofi service logs nginx             # View journal logs
+loofi service status sshd            # Detailed info
 
-# Snapshot management
-loofi snapshot list       # List all snapshots
-loofi snapshot create     # Create a new snapshot
-loofi snapshot delete ID  # Delete a snapshot
-loofi snapshot backends   # Show available backends
+# Package management
+loofi package search --query vim     # Search all sources
+loofi package install vim            # Install (auto-detect)
+loofi package remove vim             # Remove a package
+loofi package list                   # List installed packages
+loofi package list --source flatpak  # Filter by source
+loofi package recent                 # Recently installed
 
-# Smart log viewer
-loofi logs show           # Show recent journal entries
-loofi logs errors         # Error summary with pattern detection
-loofi logs export FILE    # Export logs to file
-```
-loofi ai-models recommend     # Get RAM-based model recommendation
+# Firewall management
+loofi firewall status                # Full firewall status
+loofi firewall ports                 # List open ports
+loofi firewall open-port 8080/tcp    # Open a port
+loofi firewall close-port 8080/tcp   # Close a port
+loofi firewall services              # List allowed services
+loofi firewall zones                 # List available zones
 ```
 
 ## Installation
@@ -65,14 +79,14 @@ loofi ai-models recommend     # Get RAM-based model recommendation
 **Via DNF:**
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v12.0.0/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v16.0.0/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
 ```
 
 **Build from source:**
 
 ```bash
 ./build_rpm.sh
-sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-12.0.0-1.fc43.noarch.rpm
+sudo dnf install rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
 ```
 
 ## Quick Start
@@ -83,9 +97,7 @@ loofi-fedora-tweaks
 
 # CLI
 loofi info
-loofi doctor
-loofi vm list
-loofi mesh discover
-loofi teleport capture
-loofi ai-models list
+loofi service list
+loofi package search --query vim
+loofi firewall status
 ```

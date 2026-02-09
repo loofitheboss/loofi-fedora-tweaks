@@ -503,6 +503,149 @@ loofi plugins list
 
 ---
 
+## Service Explorer Issues (v16.0)
+
+### Service list is empty
+
+**Symptom:** `loofi service list` returns no services.
+
+**Fix:**
+```bash
+# Verify systemctl works
+systemctl list-units --type=service --no-pager | head
+
+# If running in Flatpak, systemctl may need host access
+# The app auto-detects Flatpak and uses flatpak-spawn --host
+```
+
+### Cannot start/stop services
+
+**Symptom:** "Failed to start/stop" error message.
+
+**Fix:**
+```bash
+# System services require polkit authentication
+# Ensure pkexec is available
+which pkexec
+
+# Check if the polkit policy is installed
+ls /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
+
+# Try manually:
+pkexec systemctl start <service-name>
+```
+
+### User services not found
+
+**Symptom:** `--user` flag shows no services.
+
+**Fix:**
+```bash
+# User services require the user instance
+systemctl --user list-units --type=service
+
+# If running from a different user context, ensure
+# XDG_RUNTIME_DIR is set
+echo $XDG_RUNTIME_DIR
+```
+
+---
+
+## Package Explorer Issues (v16.0)
+
+### Search returns no results
+
+**Symptom:** `loofi package search --query <term>` returns nothing.
+
+**Fix:**
+```bash
+# Verify DNF works
+dnf search <term>
+
+# Check if dnf is in PATH
+which dnf
+
+# On Atomic Fedora, dnf may have limited search;
+# rpm-ostree search is not available, but dnf search still works
+```
+
+### Install fails with permission error
+
+**Symptom:** Package install fails with pkexec/permission error.
+
+**Fix:**
+```bash
+# Ensure polkit agent is running (for GUI)
+# On KDE: /usr/libexec/polkit-kde-authentication-agent-1
+# On GNOME: /usr/libexec/polkit-gnome-authentication-agent-1
+
+# Flatpak installs don't require root:
+loofi package install org.gnome.Calculator
+```
+
+### Flatpak packages not showing
+
+**Symptom:** Only RPM packages appear in search/list.
+
+**Fix:**
+```bash
+# Verify flatpak is installed
+which flatpak
+
+# Check if remotes are configured
+flatpak remotes
+
+# Add flathub if missing:
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+```
+
+---
+
+## Firewall Manager Issues (v16.0)
+
+### "firewall-cmd not found"
+
+**Symptom:** `loofi firewall status` says firewall-cmd is not available.
+
+**Fix:**
+```bash
+# Install firewalld
+sudo dnf install firewalld
+
+# Start and enable
+sudo systemctl enable --now firewalld
+```
+
+### Cannot open/close ports
+
+**Symptom:** Port operations fail with permission errors.
+
+**Fix:**
+```bash
+# Port operations use pkexec firewall-cmd
+# Ensure polkit is working
+pkexec firewall-cmd --list-ports
+
+# Check firewalld is running
+sudo systemctl status firewalld
+```
+
+### Firewall status shows stopped
+
+**Symptom:** `loofi firewall status` reports firewall is not running.
+
+**Fix:**
+```bash
+# Start firewalld
+sudo systemctl start firewalld
+
+# Or via the app:
+# loofi firewall status will show "Stopped"
+# Use pkexec systemctl start firewalld
+```
+
+---
+
 ## Performance Issues
 
 ### App is slow to start

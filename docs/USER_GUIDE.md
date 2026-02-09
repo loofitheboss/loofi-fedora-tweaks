@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 15.0.0 "Nebula"**
+> **Version 16.0.0 "Horizon"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -33,9 +33,12 @@
 24. [System Snapshot Timeline](#system-snapshot-timeline)
 25. [Smart Log Viewer](#smart-log-viewer)
 26. [Quick Actions Bar](#quick-actions-bar)
-27. [CLI Reference](#cli-reference)
-28. [All Tabs Overview](#all-tabs-overview)
-29. [Troubleshooting](#troubleshooting)
+27. [Service Explorer](#service-explorer)
+28. [Package Explorer](#package-explorer)
+29. [Firewall Manager](#firewall-manager)
+30. [CLI Reference](#cli-reference)
+31. [All Tabs Overview](#all-tabs-overview)
+32. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -101,31 +104,34 @@ Press **Ctrl+Shift+K** to open the Quick Actions Bar — a floating searchable p
 
 ## Dashboard
 
-The **Dashboard** (Home tab) is your system health overview:
+The **Dashboard** (Home tab) is your system health overview with live metrics:
 
-| Card | Description |
-|------|-------------|
-| **CPU Usage** | Current CPU utilization percentage |
-| **Memory** | RAM usage (used/total) |
-| **Disk Space** | Storage utilization |
+### Live Metrics (v16.0)
+
+| Widget | Description |
+|--------|-------------|
+| **CPU Sparkline** | 30-point area chart showing recent CPU usage (2s refresh) |
+| **RAM Sparkline** | 30-point area chart showing memory utilization (2s refresh) |
+| **Network Speed** | Real-time download/upload speed from `/proc/net/dev` |
+| **Storage Breakdown** | Per-mount-point usage bars, color-coded by utilization |
+| **Top Processes** | Top 5 processes by CPU usage |
+| **Recent Actions** | Last 5 actions from the History log |
 
 ### Quick Actions
 
 | Button | Action |
 |--------|--------|
-| **Run Cleanup** | Clean DNF cache, vacuum journal, TRIM SSD |
-| **Check Updates** | Check for system updates |
-| **Apply Preset** | Apply your saved configuration preset |
+| **Run Cleanup** | Navigate to Maintenance tab for cleanup operations |
+| **Check Updates** | Navigate to Maintenance tab for update checking |
+| **Apply Preset** | Navigate to Hardware tab for hardware profiles |
+| **Security Scan** | Navigate to Security & Privacy tab |
 
 ### Auto-Refresh
 
-The dashboard auto-refreshes every 5 seconds with live system health:
-
-| Indicator | Description |
-|-----------|-------------|
-| **CPU Load** | Real-time CPU usage with color-coded status (green/yellow/red) |
-| **Memory** | Current RAM usage updated automatically |
-| **Disk** | Disk space utilization |
+| Timer | Interval | Updates |
+|-------|----------|--------|
+| **Fast** | 2 seconds | CPU sparkline, RAM sparkline, network speed |
+| **Slow** | 10 seconds | Storage breakdown, top processes, recent actions |
 
 ---
 
@@ -877,6 +883,124 @@ registry.register(QuickAction(
 
 ---
 
+## Service Explorer
+
+*New in v16.0*
+
+The **Service Explorer** provides a full systemd service browser and controller, accessible from the CLI.
+
+### Listing Services
+
+```bash
+loofi service list                        # All system services
+loofi service list --filter active        # Only active
+loofi service list --filter failed        # Only failed
+loofi service list --search ssh           # Search by name/description
+loofi service list --user                 # User-scope services
+```
+
+Output columns: Name, State (✅/❌/⬜), Enabled, Description.
+
+### Service Control
+
+All system-scope actions use `pkexec` for privilege escalation:
+
+| Command | Action |
+|---------|--------|
+| `loofi service start <name>` | Start a service |
+| `loofi service stop <name>` | Stop a service |
+| `loofi service restart <name>` | Restart a service |
+| `loofi service enable <name>` | Enable on boot |
+| `loofi service disable <name>` | Disable on boot |
+| `loofi service mask <name>` | Prevent starting entirely |
+| `loofi service unmask <name>` | Allow starting again |
+
+### Service Details & Logs
+
+```bash
+loofi service status sshd     # PID, memory, uptime, unit file path
+loofi service logs sshd        # Last 50 journal lines
+loofi service logs nginx --lines 200  # Custom count
+```
+
+---
+
+## Package Explorer
+
+*New in v16.0*
+
+The **Package Explorer** provides unified package management across DNF/rpm-ostree and Flatpak.
+
+### Searching
+
+```bash
+loofi package search --query vim          # Search all sources
+```
+
+Results show: Name, Version, Source (dnf/rpm-ostree/flatpak), Installed status, Summary.
+
+### Install & Remove
+
+```bash
+loofi package install vim                 # Auto-detect source
+loofi package install org.gnome.Calculator  # Detected as Flatpak
+loofi package remove vim                  # Auto-detect installed source
+```
+
+Source detection logic:
+- Names with 2+ dots (e.g. `org.gnome.Calculator`) → Flatpak
+- On Atomic Fedora → rpm-ostree
+- Otherwise → DNF
+
+### Listing Packages
+
+```bash
+loofi package list                        # All installed packages
+loofi package list --source flatpak       # Flatpak apps only
+loofi package list --source dnf           # RPM packages only
+loofi package list --search vim           # Filter by name/summary
+loofi package recent                      # Installed in last 30 days
+loofi package recent --days 7             # Custom time range
+```
+
+---
+
+## Firewall Manager
+
+*New in v16.0*
+
+The **Firewall Manager** provides a CLI interface to firewalld.
+
+### Status
+
+```bash
+loofi firewall status          # Running state, default zone, ports, services
+```
+
+### Port Management
+
+```bash
+loofi firewall ports                      # List open ports
+loofi firewall open-port 8080/tcp         # Open a port (permanent + reload)
+loofi firewall close-port 8080/tcp        # Close a port
+```
+
+### Service Management
+
+```bash
+loofi firewall services                   # List allowed services
+```
+
+### Zone Management
+
+```bash
+loofi firewall zones                      # List all zones with active flag
+```
+
+All write operations use `pkexec firewall-cmd` with `--permanent` and automatic reload.
+
+---
+
 ## CLI Reference
 
 ### Info & Health
@@ -956,6 +1080,46 @@ loofi logs show --priority 3  # Filter by syslog priority
 loofi logs show --since 1h    # Entries from last hour
 loofi logs errors             # Show error summary with patterns
 loofi logs export log.txt     # Export filtered logs
+```
+
+### Service, Package & Firewall Management (v16.0)
+
+```bash
+# Service Explorer
+loofi service list             # List all systemd services
+loofi service list --filter active  # Filter by state
+loofi service list --search ssh     # Search by name/description
+loofi service list --user      # Show user-scope services
+loofi service start sshd       # Start a service (pkexec)
+loofi service stop bluetooth   # Stop a service
+loofi service restart nginx    # Restart a service
+loofi service enable sshd      # Enable on boot
+loofi service disable bluetooth  # Disable on boot
+loofi service mask cups        # Prevent service from starting
+loofi service unmask cups      # Allow service to start again
+loofi service logs nginx       # View service journal logs
+loofi service logs nginx --lines 100  # Custom line count
+loofi service status sshd      # Detailed service info
+
+# Package Explorer
+loofi package search --query vim      # Search DNF + Flatpak
+loofi package search --query vim --source dnf  # DNF only
+loofi package install vim              # Install (auto-detect source)
+loofi package install org.gnome.Calculator  # Install Flatpak
+loofi package remove vim               # Remove a package
+loofi package list                     # List all installed
+loofi package list --source flatpak    # Flatpak only
+loofi package list --search vim        # Filter installed packages
+loofi package recent                   # Recently installed (30 days)
+loofi package recent --days 7          # Custom time range
+
+# Firewall Manager
+loofi firewall status          # Full firewall snapshot
+loofi firewall ports           # List open ports
+loofi firewall open-port 8080/tcp   # Open a port (permanent)
+loofi firewall close-port 8080/tcp  # Close a port
+loofi firewall services        # List allowed services
+loofi firewall zones           # List zones with active indicator
 ```
 
 ### JSON Output (v10.0)
@@ -1050,4 +1214,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v15.0.0 - February 2026*
+*Documentation last updated: v16.0.0 - February 2026*

@@ -36,7 +36,7 @@ Open an issue with the **enhancement** label. Describe:
 * New tabs should inherit from `BaseTab` (see `ui/base_tab.py`).
 * System commands go in `utils/` modules, never directly in UI code.
 
-## Project Structure (v15.0)
+## Project Structure (v16.0)
 
 ```
 loofi-fedora-tweaks/
@@ -44,7 +44,7 @@ loofi-fedora-tweaks/
 │   ├── main.py               # Entry point (GUI/CLI/Daemon)
 │   ├── version.py            # Version source of truth
 │   ├── ui/                   # PyQt6 UI components
-│   │   ├── main_window.py    # Main window with sidebar (20 tabs)
+│   │   ├── main_window.py    # Main window with sidebar (21 tabs)
 │   │   ├── base_tab.py       # BaseTab class (shared by all tabs)
 │   │   ├── dashboard_tab.py  # Dashboard (Home)
 │   │   ├── monitor_tab.py    # System Monitor (Performance + Processes)
@@ -83,6 +83,9 @@ loofi-fedora-tweaks/
 │   │   ├── auto_tuner.py     # Performance auto-tuner [v15.0]
 │   │   ├── snapshot_manager.py # Unified snapshot management [v15.0]
 │   │   ├── smart_logs.py     # Smart log viewer [v15.0]
+│   │   ├── service_explorer.py # Systemd service browser [v16.0]
+│   │   ├── package_explorer.py # Unified package manager [v16.0]
+│   │   ├── firewall_manager.py # Firewalld backend [v16.0]
 │   │   └── ...               # Other utility modules
 │   ├── cli/                  # CLI entry point
 │   │   └── main.py           # CLI with --json support
@@ -91,12 +94,15 @@ loofi-fedora-tweaks/
 │   │   └── loofi-fedora-tweaks.png
 │   ├── config/               # Default configs
 │   └── plugins/              # Third-party extensions
-├── tests/                    # Unit tests (1290+ tests)
+├── tests/                    # Unit tests (1420+ tests)
 │   ├── conftest.py           # Shared fixtures
 │   ├── test_auto_tuner.py    # Auto-tuner tests [v15.0]
 │   ├── test_snapshot_manager.py # Snapshot tests [v15.0]
 │   ├── test_smart_logs.py    # Smart logs tests [v15.0]
 │   ├── test_quick_actions.py # Quick actions tests [v15.0]
+│   ├── test_service_explorer.py # Service explorer tests [v16.0]
+│   ├── test_package_explorer.py # Package explorer tests [v16.0]
+│   ├── test_firewall_manager.py # Firewall manager tests [v16.0]
 │   └── ...
 ├── docs/                     # Documentation
 │   ├── USER_GUIDE.md
@@ -159,14 +165,14 @@ Register new tabs in `MainWindow._lazy_tab()` loaders dict:
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1290+ tests passing
+# 1420+ tests passing
 ```
 
 ## Building the RPM
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-15.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
 ```
 
 ## CI/CD
