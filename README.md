@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v19.0.0 "Vanguard"
+# Loofi Fedora Tweaks v20.0.2 "Synapse"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,45 +10,35 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v19.0.0">
-    <img src="https://img.shields.io/badge/Release-v19.0.0-blue?style=for-the-badge&logo=github" alt="Release v19.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2">
+    <img src="https://img.shields.io/badge/Release-v20.0.2-blue?style=for-the-badge&logo=github" alt="Release v20.0.2"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1598%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1681%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v19.0.0 "Vanguard"
+## What's New in v20.0.2 "Synapse"
 
-### Vanguard — Safe Centralized Execution
+### Synapse — UI & Dependency Refresh
 
-v19.0 introduces a **centralized action executor** with preview mode, structured logging, and resource-aware agent arbitration. Every system action now flows through a single, auditable path.
+v20.0.2 focuses on UI polish and dependency hygiene.
 
-**Centralized ActionExecutor**
-* **Preview mode**: Inspect what any action _would_ do before executing it.
-* **Global dry-run**: Disable all real execution with a single toggle.
-* **Structured JSONL logging**: Every action logged for diagnostics export.
-* **Flatpak-aware**: Auto-wraps commands with `flatpak-spawn` inside sandbox.
+**Top Sub-Tab Usability**
+* Enables scroll buttons on QTabWidget sub-tabs
+* Prevents tabs from expanding off-screen
+* Elides long labels to keep the tab bar usable
+* Adds themed styling for tab scroller buttons
 
-**Unified ActionResult**
-* Single structured result type: success, exit_code, stdout, stderr, preview flag, needs_reboot.
-* Replaces ad-hoc result types across operations and agents.
-
-**Agent Arbitrator**
-* Blocks background agents when CPU is thermal-throttled.
-* Blocks background work on battery power.
-* Critical actions bypass constraints for safety-first response.
-
-**Diagnostics Export**
-* `ActionExecutor.export_diagnostics()` returns full action log + system info.
-* JSONL action log auto-trimmed at 500 entries.
+**Dependency Refresh**
+* Pinned Python dependencies to the latest stable releases
 
 ---
 
-## Early Preview: v20.0.1 "Synapse" (Phase 1)
+## Synapse Phase 1: Remote Management API (v20.0.x)
 
 **Loofi Web API (Headless Mode)**
 
@@ -301,7 +291,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v19.0.0/loofi-fedora-tweaks-19.0.0-1.noarch.rpm
+sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v20.0.2/loofi-fedora-tweaks-20.0.2-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -317,7 +307,7 @@ python3 main.py
 
 ```bash
 ./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-19.0.0-1.noarch.rpm
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-20.0.2-1.noarch.rpm
 ```
 
 ---
@@ -443,7 +433,7 @@ loofi --json doctor
 loofi --version
 ```
 
-## Loofi Web API (v20.0.1 Preview)
+## Loofi Web API (v20.0.x Preview)
 
 ```bash
 # Start the API server
@@ -487,7 +477,7 @@ curl -X POST http://localhost:8000/api/execute \
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1598 tests passing
+# 1681 tests passing
 ```
 
 ---

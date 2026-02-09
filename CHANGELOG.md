@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [20.0.2] - 2026-02-09 "Synapse"
+
+### Changed
+
+- UI: Fixed top sub-tab overflow by enabling scroll buttons, eliding long labels, and styling scrollers.
+- Dependencies: Pinned Python dependencies to the latest versions (PyQt6, requests, fastapi, uvicorn, PyJWT, bcrypt, httpx, python-multipart).
+
+---
+
 ## [20.0.1] - 2026-02-09 "Synapse"
 
 ### Changed

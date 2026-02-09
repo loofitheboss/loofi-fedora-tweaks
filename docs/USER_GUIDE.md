@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks - User Guide
 
-> **Version 17.0.0 "Atlas"**
+> **Version 20.0.2 "Synapse"**
 > Complete documentation for all features and functionality.
 
 ---
@@ -63,7 +63,7 @@ loofi-fedora-tweaks
 loofi info
 loofi cleanup
 
-# Web API Mode (v20.0.1 preview)
+# Web API Mode (v20.0.x preview)
 loofi-fedora-tweaks --web
 ```
 
@@ -1387,4 +1387,4 @@ Relaunch the app to trigger the wizard again.
 
 ---
 
-*Documentation last updated: v17.0.0 - February 2026*
+*Documentation last updated: v20.0.2 - February 2026*

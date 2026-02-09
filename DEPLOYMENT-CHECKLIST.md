@@ -1,13 +1,13 @@
-# v20.0.1 "Synapse" Production Deployment Checklist
+# v20.0.2 "Synapse" Production Deployment Checklist
 
 ## ✅ Completed
 
-- [x] Git tag v20.0.1 created and pushed
-- [x] GitHub release created with comprehensive notes
-- [x] RPM packages built (binary + source)
-  - Binary: `~/rpmbuild/RPMS/noarch/loofi-fedora-tweaks-20.0.1-1.noarch.rpm`
-  - Source: `~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.1-1.src.rpm`
-- [x] Web server tested and verified
+- [ ] Git tag v20.0.2 created and pushed
+- [ ] GitHub release created with comprehensive notes
+- [ ] RPM packages built (binary + source)
+  - Binary: `~/rpmbuild/RPMS/noarch/loofi-fedora-tweaks-20.0.2-1.noarch.rpm`
+  - Source: `~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.2-1.src.rpm`
+- [ ] Web server tested and verified
 - [x] Systemd service file created: `loofi-fedora-tweaks.service`
 - [x] Nginx reverse proxy config created: `loofi-nginx.conf`
 - [x] Release announcement drafted: `RELEASE-ANNOUNCEMENT.md`
@@ -38,7 +38,7 @@ copr-cli create loofi-fedora-tweaks \
 ### Upload SRPM
 ```bash
 # From project root
-copr-cli build loofi-fedora-tweaks ~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.1-1.src.rpm
+copr-cli build loofi-fedora-tweaks ~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.2-1.src.rpm
 
 # Monitor build progress
 copr-cli watch-build <build-id>
@@ -52,7 +52,7 @@ sudo dnf install loofi-fedora-tweaks
 
 # Test installation
 loofi-fedora-tweaks --version
-# Expected: 20.0.1 Synapse
+# Expected: 20.0.2 Synapse
 ```
 
 ---
@@ -129,7 +129,7 @@ sudo systemctl enable certbot-renew.timer
 ```bash
 # Test HTTPS endpoint
 curl https://YOUR_DOMAIN/api/health
-# Expected: {"status": "ok", "version": "20.0.1", "codename": "Synapse"}
+# Expected: {"status": "ok", "version": "20.0.2", "codename": "Synapse"}
 
 # Test authentication flow
 curl -X POST https://YOUR_DOMAIN/api/key
@@ -156,21 +156,21 @@ sudo firewall-cmd --reload
 
 ### Fedora Discussion
 - **Forum**: https://discussion.fedoraproject.org/c/desktop/gnome/19
-- **Title**: "Loofi Fedora Tweaks v20.0.1 'Synapse' - Remote System Management Released"
+- **Title**: "Loofi Fedora Tweaks v20.0.2 'Synapse' - Tab Scroller Fix & Dependency Refresh"
 - **Content**: Use `RELEASE-ANNOUNCEMENT.md` (adapt formatting for forum)
 - **Tags**: #fedora-tweaks, #system-tools, #gnome
 
 ### Reddit
 - **Subreddit**: r/Fedora
-- **Title**: "Loofi Fedora Tweaks v20.0.1 'Synapse' - Now with Remote Management API"
+- **Title**: "Loofi Fedora Tweaks v20.0.2 'Synapse' - Tab Scroller Fix & Dependency Refresh"
 - **Flair**: "New Release"
 - **Content**: Use `RELEASE-ANNOUNCEMENT.md` (Reddit markdown format)
 
 ### GitHub
-- [x] Already published: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.1
+- [ ] Publish: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2
 
 ### Social Media (Optional)
-- **Twitter/X**: "🚀 Loofi Fedora Tweaks v20.0.1 'Synapse' is out! Remote system management via REST API, autonomous agents with EventBus, and 66 new tests. Try it now: [link] #Fedora #Linux #OpenSource"
+- **Twitter/X**: "🚀 Loofi Fedora Tweaks v20.0.2 'Synapse' is out! Tab scroller fix + dependency refresh. Try it now: [link] #Fedora #Linux #OpenSource"
 - **Mastodon**: Similar to Twitter, post on Fosstodon or fedora.im instance
 
 ---
@@ -182,7 +182,7 @@ sudo firewall-cmd --reload
 - [ ] COPR build succeeds for Fedora 41
 - [ ] Package installs cleanly on fresh Fedora 40
 - [ ] Package installs cleanly on fresh Fedora 41
-- [ ] `loofi-fedora-tweaks --version` shows 20.0.1
+- [ ] `loofi-fedora-tweaks --version` shows 20.0.2
 - [ ] GUI launches successfully
 - [ ] Web mode starts without errors
 
@@ -225,7 +225,7 @@ sudo tail -f /var/log/nginx/loofi-error.log
 # Rebuild SRPM
 rpmbuild -bs loofi-fedora-tweaks.spec
 # Resubmit to COPR
-copr-cli build loofi-fedora-tweaks ~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.1-1.src.rpm
+copr-cli build loofi-fedora-tweaks ~/rpmbuild/SRPMS/loofi-fedora-tweaks-20.0.2-1.src.rpm
 ```
 
 ### If Web Service Fails

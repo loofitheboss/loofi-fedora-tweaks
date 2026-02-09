@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        20.0.1
+Version:        20.0.2
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,10 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.2-1
+- UI: Fix top tab overflow by enabling scroll buttons and styling scrollers
+- Dependencies: refresh Python dependencies to latest versions
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 20.0.1-1
 - Packaging: switch JWT dependency to python3-jwt (PyJWT) for Fedora 43
 

@@ -1,52 +1,38 @@
-# Loofi Fedora Tweaks v20.0.1 "Synapse" Release Announcement
+# Loofi Fedora Tweaks v20.0.2 "Synapse" Release Announcement
 
 ## TL;DR
 
-Loofi Fedora Tweaks v20.0.1 "Synapse" is now available! This major release adds **remote system management** via a headless web API, an **EventBus "Hive Mind"** for autonomous agents, and comprehensive security testing.
+Loofi Fedora Tweaks v20.0.2 "Synapse" is now available! This update focuses on **tab navigation usability** and refreshed dependency pins for stability.
 
 **Install now:** `sudo dnf copr enable loofitheboss/loofi-fedora-tweaks && sudo dnf install loofi-fedora-tweaks`
 
-**GitHub Release:** https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.1
+**GitHub Release:** https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2
 
 ---
 
-## What's New in v20.0.1 "Synapse"
+## What's New in v20.0.2 "Synapse"
 
-### 🌐 Loofi Web API (Remote Management)
+### 🧭 Tab Navigation Usability Fix
 
-Manage your Fedora system remotely through a secure REST API:
+Top sub-tabs are now usable even with many sections:
 
-```bash
-# Start headless web server
-loofi-fedora-tweaks --web
+- Scroll buttons enabled for overflowed tab bars
+- Non-expanding tabs keep the bar compact
+- Long labels elide instead of pushing tabs off-screen
+- Scroller buttons styled across all bundled themes
 
-# Access from anywhere
-curl https://loofi.example.com/api/health
-# {"status": "ok", "version": "20.0.1", "codename": "Synapse"}
-```
+### 📦 Dependency Refresh
 
-**Key Features:**
-- **JWT Authentication** with bcrypt-hashed API keys
-- **Mandatory Preview Mode**: All actions preview first, real execution is opt-in
-- **System Monitoring**: CPU, memory, uptime, package manager detection
-- **Agent Management**: View and control autonomous agents remotely
-- **RESTful Endpoints**: `/api/health`, `/api/info`, `/api/agents`, `/api/execute`
+Pinned the Python dependencies to the latest stable versions:
 
-### 🧠 EventBus "Hive Mind"
-
-Autonomous agents communicate through a thread-safe pub/sub system:
-- Storage cleanup agent triggers when disk space is low
-- Agents subscribe to system events and coordinate actions
-- Async callback execution prevents blocking
-- Foundation for future AI-driven system management
-
-### 🛡️ Security & Testing
-
-**66 new tests** ensuring production-ready security:
-- 28 API security tests (authentication, authorization, input validation)
-- 18 EventBus tests (concurrency, thread safety, error handling)
-- 10 agent integration tests (event subscriptions, action execution)
-- 10 agent implementation tests (cleanup agent, notification agent)
+- PyQt6 6.10.2
+- requests 2.32.5
+- fastapi 0.128.5
+- uvicorn 0.40.0
+- PyJWT 2.11.0
+- bcrypt 5.0.0
+- httpx 0.28.1
+- python-multipart 0.0.22
 
 ### 📦 Installation & Usage
 
@@ -86,44 +72,33 @@ curl -X POST http://localhost:8000/api/execute \
   -d '{"command": "dnf", "args": ["clean", "all"], "preview": true}'
 ```
 
-### 🚀 Use Cases
+### ✅ Tests
 
-1. **Homelab Management**: Control multiple Fedora systems from a central dashboard
-2. **CI/CD Integration**: Automate system tweaks in deployment pipelines
-3. **Remote Administration**: Manage headless servers without SSH
-4. **Agent Automation**: Let autonomous agents handle routine maintenance
+- UI smoke suite: 15 passed, 22 skipped (headless)
+- Visual verification recommended on hardware with OpenGL drivers
 
-### 📊 Architecture Highlights
+### 📊 Notes
 
-- **FastAPI** for modern async Python REST API
-- **Uvicorn** for production-grade ASGI server
-- **ThreadPoolExecutor** for async event processing
-- **Singleton patterns** for EventBus and AgentRegistry
-- **Pydantic models** for request/response validation
-- **python-jose** for JWT token management
-- **bcrypt** for secure password hashing
+This is a minor, compatibility-safe update focused on UI polish and dependency hygiene.
 
 ### 🔗 Links
 
-- **GitHub Release**: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.1
+- **GitHub Release**: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2
 - **Full Changelog**: https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/CHANGELOG.md
 - **Documentation**: https://github.com/loofitheboss/loofi-fedora-tweaks#readme
 - **Report Issues**: https://github.com/loofitheboss/loofi-fedora-tweaks/issues
 
-### 🎯 What's Next (v21.0.0 Roadmap)
+### 🎯 What's Next
 
-- Web dashboard UI for remote management
-- Real-time WebSocket notifications
-- Multi-agent orchestration patterns
-- AI-powered system optimization
+- Further UI polish (breadcrumb refinements, notification panel tweaks)
+- Remote management UX improvements
 
 ### 💬 Feedback Welcome!
 
-This is a **major architectural shift** toward autonomous system management. We'd love your feedback on:
-- API design and ergonomics
-- Security model and authentication flow
-- Agent use cases and feature requests
-- Integration with existing tools (Ansible, Terraform, etc.)
+We’d love your feedback on:
+- Tab navigation usability improvements
+- Theme styling for tab scrollers
+- Any regressions you notice after the dependency refresh
 
 Try it out and let us know what you think!
 
