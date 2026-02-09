@@ -190,10 +190,10 @@ QTabBar::tab:hover:!selected {
     color: #cdd6f4;
 }
 
-QTabBar::scroller {
+QTabWidget#contentTabs QTabBar::scroller {
     width: 22px;
 }
-QTabBar::scroll-left-button, QTabBar::scroll-right-button {
+QTabWidget#contentTabs QTabBar::scroll-left-button, QTabWidget#contentTabs QTabBar::scroll-right-button {
     background-color: #181825;
     border: 1px solid #313244;
     border-radius: 6px;
@@ -201,7 +201,7 @@ QTabBar::scroll-left-button, QTabBar::scroll-right-button {
     width: 18px;
     height: 18px;
 }
-QTabBar::scroll-left-button:hover, QTabBar::scroll-right-button:hover {
+QTabWidget#contentTabs QTabBar::scroll-left-button:hover, QTabWidget#contentTabs QTabBar::scroll-right-button:hover {
     background-color: #313244;
 }
 
