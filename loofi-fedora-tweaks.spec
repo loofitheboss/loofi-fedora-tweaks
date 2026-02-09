@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        18.0.0
+Version:        18.1.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -65,6 +65,12 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 18.1.0-1
+- v18.1 Navigator: Categorized Sidebar & Enhanced UX
+- UX Overhaul: Refactored sidebar with collapsible categories (System, Hardware, Network, etc.)
+- Improved Navigation: Updated search and keyboard shortcuts for hierarchical menu
+- Dashboard shortcuts updated for new structure
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 18.0.0-1
 - v18.0 Sentinel: Autonomous Agent Framework, AI Agent Planner
 - Agent Framework: Configurable agents for system monitoring, security, cleanup
