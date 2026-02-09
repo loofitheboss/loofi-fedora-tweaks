@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        21.0.0
+Version:        21.0.1
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,11 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 21.0.1-1
+- Packaging: Remove python-jose test dependency (fixes RPM install on Fedora)
+- Use PyJWT's ExpiredSignatureError instead of python-jose in tests
+- All runtime code already uses PyJWT correctly
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 21.0.0-1
 - v21.0 UX Stabilization & Layout Integrity
 - Baseline layout fixes: native title bar, border cleanup, documentMode

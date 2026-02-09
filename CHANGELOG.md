@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [21.0.1] - 2026-02-09
+
+### Fixed
+- **Packaging**: Removed python-jose test dependency that blocked RPM installation on Fedora
+- **Tests**: Use PyJWT's `ExpiredSignatureError` instead of importing from python-jose
+- Runtime code already correctly uses PyJWT; this fix aligns test dependencies
+
+---
+
 ## [21.0.0] - 2026-02-09 "UX Stabilization & Layout Integrity"
 
 ### Changed
