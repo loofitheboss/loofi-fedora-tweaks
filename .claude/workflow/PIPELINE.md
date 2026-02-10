@@ -23,7 +23,7 @@ Each phase has: entry criteria, agent assignment, exit criteria, and a standard 
 **Action:**
 1. Read ROADMAP.md for version scope
 2. Decompose into atomic tasks with dependencies
-3. Write task list to `.claude/workflow/tasks-vXX.md`
+3. Write task list to `.claude/workflow/tasks-v{VERSION}.md`
 4. Identify files to create/modify per task
 
 **Exit:** Task list approved, all tasks have acceptance criteria
