@@ -261,7 +261,7 @@ class TestCoreWorkersImports:
         """Verify __all__ exports match expected public API."""
         import core.workers
 
-        expected = {"BaseWorker"}
+        expected = {"BaseWorker", "CommandWorker"}
         assert set(core.workers.__all__) == expected
 
 

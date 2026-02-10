@@ -52,7 +52,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertTrue(first_widget.isVisible())
         self.assertGreaterEqual(first_widget.geometry().y(), 0)
 
-        window.close()
+        window.hide()
 
     def test_minimum_window_size(self):
         """Verify minimum window size is enforced (800x500)."""
@@ -69,7 +69,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertGreaterEqual(min_size.width(), 800)
         self.assertGreaterEqual(min_size.height(), 500)
 
-        window.close()
+        window.hide()
 
     def test_breadcrumb_bar_height(self):
         """Verify breadcrumb bar has positive height."""
@@ -89,7 +89,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(breadcrumb)
         self.assertGreater(breadcrumb.height(), 0)
 
-        window.close()
+        window.hide()
 
     def test_status_bar_height(self):
         """Verify status bar has positive height."""
@@ -109,7 +109,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(status_frame)
         self.assertGreater(status_frame.height(), 0)
 
-        window.close()
+        window.hide()
 
     def test_sidebar_width(self):
         """Verify sidebar has positive width."""
@@ -129,7 +129,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(sidebar)
         self.assertGreater(sidebar.width(), 0)
 
-        window.close()
+        window.hide()
 
     def test_no_widget_overlaps_origin(self):
         """Verify no visible widgets overlap the (0,0) origin point."""
@@ -161,7 +161,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertGreaterEqual(geom.x(), 0)
         self.assertGreaterEqual(geom.y(), 0)
 
-        window.close()
+        window.hide()
 
 
 if __name__ == "__main__":

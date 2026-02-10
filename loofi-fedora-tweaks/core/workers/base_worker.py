@@ -105,7 +105,6 @@ class BaseWorker(QThread, metaclass=_BaseWorkerMeta):
         Template method that handles signal emission and error handling.
         Calls `do_work()` abstract method for actual work.
         """
-        self._should_stop = False
         self._result = None
 
         try:
@@ -124,7 +123,7 @@ class BaseWorker(QThread, metaclass=_BaseWorkerMeta):
 
         except Exception as e:
             logger.error(f"{self.__class__.__name__} error: {e}", exc_info=True)
-            self.error.emit(str(e))
+            self.error.emit(f"{type(e).__name__}: {e}")
 
     @abstractmethod
     def do_work(self) -> Any:

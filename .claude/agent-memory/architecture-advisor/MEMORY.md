@@ -55,6 +55,24 @@ CLAUDE.md specifies:
 - Testing: no root required, all system calls mocked
 - Minimal disruption: incremental migration preferred
 
+## v23.0 Decisions
+
+**CommandRunner vs CommandWorker (Feb 2026):**
+- Decision: **Adapter pattern** (Option A)
+- CommandWorker wraps CommandRunner for BaseWorker compatibility
+- Preserve existing CommandRunner usage in 25+ tabs
+- No breaking changes to BaseTab API
+- Gradual migration path: new code uses CommandWorker, old code unchanged
+- Rationale: Minimize disruption, maintain backward compat, incremental refactor
+
+**Service Layer Strategy (Feb 2026):**
+- Decision: **New abstractions** (Option A)
+- Service layer provides clean interfaces, delegates to existing utils
+- SystemManager remains unchanged (no rename, no breaking imports)
+- PackageService wraps existing package_manager.py logic
+- SystemService uses SystemManager for detection/info, adds async operations
+- Rationale: Backward compatible, incremental architecture improvement, no migration disruption
+
 ## Related Files
 
 - [refactor-plan.md](refactor-plan.md) — v23.0 structure design

@@ -2,25 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## [23.0.0] - 2026-02-09 "Architecture Hardening"
+## [23.0.0] - 2026-02-10 "Architecture Hardening"
 
 ### Added
 
-- **BaseActionExecutor ABC**: Abstract base class for all executor implementations with privileged execution support via `privileged=True` parameter.
-- **pkexec Integration**: Seamless privilege elevation for system operations through BaseActionExecutor.
-- **BaseWorker QThread Pattern**: Centralized worker thread pattern in `core/workers/` for non-blocking UI operations.
-- **Comprehensive Import Tests**: 34 validation tests ensuring all module imports work correctly and backward compatibility is maintained.
+- Add `BaseActionExecutor` abstract base class with `privileged=True` execution support.
+- Add `pkexec` privilege elevation integration through executor base abstractions.
+- Add centralized `BaseWorker` QThread pattern in `core/workers/` for non-blocking operations.
+- Add comprehensive import validation coverage with 34 tests.
+- Add GitHub Actions CI workflow for automated validation.
 
 ### Changed
 
-- **Service Layer Migration**: Moved system services to `services/system/` (system.py, services.py, processes.py, process.py).
-- **Hardware Services Migration**: Moved hardware services to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py).
-- **Packaging Scripts Consolidation**: Created `scripts/` directory with all build scripts (build_rpm.sh, build_flatpak.sh, build_appimage.sh, build_sdist.sh).
-- **ActionExecutor Refactor**: Refactored ActionExecutor to subclass BaseActionExecutor for better abstraction and testability.
+- Move system services to `services/system/` (system.py, services.py, processes.py, process.py).
+- Move hardware services to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py).
+- Consolidate packaging scripts under `scripts/` (`build_rpm.sh`, `build_flatpak.sh`, `build_appimage.sh`, `build_sdist.sh`).
+- Refactor `ActionExecutor` to subclass `BaseActionExecutor` for improved abstraction and testability.
 
-### Deprecated
+### Fixed
 
-- **utils/ Backward Compatibility**: Shims added in `utils/` with deprecation warnings for old import paths. Will be removed in v25.0.0.
+- Keep backward-compatible import shims in `utils/` to preserve legacy import paths.
+
+### Removed
+
+- Remove direct legacy import usage by migrating service and worker code to new core/service modules.
 
 ---
 

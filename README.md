@@ -300,7 +300,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v21.0.0/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
+pkexec dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v23.0.0/loofi-fedora-tweaks-23.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -315,8 +315,8 @@ python3 main.py
 ### Build RPM from Source
 
 ```bash
-./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
+bash scripts/build_rpm.sh
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-23.0.0-1.noarch.rpm
 ```
 
 ---

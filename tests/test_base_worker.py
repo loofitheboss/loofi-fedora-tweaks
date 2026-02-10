@@ -92,12 +92,21 @@ class TestBaseWorker(unittest.TestCase):
             "error": []
         }
 
+    def _inc_started(self):
+        """Increment started signal count."""
+        self.signals_received["started"] += 1
+
+    def _flush_events(self):
+        """Process queued Qt signals."""
+        self.app.processEvents()
+        self.app.processEvents()
+
     def test_simple_success(self):
         """Test basic successful worker execution."""
         worker = SimpleWorker()
 
         # Connect signals
-        worker.started.connect(lambda: self.signals_received["started"].__iadd__(1))
+        worker.started.connect(self._inc_started)
         worker.progress.connect(lambda msg, pct: self.signals_received["progress"].append((msg, pct)))
         worker.finished.connect(lambda result: self.signals_received["finished"].append(result))
         worker.error.connect(lambda msg: self.signals_received["error"].append(msg))
@@ -105,8 +114,7 @@ class TestBaseWorker(unittest.TestCase):
         # Run worker
         worker.start()
         worker.wait(1000)
-        self.app.processEvents()  # Wait up to 1 second
-        self.app.processEvents()  # Process queued signals
+        self._flush_events()
 
         # Verify signals
         self.assertEqual(self.signals_received["started"], 1)
@@ -122,13 +130,14 @@ class TestBaseWorker(unittest.TestCase):
         """Test that errors are caught and emitted via error signal."""
         worker = ErrorWorker()
 
-        worker.started.connect(lambda: self.signals_received["started"].__iadd__(1))
+        worker.started.connect(self._inc_started)
         worker.progress.connect(lambda msg, pct: self.signals_received["progress"].append((msg, pct)))
         worker.finished.connect(lambda result: self.signals_received["finished"].append(result))
         worker.error.connect(lambda msg: self.signals_received["error"].append(msg))
 
         worker.start()
         worker.wait(1000)
+        self._flush_events()
 
         # Verify error signal
         self.assertEqual(self.signals_received["started"], 1)
@@ -140,7 +149,7 @@ class TestBaseWorker(unittest.TestCase):
         """Test worker cancellation support."""
         worker = CancellableWorker()
 
-        worker.started.connect(lambda: self.signals_received["started"].__iadd__(1))
+        worker.started.connect(self._inc_started)
         worker.progress.connect(lambda msg, pct: self.signals_received["progress"].append((msg, pct)))
         worker.finished.connect(lambda result: self.signals_received["finished"].append(result))
         worker.error.connect(lambda msg: self.signals_received["error"].append(msg))
@@ -149,6 +158,7 @@ class TestBaseWorker(unittest.TestCase):
         time.sleep(0.05)  # Let it run briefly
         worker.cancel()
         worker.wait(1000)
+        self._flush_events()
 
         # Verify cancellation
         self.assertEqual(self.signals_received["started"], 1)
@@ -166,6 +176,7 @@ class TestBaseWorker(unittest.TestCase):
 
         worker.start()
         worker.wait(1000)
+        self._flush_events()
 
         # Verify progress signals
         self.assertGreaterEqual(len(self.signals_received["progress"]), 5)
@@ -184,6 +195,7 @@ class TestBaseWorker(unittest.TestCase):
 
         worker.start()
         worker.wait(1000)
+        self._flush_events()
 
         result = worker.get_result()
         self.assertEqual(result, {"result": "success"})
@@ -203,6 +215,7 @@ class TestBaseWorker(unittest.TestCase):
 
         worker1.wait(1000)
         worker2.wait(1000)
+        self._flush_events()
 
         # Both should complete independently
         self.assertIsNotNone(results["worker1"])
@@ -225,12 +238,13 @@ class TestBaseWorker(unittest.TestCase):
         worker = CancellableWorker()
         worker.cancel()
 
-        worker.started.connect(lambda: self.signals_received["started"].__iadd__(1))
+        worker.started.connect(self._inc_started)
         worker.error.connect(lambda msg: self.signals_received["error"].append(msg))
 
         # Should still run but immediately detect cancellation
         worker.start()
         worker.wait(1000)
+        self._flush_events()
 
         self.assertEqual(self.signals_received["started"], 1)
         self.assertEqual(len(self.signals_received["error"]), 1)
@@ -244,6 +258,7 @@ class TestBaseWorker(unittest.TestCase):
 
         worker.start()
         worker.wait(1000)
+        self._flush_events()
 
         self.assertEqual(len(error_messages), 1)
         self.assertIn("ValueError", error_messages[0])
@@ -257,6 +272,11 @@ class TestExampleWorkers(unittest.TestCase):
         """Create QCoreApplication if not already running."""
         cls.app = QCoreApplication.instance() or QCoreApplication([])
 
+    def _flush_events(self):
+        """Process queued Qt signals."""
+        self.app.processEvents()
+        self.app.processEvents()
+
     def test_example_download_worker(self):
         """Test ExampleDownloadWorker from example_worker.py."""
         from core.workers.example_worker import ExampleDownloadWorker
@@ -268,11 +288,13 @@ class TestExampleWorkers(unittest.TestCase):
         )
 
         results = []
+        errors = []
         worker.finished.connect(lambda result: results.append(result))
+        worker.error.connect(lambda msg: errors.append(msg))
 
         worker.start()
         worker.wait(5000)
-        self.app.processEvents()  # Wait up to 5 seconds
+        self._flush_events()
 
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -291,18 +313,20 @@ class TestExampleWorkers(unittest.TestCase):
         )
 
         results = []
+        errors = []
         worker.finished.connect(lambda result: results.append(result))
+        worker.error.connect(lambda msg: errors.append(msg))
 
         worker.start()
         time.sleep(0.1)  # Let it start
         worker.cancel()
         worker.wait(5000)
+        self._flush_events()
 
-        # Should complete with cancelled status
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        self.assertFalse(result["success"])
-        self.assertTrue(result.get("cancelled", False))
+        # BaseWorker cancellation emits error instead of finished result.
+        self.assertEqual(len(results), 0)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("cancelled", errors[0].lower())
 
     def test_example_processing_worker(self):
         """Test ExampleProcessingWorker."""
@@ -316,6 +340,7 @@ class TestExampleWorkers(unittest.TestCase):
 
         worker.start()
         worker.wait(5000)
+        self._flush_events()
 
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -334,6 +359,7 @@ class TestExampleWorkers(unittest.TestCase):
 
         worker.start()
         worker.wait(5000)
+        self._flush_events()
 
         self.assertEqual(len(errors), 1)
         self.assertIn("No data to process", errors[0])

@@ -272,10 +272,13 @@ class TestServerLifecycle(unittest.TestCase):
 
     def test_start_server_success(self):
         """Server starts successfully on an available port."""
+        import socket
         key = os.urandom(32)
-        # Use port 0 to let OS assign an available port
-        # But the API requires a specific port, so use a high port
-        result = ClipboardSync.start_clipboard_server(49999, key)
+        # Find a free port dynamically to avoid conflicts
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('127.0.0.1', 0))
+            port = s.getsockname()[1]
+        result = ClipboardSync.start_clipboard_server(port, key)
         self.assertTrue(result)
 
     def test_start_server_already_running(self):

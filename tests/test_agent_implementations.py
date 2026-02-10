@@ -388,8 +388,15 @@ class TestAgentImplementations(unittest.TestCase):
                 self.assertIsNotNone(action.name)
                 self.assertIsNotNone(action.severity)
 
-    def test_event_simulator_methods(self):
+    @patch("utils.action_executor.ActionExecutor.run")
+    def test_event_simulator_methods(self, mock_executor_run):
         """Test EventSimulator helper methods work correctly."""
+        mock_executor_run.return_value = ActionResult.ok(
+            message="Simulated command",
+            exit_code=0,
+            action_id="simulated_action"
+        )
+
         # Track published events
         events_received = []
 
