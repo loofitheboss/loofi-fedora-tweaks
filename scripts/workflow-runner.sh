@@ -37,6 +37,7 @@ fail(){ echo -e "${RED}  ✗${NC} $*"; }
 
 phase_validate() {
     log "Validating release readiness for v${VERSION}..."
+    local errors=0
 
     # Version alignment
     local py_ver spec_ver
@@ -46,8 +47,8 @@ from version import __version__; print(__version__)
 " 2>/dev/null || echo "UNKNOWN")
     spec_ver=$(grep '^Version:' "$SPEC_FILE" 2>/dev/null | awk '{print $2}' || echo "UNKNOWN")
 
-    if [ "$py_ver" = "$VERSION" ]; then ok "version.py: $py_ver"; else fail "version.py: $py_ver (expected $VERSION)"; fi
-    if [ "$spec_ver" = "$VERSION" ]; then ok ".spec: $spec_ver"; else fail ".spec: $spec_ver (expected $VERSION)"; fi
+    if [ "$py_ver" = "$VERSION" ]; then ok "version.py: $py_ver"; else fail "version.py: $py_ver (expected $VERSION)"; ((errors++)); fi
+    if [ "$spec_ver" = "$VERSION" ]; then ok ".spec: $spec_ver"; else fail ".spec: $spec_ver (expected $VERSION)"; ((errors++)); fi
 
     # Documentation
     if grep -q "\[$VERSION\]" "$ROOT/CHANGELOG.md" 2>/dev/null; then ok "CHANGELOG.md has v$VERSION"; else warn "CHANGELOG.md missing v$VERSION entry"; fi
@@ -65,23 +66,31 @@ from version import __version__; print(__version__)
             warn "$script: exists but not executable"
         else
             fail "$script: missing"
+            ((errors++))
         fi
     done
 
     # Tests
     log "Running tests..."
-    if PYTHONPATH="$ROOT/loofi-fedora-tweaks" python3 -m pytest "$ROOT/tests/" -q --tb=line 2>/dev/null; then
+    if PYTHONPATH="$ROOT/loofi-fedora-tweaks" python3 -m pytest "$ROOT/tests/" -q --tb=line; then
         ok "All tests pass"
     else
         fail "Tests failing"
+        ((errors++))
     fi
 
     # Lint
     log "Running lint..."
-    if flake8 "$ROOT/loofi-fedora-tweaks/" --max-line-length=150 --ignore=E501,W503,E402,E722 --quiet 2>/dev/null; then
+    if flake8 "$ROOT/loofi-fedora-tweaks/" --max-line-length=150 --ignore=E501,W503,E402,E722; then
         ok "Lint clean"
     else
-        warn "Lint issues found"
+        warn "Lint issues found (see output above)"
+    fi
+
+    # Exit with error if any hard checks failed
+    if [ "$errors" -gt 0 ]; then
+        fail "$errors validation error(s) found"
+        exit 1
     fi
 }
 

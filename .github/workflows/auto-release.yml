@@ -49,8 +49,6 @@ jobs:
             fi
           fi
 
-          echo "version=$PY_VER" >> "$GITHUB_OUTPUT"
-
       - name: Validate documentation
         run: |
           # Check CHANGELOG has current version
@@ -144,7 +142,7 @@ jobs:
           path: rpmbuild/RPMS/noarch/*.rpm
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
     runs-on: ubuntu-latest
     container: fedora:43
     needs: [build, security]
