@@ -1,0 +1,42 @@
+# Codex Project Configuration — Loofi Fedora Tweaks
+# See: https://developers.openai.com/codex/config-reference/
+
+model = "gpt-5.3-codex"
+approval_policy = "on-failure"
+sandbox_mode = "workspace-write"
+
+# Read AGENTS.md + CLAUDE.md for project context
+project_doc_max_bytes = 65536
+project_doc_fallback_filenames = ["CLAUDE.md", "AGENTS.md"]
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = ["."]
+
+# --- Profiles ---
+# Use: codex --profile <name>
+
+[profiles.fast]
+# For docs, formatting, version bumps, git ops — cheapest tier
+model = "gpt-4o-mini"
+approval_policy = "on-failure"
+
+[profiles.balanced]
+# For business logic, tests, UI changes, reviews
+model = "gpt-4o"
+approval_policy = "on-failure"
+
+[profiles.power]
+# For complex architecture, multi-file changes, debugging
+model = "gpt-5.3-codex"
+approval_policy = "on-request"
+
+[profiles.auto]
+# Default: let GPT 5.3 handle everything
+model = "gpt-5.3-codex"
+approval_policy = "on-failure"
+
+# --- Features ---
+
+[features]
+shell_snapshot = true

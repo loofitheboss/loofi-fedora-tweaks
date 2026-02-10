@@ -1,8 +1,25 @@
 # Release Planner Memory
 
+## Workflow System (v23.0+)
+
+### My Pipeline Phases
+- P5 DOCUMENT: CHANGELOG, README, release notes, version strings
+- P6 PACKAGE: Validate build scripts, version alignment
+- P7 RELEASE: Branch, tag, push, GitHub Release
+
+### Prompts
+- `.claude/workflow/prompts/document.md`
+- `.claude/workflow/prompts/package.md`
+- `.claude/workflow/prompts/release.md`
+
+### Cost Model
+- I run on haiku (cheapest tier)
+- Docs, version bumps, packaging = all haiku-level work
+- Never need opus/sonnet for my phases
+
 ## Release Process Pattern
 
-### Version Bump Locations (v21.0.0)
+### Version Bump Locations
 1. `/loofi-fedora-tweaks/version.py` — `__version__` and `__version_codename__`
 2. `/loofi-fedora-tweaks.spec` — `Version:` and `Release:` fields
 3. Spec file `%changelog` section — add new entry at top
@@ -10,12 +27,18 @@
 5. `README.md` — update version badges, download URLs, build output paths
 6. Create `RELEASE-NOTES-v{VERSION}.md` for GitHub release
 
-### Packaging Scripts Validated (v23.0.0+)
-- All scripts now in `scripts/` directory
-- `scripts/build_rpm.sh` — dynamically reads version from version.py, no hardcoded version
+### Packaging Scripts (v23.0.0+)
+- All scripts in `scripts/` directory
+- `scripts/build_rpm.sh` — dynamically reads version from version.py
 - `scripts/build_flatpak.sh` — stub (planned for v23.1+)
-- `scripts/build_appimage.sh` — stub (planned for v23.1+)
-- `scripts/build_sdist.sh` — stub (planned for v23.1+)
+- `scripts/build_appimage.sh` — stub
+- `scripts/build_sdist.sh` — stub
+- `scripts/workflow-runner.sh` — CLI for pipeline execution
+
+### GitHub Workflows
+- `.github/workflows/ci.yml` — lint + typecheck + security + test + build
+- `.github/workflows/release.yml` — Tag-triggered release (legacy)
+- `.github/workflows/auto-release.yml` — Enhanced: validate + lint + test + security + build + release
 
 ### CHANGELOG.md Format (Keep-a-Changelog)
 ```markdown
@@ -36,33 +59,10 @@
 ## Completed Releases
 
 ### v23.0.0 "Architecture Hardening" (2026-02-09)
-**Theme**: Service layer refactor, executor abstraction, build consolidation
-
-**Architecture Changes**:
-1. BaseActionExecutor ABC with pkexec integration
-2. ActionExecutor refactored to subclass BaseActionExecutor
-3. BaseWorker QThread pattern in core/workers/
-4. System services migrated to services/system/
-5. Hardware services migrated to services/hardware/
-6. Build scripts consolidated to scripts/
-7. 34 import validation tests
-8. Backward-compat shims with deprecation warnings
-
-**Files Modified**: version.py (23.0.0, "Architecture Hardening"), loofi-fedora-tweaks.spec, CHANGELOG.md, README.md
+**Files Modified**: version.py (23.0.0), loofi-fedora-tweaks.spec, CHANGELOG.md, README.md
 **Files Created**: RELEASE-NOTES-v23.0.0.md
 **Test Count**: 1715 passing
 
 ### v21.0.0 "UX Stabilization & Layout Integrity" (2026-02-09)
-**Theme**: Layout fixes, HiDPI safety, theme consistency
-
-**7 Tasks Documented**:
-1. Baseline layout-integrity fixes (native title bar, border cleanup, documentMode)
-2. Scoped QTabBar scroller styling
-3. Min window size (800x500) + consistent margins
-4. HiDPI safety (font-metrics-based sizing, pt units)
-5. Frameless mode feature flag (stub)
-6. Layout regression tests
-7. Theme-aware inline styles (top-3 fixes)
-
 **Files Modified**: version.py, loofi-fedora-tweaks.spec, CHANGELOG.md, README.md
 **Files Created**: RELEASE-NOTES-v21.0.0.md

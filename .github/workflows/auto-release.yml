@@ -1,0 +1,215 @@
+name: Auto Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 23.0.0)'
+        required: true
+      dry_run:
+        description: 'Dry run (validate only, no release)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate version alignment
+        run: |
+          # Extract versions from all sources
+          PY_VER=$(python -c "import sys; sys.path.insert(0,'loofi-fedora-tweaks'); from version import __version__; print(__version__)")
+          SPEC_VER=$(grep '^Version:' loofi-fedora-tweaks.spec | awk '{print $2}')
+
+          echo "version.py: $PY_VER"
+          echo ".spec: $SPEC_VER"
+
+          if [ "$PY_VER" != "$SPEC_VER" ]; then
+            echo "::error::Version mismatch! version.py=$PY_VER, .spec=$SPEC_VER"
+            exit 1
+          fi
+
+          # If triggered by tag, verify tag matches code
+          if [ -n "$GITHUB_REF" ] && echo "$GITHUB_REF" | grep -q "refs/tags/v"; then
+            TAG_VER="${GITHUB_REF#refs/tags/v}"
+            if [ "$PY_VER" != "$TAG_VER" ]; then
+              echo "::error::Tag version ($TAG_VER) doesn't match code ($PY_VER)"
+              exit 1
+            fi
+          fi
+
+          echo "version=$PY_VER" >> "$GITHUB_OUTPUT"
+
+      - name: Validate documentation
+        run: |
+          # Check CHANGELOG has current version
+          if ! grep -q "## \[" CHANGELOG.md; then
+            echo "::warning::CHANGELOG.md may be missing version entries"
+          fi
+
+          # Check README exists and has content
+          if [ ! -s README.md ]; then
+            echo "::error::README.md is empty"
+            exit 1
+          fi
+
+          # Check release notes exist
+          VERSION="${{ inputs.version || '' }}"
+          if [ -n "$VERSION" ]; then
+            NOTES_FILE="RELEASE-NOTES-v${VERSION}.md"
+            if [ ! -f "$NOTES_FILE" ]; then
+              echo "::warning::$NOTES_FILE not found"
+            fi
+          fi
+
+      - name: Validate packaging scripts
+        run: |
+          for script in scripts/build_rpm.sh scripts/build_flatpak.sh scripts/build_appimage.sh scripts/build_sdist.sh; do
+            if [ -f "$script" ]; then
+              echo "✓ $script exists"
+              if [ -x "$script" ]; then
+                echo "  ✓ executable"
+              else
+                echo "  ⚠ not executable"
+              fi
+            else
+              echo "✗ $script missing"
+            fi
+          done
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install flake8
+      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest pytest-cov PyQt6
+      - run: |
+          PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
+            --tb=short \
+            --cov=loofi-fedora-tweaks \
+            --cov-report=term-missing \
+            --cov-fail-under=80
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install bandit
+      - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: bandit-report.json
+
+  build:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    needs: [validate, lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build deps
+        run: dnf install -y rpm-build python3
+      - name: Build RPM
+        run: bash scripts/build_rpm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: rpmbuild/RPMS/noarch/*.rpm
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+    runs-on: ubuntu-latest
+    container: fedora:43
+    needs: [build, security]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: dnf install -y rpm-build python3
+
+      - name: Build RPM
+        run: bash scripts/build_rpm.sh
+
+      - name: Get version info
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VER="${GITHUB_REF#refs/tags/v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+
+          # Extract codename from version.py
+          CODENAME=$(python3 -c "
+          import sys; sys.path.insert(0,'loofi-fedora-tweaks')
+          from version import __version_codename__
+          print(__version_codename__)
+          " 2>/dev/null || echo "")
+          echo "codename=$CODENAME" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release body
+        id: body
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          CODENAME="${{ steps.version.outputs.codename }}"
+          NOTES_FILE="RELEASE-NOTES-${TAG}.md"
+
+          if [ -f "$NOTES_FILE" ]; then
+            # Use release notes file if it exists
+            BODY=$(cat "$NOTES_FILE")
+          else
+            # Generate from CHANGELOG
+            BODY="## Loofi Fedora Tweaks ${TAG}"
+            if [ -n "$CODENAME" ]; then
+              BODY="${BODY} — ${CODENAME}"
+            fi
+            BODY="${BODY}
+
+### Installation
+\`\`\`bash
+sudo dnf install ./loofi-fedora-tweaks-*.rpm
+\`\`\`
+
+### Changes
+See [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details."
+          fi
+
+          # Write to file for multi-line support
+          echo "$BODY" > /tmp/release-body.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Loofi Fedora Tweaks ${{ steps.version.outputs.tag }}${{ steps.version.outputs.codename && format(' — {0}', steps.version.outputs.codename) || '' }}"
+          body_path: /tmp/release-body.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, '-rc') || contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-alpha') }}
+          files: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.version.outputs.version }}*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
