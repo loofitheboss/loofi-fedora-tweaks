@@ -8,10 +8,10 @@
 | Version | Codename | Status | Theme |
 |---------|----------|--------|-------|
 | v21.0 | UX Stabilization | DONE | Layout integrity, QSS scoping |
-| v22.0 | Usability | NEXT | Search, status indicators, preferences |
+| v22.0 | Usability | SKIPPED | Search, status indicators, preferences |
 | v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
-| v25.0 | Plugin Architecture | PLANNED | Plugin system, UI redesign, API |
+| v25.0 | Plugin Architecture | NEXT | Plugin system, UI redesign, API |
 
 ---
 
@@ -64,7 +64,7 @@
 
 ---
 
-## [NEXT] v22.0 — Usability & Workflow Enhancements
+## [SKIPPED] v22.0 — Usability & Workflow Enhancements
 
 ### Scope
 - Search/filter tweaks across all tabs
@@ -132,7 +132,7 @@
 
 ---
 
-## [PLANNED] v25.0 — Plugin Architecture + UI Redesign
+## [NEXT] v25.0 — Plugin Architecture + UI Redesign
 
 ### Scope
 - Tweaks self-register as modules
