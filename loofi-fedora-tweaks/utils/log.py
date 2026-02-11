@@ -33,16 +33,16 @@ def _setup_root_logger():
     global _initialized
     if _initialized:
         return
-    
+
     root = logging.getLogger("loofi")
     root.setLevel(logging.DEBUG)
-    
+
     # Console handler (INFO and above)
     console = logging.StreamHandler(sys.stderr)
     console.setLevel(logging.INFO)
     console.setFormatter(logging.Formatter(_LOG_FORMAT, _LOG_DATE_FORMAT))
     root.addHandler(console)
-    
+
     # File handler (DEBUG and above)
     try:
         log_file = _get_log_dir() / "app.log"
@@ -53,17 +53,17 @@ def _setup_root_logger():
     except (OSError, PermissionError):
         # If we can't write logs to file, continue with console only
         root.warning("Could not create log file, using console logging only")
-    
+
     _initialized = True
 
 
 def get_logger(name: str) -> logging.Logger:
     """
     Get a logger for the given module name.
-    
+
     Args:
         name: Module name, typically __name__
-        
+
     Returns:
         Configured logger instance
     """

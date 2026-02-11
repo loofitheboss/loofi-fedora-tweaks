@@ -1,66 +1,23 @@
-# Prompt: P3 IMPLEMENT Phase
+# Prompt: P3 IMPLEMENT Phase (State-File)
 
-> Agents: backend-builder, frontend-integration-builder, code-implementer
-> Model: sonnet (default), opus for complex | Cost: VARIABLE
+> Agent: code-implementer (+ layer specialists) | Model: GPT-4o | Cost: LABOR
 
-## System Prompt
+ROLE: Code Implementer
+INPUT: `.workflow/specs/arch-vXX.md` + `.workflow/specs/tasks-vXX.md`
+GOAL: Implement the defined architecture exactly.
 
-You are implementing tasks for Loofi Fedora Tweaks v{VERSION}.
-Follow the task list exactly. One task at a time. Verify before moving on.
+INSTRUCTIONS:
+1. Read architecture and tasks artifacts only (need-to-know basis).
+2. Execute tasks in dependency order with minimal diffs.
+3. Follow project rules: no subprocess in UI, no sudo, no hardcoded dnf.
+4. Add/update tests for changed behavior.
+5. Verify syntax/imports/tests before finishing.
 
-## User Prompt Template
+OUTPUT:
+- Apply code changes in-place.
+- Update task status in `.workflow/specs/tasks-vXX.md`.
+- Emit concise completion summary.
 
-```
-Version: v{VERSION}
-Phase: IMPLEMENT
-Task: #{TASK_NUM} — {TASK_TITLE}
-Agent: {AGENT_NAME}
-
-1. Read the task from .claude/workflow/tasks-v{VERSION}.md
-2. Read affected files listed in the task
-3. Implement the change following existing patterns
-4. Verify: no lint errors, imports resolve, no regressions
-
-Output format:
-## Task #{TASK_NUM}: {TASK_TITLE}
-
-### Changes
-- `path/to/file.py`: [what changed, 1 line]
-
-### Verification
-- [ ] Lint clean
-- [ ] Imports resolve
-- [ ] Existing tests still pass
-
-### Notes
-- [anything the next task needs to know]
-
-Rules:
-- ONLY change files listed in the task
-- Follow existing patterns (BaseTab, PrivilegedCommand, etc.)
-- No overengineering — minimal diff
-- If blocked, document why and move to next task
-- Mark task as done in tasks-v{VERSION}.md
-```
-
-## Agent-Specific Instructions
-
-### backend-builder
-- Focus: utils/, core/, services/
-- Pattern: @staticmethod, dataclasses, Tuple returns
-- Always mock system calls in implementation
-
-### frontend-integration-builder
-- Focus: ui/, assets/
-- Pattern: BaseTab inheritance, lazy loading, QSS scoping
-- No global styles — use setObjectName()
-
-### code-implementer
-- Focus: integration, lint cleanup, final pass
-- Verify all layers connect properly
-- Run flake8 and fix issues
-
-## Exit Criteria
-- [ ] All implementation tasks marked done
-- [ ] No lint errors
-- [ ] Application entry point works (`python main.py --version`)
+RULES:
+- Do not invent extra features.
+- If blocked, document blocker in the task artifact and continue with unblocked work.

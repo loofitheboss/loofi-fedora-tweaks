@@ -9,11 +9,10 @@ Three sub-tabs inside an internal QTabWidget:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QGroupBox,
-    QLabel, QPushButton, QComboBox, QCheckBox, QFormLayout,
-    QScrollArea, QFrame, QMessageBox,
+    QWidget, QVBoxLayout, QTabWidget, QGroupBox, QLabel,
+    QPushButton, QComboBox, QCheckBox, QFormLayout, QScrollArea,
+    QFrame, QMessageBox,
 )
-from PyQt6.QtCore import Qt
 
 from utils.settings import SettingsManager
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS

@@ -11,11 +11,9 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QTextEdit, QScrollArea, QFrame, QTabWidget,
     QTreeWidget, QTreeWidgetItem, QComboBox, QMenu, QMessageBox,
-    QProgressBar, QSplitter, QSlider, QLineEdit, QCheckBox,
-    QInputDialog
+    QSlider, QLineEdit, QCheckBox, QInputDialog
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import Qt
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS

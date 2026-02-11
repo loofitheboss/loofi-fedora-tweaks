@@ -434,7 +434,7 @@ class HealthTimeline:
                     if not entry.startswith("thermal_zone"):
                         continue
                     temp_file = os.path.join(thermal_base, entry, "temp")
-                    type_file = os.path.join(thermal_base, entry, "type")
+                    os.path.join(thermal_base, entry, "type")
                     if os.path.isfile(temp_file):
                         with open(temp_file, "r") as f:
                             raw = f.read().strip()

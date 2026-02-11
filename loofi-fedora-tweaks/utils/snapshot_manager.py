@@ -10,7 +10,7 @@ import logging
 import shutil
 import subprocess
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 from utils.commands import PrivilegedCommand  # noqa: F401 — keep for pattern consistency

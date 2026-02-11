@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        23.0.0
+Version:        24.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,8 +70,8 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
-* Mon Feb 09 2026 Loofi <loofi@example.com> - 23.0.0-1
-- v23.0 Architecture Hardening
+* Mon Feb 09 2026 Loofi <loofi@example.com> - 24.0.0-1
+- v24.0 Power Features
 - Created BaseActionExecutor ABC with privileged execution support (pkexec integration)
 - Centralized BaseWorker QThread pattern in core/workers/
 - Migrated system services to services/system/ (system.py, services.py, processes.py, process.py)

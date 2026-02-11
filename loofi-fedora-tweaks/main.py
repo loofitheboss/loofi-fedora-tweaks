@@ -87,9 +87,9 @@ def main():
         action="version",
         version=f"%(prog)s {__version__}"
     )
-    
+
     args, remaining = parser.parse_known_args()
-    
+
     if args.daemon:
         # Run in daemon mode
         from utils.daemon import Daemon

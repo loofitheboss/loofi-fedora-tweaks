@@ -14,8 +14,8 @@ Features:
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QScrollArea, QFrame, QMessageBox, QProgressBar,
-    QTableWidget, QTableWidgetItem, QHeaderView, QCheckBox
+    QTextEdit, QScrollArea, QFrame, QTableWidget, QTableWidgetItem,
+    QHeaderView, QCheckBox
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
@@ -29,7 +29,7 @@ from utils.command_runner import CommandRunner
 
 class SecurityTab(QWidget):
     """Security tab for system hardening and auditing."""
-    
+
     def __init__(self):
         super().__init__()
         self._setup_command_runner()
@@ -54,32 +54,32 @@ class SecurityTab(QWidget):
         if description:
             self.log(description)
         self.privacy_runner.run_command(cmd, args)
-    
+
     def init_ui(self):
         """Initialize the UI."""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
-        
+
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setSpacing(15)
-        
+
         # Header
         header = QLabel(self.tr("🛡️ Security Center"))
         # Keep header color theme-driven to avoid hardcoded red accents.
         header.setStyleSheet("font-size: 18px; font-weight: bold;")
         layout.addWidget(header)
-        
+
         # Security Score
         layout.addWidget(self._create_score_section())
-        
+
         # Port Auditor
         layout.addWidget(self._create_ports_section())
-        
+
         # USB Guard
         layout.addWidget(self._create_usb_section())
-        
+
         # Sandbox Manager
         layout.addWidget(self._create_sandbox_section())
 
@@ -100,24 +100,24 @@ class SecurityTab(QWidget):
         self.log_text.setMaximumHeight(100)
         log_layout.addWidget(self.log_text)
         layout.addWidget(log_group)
-        
+
         layout.addStretch()
         scroll.setWidget(container)
-        
+
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(*CONTENT_MARGINS)
         main_layout.addWidget(scroll)
-    
+
     def _create_score_section(self) -> QGroupBox:
         """Create security score display."""
         group = QGroupBox(self.tr("🎯 Security Score"))
         layout = QVBoxLayout(group)
-        
+
         # Get security score
         score_data = PortAuditor.get_security_score()
         score = score_data["score"]
         rating = score_data["rating"]
-        
+
         # Color based on score
         if score >= 90:
             color = "#2ecc71"  # Green
@@ -127,45 +127,45 @@ class SecurityTab(QWidget):
             color = "#e67e22"  # Dark orange
         else:
             color = "#e74c3c"  # Red
-        
+
         score_label = QLabel(f"{score}/100 - {rating}")
         score_label.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {color};")
         layout.addWidget(score_label)
-        
+
         # Stats
         stats_layout = QHBoxLayout()
         stats_layout.addWidget(QLabel(f"Open Ports: {score_data['open_ports']}"))
         stats_layout.addWidget(QLabel(f"Risky Ports: {score_data['risky_ports']}"))
-        
+
         fw_status = "✅ Running" if PortAuditor.is_firewalld_running() else "❌ Stopped"
         stats_layout.addWidget(QLabel(f"Firewall: {fw_status}"))
         stats_layout.addStretch()
         layout.addLayout(stats_layout)
-        
+
         # Recommendations
         if score_data["recommendations"]:
             rec_label = QLabel(self.tr("Recommendations:"))
             rec_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
             layout.addWidget(rec_label)
-            
+
             for rec in score_data["recommendations"][:3]:  # Limit to 3
                 rec_item = QLabel(f"  ⚠️ {rec}")
                 rec_item.setStyleSheet("color: #e67e22; font-size: 11px;")
                 rec_item.setWordWrap(True)
                 layout.addWidget(rec_item)
-        
+
         # Refresh button
         refresh_btn = QPushButton(self.tr("🔄 Refresh Score"))
         refresh_btn.clicked.connect(self._refresh_score)
         layout.addWidget(refresh_btn)
-        
+
         return group
-    
+
     def _create_ports_section(self) -> QGroupBox:
         """Create port auditor section."""
         group = QGroupBox(self.tr("🔌 Port Auditor"))
         layout = QVBoxLayout(group)
-        
+
         # Port table
         self.port_table = QTableWidget()
         self.port_table.setColumnCount(5)
@@ -177,43 +177,43 @@ class SecurityTab(QWidget):
         )
         self.port_table.setMaximumHeight(150)
         layout.addWidget(self.port_table)
-        
+
         self._refresh_ports()
-        
+
         # Buttons
         btn_layout = QHBoxLayout()
-        
+
         refresh_btn = QPushButton(self.tr("🔄 Scan Ports"))
         refresh_btn.clicked.connect(self._refresh_ports)
         btn_layout.addWidget(refresh_btn)
-        
+
         block_btn = QPushButton(self.tr("🚫 Block Selected"))
         block_btn.clicked.connect(self._block_port)
         btn_layout.addWidget(block_btn)
-        
+
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
-        
+
         return group
-    
+
     def _create_usb_section(self) -> QGroupBox:
         """Create USB Guard section."""
         group = QGroupBox(self.tr("🔒 USB Guard"))
         layout = QVBoxLayout(group)
-        
+
         # Status
         installed = USBGuardManager.is_installed()
         running = USBGuardManager.is_running() if installed else False
-        
+
         status_text = "✅ Active" if running else ("❌ Stopped" if installed else "📥 Not Installed")
         self.usb_status = QLabel(f"Status: {status_text}")
         layout.addWidget(self.usb_status)
-        
+
         if not installed:
             install_btn = QPushButton(self.tr("📥 Install USB Guard"))
             install_btn.clicked.connect(self._install_usbguard)
             layout.addWidget(install_btn)
-            
+
             info = QLabel(self.tr(
                 "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
             ))
@@ -225,43 +225,43 @@ class SecurityTab(QWidget):
             self.usb_list = QListWidget()
             self.usb_list.setMaximumHeight(100)
             layout.addWidget(self.usb_list)
-            
+
             self._refresh_usb_devices()
-            
+
             # Buttons
             btn_layout = QHBoxLayout()
-            
+
             if not running:
                 start_btn = QPushButton(self.tr("▶️ Start Service"))
                 start_btn.clicked.connect(self._start_usbguard)
                 btn_layout.addWidget(start_btn)
-            
+
             refresh_btn = QPushButton(self.tr("🔄 Refresh"))
             refresh_btn.clicked.connect(self._refresh_usb_devices)
             btn_layout.addWidget(refresh_btn)
-            
+
             allow_btn = QPushButton(self.tr("✅ Allow Selected"))
             allow_btn.clicked.connect(self._allow_usb)
             btn_layout.addWidget(allow_btn)
-            
+
             block_btn = QPushButton(self.tr("🚫 Block Selected"))
             block_btn.clicked.connect(self._block_usb)
             btn_layout.addWidget(block_btn)
-            
+
             btn_layout.addStretch()
             layout.addLayout(btn_layout)
-        
+
         return group
-    
+
     def _create_sandbox_section(self) -> QGroupBox:
         """Create sandbox manager section."""
         group = QGroupBox(self.tr("📦 Application Sandbox"))
         layout = QVBoxLayout(group)
-        
+
         # Check Firejail
         firejail_ok = SandboxManager.is_firejail_installed()
         bwrap_ok = SandboxManager.is_bubblewrap_installed()
-        
+
         status_layout = QHBoxLayout()
         fj_icon = "✅" if firejail_ok else "❌"
         bw_icon = "✅" if bwrap_ok else "❌"
@@ -269,7 +269,7 @@ class SecurityTab(QWidget):
         status_layout.addWidget(QLabel(f"{bw_icon} Bubblewrap"))
         status_layout.addStretch()
         layout.addLayout(status_layout)
-        
+
         if not firejail_ok:
             install_btn = QPushButton(self.tr("📥 Install Firejail"))
             install_btn.clicked.connect(self._install_firejail)
@@ -277,108 +277,108 @@ class SecurityTab(QWidget):
         else:
             # Available profiles
             layout.addWidget(QLabel(self.tr("Quick Launch (Sandboxed):")))
-            
+
             profiles_layout = QHBoxLayout()
-            
+
             for app, desc in list(SandboxManager.FIREJAIL_PROFILES.items())[:4]:
                 btn = QPushButton(app.capitalize())
                 btn.setToolTip(f"Launch {app} in sandbox")
                 btn.clicked.connect(lambda checked, a=app: self._launch_sandboxed(a))
                 profiles_layout.addWidget(btn)
-            
+
             profiles_layout.addStretch()
             layout.addLayout(profiles_layout)
-            
+
             # Options
             options_layout = QHBoxLayout()
-            
+
             self.no_network_check = QCheckBox(self.tr("No Network"))
             self.no_network_check.setToolTip("Disable network access")
             options_layout.addWidget(self.no_network_check)
-            
+
             self.private_home_check = QCheckBox(self.tr("Private Home"))
             self.private_home_check.setToolTip("Use empty home directory")
             options_layout.addWidget(self.private_home_check)
-            
+
             options_layout.addStretch()
             layout.addLayout(options_layout)
-            
+
             # Custom command
             custom_layout = QHBoxLayout()
-            
+
             self.sandbox_cmd = QComboBox()
             self.sandbox_cmd.setEditable(True)
             self.sandbox_cmd.addItems(["firefox", "chromium", "vlc", "gimp"])
             self.sandbox_cmd.setMinimumWidth(200)
             custom_layout.addWidget(self.sandbox_cmd)
-            
+
             run_btn = QPushButton(self.tr("🚀 Run Sandboxed"))
             run_btn.clicked.connect(self._run_custom_sandbox)
             custom_layout.addWidget(run_btn)
-            
+
             custom_layout.addStretch()
             layout.addLayout(custom_layout)
-        
+
         return group
-    
+
     def _refresh_score(self):
         """Refresh security score."""
         self.log("Rescanning security...")
         # Would need to rebuild the section - simplified for now
         self.log("Security scan complete.")
-    
+
     def _refresh_ports(self):
         """Refresh port list."""
         self.port_table.setRowCount(0)
-        
+
         ports = PortAuditor.scan_ports()
-        
+
         for port in ports:
             row = self.port_table.rowCount()
             self.port_table.insertRow(row)
-            
+
             self.port_table.setItem(row, 0, QTableWidgetItem(str(port.port)))
             self.port_table.setItem(row, 1, QTableWidgetItem(port.protocol))
             self.port_table.setItem(row, 2, QTableWidgetItem(port.address))
             self.port_table.setItem(row, 3, QTableWidgetItem(port.process))
-            
+
             status_item = QTableWidgetItem("⚠️ Risk" if port.is_risky else "✅ OK")
             if port.is_risky:
                 status_item.setForeground(QColor("#e74c3c"))
             self.port_table.setItem(row, 4, status_item)
-    
+
     def _block_port(self):
         """Block selected port."""
         row = self.port_table.currentRow()
         if row < 0:
             self.log("No port selected.")
             return
-        
+
         port = int(self.port_table.item(row, 0).text())
         protocol = self.port_table.item(row, 1).text().lower()
-        
+
         result = PortAuditor.block_port(port, protocol)
         self.log(result.message)
-    
+
     def _install_usbguard(self):
         """Install USBGuard."""
         self.log("Installing USBGuard...")
         result = USBGuardManager.install()
         self.log(result.message)
-    
+
     def _start_usbguard(self):
         """Start USBGuard service."""
         result = USBGuardManager.start_service()
         self.log(result.message)
-    
+
     def _refresh_usb_devices(self):
         """Refresh USB device list."""
         if not hasattr(self, 'usb_list'):
             return
-        
+
         self.usb_list.clear()
         devices = USBGuardManager.list_devices()
-        
+
         if not devices:
             item = QListWidgetItem("No devices found (service may not be running)")
             self.usb_list.addItem(item)
@@ -388,51 +388,51 @@ class SecurityTab(QWidget):
                 item = QListWidgetItem(f"{icon} {dev.name} ({dev.policy})")
                 item.setData(Qt.ItemDataRole.UserRole, dev.id)
                 self.usb_list.addItem(item)
-    
+
     def _allow_usb(self):
         """Allow selected USB device."""
         current = self.usb_list.currentItem()
         if not current:
             self.log("No device selected.")
             return
-        
+
         device_id = current.data(Qt.ItemDataRole.UserRole)
         if device_id:
             result = USBGuardManager.allow_device(device_id, permanent=True)
             self.log(result.message)
             self._refresh_usb_devices()
-    
+
     def _block_usb(self):
         """Block selected USB device."""
         current = self.usb_list.currentItem()
         if not current:
             self.log("No device selected.")
             return
-        
+
         device_id = current.data(Qt.ItemDataRole.UserRole)
         if device_id:
             result = USBGuardManager.block_device(device_id, permanent=True)
             self.log(result.message)
             self._refresh_usb_devices()
-    
+
     def _install_firejail(self):
         """Install Firejail."""
         self.log("Installing Firejail...")
         result = SandboxManager.install_firejail()
         self.log(result.message)
-    
+
     def _launch_sandboxed(self, app: str):
         """Launch an app in sandbox."""
         no_net = self.no_network_check.isChecked() if hasattr(self, 'no_network_check') else False
         private = self.private_home_check.isChecked() if hasattr(self, 'private_home_check') else False
-        
+
         result = SandboxManager.run_sandboxed(
             [app],
             no_network=no_net,
             private_home=private
         )
         self.log(result.message)
-    
+
     def _run_custom_sandbox(self):
         """Run custom command in sandbox."""
         cmd = self.sandbox_cmd.currentText().strip()

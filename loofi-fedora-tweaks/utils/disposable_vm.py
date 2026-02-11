@@ -14,7 +14,6 @@ import re
 import shutil
 import subprocess
 import uuid
-from typing import Optional
 
 from utils.containers import Result
 

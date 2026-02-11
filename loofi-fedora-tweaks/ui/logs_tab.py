@@ -9,9 +9,9 @@ and log export. Uses SmartLogViewer from utils/smart_logs.py.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QComboBox, QSpinBox, QLineEdit, QFileDialog, QGridLayout
+    QComboBox, QSpinBox, QFileDialog, QGridLayout, QTextEdit
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
 from ui.base_tab import BaseTab
 from utils.smart_logs import SmartLogViewer
@@ -22,6 +22,10 @@ class LogsTab(BaseTab):
 
     def __init__(self):
         super().__init__()
+        self._live_timer = QTimer(self)
+        self._live_timer.timeout.connect(self._poll_live_logs)
+        self._live_cursor = None
+        self._live_row_count = 0
         self.init_ui()
         QTimer.singleShot(200, self._load_summary)
 
@@ -81,6 +85,36 @@ class LogsTab(BaseTab):
         pg_layout.addWidget(self.pattern_table)
 
         layout.addWidget(pattern_group)
+
+        # ==================== Live Log Panel ====================
+        live_group = QGroupBox(self.tr("Live Log Panel"))
+        lg_layout = QVBoxLayout()
+        live_group.setLayout(lg_layout)
+
+        live_controls = QHBoxLayout()
+        self.btn_live_toggle = QPushButton(self.tr("▶ Start Live"))
+        self.btn_live_toggle.clicked.connect(self._toggle_live)
+        live_controls.addWidget(self.btn_live_toggle)
+
+        live_controls.addWidget(QLabel(self.tr("Every (sec):")))
+        self.live_interval_spin = QSpinBox()
+        self.live_interval_spin.setRange(1, 30)
+        self.live_interval_spin.setValue(2)
+        live_controls.addWidget(self.live_interval_spin)
+
+        live_controls.addWidget(QLabel(self.tr("Buffer rows:")))
+        self.live_buffer_spin = QSpinBox()
+        self.live_buffer_spin.setRange(50, 2000)
+        self.live_buffer_spin.setValue(300)
+        live_controls.addWidget(self.live_buffer_spin)
+        live_controls.addStretch()
+        lg_layout.addLayout(live_controls)
+
+        self.live_text = QTextEdit()
+        self.live_text.setReadOnly(True)
+        self.live_text.setMaximumHeight(180)
+        lg_layout.addWidget(self.live_text)
+        layout.addWidget(live_group)
 
         # ==================== Log Browser ====================
         browse_group = QGroupBox(self.tr("Browse Logs"))
@@ -241,7 +275,80 @@ class LogsTab(BaseTab):
 
         try:
             fmt = "json" if path.endswith(".json") else "text"
-            SmartLogViewer.export_logs(path, fmt=fmt)
+            entries = SmartLogViewer.get_logs(
+                since="24h ago",
+                lines=self.lines_spin.value(),
+            )
+            SmartLogViewer.export_logs(entries, path, format=fmt)
             self.append_output(f"Logs exported to {path}\n")
         except Exception as exc:
             self.append_output(f"Export error: {exc}\n")
+
+    def _toggle_live(self):
+        """Start/stop live polling."""
+        if self._live_timer.isActive():
+            self._stop_live()
+        else:
+            self._start_live()
+
+    def _start_live(self):
+        """Begin live log polling."""
+        interval_ms = self.live_interval_spin.value() * 1000
+        self._live_cursor = None
+        self._live_row_count = 0
+        self.live_text.clear()
+        self._live_timer.start(interval_ms)
+        self.btn_live_toggle.setText(self.tr("■ Stop Live"))
+        self.append_output("Live log panel started\n")
+        self._poll_live_logs()
+
+    def _stop_live(self):
+        """Stop live log polling."""
+        self._live_timer.stop()
+        self.btn_live_toggle.setText(self.tr("▶ Start Live"))
+        self.append_output("Live log panel stopped\n")
+
+    def _poll_live_logs(self):
+        """Poll incremental log updates and append them to the live panel."""
+        try:
+            unit = self.unit_combo.currentText()
+            if unit == self.tr("(all)"):
+                unit = None
+            priority = self.priority_combo.currentIndex()
+
+            entries, next_cursor = SmartLogViewer.get_logs_incremental(
+                self._live_cursor,
+                unit=unit,
+                priority=priority,
+                lines=max(100, self.lines_spin.value()),
+                since="2 minutes ago",
+                max_entries=200,
+            )
+            self._live_cursor = next_cursor
+            if not entries:
+                return
+
+            for entry in entries:
+                marker = f" ({entry.pattern_match})" if entry.pattern_match else ""
+                line = f"{entry.timestamp} [{entry.priority_label}] {entry.unit}: {entry.message}{marker}"
+                self.live_text.append(line)
+                self._live_row_count += 1
+
+            self._trim_live_buffer()
+        except Exception as exc:
+            self.append_output(f"Live log error: {exc}\n")
+
+    def _trim_live_buffer(self):
+        """Trim live panel to configured max rows."""
+        max_rows = self.live_buffer_spin.value()
+        if self._live_row_count <= max_rows:
+            return
+
+        doc = self.live_text.document()
+        while self._live_row_count > max_rows and doc.blockCount() > 0:
+            cursor = self.live_text.textCursor()
+            cursor.movePosition(cursor.MoveOperation.Start)
+            cursor.select(cursor.SelectionType.BlockUnderCursor)
+            cursor.removeSelectedText()
+            cursor.deleteChar()
+            self._live_row_count -= 1

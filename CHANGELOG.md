@@ -2,25 +2,54 @@
 
 All notable changes to this project will be documented in this file.
 
-## [23.0.0] - 2026-02-09 "Architecture Hardening"
+## [24.0.0] - 2026-02-10 "Power Features"
 
 ### Added
 
-- **BaseActionExecutor ABC**: Abstract base class for all executor implementations with privileged execution support via `privileged=True` parameter.
-- **pkexec Integration**: Seamless privilege elevation for system operations through BaseActionExecutor.
-- **BaseWorker QThread Pattern**: Centralized worker thread pattern in `core/workers/` for non-blocking UI operations.
-- **Comprehensive Import Tests**: 34 validation tests ensuring all module imports work correctly and backward compatibility is maintained.
+- Add `core/profiles/models.py` with `ProfileRecord` and `ProfileBundle` schema types.
+- Add `core/profiles/storage.py` with profile CRUD and single/bundle JSON import/export support.
+- Add profile API routes in `api/routes/profiles.py` for list/apply/import/export (single and bundle).
+- Add live incremental polling API `SmartLogViewer.get_logs_incremental()`.
+- Add test coverage for profile storage, profile CLI/API/UI workflows, and live log polling.
 
 ### Changed
 
-- **Service Layer Migration**: Moved system services to `services/system/` (system.py, services.py, processes.py, process.py).
-- **Hardware Services Migration**: Moved hardware services to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py).
-- **Packaging Scripts Consolidation**: Created `scripts/` directory with all build scripts (build_rpm.sh, build_flatpak.sh, build_appimage.sh, build_sdist.sh).
-- **ActionExecutor Refactor**: Refactored ActionExecutor to subclass BaseActionExecutor for better abstraction and testability.
+- Refactor `utils/profiles.py` to use `ProfileStore` while keeping backward-compatible `ProfileManager` methods.
+- Extend `ProfileManager.apply_profile()` with snapshot-before-apply hook and graceful fallback warnings.
+- Extend CLI `profile` command with `export`, `import`, `export-all`, `import-all`, `--overwrite`, `--no-snapshot`, and `--include-builtins`.
+- Update `ui/profiles_tab.py` with import/export bundle controls and per-profile export.
+- Update `ui/logs_tab.py` with live log panel controls (start/stop, interval, bounded buffer).
 
-### Deprecated
+### Fixed
 
-- **utils/ Backward Compatibility**: Shims added in `utils/` with deprecation warnings for old import paths. Will be removed in v25.0.0.
+- Fix log export action in `LogsTab` to pass fetched entries into `SmartLogViewer.export_logs()`.
+
+---
+
+## [23.0.0] - 2026-02-10 "Architecture Hardening"
+
+### Added
+
+- Add `BaseActionExecutor` abstract base class with `privileged=True` execution support.
+- Add `pkexec` privilege elevation integration through executor base abstractions.
+- Add centralized `BaseWorker` QThread pattern in `core/workers/` for non-blocking operations.
+- Add comprehensive import validation coverage with 34 tests.
+- Add GitHub Actions CI workflow for automated validation.
+
+### Changed
+
+- Move system services to `services/system/` (system.py, services.py, processes.py, process.py).
+- Move hardware services to `services/hardware/` (hardware.py, battery.py, disk.py, temperature.py, bluetooth.py, hardware_profiles.py).
+- Consolidate packaging scripts under `scripts/` (`build_rpm.sh`, `build_flatpak.sh`, `build_appimage.sh`, `build_sdist.sh`).
+- Refactor `ActionExecutor` to subclass `BaseActionExecutor` for improved abstraction and testability.
+
+### Fixed
+
+- Keep backward-compatible import shims in `utils/` to preserve legacy import paths.
+
+### Removed
+
+- Remove direct legacy import usage by migrating service and worker code to new core/service modules.
 
 ---
 

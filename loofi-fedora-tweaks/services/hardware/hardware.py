@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 class HardwareManager:
     """Manages hardware settings: CPU, GPU, Fans, Thermals."""
-    
+
     # ==================== CPU GOVERNOR ====================
-    
+
     CPU_GOVERNOR_PATH = "/sys/devices/system/cpu/cpu0/cpufreq"
-    
+
     @classmethod
     def get_available_governors(cls) -> list:
         """
@@ -34,7 +34,7 @@ class HardwareManager:
             return ["powersave", "performance"]  # Fallback
         except PermissionError:
             return []
-    
+
     @classmethod
     def get_current_governor(cls) -> str:
         """Get the current CPU governor."""
@@ -45,7 +45,7 @@ class HardwareManager:
         except OSError as e:
             logger.debug("Failed to read CPU governor: %s", e)
             return "unknown"
-    
+
     @classmethod
     def set_governor(cls, governor: str) -> bool:
         """
@@ -54,7 +54,7 @@ class HardwareManager:
         """
         if governor not in cls.get_available_governors():
             return False
-        
+
         # Create a script to set all governors
         script = f"""
 for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
@@ -83,22 +83,22 @@ done
         except (OSError, ValueError) as e:
             logger.debug("Failed to read CPU frequency: %s", e)
         return result
-    
+
     # ==================== GPU MODE ====================
-    
+
     @classmethod
     def is_hybrid_gpu(cls) -> bool:
         """Check if this is a hybrid GPU laptop (NVIDIA Optimus, AMD Switchable)."""
         # Check for NVIDIA
         nvidia_present = os.path.exists("/proc/driver/nvidia") or \
-                         shutil.which("nvidia-smi") is not None
-        
+            shutil.which("nvidia-smi") is not None
+
         # Check for integrated GPU as well
         intel_present = any("intel" in p.lower() for p in glob.glob("/sys/class/drm/card*/device/vendor"))
         amd_igpu = os.path.exists("/sys/class/drm/card0/device/driver/module/drivers/pci:amdgpu")
-        
+
         return nvidia_present and (intel_present or amd_igpu)
-    
+
     @classmethod
     def get_gpu_mode(cls) -> str:
         """
@@ -121,7 +121,7 @@ done
                     return "nvidia"
             except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("envycontrol query failed: %s", e)
-        
+
         # Check supergfxctl (ASUS)
         if shutil.which("supergfxctl"):
             try:
@@ -132,24 +132,24 @@ done
                 return result.stdout.strip().lower()
             except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("supergfxctl query failed: %s", e)
-        
+
         return "unknown"
-    
+
     @classmethod
     def set_gpu_mode(cls, mode: str) -> tuple:
         """
         Set GPU mode. Requires logout/reboot.
-        
+
         Args:
             mode: 'integrated', 'hybrid', or 'nvidia'
-        
+
         Returns:
             (success: bool, message: str)
         """
         valid_modes = ["integrated", "hybrid", "nvidia"]
         if mode not in valid_modes:
             return (False, f"Invalid mode. Choose from: {valid_modes}")
-        
+
         # Try envycontrol
         if shutil.which("envycontrol"):
             try:
@@ -180,7 +180,7 @@ done
                 return (False, str(e))
 
         return (False, "No GPU switching tool found. Install 'envycontrol' or 'supergfxctl'.")
-    
+
     @classmethod
     def get_available_gpu_tools(cls) -> list:
         """Get list of available GPU switching tools."""
@@ -190,20 +190,20 @@ done
         if shutil.which("supergfxctl"):
             tools.append("supergfxctl")
         return tools
-    
+
     # ==================== FAN CONTROL ====================
-    
+
     @classmethod
     def is_nbfc_available(cls) -> bool:
         """Check if nbfc-linux is installed."""
         return shutil.which("nbfc") is not None
-    
+
     @classmethod
     def get_nbfc_profiles(cls) -> list:
         """Get available NBFC fan profiles."""
         if not cls.is_nbfc_available():
             return []
-        
+
         try:
             result = subprocess.run(
                 ["nbfc", "config", "-l"],
@@ -214,13 +214,13 @@ done
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list NBFC profiles: %s", e)
         return []
-    
+
     @classmethod
     def get_current_nbfc_config(cls) -> Optional[str]:
         """Get currently active NBFC config."""
         if not cls.is_nbfc_available():
             return None
-        
+
         try:
             result = subprocess.run(
                 ["nbfc", "status", "-a"],
@@ -232,13 +232,13 @@ done
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get NBFC config: %s", e)
         return None
-    
+
     @classmethod
     def set_nbfc_profile(cls, profile: str) -> bool:
         """Set NBFC fan profile."""
         if not cls.is_nbfc_available():
             return False
-        
+
         try:
             result = subprocess.run(
                 ["pkexec", "nbfc", "config", "-s", profile],
@@ -257,7 +257,7 @@ done
         """
         if not cls.is_nbfc_available():
             return False
-        
+
         try:
             if speed < 0:
                 # Auto mode
@@ -280,10 +280,10 @@ done
     def get_fan_status(cls) -> dict:
         """Get current fan status (speed, temperature)."""
         status = {"speed": -1, "temperature": -1, "mode": "unknown"}
-        
+
         if not cls.is_nbfc_available():
             return status
-        
+
         try:
             result = subprocess.run(
                 ["nbfc", "status", "-a"],
@@ -302,22 +302,22 @@ done
                         pass
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get fan status: %s", e)
-        
+
         return status
-    
+
     # ==================== THERMAL / POWER PROFILES ====================
-    
+
     @classmethod
     def is_power_profiles_available(cls) -> bool:
         """Check if power-profiles-daemon is available."""
         return shutil.which("powerprofilesctl") is not None
-    
+
     @classmethod
     def get_power_profile(cls) -> str:
         """Get current power profile."""
         if not cls.is_power_profiles_available():
             return "unknown"
-        
+
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "get"],
@@ -327,7 +327,7 @@ done
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get power profile: %s", e)
             return "unknown"
-    
+
     @classmethod
     def set_power_profile(cls, profile: str) -> bool:
         """
@@ -336,11 +336,11 @@ done
         """
         if not cls.is_power_profiles_available():
             return False
-        
+
         valid = ["power-saver", "balanced", "performance"]
         if profile not in valid:
             return False
-        
+
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "set", profile],
@@ -350,13 +350,13 @@ done
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set power profile: %s", e)
             return False
-    
+
     @classmethod
     def get_available_power_profiles(cls) -> list:
         """Get available power profiles."""
         if not cls.is_power_profiles_available():
             return []
-        
+
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "list"],
@@ -375,14 +375,14 @@ done
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list power profiles: %s", e)
             return ["power-saver", "balanced", "performance"]
-    
+
     # ==================== AI HARDWARE ACCELERATION ====================
-    
+
     @classmethod
     def get_ai_capabilities(cls) -> dict:
         """
         Detect hardware acceleration support for AI workloads.
-        
+
         Returns a dict with:
             - cuda: bool - NVIDIA CUDA GPU detected
             - rocm: bool - AMD ROCm GPU detected
@@ -397,7 +397,7 @@ done
             "npu_amd": False,
             "details": {}
         }
-        
+
         # 1. Check NVIDIA CUDA
         if shutil.which("nvidia-smi"):
             try:
@@ -415,7 +415,7 @@ done
                         caps["details"]["nvidia_gpu"] = lines[0].strip()
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("nvidia-smi check failed: %s", e)
-        
+
         # 2. Check AMD ROCm
         if shutil.which("rocminfo"):
             try:
@@ -430,7 +430,7 @@ done
                     caps["details"]["rocm_available"] = True
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("rocminfo check failed: %s", e)
-        
+
         # Alternative AMD check via hip
         if not caps["rocm"] and shutil.which("hipconfig"):
             try:
@@ -444,7 +444,7 @@ done
                     caps["rocm"] = True
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("hipconfig check failed: %s", e)
-        
+
         # 3. Check Intel NPU (Core Ultra / Meteor Lake)
         # NPUs appear in /dev/accel/ on newer kernels (6.5+)
         try:
@@ -454,18 +454,18 @@ done
                 caps["details"]["npu_devices"] = accel_devices
         except OSError as e:
             logger.debug("NPU device check failed: %s", e)
-        
+
         # Alternative Intel NPU check via sysfs
         npu_path = "/sys/class/misc/intel_vpu"
         if os.path.exists(npu_path):
             caps["npu_intel"] = True
-        
+
         # 4. Check AMD Ryzen AI NPU (XDNA)
         xdna_path = "/sys/class/amdxdna"
         if os.path.exists(xdna_path):
             caps["npu_amd"] = True
             caps["details"]["amd_xdna"] = True
-        
+
         # Check for NPU driver module
         try:
             result = subprocess.run(
@@ -480,16 +480,16 @@ done
                 caps["npu_amd"] = True
         except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("lsmod NPU check failed: %s", e)
-        
+
         return caps
-    
+
     @classmethod
     def get_ai_summary(cls) -> str:
         """
         Get a human-readable summary of AI capabilities.
         """
         caps = cls.get_ai_capabilities()
-        
+
         parts = []
         if caps["cuda"]:
             gpu_name = caps["details"].get("nvidia_gpu", "NVIDIA GPU")
@@ -500,9 +500,8 @@ done
             parts.append("✅ Intel NPU")
         if caps["npu_amd"]:
             parts.append("✅ AMD Ryzen AI NPU")
-        
+
         if not parts:
             return "❌ No AI hardware acceleration detected (CPU-only mode)"
-        
-        return "AI Hardware: " + ", ".join(parts)
 
+        return "AI Hardware: " + ", ".join(parts)

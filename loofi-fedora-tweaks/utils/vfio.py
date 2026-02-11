@@ -11,12 +11,9 @@ IOMMU/GPU queries.
 """
 
 import os
-import re
-import shutil
 import subprocess
-from typing import Optional
 
-from utils.virtualization import VirtualizationManager, IOMMUDevice
+from utils.virtualization import VirtualizationManager
 
 
 class VFIOAssistant:

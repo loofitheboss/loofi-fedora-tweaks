@@ -9,9 +9,9 @@ Uses SnapshotManager from utils/snapshot_manager.py.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QInputDialog, QMessageBox, QComboBox, QGridLayout
+    QInputDialog, QMessageBox, QGridLayout
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.snapshot_manager import SnapshotManager
 from datetime import datetime

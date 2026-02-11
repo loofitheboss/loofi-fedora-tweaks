@@ -9,7 +9,7 @@ ports, services, and rich rules.
 import subprocess
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import List
 
 from utils.commands import PrivilegedCommand
 
@@ -342,7 +342,7 @@ class FirewallManager:
             if result.returncode == 0:
                 if permanent:
                     cls._reload()
-                return FirewallResult(True, f"Added rich rule")
+                return FirewallResult(True, "Added rich rule")
             else:
                 return FirewallResult(
                     False, f"Failed to add rule: {result.stderr.strip()}"
@@ -367,7 +367,7 @@ class FirewallManager:
             if result.returncode == 0:
                 if permanent:
                     cls._reload()
-                return FirewallResult(True, f"Removed rich rule")
+                return FirewallResult(True, "Removed rich rule")
             else:
                 return FirewallResult(
                     False, f"Failed to remove rule: {result.stderr.strip()}"

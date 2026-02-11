@@ -211,6 +211,70 @@ class SmartLogViewer:
             return []
 
     @staticmethod
+    def get_logs_incremental(
+        cursor: Optional[str] = None,
+        *,
+        unit: Optional[str] = None,
+        priority: Optional[int] = None,
+        lines: int = 200,
+        since: str = "2 minutes ago",
+        max_entries: int = 200,
+    ) -> Tuple[List[LogEntry], Optional[str]]:
+        """
+        Return only log entries newer than the provided cursor key.
+
+        Args:
+            cursor: Entry key returned by a previous incremental call.
+            unit: Optional unit filter.
+            priority: Optional max priority.
+            lines: Max journal lines to query per poll.
+            since: Time window for journalctl query.
+            max_entries: Bound returned list size.
+
+        Returns:
+            Tuple: (new_entries, next_cursor).
+        """
+        entries = SmartLogViewer.get_logs(
+            unit=unit,
+            priority=priority,
+            since=since,
+            lines=lines,
+        )
+        if not entries:
+            return [], cursor
+
+        # Stable key for each row; used by UI polling cursor.
+        keyed = [(entry, SmartLogViewer._entry_key(entry)) for entry in entries]
+
+        start_idx = 0
+        if cursor:
+            for idx, (_entry, key) in enumerate(keyed):
+                if key == cursor:
+                    start_idx = idx + 1
+            # If cursor is not found (e.g. rotation), return recent deduped entries.
+
+        new_entries = [entry for entry, _key in keyed[start_idx:]]
+
+        # Deduplicate exact repeated lines from journal replay.
+        deduped: List[LogEntry] = []
+        seen: set = set()
+        for entry in new_entries:
+            key = SmartLogViewer._entry_key(entry)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(entry)
+
+        if max_entries > 0 and len(deduped) > max_entries:
+            deduped = deduped[-max_entries:]
+
+        next_cursor = cursor
+        if keyed:
+            next_cursor = keyed[-1][1]
+
+        return deduped, next_cursor
+
+    @staticmethod
     def get_error_summary(since: str = "24h ago") -> LogSummary:
         """
         Produce an error summary for the given time window.
@@ -426,3 +490,9 @@ class SmartLogViewer:
             return dt.strftime("%Y-%m-%d %H:%M:%S")
         except (ValueError, TypeError, OSError):
             return str(ts_raw)
+
+    @staticmethod
+    def _entry_key(entry: LogEntry) -> str:
+        """Build a deterministic key for an entry for incremental polling."""
+        msg = (entry.message or "").replace("\n", " ").strip()
+        return f"{entry.timestamp}|{entry.unit}|{entry.priority}|{msg}"

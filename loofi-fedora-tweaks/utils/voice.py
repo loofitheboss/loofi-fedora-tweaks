@@ -15,7 +15,6 @@ import subprocess
 import shutil
 import os
 import tempfile
-from typing import Optional
 
 from utils.containers import Result
 
@@ -300,4 +299,4 @@ class VoiceManager:
             True if arecord or parecord is found on PATH.
         """
         return shutil.which("arecord") is not None or \
-               shutil.which("parecord") is not None
+            shutil.which("parecord") is not None

@@ -4,6 +4,28 @@ Enables headless operation and scripting.
 v18.0.0 "Sentinel"
 """
 
+from version import __version__, __version_codename__
+from utils.storage import StorageManager
+from utils.bluetooth import BluetoothManager
+from utils.firewall_manager import FirewallManager
+from utils.package_explorer import PackageExplorer
+from utils.service_explorer import ServiceExplorer, ServiceScope
+from utils.health_timeline import HealthTimeline
+from utils.profiles import ProfileManager
+from utils.ports import PortAuditor
+from utils.focus_mode import FocusMode
+from utils.presets import PresetManager
+from utils.journal import JournalManager
+from utils.network_monitor import NetworkMonitor
+from utils.temperature import TemperatureManager
+from utils.processes import ProcessManager
+from utils.plugin_base import PluginLoader
+from utils.monitor import SystemMonitor
+from utils.disk import DiskManager
+from utils.system import SystemManager
+from utils.operations import (
+    CleanupOps, TweakOps, AdvancedOps, NetworkOps
+)
 import sys
 import os
 import argparse
@@ -15,31 +37,6 @@ from typing import List, Optional
 # Add parent to path for imports
 sys.path.insert(0, str(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from utils.operations import (
-    CleanupOps, TweakOps, AdvancedOps, NetworkOps,
-    OperationResult, CLI_COMMANDS
-)
-from utils.system import SystemManager
-from utils.disk import DiskManager
-from utils.monitor import SystemMonitor
-from utils.plugin_base import PluginLoader
-from utils.performance import PerformanceCollector
-from utils.processes import ProcessManager
-from utils.temperature import TemperatureManager
-from utils.network_monitor import NetworkMonitor
-from utils.journal import JournalManager
-from utils.presets import PresetManager
-from utils.focus_mode import FocusMode
-from utils.ports import PortAuditor
-from utils.profiles import ProfileManager
-from utils.health_timeline import HealthTimeline
-from utils.service_explorer import ServiceExplorer, ServiceScope
-from utils.package_explorer import PackageExplorer
-from utils.firewall_manager import FirewallManager
-from utils.bluetooth import BluetoothManager
-from utils.storage import StorageManager
-
-from version import __version__, __version_codename__
 
 # Global flag for JSON output
 _json_output = False
@@ -496,7 +493,7 @@ def cmd_doctor(args):
 
 def cmd_hardware(args):
     """Show detected hardware profile."""
-    from utils.hardware_profiles import detect_hardware_profile, get_profile_label
+    from utils.hardware_profiles import detect_hardware_profile
 
     key, profile = detect_hardware_profile()
 
@@ -979,7 +976,10 @@ def cmd_profile(args):
         if not args.name:
             _print("❌ Profile name required")
             return 1
-        result = ProfileManager.apply_profile(args.name)
+        result = ProfileManager.apply_profile(
+            args.name,
+            create_snapshot=not getattr(args, "no_snapshot", False),
+        )
         if _json_output:
             _output_json({
                 "success": result.success,
@@ -1016,6 +1016,76 @@ def cmd_profile(args):
             _output_json({
                 "success": result.success,
                 "message": result.message,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "export":
+        if not args.name or not args.path:
+            _print("❌ Profile name and export path required")
+            return 1
+        result = ProfileManager.export_profile_json(args.name, args.path)
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "import":
+        path = args.path or args.name
+        if not path:
+            _print("❌ Import path required")
+            return 1
+        result = ProfileManager.import_profile_json(path, overwrite=getattr(args, "overwrite", False))
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "export-all":
+        path = args.path or args.name
+        if not path:
+            _print("❌ Export path required")
+            return 1
+        result = ProfileManager.export_bundle_json(
+            path,
+            include_builtins=getattr(args, "include_builtins", False),
+        )
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
+            })
+        else:
+            icon = "✅" if result.success else "❌"
+            _print(f"{icon} {result.message}")
+        return 0 if result.success else 1
+
+    elif args.action == "import-all":
+        path = args.path or args.name
+        if not path:
+            _print("❌ Import bundle path required")
+            return 1
+        result = ProfileManager.import_bundle_json(path, overwrite=getattr(args, "overwrite", False))
+        if _json_output:
+            _output_json({
+                "success": result.success,
+                "message": result.message,
+                "data": result.data,
             })
         else:
             icon = "✅" if result.success else "❌"
@@ -1130,10 +1200,10 @@ def cmd_tuner(args):
             _print(f"\n  Workload Detected: {workload.name}")
             _print(f"  CPU: {workload.cpu_percent:.1f}%  Memory: {workload.memory_percent:.1f}%")
             _print(f"  Description: {workload.description}")
-            _print(f"\n  Current Settings:")
+            _print("\n  Current Settings:")
             for k, v in current.items():
                 _print(f"    {k}: {v}")
-            _print(f"\n  Recommendations:")
+            _print("\n  Recommendations:")
             _print(f"    Governor: {rec.governor}")
             _print(f"    Swappiness: {rec.swappiness}")
             _print(f"    I/O Scheduler: {rec.io_scheduler}")
@@ -1440,7 +1510,7 @@ def cmd_firewall(args):
             _print(f"Open ports: {', '.join(info.ports) or 'none'}")
             _print(f"Services: {', '.join(info.services) or 'none'}")
             if info.rich_rules:
-                _print(f"Rich rules:")
+                _print("Rich rules:")
                 for r in info.rich_rules:
                     _print(f"  {r}")
         return 0
@@ -1608,7 +1678,7 @@ def cmd_bluetooth(args):
 def cmd_agent(args):
     """Handle agent subcommand."""
     import time as time_mod
-    from utils.agents import AgentRegistry, AgentType
+    from utils.agents import AgentRegistry
 
     registry = AgentRegistry.instance()
 
@@ -1708,7 +1778,7 @@ def cmd_agent(args):
             _print(f"✅ Created agent: {registered.name} (ID: {registered.agent_id})")
             _print(f"   Type: {plan.agent_type.value}")
             _print(f"   Confidence: {plan.confidence:.0%}")
-            _print(f"   Steps:")
+            _print("   Steps:")
             for step in plan.steps:
                 _print(f"     {step.step_number}. {step.description}")
             _print(f"\n   Agent starts in dry-run mode. Use 'agent enable {registered.agent_id}' to activate.")
@@ -1841,6 +1911,7 @@ def cmd_agent(args):
             return 0
 
     return 1
+
 
 def cmd_storage(args):
     """Handle storage subcommand."""
@@ -1997,8 +2068,12 @@ def main(argv: Optional[List[str]] = None):
     # Network subcommand
     net_parser = subparsers.add_parser("network", help="Network configuration")
     net_parser.add_argument("action", choices=["dns"], help="Network action")
-    net_parser.add_argument("--provider", choices=["cloudflare", "google", "quad9", "opendns"],
-                           default="cloudflare", help="DNS provider")
+    net_parser.add_argument(
+        "--provider",
+        choices=["cloudflare", "google", "quad9", "opendns"],
+        default="cloudflare",
+        help="DNS provider",
+    )
 
     # v10.0 new commands
     subparsers.add_parser("doctor", help="Check system dependencies and diagnostics")
@@ -2054,9 +2129,16 @@ def main(argv: Optional[List[str]] = None):
 
     # v13.0 Nexus Update - Profile management
     profile_parser = subparsers.add_parser("profile", help="System profile management")
-    profile_parser.add_argument("action", choices=["list", "apply", "create", "delete"],
-                                help="Profile action")
-    profile_parser.add_argument("name", nargs="?", help="Profile name (for apply/create/delete)")
+    profile_parser.add_argument(
+        "action",
+        choices=["list", "apply", "create", "delete", "export", "import", "export-all", "import-all"],
+        help="Profile action",
+    )
+    profile_parser.add_argument("name", nargs="?", help="Profile name (for apply/create/delete/export)")
+    profile_parser.add_argument("path", nargs="?", help="Import/export file path")
+    profile_parser.add_argument("--overwrite", action="store_true", help="Overwrite existing custom profiles on import")
+    profile_parser.add_argument("--no-snapshot", action="store_true", help="Skip snapshot creation when applying profiles")
+    profile_parser.add_argument("--include-builtins", action="store_true", help="Include built-in profiles in export-all bundle")
 
     # v13.0 Nexus Update - Health history
     health_history_parser = subparsers.add_parser("health-history", help="Health timeline metrics")

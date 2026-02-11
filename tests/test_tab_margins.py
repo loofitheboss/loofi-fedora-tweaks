@@ -26,7 +26,17 @@ class TestTabMargins(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.app = QApplication.instance() or QApplication([])
+        app_instance = QApplication.instance()
+        if isinstance(app_instance, QApplication):
+            cls.app = app_instance
+        elif app_instance is None:
+            cls.app = QApplication([])
+        else:
+            raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
+
+    def setUp(self):
+        if not isinstance(QApplication.instance(), QApplication):
+            raise unittest.SkipTest("QApplication unavailable for QWidget tests")
 
     def _get_root_layout_margins(self, tab_widget):
         """Helper to extract content margins from a tab's root layout."""
@@ -99,7 +109,10 @@ class TestTabMargins(unittest.TestCase):
     def test_ai_enhanced_tab_margins(self):
         """Verify AI Lab tab has positive content margins."""
         # Mock the AI-related managers to avoid import errors
-        sys.modules['utils.ai_models'] = MagicMock()
+        mock_ai_models = MagicMock()
+        mock_ai_models.AIModelManager.get_system_ram.return_value = 16384
+        mock_ai_models.AIModelManager.get_recommended_model.return_value = {"name": "test", "size": "7B"}
+        sys.modules['utils.ai_models'] = mock_ai_models
         sys.modules['utils.voice'] = MagicMock()
         sys.modules['utils.context_rag'] = MagicMock()
 
@@ -123,9 +136,19 @@ class TestTabMargins(unittest.TestCase):
 
     def test_settings_tab_margins(self):
         """Verify settings tab has positive content margins."""
-        # Mock SettingsManager
+        # Mock SettingsManager with proper return types per key
+        defaults = {
+            "theme": "dark",
+            "follow_system_theme": False,
+            "start_minimized": False,
+            "show_notifications": True,
+            "confirm_dangerous_actions": True,
+            "restore_last_tab": False,
+            "log_level": "INFO",
+            "check_updates_on_start": True,
+        }
         mock_settings_mgr = MagicMock()
-        mock_settings_mgr.get.return_value = "modern"
+        mock_settings_mgr.get.side_effect = lambda key, *a, **kw: defaults.get(key, "")
 
         with patch("ui.settings_tab.SettingsManager") as mock_mgr_class:
             mock_mgr_class.instance.return_value = mock_settings_mgr

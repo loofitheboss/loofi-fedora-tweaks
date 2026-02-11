@@ -28,10 +28,10 @@ class Result:
 class KWinManager:
     """
     Manages KWin tiling and window rules for KDE Plasma.
-    
+
     Uses kwriteconfig5/kwriteconfig6 and dbus for configuration.
     """
-    
+
     # Quick tile positions
     TILE_POSITIONS = {
         "left": "Quick Tile Window to the Left",
@@ -44,7 +44,7 @@ class KWinManager:
         "bottom_right": "Quick Tile Window to the Bottom Right",
         "maximize": "Maximize Window",
     }
-    
+
     # Default keybindings for tiling
     DEFAULT_BINDINGS = {
         "Meta+Left": "left",
@@ -56,18 +56,18 @@ class KWinManager:
         "Meta+K": "top",
         "Meta+J": "bottom",
     }
-    
+
     @classmethod
     def is_kde(cls) -> bool:
         """Check if running KDE Plasma."""
         session = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
         return "kde" in session or "plasma" in session
-    
+
     @classmethod
     def is_wayland(cls) -> bool:
         """Check if running Wayland session."""
         return os.environ.get("XDG_SESSION_TYPE", "") == "wayland"
-    
+
     @classmethod
     def get_kwriteconfig(cls) -> Optional[str]:
         """Get appropriate kwriteconfig command."""
@@ -75,7 +75,7 @@ class KWinManager:
             if shutil.which(cmd):
                 return cmd
         return None
-    
+
     @classmethod
     def get_kreadconfig(cls) -> Optional[str]:
         """Get appropriate kreadconfig command."""
@@ -83,14 +83,14 @@ class KWinManager:
             if shutil.which(cmd):
                 return cmd
         return None
-    
+
     @classmethod
     def enable_quick_tiling(cls) -> Result:
         """Enable KWin quick tiling feature."""
         kwrite = cls.get_kwriteconfig()
         if not kwrite:
             return Result(False, "kwriteconfig not found")
-        
+
         try:
             # Enable quick tiling in kwinrc
             result = subprocess.run(
@@ -100,32 +100,32 @@ class KWinManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode != 0:
                 return Result(False, f"Failed: {result.stderr}")
-            
+
             return Result(True, "Quick tiling enabled. Restart KWin to apply.")
         except Exception as e:
             return Result(False, f"Error: {e}")
-    
+
     @classmethod
     def set_keybinding(cls, shortcut: str, action: str) -> Result:
         """
         Set a KWin keybinding.
-        
+
         Args:
             shortcut: Key combo like "Meta+H"
             action: Action name from TILE_POSITIONS
         """
         if action not in cls.TILE_POSITIONS:
             return Result(False, f"Unknown action: {action}")
-        
+
         kwrite = cls.get_kwriteconfig()
         if not kwrite:
             return Result(False, "kwriteconfig not found")
-        
+
         action_name = cls.TILE_POSITIONS[action]
-        
+
         try:
             result = subprocess.run(
                 [kwrite, "--file", "kglobalshortcutsrc",
@@ -135,19 +135,19 @@ class KWinManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode != 0:
                 return Result(False, f"Failed: {result.stderr}")
-            
+
             return Result(True, f"Bound {shortcut} to {action_name}")
         except Exception as e:
             return Result(False, f"Error: {e}")
-    
+
     @classmethod
     def apply_tiling_preset(cls, preset: str = "vim") -> Result:
         """
         Apply a tiling keybinding preset.
-        
+
         Presets:
         - vim: H/J/K/L style navigation
         - arrows: Arrow key navigation
@@ -177,22 +177,22 @@ class KWinManager:
             }
         else:
             return Result(False, f"Unknown preset: {preset}")
-        
+
         errors = []
         for shortcut, action in bindings.items():
             result = cls.set_keybinding(shortcut, action)
             if not result.success:
                 errors.append(f"{shortcut}: {result.message}")
-        
+
         if errors:
             return Result(False, f"Some bindings failed: {', '.join(errors)}")
-        
+
         return Result(
             True,
             f"Applied '{preset}' preset. Restart KWin to apply.",
             {"bindings": bindings}
         )
-    
+
     @classmethod
     def reconfigure_kwin(cls) -> Result:
         """Reconfigure KWin to apply changes."""
@@ -204,10 +204,10 @@ class KWinManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 return Result(True, "KWin reconfigured")
-            
+
             # Try dbus-send as fallback
             result = subprocess.run(
                 ["dbus-send", "--type=signal", "--dest=org.kde.KWin",
@@ -216,14 +216,14 @@ class KWinManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 return Result(True, "KWin reconfigured")
             else:
                 return Result(False, "Failed to reconfigure KWin")
         except Exception as e:
             return Result(False, f"Error: {e}")
-    
+
     @classmethod
     def add_window_rule(
         cls,
@@ -234,20 +234,20 @@ class KWinManager:
     ) -> Result:
         """
         Add a KWin window rule.
-        
+
         Args:
             window_class: Window class to match
             workspace: Workspace to place window on
             maximized: Start maximized
             position: Tile position
         """
-        rules_path = Path.home() / ".config/kwinrulesrc"
-        
+        Path.home() / ".config/kwinrulesrc"
+
         try:
             # Read existing rules count
             kread = cls.get_kreadconfig()
             count = 0
-            
+
             if kread:
                 result = subprocess.run(
                     [kread, "--file", "kwinrulesrc", "--group", "General",
@@ -258,14 +258,14 @@ class KWinManager:
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     count = int(result.stdout.strip())
-            
+
             # Add new rule
             new_rule_num = count + 1
             kwrite = cls.get_kwriteconfig()
-            
+
             if not kwrite:
                 return Result(False, "kwriteconfig not found")
-            
+
             # Set rule properties
             commands = [
                 [kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
@@ -275,7 +275,7 @@ class KWinManager:
                 [kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
                  "--key", "wmclassmatch", "1"],  # Exact match
             ]
-            
+
             if workspace:
                 commands.append([
                     kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
@@ -285,7 +285,7 @@ class KWinManager:
                     kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
                     "--key", "desktopsrule", "2"  # Force
                 ])
-            
+
             if maximized:
                 commands.append([
                     kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
@@ -295,16 +295,16 @@ class KWinManager:
                     kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
                     "--key", "maximizevert", "true"
                 ])
-            
+
             # Update count
             commands.append([
                 kwrite, "--file", "kwinrulesrc", "--group", "General",
                 "--key", "count", str(new_rule_num)
             ])
-            
+
             for cmd in commands:
                 subprocess.run(cmd, capture_output=True, timeout=10)
-            
+
             return Result(
                 True,
                 f"Window rule added for {window_class}",
@@ -312,12 +312,12 @@ class KWinManager:
             )
         except Exception as e:
             return Result(False, f"Error: {e}")
-    
+
     @classmethod
     def get_window_list(cls) -> list[dict]:
         """Get list of open windows."""
         windows = []
-        
+
         try:
             result = subprocess.run(
                 ["qdbus", "org.kde.KWin", "/KWin", "queryWindowInfo"],
@@ -325,19 +325,19 @@ class KWinManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode != 0:
                 return windows
-            
+
             # Simple parsing (actual format may vary)
             for line in result.stdout.strip().split("\n"):
                 if line.strip():
                     windows.append({"info": line.strip()})
-            
+
             return windows
         except Exception:
             return windows
-    
+
     @classmethod
     def install_tiling_script(cls) -> Result:
         """
@@ -345,13 +345,13 @@ class KWinManager:
         """
         scripts_dir = Path.home() / ".local/share/kwin/scripts/LoofiTiling"
         scripts_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create main.js
         main_js = scripts_dir / "main.js"
         main_js.write_text("""/*
  * Loofi Tiling Script for KWin
  * Generated by Loofi Fedora Tweaks
- * 
+ *
  * Provides basic tiling functionality.
  */
 
@@ -360,7 +360,7 @@ function tileToGrid(client, col, row, cols, rows) {
     var area = workspace.clientArea(0, client.screen, workspace.currentDesktop);
     var cellWidth = area.width / cols;
     var cellHeight = area.height / rows;
-    
+
     client.geometry = {
         x: area.x + (cellWidth * col),
         y: area.y + (cellHeight * row),
@@ -393,7 +393,7 @@ registerShortcut("Loofi: Tile Right Third", "Tile to right third", "Meta+3", fun
 
 console.log("Loofi Tiling Script loaded");
 """)
-        
+
         # Create metadata.json
         metadata = scripts_dir / "metadata.json"
         metadata.write_text(json.dumps({
@@ -409,7 +409,7 @@ console.log("Loofi Tiling Script loaded");
             "X-Plasma-API": "javascript",
             "X-Plasma-MainScript": "main.js"
         }, indent=2))
-        
+
         return Result(
             True,
             f"Tiling script installed to {scripts_dir}. Enable in System Settings → Window Management → KWin Scripts.",

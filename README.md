@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v23.0.0 "Architecture Hardening"
+# Loofi Fedora Tweaks v24.0.0 "Power Features"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v23.0.0">
-    <img src="https://img.shields.io/badge/Release-v23.0.0-blue?style=for-the-badge&logo=github" alt="Release v23.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v24.0.0">
+    <img src="https://img.shields.io/badge/Release-v24.0.0-blue?style=for-the-badge&logo=github" alt="Release v24.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,7 +21,45 @@
 
 ---
 
-## What's New in v23.0.0 "Architecture Hardening"
+## What's New in v24.0.0 "Power Features"
+
+### Profiles: Schema + Storage + Import/Export
+
+v24.0.0 adds a versioned profile schema and storage layer, with backward-compatible profile loading.
+
+**Core Profile Layer**
+* `core/profiles/models.py`: `ProfileRecord`, `ProfileBundle`
+* `core/profiles/storage.py`: CRUD + single/bundle import/export
+* Legacy profile JSON remains readable; new exports include schema metadata
+
+**Profile Operations**
+* `ProfileManager` now supports:
+  * `export_profile_json`, `import_profile_json`
+  * `export_bundle_json`, `import_bundle_json`
+* `apply_profile()` now supports snapshot-before-apply with graceful fallback warning messages
+
+### API + CLI Extensions
+
+**Profile API Endpoints**
+* `GET /api/profiles`
+* `POST /api/profiles/apply`
+* `GET /api/profiles/{name}/export`
+* `POST /api/profiles/import`
+* `GET /api/profiles/export-all`
+* `POST /api/profiles/import-all`
+
+**CLI: profile**
+* New actions: `export`, `import`, `export-all`, `import-all`
+* New flags: `--overwrite`, `--no-snapshot`, `--include-builtins`
+
+### UI Improvements
+
+* **Profiles Tab**: Export profile, export bundle, import bundle actions
+* **Logs Tab**: New live log panel with incremental polling, start/stop controls, and bounded buffer
+
+---
+
+## Previous: v23.0.0 "Architecture Hardening"
 
 ### Architecture Hardening & Service Layer Refactor
 
@@ -300,7 +338,7 @@ curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/ma
 ### Direct RPM Download
 
 ```bash
-sudo dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v21.0.0/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
+pkexec dnf install https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v23.0.0/loofi-fedora-tweaks-23.0.0-1.noarch.rpm
 ```
 
 ### Run from Source
@@ -315,8 +353,8 @@ python3 main.py
 ### Build RPM from Source
 
 ```bash
-./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-21.0.0-1.noarch.rpm
+bash scripts/build_rpm.sh
+# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-23.0.0-1.noarch.rpm
 ```
 
 ---
@@ -368,8 +406,13 @@ loofi ai-models recommend     # Get RAM-based model recommendation
 # Profiles (v13.0)
 loofi profile list            # List all profiles
 loofi profile apply gaming    # Apply a profile
+loofi profile apply gaming --no-snapshot  # Apply without pre-apply snapshot
 loofi profile create myprofile  # Create from current state
 loofi profile delete myprofile  # Delete a custom profile
+loofi profile export gaming gaming.json  # Export one profile to JSON
+loofi profile import gaming.json --overwrite  # Import one profile from JSON
+loofi profile export-all profiles.json --include-builtins  # Export bundle
+loofi profile import-all profiles.json --overwrite  # Import bundle
 
 # Health History (v13.0)
 loofi health-history show     # Show 24h metrics summary

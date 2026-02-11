@@ -15,10 +15,10 @@ from typing import Callable, Optional
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLineEdit, QListWidget, QListWidgetItem,
-    QLabel, QWidget, QHBoxLayout,
+    QLabel, QWidget,
 )
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFont, QColor, QKeyEvent
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont, QKeyEvent
 
 from utils.log import get_logger
 
@@ -54,7 +54,8 @@ def _build_feature_registry() -> list[dict]:
         {"name": "CPU Usage", "category": "System Monitor", "keywords": ["cpu", "load", "processor", "cores", "frequency"], "action": "Performance"},
         {"name": "Memory", "category": "System Monitor", "keywords": ["ram", "memory", "swap", "usage"], "action": "Performance"},
         {"name": "Disk I/O", "category": "System Monitor", "keywords": ["disk", "io", "read", "write", "storage"], "action": "Performance"},
-        {"name": "Network Traffic", "category": "System Monitor", "keywords": ["network", "bandwidth", "traffic", "rx", "tx"], "action": "Performance"},
+        {"name": "Network Traffic", "category": "System Monitor", "keywords": [
+            "network", "bandwidth", "traffic", "rx", "tx"], "action": "Performance"},
         {"name": "Processes", "category": "System Monitor", "keywords": ["process", "pid", "top", "htop", "running"], "action": "Processes"},
         {"name": "Kill Process", "category": "System Monitor", "keywords": ["kill", "terminate", "signal", "stop process"], "action": "Processes"},
 
@@ -69,33 +70,45 @@ def _build_feature_registry() -> list[dict]:
         {"name": "Rebuild RPM DB", "category": "Maintenance", "keywords": ["rpmdb", "rpm", "rebuild", "database", "repair"], "action": "Cleanup"},
 
         # Hardware (HP Tweaks / Hardware tab)
-        {"name": "CPU Governor", "category": "Hardware", "keywords": ["cpu", "governor", "frequency", "scaling", "performance", "powersave"], "action": "Hardware"},
-        {"name": "Power Profile", "category": "Hardware", "keywords": ["power", "profile", "battery", "balanced", "performance", "saver"], "action": "HP Tweaks"},
-        {"name": "GPU Mode", "category": "Hardware", "keywords": ["gpu", "nvidia", "integrated", "hybrid", "optimus", "graphics"], "action": "Hardware"},
+        {"name": "CPU Governor", "category": "Hardware", "keywords": ["cpu", "governor",
+                                                                      "frequency", "scaling", "performance", "powersave"], "action": "Hardware"},
+        {"name": "Power Profile", "category": "Hardware", "keywords": [
+            "power", "profile", "battery", "balanced", "performance", "saver"], "action": "HP Tweaks"},
+        {"name": "GPU Mode", "category": "Hardware", "keywords": ["gpu", "nvidia",
+                                                                  "integrated", "hybrid", "optimus", "graphics"], "action": "Hardware"},
         {"name": "Fan Control", "category": "Hardware", "keywords": ["fan", "nbfc", "cooling", "temperature", "thermal"], "action": "HP Tweaks"},
-        {"name": "Battery Limit", "category": "Hardware", "keywords": ["battery", "charge", "limit", "health", "80%", "threshold"], "action": "HP Tweaks"},
+        {"name": "Battery Limit", "category": "Hardware", "keywords": ["battery",
+                                                                       "charge", "limit", "health", "80%", "threshold"], "action": "HP Tweaks"},
         {"name": "Audio Restart", "category": "Hardware", "keywords": ["audio", "pipewire", "pulseaudio", "sound", "restart"], "action": "HP Tweaks"},
-        {"name": "Fingerprint", "category": "Hardware", "keywords": ["fingerprint", "fprintd", "biometric", "enroll", "sensor"], "action": "HP Tweaks"},
+        {"name": "Fingerprint", "category": "Hardware", "keywords": ["fingerprint",
+                                                                     "fprintd", "biometric", "enroll", "sensor"], "action": "HP Tweaks"},
 
         # Software (Apps tab)
         {"name": "Install Apps", "category": "Software", "keywords": ["apps", "install", "software", "packages", "essential"], "action": "Apps"},
         {"name": "RPM Fusion", "category": "Software", "keywords": ["rpmfusion", "rpm", "fusion", "free", "nonfree", "repo"], "action": "Repos"},
         {"name": "Flathub", "category": "Software", "keywords": ["flathub", "flatpak", "remote", "repo"], "action": "Repos"},
-        {"name": "Multimedia Codecs", "category": "Software", "keywords": ["codecs", "multimedia", "h264", "h265", "mp3", "video", "audio"], "action": "Apps"},
+        {"name": "Multimedia Codecs", "category": "Software", "keywords": [
+            "codecs", "multimedia", "h264", "h265", "mp3", "video", "audio"], "action": "Apps"},
         {"name": "COPR Repos", "category": "Software", "keywords": ["copr", "repository", "third-party", "ppa"], "action": "Repos"},
 
         # Security & Privacy
-        {"name": "Security Score", "category": "Security & Privacy", "keywords": ["security", "score", "audit", "hardening", "rating"], "action": "Security"},
-        {"name": "Port Auditor", "category": "Security & Privacy", "keywords": ["port", "scan", "auditor", "open ports", "firewall"], "action": "Security"},
+        {"name": "Security Score", "category": "Security & Privacy", "keywords": [
+            "security", "score", "audit", "hardening", "rating"], "action": "Security"},
+        {"name": "Port Auditor", "category": "Security & Privacy", "keywords": [
+            "port", "scan", "auditor", "open ports", "firewall"], "action": "Security"},
         {"name": "USB Guard", "category": "Security & Privacy", "keywords": ["usb", "guard", "badusb", "device", "block"], "action": "Security"},
-        {"name": "Sandbox", "category": "Security & Privacy", "keywords": ["sandbox", "firejail", "bubblewrap", "isolation", "container"], "action": "Security"},
+        {"name": "Sandbox", "category": "Security & Privacy", "keywords": [
+            "sandbox", "firejail", "bubblewrap", "isolation", "container"], "action": "Security"},
         {"name": "Firewall", "category": "Security & Privacy", "keywords": ["firewall", "firewalld", "zone", "ports", "rules"], "action": "Security"},
-        {"name": "Telemetry", "category": "Security & Privacy", "keywords": ["telemetry", "privacy", "tracking", "analytics", "disable"], "action": "Privacy"},
+        {"name": "Telemetry", "category": "Security & Privacy", "keywords": [
+            "telemetry", "privacy", "tracking", "analytics", "disable"], "action": "Privacy"},
 
         # Network
-        {"name": "DNS Provider", "category": "Network", "keywords": ["dns", "nameserver", "cloudflare", "google", "quad9", "resolver"], "action": "Network"},
+        {"name": "DNS Provider", "category": "Network", "keywords": ["dns", "nameserver",
+                                                                     "cloudflare", "google", "quad9", "resolver"], "action": "Network"},
         {"name": "MAC Randomization", "category": "Network", "keywords": ["mac", "address", "random", "privacy", "network"], "action": "Network"},
-        {"name": "Network Monitor", "category": "Network", "keywords": ["network", "monitor", "bandwidth", "traffic", "connection"], "action": "Network"},
+        {"name": "Network Monitor", "category": "Network", "keywords": ["network",
+                                                                        "monitor", "bandwidth", "traffic", "connection"], "action": "Network"},
 
         # Gaming
         {"name": "GameMode", "category": "Gaming", "keywords": ["gamemode", "game", "mode", "performance", "feral"], "action": "Gaming"},
@@ -107,17 +120,20 @@ def _build_feature_registry() -> list[dict]:
 
         # Desktop (Director + Theming)
         {"name": "Window Manager", "category": "Desktop", "keywords": ["window", "manager", "kwin", "mutter", "compositor"], "action": "Director"},
-        {"name": "Tiling Presets", "category": "Desktop", "keywords": ["tiling", "layout", "preset", "grid", "snap", "quarter"], "action": "Director"},
+        {"name": "Tiling Presets", "category": "Desktop", "keywords": [
+            "tiling", "layout", "preset", "grid", "snap", "quarter"], "action": "Director"},
         {"name": "Theming", "category": "Desktop", "keywords": ["theme", "gtk", "qt", "dark", "light", "catppuccin", "adwaita"], "action": "Theming"},
         {"name": "Icons", "category": "Desktop", "keywords": ["icons", "icon theme", "papirus", "adwaita"], "action": "Theming"},
         {"name": "Fonts", "category": "Desktop", "keywords": ["fonts", "font", "nerd", "fira", "jetbrains", "typography"], "action": "Theming"},
 
         # Development (Containers + Developer)
         {"name": "Containers", "category": "Development", "keywords": ["container", "podman", "docker", "oci", "image"], "action": "Containers"},
-        {"name": "Distrobox", "category": "Development", "keywords": ["distrobox", "toolbox", "container", "dev", "environment"], "action": "Containers"},
+        {"name": "Distrobox", "category": "Development", "keywords": ["distrobox",
+                                                                      "toolbox", "container", "dev", "environment"], "action": "Containers"},
         {"name": "Podman", "category": "Development", "keywords": ["podman", "container", "pod", "compose", "runtime"], "action": "Containers"},
         {"name": "VS Code", "category": "Development", "keywords": ["vscode", "code", "editor", "ide", "microsoft"], "action": "Developer"},
-        {"name": "Developer Tools", "category": "Development", "keywords": ["developer", "tools", "git", "gcc", "make", "build", "sdk"], "action": "Developer"},
+        {"name": "Developer Tools", "category": "Development", "keywords": [
+            "developer", "tools", "git", "gcc", "make", "build", "sdk"], "action": "Developer"},
 
         # AI Lab
         {"name": "Ollama", "category": "AI Lab", "keywords": ["ollama", "llm", "local", "ai", "model", "inference"], "action": "AI Lab"},
@@ -127,15 +143,19 @@ def _build_feature_registry() -> list[dict]:
         # Automation (Scheduler + Replicator + Presets/Marketplace)
         {"name": "Scheduler", "category": "Automation", "keywords": ["schedule", "timer", "cron", "systemd", "task"], "action": "Scheduler"},
         {"name": "Cron Jobs", "category": "Automation", "keywords": ["cron", "job", "periodic", "timer", "automated"], "action": "Scheduler"},
-        {"name": "Replicator", "category": "Automation", "keywords": ["replicator", "export", "import", "backup", "iac", "ansible"], "action": "Replicator"},
-        {"name": "Ansible Export", "category": "Automation", "keywords": ["ansible", "playbook", "export", "automation", "yaml"], "action": "Replicator"},
+        {"name": "Replicator", "category": "Automation", "keywords": ["replicator",
+                                                                      "export", "import", "backup", "iac", "ansible"], "action": "Replicator"},
+        {"name": "Ansible Export", "category": "Automation", "keywords": [
+            "ansible", "playbook", "export", "automation", "yaml"], "action": "Replicator"},
 
         # Community (Presets + Marketplace)
         {"name": "Presets", "category": "Community", "keywords": ["preset", "profile", "configuration", "share", "community"], "action": "Presets"},
-        {"name": "Marketplace", "category": "Community", "keywords": ["marketplace", "community", "share", "download", "preset"], "action": "Marketplace"},
+        {"name": "Marketplace", "category": "Community", "keywords": ["marketplace",
+                                                                      "community", "share", "download", "preset"], "action": "Marketplace"},
 
         # Diagnostics (Watchtower + Boot)
-        {"name": "Watchtower", "category": "Diagnostics", "keywords": ["watchtower", "diagnostic", "health", "check", "doctor"], "action": "Watchtower"},
+        {"name": "Watchtower", "category": "Diagnostics", "keywords": [
+            "watchtower", "diagnostic", "health", "check", "doctor"], "action": "Watchtower"},
         {"name": "Boot Analysis", "category": "Diagnostics", "keywords": ["boot", "startup", "systemd-analyze", "blame", "time"], "action": "Boot"},
         {"name": "Kernel Params", "category": "Diagnostics", "keywords": ["kernel", "parameter", "cmdline", "grub", "boot"], "action": "Boot"},
     ]

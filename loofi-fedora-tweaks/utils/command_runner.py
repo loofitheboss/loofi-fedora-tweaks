@@ -5,11 +5,12 @@ from utils.log import get_logger
 
 logger = get_logger(__name__)
 
+
 class CommandRunner(QObject):
     output_received = pyqtSignal(str)
     finished = pyqtSignal(int)
     error_occurred = pyqtSignal(str)
-    progress_update = pyqtSignal(int, str) # New signal: percentage, status_text
+    progress_update = pyqtSignal(int, str)  # New signal: percentage, status_text
 
     def __init__(self):
         super().__init__()
@@ -26,7 +27,7 @@ class CommandRunner(QObject):
             new_args = ["--host", command] + args
             command = "flatpak-spawn"
             args = new_args
-            
+
         self.process.start(command, args)
 
     def handle_stdout(self):
@@ -40,7 +41,7 @@ class CommandRunner(QObject):
         output = bytes(data).decode('utf-8')
         # DNF often sends progress to stderr
         self.parse_progress(output)
-        self.output_received.emit(output) # Treat stderr as output for now
+        self.output_received.emit(output)  # Treat stderr as output for now
 
     def parse_progress(self, text):
         # DNF regex for progress bar: [===       ]
@@ -56,15 +57,15 @@ class CommandRunner(QObject):
 
         # DNF regex for text state (Downloading/Installing)
         if "Downloading" in text:
-            self.progress_update.emit(-1, "Downloading Packages...") # -1 can mean indeterminate or just status update
+            self.progress_update.emit(-1, "Downloading Packages...")  # -1 can mean indeterminate or just status update
             return
         if "Installing" in text:
-             self.progress_update.emit(-1, "Installing...")
-             return
+            self.progress_update.emit(-1, "Installing...")
+            return
         if "Verifying" in text:
-             self.progress_update.emit(-1, "Verifying...")
-             return
-             
+            self.progress_update.emit(-1, "Verifying...")
+            return
+
         # DNF/General Percentage: ( 45%)
         paren_percent = re.search(r'\(\s*(\d+)%\)', text)
         if paren_percent:

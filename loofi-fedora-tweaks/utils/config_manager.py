@@ -5,7 +5,6 @@ Handles backup and restore of all app settings.
 
 import json
 import logging
-import os
 import platform
 import subprocess
 from datetime import datetime
@@ -19,22 +18,22 @@ logger = logging.getLogger(__name__)
 
 class ConfigManager:
     """Manages configuration export, import, and versioning."""
-    
+
     CONFIG_DIR = Path.home() / ".config" / "loofi-fedora-tweaks"
     CONFIG_FILE = CONFIG_DIR / "config.json"
     PRESETS_DIR = CONFIG_DIR / "presets"
-    
+
     @classmethod
     def ensure_dirs(cls):
         """Ensure config directories exist."""
         cls.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
         cls.PRESETS_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     @classmethod
     def get_config_version(cls) -> str:
         """Get current config format version."""
         return "5.5.0"
-    
+
     @classmethod
     def get_system_info(cls) -> dict:
         """Gather system information for config export."""
@@ -43,7 +42,7 @@ class ConfigManager:
             "kernel": platform.release(),
             "arch": platform.machine(),
         }
-        
+
         # Get Fedora version
         try:
             with open("/etc/os-release", "r") as f:
@@ -62,25 +61,25 @@ class ConfigManager:
         except OSError as e:
             logger.debug("Failed to read hardware model: %s", e)
             info["hardware"] = "Unknown"
-        
+
         return info
-    
+
     @classmethod
     def gather_hardware_settings(cls) -> dict:
         """Gather current hardware settings."""
         from utils.hardware import HardwareManager
-        
+
         return {
             "cpu_governor": HardwareManager.get_current_governor(),
             "power_profile": HardwareManager.get_power_profile(),
             "gpu_mode": HardwareManager.get_gpu_mode() if HardwareManager.is_hybrid_gpu() else None,
         }
-    
+
     @classmethod
     def gather_repo_settings(cls) -> dict:
         """Gather enabled repositories."""
         repos = {"enabled": [], "disabled": []}
-        
+
         try:
             result = subprocess.run(
                 ["dnf", "repolist", "--enabled", "-q"],
@@ -108,17 +107,17 @@ class ConfigManager:
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list flatpak apps: %s", e)
         return apps
-    
+
     @classmethod
     def export_all(cls) -> dict:
         """
         Export all current settings to a config dict.
-        
+
         Returns:
             Complete configuration dictionary.
         """
         cls.ensure_dirs()
-        
+
         config = {
             "version": cls.get_config_version(),
             "exported_at": datetime.now().isoformat(),
@@ -129,7 +128,7 @@ class ConfigManager:
                 "flatpak_apps": cls.gather_flatpak_apps(),
             }
         }
-        
+
         # Include local presets if any
         presets = []
         if cls.PRESETS_DIR.exists():
@@ -140,9 +139,9 @@ class ConfigManager:
                 except (OSError, json.JSONDecodeError) as e:
                     logger.debug("Failed to load preset %s: %s", preset_file, e)
         config["presets"] = presets
-        
+
         return config
-    
+
     @classmethod
     def export_to_file(cls, path: str) -> Result:
         """
@@ -162,7 +161,7 @@ class ConfigManager:
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to export config: %s", e)
             return Result(False, str(e))
-    
+
     @classmethod
     def import_from_file(cls, path: str) -> Result:
         """
@@ -185,7 +184,7 @@ class ConfigManager:
         except OSError as e:
             logger.debug("Failed to import config from file: %s", e)
             return Result(False, str(e))
-    
+
     @classmethod
     def import_all(cls, config: dict) -> Result:
         """
@@ -249,7 +248,7 @@ class ConfigManager:
             return Result(True, f"Imported: {', '.join(applied)}. Errors: {', '.join(errors)}")
         else:
             return Result(True, f"Successfully imported: {', '.join(applied) if applied else 'No settings changed'}")
-    
+
     @classmethod
     def save_config(cls, config: dict) -> bool:
         """Save current runtime config."""
@@ -261,7 +260,7 @@ class ConfigManager:
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to save config: %s", e)
             return False
-    
+
     @classmethod
     def load_config(cls) -> Optional[dict]:
         """Load saved config."""

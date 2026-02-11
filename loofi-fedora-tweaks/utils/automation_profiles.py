@@ -49,10 +49,10 @@ class AutomationRule:
     action: str   # ActionType value
     action_params: Dict[str, Any]
     enabled: bool = True
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "AutomationRule":
         return cls(**data)
@@ -63,15 +63,15 @@ class AutomationProfiles:
     Manages event-triggered automation rules.
     All methods return dicts for v10.0 API compatibility.
     """
-    
+
     CONFIG_DIR = Path.home() / ".config" / "loofi-fedora-tweaks"
     CONFIG_FILE = CONFIG_DIR / "automation.json"
-    
+
     @classmethod
     def ensure_config(cls):
         """Ensure config directory and default rules exist."""
         cls.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        
+
         if not cls.CONFIG_FILE.exists():
             default_config = {
                 "enabled": True,
@@ -80,7 +80,7 @@ class AutomationProfiles:
             }
             with open(cls.CONFIG_FILE, "w") as f:
                 json.dump(default_config, f, indent=2)
-    
+
     @classmethod
     def load_config(cls) -> Dict[str, Any]:
         """Load automation configuration."""
@@ -91,46 +91,46 @@ class AutomationProfiles:
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to load automation config: %s", e)
             return {"enabled": True, "rules": []}
-    
+
     @classmethod
     def save_config(cls, config: Dict[str, Any]):
         """Save automation configuration."""
         cls.ensure_config()
         with open(cls.CONFIG_FILE, "w") as f:
             json.dump(config, f, indent=2)
-    
+
     @classmethod
     def is_enabled(cls) -> bool:
         """Check if automation system is enabled."""
         return cls.load_config().get("enabled", True)
-    
+
     @classmethod
     def set_enabled(cls, enabled: bool):
         """Enable or disable automation system."""
         config = cls.load_config()
         config["enabled"] = enabled
         cls.save_config(config)
-    
+
     # -------------------------------------------------------------------------
     # Rule Management
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def list_rules(cls) -> List[Dict[str, Any]]:
         """
         Get all automation rules.
-        
+
         Returns:
             List of rule dicts
         """
         config = cls.load_config()
         return config.get("rules", [])
-    
+
     @classmethod
     def get_rule(cls, rule_id: str) -> Optional[Dict[str, Any]]:
         """
         Get a specific rule by ID.
-        
+
         Returns:
             Rule dict or None
         """
@@ -138,12 +138,12 @@ class AutomationProfiles:
             if rule.get("id") == rule_id:
                 return rule
         return None
-    
+
     @classmethod
     def add_rule(cls, rule: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a new automation rule.
-        
+
         Returns:
             Dict with 'success' and 'message'
         """
@@ -154,25 +154,25 @@ class AutomationProfiles:
             config = cls.load_config()
             if "rules" not in config:
                 config["rules"] = []
-            
+
             # Generate ID if not provided
             if "id" not in rule:
                 import uuid
                 rule["id"] = str(uuid.uuid4())[:8]
-            
+
             config["rules"].append(rule)
             cls.save_config(config)
-            
+
             return {"success": True, "message": f"Rule '{rule.get('name', 'unnamed')}' added", "id": rule["id"]}
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to add automation rule: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def update_rule(cls, rule_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         """
         Update an existing rule.
-        
+
         Returns:
             Dict with 'success' and 'message'
         """
@@ -192,12 +192,12 @@ class AutomationProfiles:
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to update automation rule: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def delete_rule(cls, rule_id: str) -> Dict[str, Any]:
         """
         Delete an automation rule.
-        
+
         Returns:
             Dict with 'success' and 'message'
         """
@@ -205,7 +205,7 @@ class AutomationProfiles:
             config = cls.load_config()
             original_count = len(config.get("rules", []))
             config["rules"] = [r for r in config.get("rules", []) if r.get("id") != rule_id]
-            
+
             if len(config["rules"]) < original_count:
                 cls.save_config(config)
                 return {"success": True, "message": "Rule deleted"}
@@ -213,21 +213,21 @@ class AutomationProfiles:
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to delete automation rule: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def enable_rule(cls, rule_id: str, enabled: bool) -> Dict[str, Any]:
         """Enable or disable a specific rule."""
         return cls.update_rule(rule_id, {"enabled": enabled})
-    
+
     # -------------------------------------------------------------------------
     # Rule Matching
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def get_rules_for_trigger(cls, trigger: str) -> List[Dict[str, Any]]:
         """
         Get all enabled rules matching a trigger.
-        
+
         Returns:
             List of matching rule dicts
         """
@@ -235,14 +235,14 @@ class AutomationProfiles:
             rule for rule in cls.list_rules()
             if rule.get("trigger") == trigger and rule.get("enabled", True)
         ]
-    
+
     @classmethod
     def set_home_wifi_ssids(cls, ssids: List[str]):
         """Set list of home Wi-Fi network SSIDs."""
         config = cls.load_config()
         config["home_wifi_ssids"] = ssids
         cls.save_config(config)
-    
+
     @classmethod
     def get_home_wifi_ssids(cls) -> List[str]:
         """Get list of home Wi-Fi network SSIDs."""
@@ -338,29 +338,29 @@ class AutomationProfiles:
             "message": f"Simulated {len(results)} rules for trigger '{trigger}'",
             "results": results
         }
-    
+
     # -------------------------------------------------------------------------
     # Action Execution
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def execute_rules_for_trigger(cls, trigger: str, context: Optional[Dict] = None) -> Dict[str, Any]:
         """
         Execute all matching rules for a trigger.
-        
+
         Args:
             trigger: TriggerType value
             context: Optional context dict (e.g., SSID, monitor info)
-        
+
         Returns:
             Dict with results for each rule
         """
         if not cls.is_enabled():
             return {"success": True, "message": "Automation disabled", "results": []}
-        
+
         rules = cls.get_rules_for_trigger(trigger)
         results = []
-        
+
         for rule in rules:
             result = cls.execute_action(rule.get("action"), rule.get("action_params", {}))
             results.append({
@@ -368,22 +368,22 @@ class AutomationProfiles:
                 "rule_name": rule.get("name"),
                 "result": result
             })
-        
+
         return {
             "success": True,
             "message": f"Executed {len(results)} rules for trigger '{trigger}'",
             "results": results
         }
-    
+
     @classmethod
     def execute_action(cls, action: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute a single automation action.
-        
+
         Args:
             action: ActionType value
             params: Action-specific parameters
-        
+
         Returns:
             Dict with 'success' and 'message'
         """
@@ -399,7 +399,7 @@ class AutomationProfiles:
             ActionType.ENABLE_FOCUS_MODE.value: cls._action_enable_focus_mode,
             ActionType.DISABLE_FOCUS_MODE.value: cls._action_disable_focus_mode,
         }
-        
+
         handler = action_handlers.get(action)
         if handler:
             try:
@@ -407,13 +407,13 @@ class AutomationProfiles:
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, ImportError) as e:
                 logger.debug("Action execution failed: %s", e)
                 return {"success": False, "message": str(e)}
-        
+
         return {"success": False, "message": f"Unknown action: {action}"}
-    
+
     # -------------------------------------------------------------------------
     # Action Implementations
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def _action_set_power_profile(cls, params: Dict) -> Dict[str, Any]:
         """Set power profile (power-saver, balanced, performance)."""
@@ -431,7 +431,7 @@ class AutomationProfiles:
         except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set power profile: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_set_cpu_governor(cls, params: Dict) -> Dict[str, Any]:
         """Set CPU governor for all cores."""
@@ -443,7 +443,7 @@ class AutomationProfiles:
             # Fallback implementation
             try:
                 result = subprocess.run(
-                    ["pkexec", "bash", "-c", 
+                    ["pkexec", "bash", "-c",
                      f"for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo '{governor}' > $cpu; done"],
                     capture_output=True, text=True, timeout=30
                 )
@@ -453,7 +453,7 @@ class AutomationProfiles:
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to set CPU governor: %s", e)
                 return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_enable_vpn(cls, params: Dict) -> Dict[str, Any]:
         """Enable VPN connection."""
@@ -472,11 +472,11 @@ class AutomationProfiles:
                     if "vpn" in conn_type.lower():
                         vpn_name = name
                         break
-                
+
                 if not vpn_name:
                     return {"success": False, "message": "No VPN connection found"}
                 cmd = ["nmcli", "connection", "up", vpn_name]
-            
+
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
                 return {"success": True, "message": f"VPN '{vpn_name}' connected"}
@@ -484,7 +484,7 @@ class AutomationProfiles:
         except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, ValueError) as e:
             logger.debug("Failed to enable VPN: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_disable_vpn(cls, params: Dict) -> Dict[str, Any]:
         """Disable active VPN connections."""
@@ -503,14 +503,14 @@ class AutomationProfiles:
                         capture_output=True, timeout=10
                     )
                     disconnected.append(name)
-            
+
             if disconnected:
                 return {"success": True, "message": f"Disconnected VPNs: {', '.join(disconnected)}"}
             return {"success": True, "message": "No active VPN connections"}
         except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to disable VPN: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_enable_tiling(cls, params: Dict) -> Dict[str, Any]:
         """Enable tiling window manager scripts."""
@@ -521,15 +521,15 @@ class AutomationProfiles:
         except ImportError:
             # Fallback: try kwriteconfig5
             try:
-                result = subprocess.run([
+                subprocess.run([
                     "kwriteconfig5", "--file", "kwinrc",
                     "--group", "Plugins",
                     "--key", f"{script_name}Enabled", "true"
                 ], capture_output=True, text=True, timeout=10)
-                
+
                 subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"],
-                              capture_output=True, timeout=10)
-                
+                               capture_output=True, timeout=10)
+
                 return {"success": True, "message": f"Tiling script '{script_name}' enabled"}
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to enable tiling: %s", e)
@@ -544,15 +544,15 @@ class AutomationProfiles:
             return KWinTiling.disable_script(script_name)
         except ImportError:
             try:
-                result = subprocess.run([
+                subprocess.run([
                     "kwriteconfig5", "--file", "kwinrc",
                     "--group", "Plugins",
                     "--key", f"{script_name}Enabled", "false"
                 ], capture_output=True, text=True, timeout=10)
-                
+
                 subprocess.run(["qdbus", "org.kde.KWin", "/KWin", "reconfigure"],
-                              capture_output=True, timeout=10)
-                
+                               capture_output=True, timeout=10)
+
                 return {"success": True, "message": f"Tiling script '{script_name}' disabled"}
             except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to disable tiling: %s", e)
@@ -572,32 +572,32 @@ class AutomationProfiles:
                 result = subprocess.run([
                     "plasma-apply-colorscheme", "BreezeLight"
                 ], capture_output=True, text=True, timeout=10)
-            
+
             if result.returncode == 0:
                 return {"success": True, "message": f"Theme set to '{theme}'"}
-            
+
             # Try GNOME
             gsettings_value = "prefer-dark" if theme == "dark" else "default"
             result = subprocess.run([
                 "gsettings", "set", "org.gnome.desktop.interface",
                 "color-scheme", gsettings_value
             ], capture_output=True, text=True, timeout=10)
-            
+
             if result.returncode == 0:
                 return {"success": True, "message": f"Theme set to '{theme}'"}
-            
+
             return {"success": False, "message": "Could not set theme"}
         except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set theme: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_run_command(cls, params: Dict) -> Dict[str, Any]:
         """Run a custom shell command."""
         command = params.get("command")
         if not command:
             return {"success": False, "message": "No command specified"}
-        
+
         try:
             result = subprocess.run(
                 shlex.split(command),
@@ -613,7 +613,7 @@ class AutomationProfiles:
         except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.debug("Failed to run command: %s", e)
             return {"success": False, "message": str(e)}
-    
+
     @classmethod
     def _action_enable_focus_mode(cls, params: Dict) -> Dict[str, Any]:
         """Enable focus mode."""
@@ -623,7 +623,7 @@ class AutomationProfiles:
             return FocusMode.enable(profile)
         except ImportError:
             return {"success": False, "message": "Focus mode module not available"}
-    
+
     @classmethod
     def _action_disable_focus_mode(cls, params: Dict) -> Dict[str, Any]:
         """Disable focus mode."""
@@ -632,11 +632,11 @@ class AutomationProfiles:
             return FocusMode.disable()
         except ImportError:
             return {"success": False, "message": "Focus mode module not available"}
-    
+
     # -------------------------------------------------------------------------
     # Quick Presets
     # -------------------------------------------------------------------------
-    
+
     @classmethod
     def create_battery_saver_preset(cls) -> Dict[str, Any]:
         """Create common battery saver rules."""
@@ -656,12 +656,12 @@ class AutomationProfiles:
                 "enabled": True
             }
         ]
-        
+
         for rule in rules:
             cls.add_rule(rule)
-        
+
         return {"success": True, "message": f"Created {len(rules)} battery saver rules"}
-    
+
     @classmethod
     def create_tiling_preset(cls) -> Dict[str, Any]:
         """Create auto-tiling rules based on monitor setup."""
@@ -681,8 +681,8 @@ class AutomationProfiles:
                 "enabled": True
             }
         ]
-        
+
         for rule in rules:
             cls.add_rule(rule)
-        
+
         return {"success": True, "message": f"Created {len(rules)} tiling rules"}

@@ -14,8 +14,8 @@ import time
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QTableWidget, QTableWidgetItem, QHeaderView,
-    QTabWidget, QTextEdit, QLineEdit, QComboBox, QCheckBox,
-    QSpinBox, QScrollArea, QFrame, QMessageBox, QGridLayout,
+    QTabWidget, QTextEdit, QLineEdit, QCheckBox, QSpinBox,
+    QMessageBox, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont

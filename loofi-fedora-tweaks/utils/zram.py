@@ -33,13 +33,13 @@ class ZramManager:
     Manages ZRAM (compressed swap on RAM) configuration.
     Fedora uses systemd-zram-generator by default.
     """
-    
+
     # Config file locations (in order of priority)
     CONFIG_PATHS = [
         Path("/etc/systemd/zram-generator.conf"),
         Path("/usr/lib/systemd/zram-generator.conf"),
     ]
-    
+
     # Available compression algorithms
     ALGORITHMS = {
         "zstd": "Zstandard (best compression, recommended)",
@@ -47,7 +47,7 @@ class ZramManager:
         "lzo": "LZO (balanced, legacy)",
         "lzo-rle": "LZO-RLE (LZO with run-length encoding)",
     }
-    
+
     @classmethod
     def get_total_ram_mb(cls) -> int:
         """Get total system RAM in MB."""
@@ -60,17 +60,17 @@ class ZramManager:
         except Exception:
             pass
         return 8192  # Default fallback
-    
+
     @classmethod
     def get_current_config(cls) -> ZramConfig:
         """
         Get current ZRAM configuration.
-        
+
         Returns:
             ZramConfig with current settings.
         """
         total_ram = cls.get_total_ram_mb()
-        
+
         # Check if ZRAM is active
         try:
             result = subprocess.run(
@@ -80,11 +80,11 @@ class ZramManager:
             enabled = bool(result.stdout.strip())
         except Exception:
             enabled = False
-        
+
         # Read config file
         size_percent = 100  # Fedora default
         algorithm = "zstd"  # Fedora default
-        
+
         for config_path in cls.CONFIG_PATHS:
             if config_path.exists():
                 try:
@@ -109,9 +109,9 @@ class ZramManager:
                 except Exception:
                     pass
                 break
-        
+
         size_mb = (total_ram * size_percent) // 100
-        
+
         return ZramConfig(
             enabled=enabled,
             size_mb=size_mb,
@@ -119,25 +119,25 @@ class ZramManager:
             algorithm=algorithm,
             total_ram_mb=total_ram
         )
-    
+
     @classmethod
     def set_config(cls, size_percent: int, algorithm: str) -> ZramResult:
         """
         Set ZRAM configuration.
-        
+
         Args:
             size_percent: ZRAM size as percentage of RAM (10-200).
             algorithm: Compression algorithm (zstd, lz4, lzo, lzo-rle).
-            
+
         Returns:
             ZramResult with operation status.
         """
         if not 10 <= size_percent <= 200:
             return ZramResult(False, "Size must be between 10% and 200%")
-        
+
         if algorithm not in cls.ALGORITHMS:
             return ZramResult(False, f"Invalid algorithm: {algorithm}")
-        
+
         # Generate config content
         if size_percent == 100:
             size_line = "zram-size = ram"
@@ -149,7 +149,7 @@ class ZramManager:
             total_ram = cls.get_total_ram_mb()
             size_mb = (total_ram * size_percent) // 100
             size_line = f"zram-size = {size_mb}"
-        
+
         config_content = f"""# ZRAM configuration managed by Loofi Fedora Tweaks
 # See zram-generator.conf(5) for details
 
@@ -157,24 +157,24 @@ class ZramManager:
 {size_line}
 compression-algorithm = {algorithm}
 """
-        
+
         # Write config using pkexec
         config_path = "/etc/systemd/zram-generator.conf"
-        
+
         try:
             # Write to temp file first
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', suffix='.conf', delete=False) as f:
                 f.write(config_content)
                 temp_path = f.name
-            
+
             # Copy with elevated privileges
             cmd = ["pkexec", "cp", temp_path, config_path]
             result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            
+
             # Clean up temp file
             os.unlink(temp_path)
-            
+
             if result.returncode == 0:
                 return ZramResult(
                     success=True,
@@ -183,10 +183,10 @@ compression-algorithm = {algorithm}
                 )
             else:
                 return ZramResult(False, f"Failed to write config: {result.stderr}")
-                
+
         except Exception as e:
             return ZramResult(False, f"Error: {str(e)}")
-    
+
     @classmethod
     def disable(cls) -> ZramResult:
         """Disable ZRAM by removing the config."""
@@ -202,12 +202,12 @@ compression-algorithm = {algorithm}
             return ZramResult(True, "ZRAM already disabled.")
         except Exception as e:
             return ZramResult(False, f"Error: {str(e)}")
-    
+
     @classmethod
     def get_current_usage(cls) -> Optional[Tuple[int, int]]:
         """
         Get current ZRAM usage.
-        
+
         Returns:
             Tuple of (used_mb, total_mb) or None if not available.
         """

@@ -10,10 +10,8 @@ Provides:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QTextEdit, QPushButton, QProgressBar
+    QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit
 )
-from PyQt6.QtCore import Qt
 from utils.command_runner import CommandRunner
 
 
@@ -66,7 +64,6 @@ class BaseTab(QWidget):
 
     def on_progress(self, percent, status):
         """Handle progress updates. Override in subclasses for custom behavior."""
-        pass
 
     def add_section(self, title, widgets) -> QGroupBox:
         """Create a group box section with a list of widgets."""

@@ -10,11 +10,10 @@ Sub-tabs:
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QLineEdit, QTextEdit, QScrollArea, QFrame, QMessageBox,
-    QInputDialog, QMenu, QDialog, QFormLayout, QCheckBox,
+    QLineEdit, QScrollArea, QFrame, QMessageBox, QMenu,
     QTabWidget, QProgressBar
 )
-from PyQt6.QtCore import Qt, QProcess, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab

@@ -10,9 +10,8 @@ automatic recovery from corrupt files.
 
 import json
 import logging
-import os
 import threading
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Optional
 

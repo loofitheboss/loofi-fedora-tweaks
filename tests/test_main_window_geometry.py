@@ -14,7 +14,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 try:
-    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication, QScrollArea
     _HAS_QT_WIDGETS = True
 except ImportError:
     _HAS_QT_WIDGETS = False
@@ -26,7 +26,17 @@ class TestMainWindowGeometry(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.app = QApplication.instance() or QApplication([])
+        app_instance = QApplication.instance()
+        if isinstance(app_instance, QApplication):
+            cls.app = app_instance
+        elif app_instance is None:
+            cls.app = QApplication([])
+        else:
+            raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
+
+    def setUp(self):
+        if not isinstance(QApplication.instance(), QApplication):
+            raise unittest.SkipTest("QApplication unavailable for QWidget tests")
 
     def test_central_widget_starts_in_client_area(self):
         mod = importlib.import_module("ui.main_window")
@@ -52,7 +62,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertTrue(first_widget.isVisible())
         self.assertGreaterEqual(first_widget.geometry().y(), 0)
 
-        window.close()
+        window.hide()
 
     def test_minimum_window_size(self):
         """Verify minimum window size is enforced (800x500)."""
@@ -69,7 +79,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertGreaterEqual(min_size.width(), 800)
         self.assertGreaterEqual(min_size.height(), 500)
 
-        window.close()
+        window.hide()
 
     def test_breadcrumb_bar_height(self):
         """Verify breadcrumb bar has positive height."""
@@ -89,7 +99,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(breadcrumb)
         self.assertGreater(breadcrumb.height(), 0)
 
-        window.close()
+        window.hide()
 
     def test_status_bar_height(self):
         """Verify status bar has positive height."""
@@ -109,7 +119,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(status_frame)
         self.assertGreater(status_frame.height(), 0)
 
-        window.close()
+        window.hide()
 
     def test_sidebar_width(self):
         """Verify sidebar has positive width."""
@@ -129,7 +139,7 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertIsNotNone(sidebar)
         self.assertGreater(sidebar.width(), 0)
 
-        window.close()
+        window.hide()
 
     def test_no_widget_overlaps_origin(self):
         """Verify no visible widgets overlap the (0,0) origin point."""
@@ -161,7 +171,26 @@ class TestMainWindowGeometry(unittest.TestCase):
         self.assertGreaterEqual(geom.x(), 0)
         self.assertGreaterEqual(geom.y(), 0)
 
-        window.close()
+        window.hide()
+
+    def test_pages_are_wrapped_in_scroll_area(self):
+        """Verify tab pages use a scroll container to avoid vertical compression."""
+        mod = importlib.import_module("ui.main_window")
+        MainWindow = mod.MainWindow
+
+        with patch.object(MainWindow, "_start_pulse_listener", lambda self: None), \
+             patch.object(MainWindow, "setup_tray", lambda self: None), \
+             patch.object(MainWindow, "check_dependencies", lambda self: None), \
+             patch.object(MainWindow, "_check_first_run", lambda self: None):
+            window = MainWindow()
+
+        # Pick first real page item: Dashboard > Home
+        home_item = window.sidebar.topLevelItem(0).child(0)
+        page_container = home_item.data(0, mod.Qt.ItemDataRole.UserRole)
+        self.assertIsInstance(page_container, QScrollArea)
+        self.assertIsNotNone(page_container.widget())
+
+        window.hide()
 
 
 if __name__ == "__main__":

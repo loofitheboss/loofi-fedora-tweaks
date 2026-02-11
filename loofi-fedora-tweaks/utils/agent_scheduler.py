@@ -18,7 +18,6 @@ from utils.agents import (
     AgentConfig,
     AgentRegistry,
     AgentResult,
-    AgentState,
     AgentStatus,
 )
 from utils.event_bus import Event, EventBus

@@ -8,7 +8,7 @@ workers to the standardized BaseWorker base class.
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from core.workers import BaseWorker
 

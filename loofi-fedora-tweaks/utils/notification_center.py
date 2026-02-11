@@ -5,7 +5,6 @@ Part of v13.5 UX Polish.
 
 import json
 import logging
-import os
 import time
 import uuid
 from dataclasses import dataclass, field, asdict

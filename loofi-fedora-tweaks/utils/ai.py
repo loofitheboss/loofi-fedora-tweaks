@@ -11,10 +11,8 @@ Provides:
 import subprocess
 import shutil
 import os
-import json
 from dataclasses import dataclass
 from typing import Optional
-from pathlib import Path
 
 
 @dataclass
@@ -30,7 +28,7 @@ class OllamaManager:
     Manages Ollama installation and model operations.
     Ollama is the recommended local LLM runtime for ease of use.
     """
-    
+
     # Popular models optimized for local use
     RECOMMENDED_MODELS = {
         "llama3.2": {
@@ -64,12 +62,12 @@ class OllamaManager:
             "desc": "Alibaba's multilingual model"
         }
     }
-    
+
     @classmethod
     def is_installed(cls) -> bool:
         """Check if Ollama is installed."""
         return shutil.which("ollama") is not None
-    
+
     @classmethod
     def is_running(cls) -> bool:
         """Check if Ollama service is running."""
@@ -82,7 +80,7 @@ class OllamaManager:
             )
             if result.returncode == 0:
                 return True
-            
+
             # Try system service
             result = subprocess.run(
                 ["systemctl", "is-active", "ollama"],
@@ -102,7 +100,7 @@ class OllamaManager:
                 return result.returncode == 0
             except Exception:
                 return False
-    
+
     @classmethod
     def install(cls) -> Result:
         """
@@ -111,7 +109,7 @@ class OllamaManager:
         """
         if cls.is_installed():
             return Result(True, "Ollama is already installed")
-        
+
         try:
             # Use official install script
             result = subprocess.run(
@@ -120,7 +118,7 @@ class OllamaManager:
                 text=True,
                 timeout=300  # 5 minutes
             )
-            
+
             if result.returncode == 0:
                 return Result(True, "Ollama installed successfully")
             else:
@@ -129,16 +127,16 @@ class OllamaManager:
             return Result(False, "Installation timed out")
         except Exception as e:
             return Result(False, f"Installation error: {e}")
-    
+
     @classmethod
     def start_service(cls) -> Result:
         """Start Ollama service."""
         if not cls.is_installed():
             return Result(False, "Ollama is not installed")
-        
+
         if cls.is_running():
             return Result(True, "Ollama is already running")
-        
+
         try:
             # Try to start background process
             subprocess.Popen(
@@ -150,16 +148,16 @@ class OllamaManager:
             return Result(True, "Ollama service started")
         except Exception as e:
             return Result(False, f"Failed to start: {e}")
-    
+
     @classmethod
     def stop_service(cls) -> Result:
         """Stop the Ollama service."""
         if not cls.is_installed():
             return Result(False, "Ollama is not installed")
-        
+
         if not cls.is_running():
             return Result(True, "Ollama is already stopped")
-        
+
         try:
             # Try systemctl first (if running as a service)
             result = subprocess.run(
@@ -168,7 +166,7 @@ class OllamaManager:
             )
             if result.returncode == 0:
                 return Result(True, "Ollama service stopped")
-            
+
             # Fallback: kill the process
             result = subprocess.run(
                 ["pkill", "-f", "ollama serve"],
@@ -176,17 +174,17 @@ class OllamaManager:
             )
             if result.returncode == 0:
                 return Result(True, "Ollama process stopped")
-            
+
             return Result(False, "Could not stop Ollama")
         except Exception as e:
             return Result(False, f"Failed to stop: {e}")
-    
+
     @classmethod
     def list_models(cls) -> list[dict]:
         """List installed models."""
         if not cls.is_installed():
             return []
-        
+
         try:
             result = subprocess.run(
                 ["ollama", "list"],
@@ -194,13 +192,13 @@ class OllamaManager:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode != 0:
                 return []
-            
+
             models = []
             lines = result.stdout.strip().split("\n")[1:]  # Skip header
-            
+
             for line in lines:
                 if line.strip():
                     parts = line.split()
@@ -209,23 +207,23 @@ class OllamaManager:
                             "name": parts[0],
                             "size": parts[1] if len(parts) > 1 else "unknown"
                         })
-            
+
             return models
         except Exception:
             return []
-    
+
     @classmethod
     def pull_model(cls, model_name: str, callback=None) -> Result:
         """
         Download a model from Ollama library.
-        
+
         Args:
             model_name: Name of model to pull (e.g., "llama3.2", "mistral")
             callback: Optional callback for progress updates
         """
         if not cls.is_installed():
             return Result(False, "Ollama is not installed")
-        
+
         try:
             process = subprocess.Popen(
                 ["ollama", "pull", model_name],
@@ -233,29 +231,29 @@ class OllamaManager:
                 stderr=subprocess.STDOUT,
                 text=True
             )
-            
+
             output = []
             for line in process.stdout:
                 output.append(line.strip())
                 if callback:
                     callback(line.strip())
-            
+
             process.wait()
-            
+
             if process.returncode == 0:
                 return Result(True, f"Model '{model_name}' downloaded successfully")
             else:
                 return Result(False, f"Download failed: {' '.join(output[-3:])}")
-                
+
         except Exception as e:
             return Result(False, f"Download error: {e}")
-    
+
     @classmethod
     def delete_model(cls, model_name: str) -> Result:
         """Delete a downloaded model."""
         if not cls.is_installed():
             return Result(False, "Ollama is not installed")
-        
+
         try:
             result = subprocess.run(
                 ["ollama", "rm", model_name],
@@ -263,30 +261,30 @@ class OllamaManager:
                 text=True,
                 timeout=30
             )
-            
+
             if result.returncode == 0:
                 return Result(True, f"Model '{model_name}' deleted")
             else:
                 return Result(False, f"Delete failed: {result.stderr}")
         except Exception as e:
             return Result(False, f"Delete error: {e}")
-    
+
     @classmethod
     def run_prompt(cls, model: str, prompt: str, timeout: int = 60) -> Result:
         """
         Run a single prompt through a model.
-        
+
         Args:
             model: Model name
             prompt: Text prompt
             timeout: Timeout in seconds
-            
+
         Returns:
             Result with response in data["response"]
         """
         if not cls.is_installed():
             return Result(False, "Ollama is not installed")
-        
+
         try:
             result = subprocess.run(
                 ["ollama", "run", model, prompt],
@@ -294,10 +292,10 @@ class OllamaManager:
                 text=True,
                 timeout=timeout
             )
-            
+
             if result.returncode == 0:
                 return Result(
-                    True, 
+                    True,
                     "Response generated",
                     {"response": result.stdout.strip()}
                 )
@@ -314,20 +312,20 @@ class LlamaCppManager:
     Manager for llama.cpp - lower level but more control.
     Use when you need specific quantization or advanced options.
     """
-    
+
     @classmethod
     def is_installed(cls) -> bool:
         """Check if llama.cpp main binary is available."""
         return shutil.which("llama-cli") is not None or \
-               shutil.which("main") is not None
-    
+            shutil.which("main") is not None
+
     @classmethod
     def install(cls) -> Result:
         """Install llama.cpp from source or package."""
         # Check if already installed
         if cls.is_installed():
             return Result(True, "llama.cpp is already installed")
-        
+
         # Try DNF first (if packaged)
         try:
             result = subprocess.run(
@@ -338,12 +336,12 @@ class LlamaCppManager:
             )
             if result.returncode == 0:
                 return Result(
-                    False, 
+                    False,
                     "llama.cpp package found. Install with: sudo dnf install llama-cpp"
                 )
         except Exception:
             pass
-        
+
         return Result(
             False,
             "llama.cpp requires manual installation. See: https://github.com/ggerganov/llama.cpp"
@@ -355,7 +353,7 @@ class AIConfigManager:
     Manages AI-related system configuration.
     Handles GPU acceleration setup for AI workloads.
     """
-    
+
     @classmethod
     def configure_nvidia_for_ai(cls) -> Result:
         """
@@ -364,26 +362,26 @@ class AIConfigManager:
         """
         if not shutil.which("nvidia-smi"):
             return Result(False, "NVIDIA GPU not detected")
-        
+
         # Check if CUDA toolkit is installed
         cuda_paths = [
             "/usr/local/cuda",
             "/usr/lib64/cuda",
             "/opt/cuda"
         ]
-        
+
         cuda_found = any(os.path.exists(p) for p in cuda_paths)
-        
+
         if cuda_found:
             return Result(True, "CUDA toolkit is already configured")
-        
+
         return Result(
             False,
             "CUDA toolkit not found. Install with:\n"
             "sudo dnf install cuda-toolkit\n"
             "Or enable RPM Fusion and install: sudo dnf install nvidia-driver-cuda"
         )
-    
+
     @classmethod
     def configure_rocm_for_ai(cls) -> Result:
         """
@@ -402,20 +400,20 @@ class AIConfigManager:
                     return Result(False, "AMD GPU not detected")
             except Exception:
                 pass
-            
+
             return Result(
                 False,
                 "ROCm not installed. Install with:\n"
                 "sudo dnf install rocm-hip rocm-runtime rocm-smi"
             )
-        
+
         return Result(True, "ROCm is configured and ready")
-    
+
     @classmethod
     def get_gpu_memory(cls) -> dict:
         """Get GPU memory information."""
         result = {"total_mb": 0, "used_mb": 0, "free_mb": 0}
-        
+
         # Try NVIDIA
         if shutil.which("nvidia-smi"):
             try:
@@ -434,5 +432,5 @@ class AIConfigManager:
                         result["free_mb"] = int(parts[2].strip())
             except Exception:
                 pass
-        
+
         return result

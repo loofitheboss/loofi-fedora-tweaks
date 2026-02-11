@@ -1,0 +1,24 @@
+{
+  "version": "v24.0.0",
+  "generated_at": "2026-02-11T01:06:00Z",
+  "scope": "v24 task files",
+  "status": "partial_pass",
+  "commands": [
+    {
+      "cmd": "PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/test_profile_storage.py tests/test_profiles.py tests/test_profiles_tab.py tests/test_api_profiles.py tests/test_cli_profile.py tests/test_smart_logs.py tests/test_logs_tab.py -q --tb=short",
+      "result": "passed",
+      "passed": 134,
+      "failed": 0
+    },
+    {
+      "cmd": "PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -x --tb=short",
+      "result": "aborted",
+      "reason": "Qt abort (SIGABRT) in tests/test_frameless_mode_flag.py while constructing MainWindow"
+    }
+  ],
+  "notes": [
+    "Version artifacts aligned to 24.0.0.",
+    "v24 feature test files pass.",
+    "Full-suite stability issue remains outside v24 task scope."
+  ]
+}

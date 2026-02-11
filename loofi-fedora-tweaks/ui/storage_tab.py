@@ -8,9 +8,9 @@ Uses StorageManager from utils/storage.py for lsblk, smartctl, df, and fsck.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QMessageBox, QGridLayout, QProgressBar
+    QMessageBox, QGridLayout
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.storage import StorageManager
 
@@ -254,7 +254,7 @@ class StorageTab(BaseTab):
         QMessageBox.information(
             self, self.tr("Filesystem Check"),
             self.tr(f"Running read-only check on {device} ({target}).\n"
-                     "For a full repair, unmount first.")
+                    "For a full repair, unmount first.")
         )
 
         self.append_output(f"Checking {device}...\n")

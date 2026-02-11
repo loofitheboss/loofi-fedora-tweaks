@@ -11,17 +11,14 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QScrollArea, QFrame, QMessageBox, QLineEdit,
-    QTabWidget
+    QPushButton, QComboBox, QTextEdit, QScrollArea,
+    QFrame, QLineEdit, QTabWidget
 )
-from PyQt6.QtCore import Qt
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.tiling import TilingManager, DotfileManager
 from utils.kwin_tiling import KWinManager
-from utils.command_runner import CommandRunner
 
 
 class DesktopTab(BaseTab):

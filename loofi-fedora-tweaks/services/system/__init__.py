@@ -2,6 +2,7 @@
 services/system/ — Core system services (systemd, process, commands)
 
 Public API exports for system-level utilities.
+v23.0: Added BaseSystemService and SystemService for architecture hardening.
 """
 
 from __future__ import annotations
