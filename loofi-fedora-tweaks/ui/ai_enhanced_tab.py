@@ -20,6 +20,8 @@ from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 from utils.voice import VoiceManager, WHISPER_MODELS
 from utils.context_rag import ContextRAGManager
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
 # ---------------------------------------------------------------------------
@@ -87,8 +89,24 @@ class TranscribeWorker(QThread):
 # Main enhanced tab
 # ---------------------------------------------------------------------------
 
-class AIEnhancedTab(QWidget):
+class AIEnhancedTab(QWidget, PluginInterface):
     """AI Lab enhanced tab with sub-tabs for Models, Voice, and Knowledge."""
+
+    _METADATA = PluginMetadata(
+        id="ai_lab",
+        name="AI Lab",
+        description="AI model management, voice transcription, and knowledge base indexing.",
+        category="Tools",
+        icon="🧠",
+        badge="advanced",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

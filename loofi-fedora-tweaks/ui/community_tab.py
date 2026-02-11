@@ -22,6 +22,8 @@ from utils.marketplace import PresetMarketplace, MarketplaceResult
 from utils.drift import DriftDetector
 from utils.plugin_base import PluginLoader
 from ui.tab_utils import configure_top_tabs
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
 class FetchPresetsThread(QThread):
@@ -51,8 +53,24 @@ class FetchMarketplaceThread(QThread):
         self.finished.emit(result)
 
 
-class CommunityTab(QWidget):
+class CommunityTab(QWidget, PluginInterface):
     """Consolidated Community tab: Presets + Marketplace."""
+
+    _METADATA = PluginMetadata(
+        id="community",
+        name="Community",
+        description="Browse and apply community presets and configurations from the marketplace.",
+        category="Tools",
+        icon="🌍",
+        badge="",
+        order=40,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

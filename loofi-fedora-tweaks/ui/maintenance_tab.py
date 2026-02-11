@@ -18,6 +18,7 @@ from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 from utils.system import SystemManager
+from core.plugins.metadata import PluginMetadata
 from services.package.service import get_package_service
 
 import shutil
@@ -668,6 +669,22 @@ class MaintenanceTab(BaseTab):
     Uses a QTabWidget for sub-navigation.  The Overlays sub-tab is only
     shown when the system is detected as Atomic (rpm-ostree based).
     """
+
+    _METADATA = PluginMetadata(
+        id="maintenance",
+        name="Maintenance",
+        description="System updates, cache cleanup, and overlay management for Fedora.",
+        category="Software",
+        icon="🔧",
+        badge="recommended",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

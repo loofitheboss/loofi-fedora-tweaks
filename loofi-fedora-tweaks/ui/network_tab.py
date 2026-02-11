@@ -17,18 +17,35 @@ from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QComboBox, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
     QMessageBox, QPushButton, QTabWidget, QTableWidget,
-    QTableWidgetItem, QVBoxLayout,
+    QTableWidgetItem, QVBoxLayout, QWidget,
 )
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.history import HistoryManager
 from utils.network_monitor import NetworkMonitor
+from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 
 
 class NetworkTab(BaseTab):
+
+    _METADATA = PluginMetadata(
+        id="network",
+        name="Network",
+        description="Comprehensive network management including connections, DNS, privacy, and monitoring.",
+        category="Network",
+        icon="🌐",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
     """Network management with Connections, DNS, Privacy, and Monitoring sub-tabs."""
 
     def __init__(self):

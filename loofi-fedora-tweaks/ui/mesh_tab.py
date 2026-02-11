@@ -19,10 +19,28 @@ from utils.mesh_discovery import MeshDiscovery
 from utils.clipboard_sync import ClipboardSync
 from utils.file_drop import FileDropManager
 from ui.tab_utils import configure_top_tabs
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class MeshTab(QWidget):
+class MeshTab(QWidget, PluginInterface):
     """Loofi Link tab with Devices, Clipboard, and File Drop sub-tabs."""
+
+    _METADATA = PluginMetadata(
+        id="mesh",
+        name="Loofi Link",
+        description="Mesh network device discovery, clipboard sync, and file transfer between peers.",
+        category="Network",
+        icon="🔗",
+        badge="advanced",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     # Default shared key for mesh network encryption (should be set during pairing)
     _shared_key = b"loofi-mesh-default-key"

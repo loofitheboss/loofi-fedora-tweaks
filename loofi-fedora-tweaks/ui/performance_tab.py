@@ -8,16 +8,34 @@ and tuning history. Uses AutoTuner from utils/auto_tuner.py.
 
 from PyQt6.QtWidgets import (
     QVBoxLayout, QLabel, QPushButton, QGroupBox,
-    QGridLayout, QTableWidget, QTableWidgetItem, QHeaderView
+    QGridLayout, QTableWidget, QTableWidgetItem, QHeaderView,
+    QWidget
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.auto_tuner import AutoTuner, WorkloadProfile, TuningRecommendation, TuningHistoryEntry
 import time
+from core.plugins.metadata import PluginMetadata
 
 
 class PerformanceTab(BaseTab):
     """Performance auto-tuner tab with workload detection and tuning."""
+
+    _METADATA = PluginMetadata(
+        id="performance",
+        name="Performance",
+        description="Auto-tuner engine for workload detection, kernel tunables, and performance recommendations.",
+        category="Hardware",
+        icon="⚙️",
+        badge="advanced",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

@@ -2,15 +2,13 @@
 
 ## ROLE
 You are Claude Code operating inside this repository.
-Delegate to agents. Follow the automated pipeline. Minimize token usage.
+Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## KEY FILES (READ THESE, DON'T REPEAT THEIR CONTENT)
 - `ROADMAP.md` — Version scope, status, deliverables, agent assignments
-- `.claude/workflow/PIPELINE.md` — 7-phase automation pipeline (PLAN→RELEASE)
-- `.claude/workflow/model-router.md` — Model selection for cost optimization
-- `.claude/workflow/prompts/` — Standardized prompts per pipeline phase
-- `.claude/agents/` — Agent definitions (7 agents)
-- `.claude/agent-memory/` — Persistent agent context
+- `.github/claude-agents/` — Agent definitions (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
+- `.github/copilot-instructions.md` — Architecture and patterns reference
+- `AGENTS.md` — Quick reference for agent system and architecture
 
 ## TOKEN DISCIPLINE (CRITICAL)
 - Read context files once, reference by name after
@@ -19,42 +17,30 @@ Delegate to agents. Follow the automated pipeline. Minimize token usage.
 - Delegate to agents via Task tool — don't implement inline
 - Never re-explain roadmap, architecture, or patterns
 
-## AUTOMATED PIPELINE
+## AGENT SYSTEM
 
-Every version follows 7 phases. See `.claude/workflow/PIPELINE.md`.
+7 specialized agents in `.github/claude-agents/`:
+- **project-coordinator** — Task decomposition, coordination, dependency ordering
+- **architecture-advisor** — Architectural design, module structure
+- **test-writer** — Test creation, mocking, coverage
+- **code-implementer** — Code generation, implementation
+- **backend-builder** — Backend logic, utils/ modules, system integration
+- **frontend-integration-builder** — UI/UX tabs, CLI commands, wiring
+- **release-planner** — Roadmap and release planning
 
-```
-PLAN → DESIGN → IMPLEMENT → TEST → DOCUMENT → PACKAGE → RELEASE
-haiku   sonnet   variable   sonnet  haiku      haiku     haiku
-```
-
-### To start a version:
+### Using Agents:
 1. Read `ROADMAP.md` for the ACTIVE version
-2. Execute phases P1-P7 sequentially
-3. Use standardized prompts from `.claude/workflow/prompts/`
-4. Route to correct model per `.claude/workflow/model-router.md`
-
-### Agent-Phase mapping:
-| Phase | Agent | Model |
-|-------|-------|-------|
-| P1 Plan | project-coordinator | haiku |
-| P2 Design | architecture-advisor | sonnet |
-| P3 Implement | backend-builder / frontend-integration-builder / code-implementer | sonnet/opus |
-| P4 Test | test-writer | sonnet |
-| P5 Document | release-planner | haiku |
-| P6 Package | release-planner | haiku |
-| P7 Release | release-planner | haiku |
-
-## AGENT TAGS (MANDATORY)
-Always prefix agent actions:
-```
-[architecture-advisor] Reviewing...
-[backend-builder] Implementing...
-```
+2. For complex features: delegate to project-coordinator agent
+3. For simple tasks: act directly
+4. Always follow existing patterns in codebase
 
 ## RELEASE RULES
-For every vX.Y.0 — see `.claude/workflow/PIPELINE.md#release-checklist`.
-No undocumented changes. All docs/version strings/packaging validated.
+For every vX.Y.0:
+- Update version in `version.py` and `.spec`
+- Complete CHANGELOG with all changes
+- Update README with new features
+- Run full test suite
+- Build RPM and verify installation
 
 ## OUTPUT FORMAT
 1. **Checklist** (done/pending per phase)
@@ -66,7 +52,7 @@ No undocumented changes. All docs/version strings/packaging validated.
 No essays. No filler.
 
 ## MODEL ROUTING (COST OPTIMIZATION)
-See `.claude/workflow/model-router.md` for full rules.
+See `.github/workflow/model-router.md` for full rules.
 
 **Quick reference:**
 - **haiku**: docs, formatting, version bumps, git ops, checklists
@@ -76,8 +62,8 @@ See `.claude/workflow/model-router.md` for full rules.
 **Target: 60% of work on haiku, 30% sonnet, 10% opus**
 
 ## CONTEXT COMPRESSION RULES
-1. Agent memory persists — don't re-read known files
+1. CONTEXT COMPRESSION RULES
+1. Read context files once, reference by name after
 2. ROADMAP.md is truth — don't copy scope into prompts
-3. Standard prompts cached — use them as-is with variable substitution
-4. Batch file edits per agent session
-5. Skip phases with no work (early exit)
+3. Use bullet lists only, no paragraphs
+4. Max 10 lines per response section

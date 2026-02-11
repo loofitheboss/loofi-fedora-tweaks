@@ -41,4 +41,4 @@ description: Execute documentation, packaging, and release phases (P5-P7) for a 
 ## Rules
 - No undocumented changes
 - Max 8 bullets in release notes
-- Reference `.claude/workflow/prompts/document.md`, `package.md`, `release.md`
+- Reference `.github/workflow/prompts/document.md`, `package.md`, `release.md`

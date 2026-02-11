@@ -19,10 +19,28 @@ from PyQt6.QtWidgets import (
 
 from ui.tab_utils import CONTENT_MARGINS
 from utils.profiles import ProfileManager
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class ProfilesTab(QWidget):
+class ProfilesTab(QWidget, PluginInterface):
     """System Profiles tab for quick-switching system configurations."""
+
+    _METADATA = PluginMetadata(
+        id="profiles",
+        name="Profiles",
+        description="System profile quick-switch for applying and managing configuration profiles.",
+        category="Desktop",
+        icon="👤",
+        badge="",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

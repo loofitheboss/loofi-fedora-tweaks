@@ -25,10 +25,28 @@ from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
 from utils.ports import PortAuditor
 from utils.command_runner import CommandRunner
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class SecurityTab(QWidget):
+class SecurityTab(QWidget, PluginInterface):
     """Security tab for system hardening and auditing."""
+
+    _METADATA = PluginMetadata(
+        id="security",
+        name="Security & Privacy",
+        description="Security hardening including firewall, USB guard, port auditing, and telemetry removal.",
+        category="Security",
+        icon="🛡️",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

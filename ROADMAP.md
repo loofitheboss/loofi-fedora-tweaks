@@ -56,11 +56,11 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| architecture-advisor | Approve folder structure, executor design |
-| backend-builder | Service abstractions, executor impl |
-| frontend-integration-builder | Non-blocking UI via QThread |
-| test-writer | Import tests, executor tests |
-| release-planner | CI workflow, docs, packaging |
+| Arkitekt | Approve folder structure, executor design |
+| Builder | Service abstractions, executor impl |
+| Sculptor | Non-blocking UI via QThread |
+| Test | Import tests, executor tests |
+| Planner | CI workflow, docs, packaging |
 
 ---
 
@@ -86,11 +86,11 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| project-coordinator | Define search + status plan |
-| backend-builder | Persistent preferences, reset logic |
-| frontend-integration-builder | Search/filter UI, indicators |
-| test-writer | State transition tests |
-| release-planner | Docs + packaging |
+| Manager | Define search + status plan |
+| Builder | Persistent preferences, reset logic |
+| Sculptor | Search/filter UI, indicators |
+| Test | State transition tests |
+| Planner | Docs + packaging |
 
 ### Dependencies
 
@@ -119,11 +119,11 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| backend-builder | Profiles, JSON export/import |
-| frontend-integration-builder | Advanced mode toggle, log panel |
-| architecture-advisor | Validate snapshot system |
-| test-writer | Profile save/load tests |
-| release-planner | Packaging polish |
+| Builder | Profiles, JSON export/import |
+| Sculptor | Advanced mode toggle, log panel |
+| Arkitekt | Validate snapshot system |
+| Test | Profile save/load tests |
+| Planner | Packaging polish |
 
 ### Dependencies
 
@@ -156,12 +156,12 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| architecture-advisor | Define plugin interface |
-| backend-builder | Plugin loader |
-| frontend-integration-builder | Sidebar redesign |
-| test-writer | Plugin registration tests |
-| release-planner | Documentation overhaul |
-| code-implementer | Final integration |
+| Arkitekt | Define plugin interface |
+| Builder | Plugin loader |
+| Sculptor | Sidebar redesign |
+| Test | Plugin registration tests |
+| Planner | Documentation overhaul |
+| CodeGen | Final integration |
 
 ### Dependencies
 
@@ -174,6 +174,6 @@
 
 1. Only ONE version is ACTIVE at a time
 2. NEXT version can begin planning while ACTIVE is in final testing
-3. Every version must complete the [Release Checklist](.claude/workflow/PIPELINE.md#release-checklist) before tagging
+3. Every version must complete release checklist (docs, tests, packaging) before tagging
 4. Agents are assigned per-version — see Agent Assignment tables above
 5. Status transitions: PLANNED → NEXT → ACTIVE → DONE

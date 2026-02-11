@@ -22,6 +22,7 @@ from PyQt6.QtGui import QFont
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,22 @@ REFRESH_INTERVAL_MS = 10000
 
 class AgentsTab(BaseTab):
     """Tab for managing autonomous system agents."""
+
+    _METADATA = PluginMetadata(
+        id="agents",
+        name="Agents",
+        description="Manage autonomous system agents for automated monitoring and maintenance.",
+        category="Automation",
+        icon="🤖",
+        badge="",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

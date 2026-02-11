@@ -49,18 +49,23 @@ def clean_cache() -> Tuple[str, List[str], str]:
 pm = SystemManager.get_package_manager()  # "dnf" or "rpm-ostree"
 ```
 
-## Automated Pipeline
+## Agent System
 
-Every version follows 7 phases. Prompts in `.claude/workflow/prompts/`.
+Agent definitions in `.github/claude-agents/`. 7 specialized agents:
 
-```
-PLAN → DESIGN → IMPLEMENT → TEST → DOCUMENT → PACKAGE → RELEASE
-```
+- **project-coordinator** — Task decomposition, coordination, dependency ordering
+- **architecture-advisor** — Architectural design, module structure
+- **test-writer** — Test creation, mocking, coverage
+- **code-implementer** — Code generation, implementation
+- **backend-builder** — Backend logic, utils/ modules, system integration
+- **frontend-integration-builder** — UI/UX tabs, CLI commands, wiring
+- **release-planner** — Roadmap and release planning
+
+For complex features, delegate to project-coordinator agent. For simple tasks, act directly.
 
 - **ROADMAP.md** — Version scope, status (DONE/ACTIVE/NEXT/PLANNED)
-- **`.claude/workflow/PIPELINE.md`** — Phase definitions with entry/exit criteria
-- **`.claude/workflow/model-router.md`** — Model selection for cost
-- **`scripts/workflow-runner.sh`** — CLI: `./scripts/workflow-runner.sh 23.0.0 validate`
+- **`.github/claude-agents/`** — Agent definitions with role, tools, and workflows
+- **`.github/copilot-instructions.md`** — Architecture and patterns reference
 
 ## Testing
 

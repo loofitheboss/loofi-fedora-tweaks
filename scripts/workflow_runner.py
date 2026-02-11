@@ -22,7 +22,7 @@ SPECS_DIR = WORKFLOW_ROOT / "specs"
 REPORTS_DIR = WORKFLOW_ROOT / "reports"
 ARCHIVE_DIR = WORKFLOW_ROOT / "archive"
 LOCK_FILE = SPECS_DIR / ".race-lock.json"
-PROMPTS_DIR = ROOT / ".claude" / "workflow" / "prompts"
+PROMPTS_DIR = ROOT / ".github" / "workflow" / "prompts"
 MODEL_FALLBACKS = {
     "gpt-4o-mini": "gpt-5.3-codex",
 }
@@ -181,7 +181,7 @@ def run_phase(phase: str, version_tag: str, dry_run: bool, *, skip_race_check: b
     artifacts = artifact_paths(version_tag)
     roadmap = ROOT / "ROADMAP.md"
     agents_md = ROOT / "AGENTS.md"
-    memory = ROOT / ".claude" / "agent-memory" / "project-coordinator" / "MEMORY.md"
+    memory = ROOT / ".github" / "agent-memory" / "project-coordinator" / "MEMORY.md"
 
     if phase == "plan":
         if not dry_run:

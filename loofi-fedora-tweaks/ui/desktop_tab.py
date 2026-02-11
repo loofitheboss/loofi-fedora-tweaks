@@ -19,10 +19,27 @@ from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.tiling import TilingManager, DotfileManager
 from utils.kwin_tiling import KWinManager
+from core.plugins.metadata import PluginMetadata
 
 
 class DesktopTab(BaseTab):
     """Consolidated Desktop tab: Window Manager + Theming."""
+
+    _METADATA = PluginMetadata(
+        id="desktop",
+        name="Desktop",
+        description="Window manager configuration, tiling setup, theming, and dotfile synchronization.",
+        category="Desktop",
+        icon="🎨",
+        badge="",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

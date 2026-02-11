@@ -9,16 +9,34 @@ and log export. Uses SmartLogViewer from utils/smart_logs.py.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QComboBox, QSpinBox, QFileDialog, QGridLayout, QTextEdit
+    QComboBox, QSpinBox, QFileDialog, QGridLayout, QTextEdit,
+    QWidget
 )
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
 from ui.base_tab import BaseTab
 from utils.smart_logs import SmartLogViewer
+from core.plugins.metadata import PluginMetadata
 
 
 class LogsTab(BaseTab):
     """Smart log viewer tab with pattern detection."""
+
+    _METADATA = PluginMetadata(
+        id="logs",
+        name="Logs",
+        description="Smart log viewer with pattern detection, error summary, and log export.",
+        category="System",
+        icon="📋",
+        badge="advanced",
+        order=40,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

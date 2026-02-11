@@ -1,6 +1,6 @@
 """
-Main Window - v19.0 "Vanguard"
-26-tab layout with sidebar navigation, breadcrumb, and status bar.
+Main Window - v25.0 "Plugin Architecture"
+26-tab layout sourced from PluginRegistry with sidebar navigation, breadcrumb, and status bar.
 """
 
 from PyQt6.QtWidgets import (
@@ -10,14 +10,13 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QShortcut, QKeySequence, QFontMetrics
 
-# Only import essential tabs eagerly (Dashboard is always shown first)
-from ui.dashboard_tab import DashboardTab
-from ui.system_info_tab import SystemInfoTab
 from ui.lazy_widget import LazyWidget
 from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
 from utils.config_manager import ConfigManager
 from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
+from core.plugins import PluginRegistry, PluginInterface
+from core.plugins.metadata import PluginMetadata, CompatStatus
 from version import __version__
 import os
 import logging
@@ -26,35 +25,20 @@ import logging
 _ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
 _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 
-# Tab metadata: (description, badge)
-_TAB_META = {
-    "Home": ("System overview and quick actions", "recommended"),
-    "Agents": ("Automated system management agents", ""),
-    "Automation": ("Scheduled tasks and cron jobs", ""),
-    "System Info": ("Hardware and OS details", "recommended"),
-    "System Monitor": ("Live CPU, memory, and process monitoring", "recommended"),
-    "Health": ("System health timeline and trends", ""),
-    "Logs": ("Systemd journal and log viewer", "advanced"),
-    "Hardware": ("CPU, GPU, fan, and power controls", "recommended"),
-    "Performance": ("Kernel tuning and I/O scheduler", "advanced"),
-    "Storage": ("Disk usage and mount management", ""),
-    "Software": ("Package management and repos", "recommended"),
-    "Maintenance": ("System updates and cache cleanup", "recommended"),
-    "Snapshots": ("Btrfs/LVM snapshot management", "advanced"),
-    "Virtualization": ("Virtual machines and containers", "advanced"),
-    "Development": ("Developer tools and SDKs", ""),
-    "Network": ("Network interfaces and firewall", "recommended"),
-    "Loofi Link": ("Device mesh networking", "advanced"),
-    "Security & Privacy": ("Firewall, SELinux, audit tools", "recommended"),
-    "Desktop": ("GNOME/KDE customization", ""),
-    "Profiles": ("User profile and workspace management", ""),
-    "Gaming": ("Game mode and GPU optimization", ""),
-    "AI Lab": ("AI-powered system suggestions", "advanced"),
-    "State Teleport": ("System state transfer between machines", "advanced"),
-    "Diagnostics": ("System diagnostics and health checks", ""),
-    "Community": ("Community tweaks and shared configs", ""),
-    "Settings": ("App preferences and theme", ""),
-}
+
+class DisabledPluginPage(QWidget):
+    """Shown in the content area for plugins that are incompatible with the current system."""
+
+    def __init__(self, meta: PluginMetadata, reason: str):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label = QLabel(
+            f"{meta.icon}  {meta.name} is not available on this system.\n\n{reason}"
+        )
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setObjectName("disabledPluginLabel")
+        layout.addWidget(label)
 
 
 class MainWindow(QMainWindow):
@@ -210,56 +194,20 @@ class MainWindow(QMainWindow):
         # Initialize Pages
         self.pages = {}
 
-        # ==================== Dashboard ====================
-        self.add_page(self.tr("Home"), "\U0001f3e0", DashboardTab(self), "Dashboard")
+        # Build sidebar from PluginRegistry (v25.0 plugin architecture)
+        context = {
+            "main_window": self,
+            "config_manager": ConfigManager,  # class, not instance
+            "executor": None,                 # populated after executor init
+        }
+        self._build_sidebar_from_registry(context)
 
-        # ==================== Automation ====================
-        self.add_page(self.tr("Agents"), "\U0001f916", self._lazy_tab("agents"), "Automation")
-        self.add_page(self.tr("Automation"), "\u23f0", self._lazy_tab("automation"), "Automation")
-
-        # ==================== System ====================
-        self.add_page(self.tr("System Info"), "\u2139\ufe0f", SystemInfoTab(), "System")
-        self.add_page(self.tr("System Monitor"), "\U0001f4ca", self._lazy_tab("monitor"), "System")
-        self.add_page(self.tr("Health"), "\U0001f4c8", self._lazy_tab("health"), "System")
-        self.add_page(self.tr("Logs"), "\U0001f4cb", self._lazy_tab("logs"), "System")
-
-        # ==================== Hardware ====================
-        self.add_page(self.tr("Hardware"), "\u26a1", self._lazy_tab("hardware"), "Hardware")
-        self.add_page(self.tr("Performance"), "\u2699\ufe0f", self._lazy_tab("performance"), "Hardware")
-        self.add_page(self.tr("Storage"), "\U0001f4be", self._lazy_tab("storage"), "Hardware")
-
-        # ==================== Software ====================
-        self.add_page(self.tr("Software"), "\U0001f4e6", self._lazy_tab("software"), "Software")
-        self.add_page(self.tr("Maintenance"), "\U0001f527", self._lazy_tab("maintenance"), "Software")
-        self.add_page(self.tr("Snapshots"), "\U0001f4f8", self._lazy_tab("snapshots"), "Software")
-        self.add_page(self.tr("Virtualization"), "\U0001f5a5\ufe0f", self._lazy_tab("virtualization"), "Software")
-        self.add_page(self.tr("Development"), "\U0001f6e0\ufe0f", self._lazy_tab("development"), "Software")
-
-        # ==================== Network ====================
-        self.add_page(self.tr("Network"), "\U0001f310", self._lazy_tab("network"), "Network")
-        self.add_page(self.tr("Loofi Link"), "\U0001f517", self._lazy_tab("mesh"), "Network")
-
-        # ==================== Security ====================
-        self.add_page(self.tr("Security & Privacy"), "\U0001f6e1\ufe0f", self._lazy_tab("security"), "Security")
-
-        # ==================== Desktop ====================
-        self.add_page(self.tr("Desktop"), "\U0001f3a8", self._lazy_tab("desktop"), "Desktop")
-        self.add_page(self.tr("Profiles"), "\U0001f464", self._lazy_tab("profiles"), "Desktop")
-        self.add_page(self.tr("Gaming"), "\U0001f3ae", self._lazy_tab("gaming"), "Desktop")
-
-        # ==================== Tools ====================
-        self.add_page(self.tr("AI Lab"), "\U0001f9e0", self._lazy_tab("ai"), "Tools")
-        self.add_page(self.tr("State Teleport"), "\U0001f4e1", self._lazy_tab("teleport"), "Tools")
-        self.add_page(self.tr("Diagnostics"), "\U0001f52d", self._lazy_tab("diagnostics"), "Tools")
-        self.add_page(self.tr("Community"), "\U0001f30d", self._lazy_tab("community"), "Tools")
-
-        # ==================== Settings ====================
-        self.add_page(self.tr("Settings"), "\u2699\ufe0f", self._lazy_tab("settings"), "Settings")
-
-        # Expand Dashboard by default
-        self.sidebar.topLevelItem(0).setExpanded(True)
-        # Select Home
-        self.sidebar.setCurrentItem(self.sidebar.topLevelItem(0).child(0))
+        # Expand first category by default (Dashboard)
+        if self.sidebar.topLevelItemCount() > 0:
+            first = self.sidebar.topLevelItem(0)
+            first.setExpanded(True)
+            if first.childCount() > 0:
+                self.sidebar.setCurrentItem(first.child(0))
 
         # v15.0 Nebula - Quick Actions Bar (Ctrl+Shift+K)
         self._setup_quick_actions()
@@ -286,41 +234,44 @@ class MainWindow(QMainWindow):
         # First-run wizard
         self._check_first_run()
 
-    def _lazy_tab(self, tab_name: str) -> LazyWidget:
-        """Create a lazy-loaded tab widget."""
-        loaders = {
-            # v10.0 consolidated tabs
-            "monitor": lambda: __import__("ui.monitor_tab", fromlist=["MonitorTab"]).MonitorTab(),
-            "maintenance": lambda: __import__("ui.maintenance_tab", fromlist=["MaintenanceTab"]).MaintenanceTab(),
-            "hardware": lambda: __import__("ui.hardware_tab", fromlist=["HardwareTab"]).HardwareTab(),
-            "software": lambda: __import__("ui.software_tab", fromlist=["SoftwareTab"]).SoftwareTab(),
-            "security": lambda: __import__("ui.security_tab", fromlist=["SecurityTab"]).SecurityTab(),
-            "network": lambda: __import__("ui.network_tab", fromlist=["NetworkTab"]).NetworkTab(),
-            "gaming": lambda: __import__("ui.gaming_tab", fromlist=["GamingTab"]).GamingTab(),
-            "desktop": lambda: __import__("ui.desktop_tab", fromlist=["DesktopTab"]).DesktopTab(),
-            "development": lambda: __import__("ui.development_tab", fromlist=["DevelopmentTab"]).DevelopmentTab(),
-            "ai": lambda: __import__("ui.ai_enhanced_tab", fromlist=["AIEnhancedTab"]).AIEnhancedTab(),
-            "automation": lambda: __import__("ui.automation_tab", fromlist=["AutomationTab"]).AutomationTab(),
-            "community": lambda: __import__("ui.community_tab", fromlist=["CommunityTab"]).CommunityTab(),
-            "diagnostics": lambda: __import__("ui.diagnostics_tab", fromlist=["DiagnosticsTab"]).DiagnosticsTab(),
-            # v11.5 / v12.0 tabs
-            "virtualization": lambda: __import__("ui.virtualization_tab", fromlist=["VirtualizationTab"]).VirtualizationTab(),
-            "mesh": lambda: __import__("ui.mesh_tab", fromlist=["MeshTab"]).MeshTab(),
-            "teleport": lambda: __import__("ui.teleport_tab", fromlist=["TeleportTab"]).TeleportTab(),
-            # v13.0 Nexus Update tabs
-            "profiles": lambda: __import__("ui.profiles_tab", fromlist=["ProfilesTab"]).ProfilesTab(),
-            "health": lambda: __import__("ui.health_timeline_tab", fromlist=["HealthTimelineTab"]).HealthTimelineTab(),
-            # v13.5 UX Polish
-            "settings": lambda: __import__("ui.settings_tab", fromlist=["SettingsTab"]).SettingsTab(self),
-            # v17.0 Atlas — New tabs
-            "performance": lambda: __import__("ui.performance_tab", fromlist=["PerformanceTab"]).PerformanceTab(),
-            "snapshots": lambda: __import__("ui.snapshot_tab", fromlist=["SnapshotTab"]).SnapshotTab(),
-            "logs": lambda: __import__("ui.logs_tab", fromlist=["LogsTab"]).LogsTab(),
-            "storage": lambda: __import__("ui.storage_tab", fromlist=["StorageTab"]).StorageTab(),
-            # v18.0 Sentinel — Agents
-            "agents": lambda: __import__("ui.agents_tab", fromlist=["AgentsTab"]).AgentsTab(),
-        }
-        return LazyWidget(loaders[tab_name])
+    def _build_sidebar_from_registry(self, context: dict) -> None:
+        """Source all tabs from PluginRegistry. Replaces 26 hardcoded add_page() calls."""
+        from core.plugins.loader import PluginLoader
+        from core.plugins.compat import CompatibilityDetector
+
+        detector = CompatibilityDetector()
+        loader = PluginLoader(detector=detector)
+        loader.load_builtins(context=context)
+
+        registry = PluginRegistry.instance()
+
+        for plugin in registry:
+            meta = plugin.metadata()
+            compat = plugin.check_compat(detector)
+            lazy = self._wrap_in_lazy(plugin)
+            self._add_plugin_page(meta, lazy, compat)
+
+    def _wrap_in_lazy(self, plugin: PluginInterface) -> LazyWidget:
+        """Wrap plugin.create_widget() in LazyWidget for deferred instantiation."""
+        return LazyWidget(plugin.create_widget)
+
+    def _add_plugin_page(
+        self,
+        meta: PluginMetadata,
+        widget: LazyWidget,
+        compat: CompatStatus,
+    ) -> None:
+        """Register a plugin page in the sidebar and content area."""
+        self.add_page(
+            name=meta.name,
+            icon=meta.icon,
+            widget=widget,
+            category=meta.category,
+            description=meta.description,
+            badge=meta.badge,
+            disabled=not compat.compatible,
+            disabled_reason=compat.reason,
+        )
 
     def _start_pulse_listener(self):
         """Initialize and start the Pulse event listener."""
@@ -332,7 +283,17 @@ class MainWindow(QMainWindow):
         except Exception:
             pass
 
-    def add_page(self, name, icon, widget, category="General"):
+    def add_page(
+        self,
+        name: str,
+        icon: str,
+        widget,
+        category: str = "General",
+        description: str = "",
+        badge: str = "",
+        disabled: bool = False,
+        disabled_reason: str = "",
+    ) -> None:
         # Find or create category item
         category_item = None
         for i in range(self.sidebar.topLevelItemCount()):
@@ -347,8 +308,6 @@ class MainWindow(QMainWindow):
             category_item.setExpanded(True)
 
         # Badge suffix
-        meta = _TAB_META.get(name, ("", ""))
-        desc, badge = meta
         badge_suffix = ""
         if badge == "recommended":
             badge_suffix = "  ★"
@@ -357,14 +316,30 @@ class MainWindow(QMainWindow):
 
         item = QTreeWidgetItem(category_item)
         item.setText(0, f"{icon}  {name}{badge_suffix}")
-        page_widget = self._wrap_page_widget(widget)
-        # Store widget, description, and badge type
-        item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
-        item.setData(0, _ROLE_DESC, desc)
-        item.setData(0, _ROLE_BADGE, badge)
-        if desc:
-            item.setToolTip(0, desc)
 
+        # Disabled plugin: show placeholder page and gray out sidebar item
+        if disabled:
+            placeholder_meta = PluginMetadata(
+                id=name.lower().replace(" ", "_"),
+                name=name,
+                description=description,
+                category=category,
+                icon=icon,
+                badge=badge,
+            )
+            page_widget = self._wrap_page_widget(DisabledPluginPage(placeholder_meta, disabled_reason))
+            item.setDisabled(True)
+            tooltip = disabled_reason if disabled_reason else f"{name} is not available on this system."
+            item.setToolTip(0, tooltip)
+        else:
+            page_widget = self._wrap_page_widget(widget)
+            item.setData(0, _ROLE_DESC, description)
+            item.setData(0, _ROLE_BADGE, badge)
+            if description:
+                item.setToolTip(0, description)
+
+        # Store widget reference
+        item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
         self.content_area.addWidget(page_widget)
         self.pages[name] = widget
 

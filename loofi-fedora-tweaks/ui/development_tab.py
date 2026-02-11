@@ -24,6 +24,7 @@ from utils.vscode import VSCodeManager
 from utils.command_runner import CommandRunner
 import subprocess
 import shutil
+from core.plugins.metadata import PluginMetadata
 
 
 class InstallWorker(QThread):
@@ -60,6 +61,22 @@ class InstallWorker(QThread):
 
 class DevelopmentTab(BaseTab):
     """Consolidated Development tab: Containers + Developer Tools."""
+
+    _METADATA = PluginMetadata(
+        id="development",
+        name="Development",
+        description="Container management and developer tools including language version managers and VS Code extensions.",
+        category="Software",
+        icon="🛠️",
+        badge="",
+        order=50,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

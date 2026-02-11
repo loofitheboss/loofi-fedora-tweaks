@@ -8,15 +8,32 @@ Uses StorageManager from utils/storage.py for lsblk, smartctl, df, and fsck.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QMessageBox, QGridLayout
+    QMessageBox, QGridLayout, QWidget
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.storage import StorageManager
+from core.plugins.metadata import PluginMetadata
 
 
 class StorageTab(BaseTab):
     """Storage and disk management tab."""
+
+    _METADATA = PluginMetadata(
+        id="storage",
+        name="Storage",
+        description="Disk information, SMART health monitoring, and filesystem management.",
+        category="Hardware",
+        icon="💾",
+        badge="",
+        order=30,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

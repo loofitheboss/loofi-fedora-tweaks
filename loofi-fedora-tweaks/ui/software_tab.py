@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
+from core.plugins.metadata import PluginMetadata
 
 import shlex
 import subprocess
@@ -340,6 +341,22 @@ class SoftwareTab(BaseTab):
     Uses a QTabWidget for sub-navigation between the app installer
     and the repository manager.
     """
+
+    _METADATA = PluginMetadata(
+        id="software",
+        name="Software",
+        description="Application installer and repository management for Fedora packages.",
+        category="Software",
+        icon="📦",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

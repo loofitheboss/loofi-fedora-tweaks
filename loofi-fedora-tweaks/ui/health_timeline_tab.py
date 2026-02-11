@@ -19,10 +19,28 @@ from PyQt6.QtWidgets import (
 
 from ui.tab_utils import CONTENT_MARGINS
 from utils.health_timeline import HealthTimeline
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class HealthTimelineTab(QWidget):
+class HealthTimelineTab(QWidget, PluginInterface):
     """Health Timeline tab for viewing system metrics over time."""
+
+    _METADATA = PluginMetadata(
+        id="health",
+        name="Health",
+        description="System health metrics timeline for tracking CPU, RAM, disk, and thermal trends.",
+        category="System",
+        icon="📈",
+        badge="",
+        order=30,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()
