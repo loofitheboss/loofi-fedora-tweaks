@@ -14,17 +14,39 @@ from PyQt6.QtWidgets import (
     QFrame, QMessageBox,
 )
 
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 from utils.settings import SettingsManager
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 
 
-class SettingsTab(QWidget):
+class SettingsTab(QWidget, PluginInterface):
     """Application settings tab with Appearance / Behavior / Advanced sub-tabs."""
 
-    def __init__(self, main_window=None):
+    _METADATA = PluginMetadata(
+        id="settings",
+        name="Settings",
+        description="Configure appearance, behavior, and advanced application options.",
+        category="Settings",
+        icon="⚙️",
+        badge="",
+        order=10,
+    )
+
+    def __init__(self):
         super().__init__()
-        self._main_window = main_window
+        self._main_window = None
         self._mgr = SettingsManager.instance()
+        # _init_ui() is deferred to set_context() so main_window is available
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
+
+    def set_context(self, context: dict) -> None:
+        self._main_window = context.get("main_window")
         self._init_ui()
 
     # ------------------------------------------------------------------ UI --

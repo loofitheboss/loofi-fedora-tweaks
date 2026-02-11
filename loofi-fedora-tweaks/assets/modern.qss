@@ -446,3 +446,16 @@ QLabel#errorLabel {
     color: #f38ba8;
     padding: 20px;
 }
+
+/* ===== v25.0 Disabled Plugin Pages ===== */
+QLabel#disabledPluginLabel {
+    color: #6c6f85;
+    font-size: 14px;
+    padding: 40px;
+}
+
+/* Disabled sidebar items — italic + muted color */
+QTreeWidget#sidebar QTreeWidgetItem:disabled {
+    color: #6c6f85;
+    font-style: italic;
+}

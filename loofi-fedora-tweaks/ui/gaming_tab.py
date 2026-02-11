@@ -8,17 +8,35 @@ import subprocess
 
 from PyQt6.QtWidgets import (
     QGroupBox, QLabel, QMessageBox, QPushButton,
-    QVBoxLayout,
+    QVBoxLayout, QWidget,
 )
 
 from ui.base_tab import BaseTab
 from utils.commands import PrivilegedCommand
 from utils.log import get_logger
+from core.plugins.metadata import PluginMetadata
 
 logger = get_logger(__name__)
 
 
 class GamingTab(BaseTab):
+
+    _METADATA = PluginMetadata(
+        id="gaming",
+        name="Gaming",
+        description="Gaming optimization tools including driver setup and performance tweaks.",
+        category="Desktop",
+        icon="🎮",
+        badge="",
+        order=30,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
+
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()

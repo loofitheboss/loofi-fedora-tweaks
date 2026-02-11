@@ -17,6 +17,7 @@ from PyQt6.QtCore import Qt
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from core.plugins.metadata import PluginMetadata
 from utils.scheduler import TaskScheduler, ScheduledTask, TaskAction, TaskSchedule
 from utils.ansible_export import AnsibleExporter
 from utils.kickstart import KickstartGenerator
@@ -111,6 +112,22 @@ class AddTaskDialog(QDialog):
 
 class AutomationTab(BaseTab):
     """Consolidated Automation tab: Scheduler + Replicator."""
+
+    _METADATA = PluginMetadata(
+        id="automation",
+        name="Automation",
+        description="Schedule tasks and replicate system configurations automatically.",
+        category="Automation",
+        icon="⏰",
+        badge="",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

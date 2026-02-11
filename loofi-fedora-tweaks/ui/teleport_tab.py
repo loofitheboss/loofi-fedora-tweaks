@@ -19,13 +19,31 @@ from ui.tab_utils import CONTENT_MARGINS
 from utils.state_teleport import StateTeleportManager
 from utils.file_drop import FileDropManager
 from utils.mesh_discovery import MeshDiscovery
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 import os
 import time
 
 
-class TeleportTab(QWidget):
+class TeleportTab(QWidget, PluginInterface):
     """State Teleport tab for capturing and restoring workspace state."""
+
+    _METADATA = PluginMetadata(
+        id="teleport",
+        name="State Teleport",
+        description="Capture and restore workspace state including git repos and environment snapshots.",
+        category="Tools",
+        icon="📡",
+        badge="advanced",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

@@ -6,7 +6,7 @@ description: Execute implementation tasks from the task list, one at a time, in 
 # Implement Phase (P3)
 
 ## Steps
-1. Read `.claude/workflow/tasks-v{VERSION}.md`
+1. Read `.github/workflow/tasks-v{VERSION}.md`
 2. Find the next undone task
 3. Read affected files listed in the task
 4. Implement following existing patterns
@@ -31,4 +31,4 @@ python loofi-fedora-tweaks/main.py --version
 - Only change files listed in the task
 - Minimal diff — no overengineering
 - If blocked, document why and move to next task
-- Reference `.claude/workflow/prompts/implement.md` for full prompt
+- Reference `.github/workflow/prompts/implement.md` for full prompt

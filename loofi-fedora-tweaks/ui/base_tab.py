@@ -7,16 +7,44 @@ Provides:
 - Shared output area (QTextEdit)
 - Common run_command / append_output / command_finished pattern
 - Section builder helper
+
+v25.0: Implements PluginInterface as a mixin for plugin architecture support.
 """
+
+import logging
+from abc import ABCMeta
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit
 )
+from PyQt6.QtCore import pyqtWrapperType
 from utils.command_runner import CommandRunner
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
+
+logger = logging.getLogger(__name__)
+
+_STUB_META = PluginMetadata(
+    id="__stub__",
+    name="Unnamed Tab",
+    description="",
+    category="General",
+    icon="",
+    badge="",
+)
 
 
-class BaseTab(QWidget):
+# Combined metaclass to resolve conflict between QWidget and ABC
+class CombinedMeta(pyqtWrapperType, ABCMeta):
+    """Metaclass combining PyQt6 and ABC metaclasses."""
+    pass
+
+
+class BaseTab(QWidget, PluginInterface, metaclass=CombinedMeta):
     """Common base class for all tabs that execute system commands."""
+
+    # Subclasses MUST override _METADATA with their own PluginMetadata
+    _METADATA: PluginMetadata = _STUB_META
 
     def __init__(self):
         super().__init__()
@@ -80,3 +108,23 @@ class BaseTab(QWidget):
         """Add the standard output area to a layout."""
         layout.addWidget(QLabel(self.tr("Output Log:")))
         layout.addWidget(self.output_area)
+
+    # ---------------------------------------------------------------- PluginInterface
+
+    def metadata(self) -> PluginMetadata:
+        """Return plugin metadata. Logs a warning if using the stub (unset) metadata."""
+        if self._METADATA.id == "__stub__":
+            logger.warning(
+                "%s does not override _METADATA — using stub. "
+                "Set _METADATA = PluginMetadata(...) on the class.",
+                type(self).__name__,
+            )
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        """Default: return self. Tabs that need fresh instances must override."""
+        return self
+
+    def set_context(self, context: dict) -> None:
+        """Store context for tabs that need MainWindow or executor references."""
+        self._plugin_context = context

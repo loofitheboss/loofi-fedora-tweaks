@@ -22,10 +22,28 @@ from utils.vm_manager import VMManager, VM_FLAVORS
 from utils.vfio import VFIOAssistant
 from utils.disposable_vm import DisposableVMManager
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class VirtualizationTab(QWidget):
+class VirtualizationTab(QWidget, PluginInterface):
     """Virtualization management tab with VM, VFIO, and Disposable sub-tabs."""
+
+    _METADATA = PluginMetadata(
+        id="virtualization",
+        name="Virtualization",
+        description="VM lifecycle management, GPU passthrough setup, and disposable virtual machines.",
+        category="Software",
+        icon="🖥️",
+        badge="advanced",
+        order=40,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

@@ -3,64 +3,104 @@
 ## Workflow System (v23.0+)
 
 ### Automated Pipeline
-- 7-phase pipeline: PLAN → DESIGN → IMPLEMENT → TEST → DOCUMENT → PACKAGE → RELEASE
+
+- 7-phase pipeline: PLAN, DESIGN, IMPLEMENT, TEST, DOCUMENT, PACKAGE, RELEASE
 - Prompts at `.claude/workflow/prompts/`
 - Task files at `.claude/workflow/tasks-v{VERSION}.md`
 - Model routing: `.claude/workflow/model-router.md`
 - CLI runner: `scripts/workflow-runner.sh <version> [phase]`
 
 ### Version Status
+
 - v21.0: DONE (UX Stabilization)
-- v23.0: ACTIVE (Architecture Hardening)
-- v22.0: NEXT (Usability)
-- v24.0-v25.0: PLANNED
+- v22.0: SKIPPED (Usability)
+- v23.0: DONE (Architecture Hardening)
+- v24.0: DONE (Power Features)
+- v25.0: NEXT (Plugin Architecture + UI Redesign)
+  -- P1 PLAN complete 2026-02-11
 - Source of truth: `ROADMAP.md`
 
 ## Architecture
 
-- **Main window**: `loofi-fedora-tweaks/ui/main_window.py` -- HBox layout: sidebar (240px fixed) | right (breadcrumb + stacked content + status bar)
-- **Themes**: 3 QSS files in `assets/`: `style.qss` (legacy), `modern.qss` (dark/Catppuccin Mocha), `light.qss` (Catppuccin Latte)
-- **Tab pattern**: 14 tabs use `configure_top_tabs()` from `tab_utils.py`; tabs are lazy-loaded via `lazy_widget.py`
-- **Base tab**: `base_tab.py` provides command runner wiring; not all tabs extend it
+- **Main window**: `ui/main_window.py`
+  HBox: sidebar (240px) | right (breadcrumb + stack + status)
+- **Themes**: 3 QSS in `assets/`: modern (dark), light, style (legacy)
+- **Tab pattern**: 14 tabs use `configure_top_tabs()`;
+  lazy-loaded via `lazy_widget.py`
+- **Base tab**: `base_tab.py` provides CommandRunner wiring;
+  not all tabs extend it
 - **Main entry**: `main.py` loads `modern.qss` by default
 
-## v23.0 Architecture Hardening -- Status (2026-02-09)
+## v23.0 Architecture Hardening (2026-02-09)
 
 ### Completed
-- Directory skeleton: `core/` (6 subdirs), `services/` (8 subdirs), `ui/` (pre-existing)
-- `core/executor/`: ActionExecutor + ActionResult + Operations -- full implementations
-- Backward-compat shims in `utils/` (action_executor, action_result, operations, __init__)
-- Tests: `test_action_executor.py` -- 18 tests for preview/dry-run/exec/timeout/flatpak/logging
-- GitHub Actions: `ci.yml` (lint+typecheck+security+test+RPM) + `release.yml` (tag-triggered)
-- Auto-release pipeline: `.github/workflows/auto-release.yml`
+
+- Dir skeleton: `core/` (6 subdirs), `services/` (8 subdirs)
+- `core/executor/`: ActionExecutor + ActionResult + Operations
+- Backward-compat shims in `utils/`
+- Tests: `test_action_executor.py` (18 tests)
+- CI: `ci.yml` + `release.yml` + `auto-release.yml`
 
 ### Stub Only (init comment, no logic)
+
 - `core/`: agents, ai, diagnostics, export, profiles
-- `services/`: all 8 subdirs (desktop, hardware, network, security, software, storage, system, virtualization)
+- `services/`: all 8 subdirs
 
 ### Not Started
-- Service abstraction: 0 of 90 utils files migrated to services/
-- Subprocess centralization: 292 `subprocess.*` calls in 55 utils files
-- QThread/QRunnable pattern: ad-hoc in 8 files, no centralized worker
+
+- Service abstraction: 0 of 90 utils files migrated
+- Subprocess centralization: 292 calls in 55 files
+- QThread/QRunnable: ad-hoc in 8 files
 
 ### Key Numbers
+
 - 90 Python files in utils/, 40+ in ui/, 3 in core/executor/
-- 2 subprocess wrappers coexist: CommandRunner (QProcess/GUI) + ActionExecutor (subprocess/core)
-- CommandRunner imported by 11 files, PrivilegedCommand by 5 files
+- 2 subprocess wrappers: CommandRunner (QProcess/GUI)
+  and ActionExecutor (subprocess/core)
+- CommandRunner imported by 11 files
 
 ## Task Decomposition Rules
+
 - Max 15 tasks per version
-- Order: utils → core → services → ui → cli → tests → docs
+- Order: utils, core, services, ui, cli, tests, docs
 - Each task: 1 agent, 1 layer, acceptance criteria
 - Pair implementation tasks with test tasks
 
 ## Layout Constants (main_window.py)
-- Sidebar: `setFixedWidth(240)`, search: `setFixedHeight(36)`, footer: 28px
-- Breadcrumb: `setFixedHeight(44)`, status bar: `setFixedHeight(28)`
+
+- Sidebar: `setFixedWidth(240)`, search: 36px, footer: 28px
+- Breadcrumb: 44px, status bar: 28px
 
 ## Key Patterns
+
 - See [patterns.md](patterns.md) for QSS and layout patterns
 
-## Risks
-- Inline `setStyleSheet()` in ~30 files uses hardcoded dark theme colors
-- 292 direct subprocess calls -- massive migration surface
+## v25.0 Plugin Architecture -- Plan (2026-02-11)
+
+### Key Findings
+
+- 26 tabs via hardcoded `add_page()` + `_lazy_tab()` dict
+- 11 tabs extend `BaseTab`, 15 extend plain `QWidget`
+- `_TAB_META` dict holds desc+badge -- moves to PluginMetadata
+- `SettingsTab` takes MainWindow ref -- needs DI hook
+- LazyWidget pattern preserved in PluginLoader
+- Task spec: `.workflow/specs/tasks-v25.0.md` (15 tasks)
+
+### New Files (planned)
+
+- `core/plugins/interface.py` -- PluginInterface ABC
+- `core/plugins/metadata.py` -- PluginMetadata dataclass
+- `core/plugins/registry.py` -- PluginRegistry
+- `core/plugins/loader.py` -- PluginLoader
+- `core/plugins/compat.py` -- CompatibilityDetector
+
+### Critical Risks
+
+- Circular import: `core/plugins/` must not import `ui/`
+- Tab ordering regression: need PluginMetadata.order field
+- 15 QWidget-only tabs need migration to PluginInterface
+
+## General Risks
+
+- Inline `setStyleSheet()` in ~30 files: hardcoded dark colors
+- 292 direct subprocess calls: massive migration surface

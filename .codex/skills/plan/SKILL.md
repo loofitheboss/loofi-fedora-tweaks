@@ -10,7 +10,7 @@ description: Decompose an ACTIVE version from ROADMAP.md into atomic tasks with 
 2. Read all deliverables listed for that version
 3. Decompose into atomic tasks (max 15)
 4. Assign each task: agent, layer, size (S/M/L), dependencies
-5. Save to `.claude/workflow/tasks-v{VERSION}.md`
+5. Save to `.github/workflow/tasks-v{VERSION}.md`
 
 ## Output Format
 
@@ -27,4 +27,4 @@ description: Decompose an ACTIVE version from ROADMAP.md into atomic tasks with 
 - Order by dependency (no cycles)
 - Include test tasks paired with implementation tasks
 - Include doc tasks (CHANGELOG, README, release notes)
-- Reference `.claude/workflow/prompts/plan.md` for full prompt
+- Reference `.github/workflow/prompts/plan.md` for full prompt

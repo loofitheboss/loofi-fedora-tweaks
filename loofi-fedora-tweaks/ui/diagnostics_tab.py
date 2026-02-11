@@ -20,6 +20,7 @@ from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from utils.services import ServiceManager, UnitScope, UnitState
 from utils.boot_analyzer import BootAnalyzer
 from utils.journal import JournalManager
+from core.plugins.metadata import PluginMetadata
 from utils.kernel import KernelManager
 from utils.zram import ZramManager
 from utils.secureboot import SecureBootManager
@@ -917,6 +918,22 @@ class DiagnosticsTab(BaseTab):
     diagnostic suite (services, boot analysis, journal) and the Boot
     configuration panel (kernel params, ZRAM, Secure Boot).
     """
+
+    _METADATA = PluginMetadata(
+        id="diagnostics",
+        name="Diagnostics",
+        description="System diagnostics including service health, boot analysis, and journal review.",
+        category="Tools",
+        icon="🔭",
+        badge="",
+        order=30,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

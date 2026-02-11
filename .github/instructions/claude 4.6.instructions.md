@@ -2,54 +2,89 @@
 description: Primary Claude instructions for Loofi Fedora Tweaks
 applyTo: "**"
 ---
-You are the primary AI developer for the Loofi Fedora Tweaks project.
 
-Project overview:
-- Loofi Fedora Tweaks is a PyQt6-based desktop application for Fedora Linux (v17.0.0 "Atlas").
-- 25 UI tabs, 55 test files (1514 tests), 52+ utils modules.
-- Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`).
-- The project has a stable, modular architecture with an Agent-based workflow defined in `.github/agents/`.
+# Loofi Fedora Tweaks — AI Developer Instructions
 
-Workflow & Architecture:
-- The project adopts the **Agent System** defined in `.github/agents/`.
-- For complex, multi-step features, use `Manager.agent.md` as the entry point — it handles task decomposition, dependency ordering, and agent delegation.
-- Delegate to specialized agents for their respective domains:
-  - **Arkitekt** — architectural design and module structure decisions.
-  - **Test** — test file creation, mock strategies, and coverage.
-  - **CodeGen** — code generation and implementation.
-  - **Builder** — build pipeline, RPM/Flatpak packaging.
-  - **Guardian** — security review, privilege escalation audits.
-  - **Sculptor** — UI/UX refinement and PyQt6 widget work.
-  - **Planner** — roadmap and release planning.
-- For simple, single-file changes you may act directly without invoking an agent.
-- Agent files live in `.github/agents/` — consult them for each agent's scope and invocation pattern.
+## ROLE
+You are the primary AI developer for Loofi Fedora Tweaks.
+Delegate to agents. Follow existing patterns. Minimize token usage.
 
-Expectations:
-- Propose concrete code changes, not abstract plans.
-- Prefer direct edits, diffs, or file-level suggestions.
-- Follow existing project structure and naming conventions.
-- Avoid overengineering and unnecessary abstractions.
+## PROJECT OVERVIEW
+- PyQt6-based desktop app for Fedora Linux (current: v24.0.0)
+- 25 UI tabs, 55 test files (1514+ tests), 52+ utils modules
+- Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`)
+- Agent-based workflow defined in `.github/claude-agents/`
 
-Code quality:
+## KEY FILES (READ ONCE, REFERENCE BY NAME)
+- `ROADMAP.md` — Version scope, status, deliverables
+- `.github/claude-agents/` — 7 specialized agents (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
+- `AGENTS.md` — Quick reference for agent system and architecture
+- `.github/copilot-instructions.md` — Architecture and patterns reference
+- `.github/instructions/` — Primary AI instructions (claude 4.6, test)
+
+## TOKEN DISCIPLINE (CRITICAL)
+- Read context files once, reference by name after
+- Bullet lists only. No paragraphs.
+- Max 10 lines per response section
+- Delegate complex tasks to agents — don't implement inline
+- Never re-explain roadmap, architecture, or patterns
+
+## AGENT SYSTEM
+For complex, multi-step features, delegate to specialized agents in `.github/claude-agents/`:
+- **project-coordinator** (entry point) — task decomposition, dependency ordering, agent delegation
+- **architecture-advisor** — architectural design, module structure
+- **test-writer** — test creation, mocking, coverage
+- **code-implementer** — code generation, implementation
+- **backend-builder** — backend logic, utils/ modules, system integration
+- **frontend-integration-builder** — UI/UX tabs, CLI commands, wiring
+- **release-planner** — roadmap and release planning
+
+For simple, single-file changes, act directly without agent invocation.
+All agent definitions: `.github/claude-agents/*.md`
+
+## EXPECTATIONS
+- Propose concrete code changes, not abstract plans
+- Prefer direct edits, diffs, or file-level suggestions
+- Follow existing project structure and naming conventions
+- Avoid overengineering and unnecessary abstractions
+
+## CODE QUALITY
 - Python 3.11+ compatible
 - PyQt6 best practices
 - Clear separation of UI, logic, and system interaction
 - Minimal dependencies
 
-Key patterns:
-- `PrivilegedCommand` (utils/commands.py) returns `Tuple[str, List[str], str]` — always unpack before passing to subprocess.run().
-- Never pass the raw tuple to subprocess.run(); use `binary, args, _ = PrivilegedCommand.xxx(); cmd = [binary] + args`.
-- All tabs inherit from `BaseTab` (ui/base_tab.py) for CommandRunner wiring.
-- Use `pkexec` for privilege escalation, never `sudo`.
-- `SystemManager.get_package_manager()` for dnf/rpm-ostree detection — never hardcode `dnf`.
+## CRITICAL PATTERNS (NEVER VIOLATE)
+1. **PrivilegedCommand**: Returns `Tuple[str, List[str], str]` — ALWAYS unpack before subprocess.run()
+   ```python
+   binary, args, _ = PrivilegedCommand.dnf("install", "pkg")
+   cmd = [binary] + args  # Never pass tuple directly
+   ```
 
-Testing:
-- Update or add tests when behavior changes.
-- Avoid brittle or version-locked assertions.
-- All system calls must be mocked — tests run without root.
-- Use `@patch` decorators, not context managers.
+2. **BaseTab**: All command tabs inherit from `BaseTab` (ui/base_tab.py) for CommandRunner wiring
 
-Communication style:
-- Be direct and technical.
-- Assume the user understands Python and Linux.
-- Do not explain basic concepts unless asked.
+3. **Package Manager**: Use `SystemManager.get_package_manager()` — NEVER hardcode `dnf`
+
+4. **Privilege Escalation**: Use `pkexec` only, NEVER `sudo`
+
+5. **Atomic Fedora**: Always branch on `SystemManager.is_atomic()` for dnf vs rpm-ostree
+
+## TESTING RULES
+- Update or add tests when behavior changes
+- All system calls MUST be mocked — tests run without root
+- Use `@patch` decorators, NOT context managers
+- Avoid brittle or version-locked assertions
+
+## OUTPUT FORMAT
+1. **Status** (done/pending)
+2. **Changes** (max 10 bullets)
+3. **Commands** (shell, if any)
+4. **Files Changed** (list)
+
+No essays. No filler.
+
+## COMMUNICATION STYLE
+- Direct and technical
+- Assume user understands Python and Linux
+- Do not explain basic concepts unless asked
+- Use bullet lists, not paragraphs

@@ -15,10 +15,28 @@ from PyQt6.QtCore import Qt, QTimer
 from utils.hardware import HardwareManager
 from utils.command_runner import CommandRunner
 from utils.bluetooth import BluetoothManager
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
-class HardwareTab(QWidget):
+class HardwareTab(QWidget, PluginInterface):
     """Consolidated hardware control tab."""
+
+    _METADATA = PluginMetadata(
+        id="hardware",
+        name="Hardware",
+        description="Hardware info and settings including CPU governor, GPU mode, fan control, and battery.",
+        category="Hardware",
+        icon="⚡",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

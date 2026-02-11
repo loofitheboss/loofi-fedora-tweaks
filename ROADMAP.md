@@ -8,10 +8,11 @@
 | Version | Codename | Status | Theme |
 |---------|----------|--------|-------|
 | v21.0 | UX Stabilization | DONE | Layout integrity, QSS scoping |
-| v22.0 | Usability | NEXT | Search, status indicators, preferences |
+| v22.0 | Usability | SKIPPED | Search, status indicators, preferences |
 | v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
-| v25.0 | Plugin Architecture | PLANNED | Plugin system, UI redesign, API |
+| v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
+| v26.0 | Plugin Marketplace | NEXT | External plugins, marketplace, sandboxing |
 
 ---
 
@@ -56,15 +57,15 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| architecture-advisor | Approve folder structure, executor design |
-| backend-builder | Service abstractions, executor impl |
-| frontend-integration-builder | Non-blocking UI via QThread |
-| test-writer | Import tests, executor tests |
-| release-planner | CI workflow, docs, packaging |
+| Arkitekt | Approve folder structure, executor design |
+| Builder | Service abstractions, executor impl |
+| Sculptor | Non-blocking UI via QThread |
+| Test | Import tests, executor tests |
+| Planner | CI workflow, docs, packaging |
 
 ---
 
-## [NEXT] v22.0 — Usability & Workflow Enhancements
+## [SKIPPED] v22.0 — Usability & Workflow Enhancements
 
 ### Scope
 - Search/filter tweaks across all tabs
@@ -86,13 +87,14 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| project-coordinator | Define search + status plan |
-| backend-builder | Persistent preferences, reset logic |
-| frontend-integration-builder | Search/filter UI, indicators |
-| test-writer | State transition tests |
-| release-planner | Docs + packaging |
+| Manager | Define search + status plan |
+| Builder | Persistent preferences, reset logic |
+| Sculptor | Search/filter UI, indicators |
+| Test | State transition tests |
+| Planner | Docs + packaging |
 
 ### Dependencies
+
 - v23.0 service layer (for clean preference storage)
 
 ---
@@ -118,19 +120,20 @@
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| backend-builder | Profiles, JSON export/import |
-| frontend-integration-builder | Advanced mode toggle, log panel |
-| architecture-advisor | Validate snapshot system |
-| test-writer | Profile save/load tests |
-| release-planner | Packaging polish |
+| Builder | Profiles, JSON export/import |
+| Sculptor | Advanced mode toggle, log panel |
+| Arkitekt | Validate snapshot system |
+| Test | Profile save/load tests |
+| Planner | Packaging polish |
 
 ### Dependencies
-- v22.0 persistent preferences
+
 - v23.0 service layer
+- Note: v22.0 persistent preferences shipped independently; v24.0 profiles use own storage
 
 ---
 
-## [PLANNED] v25.0 — Plugin Architecture + UI Redesign
+## [DONE] v25.0 — Plugin Architecture + UI Redesign
 
 ### Scope
 - Tweaks self-register as modules
@@ -141,27 +144,28 @@
 - Sidebar redesign
 
 ### Deliverables
-- [ ] Plugin interface definition
-- [ ] Plugin loader implementation
-- [ ] Plugin registration tests
-- [ ] Sidebar navigation redesign
-- [ ] Compatibility detection engine
-- [ ] README rewrite
-- [ ] Plugin dev guide
-- [ ] CONTRIBUTING.md
-- [ ] CHANGELOG + release notes
+- [x] Plugin interface definition
+- [x] Plugin loader implementation
+- [x] Plugin registration tests
+- [x] Sidebar navigation redesign
+- [x] Compatibility detection engine
+- [x] README rewrite
+- [x] Plugin dev guide
+- [x] CONTRIBUTING.md
+- [x] CHANGELOG + release notes
 
 ### Agent Assignment
 | Agent | Task |
 |-------|------|
-| architecture-advisor | Define plugin interface |
-| backend-builder | Plugin loader |
-| frontend-integration-builder | Sidebar redesign |
-| test-writer | Plugin registration tests |
-| release-planner | Documentation overhaul |
-| code-implementer | Final integration |
+| Arkitekt | Define plugin interface |
+| Builder | Plugin loader |
+| Sculptor | Sidebar redesign |
+| Test | Plugin registration tests |
+| Planner | Documentation overhaul |
+| CodeGen | Final integration |
 
 ### Dependencies
+
 - v23.0 service layer
 - v24.0 profiles (plugin configs)
 
@@ -171,6 +175,6 @@
 
 1. Only ONE version is ACTIVE at a time
 2. NEXT version can begin planning while ACTIVE is in final testing
-3. Every version must complete the [Release Checklist](.claude/workflow/PIPELINE.md#release-checklist) before tagging
+3. Every version must complete release checklist (docs, tests, packaging) before tagging
 4. Agents are assigned per-version — see Agent Assignment tables above
 5. Status transitions: PLANNED → NEXT → ACTIVE → DONE

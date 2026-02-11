@@ -27,6 +27,8 @@ from PyQt6.QtGui import (
 from utils.performance import PerformanceCollector
 from utils.processes import ProcessManager
 from ui.tab_utils import configure_top_tabs
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
 
 # ---------------------------------------------------------------------------
@@ -1022,13 +1024,29 @@ class _ProcessesSubTab(QWidget):
 # Main consolidated tab
 # ---------------------------------------------------------------------------
 
-class MonitorTab(QWidget):
+class MonitorTab(QWidget, PluginInterface):
     """Consolidated monitor tab merging Performance and Processes.
 
     Uses a QTabWidget for sub-navigation.  Does not inherit BaseTab
     because both sub-tabs rely on their own QTimer-based refresh
     cycles rather than the CommandRunner pattern.
     """
+
+    _METADATA = PluginMetadata(
+        id="monitor",
+        name="System Monitor",
+        description="Live CPU, memory, and process monitoring with performance graphs.",
+        category="System",
+        icon="📊",
+        badge="recommended",
+        order=20,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

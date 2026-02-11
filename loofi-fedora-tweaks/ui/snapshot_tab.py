@@ -9,16 +9,33 @@ Uses SnapshotManager from utils/snapshot_manager.py.
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QInputDialog, QMessageBox, QGridLayout
+    QInputDialog, QMessageBox, QGridLayout, QWidget
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.snapshot_manager import SnapshotManager
 from datetime import datetime
+from core.plugins.metadata import PluginMetadata
 
 
 class SnapshotTab(BaseTab):
     """Snapshot timeline management tab."""
+
+    _METADATA = PluginMetadata(
+        id="snapshots",
+        name="Snapshots",
+        description="Unified snapshot management across Timeshift, Snapper, and Btrfs backends.",
+        category="Software",
+        icon="📸",
+        badge="advanced",
+        order=30,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
 
     def __init__(self):
         super().__init__()

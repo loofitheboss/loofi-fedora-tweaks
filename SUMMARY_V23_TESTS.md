@@ -71,7 +71,7 @@ Tests for `services/system/service.py` — System-level operations
 
 ### 2. Test Documentation Created
 
-- ✅ `.claude/TEST_REPORT_V23.md` — Comprehensive test report
+- ✅ `.github/TEST_REPORT_V23.md` — Comprehensive test report
 - ✅ `test_v23_changes.sh` — Test runner script
 
 ---
@@ -146,7 +146,7 @@ When tests run successfully:
 - `services/system/service.py` (208 lines)
 
 ### Documentation
-- `.claude/TEST_REPORT_V23.md` — Detailed test report
+- `.github/TEST_REPORT_V23.md` — Detailed test report
 - `SUMMARY_V23_TESTS.md` — This file
 
 ### Scripts
@@ -160,7 +160,7 @@ When tests run successfully:
 2. ⏸️ **TODO:** Execute test suite manually (see commands above)
 3. ⏸️ **TODO:** Fix any test failures discovered
 4. ⏸️ **TODO:** Verify >= 80% coverage on new modules
-5. ⏸️ **TODO:** Update `.claude/workflow/tasks-v23.0.md` to mark Task 8 & 11 complete
+5. ⏸️ **TODO:** Update `.github/workflow/tasks-v23.0.md` to mark Task 8 & 11 complete
 
 ---
 

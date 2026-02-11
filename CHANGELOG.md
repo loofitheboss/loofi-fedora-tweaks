@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [25.0.0] - 2026-02-11 "Plugin Architecture"
+
+### Added
+
+- Add `PluginInterface` ABC and `PluginMetadata` dataclass in `core/plugins/` for modular tab system.
+- Add `PluginRegistry` singleton for plugin registration, lookup, and category-based filtering.
+- Add `PluginLoader` for built-in tab discovery and validation via entrypoint import.
+- Add `CompatibilityDetector` to check Fedora version, desktop environment, Wayland/X11, and required packages.
+- Add 86 comprehensive tests for plugin registry, loader, compatibility checks, and integration.
+- Add `check_plugin_compat()` API for declarative compatibility specifications in plugin metadata.
+
+### Changed
+
+- Refactor all 26 built-in tabs to implement `PluginInterface` with self-describing metadata.
+- Replace hardcoded tab loading in `MainWindow` with dynamic `PluginLoader.load_builtins()`.
+- Refactor sidebar navigation to render categories, icons, and badges from `PluginRegistry`.
+- Convert `BaseTab` to implement `PluginInterface` with default metadata stub for backward compatibility.
+- Move tab instantiation from `MainWindow._lazy_tab()` to `PluginLoader.create_widget()`.
+
+### Removed
+
+- Remove `_TAB_META` dict from `MainWindow` (metadata now lives in each tab's `PluginMetadata`).
+- Remove `_lazy_tab()` private method from `MainWindow` (loader handles instantiation).
+
+---
+
 ## [24.0.0] - 2026-02-10 "Power Features"
 
 ### Added

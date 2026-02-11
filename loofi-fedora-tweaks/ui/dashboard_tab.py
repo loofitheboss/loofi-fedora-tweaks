@@ -21,6 +21,9 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
+
 import subprocess
 
 from utils.system import SystemManager
@@ -110,10 +113,29 @@ class SparkLine(QWidget):
 # Dashboard Tab v2
 # ---------------------------------------------------------------------------
 
-class DashboardTab(QWidget):
+class DashboardTab(QWidget, PluginInterface):
     """Overhauled dashboard with live graphs and richer information."""
 
-    def __init__(self, main_window):
+    _METADATA = PluginMetadata(
+        id="dashboard",
+        name="Home",
+        description="Live system overview with graphs, metrics, and quick actions.",
+        category="Dashboard",
+        icon="🏠",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
+
+    def set_context(self, context: dict) -> None:
+        self.main_window = context.get("main_window")
+
+    def __init__(self, main_window=None):
         super().__init__()
         self.main_window = main_window
 

@@ -3,8 +3,28 @@ from PyQt6.QtCore import QTimer
 import subprocess
 import os
 
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 
-class SystemInfoTab(QWidget):
+
+class SystemInfoTab(QWidget, PluginInterface):
+
+    _METADATA = PluginMetadata(
+        id="system_info",
+        name="System Info",
+        description="Detailed system information including hardware specs, kernel, and uptime.",
+        category="System",
+        icon="ℹ️",
+        badge="recommended",
+        order=10,
+    )
+
+    def metadata(self) -> PluginMetadata:
+        return self._METADATA
+
+    def create_widget(self) -> QWidget:
+        return self
+
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout()
