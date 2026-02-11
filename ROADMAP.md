@@ -93,6 +93,7 @@
 | release-planner | Docs + packaging |
 
 ### Dependencies
+
 - v23.0 service layer (for clean preference storage)
 
 ---
@@ -125,8 +126,9 @@
 | release-planner | Packaging polish |
 
 ### Dependencies
-- v22.0 persistent preferences
+
 - v23.0 service layer
+- Note: v22.0 persistent preferences shipped independently; v24.0 profiles use own storage
 
 ---
 
@@ -162,6 +164,7 @@
 | code-implementer | Final integration |
 
 ### Dependencies
+
 - v23.0 service layer
 - v24.0 profiles (plugin configs)
 
