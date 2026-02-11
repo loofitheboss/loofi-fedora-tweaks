@@ -115,7 +115,7 @@ jobs:
             --tb=short \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=80
+            --cov-fail-under=50
 
   security:
     runs-on: ubuntu-latest

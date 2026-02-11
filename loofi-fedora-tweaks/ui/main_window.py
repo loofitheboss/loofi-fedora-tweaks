@@ -17,6 +17,7 @@ from ui.lazy_widget import LazyWidget
 from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
 from utils.config_manager import ConfigManager
+from utils.system import SystemManager  # Backward-compatible symbol for legacy tests
 from version import __version__
 import os
 import logging
