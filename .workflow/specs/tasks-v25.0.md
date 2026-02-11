@@ -1,10 +1,10 @@
 # Tasks for v25.0 — Plugin Architecture + UI Redesign
 
 > **Version**: v25.0
-> **Phase**: P3 BUILD — COMPLETE / P4 TEST — PENDING
+> **Phase**: P4 TEST — COMPLETE / P5 DOC — PENDING
 > **Date**: 2026-02-11
-> **Agent**: project-coordinator
-> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 🔲 P5 🔲 P6 🔲 P7 🔲
+> **Agent**: test-writer
+> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 ✅ P5 🔲 P6 🔲 P7 🔲
 
 ---
 
@@ -27,13 +27,13 @@ v25.0 transforms the monolithic tab registration system into a plugin-based arch
 | 2 | Implement PluginRegistry (register, unregister, get, list, lifecycle hooks) | P3 | backend-builder | M | 1 | `core/plugins/registry.py` | [x] |
 | 3 | Implement PluginLoader (directory scan, entrypoint import, validation) | P3 | backend-builder | L | 1,2 | `core/plugins/loader.py` | [x] |
 | 4 | Implement CompatibilityDetector (Fedora version, DE, hardware, package checks) | P3 | backend-builder | M | 1 | `core/plugins/compat.py` | [x] |
-| 5 | Unit tests for PluginInterface, PluginMetadata, PluginRegistry | P4 | test-writer | M | 1,2 | `tests/test_plugin_registry.py` | [ ] |
-| 6 | Unit tests for PluginLoader (discovery, validation, error handling) | P4 | test-writer | M | 3 | `tests/test_plugin_loader.py` | [ ] |
-| 7 | Unit tests for CompatibilityDetector (mocked system calls) | P4 | test-writer | M | 4 | `tests/test_plugin_compat.py` | [ ] |
+| 5 | Unit tests for PluginInterface, PluginMetadata, PluginRegistry | P4 | test-writer | M | 1,2 | `tests/test_plugin_registry.py` | [x] |
+| 6 | Unit tests for PluginLoader (discovery, validation, error handling) | P4 | test-writer | M | 3 | `tests/test_plugin_loader.py` | [x] |
+| 7 | Unit tests for CompatibilityDetector (mocked system calls) | P4 | test-writer | M | 4 | `tests/test_plugin_compat.py` | [x] |
 | 8 | Convert BaseTab to implement PluginInterface; add default metadata | P3 | backend-builder | S | 1,2 | `ui/base_tab.py`, `core/plugins/interface.py` | [x] |
 | 9 | Refactor MainWindow to source tabs from PluginRegistry instead of hardcoded list | P3 | frontend-integration-builder | L | 2,3,8 | `ui/main_window.py` | [x] |
 | 10 | Redesign sidebar: dynamic categories from plugin metadata, icon+badge from registry | P3 | frontend-integration-builder | M | 9 | `ui/main_window.py`, `assets/modern.qss` | [x] |
-| 11 | Integration tests for plugin-driven MainWindow (load, sidebar, navigation) | P4 | test-writer | M | 9,10 | `tests/test_plugin_integration.py` | [ ] |
+| 11 | Integration tests for plugin-driven MainWindow (load, sidebar, navigation) | P4 | test-writer | M | 9,10 | `tests/test_plugin_integration.py` | [x] |
 | 12 | Migrate 5 representative built-in tabs to PluginInterface (dashboard, hardware, network, profiles, settings) | P3 | code-implementer | L | 8,9 | `ui/dashboard_tab.py`, `ui/hardware_tab.py`, `ui/network_tab.py`, `ui/profiles_tab.py`, `ui/settings_tab.py` | [x] |
 | 13 | Migrate remaining 21 built-in tabs to PluginInterface | P3 | code-implementer | L | 12 | All remaining `ui/*_tab.py` files | [x] |
 | 14 | Plugin developer guide and API reference | P5 | release-planner | M | 1,2,3,4 | `docs/plugin-dev-guide.md`, `CONTRIBUTING.md` | [ ] |
