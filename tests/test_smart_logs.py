@@ -4,7 +4,7 @@ import sys
 import os
 import json
 import tempfile
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -360,6 +360,72 @@ class TestGetErrorSummary(unittest.TestCase):
         self.assertEqual(summary.error_count, 0)
         self.assertEqual(summary.top_units, [])
         self.assertEqual(summary.detected_patterns, [])
+
+
+class TestGetLogsIncremental(unittest.TestCase):
+    """Tests for SmartLogViewer.get_logs_incremental()."""
+
+    def _entry(self, ts, msg, unit="test.service", prio=4):
+        return LogEntry(
+            timestamp=ts,
+            unit=unit,
+            priority=prio,
+            message=msg,
+            priority_label=SmartLogViewer.PRIORITY_LABELS[prio],
+        )
+
+    @patch.object(SmartLogViewer, "get_logs")
+    def test_incremental_without_cursor(self, mock_get_logs):
+        mock_get_logs.return_value = [
+            self._entry("2026-02-10 10:00:00", "a"),
+            self._entry("2026-02-10 10:00:01", "b"),
+        ]
+
+        entries, cursor = SmartLogViewer.get_logs_incremental(None)
+
+        self.assertEqual(len(entries), 2)
+        self.assertIsNotNone(cursor)
+        self.assertIn("2026-02-10 10:00:01", cursor)
+
+    @patch.object(SmartLogViewer, "get_logs")
+    def test_incremental_with_cursor_returns_newer_only(self, mock_get_logs):
+        e1 = self._entry("2026-02-10 10:00:00", "a")
+        e2 = self._entry("2026-02-10 10:00:01", "b")
+        e3 = self._entry("2026-02-10 10:00:02", "c")
+        mock_get_logs.return_value = [e1, e2, e3]
+        cursor = SmartLogViewer._entry_key(e2)
+
+        entries, next_cursor = SmartLogViewer.get_logs_incremental(cursor)
+
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].message, "c")
+        self.assertEqual(next_cursor, SmartLogViewer._entry_key(e3))
+
+    @patch.object(SmartLogViewer, "get_logs")
+    def test_incremental_deduplicates_replayed_entries(self, mock_get_logs):
+        e1 = self._entry("2026-02-10 10:00:00", "dup")
+        e2 = self._entry("2026-02-10 10:00:00", "dup")
+        e3 = self._entry("2026-02-10 10:00:01", "next")
+        mock_get_logs.return_value = [e1, e2, e3]
+
+        entries, _cursor = SmartLogViewer.get_logs_incremental(None)
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0].message, "dup")
+        self.assertEqual(entries[1].message, "next")
+
+    @patch.object(SmartLogViewer, "get_logs")
+    def test_incremental_respects_max_entries(self, mock_get_logs):
+        mock_get_logs.return_value = [
+            self._entry(f"2026-02-10 10:00:{idx:02d}", f"m{idx}")
+            for idx in range(5)
+        ]
+
+        entries, _cursor = SmartLogViewer.get_logs_incremental(None, max_entries=2)
+
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(entries[0].message, "m3")
+        self.assertEqual(entries[1].message, "m4")
 
 
 class TestGetUnitList(unittest.TestCase):

@@ -10,7 +10,7 @@
 | v21.0 | UX Stabilization | DONE | Layout integrity, QSS scoping |
 | v22.0 | Usability | NEXT | Search, status indicators, preferences |
 | v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
-| v24.0 | Power Features | PLANNED | Profiles, export, log panel, snapshots |
+| v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
 | v25.0 | Plugin Architecture | PLANNED | Plugin system, UI redesign, API |
 
 ---
@@ -97,7 +97,7 @@
 
 ---
 
-## [PLANNED] v24.0 — Advanced Power Features
+## [DONE] v24.0 — Advanced Power Features
 
 ### Scope
 - Profiles (save/load tweak configurations)
@@ -106,14 +106,14 @@
 - System snapshot before apply
 
 ### Deliverables
-- [ ] Profile dataclass + storage
-- [ ] Save/load profile UI
-- [ ] JSON export/import endpoints
-- [ ] Live log panel widget
-- [ ] Snapshot integration (Timeshift/Snapper)
-- [ ] Profile CLI commands
-- [ ] Tests for profile save/load
-- [ ] CHANGELOG + README + release notes
+- [x] Profile dataclass + storage
+- [x] Save/load profile UI
+- [x] JSON export/import endpoints
+- [x] Live log panel widget
+- [x] Snapshot integration (Timeshift/Snapper)
+- [x] Profile CLI commands
+- [x] Tests for profile save/load
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 | Agent | Task |

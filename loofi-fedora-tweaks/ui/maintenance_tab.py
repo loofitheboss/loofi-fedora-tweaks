@@ -18,6 +18,7 @@ from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 from utils.system import SystemManager
+from services.package.service import get_package_service
 
 import shutil
 
@@ -39,6 +40,8 @@ class _UpdatesSubTab(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.package_service = get_package_service()
+        self.package_manager = SystemManager.get_package_manager()
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -61,7 +64,10 @@ class _UpdatesSubTab(QWidget):
         # Individual Update Buttons
         btn_layout = QHBoxLayout()
 
-        self.btn_dnf = QPushButton(self.tr("Update System (DNF)"))
+        if self.package_manager == "rpm-ostree":
+            self.btn_dnf = QPushButton(self.tr("Update System (rpm-ostree)"))
+        else:
+            self.btn_dnf = QPushButton(self.tr("Update System (DNF)"))
         self.btn_dnf.clicked.connect(self.run_dnf_update)
         btn_layout.addWidget(self.btn_dnf)
 
@@ -138,7 +144,7 @@ class _UpdatesSubTab(QWidget):
     def run_dnf_update(self):
         from utils.safety import SafetyManager
 
-        if SafetyManager.check_dnf_lock():
+        if self.package_manager == "dnf" and SafetyManager.check_dnf_lock():
             QMessageBox.warning(
                 self,
                 self.tr("Update Locked"),
@@ -149,12 +155,20 @@ class _UpdatesSubTab(QWidget):
             )
             return
 
-        if not SafetyManager.confirm_action(self, self.tr("System Update (DNF)")):
+        action_name = (
+            self.tr("System Upgrade (rpm-ostree)")
+            if self.package_manager == "rpm-ostree"
+            else self.tr("System Update (DNF)")
+        )
+
+        if not SafetyManager.confirm_action(self, action_name):
             return
 
         self.start_process()
         self.append_output(self.tr("Starting System Update...\n"))
-        self.runner.run_command("pkexec", ["dnf", "update", "-y"])
+        result = self.package_service.update(description=action_name)
+        self._append_result_output(result)
+        self.command_finished(self._result_exit_code(result))
 
     def run_flatpak_update(self):
         self.start_process()
@@ -176,7 +190,7 @@ class _UpdatesSubTab(QWidget):
     def run_update_all(self):
         from utils.safety import SafetyManager
 
-        if SafetyManager.check_dnf_lock():
+        if self.package_manager == "dnf" and SafetyManager.check_dnf_lock():
             QMessageBox.warning(
                 self,
                 self.tr("Update Locked"),
@@ -188,10 +202,19 @@ class _UpdatesSubTab(QWidget):
             return
 
         self.start_process()
+        self.append_output(self.tr("Starting System Update...\n"))
+        update_action = (
+            self.tr("System Upgrade (rpm-ostree)")
+            if self.package_manager == "rpm-ostree"
+            else self.tr("System Update (DNF)")
+        )
+        result = self.package_service.update(description=update_action)
+        self._append_result_output(result)
+        if not result.success:
+            self.command_finished(self._result_exit_code(result))
+            return
 
         self.update_queue = [
-            ("pkexec", ["dnf", "update", "-y"],
-             self.tr("Starting System Update (DNF)...")),
             ("flatpak", ["update", "-y"],
              self.tr("Starting Flatpak Update...")),
             ("pkexec", ["fwupdmgr", "update", "-y"],
@@ -251,6 +274,20 @@ class _UpdatesSubTab(QWidget):
         self.progress_bar.setValue(0)
         self.append_output(f"{description}\n")
         self.runner.run_command(cmd, args)
+
+    def _append_result_output(self, result):
+        if result.stdout:
+            self.append_output(result.stdout)
+        if result.stderr:
+            self.append_output(result.stderr)
+        if result.message:
+            self.append_output(f"\n{result.message}\n")
+
+    @staticmethod
+    def _result_exit_code(result):
+        if result.exit_code is not None:
+            return result.exit_code
+        return 0 if result.success else 1
 
 
 # ---------------------------------------------------------------------------
@@ -418,6 +455,7 @@ class _OverlaysSubTab(QWidget):
         from utils.package_manager import PackageManager
 
         self.pkg_manager = PackageManager()
+        self.reboot_runner = CommandRunner()
         self.init_ui()
         self.refresh_list()
 
@@ -617,8 +655,7 @@ class _OverlaysSubTab(QWidget):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            import subprocess
-            subprocess.run(["systemctl", "reboot"])
+            self.reboot_runner.run_command("systemctl", ["reboot"])
 
 
 # ---------------------------------------------------------------------------

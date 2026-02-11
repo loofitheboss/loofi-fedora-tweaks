@@ -205,11 +205,12 @@ class TestGetProfile(unittest.TestCase):
 class TestApplyProfile(unittest.TestCase):
     """Tests for applying profiles with mocked subprocess calls."""
 
+    @patch.object(ProfileManager, '_create_pre_apply_snapshot')
     @patch.object(ProfileManager, '_save_active_profile')
     @patch.object(ProfileManager, '_set_swappiness', return_value=True)
     @patch.object(ProfileManager, '_toggle_services')
     @patch.object(ProfileManager, '_set_governor', return_value=True)
-    def test_apply_gaming_profile_success(self, mock_gov, mock_svc, mock_swap, mock_save):
+    def test_apply_gaming_profile_success(self, mock_gov, mock_svc, mock_swap, mock_save, mock_snapshot):
         """Gaming profile applies governor, services, and swappiness."""
         result = ProfileManager.apply_profile("gaming")
         self.assertTrue(result.success)
@@ -217,21 +218,24 @@ class TestApplyProfile(unittest.TestCase):
         mock_swap.assert_called_once_with(10)
         mock_svc.assert_called_once()
         mock_save.assert_called_once_with("gaming")
+        mock_snapshot.assert_called_once()
 
+    @patch.object(ProfileManager, '_create_pre_apply_snapshot')
     @patch.object(ProfileManager, '_save_active_profile')
     @patch.object(ProfileManager, '_set_swappiness', return_value=False)
     @patch.object(ProfileManager, '_toggle_services')
     @patch.object(ProfileManager, '_set_governor', return_value=True)
-    def test_apply_profile_swappiness_failure(self, mock_gov, mock_svc, mock_swap, mock_save):
+    def test_apply_profile_swappiness_failure(self, mock_gov, mock_svc, mock_swap, mock_save, mock_snapshot):
         """Profile apply reports swappiness failure."""
         result = ProfileManager.apply_profile("gaming")
         self.assertFalse(result.success)
         self.assertIn("swappiness", result.message)
 
+    @patch.object(ProfileManager, '_create_pre_apply_snapshot')
     @patch.object(ProfileManager, '_save_active_profile')
     @patch.object(ProfileManager, '_toggle_services')
     @patch.object(ProfileManager, '_set_governor', return_value=False)
-    def test_apply_profile_governor_failure(self, mock_gov, mock_svc, mock_save):
+    def test_apply_profile_governor_failure(self, mock_gov, mock_svc, mock_save, mock_snapshot):
         """Profile apply reports governor failure."""
         result = ProfileManager.apply_profile("development")
         self.assertFalse(result.success)
@@ -243,10 +247,11 @@ class TestApplyProfile(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertIn("not found", result.message)
 
+    @patch.object(ProfileManager, '_create_pre_apply_snapshot')
     @patch.object(ProfileManager, '_save_active_profile')
     @patch.object(ProfileManager, '_toggle_services')
     @patch.object(ProfileManager, '_set_governor', return_value=True)
-    def test_apply_presentation_no_swappiness(self, mock_gov, mock_svc, mock_save):
+    def test_apply_presentation_no_swappiness(self, mock_gov, mock_svc, mock_save, mock_snapshot):
         """Presentation profile does not set swappiness (not in settings)."""
         result = ProfileManager.apply_profile("presentation")
         self.assertTrue(result.success)
@@ -566,7 +571,7 @@ class TestCaptureCurrentAsProfile(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=0, stdout="schedutil\n")
         mock_create.return_value = Result(True, "Saved")
 
-        result = ProfileManager.capture_current_as_profile("Captured")
+        ProfileManager.capture_current_as_profile("Captured")
         mock_create.assert_called_once()
         call_args = mock_create.call_args
         settings = call_args[0][1]
@@ -584,8 +589,112 @@ class TestCaptureCurrentAsProfile(unittest.TestCase):
     def test_capture_with_no_system_data(self, mock_run, mock_open_fn, mock_create):
         """Capture proceeds even if system reads fail."""
         mock_create.return_value = Result(True, "Saved")
-        result = ProfileManager.capture_current_as_profile("Bare")
+        ProfileManager.capture_current_as_profile("Bare")
         mock_create.assert_called_once()
+
+
+class TestProfileImportExport(unittest.TestCase):
+    """Tests for profile JSON import/export helpers."""
+
+    def test_export_and_import_profile_json(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = ProfileManager.PROFILES_DIR
+            try:
+                ProfileManager.PROFILES_DIR = tmpdir
+                created = ProfileManager.create_custom_profile("Custom A", {"governor": "schedutil"})
+                self.assertTrue(created.success)
+
+                export_path = os.path.join(tmpdir, "custom_a_export.json")
+                exported = ProfileManager.export_profile_json("custom_a", export_path)
+                self.assertTrue(exported.success)
+                self.assertTrue(os.path.exists(export_path))
+
+                deleted = ProfileManager.delete_custom_profile("custom_a")
+                self.assertTrue(deleted.success)
+
+                imported = ProfileManager.import_profile_json(export_path, overwrite=False)
+                self.assertTrue(imported.success)
+                loaded = ProfileManager.get_profile("custom_a")
+                self.assertEqual(loaded.get("name"), "Custom A")
+            finally:
+                ProfileManager.PROFILES_DIR = original
+
+    def test_bundle_export_import(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original = ProfileManager.PROFILES_DIR
+            try:
+                ProfileManager.PROFILES_DIR = tmpdir
+                ProfileManager.create_custom_profile("One", {"governor": "performance"})
+                ProfileManager.create_custom_profile("Two", {"governor": "powersave"})
+
+                bundle_path = os.path.join(tmpdir, "bundle.json")
+                exported = ProfileManager.export_bundle_json(bundle_path)
+                self.assertTrue(exported.success)
+
+                ProfileManager.delete_custom_profile("one")
+                ProfileManager.delete_custom_profile("two")
+                imported = ProfileManager.import_bundle_json(bundle_path, overwrite=False)
+                self.assertTrue(imported.success)
+
+                all_profiles = ProfileManager.list_profiles()
+                keys = {p["key"] for p in all_profiles}
+                self.assertIn("one", keys)
+                self.assertIn("two", keys)
+            finally:
+                ProfileManager.PROFILES_DIR = original
+
+
+class TestSnapshotBeforeApply(unittest.TestCase):
+    """Tests for snapshot hook integration in apply_profile."""
+
+    @patch("utils.profiles.subprocess.run")
+    @patch("utils.profiles.SnapshotManager.create_snapshot")
+    @patch("utils.profiles.SnapshotManager.get_preferred_backend")
+    def test_snapshot_success_path(self, mock_backend, mock_create, mock_run):
+        mock_backend.return_value = "timeshift"
+        mock_create.return_value = ("pkexec", ["timeshift", "--create", "--comments", "x"], "Creating snapshot")
+        mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+
+        warnings = []
+        ProfileManager._create_pre_apply_snapshot("gaming", warnings)
+        self.assertEqual(warnings, [])
+        mock_run.assert_called_once()
+
+    @patch("utils.profiles.SnapshotManager.get_preferred_backend")
+    def test_snapshot_skipped_when_no_backend(self, mock_backend):
+        mock_backend.return_value = None
+        warnings = []
+        ProfileManager._create_pre_apply_snapshot("gaming", warnings)
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("No snapshot backend", warnings[0])
+
+    @patch.object(ProfileManager, "_save_active_profile")
+    @patch.object(ProfileManager, "_set_swappiness", return_value=True)
+    @patch.object(ProfileManager, "_toggle_services")
+    @patch.object(ProfileManager, "_set_governor", return_value=True)
+    @patch("utils.profiles.subprocess.run")
+    @patch("utils.profiles.SnapshotManager.create_snapshot")
+    @patch("utils.profiles.SnapshotManager.get_preferred_backend")
+    def test_apply_continues_when_snapshot_fails(
+        self,
+        mock_backend,
+        mock_create,
+        mock_run,
+        mock_governor,
+        mock_toggle,
+        mock_swappiness,
+        mock_save_active,
+    ):
+        mock_backend.return_value = "timeshift"
+        mock_create.return_value = ("pkexec", ["timeshift", "--create", "--comments", "x"], "Creating snapshot")
+        # First call is snapshot command; then no further subprocess here.
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="snapshot failed")
+
+        result = ProfileManager.apply_profile("gaming", create_snapshot=True)
+
+        self.assertTrue(result.success)
+        self.assertIn("Warnings", result.message)
+        self.assertIn("Snapshot creation failed", result.message)
 
 
 if __name__ == '__main__':

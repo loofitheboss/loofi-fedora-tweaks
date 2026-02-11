@@ -1,23 +1,27 @@
 #!/usr/bin/env bash
-# Loofi Fedora Tweaks — Workflow Runner
-# Automates the 7-phase pipeline for version releases.
+# Loofi Fedora Tweaks — Legacy Workflow Runner (State-File compatible)
 #
 # Usage:
 #   ./scripts/workflow-runner.sh <version> [phase]
 #
 # Examples:
-#   ./scripts/workflow-runner.sh 23.0.0          # Run all phases
-#   ./scripts/workflow-runner.sh 23.0.0 test     # Run only test phase
-#   ./scripts/workflow-runner.sh 23.0.0 validate # Validate release readiness
+#   ./scripts/workflow-runner.sh 23.0.0 all
+#   ./scripts/workflow-runner.sh 23.0.0 plan --dry-run
+#   ./scripts/workflow-runner.sh 23.0.0 validate
 #
-# Phases: plan, design, implement, test, document, package, release, validate
+# Phases: plan, design, implement, test, document, package, release, validate, all
 
 set -euo pipefail
 
-VERSION="${1:?Usage: $0 <version> [phase]}"
+VERSION_INPUT="${1:?Usage: $0 <version> [phase]}"
 PHASE="${2:-all}"
+DRY_RUN_FLAG="${3:-}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TASKS_FILE="$ROOT/.claude/workflow/tasks-v${VERSION}.md"
+RUNNER="$ROOT/scripts/workflow_runner.py"
+VERSION_NO_V="${VERSION_INPUT#v}"
+VERSION_TAG="v${VERSION_NO_V}"
+TASKS_FILE="$ROOT/.workflow/specs/tasks-${VERSION_TAG}.md"
+TEST_REPORT_FILE="$ROOT/.workflow/reports/test-results-${VERSION_TAG}.json"
 VERSION_PY="$ROOT/loofi-fedora-tweaks/version.py"
 SPEC_FILE="$ROOT/loofi-fedora-tweaks.spec"
 
@@ -33,12 +37,9 @@ ok()  { echo -e "${GREEN}  ✓${NC} $*"; }
 warn(){ echo -e "${YELLOW}  ⚠${NC} $*"; }
 fail(){ echo -e "${RED}  ✗${NC} $*"; }
 
-#--- Phase Functions ---
-
 phase_validate() {
-    log "Validating release readiness for v${VERSION}..."
+    log "Validating release readiness for ${VERSION_TAG}..."
 
-    # Version alignment
     local py_ver spec_ver
     py_ver=$(python3 -c "
 import sys; sys.path.insert(0,'$ROOT/loofi-fedora-tweaks')
@@ -46,17 +47,24 @@ from version import __version__; print(__version__)
 " 2>/dev/null || echo "UNKNOWN")
     spec_ver=$(grep '^Version:' "$SPEC_FILE" 2>/dev/null | awk '{print $2}' || echo "UNKNOWN")
 
-    if [ "$py_ver" = "$VERSION" ]; then ok "version.py: $py_ver"; else fail "version.py: $py_ver (expected $VERSION)"; fi
-    if [ "$spec_ver" = "$VERSION" ]; then ok ".spec: $spec_ver"; else fail ".spec: $spec_ver (expected $VERSION)"; fi
+    if [ "$py_ver" = "$VERSION_NO_V" ]; then ok "version.py: $py_ver"; else fail "version.py: $py_ver (expected $VERSION_NO_V)"; fi
+    if [ "$spec_ver" = "$VERSION_NO_V" ]; then ok ".spec: $spec_ver"; else fail ".spec: $spec_ver (expected $VERSION_NO_V)"; fi
 
-    # Documentation
-    if grep -q "\[$VERSION\]" "$ROOT/CHANGELOG.md" 2>/dev/null; then ok "CHANGELOG.md has v$VERSION"; else warn "CHANGELOG.md missing v$VERSION entry"; fi
-    if [ -f "$ROOT/RELEASE-NOTES-v${VERSION}.md" ]; then ok "Release notes exist"; else warn "RELEASE-NOTES-v${VERSION}.md missing"; fi
+    if grep -q "\[$VERSION_NO_V\]" "$ROOT/CHANGELOG.md" 2>/dev/null || grep -q "\[$VERSION_TAG\]" "$ROOT/CHANGELOG.md" 2>/dev/null; then
+        ok "CHANGELOG.md has $VERSION_TAG entry"
+    else
+        warn "CHANGELOG.md missing $VERSION_TAG entry"
+    fi
 
-    # Task file
-    if [ -f "$TASKS_FILE" ]; then ok "Task file exists"; else warn "Task file missing: $TASKS_FILE"; fi
+    if [ -f "$ROOT/RELEASE-NOTES-${VERSION_TAG}.md" ]; then
+        ok "Release notes exist"
+    else
+        warn "RELEASE-NOTES-${VERSION_TAG}.md missing"
+    fi
 
-    # Build scripts
+    if [ -f "$TASKS_FILE" ]; then ok "Task artifact exists"; else warn "Task artifact missing: $TASKS_FILE"; fi
+    if [ -f "$TEST_REPORT_FILE" ]; then ok "Test report artifact exists"; else warn "Test report artifact missing: $TEST_REPORT_FILE"; fi
+
     for script in build_rpm.sh build_flatpak.sh build_appimage.sh build_sdist.sh; do
         local path="$ROOT/scripts/$script"
         if [ -f "$path" ] && [ -x "$path" ]; then
@@ -68,7 +76,6 @@ from version import __version__; print(__version__)
         fi
     done
 
-    # Tests
     log "Running tests..."
     if PYTHONPATH="$ROOT/loofi-fedora-tweaks" python3 -m pytest "$ROOT/tests/" -q --tb=line 2>/dev/null; then
         ok "All tests pass"
@@ -76,7 +83,6 @@ from version import __version__; print(__version__)
         fail "Tests failing"
     fi
 
-    # Lint
     log "Running lint..."
     if flake8 "$ROOT/loofi-fedora-tweaks/" --max-line-length=150 --ignore=E501,W503,E402,E722 --quiet 2>/dev/null; then
         ok "Lint clean"
@@ -85,108 +91,47 @@ from version import __version__; print(__version__)
     fi
 }
 
-phase_plan() {
-    log "P1: PLAN — Decomposing v${VERSION} into tasks"
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model haiku \"Read ROADMAP.md and .claude/workflow/prompts/plan.md."
-    echo "  Execute P1 PLAN for v${VERSION}."
-    echo "  Save task list to .claude/workflow/tasks-v${VERSION}.md\""
-    echo ""
-}
+run_phase() {
+    local requested="$1"
+    local mapped="$requested"
 
-phase_design() {
-    log "P2: DESIGN — Architecture review"
-    if [ ! -f "$TASKS_FILE" ]; then fail "Run 'plan' phase first"; exit 1; fi
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model sonnet \"Read .claude/workflow/prompts/design.md."
-    echo "  Execute P2 DESIGN for v${VERSION}."
-    echo "  Review tasks in .claude/workflow/tasks-v${VERSION}.md\""
-    echo ""
-}
+    case "$requested" in
+        implement) mapped="build" ;;
+        document) mapped="doc" ;;
+        build|doc|plan|design|test|package|release|all) ;;
+        *)
+            fail "Unknown phase: $requested"
+            echo "Available: plan, design, implement, test, document, package, release, validate, all"
+            exit 1
+            ;;
+    esac
 
-phase_implement() {
-    log "P3: IMPLEMENT — Building v${VERSION}"
-    if [ ! -f "$TASKS_FILE" ]; then fail "Run 'plan' phase first"; exit 1; fi
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model sonnet \"Read .claude/workflow/prompts/implement.md."
-    echo "  Execute P3 IMPLEMENT for v${VERSION}."
-    echo "  Work through tasks in .claude/workflow/tasks-v${VERSION}.md\""
-    echo ""
-}
+    if [ ! -f "$RUNNER" ]; then
+        fail "Missing Python runner: $RUNNER"
+        exit 1
+    fi
 
-phase_test() {
-    log "P4: TEST — Running tests for v${VERSION}"
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model sonnet \"Read .claude/workflow/prompts/test.md."
-    echo "  Execute P4 TEST for v${VERSION}.\""
-    echo ""
-    log "Or run directly:"
-    echo "  PYTHONPATH=$ROOT/loofi-fedora-tweaks python3 -m pytest $ROOT/tests/ -v --cov=loofi-fedora-tweaks --cov-fail-under=80"
+    log "Delegating phase '$requested' -> '$mapped' via scripts/workflow_runner.py"
+    if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
+        python3 "$RUNNER" --phase "$mapped" --target-version "$VERSION_TAG" --dry-run
+    else
+        python3 "$RUNNER" --phase "$mapped" --target-version "$VERSION_TAG"
+    fi
 }
-
-phase_document() {
-    log "P5: DOCUMENT — Updating docs for v${VERSION}"
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model haiku \"Read .claude/workflow/prompts/document.md."
-    echo "  Execute P5 DOCUMENT for v${VERSION}.\""
-    echo ""
-}
-
-phase_package() {
-    log "P6: PACKAGE — Validating packaging for v${VERSION}"
-    echo "Run with Claude Code:"
-    echo ""
-    echo "  claude --model haiku \"Read .claude/workflow/prompts/package.md."
-    echo "  Execute P6 PACKAGE for v${VERSION}.\""
-    echo ""
-    log "Or run directly:"
-    echo "  bash $ROOT/scripts/build_rpm.sh"
-}
-
-phase_release() {
-    log "P7: RELEASE — Releasing v${VERSION}"
-    echo ""
-    echo "Manual steps:"
-    echo "  1. git checkout -b release/v${VERSION%.*}"
-    echo "  2. git tag v${VERSION}"
-    echo "  3. git push origin release/v${VERSION%.*} --tags"
-    echo "  4. GitHub Actions will create the release automatically"
-    echo ""
-    echo "Or use Claude Code:"
-    echo "  claude --model haiku \"Read .claude/workflow/prompts/release.md."
-    echo "  Execute P7 RELEASE for v${VERSION}.\""
-}
-
-#--- Main ---
 
 case "$PHASE" in
+    validate)
+        phase_validate
+        ;;
     all)
         phase_validate
-        echo ""
-        log "To run the full pipeline, execute each phase:"
-        echo "  $0 $VERSION plan"
-        echo "  $0 $VERSION design"
-        echo "  $0 $VERSION implement"
-        echo "  $0 $VERSION test"
-        echo "  $0 $VERSION document"
-        echo "  $0 $VERSION package"
-        echo "  $0 $VERSION release"
+        run_phase all
         ;;
-    plan)      phase_plan ;;
-    design)    phase_design ;;
-    implement) phase_implement ;;
-    test)      phase_test ;;
-    document)  phase_document ;;
-    package)   phase_package ;;
-    release)   phase_release ;;
-    validate)  phase_validate ;;
+    plan|design|implement|test|document|package|release|build|doc)
+        run_phase "$PHASE"
+        ;;
     *)
-        echo "Unknown phase: $PHASE"
+        fail "Unknown phase: $PHASE"
         echo "Available: plan, design, implement, test, document, package, release, validate, all"
         exit 1
         ;;

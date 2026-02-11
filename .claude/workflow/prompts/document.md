@@ -1,61 +1,24 @@
-# Prompt: P5 DOCUMENT Phase
+# Prompt: P5 DOCUMENT Phase (State-File)
 
-> Agent: release-planner | Model: haiku | Cost: LOW
+> Agent: release-planner | Model: GPT-4o-mini | Cost: LABOR-LIGHT
 
-## System Prompt
+ROLE: Technical Writer
+INPUT: `.workflow/specs/tasks-vXX.md` + `.workflow/specs/release-notes-draft-vXX.md` + git diff
+GOAL: Finalize release documentation to match actual code changes.
 
-You are the release-planner for Loofi Fedora Tweaks.
-Update all documentation for v{VERSION}.
+INSTRUCTIONS:
+1. Reconcile task artifact + draft notes against implemented diff.
+2. Update `CHANGELOG.md` (Keep-a-Changelog categories).
+3. Update `README.md` only where behavior/commands changed.
+4. Create or update `RELEASE-NOTES-vXX.md`.
+5. Keep entries concise and non-duplicative.
 
-## User Prompt Template
+RULES:
+- Imperative changelog entries.
+- Max 8 bullets in release notes.
+- Do not invent unimplemented features.
 
-```
-Version: v{VERSION}
-Codename: {CODENAME}
-Phase: DOCUMENT
-
-Update these files:
-
-1. CHANGELOG.md — Add v{VERSION} section in Keep-a-Changelog format:
-   - Read .claude/workflow/tasks-v{VERSION}.md for changes
-   - Categories: Added, Changed, Fixed, Removed
-   - Each entry: 1 line, imperative mood
-   - Date: today's date
-
-2. README.md — Update:
-   - Version badge/reference
-   - Feature list if new features added
-   - Installation instructions if changed
-
-3. RELEASE-NOTES-v{VERSION}.md — Create:
-   - Header with version and codename
-   - Highlights (max 5 bullets)
-   - Breaking changes (if any)
-   - Installation command
-   - Link to CHANGELOG
-
-4. Version strings — Verify alignment:
-   - loofi-fedora-tweaks/version.py: __version__ = "{VERSION}"
-   - loofi-fedora-tweaks.spec: Version: {VERSION}
-
-Output format:
-## Documentation: v{VERSION}
-
-### Updated Files
-- CHANGELOG.md: X entries added
-- README.md: [sections updated]
-- RELEASE-NOTES-v{VERSION}.md: created
-- Version strings: aligned ✓
-
-Rules:
-- Keep-a-Changelog format (https://keepachangelog.com/)
-- No duplicate entries
-- Imperative mood for changelog entries
-- Max 8 bullets in release notes
-```
-
-## Exit Criteria
-- [ ] CHANGELOG.md has v{VERSION} section
-- [ ] README.md reflects current version
-- [ ] RELEASE-NOTES written
-- [ ] Version strings match everywhere
+EXIT CRITERIA:
+- [ ] CHANGELOG updated
+- [ ] RELEASE-NOTES updated
+- [ ] README aligned with current behavior

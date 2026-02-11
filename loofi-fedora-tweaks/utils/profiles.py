@@ -1,19 +1,23 @@
 """
 System Profiles Manager - Quick-switch system configurations.
-Part of v13.0 "Nexus Update".
+Part of v24.0 "Power Features".
 
 Predefined profiles for Gaming, Development, Battery Saver,
 Presentation, and Server. Each profile adjusts power governor,
 compositor settings, notification rules, and services.
 """
 
+import json
 import logging
 import os
-import json
-import subprocess
 import shutil
+import subprocess
+import time
 
+from core.profiles.models import ProfileRecord
+from core.profiles.storage import ProfileStore
 from utils.containers import Result
+from utils.snapshot_manager import SnapshotManager
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +26,7 @@ class ProfileManager:
     """
     Manages system profiles for quick-switching between configurations.
 
-    Supports built-in profiles (Gaming, Development, Battery Saver,
-    Presentation, Server) and user-created custom profiles stored as
-    JSON files in PROFILES_DIR.
+    Supports built-in profiles and user-created custom profiles.
     """
 
     PROFILES_DIR = os.path.expanduser("~/.config/loofi-fedora-tweaks/profiles")
@@ -99,116 +101,35 @@ class ProfileManager:
         },
     }
 
+    @classmethod
+    def _store(cls) -> ProfileStore:
+        return ProfileStore(cls.PROFILES_DIR, cls.BUILTIN_PROFILES)
+
     # ==================== PROFILE LISTING ====================
 
     @classmethod
     def list_profiles(cls) -> list[dict]:
-        """
-        Return all available profiles (built-in + custom).
-
-        Returns:
-            List of profile dicts with keys: key, name, description, icon,
-            builtin (bool), and settings.
-        """
-        profiles = []
-
-        # Built-in profiles
-        for key, profile in cls.BUILTIN_PROFILES.items():
-            profiles.append({
-                "key": key,
-                "name": profile["name"],
-                "description": profile["description"],
-                "icon": profile["icon"],
-                "builtin": True,
-                "settings": profile["settings"],
-            })
-
-        # Custom profiles from disk
-        if os.path.isdir(cls.PROFILES_DIR):
-            try:
-                for filename in sorted(os.listdir(cls.PROFILES_DIR)):
-                    if not filename.endswith(".json"):
-                        continue
-                    filepath = os.path.join(cls.PROFILES_DIR, filename)
-                    try:
-                        with open(filepath, "r") as f:
-                            data = json.load(f)
-                        profiles.append({
-                            "key": os.path.splitext(filename)[0],
-                            "name": data.get("name", filename),
-                            "description": data.get("description", ""),
-                            "icon": data.get("icon", "\U0001f527"),
-                            "builtin": False,
-                            "settings": data.get("settings", {}),
-                        })
-                    except (json.JSONDecodeError, OSError) as e:
-                        logger.debug("Failed to load custom profile %s: %s", filepath, e)
-                        continue
-            except OSError as e:
-                logger.debug("Failed to list profiles directory: %s", e)
-
-        return profiles
+        """Return all available profiles (built-in + custom)."""
+        store = cls._store()
+        return [record.to_dict() for record in store.list_profiles()]
 
     @classmethod
     def get_profile(cls, name: str) -> dict:
-        """
-        Get a single profile by its key name.
-
-        Checks built-in profiles first, then custom profiles on disk.
-
-        Args:
-            name: Profile key name.
-
-        Returns:
-            Profile dict, or empty dict if not found.
-        """
-        # Check built-ins
-        if name in cls.BUILTIN_PROFILES:
-            profile = cls.BUILTIN_PROFILES[name]
-            return {
-                "key": name,
-                "name": profile["name"],
-                "description": profile["description"],
-                "icon": profile["icon"],
-                "builtin": True,
-                "settings": profile["settings"],
-            }
-
-        # Check custom profiles
-        safe_name = cls._sanitize_name(name)
-        filepath = os.path.join(cls.PROFILES_DIR, f"{safe_name}.json")
-        if os.path.isfile(filepath):
-            try:
-                with open(filepath, "r") as f:
-                    data = json.load(f)
-                return {
-                    "key": safe_name,
-                    "name": data.get("name", safe_name),
-                    "description": data.get("description", ""),
-                    "icon": data.get("icon", "\U0001f527"),
-                    "builtin": False,
-                    "settings": data.get("settings", {}),
-                }
-            except (json.JSONDecodeError, OSError) as e:
-                logger.debug("Failed to load profile %s: %s", safe_name, e)
-
-        return {}
+        """Get one profile by key (builtin first, then custom)."""
+        key = name if name in cls.BUILTIN_PROFILES else cls._sanitize_name(name)
+        record = cls._store().get_profile(key)
+        return record.to_dict() if record else {}
 
     # ==================== PROFILE APPLICATION ====================
 
     @classmethod
-    def apply_profile(cls, name: str) -> Result:
+    def apply_profile(cls, name: str, create_snapshot: bool = True) -> Result:
         """
         Apply a profile's settings to the system.
 
-        Sets CPU governor, toggles services, adjusts swappiness,
-        and records the active profile in the state file.
-
         Args:
             name: Profile key name to apply.
-
-        Returns:
-            Result with success status and detail message.
+            create_snapshot: Attempt a snapshot before applying.
         """
         profile = cls.get_profile(name)
         if not profile:
@@ -216,123 +137,165 @@ class ProfileManager:
 
         settings = profile.get("settings", {})
         errors = []
+        warnings = []
 
-        # Apply governor
+        # Snapshot hook (best-effort, never blocks profile application).
+        if create_snapshot:
+            cls._create_pre_apply_snapshot(profile.get("key", name), warnings)
+
         governor = settings.get("governor")
-        if governor:
-            if not cls._set_governor(governor):
-                errors.append(f"Failed to set governor to '{governor}'")
+        if governor and not cls._set_governor(governor):
+            errors.append(f"Failed to set governor to '{governor}'")
 
-        # Toggle services
         enable = settings.get("services_enable", [])
         disable = settings.get("services_disable", [])
         cls._toggle_services(enable, disable)
 
-        # Set swappiness
         swappiness = settings.get("swappiness")
-        if swappiness is not None:
-            if not cls._set_swappiness(swappiness):
-                errors.append(f"Failed to set swappiness to {swappiness}")
+        if swappiness is not None and not cls._set_swappiness(swappiness):
+            errors.append(f"Failed to set swappiness to {swappiness}")
 
-        # Record active profile
-        cls._save_active_profile(name)
+        cls._save_active_profile(profile.get("key", name))
+
+        data = {
+            "profile": profile.get("key", name),
+            "warnings": warnings,
+            "errors": errors,
+        }
 
         if errors:
-            return Result(
-                False,
-                f"Profile '{profile['name']}' applied with errors: {'; '.join(errors)}",
-                {"profile": name, "errors": errors},
-            )
+            message = f"Profile '{profile['name']}' applied with errors: {'; '.join(errors)}"
+            if warnings:
+                message += f" | Warnings: {'; '.join(warnings)}"
+            return Result(False, message, data)
 
-        return Result(
-            True,
-            f"Profile '{profile['name']}' applied successfully.",
-            {"profile": name},
-        )
+        message = f"Profile '{profile['name']}' applied successfully."
+        if warnings:
+            message += f" Warnings: {'; '.join(warnings)}"
+        return Result(True, message, data)
+
+    @classmethod
+    def _create_pre_apply_snapshot(cls, profile_key: str, warnings: list):
+        """Attempt snapshot creation before profile apply (best effort)."""
+        backend = SnapshotManager.get_preferred_backend()
+        if not backend:
+            warnings.append("No snapshot backend available; applying without snapshot")
+            return
+
+        label = f"profile-{cls._sanitize_name(profile_key)}-{int(time.time())}"
+        binary, args, _desc = SnapshotManager.create_snapshot(label, backend=backend)
+
+        # SnapshotManager returns an echo tuple when backend selection fails.
+        if binary == "echo":
+            warnings.append("Snapshot operation unavailable; applying without snapshot")
+            return
+
+        try:
+            result = subprocess.run(
+                [binary] + args,
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+            if result.returncode != 0:
+                err = result.stderr.strip() or result.stdout.strip() or "unknown error"
+                warnings.append(f"Snapshot creation failed ({backend}): {err}")
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            warnings.append(f"Snapshot creation failed ({backend}): {exc}")
 
     # ==================== CUSTOM PROFILE CRUD ====================
 
     @classmethod
     def create_custom_profile(cls, name: str, settings: dict) -> Result:
-        """
-        Save a custom profile to JSON in PROFILES_DIR.
-
-        Args:
-            name: Human-readable profile name.
-            settings: Dict of profile settings (governor, services, etc.).
-
-        Returns:
-            Result with success status.
-        """
+        """Save a custom profile to JSON in PROFILES_DIR."""
         if not name or not name.strip():
             return Result(False, "Profile name cannot be empty.")
 
         safe_name = cls._sanitize_name(name)
-
-        # Do not overwrite built-in profiles
         if safe_name in cls.BUILTIN_PROFILES:
             return Result(False, f"Cannot overwrite built-in profile '{safe_name}'.")
 
         try:
-            os.makedirs(cls.PROFILES_DIR, exist_ok=True)
-        except OSError as e:
-            return Result(False, f"Cannot create profiles directory: {e}")
+            record = ProfileRecord(
+                key=safe_name,
+                name=name.strip(),
+                description=settings.get("description", f"Custom profile: {name}"),
+                icon=settings.get("icon", "\U0001f527"),
+                builtin=False,
+                settings={k: v for k, v in settings.items() if k not in ("description", "icon")},
+            )
+        except ValueError as exc:
+            return Result(False, f"Invalid profile: {exc}")
 
-        data = {
-            "name": name.strip(),
-            "description": settings.get("description", f"Custom profile: {name}"),
-            "icon": settings.get("icon", "\U0001f527"),
-            "settings": {k: v for k, v in settings.items() if k not in ("description", "icon")},
-        }
-
-        filepath = os.path.join(cls.PROFILES_DIR, f"{safe_name}.json")
-        try:
-            with open(filepath, "w") as f:
-                json.dump(data, f, indent=4)
-            return Result(True, f"Custom profile '{name}' saved.", {"path": filepath})
-        except OSError as e:
-            return Result(False, f"Failed to save profile: {e}")
+        ok, message, path = cls._store().save_custom_profile(record, overwrite=False)
+        return Result(ok, message, {"path": path} if path else {})
 
     @classmethod
     def delete_custom_profile(cls, name: str) -> Result:
-        """
-        Delete a custom profile from disk.
+        """Delete a custom profile from disk."""
+        key = cls._sanitize_name(name)
+        ok, message = cls._store().delete_custom_profile(key)
+        return Result(ok, message)
 
-        Built-in profiles cannot be deleted.
+    # ==================== PROFILE IMPORT/EXPORT ====================
 
-        Args:
-            name: Profile key name to delete.
+    @classmethod
+    def export_profile_data(cls, name: str) -> dict:
+        """Export one profile as JSON payload for API usage."""
+        key = name if name in cls.BUILTIN_PROFILES else cls._sanitize_name(name)
+        ok, _message, payload = cls._store().export_profile_data(key)
+        return payload if ok else {}
 
-        Returns:
-            Result with success status.
-        """
-        if name in cls.BUILTIN_PROFILES:
-            return Result(False, "Cannot delete built-in profiles.")
+    @classmethod
+    def import_profile_data(cls, payload: dict, overwrite: bool = False) -> Result:
+        """Import one profile from a JSON payload."""
+        ok, message, data = cls._store().import_profile_data(payload, overwrite=overwrite)
+        return Result(ok, message, data)
 
-        safe_name = cls._sanitize_name(name)
-        filepath = os.path.join(cls.PROFILES_DIR, f"{safe_name}.json")
+    @classmethod
+    def export_bundle_data(cls, include_builtins: bool = False) -> dict:
+        """Export full profile bundle payload for API usage."""
+        _ok, _message, payload = cls._store().export_bundle_data(include_builtins=include_builtins)
+        return payload
 
-        if not os.path.isfile(filepath):
-            return Result(False, f"Custom profile '{name}' not found.")
+    @classmethod
+    def import_bundle_data(cls, payload: dict, overwrite: bool = False) -> Result:
+        """Import a full profile bundle from JSON payload."""
+        ok, message, data = cls._store().import_bundle_data(payload, overwrite=overwrite)
+        return Result(ok, message, data)
 
-        try:
-            os.remove(filepath)
-            return Result(True, f"Profile '{name}' deleted.")
-        except OSError as e:
-            return Result(False, f"Failed to delete profile: {e}")
+    @classmethod
+    def export_profile_json(cls, name: str, path: str) -> Result:
+        """Export one profile to a JSON file."""
+        key = name if name in cls.BUILTIN_PROFILES else cls._sanitize_name(name)
+        ok, message = cls._store().export_profile(key, path)
+        return Result(ok, message, {"profile": key, "path": path})
+
+    @classmethod
+    def import_profile_json(cls, path: str, overwrite: bool = False) -> Result:
+        """Import one profile from a JSON file."""
+        ok, message, data = cls._store().import_profile(path, overwrite=overwrite)
+        return Result(ok, message, data)
+
+    @classmethod
+    def export_bundle_json(cls, path: str, include_builtins: bool = False) -> Result:
+        """Export all profiles to a bundle JSON file."""
+        ok, message = cls._store().export_bundle(path, include_builtins=include_builtins)
+        return Result(ok, message, {"path": path, "include_builtins": include_builtins})
+
+    @classmethod
+    def import_bundle_json(cls, path: str, overwrite: bool = False) -> Result:
+        """Import a bundle JSON file."""
+        ok, message, data = cls._store().import_bundle(path, overwrite=overwrite)
+        return Result(ok, message, data)
 
     # ==================== ACTIVE PROFILE ====================
 
     @classmethod
     def get_active_profile(cls) -> str:
-        """
-        Read the currently active profile name from the state file.
-
-        Returns:
-            Profile key name, or empty string if none is active.
-        """
+        """Read active profile key from STATE_FILE."""
         try:
-            with open(cls.STATE_FILE, "r") as f:
+            with open(cls.STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
             return data.get("active_profile", "")
         except (FileNotFoundError, json.JSONDecodeError, OSError):
@@ -340,48 +303,37 @@ class ProfileManager:
 
     @classmethod
     def _save_active_profile(cls, name: str) -> None:
-        """Persist the active profile name to the state file."""
+        """Persist active profile key to state file."""
         try:
             state_dir = os.path.dirname(cls.STATE_FILE)
             os.makedirs(state_dir, exist_ok=True)
-            with open(cls.STATE_FILE, "w") as f:
+            with open(cls.STATE_FILE, "w", encoding="utf-8") as f:
                 json.dump({"active_profile": name}, f)
         except OSError as e:
             logger.debug("Failed to save active profile: %s", e)
 
     @classmethod
     def capture_current_as_profile(cls, name: str) -> Result:
-        """
-        Capture the current system state and save it as a custom profile.
-
-        Reads the current CPU governor, swappiness, and records them
-        in a new custom profile.
-
-        Args:
-            name: Name for the new profile.
-
-        Returns:
-            Result with success status.
-        """
+        """Capture current system state and save as a custom profile."""
         if not name or not name.strip():
             return Result(False, "Profile name cannot be empty.")
 
         settings = {}
 
-        # Read current governor
         try:
             result = subprocess.run(
                 ["cat", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"],
-                capture_output=True, text=True, timeout=5,
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0 and result.stdout.strip():
                 settings["governor"] = result.stdout.strip()
         except (subprocess.TimeoutExpired, OSError) as e:
             logger.debug("Failed to read current governor: %s", e)
 
-        # Read current swappiness
         try:
-            with open("/proc/sys/vm/swappiness", "r") as f:
+            with open("/proc/sys/vm/swappiness", "r", encoding="utf-8") as f:
                 settings["swappiness"] = int(f.read().strip())
         except (FileNotFoundError, ValueError, OSError) as e:
             logger.debug("Failed to read swappiness: %s", e)
@@ -392,8 +344,8 @@ class ProfileManager:
 
     @staticmethod
     def _sanitize_name(name: str) -> str:
-        """Sanitize profile name to prevent path traversal."""
-        safe = os.path.basename(name.strip())
+        """Sanitize profile key for safe file usage."""
+        safe = os.path.basename((name or "").strip())
         safe = safe.replace("..", "").replace("/", "").replace("\\", "")
         safe = safe.replace(" ", "_").lower()
         if not safe:
@@ -402,21 +354,15 @@ class ProfileManager:
 
     @staticmethod
     def _set_governor(governor: str) -> bool:
-        """
-        Set the CPU frequency governor using cpupower.
-
-        Args:
-            governor: Governor name (performance, powersave, schedutil, etc.).
-
-        Returns:
-            True if the command succeeded, False otherwise.
-        """
+        """Set CPU governor using cpupower."""
         if not shutil.which("cpupower"):
             return False
         try:
             result = subprocess.run(
                 ["pkexec", "cpupower", "frequency-set", "-g", governor],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             return result.returncode == 0
         except (subprocess.TimeoutExpired, OSError):
@@ -424,18 +370,14 @@ class ProfileManager:
 
     @staticmethod
     def _toggle_services(enable: list, disable: list) -> None:
-        """
-        Enable and disable systemd services.
-
-        Args:
-            enable: List of service names to start and enable.
-            disable: List of service names to stop and disable.
-        """
+        """Enable/disable service lists (best effort)."""
         for service in enable:
             try:
                 subprocess.run(
                     ["systemctl", "start", service],
-                    capture_output=True, text=True, timeout=30,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
                 )
             except (subprocess.TimeoutExpired, OSError) as e:
                 logger.debug("Failed to start service %s: %s", service, e)
@@ -444,28 +386,24 @@ class ProfileManager:
             try:
                 subprocess.run(
                     ["systemctl", "stop", service],
-                    capture_output=True, text=True, timeout=30,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
                 )
             except (subprocess.TimeoutExpired, OSError) as e:
                 logger.debug("Failed to stop service %s: %s", service, e)
 
     @staticmethod
     def _set_swappiness(value: int) -> bool:
-        """
-        Set the kernel swappiness value.
-
-        Args:
-            value: Swappiness value (0-100).
-
-        Returns:
-            True on success, False otherwise.
-        """
+        """Set kernel swappiness value."""
         if not (0 <= value <= 100):
             return False
         try:
             result = subprocess.run(
                 ["pkexec", "sysctl", f"vm.swappiness={value}"],
-                capture_output=True, text=True, timeout=15,
+                capture_output=True,
+                text=True,
+                timeout=15,
             )
             return result.returncode == 0
         except (subprocess.TimeoutExpired, OSError):

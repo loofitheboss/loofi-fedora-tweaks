@@ -1,6 +1,5 @@
 """Loofi Web API server (FastAPI + Uvicorn)."""
 
-import os
 import threading
 from pathlib import Path
 from typing import Optional
@@ -12,6 +11,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 
 from api.routes import executor as executor_routes
+from api.routes import profiles as profiles_routes
 from api.routes import system as system_routes
 from utils.auth import AuthManager
 
@@ -38,6 +38,7 @@ class APIServer:
         # API routes
         app.include_router(system_routes.router, prefix="/api")
         app.include_router(executor_routes.router, prefix="/api")
+        app.include_router(profiles_routes.router, prefix="/api")
 
         @app.post("/api/token")
         def issue_token(api_key: str = Form(...)):

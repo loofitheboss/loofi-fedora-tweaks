@@ -36,6 +36,26 @@ approval_policy = "on-request"
 model = "gpt-5.3-codex"
 approval_policy = "on-failure"
 
+# State-file workflow profiles (Brain vs Labor)
+[profiles.planner]
+# High intelligence for planning and architecture artifacts
+model = "gpt-5.3-codex"
+temperature = 0.4
+approval_policy = "on-failure"
+system_prompt = "You are the Project Coordinator. Output strict, artifact-ready task and architecture specs with no chatter."
+
+[profiles.builder]
+# Balanced implementation profile
+model = "gpt-4o"
+approval_policy = "on-failure"
+system_prompt = "You are a Senior Python Developer. Implement exactly what is in the provided architecture/task artifacts."
+
+[profiles.scribe]
+# Fast/cheap profile for docs and release notes
+model = "gpt-4o-mini"
+approval_policy = "on-failure"
+system_prompt = "You are a technical writer. Prioritize concise, accurate release documentation."
+
 # --- Features ---
 
 [features]

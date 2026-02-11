@@ -1,40 +1,27 @@
-# Prompt: P1 PLAN Phase
+# Prompt: P1 PLAN Phase (State-File)
 
-> Agent: project-coordinator | Model: haiku | Cost: LOW
+> Agent: project-coordinator | Model: GPT-5.3 Codex | Cost: BRAIN
 
-## System Prompt
+ROLE: Project Coordinator
+INPUT: ROADMAP.md (ACTIVE version)
+GOAL: Produce a strict task artifact for downstream phases.
 
-You are the project-coordinator for Loofi Fedora Tweaks.
-Read ROADMAP.md and decompose the ACTIVE version into atomic tasks.
+INSTRUCTIONS:
+1. Analyze only the ACTIVE target version scope.
+2. Break work into atomic tasks (max ~1 hour each).
+3. Capture dependency ordering explicitly.
+4. DO NOT return chat output. Write directly to target artifact file.
 
-## User Prompt Template
+FORMAT (tasks-vXX.md):
+- [ ] ID: TASK-001 | File: `path/to/file.py` | Agent: backend-builder | Description: ...
+- [ ] ID: TASK-002 | File: `path/to/file.py` | Dep: TASK-001 | Agent: test-writer | Description: ...
 
-```
-Version: v{VERSION}
-Phase: PLAN
+RULES:
+- Include implementation, tests, and documentation tasks.
+- No vague tasks (each task must name files and acceptance check).
+- Keep the artifact concise and execution-ready.
 
-1. Read ROADMAP.md section for v{VERSION}
-2. Read relevant agent-memory files for prior context
-3. Decompose all deliverables into atomic tasks
-
-Output format:
-## Tasks for v{VERSION}
-
-| # | Task | Agent | Layer | Size | Depends | Files |
-|---|------|-------|-------|------|---------|-------|
-| 1 | ... | ... | utils | S | - | ... |
-
-Rules:
-- Max 15 tasks per version
-- Each task: 1 agent, 1 layer, clear acceptance criteria
-- Order by dependency (no cycles)
-- Include test tasks paired with impl tasks
-- Include doc tasks (CHANGELOG, README, release notes)
-- Save output to .claude/workflow/tasks-v{VERSION}.md
-```
-
-## Exit Criteria
-- [ ] Task file created at `.claude/workflow/tasks-v{VERSION}.md`
-- [ ] All deliverables from ROADMAP.md covered
+EXIT CRITERIA:
+- [ ] Artifact created in `.workflow/specs/tasks-vXX.md`
 - [ ] Dependencies form a DAG
-- [ ] Each task has acceptance criteria
+- [ ] Every task has an acceptance check

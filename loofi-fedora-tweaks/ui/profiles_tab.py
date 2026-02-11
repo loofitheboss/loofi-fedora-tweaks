@@ -14,9 +14,8 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QGridLayout, QTextEdit, QScrollArea,
     QFrame, QMessageBox, QDialog, QFormLayout, QLineEdit,
-    QComboBox,
+    QComboBox, QFileDialog,
 )
-from PyQt6.QtCore import Qt
 
 from ui.tab_utils import CONTENT_MARGINS
 from utils.profiles import ProfileManager
@@ -82,6 +81,14 @@ class ProfilesTab(QWidget):
         capture_btn = QPushButton(self.tr("Capture Current State"))
         capture_btn.clicked.connect(self._capture_current)
         btn_layout.addWidget(capture_btn)
+
+        export_all_btn = QPushButton(self.tr("Export All"))
+        export_all_btn.clicked.connect(self._export_all_profiles)
+        btn_layout.addWidget(export_all_btn)
+
+        import_all_btn = QPushButton(self.tr("Import Bundle"))
+        import_all_btn.clicked.connect(self._import_bundle)
+        btn_layout.addWidget(import_all_btn)
 
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
@@ -179,6 +186,12 @@ class ProfilesTab(QWidget):
             )
             btn_layout.addWidget(delete_btn)
 
+        export_btn = QPushButton(self.tr("Export"))
+        export_btn.clicked.connect(
+            lambda checked, k=profile_key: self._export_profile(k)
+        )
+        btn_layout.addWidget(export_btn)
+
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
 
@@ -205,7 +218,7 @@ class ProfilesTab(QWidget):
             return
 
         self.log(self.tr("Applying profile '{}'...").format(profile.get("name", name)))
-        result = ProfileManager.apply_profile(name)
+        result = ProfileManager.apply_profile(name, create_snapshot=True)
         self.log(result.message)
         self._refresh_profiles()
 
@@ -221,6 +234,54 @@ class ProfilesTab(QWidget):
             return
 
         result = ProfileManager.delete_custom_profile(name)
+        self.log(result.message)
+        if result.success:
+            self._refresh_profiles()
+
+    def _export_profile(self, name: str):
+        """Export a single profile to JSON."""
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr("Export Profile"),
+            f"{name}.json",
+            self.tr("JSON Files (*.json)"),
+        )
+        if not path:
+            return
+
+        result = ProfileManager.export_profile_json(name, path)
+        self.log(result.message)
+
+    def _export_all_profiles(self):
+        """Export all custom profiles to a bundle file."""
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr("Export Profile Bundle"),
+            "profiles-bundle.json",
+            self.tr("JSON Files (*.json)"),
+        )
+        if not path:
+            return
+
+        result = ProfileManager.export_bundle_json(path, include_builtins=False)
+        self.log(result.message)
+
+    def _import_bundle(self):
+        """Import profiles from a JSON file (single or bundle)."""
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            self.tr("Import Profile JSON"),
+            "",
+            self.tr("JSON Files (*.json)"),
+        )
+        if not path:
+            return
+
+        # Try bundle first, then fall back to single profile import.
+        result = ProfileManager.import_bundle_json(path, overwrite=False)
+        if not result.success:
+            result = ProfileManager.import_profile_json(path, overwrite=False)
+
         self.log(result.message)
         if result.success:
             self._refresh_profiles()

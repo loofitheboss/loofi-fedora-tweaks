@@ -14,7 +14,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 try:
-    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication, QScrollArea
     _HAS_QT_WIDGETS = True
 except ImportError:
     _HAS_QT_WIDGETS = False
@@ -26,7 +26,17 @@ class TestMainWindowGeometry(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.app = QApplication.instance() or QApplication([])
+        app_instance = QApplication.instance()
+        if isinstance(app_instance, QApplication):
+            cls.app = app_instance
+        elif app_instance is None:
+            cls.app = QApplication([])
+        else:
+            raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
+
+    def setUp(self):
+        if not isinstance(QApplication.instance(), QApplication):
+            raise unittest.SkipTest("QApplication unavailable for QWidget tests")
 
     def test_central_widget_starts_in_client_area(self):
         mod = importlib.import_module("ui.main_window")
@@ -160,6 +170,25 @@ class TestMainWindowGeometry(unittest.TestCase):
         # In a properly laid out window, sidebar should start after any chrome
         self.assertGreaterEqual(geom.x(), 0)
         self.assertGreaterEqual(geom.y(), 0)
+
+        window.hide()
+
+    def test_pages_are_wrapped_in_scroll_area(self):
+        """Verify tab pages use a scroll container to avoid vertical compression."""
+        mod = importlib.import_module("ui.main_window")
+        MainWindow = mod.MainWindow
+
+        with patch.object(MainWindow, "_start_pulse_listener", lambda self: None), \
+             patch.object(MainWindow, "setup_tray", lambda self: None), \
+             patch.object(MainWindow, "check_dependencies", lambda self: None), \
+             patch.object(MainWindow, "_check_first_run", lambda self: None):
+            window = MainWindow()
+
+        # Pick first real page item: Dashboard > Home
+        home_item = window.sidebar.topLevelItem(0).child(0)
+        page_container = home_item.data(0, mod.Qt.ItemDataRole.UserRole)
+        self.assertIsInstance(page_container, QScrollArea)
+        self.assertIsNotNone(page_container.widget())
 
         window.hide()
 

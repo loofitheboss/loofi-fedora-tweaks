@@ -6,6 +6,8 @@ Tests the _get_frameless_mode_flag method in MainWindow.
 import os
 import unittest
 from unittest.mock import patch, MagicMock
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PyQt6.QtWidgets import QApplication
 
 
@@ -15,13 +17,19 @@ class TestFramelessModeFlag(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Ensure QApplication exists for PyQt6 tests."""
-        if not QApplication.instance():
+        app_instance = QApplication.instance()
+        if isinstance(app_instance, QApplication):
+            cls.app = app_instance
+        elif app_instance is None:
             cls.app = QApplication([])
         else:
-            cls.app = QApplication.instance()
+            raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
 
     def setUp(self):
         """Clear environment before each test."""
+        app_instance = QApplication.instance()
+        if not isinstance(app_instance, QApplication):
+            raise unittest.SkipTest("QApplication unavailable for QWidget tests")
         if "LOOFI_FRAMELESS" in os.environ:
             del os.environ["LOOFI_FRAMELESS"]
 

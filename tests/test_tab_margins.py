@@ -26,7 +26,17 @@ class TestTabMargins(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.app = QApplication.instance() or QApplication([])
+        app_instance = QApplication.instance()
+        if isinstance(app_instance, QApplication):
+            cls.app = app_instance
+        elif app_instance is None:
+            cls.app = QApplication([])
+        else:
+            raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
+
+    def setUp(self):
+        if not isinstance(QApplication.instance(), QApplication):
+            raise unittest.SkipTest("QApplication unavailable for QWidget tests")
 
     def _get_root_layout_margins(self, tab_widget):
         """Helper to extract content margins from a tab's root layout."""

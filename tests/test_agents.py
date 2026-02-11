@@ -309,7 +309,8 @@ class TestAgentExecutor:
         assert result.success is False
         assert "manual confirmation" in result.message
 
-    def test_unknown_operation(self):
+    @patch("utils.agent_runner.Arbitrator.can_proceed", return_value=True)
+    def test_unknown_operation(self, _mock_can_proceed):
         from utils.agents import AgentConfig, AgentAction, AgentState, AgentType, ActionSeverity
         from utils.agent_runner import AgentExecutor
 
@@ -327,7 +328,8 @@ class TestAgentExecutor:
         assert result.success is False
         assert "Unknown operation" in result.message
 
-    def test_no_operation_or_command(self):
+    @patch("utils.agent_runner.Arbitrator.can_proceed", return_value=True)
+    def test_no_operation_or_command(self, _mock_can_proceed):
         from utils.agents import AgentConfig, AgentAction, AgentState, AgentType, ActionSeverity
         from utils.agent_runner import AgentExecutor
 
