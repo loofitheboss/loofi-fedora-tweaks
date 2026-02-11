@@ -1,10 +1,10 @@
 # Tasks for v25.0 — Plugin Architecture + UI Redesign
 
 > **Version**: v25.0
-> **Phase**: P5 DOC — COMPLETE / P6 PACKAGE — PENDING
+> **Phase**: P6 PACKAGE — COMPLETE / P7 RELEASE — PENDING
 > **Date**: 2026-02-11
 > **Agent**: release-planner
-> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 ✅ P5 ✅ P6 🔲 P7 🔲
+> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 ✅ P5 ✅ P6 ✅ P7 🔲
 
 ---
 
