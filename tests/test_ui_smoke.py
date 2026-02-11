@@ -172,21 +172,17 @@ class TestLazyLoadingMechanism(unittest.TestCase):
         self.assertTrue(hasattr(mod, "MainWindow"))
 
     def test_lazy_tab_keys_match_expected(self):
-        """MainWindow._lazy_tab covers all expected tab keys."""
+        """v25.0: MainWindow uses PluginRegistry instead of _lazy_tab."""
         try:
             mod = importlib.import_module("ui.main_window")
         except ImportError:
             self.skipTest("PyQt6 not available in this environment")
-        # Inspect the _lazy_tab method source to find the loader keys.
-        # We use a structural check: instantiate-free approach by reading
-        # the source and verifying the dict keys.
+        # Check that MainWindow uses plugin architecture
         import inspect
-        source = inspect.getsource(mod.MainWindow._lazy_tab)
-        for key in LAZY_TAB_KEYS:
-            self.assertIn(
-                f'"{key}"', source,
-                f"Lazy tab key '{key}' not found in _lazy_tab loader map",
-            )
+        source = inspect.getsource(mod.MainWindow)
+        self.assertIn("PluginRegistry", source)
+        self.assertIn("_build_sidebar_from_registry", source)
+        self.assertIn("PluginLoader", source)
 
     def test_all_tab_modules_in_mapping(self):
         """Every module in TAB_MODULES can be imported and has its class."""

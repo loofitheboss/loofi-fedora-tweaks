@@ -107,16 +107,8 @@ class MockCommandRunner:
         pass
 
 
-# Patch PyQt6 modules before any UI imports
-with patch.dict('sys.modules', {
-    'PyQt6': MagicMock(),
-    'PyQt6.QtWidgets': MagicMock(),
-    'PyQt6.QtCore': MagicMock(QTimer=MockQTimer, Qt=MagicMock()),
-    'PyQt6.QtGui': MagicMock(),
-}):
-    # Patch BaseTab to avoid Qt initialization
-    with patch('ui.base_tab.BaseTab', MockQWidget):
-        pass
+# These tests don't require Qt mocking - they test utils/ modules directly
+# Qt mocking is handled at test method level where needed
 
 
 class TestPerformanceTabImport(unittest.TestCase):
@@ -286,7 +278,8 @@ class TestHardwareTabBluetooth(unittest.TestCase):
 class TestMainWindowRegistration(unittest.TestCase):
     """Test that tabs are registered through plugin architecture in MainWindow."""
 
-    def test_main_window_has_new_tabs(self):
+    def test_main_window_uses_plugin_registry(self):
+        """v25.0 replaced hardcoded tabs with PluginRegistry."""
         filepath = os.path.join(
             os.path.dirname(__file__), '..', 'loofi-fedora-tweaks', 'ui', 'main_window.py'
         )
@@ -296,6 +289,7 @@ class TestMainWindowRegistration(unittest.TestCase):
         self.assertIn("PluginLoader", source)
         self.assertIn("load_builtins(context=context)", source)
         self.assertIn("_build_sidebar_from_registry", source)
+        self.assertIn("CompatibilityDetector", source)
 
 
 if __name__ == '__main__':

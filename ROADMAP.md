@@ -13,7 +13,7 @@
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
 | v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
 | v25.0.3 | Maintenance Update Crash Hotfix | DONE | Stabilize Maintenance update actions |
-| v26.0 | Plugin Marketplace | NEXT | External plugins, marketplace, sandboxing |
+| v26.0 | Plugin Marketplace | ACTIVE | External plugins, marketplace, sandboxing |
 
 ---
 
@@ -184,6 +184,65 @@
 - [x] `Update All` starts with system package-manager update step
 - [x] Regression tests for maintenance update flow
 - [x] CHANGELOG + README + release notes
+
+## [ACTIVE] v26.0 — Plugin Marketplace
+
+### Scope
+- Unified plugin system (bridge core/plugins ↔ utils/plugin_base)
+- External plugin loading, install/uninstall engine
+- Plugin package format (.loofi-plugin archive)
+- Runtime permission sandboxing
+- GitHub-based plugin marketplace API
+- Marketplace UI in Community tab
+- Plugin signing & integrity verification
+- CLI marketplace commands (search/install/uninstall/update)
+- Plugin dependency resolution
+- Plugin auto-update service
+
+### Deliverables
+- [ ] PluginAdapter (wraps LoofiPlugin as PluginInterface)
+- [ ] PluginPackage dataclass + archive format spec
+- [ ] PluginSandbox (permission enforcement layer)
+- [ ] External plugin scanner + loader
+- [ ] Plugin installer engine (download, verify, extract, register)
+- [ ] Plugin integrity verifier (SHA256 + GPG)
+- [ ] PluginMarketplaceAPI (GitHub-based index)
+- [ ] Plugin dependency resolver
+- [ ] Marketplace UI (browse/search/install in Community tab)
+- [ ] Plugin detail dialog + permission consent dialog
+- [ ] CLI commands: search, install, uninstall, update, info
+- [ ] Plugin auto-update service (daemon mode)
+- [ ] 8 new test files (~180+ tests)
+- [ ] PLUGIN_SDK.md update
+- [ ] CHANGELOG + release notes
+
+### Phases
+| Phase | Tasks | Gate |
+|-------|-------|------|
+| Foundation | T1–T8: Adapter, package, sandbox, loader, installer, integrity, marketplace API, resolver | All core modules importable, unit tests pass |
+| Features | T9–T14: Marketplace UI, details dialog, CLI commands, permission dialog, auto-updater | Full E2E: search → install → load → sandbox → uninstall |
+| Stabilization | T15–T22: 8 new test files | All 2080+ tests pass |
+| Release | T23–T27: Version, docs, changelog, RPM | CI green, RPM builds |
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| Arkitekt | PluginAdapter design, package format spec |
+| Builder | Sandbox, external loader, installer, integrity, marketplace API, resolver, auto-updater |
+| Sculptor | Marketplace UI, detail dialog, permission dialog |
+| CodeGen | CLI marketplace commands |
+| Guardian | 8 test files (adapter, sandbox, loader, installer, marketplace, CLI, resolver, integrity) |
+| Planner | Version bump, PLUGIN_SDK.md, CHANGELOG, release notes |
+
+### Dependencies
+- v25.0 plugin architecture (PluginInterface, PluginRegistry, PluginLoader)
+- v24.0 profiles (plugin configs)
+
+### New Files (17)
+- `core/plugins/adapter.py`, `package.py`, `sandbox.py`, `scanner.py`, `integrity.py`, `resolver.py`
+- `utils/plugin_installer.py`, `plugin_marketplace.py`, `plugin_updater.py`
+- `ui/plugin_detail_dialog.py`, `permission_dialog.py`
+- `tests/test_plugin_{adapter,sandbox,external_loader,installer,marketplace,resolver,integrity}.py`, `test_cli_marketplace.py`
 
 ---
 

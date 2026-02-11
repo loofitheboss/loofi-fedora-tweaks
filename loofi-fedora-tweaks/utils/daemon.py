@@ -14,9 +14,11 @@ class Daemon:
 
     CHECK_INTERVAL = 300  # Check every 5 minutes
     POWER_CHECK_INTERVAL = 30  # Check power state every 30 seconds
+    PLUGIN_UPDATE_INTERVAL = 86400  # Check for plugin updates every 24 hours
 
     _running = True
     _last_power_state = None
+    _last_plugin_check = 0
 
     @classmethod
     def signal_handler(cls, signum, frame):
@@ -109,6 +111,49 @@ class Daemon:
                 print(f"[Daemon] Task '{task.name}': {'Success' if success else 'Failed'} - {message}")
 
     @classmethod
+    def check_plugin_updates(cls):
+        """Check for plugin updates and auto-update if enabled."""
+        from utils.plugin_installer import PluginInstaller
+        from utils.plugin_base import PluginLoader
+        from utils.config_manager import ConfigManager
+
+        # Check if auto-update is enabled in config
+        config = ConfigManager.load_config()
+        if not config.get("plugin_auto_update", True):
+            return
+
+        print("[Daemon] Checking for plugin updates...")
+
+        try:
+            loader = PluginLoader()
+            installer = PluginInstaller()
+            plugins = loader.list_plugins()
+
+            for plugin in plugins:
+                if not plugin.get("enabled", True):
+                    continue  # Skip disabled plugins
+
+                plugin_name = plugin["name"]
+                print(f"[Daemon] Checking updates for plugin: {plugin_name}")
+
+                result = installer.check_update(plugin_name)
+
+                if result.success and result.data and result.data.get("update_available"):
+                    new_version = result.data.get("new_version")
+                    print(f"[Daemon] Update available for {plugin_name}: {new_version}")
+
+                    # Auto-update the plugin
+                    update_result = installer.update(plugin_name)
+
+                    if update_result.success:
+                        print(f"[Daemon] Successfully updated {plugin_name} to {new_version}")
+                    else:
+                        print(f"[Daemon] Failed to update {plugin_name}: {update_result.error}")
+
+        except Exception as e:
+            print(f"[Daemon] Error checking plugin updates: {e}")
+
+    @classmethod
     def run(cls):
         """Main daemon loop."""
         print("[Daemon] Loofi Fedora Tweaks daemon starting...")
@@ -122,6 +167,7 @@ class Daemon:
 
         last_task_check = 0
         last_power_check = 0
+        last_plugin_update_check = 0
 
         while cls._running:
             try:
@@ -136,6 +182,11 @@ class Daemon:
                 if now - last_power_check >= cls.POWER_CHECK_INTERVAL:
                     cls.check_power_triggers()
                     last_power_check = now
+
+                # Check for plugin updates (daily)
+                if now - last_plugin_update_check >= cls.PLUGIN_UPDATE_INTERVAL:
+                    cls.check_plugin_updates()
+                    last_plugin_update_check = now
 
                 # Sleep briefly
                 time.sleep(10)

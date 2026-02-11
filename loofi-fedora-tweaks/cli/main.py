@@ -556,6 +556,198 @@ def cmd_plugins(args):
     return 1
 
 
+def cmd_plugin_marketplace(args):
+    """Plugin marketplace operations."""
+    from utils.plugin_marketplace import PluginMarketplace
+    from utils.plugin_installer import PluginInstaller
+    
+    marketplace = PluginMarketplace()
+    installer = PluginInstaller()
+    
+    if args.action == "search":
+        query = args.query or ""
+        category = args.category or ""
+        plugins = marketplace.search_plugins(query=query, category=category)
+        
+        if _json_output:
+            data = [
+                {
+                    "name": p.metadata.name,
+                    "version": p.metadata.version,
+                    "author": p.metadata.author,
+                    "category": p.metadata.category,
+                    "description": p.metadata.description,
+                }
+                for p in plugins
+            ]
+            _output_json({"plugins": data, "count": len(data)})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Plugin Marketplace Search Results")
+            _print("═══════════════════════════════════════════")
+            if not plugins:
+                _print("\n(no plugins found)")
+                return 0
+            for p in plugins:
+                _print(f"📦 {p.metadata.name} v{p.metadata.version} by {p.metadata.author}")
+                _print(f"   Category: {p.metadata.category}")
+                _print(f"   {p.metadata.description}")
+                _print()
+        return 0
+    
+    if args.action == "info":
+        if not args.plugin:
+            _print("❌ Plugin name required")
+            return 1
+        
+        plugins = marketplace.search_plugins(query=args.plugin)
+        matching = [p for p in plugins if p.metadata.name == args.plugin]
+        
+        if not matching:
+            _print(f"❌ Plugin '{args.plugin}' not found in marketplace")
+            return 1
+        
+        plugin = matching[0]
+        
+        if _json_output:
+            data = {
+                "name": plugin.metadata.name,
+                "version": plugin.metadata.version,
+                "author": plugin.metadata.author,
+                "category": plugin.metadata.category,
+                "description": plugin.metadata.description,
+                "homepage": plugin.metadata.homepage,
+                "permissions": plugin.manifest.permissions,
+                "dependencies": plugin.manifest.dependencies,
+            }
+            _output_json(data)
+        else:
+            _print("═══════════════════════════════════════════")
+            _print(f"   {plugin.metadata.name}")
+            _print("═══════════════════════════════════════════")
+            _print(f"Version:     {plugin.metadata.version}")
+            _print(f"Author:      {plugin.metadata.author}")
+            _print(f"Category:    {plugin.metadata.category}")
+            _print(f"Description: {plugin.metadata.description}")
+            if plugin.metadata.homepage:
+                _print(f"Homepage:    {plugin.metadata.homepage}")
+            if plugin.manifest.permissions:
+                _print(f"Permissions: {', '.join(plugin.manifest.permissions)}")
+            if plugin.manifest.dependencies:
+                _print(f"Dependencies: {', '.join(plugin.manifest.dependencies)}")
+        return 0
+    
+    if args.action == "install":
+        if not args.plugin:
+            _print("❌ Plugin name required")
+            return 1
+        
+        # Find plugin in marketplace
+        plugins = marketplace.search_plugins(query=args.plugin)
+        matching = [p for p in plugins if p.metadata.name == args.plugin]
+        
+        if not matching:
+            _print(f"❌ Plugin '{args.plugin}' not found in marketplace")
+            return 1
+        
+        plugin = matching[0]
+        
+        # Check permissions if not auto-accepted
+        if plugin.manifest.permissions and not args.accept_permissions:
+            _print(f"⚠️  Plugin '{plugin.metadata.name}' requires the following permissions:")
+            for perm in plugin.manifest.permissions:
+                _print(f"   • {perm}")
+            _print("\nRe-run with --accept-permissions to install")
+            return 1
+        
+        _print(f"🔄 Installing plugin '{plugin.metadata.name}'...")
+        
+        result = installer.install(plugin.metadata.name)
+        
+        if result.success:
+            if _json_output:
+                _output_json({"status": "success", "plugin": plugin.metadata.name})
+            else:
+                _print(f"✅ Plugin '{plugin.metadata.name}' installed successfully!")
+                _print("   Restart the application to load the plugin.")
+            return 0
+        else:
+            if _json_output:
+                _output_json({"status": "error", "error": result.error})
+            else:
+                _print(f"❌ Installation failed: {result.error}")
+            return 1
+    
+    if args.action == "uninstall":
+        if not args.plugin:
+            _print("❌ Plugin name required")
+            return 1
+        
+        _print(f"🔄 Uninstalling plugin '{args.plugin}'...")
+        
+        result = installer.uninstall(args.plugin)
+        
+        if result.success:
+            if _json_output:
+                _output_json({"status": "success", "plugin": args.plugin})
+            else:
+                _print(f"✅ Plugin '{args.plugin}' uninstalled successfully!")
+            return 0
+        else:
+            if _json_output:
+                _output_json({"status": "error", "error": result.error})
+            else:
+                _print(f"❌ Uninstall failed: {result.error}")
+            return 1
+    
+    if args.action == "update":
+        if not args.plugin:
+            _print("❌ Plugin name required")
+            return 1
+        
+        _print(f"🔄 Updating plugin '{args.plugin}'...")
+        
+        result = installer.update(args.plugin)
+        
+        if result.success:
+            if _json_output:
+                _output_json({"status": "success", "plugin": args.plugin})
+            else:
+                _print(f"✅ Plugin '{args.plugin}' updated successfully!")
+                _print("   Restart the application to load the updated plugin.")
+            return 0
+        else:
+            if _json_output:
+                _output_json({"status": "error", "error": result.error})
+            else:
+                _print(f"❌ Update failed: {result.error}")
+            return 1
+    
+    if args.action == "list-installed":
+        loader = PluginLoader()
+        plugins = loader.list_plugins()
+        
+        if _json_output:
+            _output_json({"plugins": plugins, "count": len(plugins)})
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Installed Plugins")
+            _print("═══════════════════════════════════════════")
+            if not plugins:
+                _print("\n(no plugins installed)")
+                return 0
+            for plugin in plugins:
+                name = plugin["name"]
+                enabled = plugin["enabled"]
+                manifest = plugin.get("manifest") or {}
+                status = "✅" if enabled else "❌"
+                version = manifest.get("version", "unknown")
+                _print(f"{status} {name} v{version}")
+        return 0
+    
+    return 1
+
+
 def cmd_support_bundle(args):
     """Export support bundle ZIP."""
     result = JournalManager.export_support_bundle()
@@ -2084,6 +2276,19 @@ def main(argv: Optional[List[str]] = None):
     plugin_parser.add_argument("action", choices=["list", "enable", "disable"], help="Plugin action")
     plugin_parser.add_argument("name", nargs="?", help="Plugin name for enable/disable")
 
+    # v26.0 - Plugin marketplace
+    marketplace_parser = subparsers.add_parser("plugin-marketplace", help="Plugin marketplace operations")
+    marketplace_parser.add_argument(
+        "action",
+        choices=["search", "install", "uninstall", "update", "info", "list-installed"],
+        help="Marketplace action"
+    )
+    marketplace_parser.add_argument("plugin", nargs="?", help="Plugin name or ID")
+    marketplace_parser.add_argument("--category", help="Filter by category")
+    marketplace_parser.add_argument("--query", help="Search query")
+    marketplace_parser.add_argument("--accept-permissions", action="store_true",
+                                   help="Auto-accept permissions (non-interactive)")
+
     # Support bundle
     subparsers.add_parser("support-bundle", help="Export support bundle ZIP")
 
@@ -2267,6 +2472,7 @@ def main(argv: Optional[List[str]] = None):
         "doctor": cmd_doctor,
         "hardware": cmd_hardware,
         "plugins": cmd_plugins,
+        "plugin-marketplace": cmd_plugin_marketplace,
         "support-bundle": cmd_support_bundle,
         # v11.5 / v12.0
         "vm": cmd_vm,
