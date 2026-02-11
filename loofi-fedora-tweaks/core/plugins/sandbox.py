@@ -148,6 +148,50 @@ class PluginSandbox:
         if self.importer and self.importer in sys.meta_path:
             sys.meta_path.remove(self.importer)
             logger.debug("Import hook removed for plugin '%s'", self.plugin_id)
+    
+    def wrap(self, plugin: Any) -> Any:
+        """Wrap plugin instance with sandbox enforcement (modifies in-place).
+        
+        Args:
+            plugin: Plugin instance to wrap
+            
+        Returns:
+            The same plugin instance (for chaining)
+        """
+        # Install import hook
+        if not hasattr(self, "_importer"):
+            self._importer = RestrictedImporter(self.plugin_id, self.permissions)
+            sys.meta_path.insert(0, self._importer)
+        
+        # Create restricted builtins
+        if not hasattr(self, "_restricted_builtins"):
+            original_builtins = __builtins__ if isinstance(__builtins__, dict) else __builtins__.__dict__
+            self._restricted_builtins = original_builtins.copy()
+            
+            if "filesystem" not in self.permissions:
+                # Wrap open() to restrict file access
+                original_open = self._restricted_builtins.get("open", open)
+                self._restricted_builtins["open"] = self.wrap_open(original_open)
+        
+        logger.debug("Sandbox wrapped plugin '%s'", self.plugin_id)
+        return plugin
+    
+    def unwrap(self, plugin: Any = None) -> None:
+        """Remove sandbox hooks from plugin (cleanup).
+        
+        Args:
+            plugin: Plugin instance (optional, for API consistency)
+        """
+        # Remove import hook
+        if hasattr(self, "_importer") and self._importer in sys.meta_path:
+            sys.meta_path.remove(self._importer)
+            delattr(self, "_importer")
+        
+        # Clear restricted builtins
+        if hasattr(self, "_restricted_builtins"):
+            delattr(self, "_restricted_builtins")
+        
+        logger.debug("Sandbox unwrapped for plugin '%s'", self.plugin_id)
 
     def check_permission(self, permission: str) -> bool:
         """Check if plugin has specific permission."""

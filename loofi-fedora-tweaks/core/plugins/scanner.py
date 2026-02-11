@@ -56,7 +56,12 @@ class PluginScanner:
         """
         config_base = Path.home() / ".config" / "loofi-fedora-tweaks"
         self.plugins_dir = plugins_dir or (config_base / "plugins")
-        self.state_file = config_base / "plugins.json"
+        
+        # State file is in plugins_dir parent (or config_base if custom dir)
+        if plugins_dir:
+            self.state_file = self.plugins_dir.parent / "plugins.json"
+        else:
+            self.state_file = config_base / "plugins.json"
         
         # Ensure directories exist
         self.plugins_dir.mkdir(parents=True, exist_ok=True)
@@ -78,7 +83,13 @@ class PluginScanner:
         state = self._load_state()
         
         # Scan all subdirectories
-        for plugin_dir in self.plugins_dir.iterdir():
+        try:
+            entries = list(self.plugins_dir.iterdir())
+        except PermissionError as exc:
+            logger.warning("Permission denied scanning plugins: %s", exc)
+            return []
+        
+        for plugin_dir in entries:
             if not plugin_dir.is_dir():
                 continue
             
@@ -240,13 +251,23 @@ class PluginScanner:
         Returns:
             True if enabled (or not in state = default enabled), False if disabled
         """
+        # Support two state formats:
+        # 1. {plugin_id: {"enabled": bool}} (new format)
+        # 2. {"enabled": {plugin_id: bool}} (old format)
+        
+        if plugin_id in state:
+            # New format: {plugin_id: {"enabled": bool}}
+            plugin_data = state[plugin_id]
+            if isinstance(plugin_data, dict) and "enabled" in plugin_data:
+                return plugin_data["enabled"]
+        
+        # Old format: {"enabled": {plugin_id: bool}}
         enabled_map = state.get("enabled", {})
+        if plugin_id in enabled_map:
+            return enabled_map[plugin_id]
         
         # Default is enabled if not in state
-        if plugin_id not in enabled_map:
-            return True
-        
-        return bool(enabled_map[plugin_id])
+        return True
     
     def _parse_version(self, version_str: str) -> Tuple[int, ...]:
         """

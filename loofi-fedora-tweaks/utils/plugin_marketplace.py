@@ -201,7 +201,7 @@ class PluginMarketplace:
                 error=f"Failed to fetch index: {exc}"
             )
 
-    def search(self, query: str, category: Optional[str] = None) -> MarketplaceResult:
+    def search(self, query: str = "", category: Optional[str] = None) -> MarketplaceResult:
         """
         Search plugins by name, description, or tags.
         
@@ -217,8 +217,7 @@ class PluginMarketplace:
         
         if not index_result.success or not index_result.data:
             return index_result
-        
-        query_lower = query.lower()
+        query_lower = query.lower() if query else ""
         results = []
         
         for plugin in index_result.data:
@@ -226,17 +225,19 @@ class PluginMarketplace:
             if category and plugin.category.lower() != category.lower():
                 continue
             
-            # Search in name, description, tags
-            if (query_lower in plugin.name.lower() or
+            # Search in name, description, tags (if query provided)
+            if not query or (
+                query_lower in plugin.name.lower() or
                 query_lower in plugin.description.lower() or
-                any(query_lower in tag.lower() for tag in plugin.tags)):
+                any(query_lower in tag.lower() for tag in plugin.tags)
+            ):
                 results.append(plugin)
         
         logger.info("Search '%s' found %d results", query, len(results))
         
         return MarketplaceResult(success=True, data=results)
 
-    def get_plugin_info(self, plugin_id: str) -> Optional[PluginMetadata]:
+    def get_plugin(self, plugin_id: str) -> MarketplaceResult:
         """
         Get detailed information for a specific plugin.
         
@@ -244,19 +245,46 @@ class PluginMarketplace:
             plugin_id: Plugin ID to lookup
             
         Returns:
-            PluginMetadata or None if not found
+            MarketplaceResult with single plugin or error
         """
         index_result = self.fetch_index()
         
-        if not index_result.success or not index_result.data:
-            return None
+        if not index_result.success:
+            return MarketplaceResult(
+                success=False,
+                error="Failed to fetch plugin index"
+            )
+        
+        if index_result.data is None:
+            return MarketplaceResult(
+                success=False,
+                error="Failed to fetch plugin index"
+            )
         
         for plugin in index_result.data:
             if plugin.id == plugin_id:
                 logger.debug("Found plugin info for %s", plugin_id)
-                return plugin
+                return MarketplaceResult(success=True, data=[plugin])
         
         logger.warning("Plugin not found: %s", plugin_id)
+        return MarketplaceResult(
+            success=False,
+            error=f"Plugin '{plugin_id}' not found in marketplace"
+        )
+    
+    def get_plugin_info(self, plugin_id: str) -> Optional[PluginMetadata]:
+        """
+        Get detailed information for a specific plugin (legacy method).
+        
+        Args:
+            plugin_id: Plugin ID to lookup
+            
+        Returns:
+            PluginMetadata or None if not found
+        """
+        result = self.get_plugin(plugin_id)
+        if result.success and result.data:
+            return result.data[0]
         return None
 
     def download_plugin(self, plugin_id: str, destination: Path, version: Optional[str] = None) -> MarketplaceResult:

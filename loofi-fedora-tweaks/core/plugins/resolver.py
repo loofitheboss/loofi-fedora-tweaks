@@ -147,8 +147,8 @@ class DependencyResolver:
                 if not self._check_version_constraint(installed_ver, operator, version):
                     logger.debug("Version mismatch: %s requires %s%s%s (installed: %s)",
                                plugin_id, dep_id, operator, version, installed_ver)
-                    # Treat version mismatch as missing for now
-                    missing.append(f"{dep_id}{operator}{version}")
+                    # Treat version mismatch as missing - return just plugin ID
+                    missing.append(dep_id)
         
         return missing
 
@@ -208,6 +208,16 @@ class DependencyResolver:
         """
         errors = []
         missing_all = []
+        
+        # Handle empty input
+        if not plugin_requirements:
+            return ResolverResult(
+                success=True,
+                install_order=[],
+                errors=[],
+                missing=[],
+                conflicts=[]
+            )
         
         try:
             # Check for missing dependencies

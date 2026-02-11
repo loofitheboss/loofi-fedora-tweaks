@@ -112,6 +112,18 @@ class PluginInstaller:
             logger.error("Failed to write extracted files: %s", exc)
             return False
 
+    def validate_manifest(self, plugin_dir: Path) -> Optional[PluginManifest]:
+        """
+        Validate plugin manifest.json (public method).
+        
+        Args:
+            plugin_dir: Plugin directory
+            
+        Returns:
+            PluginManifest or None if invalid
+        """
+        return self._validate_manifest(plugin_dir)
+    
     def _validate_manifest(self, plugin_dir: Path) -> Optional[PluginManifest]:
         """
         Validate plugin manifest.json.
@@ -145,7 +157,7 @@ class PluginInstaller:
                 version=data["version"],
                 description=data["description"],
                 author=data["author"],
-                entrypoint=data["entrypoint"],
+                entry_point=data.get("entrypoint", data.get("entry_point", "plugin.py")),
                 icon=data.get("icon", "🔌"),
                 category=data.get("category", "Other"),
                 tags=data.get("tags", []),
@@ -165,12 +177,12 @@ class PluginInstaller:
             logger.error("Failed to parse manifest: %s", exc)
             return None
 
-    def install(self, plugin_id: str, version: Optional[str] = None, skip_deps: bool = False) -> InstallerResult:
+    def install(self, plugin_id_or_meta, version: Optional[str] = None, skip_deps: bool = False) -> InstallerResult:
         """
         Download and install plugin from marketplace.
         
         Args:
-            plugin_id: Plugin ID to install
+            plugin_id_or_meta: Plugin ID string or PluginMetadata object
             version: Optional specific version (defaults to latest)
             skip_deps: If True, don't install dependencies
             
@@ -178,6 +190,15 @@ class PluginInstaller:
             InstallerResult with installation status
         """
         try:
+            # Handle both plugin ID and metadata
+            if isinstance(plugin_id_or_meta, str):
+                plugin_id = plugin_id_or_meta
+                plugin_meta = None
+            else:
+                # PluginMetadata object
+                plugin_meta = plugin_id_or_meta
+                plugin_id = plugin_meta.id
+            
             logger.info("Installing plugin: %s (version: %s)", plugin_id, version or "latest")
             
             # Check if already installed
@@ -190,14 +211,15 @@ class PluginInstaller:
                     error="Plugin already installed (use update to upgrade)"
                 )
             
-            # Get plugin metadata from marketplace
-            plugin_meta = self.marketplace.get_plugin_info(plugin_id)
+            # Get plugin metadata from marketplace if not provided
             if not plugin_meta:
-                return InstallerResult(
-                    success=False,
-                    plugin_id=plugin_id,
-                    error="Plugin not found in marketplace"
-                )
+                plugin_meta = self.marketplace.get_plugin_info(plugin_id)
+                if not plugin_meta:
+                    return InstallerResult(
+                        success=False,
+                        plugin_id=plugin_id,
+                        error="Plugin not found in marketplace"
+                    )
             
             # Check dependencies
             if not skip_deps and plugin_meta.requires:
@@ -297,12 +319,13 @@ class PluginInstaller:
                 error=f"Installation error: {exc}"
             )
 
-    def uninstall(self, plugin_id: str) -> InstallerResult:
+    def uninstall(self, plugin_id: str, create_backup: bool = False) -> InstallerResult:
         """
         Uninstall plugin and remove its directory.
         
         Args:
             plugin_id: Plugin ID to uninstall
+            create_backup: If True, create backup before removal
             
         Returns:
             InstallerResult with uninstall status
@@ -316,8 +339,22 @@ class PluginInstaller:
                 return InstallerResult(
                     success=False,
                     plugin_id=plugin_id,
-                    error="Plugin not installed"
+                    error="Plugin not found or not installed"
                 )
+            
+            backup_path = None
+            
+            # Create backup if requested
+            if create_backup:
+                manifest = self._validate_manifest(plugin_dir)
+                version = manifest.version if manifest else "unknown"
+                backup_path = self.backups_dir / f"{plugin_id}-{version}"
+                
+                logger.info("Creating backup at %s", backup_path)
+                if backup_path.exists():
+                    shutil.rmtree(backup_path)
+                
+                shutil.copytree(plugin_dir, backup_path)
             
             # Remove directory
             shutil.rmtree(plugin_dir)
@@ -333,7 +370,8 @@ class PluginInstaller:
             
             return InstallerResult(
                 success=True,
-                plugin_id=plugin_id
+                plugin_id=plugin_id,
+                backup_path=backup_path
             )
             
         except Exception as exc:
@@ -538,4 +576,54 @@ class PluginInstaller:
                 success=False,
                 plugin_id=plugin_id,
                 error=f"Check update error: {exc}"
+            )
+    
+    def list_installed(self) -> InstallerResult:
+        """
+        List all installed plugins.
+        
+        Returns:
+            InstallerResult with list of installed plugin manifests in .data
+        """
+        try:
+            logger.debug("Listing installed plugins")
+            
+            if not self.plugins_dir.exists():
+                return InstallerResult(
+                    success=True,
+                    plugin_id="",
+                    data=[]
+                )
+            
+            installed = []
+            
+            for plugin_dir in self.plugins_dir.iterdir():
+                if not plugin_dir.is_dir():
+                    continue
+                
+                # Skip backups directory
+                if plugin_dir.name.startswith("."):
+                    continue
+                
+                # Try to read manifest
+                manifest = self._validate_manifest(plugin_dir)
+                if manifest:
+                    installed.append(manifest)
+                    logger.debug("Found installed plugin: %s v%s", manifest.id, manifest.version)
+            
+            logger.info("Found %d installed plugin(s)", len(installed))
+            
+            return InstallerResult(
+                success=True,
+                plugin_id="",
+                data=installed
+            )
+            
+        except Exception as exc:
+            logger.error("Failed to list installed plugins: %s", exc)
+            return InstallerResult(
+                success=False,
+                plugin_id="",
+                error=f"List error: {exc}",
+                data=[]
             )

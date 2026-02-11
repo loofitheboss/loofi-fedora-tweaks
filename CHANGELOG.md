@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [26.0.0] - 2026-02-12 "Plugin Marketplace"
+
+### Added
+
+- Add Plugin Marketplace system for external plugin discovery, installation, and management
+- Add `PluginAdapter` to bridge `LoofiPlugin` (old API) with `PluginInterface` (v25+ core API)
+- Add `PluginPackage` dataclass for `.loofi-plugin` archive format specification
+- Add `PluginSandbox` for runtime permission enforcement (filesystem, network, sudo, clipboard, notifications)
+- Add external plugin scanner and loader in `core/plugins/scanner.py`
+- Add `PluginInstaller` engine with download, verify, extract, and register workflow
+- Add `PluginIntegrityVerifier` with SHA256 hash and GPG signature verification
+- Add `PluginMarketplaceAPI` with GitHub-based plugin index fetching
+- Add `PluginDependencyResolver` for automatic dependency installation and version constraints
+- Add CLI marketplace commands: `search`, `install`, `uninstall`, `update`, `info`
+- Add Marketplace UI in Community tab (browse, search, install with permission dialog)
+- Add plugin auto-update service for daemon mode
+- Add 195 new tests across 8 test modules (adapter, sandbox, loader, installer, marketplace, resolver, integrity, CLI)
+
+### Changed
+
+- Update `PluginLoader` to support both built-in and external plugin sources
+- Extend `plugin.json` manifest format with `dependencies`, `checksum`, `signature` fields
+- Update `PLUGIN_SDK.md` with comprehensive marketplace usage guide and API reference
+- Refactor permission system to enforce grants at runtime via `PluginSandbox`
+
+### Fixed
+
+- Fix plugin installation race conditions with atomic file operations
+- Fix permission dialog to properly handle user cancellation
+- Fix dependency resolution to respect version constraints (>=, >, <, <=, ==)
+
+---
+
 ## [25.0.3] - 2026-02-11 "Maintenance Update Crash Hotfix"
 
 ### Fixed

@@ -20,6 +20,8 @@ from utils.network_monitor import NetworkMonitor
 from utils.temperature import TemperatureManager
 from utils.processes import ProcessManager
 from utils.plugin_base import PluginLoader
+from utils.plugin_marketplace import PluginMarketplace
+from utils.plugin_installer import PluginInstaller
 from utils.monitor import SystemMonitor
 from utils.disk import DiskManager
 from utils.system import SystemManager
@@ -558,193 +560,171 @@ def cmd_plugins(args):
 
 def cmd_plugin_marketplace(args):
     """Plugin marketplace operations."""
-    from utils.plugin_marketplace import PluginMarketplace
-    from utils.plugin_installer import PluginInstaller
-    
     marketplace = PluginMarketplace()
     installer = PluginInstaller()
-    
+    use_json = getattr(args, 'json', False) or _json_output
+
     if args.action == "search":
-        query = args.query or ""
-        category = args.category or ""
-        plugins = marketplace.search_plugins(query=query, category=category)
-        
-        if _json_output:
+        query = getattr(args, 'query', None) or ""
+        category = getattr(args, 'category', None)
+        result = marketplace.search(query=query, category=category)
+
+        if not result.success:
+            print(f"Error: {result.error}", file=sys.stderr)
+            return 1
+
+        plugins = result.data or []
+        if use_json:
             data = [
                 {
-                    "name": p.metadata.name,
-                    "version": p.metadata.version,
-                    "author": p.metadata.author,
-                    "category": p.metadata.category,
-                    "description": p.metadata.description,
+                    "id": p.id,
+                    "name": p.name,
+                    "version": p.version,
+                    "author": p.author,
+                    "category": p.category,
+                    "description": p.description,
                 }
                 for p in plugins
             ]
-            _output_json({"plugins": data, "count": len(data)})
+            print(json_module.dumps({"plugins": data, "count": len(data)}, indent=2, default=str))
         else:
-            _print("═══════════════════════════════════════════")
-            _print("   Plugin Marketplace Search Results")
-            _print("═══════════════════════════════════════════")
             if not plugins:
-                _print("\n(no plugins found)")
+                print("No plugins found")
                 return 0
             for p in plugins:
-                _print(f"📦 {p.metadata.name} v{p.metadata.version} by {p.metadata.author}")
-                _print(f"   Category: {p.metadata.category}")
-                _print(f"   {p.metadata.description}")
-                _print()
+                print(f"📦 {p.name} v{p.version} by {p.author}")
+                print(f"   Category: {p.category}")
+                print(f"   {p.description}")
+                print()
         return 0
-    
+
     if args.action == "info":
-        if not args.plugin:
-            _print("❌ Plugin name required")
+        plugin_id = getattr(args, 'plugin_id', None)
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
             return 1
-        
-        plugins = marketplace.search_plugins(query=args.plugin)
-        matching = [p for p in plugins if p.metadata.name == args.plugin]
-        
-        if not matching:
-            _print(f"❌ Plugin '{args.plugin}' not found in marketplace")
+
+        result = marketplace.get_plugin(plugin_id)
+
+        if not result.success:
+            print(f"Error: {result.error}", file=sys.stderr)
             return 1
-        
-        plugin = matching[0]
-        
-        if _json_output:
+
+        plugin = result.data[0] if isinstance(result.data, list) else result.data
+
+        if use_json:
             data = {
-                "name": plugin.metadata.name,
-                "version": plugin.metadata.version,
-                "author": plugin.metadata.author,
-                "category": plugin.metadata.category,
-                "description": plugin.metadata.description,
-                "homepage": plugin.metadata.homepage,
-                "permissions": plugin.manifest.permissions,
-                "dependencies": plugin.manifest.dependencies,
+                "id": plugin.id,
+                "name": plugin.name,
+                "version": plugin.version,
+                "author": plugin.author,
+                "category": plugin.category,
+                "description": plugin.description,
+                "homepage": getattr(plugin, 'homepage', None),
+                "license": getattr(plugin, 'license', None),
             }
-            _output_json(data)
+            print(json_module.dumps(data, indent=2, default=str))
         else:
-            _print("═══════════════════════════════════════════")
-            _print(f"   {plugin.metadata.name}")
-            _print("═══════════════════════════════════════════")
-            _print(f"Version:     {plugin.metadata.version}")
-            _print(f"Author:      {plugin.metadata.author}")
-            _print(f"Category:    {plugin.metadata.category}")
-            _print(f"Description: {plugin.metadata.description}")
-            if plugin.metadata.homepage:
-                _print(f"Homepage:    {plugin.metadata.homepage}")
-            if plugin.manifest.permissions:
-                _print(f"Permissions: {', '.join(plugin.manifest.permissions)}")
-            if plugin.manifest.dependencies:
-                _print(f"Dependencies: {', '.join(plugin.manifest.dependencies)}")
+            print(f"{plugin.name} v{plugin.version}")
+            print(f"Author:      {plugin.author}")
+            print(f"Category:    {plugin.category}")
+            print(f"Description: {plugin.description}")
+            if getattr(plugin, 'homepage', None):
+                print(f"Homepage:    {plugin.homepage}")
         return 0
-    
+
     if args.action == "install":
-        if not args.plugin:
-            _print("❌ Plugin name required")
+        plugin_id = getattr(args, 'plugin_id', None)
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
             return 1
-        
-        # Find plugin in marketplace
-        plugins = marketplace.search_plugins(query=args.plugin)
-        matching = [p for p in plugins if p.metadata.name == args.plugin]
-        
-        if not matching:
-            _print(f"❌ Plugin '{args.plugin}' not found in marketplace")
+
+        # Fetch plugin info
+        info_result = marketplace.get_plugin(plugin_id)
+        if not info_result.success:
+            print(f"Error: {info_result.error}", file=sys.stderr)
             return 1
-        
-        plugin = matching[0]
-        
-        # Check permissions if not auto-accepted
-        if plugin.manifest.permissions and not args.accept_permissions:
-            _print(f"⚠️  Plugin '{plugin.metadata.name}' requires the following permissions:")
-            for perm in plugin.manifest.permissions:
-                _print(f"   • {perm}")
-            _print("\nRe-run with --accept-permissions to install")
+
+        plugin = info_result.data[0] if isinstance(info_result.data, list) else info_result.data
+
+        # Check permissions consent
+        permissions = getattr(plugin, 'requires', None) or []
+        accept = getattr(args, 'accept_permissions', False)
+        if permissions and not accept:
+            print(f"Plugin '{plugin.name}' requires permissions: {', '.join(permissions)}")
+            print("Re-run with --accept-permissions to install")
             return 1
-        
-        _print(f"🔄 Installing plugin '{plugin.metadata.name}'...")
-        
-        result = installer.install(plugin.metadata.name)
-        
+
+        result = installer.install(plugin_id)
+
         if result.success:
-            if _json_output:
-                _output_json({"status": "success", "plugin": plugin.metadata.name})
+            if use_json:
+                print(json_module.dumps({"status": "success", "plugin": plugin_id}, indent=2, default=str))
             else:
-                _print(f"✅ Plugin '{plugin.metadata.name}' installed successfully!")
-                _print("   Restart the application to load the plugin.")
+                print(f"Successfully installed '{plugin.name}'")
             return 0
         else:
-            if _json_output:
-                _output_json({"status": "error", "error": result.error})
-            else:
-                _print(f"❌ Installation failed: {result.error}")
+            print(f"Error: Installation failed: {result.error}", file=sys.stderr)
             return 1
-    
+
     if args.action == "uninstall":
-        if not args.plugin:
-            _print("❌ Plugin name required")
+        plugin_id = getattr(args, 'plugin_id', None)
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
             return 1
-        
-        _print(f"🔄 Uninstalling plugin '{args.plugin}'...")
-        
-        result = installer.uninstall(args.plugin)
-        
+
+        result = installer.uninstall(plugin_id)
+
         if result.success:
-            if _json_output:
-                _output_json({"status": "success", "plugin": args.plugin})
+            if use_json:
+                print(json_module.dumps({"status": "success", "plugin": plugin_id}, indent=2, default=str))
             else:
-                _print(f"✅ Plugin '{args.plugin}' uninstalled successfully!")
+                print(f"Successfully uninstalled '{plugin_id}'")
             return 0
         else:
-            if _json_output:
-                _output_json({"status": "error", "error": result.error})
-            else:
-                _print(f"❌ Uninstall failed: {result.error}")
+            print(f"Error: {result.error}", file=sys.stderr)
             return 1
-    
+
     if args.action == "update":
-        if not args.plugin:
-            _print("❌ Plugin name required")
+        plugin_id = getattr(args, 'plugin_id', None)
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
             return 1
-        
-        _print(f"🔄 Updating plugin '{args.plugin}'...")
-        
-        result = installer.update(args.plugin)
-        
+
+        # Check if update is available first
+        check = installer.check_update(plugin_id)
+        if check.success and check.data and not check.data.get("update_available", True):
+            print(f"Plugin '{plugin_id}' is already up to date")
+            return 0
+
+        result = installer.update(plugin_id)
+
         if result.success:
-            if _json_output:
-                _output_json({"status": "success", "plugin": args.plugin})
+            if use_json:
+                print(json_module.dumps({"status": "success", "plugin": plugin_id}, indent=2, default=str))
             else:
-                _print(f"✅ Plugin '{args.plugin}' updated successfully!")
-                _print("   Restart the application to load the updated plugin.")
+                print(f"Successfully updated '{plugin_id}'")
             return 0
         else:
-            if _json_output:
-                _output_json({"status": "error", "error": result.error})
-            else:
-                _print(f"❌ Update failed: {result.error}")
+            print(f"Error: {result.error}", file=sys.stderr)
             return 1
-    
+
     if args.action == "list-installed":
-        loader = PluginLoader()
-        plugins = loader.list_plugins()
-        
-        if _json_output:
-            _output_json({"plugins": plugins, "count": len(plugins)})
+        result = installer.list_installed()
+
+        plugins = result.data or []
+        if use_json:
+            print(json_module.dumps(plugins, indent=2, default=str))
         else:
-            _print("═══════════════════════════════════════════")
-            _print("   Installed Plugins")
-            _print("═══════════════════════════════════════════")
             if not plugins:
-                _print("\n(no plugins installed)")
+                print("No plugins installed")
                 return 0
-            for plugin in plugins:
-                name = plugin["name"]
-                enabled = plugin["enabled"]
-                manifest = plugin.get("manifest") or {}
-                status = "✅" if enabled else "❌"
-                version = manifest.get("version", "unknown")
-                _print(f"{status} {name} v{version}")
+            for p in plugins:
+                name = p.get("name", p.get("id", "unknown"))
+                version = p.get("version", "unknown")
+                print(f"📦 {name} v{version}")
         return 0
-    
+
     return 1
 
 

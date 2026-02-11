@@ -419,3 +419,233 @@ loofi plugins disable my_plugin  # Disable a plugin
 ```python
 {"network", "filesystem", "sudo", "clipboard", "notifications"}
 ```
+
+---
+
+## Plugin Marketplace (v26.0+)
+
+### Overview
+
+The Plugin Marketplace enables:
+- **Discovery**: Browse and search external plugins from GitHub
+- **Installation**: One-click install from `.loofi-plugin` archives
+- **Sandboxing**: Runtime permission enforcement for installed plugins
+- **Integrity**: SHA256 + GPG signature verification
+- **Auto-Updates**: Automatic plugin updates via daemon service
+- **Dependencies**: Automatic resolution of plugin dependencies
+
+### Marketplace Architecture
+
+```
+PluginMarketplaceAPI (GitHub index) → PluginInstaller → PluginSandbox → PluginLoader
+```
+
+Plugin lifecycle:
+1. Search marketplace index (GitHub API)
+2. Download `.loofi-plugin` archive
+3. Verify integrity (SHA256, optional GPG)
+4. Extract to `plugins/`
+5. Scan and register plugin
+6. Load with sandboxed permissions
+
+### CLI Commands
+
+```bash
+# Search marketplace
+loofi-fedora-tweaks --cli marketplace search "backup"
+
+# Get plugin details
+loofi-fedora-tweaks --cli marketplace info backup-manager
+
+# Install plugin
+loofi-fedora-tweaks --cli marketplace install backup-manager
+
+# Update all plugins
+loofi-fedora-tweaks --cli marketplace update
+
+# Uninstall plugin
+loofi-fedora-tweaks --cli marketplace uninstall backup-manager
+```
+
+### Marketplace UI
+
+Access via **Community Tab** → **Marketplace** section:
+- **Browse**: Grid view of available plugins
+- **Search**: Filter by name, description, or tags
+- **Install**: One-click install with permission consent dialog
+- **Details**: View plugin info, permissions, dependencies, reviews
+
+### Plugin Package Format
+
+External plugins are distributed as `.loofi-plugin` archives:
+
+```
+my-plugin.loofi-plugin (ZIP archive)
+├── plugin.json         # Manifest
+├── plugin.py           # Entry point
+├── metadata.json       # Package metadata (publisher, license, tags)
+├── checksum.txt        # SHA256 hash
+└── signature.asc       # Optional GPG signature
+```
+
+**metadata.json** structure:
+```json
+{
+    "publisher": "Your Name",
+    "license": "MIT",
+    "tags": ["backup", "automation"],
+    "homepage": "https://github.com/user/plugin",
+    "source": "https://github.com/user/plugin",
+    "checksum": "sha256:abc123...",
+    "signature": "gpg:xyz789...",
+    "dependencies": ["another-plugin>=1.0.0"]
+}
+```
+
+### Creating Marketplace Plugins
+
+1. **Develop Locally**
+   - Follow standard plugin structure
+   - Test with local PluginLoader
+
+2. **Add Metadata**
+   - Create `metadata.json` with package info
+   - Add dependencies if needed
+
+3. **Package Plugin**
+   ```bash
+   cd plugins/my-plugin
+   zip -r my-plugin.loofi-plugin plugin.json plugin.py metadata.json
+   sha256sum my-plugin.loofi-plugin > checksum.txt
+   ```
+
+4. **Sign (Optional)**
+   ```bash
+   gpg --detach-sign --armor my-plugin.loofi-plugin
+   ```
+
+5. **Publish to Marketplace**
+   - Upload to GitHub release
+   - Submit PR to marketplace index repository
+   - Index entry: `{"name": "my-plugin", "url": "https://github.com/user/repo/releases/download/v1.0.0/my-plugin.loofi-plugin", "version": "1.0.0"}`
+
+### Permission Sandboxing
+
+Plugins request permissions in `plugin.json`:
+
+```json
+{
+    "permissions": ["filesystem", "network"]
+}
+```
+
+**Available Permissions:**
+- `filesystem`: Read/write user files
+- `network`: HTTP/HTTPS requests
+- `sudo`: Privileged operations (pkexec)
+- `clipboard`: Access clipboard data
+- `notifications`: Send desktop notifications
+
+**Permission Grant Flow:**
+1. User installs plugin from marketplace
+2. Permission dialog shows requested permissions
+3. User accepts or declines
+4. PluginSandbox enforces granted permissions at runtime
+
+**Permission Enforcement:**
+- File operations wrapped via `PluginSandbox.safe_write()`
+- Network requests proxied through `PluginSandbox.safe_request()`
+- Privileged commands validated before execution
+
+### Dependency Resolution
+
+If a plugin depends on other plugins:
+
+```json
+{
+    "dependencies": ["logger>=1.0.0", "utils>=2.1.0"]
+}
+```
+
+`PluginDependencyResolver` will:
+1. Parse dependency specifications
+2. Check installed versions
+3. Install missing dependencies from marketplace
+4. Verify version constraints
+5. Load plugins in dependency order
+
+### Auto-Update Service
+
+Enable auto-updates in **Settings** → **Plugins** → **Auto-Update**:
+
+```bash
+# Manual check for updates
+loofi-fedora-tweaks --cli marketplace update
+
+# Daemon mode (runs background update service)
+loofi-fedora-tweaks --daemon
+```
+
+The updater checks for new versions daily and notifies the user.
+
+### API Reference
+
+#### `PluginMarketplaceAPI`
+
+```python
+from utils.plugin_marketplace import PluginMarketplaceAPI
+
+api = PluginMarketplaceAPI()
+plugins = api.search_plugins("backup")  # Returns list[PluginPackage]
+details = api.get_plugin_details("backup-manager")  # Returns PluginPackage
+```
+
+#### `PluginInstaller`
+
+```python
+from utils.plugin_installer import PluginInstaller
+
+installer = PluginInstaller()
+installer.install_plugin("backup-manager", verify_signature=True)
+installer.uninstall_plugin("backup-manager")
+```
+
+#### `PluginSandbox`
+
+```python
+from core.plugins.sandbox import PluginSandbox
+
+sandbox = PluginSandbox.for_plugin("my-plugin", ["filesystem", "network"])
+sandbox.safe_write("/path/to/file", "content")  # Permission-checked
+```
+
+#### `PluginDependencyResolver`
+
+```python
+from core.plugins.resolver import PluginDependencyResolver
+
+resolver = PluginDependencyResolver()
+order = resolver.resolve_dependencies(["plugin-a", "plugin-b"])
+```
+
+### Testing Marketplace Plugins
+
+All marketplace functionality is covered by unit tests:
+
+```bash
+# Run marketplace test suite
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_plugin_marketplace.py -v
+
+# Run full plugin test suite
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_plugin_*.py -v
+```
+
+### Security Considerations
+
+1. **Integrity Verification**: Always enable signature verification for production
+2. **Permission Minimization**: Request only necessary permissions
+3. **Code Review**: Review plugin source before installation
+4. **Sandboxing**: Permissions are enforced at runtime, but Python sandbox limitations apply
+5. **Updates**: Keep plugins updated via auto-update service
+
+---
