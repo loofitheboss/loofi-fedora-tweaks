@@ -132,17 +132,14 @@ def run_agent(
         print("ERROR: 'codex' command not found in PATH.", file=sys.stderr)
         return 127
 
-    cmd = ["codex", "--model", model]
-    valid_inputs = 0
-
+    valid_inputs: list[Path] = []
     for path in inputs:
         if path.exists():
-            cmd.extend(["--file", str(path)])
-            valid_inputs += 1
+            valid_inputs.append(path)
         else:
             print(f"WARN: skipping missing input: {path}")
 
-    if valid_inputs == 0:
+    if not valid_inputs:
         print("ERROR: no valid inputs found for this phase.", file=sys.stderr)
         return 2
 
@@ -150,7 +147,15 @@ def run_agent(
         print(f"ERROR: missing prompt file: {prompt_file}", file=sys.stderr)
         return 2
 
-    cmd.extend(["--prompt-file", str(prompt_file), "--instruction", instruction])
+    phase_prompt = prompt_file.read_text(encoding="utf-8")
+    input_paths = "\n".join(f"- {path}" for path in valid_inputs)
+    combined_prompt = (
+        f"{phase_prompt}\n\n"
+        f"WORKFLOW PHASE: {phase_name}\n"
+        f"INPUT PATHS (read these from the repository):\n{input_paths}\n\n"
+        f"EXECUTION INSTRUCTION:\n{instruction}\n"
+    )
+    cmd = ["codex", "exec", "--model", model, "--cd", str(ROOT)]
 
     print(f"\n[workflow] Phase: {phase_name}")
     print(f"[workflow] Model: {model}")
@@ -162,7 +167,7 @@ def run_agent(
         print(" ".join(cmd))
         return 0
 
-    result = subprocess.run(cmd, check=False)
+    result = subprocess.run(cmd, input=combined_prompt, text=True, check=False)
     if result.returncode != 0:
         print(f"ERROR: phase '{phase_name}' failed with exit code {result.returncode}", file=sys.stderr)
     return result.returncode
