@@ -1,0 +1,12 @@
+{
+  "files.associations": {
+    "*.instructions.md": "markdown"
+  },
+  "workbench.editor.customLabels.patterns": {
+    "**/.workflow/context/**/context.md": "AI Context",
+    "**/.github/workflow/STABLE_TASK_INSTRUCTIONS.md": "Stable AI Instructions"
+  },
+  "search.exclude": {
+    "**/.workflow/archive/**": true
+  }
+}

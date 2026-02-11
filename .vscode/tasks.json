@@ -1,0 +1,73 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "workflowVersion",
+      "type": "promptString",
+      "description": "Target version (example: v25.1 or 25.1)",
+      "default": "v25.0"
+    },
+    {
+      "id": "workflowTask",
+      "type": "promptString",
+      "description": "Task label for context bundle",
+      "default": "general"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Workflow: Sync AI Context",
+      "type": "shell",
+      "command": "python3 scripts/sync_ai_context.py --target-version ${input:workflowVersion} --phase plan --task ${input:workflowTask}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Plan",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase plan --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Design",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase design --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Build",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase build --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Test",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase test --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Doc",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase doc --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Package",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase package --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Release",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase release --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Full Pipeline",
+      "type": "shell",
+      "command": "python3 scripts/workflow_runner.py --phase all --target-version ${input:workflowVersion}",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -215,6 +215,7 @@ A complete autonomous agent system for proactive system management, with AI plan
 * **[Contributing](docs/CONTRIBUTING.md)** — Development setup, code style, PR workflow
 * **[Changelog](CHANGELOG.md)** — Full version history
 * **[Plugin SDK](docs/PLUGIN_SDK.md)** — Build third-party plugins
+* **[AI Toolchain Playbook](.github/workflow/TOOLCHAIN_PLAYBOOK.md)** — VS Code workflow for Copilot + Claude Code + Codex
 
 ---
 

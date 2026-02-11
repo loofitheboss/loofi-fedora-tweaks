@@ -16,6 +16,9 @@ venv/
 # IDE
 .idea/
 .vscode/
+!.vscode/
+!.vscode/tasks.json
+!.vscode/settings.json
 *.swp
 *.swo
 *~
@@ -42,3 +45,7 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated AI handoff context bundles
+.workflow/context/*/
+!.workflow/context/.gitkeep
