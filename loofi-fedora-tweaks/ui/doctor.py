@@ -37,7 +37,6 @@ class DependencyDoctor(QDialog):
         }
 
         self.missing_tools = []
-        self.check_tools()
 
         # Action Buttons
         btn_layout = QHBoxLayout()
@@ -53,6 +52,9 @@ class DependencyDoctor(QDialog):
         btn_layout.addWidget(self.btn_close)
 
         layout.addLayout(btn_layout)
+
+        # Populate tool list after action buttons are created.
+        self.check_tools()
 
         # Command Runner for installation
         self.runner = CommandRunner()
