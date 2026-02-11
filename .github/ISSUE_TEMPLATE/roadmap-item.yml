@@ -1,0 +1,56 @@
+name: Roadmap Item
+description: Track one roadmap item through the automated plan->release workflow.
+title: "[Roadmap] vX.Y - "
+labels:
+  - roadmap-item
+body:
+  - type: input
+    id: target_version
+    attributes:
+      label: Target Version
+      description: Version tag used by the workflow runner.
+      placeholder: v26.0
+    validations:
+      required: true
+
+  - type: input
+    id: scope_title
+    attributes:
+      label: Scope Title
+      description: Short name for this roadmap item.
+      placeholder: Plugin Marketplace dependency resolver
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included in this roadmap item?
+      placeholder: |
+        - Deliverable 1
+        - Deliverable 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What must be true before release?
+      placeholder: |
+        - [ ] Tests pass
+        - [ ] Docs updated
+        - [ ] Release notes prepared
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context Links
+      description: Related docs, PRs, discussions, or design notes.
+      placeholder: |
+        - ROADMAP.md section
+        - Existing PR
+        - Design doc

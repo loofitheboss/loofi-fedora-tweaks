@@ -1,0 +1,106 @@
+name: Roadmap Issue -> Draft PR
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  sync-roadmap-pr:
+    if: contains(join(github.event.issue.labels.*.name, ','), 'roadmap-item')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build roadmap tracker artifact
+        id: tracker
+        run: |
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+          ISSUE_BODY=$(python3 - <<'PY'
+          import json
+          import os
+
+          event_path = os.environ["GITHUB_EVENT_PATH"]
+          with open(event_path, "r", encoding="utf-8") as fh:
+              payload = json.load(fh)
+          issue = payload.get("issue", {})
+          print(issue.get("body", ""))
+          PY
+          )
+
+          VERSION=$(printf "%s\n%s\n" "$ISSUE_TITLE" "$ISSUE_BODY" | grep -Eo 'v[0-9]+\.[0-9]+' | head -n1 || true)
+          if [ -z "$VERSION" ]; then
+            VERSION="vTBD"
+          fi
+
+          TRACKER_FILE=".workflow/issue-tracker/issue-${ISSUE_NUMBER}.md"
+          mkdir -p "$(dirname "$TRACKER_FILE")"
+
+          cat > "$TRACKER_FILE" <<EOF
+          # Roadmap Issue #${ISSUE_NUMBER}
+
+          - Title: ${ISSUE_TITLE}
+          - URL: ${ISSUE_URL}
+          - Target Version: ${VERSION}
+          - Synced At: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          ## Workflow Checklist
+
+          - [ ] P1 PLAN -> \
+            \`.workflow/specs/tasks-${VERSION}.md\`
+          - [ ] P2 DESIGN -> \
+            \`.workflow/specs/arch-${VERSION}.md\` + \
+            \`.workflow/specs/release-notes-draft-${VERSION}.md\`
+          - [ ] P3 BUILD complete
+          - [ ] P4 TEST -> \
+            \`.workflow/reports/test-results-${VERSION}.json\`
+          - [ ] P5 DOC complete (CHANGELOG + README + release notes)
+          - [ ] P6 PACKAGE complete
+          - [ ] P7 RELEASE complete
+
+          ## Traceability
+
+          - [ ] Writer lock ownership recorded
+          - [ ] Run manifest updated: \
+            \`.workflow/reports/run-manifest-${VERSION}.json\`
+          - [ ] Issue linked in workflow runner calls via \`--issue ${ISSUE_NUMBER}\`
+          EOF
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tracker_file=${TRACKER_FILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update roadmap draft PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: roadmap/issue-${{ github.event.issue.number }}
+          delete-branch: false
+          draft: true
+          title: "chore(workflow): roadmap issue #${{ github.event.issue.number }} tracker"
+          commit-message: "chore(workflow): sync roadmap tracker for issue #${{ github.event.issue.number }}"
+          labels: |
+            roadmap
+            automation
+          body: |
+            This draft PR is auto-managed from roadmap issue #${{ github.event.issue.number }}.
+
+            - Issue: ${{ github.event.issue.html_url }}
+            - Target version: `${{ steps.tracker.outputs.version }}`
+            - Tracker file: `${{ steps.tracker.outputs.tracker_file }}`
+
+            ### Phase Artifacts
+
+            - [ ] `.workflow/specs/tasks-${{ steps.tracker.outputs.version }}.md`
+            - [ ] `.workflow/specs/arch-${{ steps.tracker.outputs.version }}.md`
+            - [ ] `.workflow/reports/test-results-${{ steps.tracker.outputs.version }}.json`
+            - [ ] `.workflow/reports/run-manifest-${{ steps.tracker.outputs.version }}.json`
+            - [ ] `CHANGELOG.md`
+            - [ ] `README.md`
+            - [ ] `RELEASE-NOTES-${{ steps.tracker.outputs.version }}.md`

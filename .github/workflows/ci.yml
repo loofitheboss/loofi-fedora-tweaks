@@ -6,6 +6,15 @@ on:
     branches: [master]
 
 jobs:
+  adapter_drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/sync_ai_adapters.py --check
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +34,15 @@ jobs:
           python-version: '3.12'
       - run: pip install mypy PyQt6-stubs
       - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any || true
+
+  docs_gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/check_release_docs.py
 
   security:
     runs-on: ubuntu-latest
@@ -60,7 +78,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: fedora:43
-    needs: [test]
+    needs: [adapter_drift, lint, typecheck, docs_gate, security, test]
     steps:
       - uses: actions/checkout@v4
       - run: dnf install -y rpm-build python3

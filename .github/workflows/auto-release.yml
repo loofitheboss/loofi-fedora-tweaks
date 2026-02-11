@@ -2,34 +2,49 @@ name: Auto Release Pipeline
 
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 23.0.0)'
-        required: true
+        description: 'Version without v prefix (example: 25.0.1). Required for manual release runs.'
+        required: false
       dry_run:
-        description: 'Dry run (validate only, no release)'
+        description: 'Dry run (validate/build only, skip tag/release publish).'
         type: boolean
-        default: true
+        default: false
 
 permissions:
   contents: write
 
+concurrency:
+  group: auto-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
+      - name: Resolve version and tag
+        id: version
+        run: |
+          PY_VER=$(python -c "import sys; sys.path.insert(0,'loofi-fedora-tweaks'); from version import __version__; print(__version__)")
+          echo "version=${PY_VER}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${PY_VER}" >> "$GITHUB_OUTPUT"
+
       - name: Validate version alignment
         run: |
-          # Extract versions from all sources
-          PY_VER=$(python -c "import sys; sys.path.insert(0,'loofi-fedora-tweaks'); from version import __version__; print(__version__)")
+          PY_VER="${{ steps.version.outputs.version }}"
           SPEC_VER=$(grep '^Version:' loofi-fedora-tweaks.spec | awk '{print $2}')
 
           echo "version.py: $PY_VER"
@@ -40,8 +55,7 @@ jobs:
             exit 1
           fi
 
-          # If triggered by tag, verify tag matches code
-          if [ -n "$GITHUB_REF" ] && echo "$GITHUB_REF" | grep -q "refs/tags/v"; then
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             TAG_VER="${GITHUB_REF#refs/tags/v}"
             if [ "$PY_VER" != "$TAG_VER" ]; then
               echo "::error::Tag version ($TAG_VER) doesn't match code ($PY_VER)"
@@ -49,29 +63,8 @@ jobs:
             fi
           fi
 
-          echo "version=$PY_VER" >> "$GITHUB_OUTPUT"
-
-      - name: Validate documentation
-        run: |
-          # Check CHANGELOG has current version
-          if ! grep -q "## \[" CHANGELOG.md; then
-            echo "::warning::CHANGELOG.md may be missing version entries"
-          fi
-
-          # Check README exists and has content
-          if [ ! -s README.md ]; then
-            echo "::error::README.md is empty"
-            exit 1
-          fi
-
-          # Check release notes exist
-          VERSION="${{ inputs.version || '' }}"
-          if [ -n "$VERSION" ]; then
-            NOTES_FILE="RELEASE-NOTES-v${VERSION}.md"
-            if [ ! -f "$NOTES_FILE" ]; then
-              echo "::warning::$NOTES_FILE not found"
-            fi
-          fi
+      - name: Validate release docs and workflow logs
+        run: python3 scripts/check_release_docs.py --require-logs
 
       - name: Validate packaging scripts
         run: |
@@ -81,10 +74,12 @@ jobs:
               if [ -x "$script" ]; then
                 echo "  ✓ executable"
               else
-                echo "  ⚠ not executable"
+                echo "::error::$script exists but is not executable"
+                exit 1
               fi
             else
-              echo "✗ $script missing"
+              echo "::error::$script missing"
+              exit 1
             fi
           done
 
@@ -147,73 +142,102 @@ jobs:
           name: rpm-package
           path: rpmbuild/RPMS/noarch/*.rpm
 
-  release:
-    if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+  auto_tag:
+    if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
-    container: fedora:43
-    needs: [build, security]
+    needs: [validate, lint, test, security, build]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install build deps
-        run: dnf install -y rpm-build python3
-
-      - name: Build RPM
-        run: bash scripts/build_rpm.sh
-
-      - name: Get version info
-        id: version
+      - name: Create version tag if missing
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          VER="${GITHUB_REF#refs/tags/v}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          TAG="${{ needs.validate.outputs.tag }}"
+          git fetch --tags origin
 
-          # Extract codename from version.py
-          CODENAME=$(python3 -c "
-          import sys; sys.path.insert(0,'loofi-fedora-tweaks')
-          from version import __version_codename__
-          print(__version_codename__)
-          " 2>/dev/null || echo "")
-          echo "codename=$CODENAME" >> "$GITHUB_OUTPUT"
-
-      - name: Generate release body
-        id: body
-        run: |
-          TAG="${{ steps.version.outputs.tag }}"
-          CODENAME="${{ steps.version.outputs.codename }}"
-          NOTES_FILE="RELEASE-NOTES-${TAG}.md"
-
-          if [ -f "$NOTES_FILE" ]; then
-            # Use release notes file if it exists
-            BODY=$(cat "$NOTES_FILE")
-          else
-            # Generate from CHANGELOG
-            BODY="## Loofi Fedora Tweaks ${TAG}"
-            if [ -n "$CODENAME" ]; then
-              BODY="${BODY} — ${CODENAME}"
-            fi
-            BODY="${BODY}
-
-### Installation
-\`\`\`bash
-sudo dnf install ./loofi-fedora-tweaks-*.rpm
-\`\`\`
-
-### Changes
-See [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details."
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists. Skipping."
+            exit 0
           fi
 
-          # Write to file for multi-line support
-          echo "$BODY" > /tmp/release-body.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${TAG}" "${GITHUB_SHA}"
+          git push origin "${TAG}"
+          echo "Created and pushed ${TAG}"
 
-      - name: Create GitHub Release
+  release:
+    if: (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')) && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+    runs-on: ubuntu-latest
+    container: fedora:43
+    needs: [validate, lint, test, security, build]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download RPM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: rpmbuild/RPMS/noarch
+
+      - name: Resolve release tag
+        id: release_meta
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG="v${{ inputs.version }}"
+          fi
+          VERSION="${TAG#v}"
+
+          git fetch --tags origin
+          if ! git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag "${TAG}" "${GITHUB_SHA}"
+            git push origin "${TAG}"
+          fi
+
+          CODENAME=$(python3 -c "import sys; sys.path.insert(0,'loofi-fedora-tweaks'); from version import __version_codename__; print(__version_codename__)" 2>/dev/null || echo "")
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "codename=${CODENAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release body
+        run: |
+          TAG="${{ steps.release_meta.outputs.tag }}"
+          VERSION="${{ steps.release_meta.outputs.version }}"
+          CODENAME="${{ steps.release_meta.outputs.codename }}"
+          NOTES_FILE="RELEASE-NOTES-v${VERSION}.md"
+
+          if [ -f "$NOTES_FILE" ]; then
+            cp "$NOTES_FILE" /tmp/release-body.md
+          else
+            cat > /tmp/release-body.md <<EOF
+          ## Loofi Fedora Tweaks ${TAG}${CODENAME:+ — ${CODENAME}}
+
+          ### Installation
+          \`\`\`bash
+          sudo dnf install ./loofi-fedora-tweaks-*.rpm
+          \`\`\`
+
+          ### Changes
+          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
+          EOF
+          fi
+
+      - name: Publish GitHub Release (idempotent)
         uses: softprops/action-gh-release@v2
         with:
-          name: "Loofi Fedora Tweaks ${{ steps.version.outputs.tag }}${{ steps.version.outputs.codename && format(' — {0}', steps.version.outputs.codename) || '' }}"
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          name: "Loofi Fedora Tweaks ${{ steps.release_meta.outputs.tag }}${{ steps.release_meta.outputs.codename && format(' — {0}', steps.release_meta.outputs.codename) || '' }}"
           body_path: /tmp/release-body.md
           draft: false
-          prerelease: ${{ contains(steps.version.outputs.tag, '-rc') || contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-alpha') }}
-          files: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.version.outputs.version }}*.rpm
+          prerelease: ${{ contains(steps.release_meta.outputs.tag, '-rc') || contains(steps.release_meta.outputs.tag, '-beta') || contains(steps.release_meta.outputs.tag, '-alpha') }}
+          files: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.release_meta.outputs.version }}*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
