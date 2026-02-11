@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [25.0.3] - 2026-02-11 "Maintenance Update Crash Hotfix"
+
+### Fixed
+
+- Fix crash when pressing `Update System` and `Update All` in Maintenance by routing system updates through the stable `CommandRunner` execution path.
+- Fix update queue behavior to always start `Update All` with the system package-manager step before Flatpak and firmware updates.
+- Add regression tests for maintenance update command selection and update-all startup sequencing.
+
 ## [25.0.2] - 2026-02-11 "Plugin Architecture Testability Hotfix"
 
 ### Fixed

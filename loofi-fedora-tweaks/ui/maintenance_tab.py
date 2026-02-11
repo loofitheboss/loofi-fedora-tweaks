@@ -19,7 +19,6 @@ from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 from utils.system import SystemManager
 from core.plugins.metadata import PluginMetadata
-from services.package.service import get_package_service
 
 import shutil
 
@@ -41,7 +40,6 @@ class _UpdatesSubTab(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.package_service = get_package_service()
         self.package_manager = SystemManager.get_package_manager()
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -142,6 +140,16 @@ class _UpdatesSubTab(QWidget):
 
     # -- Individual update actions -----------------------------------------
 
+    @staticmethod
+    def _system_update_step(package_manager):
+        if package_manager == "rpm-ostree":
+            return ("pkexec", ["rpm-ostree", "upgrade"], "Starting System Upgrade...")
+        return (
+            "pkexec",
+            [package_manager, "update", "-y"],
+            "Starting System Update...",
+        )
+
     def run_dnf_update(self):
         from utils.safety import SafetyManager
 
@@ -166,10 +174,9 @@ class _UpdatesSubTab(QWidget):
             return
 
         self.start_process()
-        self.append_output(self.tr("Starting System Update...\n"))
-        result = self.package_service.update(description=action_name)
-        self._append_result_output(result)
-        self.command_finished(self._result_exit_code(result))
+        cmd, args, desc = self._system_update_step(self.package_manager)
+        self.append_output(self.tr(desc) + "\n")
+        self.runner.run_command(cmd, args)
 
     def run_flatpak_update(self):
         self.start_process()
@@ -203,19 +210,8 @@ class _UpdatesSubTab(QWidget):
             return
 
         self.start_process()
-        self.append_output(self.tr("Starting System Update...\n"))
-        update_action = (
-            self.tr("System Upgrade (rpm-ostree)")
-            if self.package_manager == "rpm-ostree"
-            else self.tr("System Update (DNF)")
-        )
-        result = self.package_service.update(description=update_action)
-        self._append_result_output(result)
-        if not result.success:
-            self.command_finished(self._result_exit_code(result))
-            return
-
         self.update_queue = [
+            self._system_update_step(self.package_manager),
             ("flatpak", ["update", "-y"],
              self.tr("Starting Flatpak Update...")),
             ("pkexec", ["fwupdmgr", "update", "-y"],
@@ -223,7 +219,7 @@ class _UpdatesSubTab(QWidget):
         ]
         self.current_update_index = 0
         cmd, args, desc = self.update_queue[0]
-        self.append_output(desc + "\n")
+        self.append_output(self.tr(desc) + "\n")
         self.runner.run_command(cmd, args)
 
     # -- Helpers -----------------------------------------------------------
@@ -275,21 +271,6 @@ class _UpdatesSubTab(QWidget):
         self.progress_bar.setValue(0)
         self.append_output(f"{description}\n")
         self.runner.run_command(cmd, args)
-
-    def _append_result_output(self, result):
-        if result.stdout:
-            self.append_output(result.stdout)
-        if result.stderr:
-            self.append_output(result.stderr)
-        if result.message:
-            self.append_output(f"\n{result.message}\n")
-
-    @staticmethod
-    def _result_exit_code(result):
-        if result.exit_code is not None:
-            return result.exit_code
-        return 0 if result.success else 1
-
 
 # ---------------------------------------------------------------------------
 # Sub-tab: Cleanup

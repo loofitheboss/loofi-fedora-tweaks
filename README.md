@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v25.0.2 "Plugin Architecture Testability Hotfix"
+# Loofi Fedora Tweaks v25.0.3 "Maintenance Update Crash Hotfix"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v25.0.2">
-    <img src="https://img.shields.io/badge/Release-v25.0.2-blue?style=for-the-badge&logo=github" alt="Release v25.0.2"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v25.0.3">
+    <img src="https://img.shields.io/badge/Release-v25.0.3-blue?style=for-the-badge&logo=github" alt="Release v25.0.3"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>

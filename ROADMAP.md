@@ -12,6 +12,7 @@
 | v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
 | v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
+| v25.0.3 | Maintenance Update Crash Hotfix | DONE | Stabilize Maintenance update actions |
 | v26.0 | Plugin Marketplace | NEXT | External plugins, marketplace, sandboxing |
 
 ---
@@ -168,6 +169,21 @@
 
 - v23.0 service layer
 - v24.0 profiles (plugin configs)
+
+---
+
+## [DONE] v25.0.3 — Maintenance Update Crash Hotfix
+
+### Scope
+- Fix Maintenance update action crash on button press
+- Keep update flow consistent with existing command runner behavior
+- Add regression coverage for update command selection/queue startup
+
+### Deliverables
+- [x] Update handlers use stable command-runner execution path
+- [x] `Update All` starts with system package-manager update step
+- [x] Regression tests for maintenance update flow
+- [x] CHANGELOG + README + release notes
 
 ---
 

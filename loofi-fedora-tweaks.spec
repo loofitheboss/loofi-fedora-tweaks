@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        25.0.2
+Version:        25.0.3
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,12 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Wed Feb 11 2026 Loofi <loofi@example.com> - 25.0.3-1
+- v25.0.3 Maintenance Update Crash Hotfix
+- Fixed crash when clicking Maintenance update actions by unifying update execution path
+- Aligned update-all sequencing to include system update as queued first step
+- Added headless regression coverage for maintenance update command selection and queue startup
+
 * Mon Feb 09 2026 Loofi <loofi@example.com> - 24.0.0-1
 - v24.0 Power Features
 - Created BaseActionExecutor ABC with privileged execution support (pkexec integration)
