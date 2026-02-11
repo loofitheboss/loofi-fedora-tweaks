@@ -113,8 +113,31 @@ class SystemPulse(QObject):
             self._loop.run()
 
         except Exception as e:
-            logger.warning("[Pulse] Error starting DBus listener: %s", e)
+            if self._is_expected_dbus_unavailable(e):
+                logger.info(
+                    "[Pulse] DBus not accessible (%s), using polling fallback",
+                    e,
+                )
+            else:
+                logger.warning("[Pulse] Error starting DBus listener: %s", e)
             self._run_polling_fallback()
+
+    @staticmethod
+    def _is_expected_dbus_unavailable(exc: Exception) -> bool:
+        """
+        Return True when DBus startup failure is expected in constrained environments
+        (sandbox, missing system bus, permission restrictions).
+        """
+        msg = str(exc).lower()
+        expected_fragments = (
+            "operation not permitted",
+            "accessdenied",
+            "permission denied",
+            "failed to connect to socket /run/dbus/system_bus_socket",
+            "no such file or directory",
+            "dbus.error.noserver",
+        )
+        return any(fragment in msg for fragment in expected_fragments)
 
     def stop(self):
         """Stop the DBus listener loop."""

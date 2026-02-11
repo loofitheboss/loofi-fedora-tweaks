@@ -12,12 +12,10 @@ v25.0: Implements PluginInterface as a mixin for plugin architecture support.
 """
 
 import logging
-from abc import ABCMeta
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit
 )
-from PyQt6.QtCore import pyqtWrapperType
 from utils.command_runner import CommandRunner
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
@@ -34,13 +32,7 @@ _STUB_META = PluginMetadata(
 )
 
 
-# Combined metaclass to resolve conflict between QWidget and ABC
-class CombinedMeta(pyqtWrapperType, ABCMeta):
-    """Metaclass combining PyQt6 and ABC metaclasses."""
-    pass
-
-
-class BaseTab(QWidget, PluginInterface, metaclass=CombinedMeta):
+class BaseTab(QWidget, PluginInterface):
     """Common base class for all tabs that execute system commands."""
 
     # Subclasses MUST override _METADATA with their own PluginMetadata

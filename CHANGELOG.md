@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [25.0.1] - 2026-02-11 "Plugin Architecture Hotfix"
+
+### Fixed
+
+- Fix plugin startup regression on newer PyQt6 builds by removing `ABC` metaclass coupling from `PluginInterface`.
+- Fix tab base class compatibility by removing `pyqtWrapperType` dependency from `BaseTab`.
+- Fix noisy startup logs in restricted environments by downgrading expected DBus access failures to info-level fallback messages.
+
+---
+
 ## [25.0.0] - 2026-02-11 "Plugin Architecture"
 
 ### Added

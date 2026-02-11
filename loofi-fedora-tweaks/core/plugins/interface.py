@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from PyQt6.QtWidgets import QWidget
@@ -9,7 +8,7 @@ if TYPE_CHECKING:
     from core.plugins.compat import CompatibilityDetector
 
 
-class PluginInterface(ABC):
+class PluginInterface:
     """
     Abstract base class for all Loofi tab plugins.
 
@@ -17,19 +16,17 @@ class PluginInterface(ABC):
     Core never imports ui/; tabs import from core.
     """
 
-    @abstractmethod
     def metadata(self) -> PluginMetadata:
         """Return immutable plugin metadata. Must not perform I/O."""
-        ...
+        raise NotImplementedError
 
-    @abstractmethod
     def create_widget(self) -> QWidget:
         """
         Instantiate and return the tab's QWidget.
         Called lazily by PluginLoader inside a LazyWidget wrapper.
         Must not be called more than once per plugin instance.
         """
-        ...
+        raise NotImplementedError
 
     def on_activate(self) -> None:
         """Called when this tab becomes the active page. Optional."""
