@@ -406,8 +406,13 @@ loofi ai-models recommend     # Get RAM-based model recommendation
 # Profiles (v13.0)
 loofi profile list            # List all profiles
 loofi profile apply gaming    # Apply a profile
+loofi profile apply gaming --no-snapshot  # Apply without pre-apply snapshot
 loofi profile create myprofile  # Create from current state
 loofi profile delete myprofile  # Delete a custom profile
+loofi profile export gaming gaming.json  # Export one profile to JSON
+loofi profile import gaming.json --overwrite  # Import one profile from JSON
+loofi profile export-all profiles.json --include-builtins  # Export bundle
+loofi profile import-all profiles.json --overwrite  # Import bundle
 
 # Health History (v13.0)
 loofi health-history show     # Show 24h metrics summary

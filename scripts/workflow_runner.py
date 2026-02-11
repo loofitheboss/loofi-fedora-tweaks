@@ -23,6 +23,9 @@ REPORTS_DIR = WORKFLOW_ROOT / "reports"
 ARCHIVE_DIR = WORKFLOW_ROOT / "archive"
 LOCK_FILE = SPECS_DIR / ".race-lock.json"
 PROMPTS_DIR = ROOT / ".claude" / "workflow" / "prompts"
+MODEL_FALLBACKS = {
+    "gpt-4o-mini": "gpt-5.3-codex",
+}
 
 
 def normalize_version_tag(version: str) -> str:
@@ -128,6 +131,7 @@ def run_agent(
     instruction: str,
     dry_run: bool,
 ) -> int:
+    model = MODEL_FALLBACKS.get(model, model)
     if not dry_run and shutil.which("codex") is None:
         print("ERROR: 'codex' command not found in PATH.", file=sys.stderr)
         return 127
@@ -155,7 +159,7 @@ def run_agent(
         f"INPUT PATHS (read these from the repository):\n{input_paths}\n\n"
         f"EXECUTION INSTRUCTION:\n{instruction}\n"
     )
-    cmd = ["codex", "exec", "--model", model, "--cd", str(ROOT)]
+    cmd = ["codex", "exec", "--model", model, "--sandbox", "workspace-write", "--cd", str(ROOT)]
 
     print(f"\n[workflow] Phase: {phase_name}")
     print(f"[workflow] Model: {model}")

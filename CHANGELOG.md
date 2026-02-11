@@ -8,23 +8,15 @@ All notable changes to this project will be documented in this file.
 
 - Add `core/profiles/models.py` with `ProfileRecord` and `ProfileBundle` schema types.
 - Add `core/profiles/storage.py` with profile CRUD and single/bundle JSON import/export support.
-- Add profile API routes in `api/routes/profiles.py`:
-  - `GET /api/profiles`
-  - `POST /api/profiles/apply`
-  - `GET /api/profiles/{name}/export`
-  - `POST /api/profiles/import`
-  - `GET /api/profiles/export-all`
-  - `POST /api/profiles/import-all`
+- Add profile API routes in `api/routes/profiles.py` for list/apply/import/export (single and bundle).
 - Add live incremental polling API `SmartLogViewer.get_logs_incremental()`.
-- Add profile/CLI/API test coverage for v24 profile workflows.
+- Add test coverage for profile storage, profile CLI/API/UI workflows, and live log polling.
 
 ### Changed
 
 - Refactor `utils/profiles.py` to use `ProfileStore` while keeping backward-compatible `ProfileManager` methods.
 - Extend `ProfileManager.apply_profile()` with snapshot-before-apply hook and graceful fallback warnings.
-- Extend CLI `profile` command with:
-  - `export`, `import`, `export-all`, `import-all`
-  - `--overwrite`, `--no-snapshot`, `--include-builtins`
+- Extend CLI `profile` command with `export`, `import`, `export-all`, `import-all`, `--overwrite`, `--no-snapshot`, and `--include-builtins`.
 - Update `ui/profiles_tab.py` with import/export bundle controls and per-profile export.
 - Update `ui/logs_tab.py` with live log panel controls (start/stop, interval, bounded buffer).
 
