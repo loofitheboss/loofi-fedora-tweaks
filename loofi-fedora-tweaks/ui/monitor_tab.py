@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
     QInputDialog, QFrame, QHeaderView, QGridLayout, QGroupBox,
     QTabWidget
 )
-from PyQt6.QtCore import Qt, QTimer, QRectF
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (
     QPainter, QColor, QPen, QPainterPath, QLinearGradient, QBrush
 )

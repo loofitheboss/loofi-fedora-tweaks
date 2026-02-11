@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QGridLayout, QFrame, QProgressBar, QScrollArea
 )
-from PyQt6.QtCore import Qt, QTimer, QRectF
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 
 import subprocess
@@ -527,7 +527,7 @@ class DashboardTab(QWidget):
                     parts = line.split()
                     if len(parts) < 3:
                         continue
-                    device, mp, fstype = parts[0], parts[1], parts[2]
+                    mp, fstype = parts[1], parts[2]
                     if fstype in ("ext4", "btrfs", "xfs", "f2fs", "vfat", "ntfs"):
                         if mp not in mounts and not mp.startswith("/snap"):
                             mounts.append(mp)

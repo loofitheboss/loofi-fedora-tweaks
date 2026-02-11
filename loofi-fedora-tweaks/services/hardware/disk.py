@@ -3,7 +3,6 @@ Disk Manager - Disk space monitoring and analysis utilities.
 Provides disk usage stats, low space warnings, and large directory detection.
 """
 
-import os
 import shutil
 import subprocess
 from dataclasses import dataclass

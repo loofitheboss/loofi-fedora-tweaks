@@ -7,8 +7,8 @@ Uses PrivilegedCommand for package installation.
 import subprocess
 
 from PyQt6.QtWidgets import (
-    QGroupBox, QHBoxLayout, QLabel, QMessageBox,
-    QPushButton, QVBoxLayout,
+    QGroupBox, QLabel, QMessageBox, QPushButton,
+    QVBoxLayout,
 )
 
 from ui.base_tab import BaseTab

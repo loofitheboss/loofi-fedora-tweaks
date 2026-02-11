@@ -4,10 +4,9 @@ Reads from /proc to gather CPU, memory, network, and disk I/O samples
 for live performance graphing. Part of the v9.2 Pulse Update.
 """
 
-import os
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 

@@ -6,7 +6,7 @@ This module will be removed in v24.0.
 """
 
 import warnings
-import subprocess  # For test mocking compatibility
+import subprocess  # noqa: F401 - For test mocking compatibility
 from services.hardware.bluetooth import (
     BluetoothManager,
     BluetoothDevice,

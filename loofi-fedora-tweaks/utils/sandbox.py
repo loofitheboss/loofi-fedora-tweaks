@@ -25,11 +25,11 @@ class Result:
 class SandboxManager:
     """
     Manages application sandboxing via Firejail or Bubblewrap.
-    
+
     Firejail is preferred for ease of use with existing profiles.
     Bubblewrap is used for custom, minimal sandboxes.
     """
-    
+
     # Common Firejail profiles for popular apps
     FIREJAIL_PROFILES = {
         "firefox": "Firefox web browser",
@@ -42,23 +42,23 @@ class SandboxManager:
         "thunderbird": "Thunderbird email",
         "telegram-desktop": "Telegram messenger",
     }
-    
+
     @classmethod
     def is_firejail_installed(cls) -> bool:
         """Check if Firejail is installed."""
         return shutil.which("firejail") is not None
-    
+
     @classmethod
     def is_bubblewrap_installed(cls) -> bool:
         """Check if Bubblewrap is installed."""
         return shutil.which("bwrap") is not None
-    
+
     @classmethod
     def install_firejail(cls) -> Result:
         """Install Firejail via DNF."""
         if cls.is_firejail_installed():
             return Result(True, "Firejail is already installed")
-        
+
         try:
             result = subprocess.run(
                 ["pkexec", "dnf", "install", "firejail", "-y"],
@@ -66,35 +66,35 @@ class SandboxManager:
                 text=True,
                 timeout=120
             )
-            
+
             if result.returncode == 0:
                 return Result(True, "Firejail installed successfully")
             else:
                 return Result(False, f"Installation failed: {result.stderr}")
         except Exception as e:
             return Result(False, f"Installation error: {e}")
-    
+
     @classmethod
     def list_profiles(cls) -> list[str]:
         """List available Firejail profiles."""
         if not cls.is_firejail_installed():
             return []
-        
+
         profiles = []
         profile_dirs = [
             "/etc/firejail",
             "/usr/local/etc/firejail",
             Path.home() / ".config/firejail"
         ]
-        
+
         for dir_path in profile_dirs:
             if os.path.exists(dir_path):
                 for f in os.listdir(dir_path):
                     if f.endswith(".profile"):
                         profiles.append(f.replace(".profile", ""))
-        
+
         return sorted(set(profiles))
-    
+
     @classmethod
     def run_sandboxed(
         cls,
@@ -106,35 +106,35 @@ class SandboxManager:
     ) -> Result:
         """
         Run a command in a Firejail sandbox.
-        
+
         Args:
             command: Command and arguments to run
             no_network: Disable network access
             private_home: Use empty private home directory
             read_only_home: Mount home as read-only
             profile: Specific profile to use
-            
+
         Returns:
             Result with process info.
         """
         if not cls.is_firejail_installed():
             return Result(False, "Firejail is not installed")
-        
+
         firejail_cmd = ["firejail"]
-        
+
         if no_network:
             firejail_cmd.append("--net=none")
-        
+
         if private_home:
             firejail_cmd.append("--private")
         elif read_only_home:
             firejail_cmd.append("--private-home")
-        
+
         if profile:
             firejail_cmd.extend(["--profile", profile])
-        
+
         firejail_cmd.extend(command)
-        
+
         try:
             # Start process in background
             process = subprocess.Popen(
@@ -143,7 +143,7 @@ class SandboxManager:
                 stderr=subprocess.DEVNULL,
                 start_new_session=True
             )
-            
+
             return Result(
                 True,
                 f"Started sandboxed: {' '.join(command)}",
@@ -151,7 +151,7 @@ class SandboxManager:
             )
         except Exception as e:
             return Result(False, f"Failed to start sandbox: {e}")
-    
+
     @classmethod
     def create_desktop_entry(
         cls,
@@ -162,22 +162,22 @@ class SandboxManager:
     ) -> Result:
         """
         Create a sandboxed .desktop entry for an application.
-        
+
         This creates a new desktop file that launches the app
         through Firejail with specified restrictions.
         """
         if not cls.is_firejail_installed():
             return Result(False, "Firejail is not installed")
-        
+
         # Build firejail command
         fj_opts = []
         if no_network:
             fj_opts.append("--net=none")
         if private_home:
             fj_opts.append("--private")
-        
+
         fj_cmd = f"firejail {' '.join(fj_opts)} {exec_command}"
-        
+
         desktop_content = f"""[Desktop Entry]
 Name={app_name} (Sandboxed)
 Comment={app_name} running in Firejail sandbox
@@ -187,19 +187,19 @@ Terminal=false
 Type=Application
 Categories=Security;
 """
-        
+
         desktop_dir = Path.home() / ".local/share/applications"
         desktop_dir.mkdir(parents=True, exist_ok=True)
-        
+
         desktop_file = desktop_dir / f"{app_name.lower()}-sandboxed.desktop"
-        
+
         try:
             with open(desktop_file, "w") as f:
                 f.write(desktop_content)
-            
+
             # Make executable
             os.chmod(desktop_file, 0o755)
-            
+
             return Result(
                 True,
                 f"Created sandboxed launcher: {desktop_file}",
@@ -207,7 +207,7 @@ Categories=Security;
             )
         except Exception as e:
             return Result(False, f"Failed to create desktop entry: {e}")
-    
+
     @classmethod
     def get_sandbox_status(cls, pid: int) -> dict:
         """Check if a process is running in a sandbox."""
@@ -216,14 +216,14 @@ Categories=Security;
             "sandboxed": False,
             "restrictions": []
         }
-        
+
         # Check if process exists
         try:
             os.kill(pid, 0)
             status["running"] = True
         except OSError:
             return status
-        
+
         # Check if running under firejail
         try:
             cmdline_path = f"/proc/{pid}/cmdline"
@@ -232,7 +232,7 @@ Categories=Security;
                     cmdline = f.read().decode("utf-8", errors="ignore")
                     if "firejail" in cmdline:
                         status["sandboxed"] = True
-                        
+
                         # Parse restrictions
                         if "--net=none" in cmdline:
                             status["restrictions"].append("no_network")
@@ -240,7 +240,7 @@ Categories=Security;
                             status["restrictions"].append("private_home")
         except Exception:
             pass
-        
+
         return status
 
 
@@ -249,12 +249,12 @@ class BubblewrapManager:
     Low-level sandboxing via Bubblewrap.
     Use for custom, minimal sandboxes with fine-grained control.
     """
-    
+
     @classmethod
     def is_installed(cls) -> bool:
         """Check if Bubblewrap is installed."""
         return shutil.which("bwrap") is not None
-    
+
     @classmethod
     def run_minimal_sandbox(
         cls,
@@ -263,7 +263,7 @@ class BubblewrapManager:
     ) -> Result:
         """
         Run command in a minimal Bubblewrap sandbox.
-        
+
         This creates an extremely restricted environment with:
         - No network
         - No home directory access (unless specified)
@@ -271,7 +271,7 @@ class BubblewrapManager:
         """
         if not cls.is_installed():
             return Result(False, "Bubblewrap is not installed")
-        
+
         bwrap_cmd = [
             "bwrap",
             "--ro-bind", "/usr", "/usr",
@@ -285,15 +285,15 @@ class BubblewrapManager:
             "--unshare-net",  # No network
             "--unshare-pid",  # Separate PID namespace
         ]
-        
+
         # Add shared paths
         if share_paths:
             for path in share_paths:
                 if os.path.exists(path):
                     bwrap_cmd.extend(["--bind", path, path])
-        
+
         bwrap_cmd.extend(command)
-        
+
         try:
             process = subprocess.Popen(
                 bwrap_cmd,
@@ -301,7 +301,7 @@ class BubblewrapManager:
                 stderr=subprocess.DEVNULL,
                 start_new_session=True
             )
-            
+
             return Result(
                 True,
                 f"Started in minimal sandbox: {' '.join(command)}",

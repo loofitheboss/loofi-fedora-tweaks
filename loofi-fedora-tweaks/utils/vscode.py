@@ -7,7 +7,6 @@ Python, C++, and other development profiles.
 """
 
 import json
-import os
 import subprocess
 import shutil
 from dataclasses import dataclass
@@ -26,13 +25,13 @@ class Result:
 class VSCodeManager:
     """
     Manages VS Code extensions and settings.
-    
+
     Supports:
     - Standard VS Code (code)
     - VSCodium (codium)
     - Flatpak VS Code (com.visualstudio.code)
     """
-    
+
     # Extension profiles for different development scenarios
     EXTENSION_PROFILES = {
         "python": {
@@ -88,22 +87,22 @@ class VSCodeManager:
             ]
         },
     }
-    
+
     @classmethod
     def get_vscode_command(cls) -> Optional[str]:
         """
         Find the VS Code command available on the system.
-        
+
         Returns:
             Command name if found, None otherwise.
         """
         # Priority order: native > flatpak > codium
         candidates = ["code", "codium", "code-oss"]
-        
+
         for cmd in candidates:
             if shutil.which(cmd):
                 return cmd
-        
+
         # Check for Flatpak
         if shutil.which("flatpak"):
             flatpak_apps = ["com.visualstudio.code", "com.vscodium.codium"]
@@ -118,26 +117,26 @@ class VSCodeManager:
                         return f"flatpak run {app}"
                 except Exception:
                     pass
-        
+
         return None
-    
+
     @classmethod
     def is_available(cls) -> bool:
         """Check if any VS Code variant is available."""
         return cls.get_vscode_command() is not None
-    
+
     @classmethod
     def get_installed_extensions(cls) -> list[str]:
         """
         Get list of currently installed extensions.
-        
+
         Returns:
             List of extension IDs.
         """
         cmd = cls.get_vscode_command()
         if not cmd:
             return []
-        
+
         try:
             if cmd.startswith("flatpak"):
                 result = subprocess.run(
@@ -153,28 +152,28 @@ class VSCodeManager:
                     text=True,
                     timeout=30
                 )
-            
+
             if result.returncode == 0:
                 return [ext.strip().lower() for ext in result.stdout.strip().split("\n") if ext.strip()]
             return []
         except Exception:
             return []
-    
+
     @classmethod
     def install_extension(cls, extension_id: str) -> Result:
         """
         Install a single extension.
-        
+
         Args:
             extension_id: Extension identifier (e.g., "ms-python.python")
-            
+
         Returns:
             Result object with success status.
         """
         cmd = cls.get_vscode_command()
         if not cmd:
             return Result(False, "VS Code is not installed.")
-        
+
         try:
             if cmd.startswith("flatpak"):
                 result = subprocess.run(
@@ -190,48 +189,48 @@ class VSCodeManager:
                     text=True,
                     timeout=120
                 )
-            
+
             if result.returncode == 0:
                 return Result(True, f"Extension '{extension_id}' installed.")
             else:
                 return Result(False, f"Failed to install: {result.stderr}")
-                
+
         except subprocess.TimeoutExpired:
             return Result(False, "Installation timed out.")
         except Exception as e:
             return Result(False, f"Error: {e}")
-    
+
     @classmethod
     def install_profile(cls, profile: str) -> Result:
         """
         Install all extensions from a profile.
-        
+
         Args:
             profile: Profile key (python, cpp, rust, web, containers)
-            
+
         Returns:
             Result with success count.
         """
         if profile not in cls.EXTENSION_PROFILES:
             return Result(False, f"Unknown profile: {profile}")
-        
+
         extensions = cls.EXTENSION_PROFILES[profile]["extensions"]
         installed = cls.get_installed_extensions()
-        
+
         success_count = 0
         fail_count = 0
-        
+
         for ext in extensions:
             if ext.lower() in installed:
                 success_count += 1
                 continue
-            
+
             result = cls.install_extension(ext)
             if result.success:
                 success_count += 1
             else:
                 fail_count += 1
-        
+
         profile_name = cls.EXTENSION_PROFILES[profile]["name"]
         return Result(
             fail_count == 0,
@@ -239,17 +238,17 @@ class VSCodeManager:
             + (f" ({fail_count} failed)" if fail_count else ""),
             {"installed": success_count, "failed": fail_count}
         )
-    
+
     @classmethod
     def get_settings_path(cls) -> Optional[Path]:
         """
         Get the path to VS Code settings.json.
-        
+
         Returns:
             Path to settings file, or None if not found.
         """
         home = Path.home()
-        
+
         # Check different VS Code data directories
         paths = [
             home / ".config" / "Code" / "User" / "settings.json",  # Standard
@@ -257,47 +256,47 @@ class VSCodeManager:
             home / ".config" / "VSCodium" / "User" / "settings.json",  # VSCodium
             home / ".var" / "app" / "com.visualstudio.code" / "config" / "Code" / "User" / "settings.json",  # Flatpak
         ]
-        
+
         for path in paths:
             if path.parent.exists():
                 return path
-        
+
         return None
-    
+
     @classmethod
     def backup_settings(cls) -> Optional[Path]:
         """
         Create a backup of current settings.json.
-        
+
         Returns:
             Path to backup file, or None if no settings exist.
         """
         settings_path = cls.get_settings_path()
         if not settings_path or not settings_path.exists():
             return None
-        
+
         backup_path = settings_path.with_suffix(".json.bak")
         shutil.copy2(settings_path, backup_path)
         return backup_path
-    
+
     @classmethod
     def inject_settings(cls, profile: str) -> Result:
         """
         Inject recommended settings for a development profile.
-        
+
         This merges recommended settings with existing settings,
         without overwriting user customizations.
-        
+
         Args:
             profile: Development profile (python, cpp, rust, etc.)
-            
+
         Returns:
             Result with success status.
         """
         settings_path = cls.get_settings_path()
         if not settings_path:
             return Result(False, "Could not find VS Code settings directory.")
-        
+
         # Profile-specific settings
         profile_settings = {
             "python": {
@@ -331,14 +330,14 @@ class VSCodeManager:
                 }
             },
         }
-        
+
         if profile not in profile_settings:
             return Result(False, f"No settings defined for profile: {profile}")
-        
+
         try:
             # Backup existing settings
             cls.backup_settings()
-            
+
             # Load existing settings or create new
             if settings_path.exists():
                 with open(settings_path) as f:
@@ -346,7 +345,7 @@ class VSCodeManager:
             else:
                 current_settings = {}
                 settings_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Deep merge new settings
             new_settings = profile_settings[profile]
             for key, value in new_settings.items():
@@ -354,23 +353,23 @@ class VSCodeManager:
                     current_settings[key].update(value)
                 else:
                     current_settings[key] = value
-            
+
             # Write updated settings
             with open(settings_path, "w") as f:
                 json.dump(current_settings, f, indent=4)
-            
+
             return Result(True, f"Settings for {profile} profile injected successfully.")
-            
+
         except json.JSONDecodeError:
             return Result(False, "Could not parse existing settings.json")
         except Exception as e:
             return Result(False, f"Error updating settings: {e}")
-    
+
     @classmethod
     def get_available_profiles(cls) -> list[dict]:
         """
         Get list of available extension profiles.
-        
+
         Returns:
             List of profile info dicts.
         """

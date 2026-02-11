@@ -8,17 +8,15 @@ original AppsTab and ReposTab.
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
-    QGroupBox, QCheckBox, QScrollArea, QFrame, QTabWidget
+    QGroupBox, QScrollArea, QFrame, QTabWidget
 )
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
 
-import json
 import shlex
 import subprocess
-import os
 
 
 # ---------------------------------------------------------------------------

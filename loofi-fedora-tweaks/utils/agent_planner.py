@@ -25,6 +25,7 @@ from utils.agents import (
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class PlanStep:
     """A single step in an agent plan."""
@@ -40,6 +41,7 @@ class PlanStep:
             "operation": self.operation,
             "severity": self.severity.value,
         }
+
 
 @dataclass
 class AgentPlan:
@@ -90,6 +92,7 @@ class AgentPlan:
         }
 
 # ==================== Goal Templates ====================
+
 
 GOAL_TEMPLATES: Dict[str, AgentPlan] = {
     "keep_system_healthy": AgentPlan(
@@ -179,6 +182,7 @@ GOAL_TEMPLATES: Dict[str, AgentPlan] = {
         },
     ),
 }
+
 
 class AgentPlanner:
     """

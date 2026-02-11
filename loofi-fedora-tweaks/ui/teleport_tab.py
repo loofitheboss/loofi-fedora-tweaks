@@ -14,10 +14,9 @@ from PyQt6.QtWidgets import (
     QTextEdit, QScrollArea, QFrame, QMessageBox, QFileDialog,
     QLineEdit,
 )
-from PyQt6.QtCore import Qt
 
 from ui.tab_utils import CONTENT_MARGINS
-from utils.state_teleport import StateTeleportManager, TeleportPackage
+from utils.state_teleport import StateTeleportManager
 from utils.file_drop import FileDropManager
 from utils.mesh_discovery import MeshDiscovery
 

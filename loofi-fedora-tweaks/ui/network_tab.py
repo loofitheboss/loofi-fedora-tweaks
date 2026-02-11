@@ -13,7 +13,7 @@ import logging
 import os
 import subprocess
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QComboBox, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
     QMessageBox, QPushButton, QTabWidget, QTableWidget,
@@ -381,7 +381,7 @@ class NetworkTab(BaseTab):
                 ["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY,ACTIVE", "device", "wifi", "list", "--rescan", "yes"],
                 capture_output=True, text=True, timeout=15
             )
-            lines = [l for l in result.stdout.strip().splitlines() if l.strip()]
+            lines = [line for line in result.stdout.strip().splitlines() if line.strip()]
             self.wifi_table.setRowCount(len(lines))
             for i, line in enumerate(lines):
                 parts = line.split(":")
@@ -423,9 +423,9 @@ class NetworkTab(BaseTab):
                 ["nmcli", "-t", "-f", "NAME,TYPE,ACTIVE", "connection", "show"],
                 capture_output=True, text=True, timeout=5
             )
-            vpn_lines = [l for l in result.stdout.strip().splitlines()
-                         if "vpn" in l.lower() or "wireguard" in l.lower()
-                         or "openvpn" in l.lower()]
+            vpn_lines = [line for line in result.stdout.strip().splitlines()
+                         if "vpn" in line.lower() or "wireguard" in line.lower()
+                         or "openvpn" in line.lower()]
             self.vpn_table.setRowCount(len(vpn_lines))
             for i, line in enumerate(vpn_lines):
                 parts = line.split(":")

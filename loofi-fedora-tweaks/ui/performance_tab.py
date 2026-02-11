@@ -7,11 +7,10 @@ and tuning history. Uses AutoTuner from utils/auto_tuner.py.
 """
 
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QGridLayout, QTableWidget, QTableWidgetItem,
-    QHeaderView, QComboBox
+    QVBoxLayout, QLabel, QPushButton, QGroupBox,
+    QGridLayout, QTableWidget, QTableWidgetItem, QHeaderView
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
 from utils.auto_tuner import AutoTuner, WorkloadProfile, TuningRecommendation, TuningHistoryEntry
 import time

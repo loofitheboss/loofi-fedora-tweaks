@@ -15,7 +15,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QStackedWidget, QWidget, QRadioButton, QButtonGroup,
-    QFrame, QSizePolicy, QScrollArea,
+    QFrame, QScrollArea,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -529,7 +529,7 @@ class FirstRunWizard(QDialog):
 
     def _capture_use_case(self):
         """Read the currently selected radio button."""
-        keys = list(USE_CASES.keys())
+        list(USE_CASES.keys())
         for key, radio in self._uc_radios.items():
             if radio.isChecked():
                 self._selected_use_case = key

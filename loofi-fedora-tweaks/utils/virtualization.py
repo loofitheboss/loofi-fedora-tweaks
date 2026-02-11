@@ -8,11 +8,9 @@ wizard and VFIO Passthrough Assistant.
 """
 
 import os
-import re
 import shutil
 import subprocess
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass

@@ -7,10 +7,9 @@ import json
 import hashlib
 import logging
 import subprocess
-import os
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Any
+from typing import List, Optional
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -43,14 +42,14 @@ class SystemSnapshot:
     timestamp: str
     preset_name: str
     preset_hash: str
-    
+
     # State hashes
     kernel_params_hash: str
     installed_packages_hash: str
     enabled_services_hash: str
     dnf_config_hash: str
     sysctl_hash: str
-    
+
     # Actual values for comparison
     kernel_params: List[str]
     layered_packages: List[str]
@@ -60,38 +59,38 @@ class SystemSnapshot:
 class DriftDetector:
     """
     Detects configuration drift from applied presets.
-    
+
     Workflow:
     1. When preset is applied, save a SystemSnapshot
     2. Periodically compare current state to snapshot
     3. Alert user if significant drift is detected
     """
-    
+
     SNAPSHOTS_DIR = Path.home() / ".local/share/loofi-fedora-tweaks/snapshots"
     CURRENT_SNAPSHOT = SNAPSHOTS_DIR / "current.json"
-    
+
     def __init__(self):
         self.SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     def capture_snapshot(self, preset_name: str = "manual") -> SystemSnapshot:
         """
         Capture current system state as a snapshot.
-        
+
         Args:
             preset_name: Name of the preset being applied.
-            
+
         Returns:
             SystemSnapshot of current system state.
         """
         timestamp = datetime.now().isoformat()
-        
+
         # Gather system state
         kernel_params = self._get_kernel_params()
         layered_packages = self._get_layered_packages()
         user_services = self._get_user_services()
         dnf_config = self._get_dnf_config()
         sysctl_values = self._get_sysctl_values()
-        
+
         snapshot = SystemSnapshot(
             timestamp=timestamp,
             preset_name=preset_name,
@@ -105,9 +104,9 @@ class DriftDetector:
             layered_packages=layered_packages,
             user_services=user_services
         )
-        
+
         return snapshot
-    
+
     def save_snapshot(self, snapshot: SystemSnapshot) -> bool:
         """Save a snapshot as the current baseline."""
         try:
@@ -122,7 +121,7 @@ class DriftDetector:
         """Load the current baseline snapshot."""
         if not self.CURRENT_SNAPSHOT.exists():
             return None
-        
+
         try:
             with open(self.CURRENT_SNAPSHOT, "r") as f:
                 data = json.load(f)
@@ -130,29 +129,29 @@ class DriftDetector:
         except (OSError, json.JSONDecodeError, TypeError) as e:
             logger.debug("Failed to load snapshot: %s", e)
             return None
-    
+
     def check_drift(self) -> Optional[DriftReport]:
         """
         Check for configuration drift from the saved snapshot.
-        
+
         Returns:
             DriftReport if there's a baseline, None otherwise.
         """
         baseline = self.load_snapshot()
         if not baseline:
             return None
-        
+
         # Capture current state
         current = self.capture_snapshot(baseline.preset_name)
-        
+
         # Compare states
         drift_items = []
-        
+
         # Check kernel parameters
         if current.kernel_params_hash != baseline.kernel_params_hash:
             added = set(current.kernel_params) - set(baseline.kernel_params)
             removed = set(baseline.kernel_params) - set(current.kernel_params)
-            
+
             for param in added:
                 drift_items.append(DriftItem(
                     category="kernel",
@@ -161,7 +160,7 @@ class DriftDetector:
                     actual="set",
                     severity="warning"
                 ))
-            
+
             for param in removed:
                 drift_items.append(DriftItem(
                     category="kernel",
@@ -170,12 +169,12 @@ class DriftDetector:
                     actual="not set",
                     severity="warning"
                 ))
-        
+
         # Check packages
         if current.installed_packages_hash != baseline.installed_packages_hash:
             added = set(current.layered_packages) - set(baseline.layered_packages)
             removed = set(baseline.layered_packages) - set(current.layered_packages)
-            
+
             for pkg in added:
                 drift_items.append(DriftItem(
                     category="packages",
@@ -184,7 +183,7 @@ class DriftDetector:
                     actual="installed",
                     severity="info"
                 ))
-            
+
             for pkg in removed:
                 drift_items.append(DriftItem(
                     category="packages",
@@ -193,12 +192,12 @@ class DriftDetector:
                     actual="not installed",
                     severity="warning"
                 ))
-        
+
         # Check services
         if current.enabled_services_hash != baseline.enabled_services_hash:
             added = set(current.user_services) - set(baseline.user_services)
             removed = set(baseline.user_services) - set(current.user_services)
-            
+
             for svc in added:
                 drift_items.append(DriftItem(
                     category="services",
@@ -207,7 +206,7 @@ class DriftDetector:
                     actual="enabled",
                     severity="info"
                 ))
-            
+
             for svc in removed:
                 drift_items.append(DriftItem(
                     category="services",
@@ -216,7 +215,7 @@ class DriftDetector:
                     actual="disabled",
                     severity="warning"
                 ))
-        
+
         return DriftReport(
             preset_name=baseline.preset_name,
             applied_at=baseline.timestamp,
@@ -225,7 +224,7 @@ class DriftDetector:
             drift_count=len(drift_items),
             items=drift_items
         )
-    
+
     def clear_baseline(self) -> bool:
         """Clear the current baseline snapshot."""
         try:
@@ -235,9 +234,9 @@ class DriftDetector:
         except OSError as e:
             logger.debug("Failed to clear baseline: %s", e)
             return False
-    
+
     # System state gathering methods
-    
+
     def _get_kernel_params(self) -> List[str]:
         """Get current kernel command line parameters."""
         try:
@@ -246,7 +245,7 @@ class DriftDetector:
         except Exception as e:
             logger.debug("Failed to read kernel params: %s", e)
             return []
-    
+
     def _get_layered_packages(self) -> List[str]:
         """Get list of layered packages (rpm-ostree or manual installs)."""
         try:
@@ -261,7 +260,7 @@ class DriftDetector:
                 deployments = data.get("deployments", [])
                 if deployments:
                     return deployments[0].get("requested-packages", [])
-            
+
             # Fallback: get manually installed packages
             result = subprocess.run(
                 ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
@@ -273,7 +272,7 @@ class DriftDetector:
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get layered packages: %s", e)
         return []
-    
+
     def _get_user_services(self) -> List[str]:
         """Get list of user-enabled systemd services."""
         try:
@@ -290,7 +289,7 @@ class DriftDetector:
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get user services: %s", e)
         return []
-    
+
     def _get_dnf_config(self) -> str:
         """Get DNF configuration content."""
         try:
@@ -299,7 +298,7 @@ class DriftDetector:
         except OSError as e:
             logger.debug("Failed to read dnf config: %s", e)
             return ""
-    
+
     def _get_sysctl_values(self) -> str:
         """Get relevant sysctl values."""
         keys = [
@@ -307,7 +306,7 @@ class DriftDetector:
             "net.ipv4.tcp_congestion_control",
             "net.core.default_qdisc"
         ]
-        
+
         values = []
         for key in keys:
             try:
@@ -319,13 +318,13 @@ class DriftDetector:
                     values.append(f"{key}={result.stdout.strip()}")
             except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to read sysctl %s: %s", key, e)
-        
+
         return "\n".join(values)
-    
+
     def _hash_string(self, s: str) -> str:
         """Create SHA256 hash of a string."""
         return hashlib.sha256(s.encode()).hexdigest()[:16]
-    
+
     def _hash_list(self, lst: List[str]) -> str:
         """Create SHA256 hash of a sorted list."""
         return self._hash_string("\n".join(sorted(lst)))

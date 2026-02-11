@@ -374,7 +374,7 @@ class AgentExecutor:
                 text=True,
                 timeout=10,
             )
-            lines = [l for l in result.stdout.strip().split("\n") if l.strip()]
+            lines = [line for line in result.stdout.strip().split("\n") if line.strip()]
             count = len(lines)
 
             if count > max_allowed:
@@ -430,7 +430,7 @@ class AgentExecutor:
             )
             # Exit code 100 = updates available, 0 = no updates
             if result.returncode == 100:
-                lines = [l for l in result.stdout.strip().split("\n") if l.strip() and not l.startswith("Last")]
+                lines = [line for line in result.stdout.strip().split("\n") if line.strip() and not line.startswith("Last")]
                 count = len(lines)
                 return AgentResult(
                     success=True,
@@ -456,7 +456,7 @@ class AgentExecutor:
                 timeout=30,
             )
             if result.returncode == 0:
-                lines = [l for l in result.stdout.strip().split("\n") if l.strip()]
+                lines = [line for line in result.stdout.strip().split("\n") if line.strip()]
                 count = len(lines)
                 return AgentResult(
                     success=True,

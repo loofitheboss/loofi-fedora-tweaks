@@ -10,17 +10,15 @@ Sub-tabs:
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QListWidget, QMessageBox, QInputDialog, QGroupBox,
-    QTabWidget, QFileDialog, QDialog, QLineEdit, QFormLayout,
-    QListWidgetItem, QComboBox, QTextEdit, QScrollArea, QFrame,
-    QProgressBar
+    QTabWidget, QFileDialog, QLineEdit, QListWidgetItem, QComboBox,
+    QTextEdit
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont
 
 from utils.presets import PresetManager
 from utils.config_manager import ConfigManager
 from utils.cloud_sync import CloudSyncManager
-from utils.marketplace import PresetMarketplace, CommunityPreset, MarketplaceResult
+from utils.marketplace import PresetMarketplace, MarketplaceResult
 from utils.drift import DriftDetector
 from utils.plugin_base import PluginLoader
 from ui.tab_utils import configure_top_tabs

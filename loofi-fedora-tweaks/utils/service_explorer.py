@@ -8,7 +8,7 @@ service browsing, control, and inspection for both system and user scopes.
 
 import subprocess
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional
 from enum import Enum
 

@@ -6,7 +6,7 @@ This module will be removed in v24.0.
 """
 
 import warnings
-import os  # For test mocking compatibility
+import os  # noqa: F401 - For test mocking compatibility
 from services.hardware.hardware_profiles import (
     PROFILES,
     detect_hardware_profile,

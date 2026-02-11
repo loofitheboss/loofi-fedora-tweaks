@@ -5,7 +5,6 @@ Part of v14.0 "Horizon Update".
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QPushButton, QTextEdit, QCheckBox, QHBoxLayout,
 )
-from PyQt6.QtCore import Qt
 
 from version import __version__, __version_codename__
 

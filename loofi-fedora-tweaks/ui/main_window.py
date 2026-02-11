@@ -5,16 +5,15 @@ Main Window - v19.0 "Vanguard"
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
-    QStackedWidget, QLabel, QFrame, QHeaderView, QTreeWidgetItemIterator
+    QStackedWidget, QLabel, QFrame, QTreeWidgetItemIterator, QScrollArea
 )
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QIcon, QShortcut, QKeySequence, QFontMetrics
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QShortcut, QKeySequence, QFontMetrics
 
 # Only import essential tabs eagerly (Dashboard is always shown first)
 from ui.dashboard_tab import DashboardTab
 from ui.system_info_tab import SystemInfoTab
 from ui.lazy_widget import LazyWidget
-from utils.system import SystemManager
 from utils.pulse import SystemPulse, PulseThread
 from utils.focus_mode import FocusMode
 from utils.config_manager import ConfigManager
@@ -28,32 +27,32 @@ _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 
 # Tab metadata: (description, badge)
 _TAB_META = {
-    "Home":               ("System overview and quick actions", "recommended"),
-    "Agents":             ("Automated system management agents", ""),
-    "Automation":         ("Scheduled tasks and cron jobs", ""),
-    "System Info":        ("Hardware and OS details", "recommended"),
-    "System Monitor":     ("Live CPU, memory, and process monitoring", "recommended"),
-    "Health":             ("System health timeline and trends", ""),
-    "Logs":               ("Systemd journal and log viewer", "advanced"),
-    "Hardware":           ("CPU, GPU, fan, and power controls", "recommended"),
-    "Performance":        ("Kernel tuning and I/O scheduler", "advanced"),
-    "Storage":            ("Disk usage and mount management", ""),
-    "Software":           ("Package management and repos", "recommended"),
-    "Maintenance":        ("System updates and cache cleanup", "recommended"),
-    "Snapshots":          ("Btrfs/LVM snapshot management", "advanced"),
-    "Virtualization":     ("Virtual machines and containers", "advanced"),
-    "Development":        ("Developer tools and SDKs", ""),
-    "Network":            ("Network interfaces and firewall", "recommended"),
-    "Loofi Link":         ("Device mesh networking", "advanced"),
+    "Home": ("System overview and quick actions", "recommended"),
+    "Agents": ("Automated system management agents", ""),
+    "Automation": ("Scheduled tasks and cron jobs", ""),
+    "System Info": ("Hardware and OS details", "recommended"),
+    "System Monitor": ("Live CPU, memory, and process monitoring", "recommended"),
+    "Health": ("System health timeline and trends", ""),
+    "Logs": ("Systemd journal and log viewer", "advanced"),
+    "Hardware": ("CPU, GPU, fan, and power controls", "recommended"),
+    "Performance": ("Kernel tuning and I/O scheduler", "advanced"),
+    "Storage": ("Disk usage and mount management", ""),
+    "Software": ("Package management and repos", "recommended"),
+    "Maintenance": ("System updates and cache cleanup", "recommended"),
+    "Snapshots": ("Btrfs/LVM snapshot management", "advanced"),
+    "Virtualization": ("Virtual machines and containers", "advanced"),
+    "Development": ("Developer tools and SDKs", ""),
+    "Network": ("Network interfaces and firewall", "recommended"),
+    "Loofi Link": ("Device mesh networking", "advanced"),
     "Security & Privacy": ("Firewall, SELinux, audit tools", "recommended"),
-    "Desktop":            ("GNOME/KDE customization", ""),
-    "Profiles":           ("User profile and workspace management", ""),
-    "Gaming":             ("Game mode and GPU optimization", ""),
-    "AI Lab":             ("AI-powered system suggestions", "advanced"),
-    "State Teleport":     ("System state transfer between machines", "advanced"),
-    "Diagnostics":        ("System diagnostics and health checks", ""),
-    "Community":          ("Community tweaks and shared configs", ""),
-    "Settings":           ("App preferences and theme", ""),
+    "Desktop": ("GNOME/KDE customization", ""),
+    "Profiles": ("User profile and workspace management", ""),
+    "Gaming": ("Game mode and GPU optimization", ""),
+    "AI Lab": ("AI-powered system suggestions", "advanced"),
+    "State Teleport": ("System state transfer between machines", "advanced"),
+    "Diagnostics": ("System diagnostics and health checks", ""),
+    "Community": ("Community tweaks and shared configs", ""),
+    "Settings": ("App preferences and theme", ""),
 }
 
 
@@ -357,15 +356,32 @@ class MainWindow(QMainWindow):
 
         item = QTreeWidgetItem(category_item)
         item.setText(0, f"{icon}  {name}{badge_suffix}")
+        page_widget = self._wrap_page_widget(widget)
         # Store widget, description, and badge type
-        item.setData(0, Qt.ItemDataRole.UserRole, widget)
+        item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
         item.setData(0, _ROLE_DESC, desc)
         item.setData(0, _ROLE_BADGE, badge)
         if desc:
             item.setToolTip(0, desc)
 
-        self.content_area.addWidget(widget)
+        self.content_area.addWidget(page_widget)
         self.pages[name] = widget
+
+    def _wrap_page_widget(self, widget: QWidget) -> QScrollArea:
+        """
+        Wrap a page widget in a scroll area.
+
+        Prevents dense tabs from being vertically compressed on smaller
+        displays; users can scroll instead of seeing clipped/collapsed controls.
+        """
+        scroll = QScrollArea()
+        scroll.setObjectName("pageScroll")
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setWidget(widget)
+        return scroll
 
     def change_page(self, current, previous):
         if not current:
@@ -426,12 +442,12 @@ class MainWindow(QMainWindow):
     def _filter_sidebar(self, text: str):
         """Filter sidebar items by search text."""
         search = text.lower()
-        
+
         # Iterate top-level categories
         for i in range(self.sidebar.topLevelItemCount()):
             category = self.sidebar.topLevelItem(i)
             category_visible = False
-            
+
             # Check children
             for j in range(category.childCount()):
                 child = category.child(j)
@@ -440,7 +456,7 @@ class MainWindow(QMainWindow):
                     category_visible = True
                 else:
                     child.setHidden(True)
-            
+
             # Check category itself
             if search in category.text(0).lower():
                 category_visible = True
@@ -448,7 +464,7 @@ class MainWindow(QMainWindow):
                 # Let's show all children if category matches
                 for j in range(category.childCount()):
                     category.child(j).setHidden(False)
-            
+
             category.setHidden(not category_visible)
             if category_visible:
                 category.setExpanded(True)
@@ -458,7 +474,7 @@ class MainWindow(QMainWindow):
         # Ctrl+1 through Ctrl+9 - switch to category 1-9
         for i in range(1, 10):
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
-            shortcut.activated.connect(lambda idx=i-1: self._select_category(idx))
+            shortcut.activated.connect(lambda idx=i - 1: self._select_category(idx))
 
         # Ctrl+Tab - next tab
         next_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
@@ -486,7 +502,7 @@ class MainWindow(QMainWindow):
         current = self.sidebar.currentItem()
         if not current:
             return
-        
+
         # Try to find next item below
         next_item = self.sidebar.itemBelow(current)
         if next_item:
@@ -500,7 +516,7 @@ class MainWindow(QMainWindow):
         current = self.sidebar.currentItem()
         if not current:
             return
-            
+
         # Try to find item above
         prev_item = self.sidebar.itemAbove(current)
         if prev_item:
@@ -594,9 +610,9 @@ class MainWindow(QMainWindow):
             self.tray_icon = QSystemTrayIcon(self)
             icon_path = os.path.join(os.path.dirname(__file__), "..", "assets", "loofi-fedora-tweaks.png")
             if os.path.exists(icon_path):
-                 self.tray_icon.setIcon(QIcon(icon_path))
+                self.tray_icon.setIcon(QIcon(icon_path))
             else:
-                 self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
+                self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
 
             tray_menu = QMenu()
             show_action = QAction(self.tr("Show"), self)
@@ -670,7 +686,7 @@ class MainWindow(QMainWindow):
         critical = ["dnf", "pkexec"]
         missing = [tool for tool in critical if not shutil.which(tool)]
         if missing:
-             self.show_doctor()
+            self.show_doctor()
 
     def show_doctor(self):
         from ui.doctor import DependencyDoctor

@@ -8,10 +8,11 @@ from utils.log import get_logger
 
 logger = get_logger(__name__)
 
+
 class AppConfigFetcher(QThread):
     config_ready = pyqtSignal(list)
     config_error = pyqtSignal(str)
-    
+
     REMOTE_URL = "https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/config/apps.json"
     CACHE_DIR = os.path.expanduser("~/.cache/loofi-fedora-tweaks")
     CACHE_FILE = os.path.join(CACHE_DIR, "apps.json")
@@ -33,7 +34,7 @@ class AppConfigFetcher(QThread):
                         return
             except Exception as e:
                 logger.warning("Remote fetch failed: %s", e)
-        
+
         # 2. Try Cache
         if os.path.exists(self.CACHE_FILE):
             try:

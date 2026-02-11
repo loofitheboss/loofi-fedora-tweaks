@@ -3,9 +3,10 @@ import json
 import subprocess
 import shutil
 
+
 class PresetManager:
     PRESETS_DIR = os.path.expanduser("~/.config/loofi-fedora-tweaks/presets")
-    
+
     def __init__(self):
         os.makedirs(self.PRESETS_DIR, exist_ok=True)
 
@@ -37,7 +38,7 @@ class PresetManager:
             "battery_limit": self._get_battery_limit(),
             "power_profile": self._get_power_profile()
         }
-        
+
         safe_name = self._sanitize_name(name)
         path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         with open(path, 'w') as f:
@@ -50,19 +51,19 @@ class PresetManager:
         path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         if not os.path.exists(path):
             return False
-            
+
         with open(path, 'r') as f:
             data = json.load(f)
-            
+
         # Apply GSettings
         self._set_gsettings("org.gnome.desktop.interface", "gtk-theme", data.get("theme"))
         self._set_gsettings("org.gnome.desktop.interface", "icon-theme", data.get("icon_theme"))
         self._set_gsettings("org.gnome.desktop.interface", "cursor-theme", data.get("cursor_theme"))
         self._set_gsettings("org.gnome.desktop.interface", "color-scheme", data.get("color_scheme"))
-        
+
         # Apply Battery Limit (Requires PKEXEC if changed)
         # We can implement a signal or callback, or just run valid commands here if possible.
-        # Since we are in a utility, we might need to return specific actions for the UI to handle, 
+        # Since we are in a utility, we might need to return specific actions for the UI to handle,
         # OR we use our BatteryManager if we can trust it.
         # For now, let's return a dict of complex actions for the UI to perform if needed.
         return data
@@ -74,7 +75,7 @@ class PresetManager:
             os.remove(path)
             return True
         return False
-    
+
     def save_preset_data(self, name, data):
         """Save preset from provided data (for community presets)."""
         safe_name = self._sanitize_name(name)

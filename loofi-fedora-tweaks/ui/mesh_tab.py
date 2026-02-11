@@ -11,12 +11,11 @@ Provides a three-sub-tab interface:
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QScrollArea, QFrame, QTabWidget, QFileDialog,
-    QProgressBar, QLineEdit, QMessageBox,
+    QTextEdit, QTabWidget, QFileDialog, QProgressBar,
 )
 from PyQt6.QtCore import Qt
 
-from utils.mesh_discovery import MeshDiscovery, PeerDevice
+from utils.mesh_discovery import MeshDiscovery
 from utils.clipboard_sync import ClipboardSync
 from utils.file_drop import FileDropManager
 from ui.tab_utils import configure_top_tabs

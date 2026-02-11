@@ -7,7 +7,6 @@ Supports DNF (traditional), rpm-ostree (atomic), and Flatpak.
 
 import subprocess
 import logging
-import json
 from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -87,13 +86,12 @@ class PackageExplorer:
                 return []
 
             packages: List[PackageInfo] = []
-            current_section = ""
             for line in result.stdout.strip().splitlines():
                 if not line.strip():
                     continue
                 # DNF outputs section headers like "Name Matched: ..." or "Summary Matched: ..."
                 if line.startswith("=") or "Matched" in line:
-                    current_section = line.strip()
+                    line.strip()
                     continue
 
                 # Lines look like: name.arch : summary

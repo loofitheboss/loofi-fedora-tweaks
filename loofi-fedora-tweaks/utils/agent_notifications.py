@@ -17,7 +17,9 @@ import time
 import urllib.request
 import urllib.error
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
+
+from utils.agents import AgentResult
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +86,7 @@ class AgentNotifier:
         self,
         agent_id: str,
         agent_name: str,
-        result: "AgentResult",
+        result: AgentResult,
         config: AgentNotificationConfig,
     ) -> bool:
         """
@@ -120,7 +122,7 @@ class AgentNotifier:
     def _should_notify(
         self,
         agent_id: str,
-        result: "AgentResult",
+        result: AgentResult,
         config: AgentNotificationConfig,
     ) -> bool:
         """Check if this result warrants a notification."""
@@ -148,7 +150,7 @@ class AgentNotifier:
         return (time.time() - last) >= config.cooldown_seconds
 
     @staticmethod
-    def _get_result_severity(result: "AgentResult") -> str:
+    def _get_result_severity(result: AgentResult) -> str:
         """Infer severity from result data."""
         if result.data:
             if result.data.get("alert"):
@@ -161,7 +163,7 @@ class AgentNotifier:
         return "info"
 
     @staticmethod
-    def _send_desktop(agent_name: str, result: "AgentResult") -> bool:
+    def _send_desktop(agent_name: str, result: AgentResult) -> bool:
         """Send desktop notification via existing NotificationManager."""
         try:
             from utils.notifications import NotificationManager
@@ -177,7 +179,7 @@ class AgentNotifier:
             return False
 
     @staticmethod
-    def _send_in_app(agent_name: str, result: "AgentResult"):
+    def _send_in_app(agent_name: str, result: AgentResult):
         """Add to in-app NotificationCenter."""
         try:
             from utils.notification_center import NotificationCenter
@@ -195,7 +197,7 @@ class AgentNotifier:
     def _send_webhook(
         agent_id: str,
         agent_name: str,
-        result: "AgentResult",
+        result: AgentResult,
         config: AgentNotificationConfig,
     ) -> bool:
         """POST JSON payload to webhook URL in a background thread."""

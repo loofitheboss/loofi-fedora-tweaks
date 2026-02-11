@@ -110,7 +110,7 @@ class ProcessManager:
                 "utime": int(fields[11]),      # field 14: user mode jiffies
                 "stime": int(fields[12]),      # field 15: kernel mode jiffies
                 "nice": int(fields[16]),       # field 19: nice value
-                "num_threads": int(fields[17]),# field 20
+                "num_threads": int(fields[17]),  # field 20
                 "rss": int(fields[21]),        # field 24: resident set size in pages
             }
         except (ValueError, IndexError):

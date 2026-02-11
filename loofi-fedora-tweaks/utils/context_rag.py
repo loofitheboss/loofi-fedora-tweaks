@@ -13,8 +13,6 @@ import os
 import json
 import math
 import time
-from typing import Optional
-from pathlib import Path
 
 from utils.containers import Result
 
@@ -315,7 +313,7 @@ class ContextRAGManager:
         for file_path in resolved:
             if total_size >= MAX_INDEX_SIZE:
                 if callback:
-                    callback(f"Index size limit reached ({MAX_INDEX_SIZE // (1024*1024)} MB)")
+                    callback(f"Index size limit reached ({MAX_INDEX_SIZE // (1024 * 1024)} MB)")
                 break
 
             try:

@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import shutil
 import subprocess
 from datetime import datetime
 
@@ -12,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 class HistoryManager:
     HISTORY_FILE = os.path.expanduser("~/.config/loofi-fedora-tweaks/history.json")
-    
+
     def __init__(self):
         os.makedirs(os.path.dirname(self.HISTORY_FILE), exist_ok=True)
-    
+
     def log_change(self, description, undo_command):
         """
         Logs a change with a command to undo it.
@@ -26,23 +25,23 @@ class HistoryManager:
             "description": description,
             "undo_command": undo_command
         }
-        
+
         history = self._load_history()
         history.append(entry)
-        
+
         # Keep history manageable (last 50 items)
         if len(history) > 50:
             history = history[-50:]
-            
+
         self._save_history(history)
-        
+
     def get_last_action(self):
         """Returns the description of the last action, or None."""
         history = self._load_history()
         if not history:
             return None
         return history[-1]
-        
+
     def undo_last_action(self):
         """
         Executes the undo command for the last action and removes it from history.
