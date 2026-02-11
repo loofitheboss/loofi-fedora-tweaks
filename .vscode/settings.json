@@ -1,0 +1,14 @@
+{
+    "chatgpt.openOnStartup": true,
+    "claudeCode.allowDangerouslySkipPermissions": true,
+    "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,
+    "chat.agentSkillsLocations": {
+        ".codex/skills": true,
+        "~/.codex/skills": true
+    },
+    "chat.agentFilesLocations": {
+        ".github/claude-agents": true,
+        ".github/agents": true,
+        ".github/instructions": true
+    }
+}

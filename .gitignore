@@ -16,6 +16,10 @@ venv/
 # IDE
 .idea/
 .vscode/
+!.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
 *.swp
 *.swo
 *~

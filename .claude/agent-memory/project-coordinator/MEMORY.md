@@ -5,9 +5,9 @@
 ### Automated Pipeline
 
 - 7-phase pipeline: PLAN, DESIGN, IMPLEMENT, TEST, DOCUMENT, PACKAGE, RELEASE
-- Prompts at `.claude/workflow/prompts/`
-- Task files at `.claude/workflow/tasks-v{VERSION}.md`
-- Model routing: `.claude/workflow/model-router.md`
+- Prompts at `.github/workflow/prompts/`
+- Task files at `.workflow/specs/tasks-v{VERSION}.md`
+- Model routing: `.github/workflow/model-router.toml`
 - CLI runner: `scripts/workflow-runner.sh <version> [phase]`
 
 ### Version Status
@@ -39,7 +39,7 @@
 - `core/executor/`: ActionExecutor + ActionResult + Operations
 - Backward-compat shims in `utils/`
 - Tests: `test_action_executor.py` (18 tests)
-- CI: `ci.yml` + `release.yml` + `auto-release.yml`
+- CI: `ci.yml` + `auto-release.yml`
 
 ### Stub Only (init comment, no logic)
 

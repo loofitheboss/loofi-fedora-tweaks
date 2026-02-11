@@ -1,0 +1,8 @@
+{
+  "canonical_root": ".github",
+  "claude_agents": ".github/claude-agents",
+  "workflow_prompts": ".github/workflow/prompts",
+  "workflow_router": ".github/workflow/model-router.toml",
+  "copilot_instructions": ".github/copilot-instructions.md",
+  "runtime_artifacts": ".workflow"
+}

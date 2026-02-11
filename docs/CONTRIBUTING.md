@@ -110,7 +110,7 @@ loofi-fedora-tweaks/
 │   └── CONTRIBUTING.md       # This file
 ├── .github/
 │   ├── workflows/ci.yml      # CI pipeline (lint, test, build)
-│   ├── workflows/release.yml # Tag-triggered releases
+│   ├── workflows/auto-release.yml # Master auto-tag + tag-triggered release publish
 │   ├── agents/               # Development agents [v15.0]
 │   └── copilot-instructions.md
 ├── build_rpm.sh              # Build script

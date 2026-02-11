@@ -6,7 +6,7 @@ description: Write and run tests for all changed files in the current version.
 # Test Phase (P4)
 
 ## Steps
-1. Read `.github/workflow/tasks-v{VERSION}.md` for changed files
+1. Read `.workflow/specs/tasks-v{VERSION}.md` for changed files
 2. For each changed module, write/update tests:
    - Success path
    - Failure path (CalledProcessError, FileNotFoundError)

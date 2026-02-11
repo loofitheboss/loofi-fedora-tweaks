@@ -6,7 +6,7 @@ description: Execute implementation tasks from the task list, one at a time, in 
 # Implement Phase (P3)
 
 ## Steps
-1. Read `.github/workflow/tasks-v{VERSION}.md`
+1. Read `.workflow/specs/tasks-v{VERSION}.md`
 2. Find the next undone task
 3. Read affected files listed in the task
 4. Implement following existing patterns

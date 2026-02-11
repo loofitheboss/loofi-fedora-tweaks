@@ -10,7 +10,7 @@ description: Decompose an ACTIVE version from ROADMAP.md into atomic tasks with 
 2. Read all deliverables listed for that version
 3. Decompose into atomic tasks (max 15)
 4. Assign each task: agent, layer, size (S/M/L), dependencies
-5. Save to `.github/workflow/tasks-v{VERSION}.md`
+5. Save to `.workflow/specs/tasks-v{VERSION}.md`
 
 ## Output Format
 

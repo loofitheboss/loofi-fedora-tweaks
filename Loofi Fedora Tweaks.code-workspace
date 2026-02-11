@@ -10,7 +10,9 @@
 			".codex/skills": true
 		},
 		"chat.agentFilesLocations": {
-			".claude/agents": true
+			".github/claude-agents": true,
+			".github/agents": true,
+			".github/instructions": true
 		}
 	}
 }

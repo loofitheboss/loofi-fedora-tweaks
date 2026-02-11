@@ -8,9 +8,9 @@
 - P7 RELEASE: Branch, tag, push, GitHub Release
 
 ### Prompts
-- `.claude/workflow/prompts/document.md`
-- `.claude/workflow/prompts/package.md`
-- `.claude/workflow/prompts/release.md`
+- `.github/workflow/prompts/document.md`
+- `.github/workflow/prompts/package.md`
+- `.github/workflow/prompts/release.md`
 
 ### Cost Model
 - I run on haiku (cheapest tier)
@@ -37,8 +37,7 @@
 
 ### GitHub Workflows
 - `.github/workflows/ci.yml` — lint + typecheck + security + test + build
-- `.github/workflows/release.yml` — Tag-triggered release (legacy)
-- `.github/workflows/auto-release.yml` — Enhanced: validate + lint + test + security + build + release
+- `.github/workflows/auto-release.yml` — Single publisher workflow (master auto-tag + tag release)
 
 ### CHANGELOG.md Format (Keep-a-Changelog)
 ```markdown

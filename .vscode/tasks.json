@@ -1,0 +1,184 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Workflow: Phase (write)",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/workflow_runner.py",
+        "--phase",
+        "${input:workflowPhase}",
+        "--target-version",
+        "${input:workflowVersion}",
+        "--assistant",
+        "${input:workflowAssistant}",
+        "--mode",
+        "write",
+        "--owner",
+        "${input:workflowOwner}",
+        "--issue",
+        "${input:workflowIssue}"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Phase (review)",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/workflow_runner.py",
+        "--phase",
+        "${input:workflowPhase}",
+        "--target-version",
+        "${input:workflowVersion}",
+        "--assistant",
+        "${input:workflowAssistant}",
+        "--mode",
+        "review",
+        "--issue",
+        "${input:workflowIssue}"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: All (write)",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/workflow_runner.py",
+        "--phase",
+        "all",
+        "--target-version",
+        "${input:workflowVersion}",
+        "--assistant",
+        "${input:workflowAssistant}",
+        "--mode",
+        "write",
+        "--owner",
+        "${input:workflowOwner}",
+        "--issue",
+        "${input:workflowIssue}"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Release Writer Lock",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/workflow_runner.py",
+        "--release-writer-lock",
+        "--assistant",
+        "${input:workflowAssistant}",
+        "--owner",
+        "${input:workflowOwner}"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Sync AI Adapters",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/sync_ai_adapters.py"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Check AI Adapter Drift",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/sync_ai_adapters.py",
+        "--check"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Validate Release Docs",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/check_release_docs.py"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Validate Release Docs + Logs",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "scripts/check_release_docs.py",
+        "--require-logs"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workflow: Legacy Validate",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "scripts/workflow-runner.sh",
+        "${input:workflowVersionNoV}",
+        "validate"
+      ],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "workflowVersion",
+      "type": "promptString",
+      "description": "Workflow target version (example: v26.0)",
+      "default": "v26.0"
+    },
+    {
+      "id": "workflowVersionNoV",
+      "type": "promptString",
+      "description": "Workflow target version without v (example: 26.0)",
+      "default": "26.0"
+    },
+    {
+      "id": "workflowPhase",
+      "type": "pickString",
+      "description": "Workflow phase",
+      "options": [
+        "plan",
+        "design",
+        "build",
+        "test",
+        "doc",
+        "package",
+        "release"
+      ],
+      "default": "plan"
+    },
+    {
+      "id": "workflowAssistant",
+      "type": "pickString",
+      "description": "Assistant identity for lock/reports",
+      "options": [
+        "codex",
+        "claude",
+        "copilot"
+      ],
+      "default": "codex"
+    },
+    {
+      "id": "workflowOwner",
+      "type": "promptString",
+      "description": "Writer lock owner",
+      "default": "loofi"
+    },
+    {
+      "id": "workflowIssue",
+      "type": "promptString",
+      "description": "GitHub issue id (optional)",
+      "default": ""
+    }
+  ]
+}
