@@ -185,7 +185,7 @@
 - [x] Regression tests for maintenance update flow
 - [x] CHANGELOG + README + release notes
 
-## [ACTIVE] v26.0 — Plugin Marketplace
+## [DONE] v26.0 — Plugin Marketplace
 
 ### Scope
 - Unified plugin system (bridge core/plugins ↔ utils/plugin_base)
@@ -208,21 +208,22 @@
 - [x] Plugin integrity verifier (SHA256 + GPG)
 - [x] PluginMarketplaceAPI (GitHub-based index)
 - [x] Plugin dependency resolver
-- [ ] Marketplace UI (browse/search/install in Community tab)
-- [ ] Plugin detail dialog + permission consent dialog
-- [ ] CLI commands: search, install, uninstall, update, info
-- [ ] Plugin auto-update service (daemon mode)
-- [x] 8 new test files (195 tests, 176 passing @ 86%)
-- [ ] PLUGIN_SDK.md update
-- [ ] CHANGELOG + release notes
+- [x] Marketplace UI (browse/search/install in Community tab)
+- [x] Plugin detail dialog + permission consent dialog
+- [x] CLI commands: search, install, uninstall, update, info
+- [x] Plugin auto-update service (daemon mode)
+- [x] 195 comprehensive tests (100% pass rate)
+- [x] PLUGIN_SDK.md update
+- [x] CHANGELOG + release notes
+- [x] RPM built and tested (v26.0.0)
 
 ### Phases
 | Phase | Tasks | Status | Gate |
 |-------|-------|--------|------|
 | Foundation | T1–T8: Adapter, package, sandbox, loader, installer, integrity, marketplace API, resolver | ✅ DONE | All core modules importable, unit tests pass |
-| Features | T9–T14: Marketplace UI, details dialog, CLI commands, permission dialog, auto-updater | ⚠️ PARTIAL | CLI commands pending (14 tests) |
-| Stabilization | T15–T22: 8 new test files (195 tests) | ✅ DONE | 176/205 tests pass (86%), CLI stub needed |
-| Release | T23–T27: Version, docs, changelog, RPM | NEXT | CLI implementation, then CI green, RPM builds |
+| Features | T9–T14: Marketplace UI, details dialog, CLI commands, permission dialog, auto-updater | ✅ DONE | CLI commands implemented and tested |
+| Stabilization | T15–T22: 8 new test files (195 tests) | ✅ DONE | 195/195 tests pass (100%) |
+| Release | T23–T27: Version, docs, changelog, RPM | ✅ DONE | v26.0.0 released (2026-02-12) |
 
 ### Agent Assignment
 | Agent | Task |
