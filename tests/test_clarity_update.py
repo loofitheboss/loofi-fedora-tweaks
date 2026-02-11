@@ -24,11 +24,11 @@ class TestVersionModule(unittest.TestCase):
 
     def test_version_is_current(self):
         from version import __version__
-        self.assertEqual(__version__, "24.0.0")
+        self.assertEqual(__version__, "25.0.2")
 
     def test_version_codename(self):
         from version import __version_codename__
-        self.assertEqual(__version_codename__, "Power Features")
+        self.assertEqual(__version_codename__, "Plugin Architecture Testability Hotfix")
 
     def test_app_name(self):
         from version import __app_name__

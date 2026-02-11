@@ -8,7 +8,10 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-from PyQt6.QtWidgets import QApplication
+try:
+    from PyQt6.QtWidgets import QApplication
+except ImportError:
+    QApplication = None
 
 
 class TestFramelessModeFlag(unittest.TestCase):
@@ -17,6 +20,8 @@ class TestFramelessModeFlag(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Ensure QApplication exists for PyQt6 tests."""
+        if QApplication is None:
+            raise unittest.SkipTest("PyQt6 unavailable in test environment")
         app_instance = QApplication.instance()
         if isinstance(app_instance, QApplication):
             cls.app = app_instance

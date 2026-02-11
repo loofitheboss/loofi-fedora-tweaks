@@ -14,4 +14,12 @@ Patch release focused on reliability and CI/testability for the plugin architect
 - `1824 passed`, `122 skipped` test outcomes on the release branch.
 - Lint is clean with project flake8 configuration.
 
+### Files Changed
+
+- `loofi-fedora-tweaks/core/plugins/interface.py`
+- `loofi-fedora-tweaks/ui/base_tab.py`
+- `tests/test_frameless_mode_flag.py`
+- `tests/test_v17_atlas.py`
+- `tests/test_clarity_update.py`
+
 Tag: `v25.0.2`

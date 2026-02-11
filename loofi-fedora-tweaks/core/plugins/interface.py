@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtWidgets import QWidget
 from core.plugins.metadata import PluginMetadata, CompatStatus
 
 if TYPE_CHECKING:
     from core.plugins.compat import CompatibilityDetector
+    from PyQt6.QtWidgets import QWidget
+else:
+    QWidget = Any
 
 
 class PluginInterface:

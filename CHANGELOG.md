@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [25.0.2] - 2026-02-11 "Plugin Architecture Testability Hotfix"
+
+### Fixed
+
+- Fix plugin/core import behavior to avoid hard Qt runtime dependency during non-UI module loading.
+- Fix `BaseTab` inheritance fallback to prevent metaclass/MRO import failures in mocked headless test contexts.
+- Fix frameless-mode tests to skip cleanly when PyQt6 system libraries are unavailable.
+- Fix stale architecture/version assertions in legacy tests to match current plugin-based app structure and `25.0.1+` metadata.
+
 ## [25.0.1] - 2026-02-11 "Plugin Architecture Hotfix"
 
 ### Fixed

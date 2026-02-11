@@ -284,7 +284,7 @@ class TestHardwareTabBluetooth(unittest.TestCase):
 
 
 class TestMainWindowRegistration(unittest.TestCase):
-    """Test that new tabs are registered in MainWindow."""
+    """Test that tabs are registered through plugin architecture in MainWindow."""
 
     def test_main_window_has_new_tabs(self):
         filepath = os.path.join(
@@ -292,16 +292,10 @@ class TestMainWindowRegistration(unittest.TestCase):
         )
         with open(filepath, 'r') as f:
             source = f.read()
-        # Lazy loaders
-        self.assertIn('"performance"', source)
-        self.assertIn('"snapshots"', source)
-        self.assertIn('"logs"', source)
-        self.assertIn('"storage"', source)
-        # add_page calls
-        self.assertIn('Performance', source)
-        self.assertIn('Snapshots', source)
-        self.assertIn('Logs', source)
-        self.assertIn('Storage', source)
+        self.assertIn("PluginRegistry", source)
+        self.assertIn("PluginLoader", source)
+        self.assertIn("load_builtins(context=context)", source)
+        self.assertIn("_build_sidebar_from_registry", source)
 
 
 if __name__ == '__main__':
