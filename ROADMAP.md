@@ -11,7 +11,8 @@
 | v22.0 | Usability | SKIPPED | Search, status indicators, preferences |
 | v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
-| v25.0 | Plugin Architecture | NEXT | Plugin system, UI redesign, API |
+| v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
+| v26.0 | Plugin Marketplace | NEXT | External plugins, marketplace, sandboxing |
 
 ---
 
@@ -132,7 +133,7 @@
 
 ---
 
-## [NEXT] v25.0 — Plugin Architecture + UI Redesign
+## [DONE] v25.0 — Plugin Architecture + UI Redesign
 
 ### Scope
 - Tweaks self-register as modules
@@ -143,15 +144,15 @@
 - Sidebar redesign
 
 ### Deliverables
-- [ ] Plugin interface definition
-- [ ] Plugin loader implementation
-- [ ] Plugin registration tests
-- [ ] Sidebar navigation redesign
-- [ ] Compatibility detection engine
-- [ ] README rewrite
-- [ ] Plugin dev guide
-- [ ] CONTRIBUTING.md
-- [ ] CHANGELOG + release notes
+- [x] Plugin interface definition
+- [x] Plugin loader implementation
+- [x] Plugin registration tests
+- [x] Sidebar navigation redesign
+- [x] Compatibility detection engine
+- [x] README rewrite
+- [x] Plugin dev guide
+- [x] CONTRIBUTING.md
+- [x] CHANGELOG + release notes
 
 ### Agent Assignment
 | Agent | Task |

@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v24.0.0 "Power Features"
+# Loofi Fedora Tweaks v25.0.0 "Plugin Architecture"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,43 +10,41 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v24.0.0">
-    <img src="https://img.shields.io/badge/Release-v24.0.0-blue?style=for-the-badge&logo=github" alt="Release v24.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v25.0.0">
+    <img src="https://img.shields.io/badge/Release-v25.0.0-blue?style=for-the-badge&logo=github" alt="Release v25.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1715%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-1871%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
 </p>
 
 ---
 
-## What's New in v24.0.0 "Power Features"
+## What's New in v25.0.0 "Plugin Architecture"
 
-### Profiles: Schema + Storage + Import/Export
+### Modular Plugin System
 
-v24.0.0 adds a versioned profile schema and storage layer, with backward-compatible profile loading.
+v25.0 transforms the internal architecture from a hardcoded tab list to a plugin-based system where each of the 26 tabs is a self-describing module. **User experience remains identical** — no visible changes, same tabs, same navigation.
 
-**Core Profile Layer**
-* `core/profiles/models.py`: `ProfileRecord`, `ProfileBundle`
-* `core/profiles/storage.py`: CRUD + single/bundle import/export
-* Legacy profile JSON remains readable; new exports include schema metadata
+**Why this matters:**
+* Foundation for user-installable plugins (coming in v26.0)
+* Easier maintenance and testing of individual features
+* Compatibility-aware feature gating (disable incompatible features gracefully)
+* Clear plugin API for future extensibility
 
-**Profile Operations**
-* `ProfileManager` now supports:
-  * `export_profile_json`, `import_profile_json`
-  * `export_bundle_json`, `import_bundle_json`
-* `apply_profile()` now supports snapshot-before-apply with graceful fallback warning messages
+**Core Plugin Layer**
+* `core/plugins/interface.py`: `PluginInterface` ABC
+* `core/plugins/metadata.py`: `PluginMetadata` dataclass with category, icon, badge, order
+* `core/plugins/registry.py`: `PluginRegistry` singleton for plugin discovery
+* `core/plugins/loader.py`: `PluginLoader` for entrypoint import and validation
+* `core/plugins/compat.py`: `CompatibilityDetector` for Fedora version, DE, Wayland/X11, package checks
 
-### API + CLI Extensions
+### Compatibility Detection
 
-**Profile API Endpoints**
-* `GET /api/profiles`
-* `POST /api/profiles/apply`
-* `GET /api/profiles/{name}/export`
-* `POST /api/profiles/import`
-* `GET /api/profiles/export-all`
-* `POST /api/profiles/import-all`
+* Tabs can declare minimum Fedora version, required DE, Wayland/X11, packages
+* Incompatible tabs appear disabled with explanatory tooltip
+* Declarative `compat` dict or programmatic `check_compat()` override
 
 **CLI: profile**
 * New actions: `export`, `import`, `export-all`, `import-all`

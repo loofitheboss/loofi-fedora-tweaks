@@ -1,10 +1,10 @@
 # Tasks for v25.0 — Plugin Architecture + UI Redesign
 
 > **Version**: v25.0
-> **Phase**: P4 TEST — COMPLETE / P5 DOC — PENDING
+> **Phase**: P5 DOC — COMPLETE / P6 PACKAGE — PENDING
 > **Date**: 2026-02-11
-> **Agent**: test-writer
-> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 ✅ P5 🔲 P6 🔲 P7 🔲
+> **Agent**: release-planner
+> **Status**: P1 ✅ P2 ✅ P3 ✅ P4 ✅ P5 ✅ P6 🔲 P7 🔲
 
 ---
 
@@ -36,8 +36,8 @@ v25.0 transforms the monolithic tab registration system into a plugin-based arch
 | 11 | Integration tests for plugin-driven MainWindow (load, sidebar, navigation) | P4 | test-writer | M | 9,10 | `tests/test_plugin_integration.py` | [x] |
 | 12 | Migrate 5 representative built-in tabs to PluginInterface (dashboard, hardware, network, profiles, settings) | P3 | code-implementer | L | 8,9 | `ui/dashboard_tab.py`, `ui/hardware_tab.py`, `ui/network_tab.py`, `ui/profiles_tab.py`, `ui/settings_tab.py` | [x] |
 | 13 | Migrate remaining 21 built-in tabs to PluginInterface | P3 | code-implementer | L | 12 | All remaining `ui/*_tab.py` files | [x] |
-| 14 | Plugin developer guide and API reference | P5 | release-planner | M | 1,2,3,4 | `docs/plugin-dev-guide.md`, `CONTRIBUTING.md` | [ ] |
-| 15 | Update README, CHANGELOG, RELEASE-NOTES, ROADMAP status | P5 | release-planner | S | 11,13 | `README.md`, `CHANGELOG.md`, `RELEASE-NOTES-v25.0.0.md`, `ROADMAP.md` | [ ] |
+| 14 | Plugin developer guide and API reference | P5 | release-planner | M | 1,2,3,4 | `docs/plugin-dev-guide.md`, `CONTRIBUTING.md` | [x] |
+| 15 | Update README, CHANGELOG, RELEASE-NOTES, ROADMAP status | P5 | release-planner | S | 11,13 | `README.md`, `CHANGELOG.md`, `RELEASE-NOTES-v25.0.0.md`, `ROADMAP.md` | [x] |
 
 ---
 
