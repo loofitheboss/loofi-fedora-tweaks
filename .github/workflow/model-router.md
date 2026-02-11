@@ -1,6 +1,7 @@
 # Model Router (Brain vs Labor)
 
 > Route by decision complexity, not by phase habit.
+> Source of truth for automation is `.github/workflow/model-router.toml`.
 
 ## Tiers
 | Tier | Model | Use When |
@@ -25,6 +26,7 @@
 - P3 implement does not read ROADMAP.md.
 - Promote LABOR -> BRAIN only for blockers that require architecture changes.
 - Never run docs/package/release on BRAIN tier unless explicitly required.
+- No implicit model fallback to expensive tiers.
 
 ## Cost Control
 - Prefer artifact diffs over chat history transfer.

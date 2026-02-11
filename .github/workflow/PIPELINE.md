@@ -2,12 +2,19 @@
 
 > This pipeline uses a Race Lock to guarantee version integrity.
 > It keeps active specs in a hot workspace and archives prior runs as cold history.
+> It also uses a Writer Lock to guarantee single-writer mutations across assistants.
 
 ## Race Lock
 When you run `--phase plan`, the runner creates `.workflow/specs/.race-lock.json`.
 - Purpose: prevent version mixing (example: running `v25.0` design in a `v25.0` race).
 - Enforcement: non-plan phases must match the lock version exactly.
 - Reset: starting a new `plan` archives current specs and creates a fresh lock.
+
+## Writer Lock
+Write mode creates `.workflow/specs/.writer-lock.json` with:
+- `assistant`, `owner`, `version`, `phase`, `acquired_at`, `expires_at`
+- Only one writer can mutate at a time (`--mode write`)
+- Review mode does not require writer lock (`--mode review`) and writes reports to `.workflow/reports/reviews/{assistant}/`
 
 ## Directory Structure
 ```text
@@ -19,6 +26,9 @@ When you run `--phase plan`, the runner creates `.workflow/specs/.race-lock.json
 │   └── release-notes-draft-v25.0.md
 ├── reports/
 │   └── test-results-v25.0.json
+│   └── run-manifest-v25.0.json
+│   └── reviews/
+│       └── codex/v25.0-design.md
 └── archive/                    # COLD: previous race snapshots
     ├── v23.0_20260210_101010/
     └── v23.1_20260315_090001/
@@ -44,6 +54,18 @@ python3 scripts/workflow_runner.py --phase release --target-version v25.0
 3. Run full sequence:
 ```bash
 python3 scripts/workflow_runner.py --phase all --target-version v25.0
+```
+
+## Assistant-Aware Execution
+```bash
+# Write mode with lock metadata
+python3 scripts/workflow_runner.py --phase build --target-version v25.0 --assistant codex --mode write --owner loofi --issue 123
+
+# Review mode (read-only assistant execution + review report)
+python3 scripts/workflow_runner.py --phase design --target-version v25.0 --assistant claude --mode review --issue 123
+
+# Release writer lock (handoff)
+python3 scripts/workflow_runner.py --release-writer-lock --assistant codex --owner loofi
 ```
 
 ## Version Mismatch Behavior

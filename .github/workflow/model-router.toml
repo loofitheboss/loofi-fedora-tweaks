@@ -1,0 +1,16 @@
+# Machine-readable phase -> model routing.
+# Keep this aligned with .github/workflow/model-router.md.
+
+[tiers]
+brain = "gpt-5.3-codex"
+labor = "gpt-4o"
+labor_light = "gpt-4o-mini"
+
+[phases]
+plan = "gpt-5.3-codex"
+design = "gpt-5.3-codex"
+build = "gpt-4o"
+test = "gpt-4o"
+doc = "gpt-4o-mini"
+package = "gpt-4o-mini"
+release = "gpt-4o-mini"

@@ -2,20 +2,22 @@
 # Loofi Fedora Tweaks — Legacy Workflow Runner (State-File compatible)
 #
 # Usage:
-#   ./scripts/workflow-runner.sh <version> [phase]
+#   ./scripts/workflow-runner.sh <version> [phase] [runner args...]
 #
 # Examples:
 #   ./scripts/workflow-runner.sh 23.0.0 all
 #   ./scripts/workflow-runner.sh 23.0.0 plan --dry-run
+#   ./scripts/workflow-runner.sh 26.0 design --assistant codex --mode write --issue 42
 #   ./scripts/workflow-runner.sh 23.0.0 validate
 #
 # Phases: plan, design, implement, test, document, package, release, validate, all
 
 set -euo pipefail
 
-VERSION_INPUT="${1:?Usage: $0 <version> [phase]}"
+VERSION_INPUT="${1:?Usage: $0 <version> [phase] [runner args...]}"
 PHASE="${2:-all}"
-DRY_RUN_FLAG="${3:-}"
+shift 2 || true
+EXTRA_ARGS=("$@")
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RUNNER="$ROOT/scripts/workflow_runner.py"
 VERSION_NO_V="${VERSION_INPUT#v}"
@@ -112,11 +114,7 @@ run_phase() {
     fi
 
     log "Delegating phase '$requested' -> '$mapped' via scripts/workflow_runner.py"
-    if [ "$DRY_RUN_FLAG" = "--dry-run" ]; then
-        python3 "$RUNNER" --phase "$mapped" --target-version "$VERSION_TAG" --dry-run
-    else
-        python3 "$RUNNER" --phase "$mapped" --target-version "$VERSION_TAG"
-    fi
+    python3 "$RUNNER" --phase "$mapped" --target-version "$VERSION_TAG" "${EXTRA_ARGS[@]}"
 }
 
 case "$PHASE" in

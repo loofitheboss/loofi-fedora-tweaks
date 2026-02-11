@@ -11,6 +11,12 @@ python3 scripts/workflow_runner.py --phase all --target-version v24.0
 
 # Preview commands without execution
 python3 scripts/workflow_runner.py --phase design --target-version v24.0 --dry-run
+
+# Explicit assistant write mode
+python3 scripts/workflow_runner.py --phase build --target-version v24.0 --assistant codex --mode write --issue 42
+
+# Review-only mode (no writer lock)
+python3 scripts/workflow_runner.py --phase test --target-version v24.0 --assistant claude --mode review --issue 42
 ```
 
 ## Artifact Locations
@@ -18,6 +24,7 @@ python3 scripts/workflow_runner.py --phase design --target-version v24.0 --dry-r
 - Specs: `.workflow/specs/`
 - Reports: `.workflow/reports/`
 - Prompts: `.github/workflow/prompts/`
+- Model routing: `.github/workflow/model-router.toml`
 
 ## Need-to-Know Rule
 
@@ -27,3 +34,4 @@ python3 scripts/workflow_runner.py --phase design --target-version v24.0 --dry-r
 ## Legacy Runner
 
 - `scripts/workflow-runner.sh` remains available for manual/legacy flow.
+- `scripts/sync_ai_adapters.py` syncs Claude/Copilot/Codex adapter files from canonical `.github/`.
