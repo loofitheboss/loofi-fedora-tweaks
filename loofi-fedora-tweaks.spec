@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        26.0.2
+Version:        27.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,12 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Thu Feb 12 2026 Loofi <loofi@example.com> - 27.0.0-1
+- v27.0.0 Marketplace Enhancement
+- Added CDN-first marketplace index with signed metadata and fallback behavior
+- Added ratings/reviews, verified publisher badges, analytics opt-in, and hot reload
+- Updated SDK, changelog, README, and release notes for v27.0.0
+
 * Thu Feb 12 2026 Loofi <loofi@example.com> - 26.0.2-1
 - v26.0.2 Status Bar UI Hotfix
 - Fixed bottom status bar label rendering artifacts by forcing transparent label backgrounds in dark and light themes

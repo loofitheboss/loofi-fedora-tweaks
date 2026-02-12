@@ -13,7 +13,8 @@
 | v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
 | v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
 | v25.0.3 | Maintenance Update Crash Hotfix | DONE | Stabilize Maintenance update actions |
-| v26.0 | Plugin Marketplace | ACTIVE | External plugins, marketplace, sandboxing |
+| v26.0 | Plugin Marketplace | DONE | External plugins, marketplace, sandboxing |
+| v27.0 | Marketplace Enhancement | DONE | CDN index, ratings/reviews, badges, analytics, hot-reload, stronger sandbox |
 
 ---
 
@@ -244,6 +245,44 @@
 - `utils/plugin_installer.py`, `plugin_marketplace.py`, `plugin_updater.py`
 - `ui/plugin_detail_dialog.py`, `permission_dialog.py`
 - `tests/test_plugin_{adapter,sandbox,external_loader,installer,marketplace,resolver,integrity}.py`, `test_cli_marketplace.py`
+
+---
+
+## [DONE] v27.0 — Marketplace Enhancement
+
+### Scope
+- Replace GitHub-based marketplace index with dedicated CDN-backed index
+- Add plugin ratings and reviews (read/write integration)
+- Add verified publisher badges
+- Add opt-in plugin usage analytics
+- Add hot reload for installed plugins without app restart
+- Strengthen plugin sandbox with OS-level isolation
+
+### Deliverables
+- [x] CDN marketplace client + signed index schema
+- [x] Marketplace API/provider abstraction updated to CDN-first with fallback
+- [x] Ratings/reviews models and backend integration
+- [x] Ratings/reviews UI in Community tab
+- [x] Verified publisher badge support in listing and detail views
+- [x] Analytics consent preference (default off) + telemetry sender
+- [x] Hot-reload manager integrated with plugin loader/registry
+- [x] OS-level isolation support for plugin execution policy
+- [x] Test coverage for CDN, reviews, badges, analytics, hot reload, sandbox
+- [x] CHANGELOG + README + release notes + RPM validation
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| Arkitekt | CDN/index contract, isolation design |
+| Builder | Marketplace backend, analytics, hot reload, sandbox hardening |
+| Sculptor | Community tab UX for reviews and verification badges |
+| CodeGen | CLI extensions for review/badge/marketplace flows |
+| Guardian | Unit/integration test matrix for new marketplace features |
+| Planner | Versioning, docs, release checklist and packaging |
+
+### Dependencies
+- v26.0 plugin marketplace baseline
+- v25.0 plugin architecture (PluginInterface/Registry/Loader)
 
 ---
 

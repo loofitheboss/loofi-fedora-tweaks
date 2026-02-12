@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [27.0.0] - 2026-02-12 "Marketplace Enhancement"
+
+### Added
+
+- Add CDN-first marketplace index provider with cache and fallback behavior.
+- Add marketplace ratings/reviews APIs and CLI operations (`reviews`, `review-submit`, `rating`).
+- Add verified publisher verification state and badge exposure in marketplace listing/detail outputs.
+- Add opt-in plugin analytics pipeline (default off) with batched anonymized event sending.
+- Add plugin hot-reload request/rollback contracts and stronger isolation policy enforcement hooks.
+
+### Changed
+
+- Update Plugin SDK marketplace documentation to reflect CDN-first behavior and v27 command flows.
+- Update release documentation set (`README.md`, release notes, roadmap) for v27.0.0 alignment.
+
+---
+
 ## [26.0.2] - 2026-02-12 "Status Bar UI Hotfix"
 
 ### Fixed

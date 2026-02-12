@@ -422,26 +422,27 @@ loofi plugins disable my_plugin  # Disable a plugin
 
 ---
 
-## Plugin Marketplace (v26.0+)
+## Plugin Marketplace (v27.0+)
 
 ### Overview
 
 The Plugin Marketplace enables:
-- **Discovery**: Browse and search external plugins from GitHub
+- **Discovery**: Browse and search external plugins from a CDN-first signed index
 - **Installation**: One-click install from `.loofi-plugin` archives
 - **Sandboxing**: Runtime permission enforcement for installed plugins
 - **Integrity**: SHA256 + GPG signature verification
 - **Auto-Updates**: Automatic plugin updates via daemon service
 - **Dependencies**: Automatic resolution of plugin dependencies
+- **Trust + Quality**: Verified publisher badges plus ratings/reviews support
 
 ### Marketplace Architecture
 
 ```
-PluginMarketplaceAPI (GitHub index) → PluginInstaller → PluginSandbox → PluginLoader
+PluginCDNClient → PluginMarketplaceAPI (fallback-aware) → PluginInstaller → PluginSandbox → PluginLoader
 ```
 
 Plugin lifecycle:
-1. Search marketplace index (GitHub API)
+1. Fetch signed marketplace index from CDN (with local cache + fallback provider)
 2. Download `.loofi-plugin` archive
 3. Verify integrity (SHA256, optional GPG)
 4. Extract to `plugins/`
@@ -452,19 +453,24 @@ Plugin lifecycle:
 
 ```bash
 # Search marketplace
-loofi-fedora-tweaks --cli marketplace search "backup"
+loofi-fedora-tweaks --cli plugin-marketplace search --query backup
 
 # Get plugin details
-loofi-fedora-tweaks --cli marketplace info backup-manager
+loofi-fedora-tweaks --cli plugin-marketplace info backup-manager
 
 # Install plugin
-loofi-fedora-tweaks --cli marketplace install backup-manager
+loofi-fedora-tweaks --cli plugin-marketplace install backup-manager --accept-permissions
 
 # Update all plugins
-loofi-fedora-tweaks --cli marketplace update
+loofi-fedora-tweaks --cli plugin-marketplace update
 
 # Uninstall plugin
-loofi-fedora-tweaks --cli marketplace uninstall backup-manager
+loofi-fedora-tweaks --cli plugin-marketplace uninstall backup-manager
+
+# Ratings/reviews
+loofi-fedora-tweaks --cli plugin-marketplace reviews backup-manager --limit 10
+loofi-fedora-tweaks --cli plugin-marketplace review-submit backup-manager --reviewer "alice" --rating 5 --title "Great" --comment "Stable and useful"
+loofi-fedora-tweaks --cli plugin-marketplace rating backup-manager
 ```
 
 ### Marketplace UI
@@ -473,7 +479,7 @@ Access via **Community Tab** → **Marketplace** section:
 - **Browse**: Grid view of available plugins
 - **Search**: Filter by name, description, or tags
 - **Install**: One-click install with permission consent dialog
-- **Details**: View plugin info, permissions, dependencies, reviews
+- **Details**: View plugin info, permissions, dependencies, reviews, and verified publisher badge
 
 ### Plugin Package Format
 
@@ -525,9 +531,9 @@ my-plugin.loofi-plugin (ZIP archive)
    ```
 
 5. **Publish to Marketplace**
-   - Upload to GitHub release
-   - Submit PR to marketplace index repository
-   - Index entry: `{"name": "my-plugin", "url": "https://github.com/user/repo/releases/download/v1.0.0/my-plugin.loofi-plugin", "version": "1.0.0"}`
+   - Host the `.loofi-plugin` archive at a stable HTTPS URL
+   - Submit metadata to the marketplace ingestion workflow with publisher verification data
+   - Include index-ready fields: `name`, `version`, `download_url`, checksum/signature metadata
 
 ### Permission Sandboxing
 
@@ -580,7 +586,7 @@ Enable auto-updates in **Settings** → **Plugins** → **Auto-Update**:
 
 ```bash
 # Manual check for updates
-loofi-fedora-tweaks --cli marketplace update
+loofi-fedora-tweaks --cli plugin-marketplace update
 
 # Daemon mode (runs background update service)
 loofi-fedora-tweaks --daemon

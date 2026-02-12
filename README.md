@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v26.0.2 "Status Bar UI Hotfix"
+# Loofi Fedora Tweaks v27.0.0 "Marketplace Enhancement"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.2">
-    <img src="https://img.shields.io/badge/Release-v26.0.2-blue?style=for-the-badge&logo=github" alt="Release v26.0.2"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v27.0.0">
+    <img src="https://img.shields.io/badge/Release-v27.0.0-blue?style=for-the-badge&logo=github" alt="Release v27.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,14 +35,17 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v26.0.2?
+## What Is New in v27.0.0?
 
-`v26.0.2` is a focused visual hotfix release:
+`v27.0.0` ships the Marketplace Enhancement release:
 
-- Fixed bottom status bar text/background rendering artifacts.
-- Forced transparent status bar label backgrounds in both dark and light themes.
+- CDN-first marketplace index with signed metadata and fallback provider behavior.
+- Ratings/reviews support in backend, Community tab, and CLI (`reviews`, `review-submit`, `rating`).
+- Verified publisher badges and trust-aware verification output in UI and CLI.
+- Opt-in plugin analytics pipeline (disabled by default) with anonymized batched events.
+- Plugin hot reload support with rollback-aware reload contracts and stronger isolation policy enforcement.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v26.0.2.md`](docs/releases/RELEASE-NOTES-v26.0.2.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v27.0.0.md`](docs/releases/RELEASE-NOTES-v27.0.0.md)
 
 ---
 
@@ -152,7 +155,7 @@ loofi storage usage
 loofi firewall ports
 ```
 
-### Plugins and Marketplace (v26.x)
+### Plugins and Marketplace (v27.x)
 
 ```bash
 loofi plugins list
