@@ -177,12 +177,12 @@ jobs:
     container: fedora:43
     needs: [validate, lint, test, security, build]
     steps:
+      - name: Install release deps
+        run: dnf install -y git python3
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Install release deps
-        run: dnf install -y git python3
 
       - name: Download RPM artifact
         uses: actions/download-artifact@v4
