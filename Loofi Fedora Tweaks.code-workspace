@@ -5,15 +5,15 @@
 		}
 	],
 	"settings": {
-		"chat.agentSkillsLocations": {
-			"~/.codex/skills": true,
-			".codex/skills": true
-		},
 		"chat.agentFilesLocations": {
 			".github/claude-agents": true,
 			".github/agents": true,
 			".github/instructions": true
 		},
-		"chatgpt.openOnStartup": true
+		"chatgpt.openOnStartup": true,
+		"chat.agentSkillsLocations": {
+			".codex/skills": true,
+			"~/.codex/skills": true
+		}
 	}
 }

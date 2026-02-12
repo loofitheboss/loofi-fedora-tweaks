@@ -6,9 +6,6 @@ on:
       - master
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       version:
@@ -20,15 +17,22 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: auto-release-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PYTHON_VERSION: '3.12'
+  PIP_CACHE_FILES: |
+    requirements.txt
+    .github/workflows/auto-release.yml
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -36,7 +40,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
 
       - name: Resolve version and tag
         id: version
@@ -44,6 +50,16 @@ jobs:
           PY_VER=$(python -c "import sys; sys.path.insert(0,'loofi-fedora-tweaks'); from version import __version__; print(__version__)")
           echo "version=${PY_VER}" >> "$GITHUB_OUTPUT"
           echo "tag=v${PY_VER}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate manual release version input
+        if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+        run: |
+          INPUT_VER="${{ inputs.version }}"
+          CODE_VER="${{ steps.version.outputs.version }}"
+          if [ "$INPUT_VER" != "$CODE_VER" ]; then
+            echo "::error::workflow_dispatch version '$INPUT_VER' does not match code version '$CODE_VER'"
+            exit 1
+          fi
 
       - name: Validate version alignment
         run: |
@@ -89,40 +105,52 @@ jobs:
 
   adapter_drift:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/sync_ai_adapters.py --check
 
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install flake8
       - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
 
   typecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install mypy PyQt6-stubs
-      - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any || true
+      - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
 
   docs_gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/check_release_docs.py
 
   test:
@@ -138,7 +166,9 @@ jobs:
           sudo apt-get install -y libegl1
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
       - run: python loofi-fedora-tweaks/main.py --cli --version
@@ -152,13 +182,16 @@ jobs:
 
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install bandit
-      - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json || true
+      - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -168,6 +201,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: fedora:43
+    timeout-minutes: 20
     needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security]
     steps:
       - uses: actions/checkout@v4
@@ -179,10 +213,14 @@ jobs:
         with:
           name: rpm-package
           path: rpmbuild/RPMS/noarch/*.rpm
+          if-no-files-found: error
 
   auto_tag:
     if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
     steps:
       - uses: actions/checkout@v4
@@ -209,6 +247,9 @@ jobs:
     if: (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')) && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
     container: fedora:43
+    timeout-minutes: 20
+    permissions:
+      contents: write
     needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
     steps:
       - name: Install release deps
@@ -267,7 +308,7 @@ jobs:
 
           ### Installation
           \`\`\`bash
-          sudo dnf install ./loofi-fedora-tweaks-*.rpm
+          pkexec dnf install ./loofi-fedora-tweaks-*.rpm
           \`\`\`
 
           ### Changes

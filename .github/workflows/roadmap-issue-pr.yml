@@ -9,10 +9,15 @@ permissions:
   pull-requests: write
   issues: read
 
+concurrency:
+  group: roadmap-issue-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   sync-roadmap-pr:
     if: contains(join(github.event.issue.labels.*.name, ','), 'roadmap-item')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -36,7 +41,7 @@ jobs:
           PY
           )
 
-          VERSION=$(printf "%s\n%s\n" "$ISSUE_TITLE" "$ISSUE_BODY" | grep -Eo 'v[0-9]+\.[0-9]+' | head -n1 || true)
+          VERSION=$(printf "%s\n%s\n" "$ISSUE_TITLE" "$ISSUE_BODY" | grep -Eo 'v[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1 || true)
           if [ -z "$VERSION" ]; then
             VERSION="vTBD"
           fi
@@ -82,6 +87,7 @@ jobs:
         with:
           branch: roadmap/issue-${{ github.event.issue.number }}
           delete-branch: false
+          add-paths: ${{ steps.tracker.outputs.tracker_file }}
           draft: true
           title: "chore(workflow): roadmap issue #${{ github.event.issue.number }} tracker"
           commit-message: "chore(workflow): sync roadmap tracker for issue #${{ github.event.issue.number }}"
