@@ -441,6 +441,174 @@ class TestCLIMarketplaceListInstalled:
             assert "no plugins" in output.lower() or "none" in output.lower()
 
 
+class TestCLIMarketplaceReviews:
+    """Tests for 'reviews' and 'review-submit' actions."""
+
+    @patch('cli.main.PluginMarketplace')
+    def test_reviews_plain_output_success(self, mock_marketplace_class):
+        """reviews prints human output for fetched reviews."""
+        from utils.plugin_marketplace import MarketplaceReview
+
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.fetch_reviews.return_value = MarketplaceResult(
+            success=True,
+            data=[
+                MarketplaceReview(
+                    plugin_id="test-plugin",
+                    reviewer="Alice",
+                    rating=5,
+                    title="Great",
+                    comment="Works perfectly",
+                    created_at="2026-01-01T00:00:00Z",
+                )
+            ],
+        )
+
+        args = _make_args('reviews', plugin_id="test-plugin", limit=10, offset=0)
+
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            exit_code = cmd_plugin_marketplace(args)
+            output = mock_stdout.getvalue()
+
+            assert exit_code == 0
+            assert "Alice" in output
+            assert "5/5" in output
+            assert "Works perfectly" in output
+
+    @patch('cli.main.PluginMarketplace')
+    def test_reviews_json_output_success(self, mock_marketplace_class):
+        """reviews with --json outputs expected JSON envelope."""
+        from utils.plugin_marketplace import MarketplaceReview
+
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.fetch_reviews.return_value = MarketplaceResult(
+            success=True,
+            data=[
+                MarketplaceReview(
+                    plugin_id="test-plugin",
+                    reviewer="Alice",
+                    rating=4,
+                    title="Solid",
+                    comment="Nice plugin",
+                    created_at="2026-01-01T00:00:00Z",
+                )
+            ],
+        )
+
+        args = _make_args('reviews', plugin_id="test-plugin", limit=20, offset=0, json=True)
+
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            exit_code = cmd_plugin_marketplace(args)
+            payload = json.loads(mock_stdout.getvalue())
+
+            assert exit_code == 0
+            assert payload["plugin_id"] == "test-plugin"
+            assert payload["count"] == 1
+            assert payload["reviews"][0]["reviewer"] == "Alice"
+            assert payload["reviews"][0]["rating"] == 4
+
+    @patch('cli.main.PluginMarketplace')
+    def test_reviews_error_output(self, mock_marketplace_class):
+        """reviews returns non-zero and prints errors to stderr."""
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.fetch_reviews.return_value = MarketplaceResult(
+            success=False,
+            error="Review validation failed",
+        )
+
+        args = _make_args('reviews', plugin_id="test-plugin", limit=0, offset=0)
+
+        with patch('sys.stderr', new_callable=StringIO) as mock_stderr:
+            exit_code = cmd_plugin_marketplace(args)
+            output = mock_stderr.getvalue()
+
+            assert exit_code == 1
+            assert "Review validation failed" in output
+
+    @patch('cli.main.PluginMarketplace')
+    def test_review_submit_plain_output_success(self, mock_marketplace_class):
+        """review-submit prints success in plain mode."""
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.submit_review.return_value = MarketplaceResult(
+            success=True,
+            data={"id": "rev-1"},
+        )
+
+        args = _make_args(
+            'review-submit',
+            plugin_id="test-plugin",
+            reviewer="Alice",
+            rating=5,
+            title="Great",
+            comment="Loved it",
+        )
+
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            exit_code = cmd_plugin_marketplace(args)
+            output = mock_stdout.getvalue()
+
+            assert exit_code == 0
+            assert "Review submitted" in output
+            mock_mp.submit_review.assert_called_once()
+
+    @patch('cli.main.PluginMarketplace')
+    def test_review_submit_json_output_success(self, mock_marketplace_class):
+        """review-submit with --json outputs status + payload."""
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.submit_review.return_value = MarketplaceResult(
+            success=True,
+            data={"id": "rev-1", "rating": 5},
+        )
+
+        args = _make_args(
+            'review-submit',
+            plugin_id="test-plugin",
+            reviewer="Alice",
+            rating=5,
+            title="Great",
+            comment="Loved it",
+            json=True,
+        )
+
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            exit_code = cmd_plugin_marketplace(args)
+            payload = json.loads(mock_stdout.getvalue())
+
+            assert exit_code == 0
+            assert payload["status"] == "success"
+            assert payload["plugin_id"] == "test-plugin"
+            assert payload["review"]["id"] == "rev-1"
+
+    @patch('cli.main.PluginMarketplace')
+    def test_review_submit_error_output(self, mock_marketplace_class):
+        """review-submit returns non-zero and prints validation errors."""
+        mock_mp = MagicMock()
+        mock_marketplace_class.return_value = mock_mp
+        mock_mp.submit_review.return_value = MarketplaceResult(
+            success=False,
+            error="Rating must be between 1 and 5",
+        )
+
+        args = _make_args(
+            'review-submit',
+            plugin_id="test-plugin",
+            reviewer="Alice",
+            rating=8,
+        )
+
+        with patch('sys.stderr', new_callable=StringIO) as mock_stderr:
+            exit_code = cmd_plugin_marketplace(args)
+            output = mock_stderr.getvalue()
+
+            assert exit_code == 1
+            assert "Rating must be between 1 and 5" in output
+
+
 class TestCLIMarketplaceIntegration:
     """Integration tests for CLI marketplace workflow."""
 

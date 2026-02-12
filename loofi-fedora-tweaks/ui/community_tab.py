@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QListWidget, QMessageBox, QInputDialog, QGroupBox,
     QTabWidget, QFileDialog, QLineEdit, QListWidgetItem, QComboBox,
-    QTextEdit
+    QTextEdit, QCheckBox
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
@@ -23,6 +23,8 @@ from utils.drift import DriftDetector
 from utils.plugin_base import PluginLoader
 from utils.plugin_installer import PluginInstaller
 from utils.plugin_marketplace import PluginMarketplace
+from utils.plugin_analytics import PluginAnalytics
+from utils.settings import SettingsManager
 from ui.tab_utils import configure_top_tabs
 from ui.permission_consent_dialog import PermissionConsentDialog
 from core.plugins.interface import PluginInterface
@@ -83,7 +85,11 @@ class CommunityTab(QWidget, PluginInterface):
         # v26 compatibility: plugin marketplace helpers used by CLI/UI tests.
         self.plugin_marketplace = PluginMarketplace()
         self.plugin_installer = PluginInstaller()
+        self.settings_manager = SettingsManager.instance()
+        self.plugin_analytics = PluginAnalytics(settings_manager=self.settings_manager)
         self.selected_marketplace_plugin = None
+        self.selected_marketplace_plugin_id = None
+        self.marketplace_plugin_metadata = {}
         self.current_presets = []
         self.init_ui()
 
@@ -724,6 +730,14 @@ class CommunityTab(QWidget, PluginInterface):
         self.detail_stats = QLabel("")
         details_layout.addWidget(self.detail_stats)
 
+        self.detail_verification = QLabel("")
+        self.detail_verification.setStyleSheet("color: #888;")
+        details_layout.addWidget(self.detail_verification)
+
+        self.detail_rating_summary = QLabel("")
+        self.detail_rating_summary.setStyleSheet("color: #888;")
+        details_layout.addWidget(self.detail_rating_summary)
+
         # Action buttons
         btn_layout = QHBoxLayout()
 
@@ -743,6 +757,70 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addLayout(btn_layout)
 
         layout.addWidget(details_group)
+
+        # Reviews section
+        reviews_group = QGroupBox(self.tr("Ratings & Reviews"))
+        reviews_layout = QVBoxLayout(reviews_group)
+
+        self.reviews_summary_label = QLabel(self.tr("Select a preset to view ratings and reviews."))
+        self.reviews_summary_label.setStyleSheet("color: #888;")
+        reviews_layout.addWidget(self.reviews_summary_label)
+
+        self.reviews_text = QTextEdit()
+        self.reviews_text.setReadOnly(True)
+        self.reviews_text.setMinimumHeight(130)
+        reviews_layout.addWidget(self.reviews_text)
+
+        review_form_row_1 = QHBoxLayout()
+        self.review_reviewer_input = QLineEdit()
+        self.review_reviewer_input.setPlaceholderText(self.tr("Reviewer name"))
+        review_form_row_1.addWidget(self.review_reviewer_input)
+
+        self.review_rating_combo = QComboBox()
+        for rating in range(5, 0, -1):
+            self.review_rating_combo.addItem(self.tr("{} star(s)").format(rating), rating)
+        review_form_row_1.addWidget(self.review_rating_combo)
+        reviews_layout.addLayout(review_form_row_1)
+
+        self.review_title_input = QLineEdit()
+        self.review_title_input.setPlaceholderText(self.tr("Review title (optional)"))
+        reviews_layout.addWidget(self.review_title_input)
+
+        self.review_comment_input = QTextEdit()
+        self.review_comment_input.setPlaceholderText(self.tr("Write your review (optional)"))
+        self.review_comment_input.setMaximumHeight(90)
+        reviews_layout.addWidget(self.review_comment_input)
+
+        review_actions_layout = QHBoxLayout()
+        self.submit_review_btn = QPushButton(self.tr("Submit Review"))
+        self.submit_review_btn.setEnabled(False)
+        self.submit_review_btn.clicked.connect(self.submit_marketplace_review)
+        review_actions_layout.addWidget(self.submit_review_btn)
+
+        self.review_feedback_label = QLabel("")
+        self.review_feedback_label.setStyleSheet("color: #888;")
+        review_actions_layout.addWidget(self.review_feedback_label)
+        review_actions_layout.addStretch()
+        reviews_layout.addLayout(review_actions_layout)
+
+        layout.addWidget(reviews_group)
+
+        analytics_group = QGroupBox(self.tr("Usage Analytics (Opt-in)"))
+        analytics_layout = QVBoxLayout(analytics_group)
+
+        self.analytics_opt_in_checkbox = QCheckBox(
+            self.tr("Share anonymous plugin marketplace usage analytics")
+        )
+        self.analytics_opt_in_checkbox.setChecked(self.plugin_analytics.is_enabled())
+        self.analytics_opt_in_checkbox.stateChanged.connect(self._on_analytics_opt_in_changed)
+        analytics_layout.addWidget(self.analytics_opt_in_checkbox)
+
+        self.analytics_status_label = QLabel("")
+        self.analytics_status_label.setStyleSheet("color: #888;")
+        analytics_layout.addWidget(self.analytics_status_label)
+        self._update_analytics_status_label(self.plugin_analytics.is_enabled())
+
+        layout.addWidget(analytics_group)
 
         # Drift Detection Section
         drift_group = QGroupBox(self.tr("Configuration Drift"))
@@ -819,23 +897,151 @@ class CommunityTab(QWidget, PluginInterface):
         """Handle marketplace fetch completion."""
         if result.success:
             self.current_presets = result.data or []
+            self._refresh_plugin_metadata_cache()
             self.populate_marketplace_preset_list()
             self.marketplace_status_label.setText(result.message)
         else:
             self.marketplace_status_label.setText(result.message)
+
+    def _normalize_marketplace_key(self, value) -> str:
+        """Normalize identifiers for matching preset records with plugin metadata."""
+        if value is None:
+            return ""
+        return str(value).strip().lower().replace(" ", "-").replace("_", "-")
+
+    def _refresh_plugin_metadata_cache(self):
+        """Best-effort cache of marketplace plugin metadata for ratings/badges in UI."""
+        self.marketplace_plugin_metadata = {}
+        result = self.plugin_marketplace.search()
+        if not result or not getattr(result, "success", False) or not result.data:
+            return
+
+        for plugin in result.data:
+            plugin_id = self._normalize_marketplace_key(getattr(plugin, "id", ""))
+            plugin_name = self._normalize_marketplace_key(getattr(plugin, "name", ""))
+            if plugin_id:
+                self.marketplace_plugin_metadata[plugin_id] = plugin
+            if plugin_name:
+                self.marketplace_plugin_metadata[plugin_name] = plugin
+
+    def _resolve_plugin_metadata_for_preset(self, preset):
+        """Resolve plugin metadata using common preset/plugin identifiers."""
+        candidates = [
+            self._normalize_marketplace_key(getattr(preset, "id", "")),
+            self._normalize_marketplace_key(getattr(preset, "plugin_id", "")),
+            self._normalize_marketplace_key(getattr(preset, "name", "")),
+        ]
+        for candidate in candidates:
+            if candidate and candidate in self.marketplace_plugin_metadata:
+                return self.marketplace_plugin_metadata[candidate]
+        return None
+
+    def _build_badge_rating_summary(self, plugin_meta) -> str:
+        """Build compact badge/rating summary for list rows."""
+        if not plugin_meta:
+            return self.tr("Unverified | No rating")
+
+        verified = bool(getattr(plugin_meta, "verified_publisher", False))
+        badge = getattr(plugin_meta, "publisher_badge", "") or ""
+        badge_text = self.tr("Verified {}").format(f"({badge})" if badge else "") if verified else self.tr("Unverified")
+
+        average = getattr(plugin_meta, "rating_average", None)
+        review_count = getattr(plugin_meta, "review_count", 0) or 0
+        if average is None:
+            rating_text = self.tr("No rating")
+        else:
+            rating_text = self.tr("{:.1f}/5 ({} reviews)").format(float(average), int(review_count))
+
+        return f"{badge_text} | {rating_text}"
+
+    def _set_review_feedback(self, message: str, success: bool):
+        """Show inline review form feedback with simple success/error coloring."""
+        color = "#a6e3a1" if success else "#f38ba8"
+        self.review_feedback_label.setStyleSheet(f"color: {color};")
+        self.review_feedback_label.setText(message)
+
+    def _update_analytics_status_label(self, enabled: bool):
+        if enabled:
+            self.analytics_status_label.setText(self.tr("Enabled: only anonymized marketplace usage events are sent in batches."))
+        else:
+            self.analytics_status_label.setText(self.tr("Disabled: no usage analytics events are collected or sent."))
+
+    def _on_analytics_opt_in_changed(self, state):
+        """Persist analytics consent and update local status copy."""
+        enabled = state == Qt.CheckState.Checked.value
+        self.plugin_analytics.set_enabled(enabled)
+        self._update_analytics_status_label(enabled)
+
+    def _track_analytics_event(self, event_type: str, action: str, plugin_id: str = "", metadata=None):
+        """Best-effort analytics tracking; never block primary UI actions."""
+        self.plugin_analytics.track_event(
+            event_type=event_type,
+            action=action,
+            plugin_id=plugin_id,
+            metadata=metadata or {},
+        )
+
+    def _load_marketplace_reviews(self):
+        """Fetch and render ratings + review list for selected marketplace plugin."""
+        self.reviews_text.clear()
+        self.reviews_summary_label.setText(self.tr("No review data available."))
+
+        if not self.selected_marketplace_plugin_id:
+            return
+
+        aggregate_result = self.plugin_marketplace.get_rating_aggregate(self.selected_marketplace_plugin_id)
+        if aggregate_result.success and aggregate_result.data:
+            aggregate = aggregate_result.data
+            self.reviews_summary_label.setText(
+                self.tr("Average: {:.1f}/5 from {} ratings ({} reviews)").format(
+                    aggregate.average_rating, aggregate.rating_count, aggregate.review_count
+                )
+            )
+            self.detail_rating_summary.setText(
+                self.tr("Rating: {:.1f}/5 | {} ratings | {} reviews").format(
+                    aggregate.average_rating, aggregate.rating_count, aggregate.review_count
+                )
+            )
+        else:
+            self.reviews_summary_label.setText(self.tr("Ratings unavailable: {}").format(aggregate_result.error or "unknown"))
+
+        reviews_result = self.plugin_marketplace.fetch_reviews(self.selected_marketplace_plugin_id, limit=5, offset=0)
+        if not reviews_result.success:
+            self.reviews_text.setPlainText(self.tr("Unable to load reviews: {}").format(reviews_result.error or "unknown"))
+            return
+
+        reviews = reviews_result.data or []
+        if not reviews:
+            self.reviews_text.setPlainText(self.tr("No reviews yet. Be the first to submit one."))
+            return
+
+        lines = []
+        for review in reviews:
+            lines.append(f"{review.rating}/5 - {review.reviewer}")
+            if review.title:
+                lines.append(f"{review.title}")
+            if review.comment:
+                lines.append(f"{review.comment}")
+            if review.created_at:
+                lines.append(f"{review.created_at}")
+            lines.append("")
+        self.reviews_text.setPlainText("\n".join(lines).strip())
 
     def populate_marketplace_preset_list(self):
         """Populate the marketplace list widget with presets."""
         self.marketplace_preset_list.clear()
 
         for preset in self.current_presets:
+            plugin_meta = self._resolve_plugin_metadata_for_preset(preset)
+            badge_rating = self._build_badge_rating_summary(plugin_meta)
             item = QListWidgetItem(
-                self.tr("{stars} stars | {name} by {author}\n   [{category}] {desc}...").format(
+                self.tr("{stars} stars | {name} by {author}\n   [{category}] {desc}...\n   {badge_rating}").format(
                     stars=preset.stars,
                     name=preset.name,
                     author=preset.author,
                     category=preset.category,
-                    desc=preset.description[:60]
+                    desc=preset.description[:60],
+                    badge_rating=badge_rating,
                 )
             )
             item.setData(Qt.ItemDataRole.UserRole, preset)
@@ -863,9 +1069,101 @@ class CommunityTab(QWidget, PluginInterface):
                 preset.stars, preset.download_count, ', '.join(preset.tags)
             )
         )
+        plugin_meta = self._resolve_plugin_metadata_for_preset(preset)
+        self.selected_marketplace_plugin_id = None
+
+        if plugin_meta:
+            self.selected_marketplace_plugin_id = getattr(plugin_meta, "id", None)
+            verified = bool(getattr(plugin_meta, "verified_publisher", False))
+            badge = getattr(plugin_meta, "publisher_badge", "") or ""
+            publisher_id = getattr(plugin_meta, "publisher_id", "") or ""
+            verification_label = self.tr("Verified Publisher")
+            if verified and badge:
+                verification_label = self.tr("Verified Publisher ({})").format(badge)
+            if not verified:
+                verification_label = self.tr("Publisher not verified")
+            if publisher_id:
+                verification_label = f"{verification_label} | {publisher_id}"
+            self.detail_verification.setText(verification_label)
+
+            if getattr(plugin_meta, "rating_average", None) is not None:
+                self.detail_rating_summary.setText(
+                    self.tr("Rating: {:.1f}/5 | {} ratings | {} reviews").format(
+                        float(plugin_meta.rating_average),
+                        int(getattr(plugin_meta, "rating_count", 0) or 0),
+                        int(getattr(plugin_meta, "review_count", 0) or 0),
+                    )
+                )
+            else:
+                self.detail_rating_summary.setText(self.tr("Rating: No ratings yet"))
+        else:
+            self.detail_verification.setText(self.tr("Publisher verification unavailable for this preset"))
+            self.detail_rating_summary.setText(self.tr("Rating data unavailable for this preset"))
+
+        self.submit_review_btn.setEnabled(bool(self.selected_marketplace_plugin_id))
+        self._set_review_feedback("", True)
+        self._load_marketplace_reviews()
+        self._track_analytics_event(
+            event_type="marketplace",
+            action="select_preset",
+            plugin_id=self.selected_marketplace_plugin_id or "",
+            metadata={"category": getattr(preset, "category", ""), "has_metadata": bool(plugin_meta)},
+        )
 
         self.download_btn.setEnabled(True)
         self.apply_btn.setEnabled(True)
+
+    def submit_marketplace_review(self):
+        """Submit a review for the selected marketplace plugin with inline validation feedback."""
+        if not self.selected_marketplace_plugin_id:
+            self._set_review_feedback(self.tr("Select a preset with marketplace plugin metadata first."), False)
+            return
+
+        reviewer = self.review_reviewer_input.text().strip()
+        rating = int(self.review_rating_combo.currentData() or 0)
+        title = self.review_title_input.text().strip()
+        comment = self.review_comment_input.toPlainText().strip()
+
+        if not reviewer:
+            self._set_review_feedback(self.tr("Reviewer name is required."), False)
+            return
+        if rating < 1 or rating > 5:
+            self._set_review_feedback(self.tr("Rating must be between 1 and 5."), False)
+            return
+        if len(title) > 120:
+            self._set_review_feedback(self.tr("Title must be at most 120 characters."), False)
+            return
+        if len(comment) > 5000:
+            self._set_review_feedback(self.tr("Comment must be at most 5000 characters."), False)
+            return
+
+        result = self.plugin_marketplace.submit_review(
+            plugin_id=self.selected_marketplace_plugin_id,
+            reviewer=reviewer,
+            rating=rating,
+            title=title,
+            comment=comment,
+        )
+        if result.success:
+            self.review_title_input.clear()
+            self.review_comment_input.clear()
+            self._set_review_feedback(self.tr("Review submitted successfully."), True)
+            self._load_marketplace_reviews()
+            self._track_analytics_event(
+                event_type="marketplace",
+                action="submit_review",
+                plugin_id=self.selected_marketplace_plugin_id,
+                metadata={"status": "success", "rating": rating},
+            )
+            return
+
+        self._track_analytics_event(
+            event_type="marketplace",
+            action="submit_review",
+            plugin_id=self.selected_marketplace_plugin_id,
+            metadata={"status": "error"},
+        )
+        self._set_review_feedback(self.tr("Review submit failed: {}").format(result.error or "unknown"), False)
 
     def search_presets(self):
         """Search for presets in the marketplace."""
@@ -892,6 +1190,12 @@ class CommunityTab(QWidget, PluginInterface):
         result = self.marketplace.download_preset(self.selected_preset)
 
         if result.success:
+            self._track_analytics_event(
+                event_type="marketplace",
+                action="download_preset",
+                plugin_id=self.selected_marketplace_plugin_id or "",
+                metadata={"status": "success"},
+            )
             QMessageBox.information(
                 self, self.tr("Downloaded"),
                 self.tr("Preset '{}' downloaded successfully!").format(
@@ -899,6 +1203,12 @@ class CommunityTab(QWidget, PluginInterface):
                 )
             )
         else:
+            self._track_analytics_event(
+                event_type="marketplace",
+                action="download_preset",
+                plugin_id=self.selected_marketplace_plugin_id or "",
+                metadata={"status": "error"},
+            )
             QMessageBox.warning(self, self.tr("Error"), result.message)
 
     def download_and_apply(self):

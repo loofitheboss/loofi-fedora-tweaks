@@ -10,14 +10,18 @@ category structure tests remain realistic.
 import os
 import sys
 import logging
+from types import SimpleNamespace
 import pytest
 from unittest.mock import MagicMock, patch
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QListWidgetItem
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 from core.plugins.registry import PluginRegistry
 from core.plugins.loader import PluginLoader, _BUILTIN_PLUGINS
 from core.plugins.metadata import PluginMetadata
+from utils.plugin_marketplace import MarketplaceRatingAggregate, MarketplaceResult, PluginMetadata as MarketplacePluginMetadata
 
 
 # ---------------------------------------------------------------------------
@@ -355,3 +359,92 @@ class TestPluginIntegrationRegistryIsolation:
 
         # None should succeed since all IDs are already registered
         assert loaded_second == []
+
+
+class TestCommunityTabMarketplaceIntegration:
+    """Integration checks for CommunityTab marketplace UI/backend interaction."""
+
+    _app = None
+
+    @classmethod
+    def setup_class(cls):
+        cls._app = QApplication.instance() or QApplication(sys.argv)
+
+    @patch("ui.community_tab.CommunityTab.refresh_marketplace")
+    @patch("ui.community_tab.PluginLoader")
+    @patch("ui.community_tab.PluginInstaller")
+    @patch("ui.community_tab.PluginMarketplace")
+    @patch("ui.community_tab.DriftDetector")
+    @patch("ui.community_tab.PresetManager")
+    @patch("ui.community_tab.CloudSyncManager")
+    @patch("ui.community_tab.ConfigManager")
+    @patch("ui.community_tab.PresetMarketplace")
+    def test_marketplace_selection_triggers_rating_and_review_calls(
+        self,
+        _preset_marketplace,
+        _config_manager,
+        mock_cloud_sync,
+        _preset_manager,
+        _drift_detector,
+        mock_plugin_marketplace_cls,
+        _plugin_installer,
+        mock_plugin_loader_cls,
+        _refresh_marketplace,
+    ):
+        """Selecting a marketplace item invokes aggregate/review backend lookups."""
+        mock_cloud_sync.get_gist_token.return_value = ""
+        mock_cloud_sync.get_gist_id.return_value = ""
+
+        mock_plugin_loader = MagicMock()
+        mock_plugin_loader.list_plugins.return_value = []
+        mock_plugin_loader_cls.return_value = mock_plugin_loader
+
+        mock_marketplace = MagicMock()
+        mock_marketplace.get_rating_aggregate.return_value = MarketplaceResult(
+            success=True,
+            data=MarketplaceRatingAggregate(
+                plugin_id="test-plugin",
+                average_rating=4.9,
+                rating_count=10,
+                review_count=8,
+                breakdown={5: 8, 4: 2},
+            ),
+        )
+        mock_marketplace.fetch_reviews.return_value = MarketplaceResult(success=True, data=[])
+        mock_plugin_marketplace_cls.return_value = mock_marketplace
+
+        from ui.community_tab import CommunityTab
+        tab = CommunityTab()
+
+        plugin_meta = MarketplacePluginMetadata(
+            id="test-plugin",
+            name="Test Plugin",
+            description="Plugin",
+            version="1.0.0",
+            author="Author",
+            category="System",
+            download_url="https://example.com/plugin.loofi-plugin",
+            checksum_sha256="a" * 64,
+            verified_publisher=True,
+            publisher_badge="verified",
+        )
+        tab.marketplace_plugin_metadata = {"test-plugin": plugin_meta}
+
+        preset = SimpleNamespace(
+            id="test-plugin",
+            plugin_id="test-plugin",
+            name="Test Plugin",
+            author="Preset Author",
+            category="System",
+            description="Preset description",
+            stars=5,
+            download_count=42,
+            tags=["fedora"],
+        )
+        item = QListWidgetItem("preset")
+        item.setData(Qt.ItemDataRole.UserRole, preset)
+
+        tab.on_marketplace_preset_selected(item)
+
+        mock_marketplace.get_rating_aggregate.assert_called_once_with("test-plugin")
+        mock_marketplace.fetch_reviews.assert_called_once_with("test-plugin", limit=5, offset=0)

@@ -79,6 +79,17 @@ class PermissionConsentDialog(QDialog):
         html_lines.append("<hr>")
         html_lines.append(f"<p><b>Author:</b> {self.plugin_package.metadata.author}</p>")
         html_lines.append(f"<p><b>Version:</b> {self.plugin_package.metadata.version}</p>")
+        verified = bool(getattr(self.plugin_package.metadata, "verified_publisher", False))
+        publisher_id = getattr(self.plugin_package.metadata, "publisher_id", "") or "unknown"
+        publisher_badge = getattr(self.plugin_package.metadata, "publisher_badge", "") or ""
+        publisher_state = "Verified" if verified else "Unverified"
+        if publisher_badge:
+            publisher_state = f"{publisher_state} ({publisher_badge})"
+        publisher_color = "#a6e3a1" if verified else "#f38ba8"
+        html_lines.append(
+            f"<p><b>Publisher:</b> {publisher_id} "
+            f"<span style='color: {publisher_color}; font-weight: bold;'>[{publisher_state}]</span></p>"
+        )
         if self.plugin_package.metadata.homepage:
             html_lines.append(
                 f"<p><b>Homepage:</b> <a href='{self.plugin_package.metadata.homepage}'>"

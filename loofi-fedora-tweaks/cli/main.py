@@ -593,6 +593,9 @@ def cmd_plugin_marketplace(args):
                     "author": p.author,
                     "category": p.category,
                     "description": p.description,
+                    "verified_publisher": bool(getattr(p, "verified_publisher", False)),
+                    "publisher_id": getattr(p, "publisher_id", None),
+                    "publisher_badge": getattr(p, "publisher_badge", None),
                 }
                 for p in plugins
             ]
@@ -604,6 +607,11 @@ def cmd_plugin_marketplace(args):
             for p in plugins:
                 print(f"📦 {p.name} v{p.version} by {p.author}")
                 print(f"   Category: {p.category}")
+                if getattr(p, "verified_publisher", False):
+                    badge = getattr(p, "publisher_badge", None) or "verified"
+                    publisher_id = getattr(p, "publisher_id", None)
+                    publisher_suffix = f" ({publisher_id})" if publisher_id else ""
+                    print(f"   Publisher: {badge}{publisher_suffix}")
                 print(f"   {p.description}")
                 print()
         return 0
@@ -632,6 +640,9 @@ def cmd_plugin_marketplace(args):
                 "description": plugin.description,
                 "homepage": getattr(plugin, 'homepage', None),
                 "license": getattr(plugin, 'license', None),
+                "verified_publisher": bool(getattr(plugin, "verified_publisher", False)),
+                "publisher_id": getattr(plugin, "publisher_id", None),
+                "publisher_badge": getattr(plugin, "publisher_badge", None),
             }
             print(json_module.dumps(data, indent=2, default=str))
         else:
@@ -639,6 +650,13 @@ def cmd_plugin_marketplace(args):
             print(f"Author:      {plugin.author}")
             print(f"Category:    {plugin.category}")
             print(f"Description: {plugin.description}")
+            if getattr(plugin, "verified_publisher", False):
+                badge = getattr(plugin, "publisher_badge", None) or "verified"
+                publisher_id = getattr(plugin, "publisher_id", None)
+                if publisher_id:
+                    print(f"Publisher:   {badge} ({publisher_id})")
+                else:
+                    print(f"Publisher:   {badge}")
             if getattr(plugin, 'homepage', None):
                 print(f"Homepage:    {plugin.homepage}")
         return 0
@@ -676,6 +694,115 @@ def cmd_plugin_marketplace(args):
         else:
             print(f"Error: Installation failed: {result.error}", file=sys.stderr)
             return 1
+
+    if args.action == "reviews":
+        plugin_id = _resolve_plugin_id()
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
+            return 1
+
+        limit = getattr(args, "limit", 20)
+        offset = getattr(args, "offset", 0)
+        result = marketplace.fetch_reviews(plugin_id=plugin_id, limit=limit, offset=offset)
+
+        if not result.success:
+            print(f"Error: {result.error}", file=sys.stderr)
+            return 1
+
+        reviews = result.data or []
+        if use_json:
+            data = [
+                {
+                    "plugin_id": r.plugin_id,
+                    "reviewer": r.reviewer,
+                    "rating": r.rating,
+                    "title": r.title,
+                    "comment": r.comment,
+                    "created_at": r.created_at,
+                    "updated_at": r.updated_at,
+                }
+                for r in reviews
+            ]
+            print(json_module.dumps({"plugin_id": plugin_id, "reviews": data, "count": len(data)}, indent=2, default=str))
+        else:
+            if not reviews:
+                print("No reviews found")
+                return 0
+            for review in reviews:
+                print(f"★ {review.rating}/5 by {review.reviewer}")
+                if review.title:
+                    print(f"  {review.title}")
+                if review.comment:
+                    print(f"  {review.comment}")
+                if review.created_at:
+                    print(f"  Date: {review.created_at}")
+                print()
+        return 0
+
+    if args.action == "review-submit":
+        plugin_id = _resolve_plugin_id()
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
+            return 1
+
+        reviewer = getattr(args, "reviewer", "")
+        rating = getattr(args, "rating", None)
+        title = getattr(args, "title", "") or ""
+        comment = getattr(args, "comment", "") or ""
+
+        result = marketplace.submit_review(
+            plugin_id=plugin_id,
+            reviewer=reviewer,
+            rating=rating,
+            title=title,
+            comment=comment,
+        )
+
+        if not result.success:
+            print(f"Error: {result.error}", file=sys.stderr)
+            return 1
+
+        if use_json:
+            print(json_module.dumps({"status": "success", "plugin_id": plugin_id, "review": result.data}, indent=2, default=str))
+        else:
+            print(f"Review submitted for '{plugin_id}'")
+        return 0
+
+    if args.action == "rating":
+        plugin_id = _resolve_plugin_id()
+        if not plugin_id:
+            print("Error: Plugin ID required", file=sys.stderr)
+            return 1
+
+        result = marketplace.get_rating_aggregate(plugin_id=plugin_id)
+        if not result.success:
+            print(f"Error: {result.error}", file=sys.stderr)
+            return 1
+
+        aggregate = result.data
+        if use_json:
+            print(
+                json_module.dumps(
+                    {
+                        "plugin_id": aggregate.plugin_id,
+                        "average_rating": aggregate.average_rating,
+                        "rating_count": aggregate.rating_count,
+                        "review_count": aggregate.review_count,
+                        "breakdown": aggregate.breakdown,
+                    },
+                    indent=2,
+                    default=str,
+                )
+            )
+        else:
+            print(f"Rating for {aggregate.plugin_id}: {aggregate.average_rating:.2f}/5")
+            print(f"Ratings: {aggregate.rating_count}")
+            print(f"Reviews: {aggregate.review_count}")
+            if aggregate.breakdown:
+                print("Breakdown:")
+                for stars in sorted(aggregate.breakdown.keys(), reverse=True):
+                    print(f"  {stars}★: {aggregate.breakdown[stars]}")
+        return 0
 
     if args.action == "uninstall":
         plugin_id = _resolve_plugin_id()
@@ -2270,12 +2397,18 @@ def main(argv: Optional[List[str]] = None):
     marketplace_parser = subparsers.add_parser("plugin-marketplace", help="Plugin marketplace operations")
     marketplace_parser.add_argument(
         "action",
-        choices=["search", "install", "uninstall", "update", "info", "list-installed"],
+        choices=["search", "install", "uninstall", "update", "info", "list-installed", "reviews", "review-submit", "rating"],
         help="Marketplace action"
     )
     marketplace_parser.add_argument("plugin", nargs="?", help="Plugin name or ID")
     marketplace_parser.add_argument("--category", help="Filter by category")
     marketplace_parser.add_argument("--query", help="Search query")
+    marketplace_parser.add_argument("--limit", type=int, default=20, help="Review fetch limit (for reviews)")
+    marketplace_parser.add_argument("--offset", type=int, default=0, help="Review fetch offset (for reviews)")
+    marketplace_parser.add_argument("--reviewer", help="Reviewer name (for review-submit)")
+    marketplace_parser.add_argument("--rating", type=int, help="Rating 1-5 (for review-submit)")
+    marketplace_parser.add_argument("--title", help="Review title (for review-submit)")
+    marketplace_parser.add_argument("--comment", help="Review comment (for review-submit)")
     marketplace_parser.add_argument(
         "--accept-permissions", action="store_true",
         help="Auto-accept permissions (non-interactive)")

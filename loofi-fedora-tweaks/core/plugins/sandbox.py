@@ -12,9 +12,11 @@ For high-risk plugins, consider process isolation (bubblewrap, firejail).
 import logging
 import sys
 import functools
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, Optional, Set
+from typing import Any, Callable, Optional, Protocol, Set
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec
 
@@ -41,6 +43,32 @@ SUBPROCESS_MODULES = {"subprocess", "os.system", "commands", "popen2"}
 
 # Dangerous builtins to monitor
 RESTRICTED_BUILTINS = {"open", "compile", "exec", "eval", "__import__"}
+
+
+class IsolationMode(str, Enum):
+    """OS-level isolation policy mode for plugin execution."""
+
+    ADVISORY = "advisory"
+    PROCESS = "process"
+    OS = "os"
+
+
+@dataclass(frozen=True)
+class PluginIsolationPolicy:
+    """Contract for v27 plugin isolation policy."""
+    plugin_id: str
+    mode: IsolationMode = IsolationMode.ADVISORY
+    allow_network: bool = False
+    allow_filesystem: bool = False
+    allow_subprocess: bool = False
+    allow_privileged: bool = False
+
+
+class IsolationProvider(Protocol):
+    """Interface for policy application by concrete isolation backends."""
+
+    def apply_policy(self, policy: PluginIsolationPolicy) -> bool:
+        """Apply isolation policy and return True if enforced."""
 
 
 class RestrictedImporter(MetaPathFinder):
@@ -102,7 +130,12 @@ class PluginSandbox:
         wrapped = sandbox.wrap_plugin(original_plugin)
     """
 
-    def __init__(self, plugin_id: str, permissions: list[str]):
+    def __init__(
+        self,
+        plugin_id: str,
+        permissions: list[str],
+        isolation_mode: Optional[IsolationMode] = None,
+    ):
         """
         Initialize sandbox with plugin ID and granted permissions.
 
@@ -123,6 +156,15 @@ class PluginSandbox:
             )
             self.permissions -= invalid
 
+        self.policy = PluginIsolationPolicy(
+            plugin_id=plugin_id,
+            mode=isolation_mode or self._derive_isolation_mode(),
+            allow_network="network" in self.permissions,
+            allow_filesystem="filesystem" in self.permissions,
+            allow_subprocess="subprocess" in self.permissions,
+            allow_privileged="sudo" in self.permissions,
+        )
+
         # Define allowed paths for filesystem access
         config_base = Path.home() / ".config" / "loofi-fedora-tweaks"
         self.allowed_paths = {
@@ -134,6 +176,42 @@ class PluginSandbox:
             "PluginSandbox initialized for '%s' with permissions: %s",
             plugin_id, sorted(self.permissions)
         )
+
+    def _derive_isolation_mode(self) -> IsolationMode:
+        """
+        Determine minimum required isolation mode from requested permissions.
+
+        - `sudo`/`subprocess` => OS mode required
+        - `network`/`filesystem` => process mode required
+        - otherwise advisory
+        """
+        if "sudo" in self.permissions or "subprocess" in self.permissions:
+            return IsolationMode.OS
+        if "network" in self.permissions or "filesystem" in self.permissions:
+            return IsolationMode.PROCESS
+        return IsolationMode.ADVISORY
+
+    def enforce_isolation(
+        self,
+        provider: Optional[IsolationProvider] = None,
+        policy: Optional[PluginIsolationPolicy] = None,
+    ) -> bool:
+        """
+        Enforce isolation policy for this plugin.
+
+        Returns:
+            True when selected policy mode is enforceable on current system.
+        """
+        enforced_policy = policy or self.policy
+        isolation_provider = provider or _DefaultIsolationProvider()
+        enforced = isolation_provider.apply_policy(enforced_policy)
+        if not enforced:
+            logger.warning(
+                "Isolation policy for plugin '%s' could not be enforced (mode=%s)",
+                self.plugin_id,
+                enforced_policy.mode,
+            )
+        return enforced
 
     def install(self):
         """Install import hook in sys.meta_path."""
@@ -437,3 +515,13 @@ def create_sandbox(plugin_id: str, permissions: list[str]) -> PluginSandbox:
         ...     pass
     """
     return PluginSandbox(plugin_id, permissions)
+
+
+class _DefaultIsolationProvider:
+    """Default isolation provider backed by utils.sandbox runtime checks."""
+
+    def apply_policy(self, policy: PluginIsolationPolicy) -> bool:
+        from utils.sandbox import PluginIsolationManager
+
+        result = PluginIsolationManager.enforce_policy(policy)
+        return result.success

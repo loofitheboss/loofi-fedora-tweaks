@@ -4,8 +4,9 @@ import importlib.util
 import inspect
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Protocol
 
 from core.plugins.registry import PluginRegistry
 from core.plugins.interface import PluginInterface
@@ -49,6 +50,30 @@ _BUILTIN_PLUGINS: list[tuple[str, str]] = [
 ]
 
 
+@dataclass(frozen=True)
+class HotReloadRequest:
+    """Contract describing a plugin hot-reload trigger and changed files."""
+    plugin_id: str
+    changed_files: tuple[str, ...] = ()
+    reason: str = "filesystem"
+
+
+@dataclass(frozen=True)
+class HotReloadResult:
+    """Contract describing hot-reload execution outcome."""
+    plugin_id: str
+    reloaded: bool
+    message: str = ""
+    rolled_back: bool = False
+
+
+class HotReloadManager(Protocol):
+    """Interface contract for plugin hot-reload integrations (v27)."""
+
+    def request_reload(self, request: HotReloadRequest) -> HotReloadResult:
+        """Evaluate and execute a plugin reload request."""
+
+
 class PluginLoader:
     """
     Discovers and loads plugins into PluginRegistry.
@@ -64,6 +89,10 @@ class PluginLoader:
     ) -> None:
         self._registry = registry or PluginRegistry.instance()
         self._detector = detector or CompatibilityDetector()
+        self._external_plugin_dirs: dict[str, Path] = {}
+        self._external_registry_ids: dict[str, str] = {}
+        self._external_snapshots: dict[str, str] = {}
+        self._external_context: dict = {}
 
     def load_builtins(self, context: dict | None = None) -> list[str]:
         """
@@ -115,6 +144,7 @@ class PluginLoader:
             List of successfully loaded plugin IDs
         """
         scanner = PluginScanner(Path(directory) if directory else None)
+        self._external_context = dict(context or {})
         discovered = scanner.scan()
 
         if not discovered:
@@ -129,6 +159,12 @@ class PluginLoader:
             try:
                 # Create sandbox with declared permissions
                 sandbox = create_sandbox(plugin_id, manifest.permissions)
+                if not sandbox.enforce_isolation():
+                    log.warning(
+                        "Skipping plugin '%s': isolation policy could not be enforced",
+                        plugin_id,
+                    )
+                    continue
 
                 # Load plugin module
                 plugin_instance = self._load_external_plugin(
@@ -163,6 +199,11 @@ class PluginLoader:
                 # Register in registry
                 self._registry.register(adapter)
                 loaded.append(plugin_id)
+                self._external_plugin_dirs[plugin_id] = plugin_dir
+                self._external_registry_ids[plugin_id] = adapter.metadata().id
+                self._external_snapshots[plugin_id] = scanner.build_plugin_fingerprint(
+                    plugin_dir, manifest.entry_point or "plugin.py"
+                )
 
                 log.info(
                     "Loaded external plugin: %s v%s",
@@ -178,6 +219,139 @@ class PluginLoader:
 
         log.info("Loaded %d external plugin(s)", len(loaded))
         return loaded
+
+    def request_reload(self, request: HotReloadRequest) -> HotReloadResult:
+        """
+        Reload an already loaded external plugin if file changes are detected.
+
+        Reload strategy:
+        1. Validate plugin is known and currently registered.
+        2. Detect content change (explicit changed_files or fingerprint delta).
+        3. Unregister old plugin and attempt full reload.
+        4. On failure, rollback old plugin registration.
+        """
+        plugin_id = str(request.plugin_id or "").strip()
+        if not plugin_id:
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message="Plugin ID is required",
+            )
+
+        plugin_dir = self._external_plugin_dirs.get(plugin_id)
+        if not plugin_dir:
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message=f"Plugin '{plugin_id}' is not loaded as external plugin",
+            )
+
+        registry_id = self._external_registry_ids.get(plugin_id, plugin_id)
+        previous_plugin = self._registry.get(registry_id)
+        if previous_plugin is None:
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message=f"Plugin '{plugin_id}' is not present in registry",
+            )
+
+        scanner = PluginScanner(plugin_dir.parent)
+        manifest = scanner._validate_plugin(plugin_dir)
+        if manifest is None:
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message=f"Plugin '{plugin_id}' manifest/entry validation failed",
+            )
+
+        current_fingerprint = scanner.build_plugin_fingerprint(
+            plugin_dir, manifest.entry_point or "plugin.py"
+        )
+        previous_fingerprint = self._external_snapshots.get(plugin_id, "")
+        changed = bool(request.changed_files) or (previous_fingerprint != current_fingerprint)
+        if not changed:
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message=f"No changes detected for plugin '{plugin_id}'",
+            )
+
+        return self._reload_external_plugin(
+            plugin_id=plugin_id,
+            plugin_dir=plugin_dir,
+            manifest=manifest,
+            previous_plugin=previous_plugin,
+            previous_registry_id=registry_id,
+            new_fingerprint=current_fingerprint,
+            reason=request.reason,
+        )
+
+    def _reload_external_plugin(
+        self,
+        plugin_id: str,
+        plugin_dir: Path,
+        manifest,
+        previous_plugin: PluginInterface,
+        previous_registry_id: str,
+        new_fingerprint: str,
+        reason: str = "manual",
+    ) -> HotReloadResult:
+        """Reload one external plugin and rollback on any failure."""
+        self._registry.unregister(previous_registry_id)
+
+        try:
+            sandbox = create_sandbox(plugin_id, manifest.permissions)
+            if not sandbox.enforce_isolation():
+                raise RuntimeError("Isolation policy could not be enforced")
+
+            plugin_instance = self._load_external_plugin(plugin_dir, manifest, sandbox)
+            if not plugin_instance:
+                raise RuntimeError("Plugin import failed")
+
+            plugin_instance.manifest = manifest
+            adapter = PluginAdapter(plugin_instance)
+
+            if self._external_context:
+                adapter.set_context(self._external_context)
+
+            compat_result = self._detector.check(adapter.metadata())
+            if not compat_result.compatible:
+                raise RuntimeError(f"Incompatible plugin: {compat_result.reason}")
+
+            self._registry.register(adapter)
+            self._external_registry_ids[plugin_id] = adapter.metadata().id
+            self._external_snapshots[plugin_id] = new_fingerprint
+
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=True,
+                message=f"Plugin reloaded ({reason})",
+                rolled_back=False,
+            )
+
+        except Exception as exc:
+            restored = self._restore_previous_plugin(previous_registry_id, previous_plugin)
+            return HotReloadResult(
+                plugin_id=plugin_id,
+                reloaded=False,
+                message=f"Hot reload failed: {exc}",
+                rolled_back=restored,
+            )
+
+    def _restore_previous_plugin(self, previous_registry_id: str, previous_plugin: PluginInterface) -> bool:
+        """Best-effort rollback of prior plugin registration."""
+        try:
+            if self._registry.get(previous_registry_id) is None:
+                self._registry.register(previous_plugin)
+            return True
+        except Exception as exc:
+            log.error(
+                "Rollback failed for plugin '%s': %s",
+                previous_registry_id,
+                exc,
+                exc_info=True,
+            )
+            return False
 
     def _load_external_plugin(
         self,

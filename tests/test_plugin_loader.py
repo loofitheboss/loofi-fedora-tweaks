@@ -282,3 +282,34 @@ class TestPluginLoaderDefaultDependencies:
         """Passing registry=None causes the loader to use PluginRegistry.instance()."""
         loader = PluginLoader(registry=None)
         assert loader._registry is PluginRegistry.instance()
+
+
+class TestPluginLoaderRollback:
+    """Tests for rollback helper used by hot-reload."""
+
+    def setup_method(self):
+        PluginRegistry.reset()
+
+    def teardown_method(self):
+        PluginRegistry.reset()
+
+    @patch("core.plugins.registry.PluginRegistry.register", side_effect=RuntimeError("boom"))
+    @patch("core.plugins.registry.PluginRegistry.get", return_value=None)
+    def test_restore_previous_plugin_returns_false_on_register_error(self, mock_get, mock_register):
+        """_restore_previous_plugin reports rollback failure if register raises."""
+        registry = PluginRegistry.instance()
+        loader = PluginLoader(registry=registry)
+
+        previous_plugin = MagicMock()
+        previous_plugin.metadata.return_value = PluginMetadata(
+            id="demo",
+            name="Demo",
+            description="",
+            category="Test",
+            icon="",
+            badge="",
+        )
+
+        restored = loader._restore_previous_plugin("demo", previous_plugin)
+
+        assert restored is False

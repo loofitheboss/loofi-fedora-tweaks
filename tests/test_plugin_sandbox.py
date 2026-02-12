@@ -249,6 +249,54 @@ class TestPluginSandboxUnwrap:
             sys.meta_path[:] = original_path
 
 
+class TestPluginSandboxIsolationPolicy:
+    """Tests for v27 isolation enforcement flow."""
+
+    def test_enforce_isolation_with_explicit_provider_success(self):
+        """enforce_isolation returns True when provider applies policy."""
+        sandbox = PluginSandbox("iso-test", {"network"})
+        provider = Mock()
+        provider.apply_policy.return_value = True
+
+        result = sandbox.enforce_isolation(provider=provider)
+
+        assert result is True
+        provider.apply_policy.assert_called_once_with(sandbox.policy)
+
+    def test_enforce_isolation_with_explicit_provider_failure(self):
+        """enforce_isolation returns False when provider rejects policy."""
+        sandbox = PluginSandbox("iso-test", {"subprocess"})
+        provider = Mock()
+        provider.apply_policy.return_value = False
+
+        result = sandbox.enforce_isolation(provider=provider)
+
+        assert result is False
+        provider.apply_policy.assert_called_once_with(sandbox.policy)
+
+    @patch("utils.sandbox.PluginIsolationManager.enforce_policy")
+    def test_enforce_isolation_default_provider_success(self, mock_enforce_policy):
+        """Default provider maps PluginIsolationManager success to True."""
+        sandbox = PluginSandbox("iso-test", {"filesystem"})
+        mock_enforce_policy.return_value = Mock(success=True)
+
+        result = sandbox.enforce_isolation()
+
+        assert result is True
+        mock_enforce_policy.assert_called_once_with(sandbox.policy)
+
+    @patch("utils.sandbox.PluginIsolationManager.enforce_policy")
+    def test_enforce_isolation_default_provider_failure(self, mock_enforce_policy):
+        """Default provider maps PluginIsolationManager failure to False."""
+        sandbox = PluginSandbox("iso-test", {"filesystem"})
+        mock_enforce_policy.return_value = Mock(success=False)
+
+        result = sandbox.enforce_isolation()
+
+        assert result is False
+        mock_enforce_policy.assert_called_once_with(sandbox.policy)
+
+
 class TestCreateSandboxFactory:
     """Tests for create_sandbox() factory function."""
 

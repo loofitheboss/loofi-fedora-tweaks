@@ -232,6 +232,52 @@ class TestPluginMarketplaceParseEntry:
         assert metadata.tags == []
         assert metadata.requires == []
 
+    def test_parse_supports_nested_rating_and_verification_fields(self):
+        """_parse_plugin_entry() supports v27 nested ratings/verification schema."""
+        mp = PluginMarketplace()
+        entry = _make_plugin_entry("nested-schema")
+        entry["ratings"] = {
+            "average": "4.7",
+            "count": "22",
+            "review_count": "19"
+        }
+        entry["publisher_verification"] = {
+            "verified": True,
+            "publisher_id": "publisher-123",
+            "badge": "verified"
+        }
+
+        metadata = mp._parse_plugin_entry(entry)
+
+        assert metadata is not None
+        assert metadata.rating_average == 4.7
+        assert metadata.rating_count == 22
+        assert metadata.review_count == 19
+        assert metadata.verified_publisher is True
+        assert metadata.publisher_id == "publisher-123"
+        assert metadata.publisher_badge == "verified"
+
+    def test_parse_keeps_legacy_flat_rating_and_verification_fields(self):
+        """_parse_plugin_entry() remains compatible with legacy flat fields."""
+        mp = PluginMarketplace()
+        entry = _make_plugin_entry("legacy-schema")
+        entry["rating_average"] = 4.1
+        entry["rating_count"] = 11
+        entry["review_count"] = 9
+        entry["verified_publisher"] = True
+        entry["publisher_id"] = "legacy-publisher"
+        entry["publisher_badge"] = "trusted"
+
+        metadata = mp._parse_plugin_entry(entry)
+
+        assert metadata is not None
+        assert metadata.rating_average == 4.1
+        assert metadata.rating_count == 11
+        assert metadata.review_count == 9
+        assert metadata.verified_publisher is True
+        assert metadata.publisher_id == "legacy-publisher"
+        assert metadata.publisher_badge == "trusted"
+
 
 class TestPluginMarketplaceFetchIndex:
     """Tests for fetch_index() marketplace API."""
@@ -312,6 +358,25 @@ class TestPluginMarketplaceFetchIndex:
         
         assert result.success is True
         assert len(result.data) == 2  # Only valid entries
+
+    @patch.object(PluginMarketplace, '_fetch_json')
+    def test_fetch_index_prefers_cdn_before_fallback(self, mock_fetch):
+        """fetch_index() uses CDN response when available."""
+        cdn_index = _make_index_json([_make_plugin_entry("cdn-first")])
+        cdn_index["signature"] = {
+            "algorithm": "ed25519",
+            "key_id": "key-1",
+            "signature": "abc123"
+        }
+        mock_fetch.return_value = cdn_index
+
+        mp = PluginMarketplace()
+        result = mp.fetch_index(force_refresh=True)
+
+        assert result.success is True
+        assert result.data is not None
+        assert result.data[0].id == "cdn-first"
+        assert "cdn.loofi.software" in mock_fetch.call_args[0][0]
 
 
 class TestPluginMarketplaceSearch:

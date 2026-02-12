@@ -26,6 +26,8 @@ Usage:
 from __future__ import annotations
 from pathlib import Path
 from typing import List, Tuple, Optional
+from dataclasses import dataclass
+import hashlib
 import json
 import logging
 
@@ -33,6 +35,15 @@ from core.plugins.package import PluginManifest
 from version import __version__ as APP_VERSION
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class PluginChangeSet:
+    """Contract describing plugin snapshot changes for hot-reload."""
+    plugin_id: str
+    fingerprint_before: str = ""
+    fingerprint_after: str = ""
+    changed_files: tuple[str, ...] = ()
 
 
 class PluginScanner:
@@ -118,6 +129,85 @@ class PluginScanner:
 
         logger.info("Discovered %d external plugin(s)", len(discovered))
         return discovered
+
+    def build_plugin_fingerprint(self, plugin_dir: Path, entry_point: str = "plugin.py") -> str:
+        """
+        Build a stable fingerprint for plugin directory contents.
+
+        Fingerprint is based on file paths + mtime + size and is used by
+        hot-reload detection to determine if plugin content changed.
+        """
+        if not plugin_dir.exists() or not plugin_dir.is_dir():
+            return ""
+
+        hasher = hashlib.sha256()
+        files: List[Path] = []
+
+        try:
+            files = [p for p in plugin_dir.rglob("*") if p.is_file()]
+        except OSError:
+            return ""
+
+        for file_path in sorted(files):
+            try:
+                rel = file_path.relative_to(plugin_dir).as_posix()
+                if "__pycache__" in rel:
+                    continue
+                stat = file_path.stat()
+                hasher.update(rel.encode("utf-8"))
+                hasher.update(str(stat.st_mtime_ns).encode("utf-8"))
+                hasher.update(str(stat.st_size).encode("utf-8"))
+            except OSError:
+                continue
+
+        # Include resolved entry point marker so entry changes are always represented.
+        hasher.update(f"entry:{entry_point}".encode("utf-8"))
+        return hasher.hexdigest()
+
+    def collect_snapshots(
+        self,
+        discovered: Optional[List[Tuple[Path, PluginManifest]]] = None,
+    ) -> dict[str, str]:
+        """Return map of plugin_id -> content fingerprint for valid discovered plugins."""
+        discovered_plugins = discovered if discovered is not None else self.scan()
+        snapshots: dict[str, str] = {}
+        for plugin_dir, manifest in discovered_plugins:
+            snapshots[manifest.id] = self.build_plugin_fingerprint(
+                plugin_dir, manifest.entry_point or "plugin.py"
+            )
+        return snapshots
+
+    def detect_changed_plugins(self, previous_snapshots: Optional[dict[str, str]] = None) -> List[PluginChangeSet]:
+        """
+        Compare current snapshots with previous snapshots and return changed plugins.
+        """
+        previous = previous_snapshots or {}
+        discovered = self.scan()
+        current = self.collect_snapshots(discovered)
+        changes: List[PluginChangeSet] = []
+
+        for plugin_id, fingerprint in current.items():
+            old = previous.get(plugin_id, "")
+            if old != fingerprint:
+                changes.append(
+                    PluginChangeSet(
+                        plugin_id=plugin_id,
+                        fingerprint_before=old,
+                        fingerprint_after=fingerprint,
+                    )
+                )
+
+        for plugin_id, old in previous.items():
+            if plugin_id not in current:
+                changes.append(
+                    PluginChangeSet(
+                        plugin_id=plugin_id,
+                        fingerprint_before=old,
+                        fingerprint_after="",
+                    )
+                )
+
+        return changes
 
     def _validate_plugin(self, plugin_dir: Path) -> Optional[PluginManifest]:
         """

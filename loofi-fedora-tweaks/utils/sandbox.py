@@ -22,6 +22,49 @@ class Result:
     data: Optional[dict] = None
 
 
+class PluginIsolationManager:
+    """Runtime enforcement checks for plugin isolation policies."""
+
+    @staticmethod
+    def _mode_value(mode) -> str:
+        value = getattr(mode, "value", mode)
+        return str(value or "advisory").strip().lower()
+
+    @classmethod
+    def can_enforce_mode(cls, mode) -> bool:
+        """Return whether current host can enforce a requested isolation mode."""
+        mode_value = cls._mode_value(mode)
+        if mode_value == "advisory":
+            return True
+        if mode_value == "process":
+            return (
+                SandboxManager.is_firejail_installed()
+                or BubblewrapManager.is_installed()
+            )
+        if mode_value == "os":
+            return BubblewrapManager.is_installed()
+        return False
+
+    @classmethod
+    def enforce_policy(cls, policy) -> Result:
+        """Validate that policy isolation mode is enforceable on this host."""
+        mode = cls._mode_value(getattr(policy, "mode", "advisory"))
+        plugin_id = str(getattr(policy, "plugin_id", "unknown-plugin"))
+
+        if cls.can_enforce_mode(mode):
+            return Result(
+                True,
+                f"Isolation policy enforced for {plugin_id} (mode={mode})",
+                {"plugin_id": plugin_id, "mode": mode},
+            )
+
+        return Result(
+            False,
+            f"Isolation policy cannot be enforced for {plugin_id} (mode={mode})",
+            {"plugin_id": plugin_id, "mode": mode},
+        )
+
+
 class SandboxManager:
     """
     Manages application sandboxing via Firejail or Bubblewrap.

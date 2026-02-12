@@ -54,6 +54,9 @@ class TestDefaults(unittest.TestCase):
     def test_default_log_level_is_info(self):
         self.assertEqual(AppSettings().log_level, "INFO")
 
+    def test_default_plugin_analytics_is_disabled(self):
+        self.assertFalse(AppSettings().plugin_analytics_enabled)
+
     def test_known_keys_match_dataclass_fields(self):
         from dataclasses import fields
         field_names = {f.name for f in fields(AppSettings)}
@@ -177,6 +180,18 @@ class TestSaveLoad(unittest.TestCase):
             mgr = SettingsManager(settings_path=path)
             mgr.save()
             self.assertTrue(path.exists())
+
+    def test_plugin_analytics_toggle_persists(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "settings.json"
+            mgr1 = SettingsManager(settings_path=path)
+            mgr1.set("plugin_analytics_enabled", True)
+            mgr1.set("plugin_analytics_anonymous_id", "anon-001")
+            mgr1.save()
+
+            mgr2 = SettingsManager(settings_path=path)
+            self.assertTrue(mgr2.get("plugin_analytics_enabled"))
+            self.assertEqual(mgr2.get("plugin_analytics_anonymous_id"), "anon-001")
 
 
 # ---------------------------------------------------------------------------

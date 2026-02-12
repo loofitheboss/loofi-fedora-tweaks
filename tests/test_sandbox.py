@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock, mock_open
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.sandbox import SandboxManager, BubblewrapManager, Result
+from utils.sandbox import SandboxManager, BubblewrapManager, PluginIsolationManager, Result
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +201,51 @@ class TestBubblewrapManager(unittest.TestCase):
         """run_minimal_sandbox returns failure when bwrap not installed."""
         result = BubblewrapManager.run_minimal_sandbox(["bash"])
         self.assertFalse(result.success)
+
+
+class TestPluginIsolationManager(unittest.TestCase):
+    """Tests for policy mode enforcement checks."""
+
+    @patch.object(SandboxManager, 'is_firejail_installed', return_value=False)
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_can_enforce_mode_advisory_always_true(self, mock_bwrap, mock_firejail):
+        self.assertTrue(PluginIsolationManager.can_enforce_mode("advisory"))
+
+    @patch.object(SandboxManager, 'is_firejail_installed', return_value=True)
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_can_enforce_mode_process_with_firejail(self, mock_bwrap, mock_firejail):
+        self.assertTrue(PluginIsolationManager.can_enforce_mode("process"))
+
+    @patch.object(SandboxManager, 'is_firejail_installed', return_value=False)
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_can_enforce_mode_process_without_tools(self, mock_bwrap, mock_firejail):
+        self.assertFalse(PluginIsolationManager.can_enforce_mode("process"))
+
+    @patch.object(BubblewrapManager, 'is_installed', return_value=True)
+    def test_can_enforce_mode_os_with_bwrap(self, mock_bwrap):
+        self.assertTrue(PluginIsolationManager.can_enforce_mode("os"))
+
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_can_enforce_mode_os_without_bwrap(self, mock_bwrap):
+        self.assertFalse(PluginIsolationManager.can_enforce_mode("os"))
+
+    @patch.object(SandboxManager, 'is_firejail_installed', return_value=True)
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_enforce_policy_success_path(self, mock_bwrap, mock_firejail):
+        policy = MagicMock(plugin_id="plugin-a", mode="process")
+        result = PluginIsolationManager.enforce_policy(policy)
+        self.assertTrue(result.success)
+        self.assertIn("enforced", result.message)
+        self.assertEqual(result.data["plugin_id"], "plugin-a")
+
+    @patch.object(SandboxManager, 'is_firejail_installed', return_value=False)
+    @patch.object(BubblewrapManager, 'is_installed', return_value=False)
+    def test_enforce_policy_failure_path(self, mock_bwrap, mock_firejail):
+        policy = MagicMock(plugin_id="plugin-a", mode="process")
+        result = PluginIsolationManager.enforce_policy(policy)
+        self.assertFalse(result.success)
+        self.assertIn("cannot be enforced", result.message)
+        self.assertEqual(result.data["mode"], "process")
 
 
 if __name__ == '__main__':

@@ -39,6 +39,9 @@ class AppSettings:
     # Advanced
     log_level: str = "INFO"
     check_updates_on_start: bool = True
+    plugin_analytics_enabled: bool = False
+    plugin_analytics_anonymous_id: str = ""
+    plugin_analytics_endpoint: str = "https://api.loofi.software/marketplace/v1/analytics/events"
 
     # Version tracking
     last_seen_version: str = "0.0.0"

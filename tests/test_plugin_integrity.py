@@ -366,3 +366,59 @@ class TestIntegrityVerifierEdgeCases:
             assert result.success is False
             assert result.checksum == actual_hash
             assert result.checksum != wrong_hash
+
+
+class TestIntegrityVerifierPublisherMetadata:
+    """Tests for verify_publisher_metadata() contract validation."""
+
+    def test_verify_publisher_metadata_valid_signature_and_chain(self):
+        """Verified publisher with signed metadata passes validation."""
+        result = IntegrityVerifier.verify_publisher_metadata(
+            verified=True,
+            publisher_id="publisher-123",
+            signature="a1b2c3d4e5f6a7b8c9d0",
+            trust_chain=["root-ca", "marketplace-ca", "publisher-123"],
+        )
+
+        assert result.success is True
+        assert result.signature_valid is True
+        assert result.error is None
+
+    def test_verify_publisher_metadata_invalid_signature(self):
+        """Verified publisher fails when signature format is invalid."""
+        result = IntegrityVerifier.verify_publisher_metadata(
+            verified=True,
+            publisher_id="publisher-123",
+            signature="short-sig",
+            trust_chain=["root-ca", "publisher-123"],
+        )
+
+        assert result.success is False
+        assert result.signature_valid is False
+        assert result.error == "Invalid publisher signature format"
+
+    def test_verify_publisher_metadata_missing_trust_chain(self):
+        """Verified publisher fails when trust chain is missing."""
+        result = IntegrityVerifier.verify_publisher_metadata(
+            verified=True,
+            publisher_id="publisher-123",
+            signature="a1b2c3d4e5f6a7b8c9d0",
+            trust_chain=[],
+        )
+
+        assert result.success is False
+        assert result.signature_valid is False
+        assert result.error == "Missing trust chain for verified publisher"
+
+    def test_verify_publisher_metadata_unsigned_publisher_path(self):
+        """Unsigned publisher remains unverified without error."""
+        result = IntegrityVerifier.verify_publisher_metadata(
+            verified=False,
+            publisher_id="publisher-123",
+            signature="",
+            trust_chain=None,
+        )
+
+        assert result.success is True
+        assert result.signature_valid is False
+        assert result.error is None

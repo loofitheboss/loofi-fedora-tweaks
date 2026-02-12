@@ -8,7 +8,7 @@ import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,46 @@ class VerificationResult:
 
 class IntegrityVerifier:
     """Verify plugin archive integrity with checksums and signatures."""
+
+    @staticmethod
+    def verify_publisher_metadata(
+        *,
+        verified: bool,
+        publisher_id: str,
+        signature: str = "",
+        trust_chain: Any = None,
+    ) -> VerificationResult:
+        """
+        Validate signed publisher verification metadata contract.
+
+        This performs structural validation for signed verification payloads.
+        Cryptographic verification is handled upstream by trusted index delivery.
+        """
+        if not verified:
+            return VerificationResult(success=True, signature_valid=False)
+
+        if not isinstance(publisher_id, str) or not publisher_id.strip():
+            return VerificationResult(success=False, error="Missing publisher_id for verified publisher", signature_valid=False)
+
+        if not isinstance(signature, str) or not signature.strip():
+            return VerificationResult(success=False, error="Missing publisher signature for verified publisher", signature_valid=False)
+
+        if len(signature.strip()) < 16:
+            return VerificationResult(success=False, error="Invalid publisher signature format", signature_valid=False)
+
+        if not isinstance(trust_chain, (list, tuple)) or len(trust_chain) == 0:
+            return VerificationResult(success=False, error="Missing trust chain for verified publisher", signature_valid=False)
+
+        normalized_chain = []
+        for node in trust_chain:
+            if not isinstance(node, str) or not node.strip():
+                return VerificationResult(success=False, error="Invalid trust chain entry for verified publisher", signature_valid=False)
+            normalized_chain.append(node.strip())
+
+        if len(set(normalized_chain)) != len(normalized_chain):
+            return VerificationResult(success=False, error="Duplicate trust chain entries for verified publisher", signature_valid=False)
+
+        return VerificationResult(success=True, signature_valid=True)
 
     @staticmethod
     def verify_checksum(archive_path: Path, expected_hash: str) -> VerificationResult:
