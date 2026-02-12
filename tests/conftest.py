@@ -11,6 +11,9 @@ import sys
 import tempfile
 import shutil
 
+# Force offscreen Qt rendering in CI (must be set before any PyQt6 import)
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 import pytest
 from unittest.mock import patch, MagicMock
 
