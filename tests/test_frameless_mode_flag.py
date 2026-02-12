@@ -1,11 +1,18 @@
 """
 Unit tests for frameless mode feature flag.
 Tests the _get_frameless_mode_flag method in MainWindow.
+
+Note: These tests create real QApplication/MainWindow instances.
+The logic is also tested without Qt in test_frameless_logic.py.
+Skipped in CI where the offscreen Qt platform may crash.
 """
 
 import os
 import unittest
 from unittest.mock import patch, MagicMock
+
+# Skip in CI environments (Qt offscreen crashes with SIGABRT on headless runners)
+_IN_CI = os.environ.get("CI", "") == "true" or os.environ.get("GITHUB_ACTIONS", "") == "true"
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 try:
@@ -14,6 +21,7 @@ except ImportError:
     QApplication = None
 
 
+@unittest.skipIf(_IN_CI, "Skipped in CI — Qt widget tests crash on headless runners. Logic covered by test_frameless_logic.py")
 class TestFramelessModeFlag(unittest.TestCase):
     """Test frameless mode feature flag logic."""
 
