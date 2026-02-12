@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v26.0.0 "Plugin Marketplace"
+# Loofi Fedora Tweaks v26.0.1 "Breadcrumb Bar UI Hotfix"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.0">
-    <img src="https://img.shields.io/badge/Release-v26.0.0-blue?style=for-the-badge&logo=github" alt="Release v26.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.1">
+    <img src="https://img.shields.io/badge/Release-v26.0.1-blue?style=for-the-badge&logo=github" alt="Release v26.0.1"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,20 +21,18 @@
 
 ---
 
-## What's New in v26.0.0 "Plugin Marketplace"
+## What's New in v26.0.1 "Breadcrumb Bar UI Hotfix"
 
-### Marketplace & External Plugins
+### UI Rendering Hotfix
 
-v26.0 adds a complete plugin marketplace system so users can discover, install, and manage third-party plugins directly from the app.
+v26.0.1 is a focused visual fix release for the top breadcrumb bar.
 
 **Highlights:**
-* Community plugin discovery and install flow in the **Community** tab
-* Signed `.loofi-plugin` package support with integrity verification
-* Permission-aware plugin sandboxing
-* Automatic dependency resolution with version constraints
-* `PluginAdapter` bridge for legacy `LoofiPlugin` compatibility
+* Fix breadcrumb text rendering artifacts caused by label background inheritance
+* Ensure transparent breadcrumb labels in both dark and light themes
+* Keep behavior unchanged outside the breadcrumb bar styling
 
-See full details in **[RELEASE-NOTES-v26.0.0.md](docs/releases/RELEASE-NOTES-v26.0.0.md)**.
+See full details in **[RELEASE-NOTES-v26.0.1.md](docs/releases/RELEASE-NOTES-v26.0.1.md)**.
 
 ---
 

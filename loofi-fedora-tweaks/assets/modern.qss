@@ -331,6 +331,9 @@ QFrame#breadcrumbBar {
     background-color: #181825;
     border-bottom: none;
 }
+QFrame#breadcrumbBar QLabel {
+    background-color: transparent;
+}
 QLabel#bcCategory {
     color: #a6adc8;
     font-size: 9.75pt; /* HiDPI: was 13px, now 9.75pt (13/1.333) */

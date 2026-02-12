@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [26.0.1] - 2026-02-12 "Breadcrumb Bar UI Hotfix"
+
+### Fixed
+
+- Fix breadcrumb bar text rendering artifacts where each label drew an opaque block behind `Category > Page > Description`.
+- Force transparent label backgrounds for breadcrumb labels in both `modern.qss` and `light.qss`.
+
+---
+
 ## [26.0.0] - 2026-02-12 "Plugin Marketplace"
 
 ### Added
