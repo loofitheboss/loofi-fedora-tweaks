@@ -186,6 +186,7 @@ Optional features may require extra packages (for example: virtualization tools,
 
 ## Documentation
 
+- Beginner quick guide: [`docs/BEGINNER_QUICK_GUIDE.md`](docs/BEGINNER_QUICK_GUIDE.md)
 - User guide: [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
 - Troubleshooting: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)
 - Contributing: [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)

@@ -4,6 +4,7 @@ Central documentation map for Loofi Fedora Tweaks.
 
 ## Start Here
 
+- `BEGINNER_QUICK_GUIDE.md` - Fast onboarding for new users
 - `USER_GUIDE.md` - End-user walkthrough (GUI, CLI, modes, workflows)
 - `TROUBLESHOOTING.md` - Common issues and fixes
 - `CONTRIBUTING.md` - Development and contribution workflow
