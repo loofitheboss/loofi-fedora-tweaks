@@ -29,11 +29,11 @@ class IntegrityVerifier:
     def verify_checksum(archive_path: Path, expected_hash: str) -> VerificationResult:
         """
         Verify SHA256 checksum of plugin archive.
-        
+
         Args:
             archive_path: Path to .loofi-plugin archive
             expected_hash: Expected SHA256 hash (hex string)
-            
+
         Returns:
             VerificationResult with success status
         """
@@ -45,16 +45,16 @@ class IntegrityVerifier:
                 )
 
             logger.info("Verifying checksum for %s", archive_path.name)
-            
+
             # Calculate SHA256 hash
             sha256_hash = hashlib.sha256()
             with open(archive_path, "rb") as f:
                 # Read in chunks to handle large files
                 for chunk in iter(lambda: f.read(65536), b""):
                     sha256_hash.update(chunk)
-            
+
             actual_hash = sha256_hash.hexdigest()
-            
+
             # Compare hashes (case-insensitive)
             if actual_hash.lower() == expected_hash.lower():
                 logger.info("Checksum verified successfully")
@@ -69,7 +69,7 @@ class IntegrityVerifier:
                     error=f"Checksum mismatch: expected {expected_hash}, got {actual_hash}",
                     checksum=actual_hash
                 )
-                
+
         except OSError as exc:
             logger.error("Failed to read archive: %s", exc)
             return VerificationResult(
@@ -87,11 +87,11 @@ class IntegrityVerifier:
     def verify_signature(archive_path: Path, signature_path: Path) -> VerificationResult:
         """
         Verify GPG signature of plugin archive (optional).
-        
+
         Args:
             archive_path: Path to .loofi-plugin archive
             signature_path: Path to .sig file
-            
+
         Returns:
             VerificationResult with signature validation status
         """
@@ -101,7 +101,7 @@ class IntegrityVerifier:
                     success=False,
                     error=f"Archive not found: {archive_path}"
                 )
-            
+
             if not signature_path.exists():
                 return VerificationResult(
                     success=False,
@@ -123,7 +123,7 @@ class IntegrityVerifier:
                         break
                 except (FileNotFoundError, subprocess.SubprocessError):
                     continue
-            
+
             if not gpg_cmd:
                 logger.warning("GPG not available, skipping signature verification")
                 return VerificationResult(
@@ -133,7 +133,7 @@ class IntegrityVerifier:
                 )
 
             logger.info("Verifying GPG signature for %s", archive_path.name)
-            
+
             # Verify signature
             result = subprocess.run(
                 [gpg_cmd, "--verify", str(signature_path), str(archive_path)],
@@ -142,7 +142,7 @@ class IntegrityVerifier:
                 timeout=10,
                 check=False
             )
-            
+
             if result.returncode == 0:
                 logger.info("GPG signature verified successfully")
                 return VerificationResult(
@@ -156,7 +156,7 @@ class IntegrityVerifier:
                     error=f"Invalid signature: {result.stderr.strip()}",
                     signature_valid=False
                 )
-                
+
         except subprocess.TimeoutExpired:
             logger.error("GPG verification timed out")
             return VerificationResult(
@@ -175,60 +175,60 @@ class IntegrityVerifier:
         """
         Generate SHA256 checksums for all files in plugin directory.
         For plugin authors to create CHECKSUMS.sha256 file.
-        
+
         Args:
             plugin_dir: Path to plugin directory
-            
+
         Returns:
             Dictionary mapping relative paths to SHA256 hashes
         """
         checksums = {}
-        
+
         try:
             if not plugin_dir.exists() or not plugin_dir.is_dir():
                 logger.error("Plugin directory not found: %s", plugin_dir)
                 return checksums
 
             logger.info("Generating checksums for %s", plugin_dir)
-            
+
             # Walk directory and hash all files
             for root, _, files in os.walk(plugin_dir):
                 for filename in files:
                     if filename == "CHECKSUMS.sha256":
                         continue  # Skip existing checksum file
-                    
+
                     file_path = Path(root) / filename
                     relative_path = file_path.relative_to(plugin_dir)
-                    
+
                     try:
                         sha256_hash = hashlib.sha256()
                         with open(file_path, "rb") as f:
                             for chunk in iter(lambda: f.read(65536), b""):
                                 sha256_hash.update(chunk)
-                        
+
                         checksums[str(relative_path)] = sha256_hash.hexdigest()
                         logger.debug("Hashed %s: %s", relative_path, checksums[str(relative_path)])
-                        
+
                     except OSError as exc:
                         logger.warning("Failed to hash %s: %s", relative_path, exc)
                         continue
-            
+
             logger.info("Generated %d checksums", len(checksums))
-            
+
         except Exception as exc:
             logger.error("Failed to generate checksums: %s", exc)
-        
+
         return checksums
 
     @staticmethod
     def verify_directory_checksums(plugin_dir: Path, checksums: Dict[str, str]) -> VerificationResult:
         """
         Verify all files in plugin directory against provided checksums.
-        
+
         Args:
             plugin_dir: Path to plugin directory
             checksums: Dictionary mapping relative paths to expected SHA256 hashes
-            
+
         Returns:
             VerificationResult with overall verification status
         """
@@ -240,45 +240,45 @@ class IntegrityVerifier:
                 )
 
             logger.info("Verifying directory checksums for %s", plugin_dir)
-            
+
             mismatches = []
             missing = []
-            
+
             for relative_path, expected_hash in checksums.items():
                 file_path = plugin_dir / relative_path
-                
+
                 if not file_path.exists():
                     missing.append(relative_path)
                     logger.warning("Missing file: %s", relative_path)
                     continue
-                
+
                 # Calculate actual hash
                 sha256_hash = hashlib.sha256()
                 with open(file_path, "rb") as f:
                     for chunk in iter(lambda: f.read(65536), b""):
                         sha256_hash.update(chunk)
-                
+
                 actual_hash = sha256_hash.hexdigest()
-                
+
                 if actual_hash.lower() != expected_hash.lower():
                     mismatches.append(relative_path)
                     logger.warning("Checksum mismatch for %s", relative_path)
-            
+
             if mismatches or missing:
                 errors = []
                 if mismatches:
                     errors.append(f"Checksum mismatches: {', '.join(mismatches)}")
                 if missing:
                     errors.append(f"Missing files: {', '.join(missing)}")
-                
+
                 return VerificationResult(
                     success=False,
                     error="; ".join(errors)
                 )
-            
+
             logger.info("All directory checksums verified successfully")
             return VerificationResult(success=True)
-            
+
         except Exception as exc:
             logger.error("Failed to verify directory checksums: %s", exc)
             return VerificationResult(

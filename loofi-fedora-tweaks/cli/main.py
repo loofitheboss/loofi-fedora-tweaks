@@ -2266,8 +2266,9 @@ def main(argv: Optional[List[str]] = None):
     marketplace_parser.add_argument("plugin", nargs="?", help="Plugin name or ID")
     marketplace_parser.add_argument("--category", help="Filter by category")
     marketplace_parser.add_argument("--query", help="Search query")
-    marketplace_parser.add_argument("--accept-permissions", action="store_true",
-                                   help="Auto-accept permissions (non-interactive)")
+    marketplace_parser.add_argument(
+        "--accept-permissions", action="store_true",
+        help="Auto-accept permissions (non-interactive)")
 
     # Support bundle
     subparsers.add_parser("support-bundle", help="Export support bundle ZIP")

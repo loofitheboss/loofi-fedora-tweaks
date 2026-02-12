@@ -276,6 +276,7 @@ class _UpdatesSubTab(QWidget):
 # Sub-tab: Cleanup
 # ---------------------------------------------------------------------------
 
+
 class _CleanupSubTab(QWidget):
     """Sub-tab containing all cleanup and maintenance functionality.
 
