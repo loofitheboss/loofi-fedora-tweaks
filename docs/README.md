@@ -1,21 +1,31 @@
 # Documentation Index
 
-This folder contains project documentation grouped by purpose.
+Central documentation map for Loofi Fedora Tweaks.
 
-## Core Docs
-- `USER_GUIDE.md`
-- `CONTRIBUTING.md`
-- `TROUBLESHOOTING.md`
-- `PLUGIN_SDK.md`
-- `RELEASE_CHECKLIST.md`
+## Start Here
 
-## Releases
-- `releases/RELEASE-NOTES-v*.md` - Versioned release notes used for GitHub releases
+- `USER_GUIDE.md` - End-user walkthrough (GUI, CLI, modes, workflows)
+- `TROUBLESHOOTING.md` - Common issues and fixes
+- `CONTRIBUTING.md` - Development and contribution workflow
+
+## Product and Release Docs
+
+- `../README.md` - Project overview and quick start
+- `../CHANGELOG.md` - Full change history
+- `releases/RELEASE-NOTES-v*.md` - Version-specific release notes
 - `releases/RELEASE-ANNOUNCEMENT.md` - Announcement template/content
-- `releases/release_notes.md` and `releases/RELEASE_NOTES.md` - Legacy notes kept for continuity
+- `RELEASE_CHECKLIST.md` - Release execution checklist
+- `checklists/DEPLOYMENT-CHECKLIST.md` - Deployment readiness checklist
 
-## Checklists
-- `checklists/DEPLOYMENT-CHECKLIST.md` - Production deployment checklist
+## Developer Docs
 
-## Reports
-- `reports/` - Historical implementation/testing summaries and archived outputs
+- `PLUGIN_SDK.md` - External plugin model and marketplace integration
+- `reports/` - Historical implementation/test summaries
+
+## Legacy/Archive Notes
+
+- `releases/release_notes.md`
+- `releases/RELEASE_NOTES.md`
+- `release_notes.md`
+
+These legacy files are kept for compatibility and historical context.

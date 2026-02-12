@@ -1,71 +1,124 @@
 # Release Checklist
 
-Use this before tagging a new release.
+Use this checklist before tagging a release.
 
-## Version Bump
+---
 
-1. Update version in three files (must stay in sync):
-   - `loofi-fedora-tweaks/version.py` — `__version__` and `__version_codename__`
-   - `loofi-fedora-tweaks.spec` — `Version:`
-   - `build_rpm.sh` — `VERSION=`
+## 1. Version Alignment
 
-## Documentation
+Update and verify version fields stay in sync:
 
-2. Update `CHANGELOG.md` with full feature list.
-3. Update versioned release notes in `docs/releases/` and keep legacy notes in sync if still used.
-4. Update `README.md` — version badges, What's New section, CLI commands, test count.
-5. Update `docs/USER_GUIDE.md` — new feature sections, CLI reference, version header.
-6. Update `docs/CONTRIBUTING.md` — project structure, test counts.
-7. Update `docs/TROUBLESHOOTING.md` — add troubleshooting for new features.
-8. Update `docs/PLUGIN_SDK.md` — bump `min_app_version` examples if needed.
+1. `loofi-fedora-tweaks/version.py` - `__version__`, `__version_codename__`
+2. `loofi-fedora-tweaks.spec` - `Version:`
 
-## Testing
+Quick verify:
 
-9. Run full test suite:
-   ```bash
-   PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-   ```
-10. Verify all new tests pass.
+```bash
+rg -n "__version__|__version_codename__" loofi-fedora-tweaks/version.py
+rg -n "^Version:" loofi-fedora-tweaks.spec
+```
 
-## Build
+---
 
-11. Build RPM locally:
-    ```bash
-    bash scripts/build_rpm.sh
-    ```
-12. Verify RPM exists in `rpmbuild/RPMS/noarch/`.
+## 2. Documentation
 
-## Smoke Test
+1. Update `CHANGELOG.md`
+2. Add/update `docs/releases/RELEASE-NOTES-vX.Y.Z.md`
+3. Update `README.md` for current release and command examples
+4. Update `docs/USER_GUIDE.md` for new behavior/features
+5. Update `docs/TROUBLESHOOTING.md` for new failure modes
+6. Update `docs/CONTRIBUTING.md` if workflows changed
 
-13. Test CLI commands:
-    ```bash
-    loofi --version
-    loofi doctor
-    loofi plugins list
-    loofi tuner analyze
-    loofi snapshot backends
-    loofi logs errors
-    ```
+---
 
-## Release
+## 3. Tests and Lint
 
-14. Commit all changes:
-    ```bash
-    git add -A && git commit -m "Release vX.Y.Z Codename"
-    ```
-15. Create annotated tag:
-    ```bash
-    git tag -a vX.Y.Z -m "vX.Y.Z Codename - summary"
-    ```
-16. Push to origin (triggers CI release workflow):
-    ```bash
-    git push origin master --tags
-    ```
-17. Wait for CI to create GitHub release, then update with full notes:
-    ```bash
-    gh release edit vX.Y.Z --title 'vX.Y.Z "Codename"' --latest --notes "..."
-    ```
-18. Verify release:
-    ```bash
-    gh release list --limit 3
-    ```
+Run full tests:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=80
+```
+
+Run lint:
+
+```bash
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+```
+
+---
+
+## 4. Package Build
+
+Build RPM:
+
+```bash
+bash scripts/build_rpm.sh
+```
+
+Verify output exists:
+
+```bash
+ls -lah rpmbuild/RPMS/noarch/
+```
+
+---
+
+## 5. Smoke Test
+
+Use installed binary or source run target and verify key commands:
+
+```bash
+loofi-fedora-tweaks --version
+loofi-fedora-tweaks --cli info
+loofi-fedora-tweaks --cli doctor
+loofi-fedora-tweaks --cli plugins list
+loofi-fedora-tweaks --cli plugin-marketplace search --query test
+```
+
+Optional GUI smoke test:
+
+```bash
+loofi-fedora-tweaks
+```
+
+---
+
+## 6. Commit and Tag
+
+Commit release changes:
+
+```bash
+git add -A
+git commit -m "Release vX.Y.Z Codename"
+```
+
+Create tag:
+
+```bash
+git tag -a vX.Y.Z -m "vX.Y.Z Codename"
+```
+
+Push branch and tags:
+
+```bash
+git push origin master
+git push origin vX.Y.Z
+```
+
+---
+
+## 7. GitHub Release Validation
+
+After CI/workflows complete:
+
+```bash
+gh release list --limit 3
+gh release view vX.Y.Z
+```
+
+Confirm:
+
+1. Tag exists and points to intended commit.
+2. Release notes are correct.
+3. RPM artifacts are attached.
+4. `ROADMAP.md` release status is updated if applicable.

@@ -1,187 +1,124 @@
 # Contributing to Loofi Fedora Tweaks
 
-Thank you for considering contributing! Here's how you can help.
+Thanks for contributing.
 
-## Reporting Bugs
-
-1. Search [existing issues](https://github.com/loofitheboss/loofi-fedora-tweaks/issues) to avoid duplicates.
-2. Open a new issue with:
-    * **Title**: Short and descriptive.
-    * **Steps to Reproduce**: What did you do?
-    * **Expected Behavior**: What should have happened?
-    * **Actual Behavior**: What happened instead?
-    * **Environment**: Fedora version, KDE Plasma version, Python version.
-
-## Feature Requests
-
-Open an issue with the **enhancement** label. Describe:
-
-* The problem you're trying to solve.
-* Your proposed solution.
-
-## Pull Requests
-
-1. **Fork** the repository.
-2. **Create a branch**: `git checkout -b feature/your-feature-name`
-3. **Make changes** and commit: `git commit -m "Add your feature"`
-4. **Push**: `git push origin feature/your-feature-name`
-5. **Open a Pull Request** on GitHub.
-
-### Code Style
-
-* Python: Follow PEP 8.
-* Use meaningful variable names.
-* Comment complex logic.
-* Wrap all user-visible strings with `self.tr("...")` for i18n.
-* New tabs should inherit from `BaseTab` (see `ui/base_tab.py`).
-* System commands go in `utils/` modules, never directly in UI code.
-
-## Project Structure (v16.0)
-
-```
-loofi-fedora-tweaks/
-├── loofi-fedora-tweaks/       # Main application source
-│   ├── main.py               # Entry point (GUI/CLI/Daemon)
-│   ├── version.py            # Version source of truth
-│   ├── ui/                   # PyQt6 UI components
-│   │   ├── main_window.py    # Main window with sidebar (21 tabs)
-│   │   ├── base_tab.py       # BaseTab class (shared by all tabs)
-│   │   ├── dashboard_tab.py  # Dashboard (Home)
-│   │   ├── monitor_tab.py    # System Monitor (Performance + Processes)
-│   │   ├── maintenance_tab.py # Maintenance (Updates + Cleanup + Overlays)
-│   │   ├── software_tab.py   # Software (Apps + Repos)
-│   │   ├── hardware_tab.py   # Hardware (CPU/GPU/Fan/Battery/Audio/Fingerprint)
-│   │   ├── security_tab.py   # Security & Privacy
-│   │   ├── desktop_tab.py    # Desktop (Director + Theming)
-│   │   ├── development_tab.py # Development (Containers + Developer)
-│   │   ├── automation_tab.py # Automation (Scheduler + Replicator)
-│   │   ├── community_tab.py  # Community (Presets + Marketplace)
-│   │   ├── diagnostics_tab.py # Diagnostics (Watchtower + Boot)
-│   │   ├── virtualization_tab.py # Virtualization (VMs + VFIO + Disposable)
-│   │   ├── mesh_tab.py         # Loofi Link (Mesh + Clipboard + File Drop)
-│   │   ├── teleport_tab.py     # State Teleport (Capture/Restore)
-│   │   ├── ai_enhanced_tab.py  # AI Lab Enhanced (Models + Voice + RAG)
-│   │   ├── quick_actions.py    # Quick Actions Bar (Ctrl+Shift+K) [v15.0]
-│   │   ├── wizard.py         # First-run wizard
-│   │   ├── command_palette.py # Ctrl+K command palette
-│   │   └── lazy_widget.py    # Lazy tab loading
-│   ├── utils/                # Business logic and system commands
-│   │   ├── commands.py       # PrivilegedCommand builder (safe pkexec)
-│   │   ├── errors.py         # Error hierarchy (LoofiError, etc.)
-│   │   ├── formatting.py     # Shared formatting utilities
-│   │   ├── hardware_profiles.py # Hardware auto-detection via DMI
-│   │   ├── command_runner.py # Async QProcess wrapper
-│   │   ├── operations.py     # Shared operations layer
-│   │   ├── system.py         # System detection (Atomic/Traditional)
-│   │   ├── pulse.py          # Event-driven automation engine
-│   │   ├── vm_manager.py     # VM creation and lifecycle
-│   │   ├── vfio.py           # VFIO GPU passthrough assistant
-│   │   ├── mesh_discovery.py # mDNS LAN device discovery
-│   │   ├── state_teleport.py # Workspace state capture/restore
-│   │   ├── ai_models.py      # AI lite model library
-│   │   ├── focus_mode.py     # Focus mode / distraction blocking
-│   │   ├── auto_tuner.py     # Performance auto-tuner [v15.0]
-│   │   ├── snapshot_manager.py # Unified snapshot management [v15.0]
-│   │   ├── smart_logs.py     # Smart log viewer [v15.0]
-│   │   ├── service_explorer.py # Systemd service browser [v16.0]
-│   │   ├── package_explorer.py # Unified package manager [v16.0]
-│   │   ├── firewall_manager.py # Firewalld backend [v16.0]
-│   │   └── ...               # Other utility modules
-│   ├── cli/                  # CLI entry point
-│   │   └── main.py           # CLI with --json support
-│   ├── assets/               # Icons, QSS themes
-│   │   ├── modern.qss        # Dark theme
-│   │   └── loofi-fedora-tweaks.png
-│   ├── config/               # Default configs
-│   └── plugins/              # Third-party extensions
-├── tests/                    # Unit tests (1420+ tests)
-│   ├── conftest.py           # Shared fixtures
-│   ├── test_auto_tuner.py    # Auto-tuner tests [v15.0]
-│   ├── test_snapshot_manager.py # Snapshot tests [v15.0]
-│   ├── test_smart_logs.py    # Smart logs tests [v15.0]
-│   ├── test_quick_actions.py # Quick actions tests [v15.0]
-│   ├── test_service_explorer.py # Service explorer tests [v16.0]
-│   ├── test_package_explorer.py # Package explorer tests [v16.0]
-│   ├── test_firewall_manager.py # Firewall manager tests [v16.0]
-│   └── ...
-├── docs/                     # Documentation
-│   ├── USER_GUIDE.md
-│   ├── RELEASE_CHECKLIST.md
-│   └── CONTRIBUTING.md       # This file
-├── .github/
-│   ├── workflows/ci.yml      # CI pipeline (lint, test, build)
-│   ├── workflows/auto-release.yml # Master auto-tag + tag-triggered release publish
-│   ├── agents/               # Development agents [v15.0]
-│   └── copilot-instructions.md
-├── build_rpm.sh              # Build script
-├── loofi-fedora-tweaks.spec  # RPM spec file
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project overview
-```
-
-## Key Patterns for Contributors
-
-### BaseTab Class
-
-All new tabs that execute system commands should inherit from `BaseTab`:
-
-```python
-from ui.base_tab import BaseTab
-
-class MyNewTab(BaseTab):
-    def __init__(self):
-        super().__init__()
-        # BaseTab provides: self.output_area, self.runner, self.run_command()
-```
-
-### PrivilegedCommand Builder
-
-Use `PrivilegedCommand` for safe pkexec operations:
-
-```python
-from utils.commands import PrivilegedCommand
-
-cmd = PrivilegedCommand.dnf("install", "-y", "package-name")
-# Returns: ["pkexec", "dnf", "install", "-y", "package-name"]
-```
-
-### Error Framework
-
-Use typed exceptions from `utils/errors.py`:
-
-```python
-from utils.errors import CommandFailedError, PrivilegeError
-```
-
-### Lazy Tab Registration
-
-Register new tabs in `MainWindow._lazy_tab()` loaders dict:
-
-```python
-"mytab": lambda: __import__("ui.mytab_tab", fromlist=["MyTabTab"]).MyTabTab(),
-```
-
-## Running Tests
-
-```bash
-PYTHONPATH=loofi-fedora-tweaks python3 -m pytest tests/ -v
-# 1420+ tests passing
-```
-
-## Building the RPM
-
-```bash
-./build_rpm.sh
-# Output: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-16.0.0-1.noarch.rpm
-```
-
-## CI/CD
-
-Pull requests automatically run:
-1. **Lint** (flake8) - Code style checks
-2. **Test** (pytest) - Full test suite
-3. **Build** (rpmbuild) - RPM package build in Fedora 43 container
+This guide focuses on how to make safe, reviewable changes that match project conventions.
 
 ---
 
-Thanks for contributing!
+## Development Setup
+
+```bash
+git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
+cd loofi-fedora-tweaks
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run from source:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py
+```
+
+CLI mode:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py --cli info
+```
+
+---
+
+## Project Architecture (Current)
+
+High-level layout:
+
+- `loofi-fedora-tweaks/ui/` - PyQt6 tabs and window components
+- `loofi-fedora-tweaks/utils/` - business logic and command operations
+- `loofi-fedora-tweaks/core/plugins/` - plugin registry/loader/compat layer
+- `loofi-fedora-tweaks/cli/main.py` - CLI entrypoint
+- `loofi-fedora-tweaks/services/` - service layer components
+- `tests/` - unit tests with mocks
+
+The UI is plugin-driven: tab metadata, registration, and compatibility are sourced from plugin interfaces.
+
+---
+
+## Critical Engineering Rules
+
+1. Never use `sudo` in application command execution paths; use `pkexec` via command helpers.
+2. Never hardcode `dnf`; use package manager detection (`dnf` vs `rpm-ostree`).
+3. Never call subprocesses directly from UI tabs; put system logic in `utils/`.
+4. Always unpack operation tuples before `subprocess.run()`.
+5. Keep version values synchronized across `version.py` and `.spec`.
+
+---
+
+## Coding Standards
+
+- Prefer existing patterns over new abstractions.
+- Keep changes minimal and targeted.
+- New UI tabs should follow `BaseTab` and plugin metadata conventions.
+- Keep user-visible strings translatable (`self.tr("...")`) in UI code.
+- Avoid introducing root-required tests or environment-coupled behavior.
+
+---
+
+## Testing Requirements
+
+Run tests before opening a PR:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=80
+```
+
+Testing expectations:
+
+- Mock all system calls (`subprocess`, filesystem, command discovery).
+- Cover both success and failure paths.
+- Prefer `@patch` decorators in unittest-style tests.
+
+---
+
+## Lint and Build
+
+Lint:
+
+```bash
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+```
+
+Build RPM:
+
+```bash
+bash scripts/build_rpm.sh
+```
+
+---
+
+## Pull Request Workflow
+
+1. Create a topic branch from `master`.
+2. Keep commits scoped (for example docs-only or tests-only).
+3. Update docs for behavioral changes (`README`, user guide, release notes/changelog as needed).
+4. Include test evidence in the PR description.
+5. Link related issues.
+
+Recommended commit style:
+
+- `fix: ...`
+- `feat: ...`
+- `docs: ...`
+- `test: ...`
+
+---
+
+## Reporting Bugs and Requesting Features
+
+Use GitHub issues:
+
+- Bugs: include reproduction steps, expected/actual behavior, logs, environment.
+- Features: include user problem, proposed UX/CLI behavior, and constraints.
+
+Issue tracker: <https://github.com/loofitheboss/loofi-fedora-tweaks/issues>
