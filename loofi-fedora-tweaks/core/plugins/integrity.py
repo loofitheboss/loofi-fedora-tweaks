@@ -155,6 +155,7 @@ class IntegrityVerifier:
                     result = subprocess.run(
                         [cmd, "--version"],
                         capture_output=True,
+                        text=True,
                         timeout=5,
                         check=False
                     )
@@ -222,7 +223,7 @@ class IntegrityVerifier:
         Returns:
             Dictionary mapping relative paths to SHA256 hashes
         """
-        checksums = {}
+        checksums: Dict[str, str] = {}
 
         try:
             if not plugin_dir.exists() or not plugin_dir.is_dir():

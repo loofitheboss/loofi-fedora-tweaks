@@ -8,7 +8,7 @@ Supports DNF, rpm-ostree, and Flatpak backends.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Any, Callable, List, Optional
 
 from core.executor.action_result import ActionResult
 
@@ -28,7 +28,7 @@ class BasePackageService(ABC):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., Any]] = None
     ) -> ActionResult:
         """
         Install one or more packages.
@@ -49,7 +49,7 @@ class BasePackageService(ABC):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., Any]] = None
     ) -> ActionResult:
         """
         Remove one or more packages.
@@ -70,7 +70,7 @@ class BasePackageService(ABC):
         packages: Optional[List[str]] = None,
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., Any]] = None
     ) -> ActionResult:
         """
         Update packages (or all packages if none specified).

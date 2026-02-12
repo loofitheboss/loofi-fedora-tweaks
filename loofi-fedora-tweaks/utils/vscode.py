@@ -10,7 +10,7 @@ import json
 import subprocess
 import shutil
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Dict, Optional
 from pathlib import Path
 
 
@@ -298,7 +298,7 @@ class VSCodeManager:
             return Result(False, "Could not find VS Code settings directory.")
 
         # Profile-specific settings
-        profile_settings = {
+        profile_settings: Dict[str, Dict[str, Any]] = {
             "python": {
                 "python.analysis.typeCheckingMode": "basic",
                 "python.formatting.provider": "none",

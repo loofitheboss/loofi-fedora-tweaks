@@ -146,7 +146,7 @@ class BootAnalyzer:
             return []
 
     @classmethod
-    def get_slow_services(cls, threshold: float = None) -> list[ServiceTime]:
+    def get_slow_services(cls, threshold: Optional[float] = None) -> list[ServiceTime]:
         """
         Get services that take longer than threshold to start.
 

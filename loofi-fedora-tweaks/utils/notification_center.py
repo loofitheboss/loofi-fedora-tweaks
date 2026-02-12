@@ -33,7 +33,7 @@ class NotificationCenter:
     """Singleton notification center with JSON persistence."""
 
     _instance: Optional['NotificationCenter'] = None
-    _notifications: List[Notification] = None
+    _notifications: List[Notification] = []
 
     def __new__(cls):
         if cls._instance is None:

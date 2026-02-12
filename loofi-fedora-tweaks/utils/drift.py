@@ -259,7 +259,7 @@ class DriftDetector:
                 data = json.loads(result.stdout)
                 deployments = data.get("deployments", [])
                 if deployments:
-                    return deployments[0].get("requested-packages", [])
+                    return list(deployments[0].get("requested-packages", []))
 
             # Fallback: get manually installed packages
             result = subprocess.run(

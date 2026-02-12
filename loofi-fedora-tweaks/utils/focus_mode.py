@@ -80,7 +80,7 @@ class FocusMode:
         cls.ensure_config()
         try:
             with open(cls.CONFIG_FILE, "r") as f:
-                return json.load(f)
+                return dict(json.load(f))
         except Exception:
             return {"active": False, "profiles": {}}
 
@@ -111,7 +111,8 @@ class FocusMode:
             Profile dict or None
         """
         config = cls.load_config()
-        return config.get("profiles", {}).get(name)
+        result = config.get("profiles", {}).get(name)
+        return dict(result) if result is not None else None
 
     @classmethod
     def save_profile(cls, name: str, profile: Dict[str, Any]) -> bool:
@@ -158,7 +159,7 @@ class FocusMode:
             True if active
         """
         config = cls.load_config()
-        return config.get("active", False)
+        return bool(config.get("active", False))
 
     @classmethod
     def get_active_profile(cls) -> Optional[str]:

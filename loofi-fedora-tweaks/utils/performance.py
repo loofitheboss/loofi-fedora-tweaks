@@ -81,7 +81,7 @@ class PerformanceCollector:
     # ==================== STATIC HELPERS ====================
 
     @staticmethod
-    def bytes_to_human(num_bytes: int) -> str:
+    def bytes_to_human(num_bytes: float) -> str:
         """Convert bytes to human-readable format."""
         for unit in ("B", "KB", "MB", "GB", "TB"):
             if abs(num_bytes) < 1024:

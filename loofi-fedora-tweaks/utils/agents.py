@@ -646,7 +646,7 @@ class AgentRegistry:
 
     def get_recent_activity(self, limit: int = 20) -> List[Dict[str, Any]]:
         """Get recent activity across all agents."""
-        activity = []
+        activity: List[Dict[str, Any]] = []
         for agent in self._agents.values():
             state = self.get_state(agent.agent_id)
             for result in state.history:
@@ -659,7 +659,7 @@ class AgentRegistry:
                     "timestamp": result.timestamp,
                 })
         # Sort by timestamp descending
-        activity.sort(key=lambda x: x["timestamp"], reverse=True)
+        activity.sort(key=lambda x: float(x["timestamp"]), reverse=True)
         return activity[:limit]
 
     def update_agent_settings(self, agent_id: str, settings: Dict[str, Any]) -> bool:

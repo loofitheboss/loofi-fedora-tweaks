@@ -3,6 +3,7 @@ import os
 import subprocess
 import logging
 from core.plugins.metadata import CompatStatus
+from typing import Any
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class CompatibilityDetector:
     """
 
     def __init__(self) -> None:
-        self._cache: dict[str, object] = {}
+        self._cache: dict[str, Any] = {}
 
     # ---------------------------------------------------------------- Public API
 
@@ -31,26 +32,26 @@ class CompatibilityDetector:
         """Return Fedora major version number, or 0 if not Fedora."""
         if "fedora_version" not in self._cache:
             self._cache["fedora_version"] = self._read_fedora_version()
-        return self._cache["fedora_version"]
+        return int(self._cache["fedora_version"])
 
     def desktop_environment(self) -> str:
         """Return lowercase DE name: 'gnome', 'kde', 'xfce', 'other', or 'unknown'."""
         if "desktop_env" not in self._cache:
             self._cache["desktop_env"] = self._read_desktop_env()
-        return self._cache["desktop_env"]
+        return str(self._cache["desktop_env"])
 
     def is_wayland(self) -> bool:
         """Return True if running under Wayland."""
         if "is_wayland" not in self._cache:
             self._cache["is_wayland"] = bool(os.environ.get("WAYLAND_DISPLAY"))
-        return self._cache["is_wayland"]
+        return bool(self._cache["is_wayland"])
 
     def has_package(self, package_name: str) -> bool:
         """Return True if RPM package is installed."""
         key = f"pkg:{package_name}"
         if key not in self._cache:
             self._cache[key] = self._check_package(package_name)
-        return self._cache[key]
+        return bool(self._cache[key])
 
     def check_plugin_compat(self, compat_spec: dict) -> CompatStatus:
         """

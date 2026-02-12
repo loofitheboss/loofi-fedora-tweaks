@@ -97,15 +97,15 @@ class DependencyResolver:
                 required = parse_version(required_version)
 
                 if operator == "==":
-                    return installed == required
+                    return bool(installed == required)
                 elif operator == ">=":
-                    return installed >= required
+                    return bool(installed >= required)
                 elif operator == "<=":
-                    return installed <= required
+                    return bool(installed <= required)
                 elif operator == ">":
-                    return installed > required
+                    return bool(installed > required)
                 elif operator == "<":
-                    return installed < required
+                    return bool(installed < required)
                 else:
                     return True
             else:

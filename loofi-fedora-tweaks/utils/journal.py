@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 import tempfile
 import zipfile
 
@@ -327,7 +327,7 @@ class JournalManager:
         - failed_services: List of failed service names
         - recent_errors: Last 5 error messages
         """
-        diagnostic = {
+        diagnostic: dict[str, Any] = {
             "error_count": 0,
             "failed_services": [],
             "recent_errors": []
