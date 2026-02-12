@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
-  <img src="https://img.shields.io/badge/Tests-1871%20passing-brightgreen?style=for-the-badge" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-2082%20passed%20(95%20skipped)-brightgreen?style=for-the-badge" alt="Tests 2082 passed, 95 skipped"/>
 </p>
 
 ---
