@@ -4,6 +4,7 @@
 > A practical, detailed guide to using Loofi Fedora Tweaks effectively and safely.
 
 New users can start with: `docs/BEGINNER_QUICK_GUIDE.md`.
+Advanced operators can use: `docs/ADVANCED_ADMIN_GUIDE.md`.
 
 ---
 

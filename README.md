@@ -188,6 +188,7 @@ Optional features may require extra packages (for example: virtualization tools,
 
 - Beginner quick guide: [`docs/BEGINNER_QUICK_GUIDE.md`](docs/BEGINNER_QUICK_GUIDE.md)
 - User guide: [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md)
+- Advanced admin guide: [`docs/ADVANCED_ADMIN_GUIDE.md`](docs/ADVANCED_ADMIN_GUIDE.md)
 - Troubleshooting: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)
 - Contributing: [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)
 - Plugin SDK: [`docs/PLUGIN_SDK.md`](docs/PLUGIN_SDK.md)
