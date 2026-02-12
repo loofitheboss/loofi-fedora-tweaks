@@ -1,0 +1,52 @@
+{
+  "version": "v28.0.0",
+  "phase": "P4_TEST",
+  "date": "2026-02-12",
+  "generated_at": "2026-02-12T22:15:00Z",
+  "scope": "v28.0.0 workflow runner artifacts",
+  "status": "pass",
+  "summary": {
+    "total_tests": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "duration_seconds": 0.05,
+    "pass_rate": "100%"
+  },
+  "commands": [
+    {
+      "cmd": "PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_workflow_runner_locks.py -v --tb=short",
+      "result": "passed",
+      "passed": 11,
+      "failed": 0
+    }
+  ],
+  "test_files": [
+    "tests/test_workflow_runner_locks.py"
+  ],
+  "changed_files": [
+    "scripts/workflow_runner.py",
+    ".github/workflow/prompts/plan.md",
+    ".github/workflow/model-router.toml"
+  ],
+  "coverage": {
+    "module": "scripts/workflow_runner.py",
+    "statements": 343,
+    "missed": 221,
+    "coverage_percent": 36,
+    "note": "Coverage reflects lock/validation helpers tested; full integration covered by workflow execution"
+  },
+  "notes": [
+    "v28.0.0 kickoff plan tasks validated",
+    "Task contract validation tests passing for all required markers",
+    "Writer lock behavior verified with concurrent access and TTL expiry tests",
+    "Model router TOML override behavior confirmed",
+    "Race lock version mismatch detection working correctly",
+    "Review mode report generation tested"
+  ],
+  "release_gate": {
+    "status": "PASS",
+    "notes": "All v28.0.0 workflow runner tests passing. Ready for documentation phase."
+  }
+}

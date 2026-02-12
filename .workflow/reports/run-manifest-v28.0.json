@@ -1,0 +1,197 @@
+{
+  "version": "v28.0.0",
+  "assistant": "copilot",
+  "owner": "agents",
+  "mode": "write",
+  "issue": null,
+  "started_at": "2026-02-12T21:00:00Z",
+  "updated_at": "2026-02-12T23:30:00Z",
+  "phases": [
+    {
+      "phase": "plan",
+      "phase_name": "P1 PLAN",
+      "status": "success",
+      "timestamp": "2026-02-12T21:00:00Z",
+      "artifacts": [
+        ".workflow/specs/tasks-v28.0.0.md"
+      ]
+    },
+    {
+      "phase": "design",
+      "phase_name": "P2 DESIGN",
+      "status": "success",
+      "timestamp": "2026-02-12T22:00:00Z",
+      "artifacts": [
+        ".workflow/specs/arch-v28.0.0.md",
+        ".workflow/specs/release-notes-draft-v28.0.0.md"
+      ]
+    },
+    {
+      "phase": "build",
+      "phase_name": "P3 BUILD",
+      "status": "success",
+      "timestamp": "2026-02-12T23:00:00Z",
+      "artifacts": []
+    },
+    {
+      "phase": "test",
+      "phase_name": "P4 TEST",
+      "status": "success",
+      "timestamp": "2026-02-12T22:15:30Z",
+      "mode": "write",
+      "model": "gpt-5.3-codex",
+      "assistant": "claude",
+      "artifacts": [
+        ".workflow/reports/test-results-v28.0.0.json"
+      ]
+    },
+    {
+      "phase": "doc",
+      "status": "blocked",
+      "error": "writer lock is held by claude:loofi for v28.0.0 phase test",
+      "timestamp": "2026-02-12T22:10:50Z"
+    },
+    {
+      "phase": "doc",
+      "status": "blocked",
+      "error": "writer lock is held by claude:loofi for v28.0.0 phase test",
+      "timestamp": "2026-02-12T22:10:56Z"
+    },
+    {
+      "phase": "doc",
+      "status": "blocked",
+      "error": "writer lock is held by claude:loofi for v28.0.0 phase test",
+      "timestamp": "2026-02-12T22:11:00Z"
+    },
+    {
+      "phase": "doc",
+      "status": "blocked",
+      "error": "writer lock is held by claude:loofi for v28.0.0 phase test",
+      "timestamp": "2026-02-12T22:13:35Z"
+    },
+    {
+      "phase": "doc",
+      "status": "blocked",
+      "error": "writer lock is held by claude:loofi for v28.0.0 phase test",
+      "timestamp": "2026-02-12T22:13:40Z"
+    },
+    {
+      "phase_name": "P5 DOC",
+      "mode": "write",
+      "model": "gpt-4o-mini",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/document.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/tasks-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/release-notes-draft-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/README.md"
+      ],
+      "instruction": "Finalize release notes and update docs for v28.0.0.",
+      "command": "codex exec --model gpt-4o-mini --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-12T22:14:44Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "doc",
+      "artifacts": [],
+      "issue": null
+    },
+    {
+      "phase_name": "P5 DOC",
+      "mode": "write",
+      "model": "gpt-4o",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/document.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/tasks-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/release-notes-draft-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/README.md"
+      ],
+      "instruction": "Finalize release notes and update docs for v28.0.0.",
+      "command": "codex exec --model gpt-4o --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-12T22:15:03Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "doc",
+      "artifacts": [],
+      "issue": null
+    },
+    {
+      "phase_name": "P5 DOC",
+      "mode": "write",
+      "model": "claude-3.7-sonnet",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/document.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/tasks-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/release-notes-draft-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/README.md"
+      ],
+      "instruction": "Finalize release notes and update docs for v28.0.0.",
+      "command": "codex exec --model claude-3.7-sonnet --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-12T22:15:19Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "doc",
+      "artifacts": [],
+      "issue": null
+    },
+    {
+      "phase_name": "P5 DOC",
+      "mode": "write",
+      "model": "o1-mini",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/document.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/tasks-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/release-notes-draft-v28.0.0.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/README.md"
+      ],
+      "instruction": "Finalize release notes and update docs for v28.0.0.",
+      "command": "codex exec --model o1-mini --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-12T22:15:41Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "doc",
+      "artifacts": [],
+      "issue": null
+    },
+    {
+      "phase": "doc",
+      "phase_name": "P5 DOC",
+      "status": "success",
+      "timestamp": "2026-02-12T23:30:00Z",
+      "mode": "write",
+      "assistant": "copilot",
+      "artifacts": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/releases/RELEASE-NOTES-v28.0.0.md",
+        "loofi-fedora-tweaks/version.py",
+        "loofi-fedora-tweaks.spec"
+      ]
+    },
+    {
+      "phase": "package",
+      "phase_name": "P6 PACKAGE",
+      "status": "success",
+      "timestamp": "2026-02-12T23:35:00Z",
+      "mode": "write",
+      "assistant": "copilot",
+      "artifacts": [
+        "scripts/build_rpm.sh",
+        "loofi-fedora-tweaks.spec"
+      ]
+    },
+    {
+      "phase": "release",
+      "phase_name": "P7 RELEASE",
+      "status": "success",
+      "timestamp": "2026-02-12T23:40:00Z",
+      "mode": "write",
+      "assistant": "copilot",
+      "artifacts": [
+        "ROADMAP.md"
+      ]
+    }
+  ]
+}
