@@ -61,6 +61,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
@@ -72,10 +73,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt pytest pytest-cov PyQt6
+      - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
       - run: python loofi-fedora-tweaks/main.py --cli --version
-      - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short --cov=loofi-fedora-tweaks --cov-report=term-missing --cov-fail-under=50
+      - run: PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short --timeout=60 --cov=loofi-fedora-tweaks --cov-report=term-missing --cov-fail-under=50
 
   build:
     runs-on: ubuntu-latest
