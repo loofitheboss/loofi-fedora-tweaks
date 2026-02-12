@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v25.0.3 "Maintenance Update Crash Hotfix"
+# Loofi Fedora Tweaks v26.0.0 "Plugin Marketplace"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v25.0.3">
-    <img src="https://img.shields.io/badge/Release-v25.0.3-blue?style=for-the-badge&logo=github" alt="Release v25.0.3"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.0">
+    <img src="https://img.shields.io/badge/Release-v26.0.0-blue?style=for-the-badge&logo=github" alt="Release v26.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,39 +21,20 @@
 
 ---
 
-## What's New in v25.0.0 "Plugin Architecture"
+## What's New in v26.0.0 "Plugin Marketplace"
 
-### Modular Plugin System
+### Marketplace & External Plugins
 
-v25.0 transforms the internal architecture from a hardcoded tab list to a plugin-based system where each of the 26 tabs is a self-describing module. **User experience remains identical** — no visible changes, same tabs, same navigation.
+v26.0 adds a complete plugin marketplace system so users can discover, install, and manage third-party plugins directly from the app.
 
-**Why this matters:**
-* Foundation for user-installable plugins (coming in v26.0)
-* Easier maintenance and testing of individual features
-* Compatibility-aware feature gating (disable incompatible features gracefully)
-* Clear plugin API for future extensibility
+**Highlights:**
+* Community plugin discovery and install flow in the **Community** tab
+* Signed `.loofi-plugin` package support with integrity verification
+* Permission-aware plugin sandboxing
+* Automatic dependency resolution with version constraints
+* `PluginAdapter` bridge for legacy `LoofiPlugin` compatibility
 
-**Core Plugin Layer**
-* `core/plugins/interface.py`: `PluginInterface` ABC
-* `core/plugins/metadata.py`: `PluginMetadata` dataclass with category, icon, badge, order
-* `core/plugins/registry.py`: `PluginRegistry` singleton for plugin discovery
-* `core/plugins/loader.py`: `PluginLoader` for entrypoint import and validation
-* `core/plugins/compat.py`: `CompatibilityDetector` for Fedora version, DE, Wayland/X11, package checks
-
-### Compatibility Detection
-
-* Tabs can declare minimum Fedora version, required DE, Wayland/X11, packages
-* Incompatible tabs appear disabled with explanatory tooltip
-* Declarative `compat` dict or programmatic `check_compat()` override
-
-**CLI: profile**
-* New actions: `export`, `import`, `export-all`, `import-all`
-* New flags: `--overwrite`, `--no-snapshot`, `--include-builtins`
-
-### UI Improvements
-
-* **Profiles Tab**: Export profile, export bundle, import bundle actions
-* **Logs Tab**: New live log panel with incremental polling, start/stop controls, and bounded buffer
+See full details in **[RELEASE-NOTES-v26.0.0.md](RELEASE-NOTES-v26.0.0.md)**.
 
 ---
 
