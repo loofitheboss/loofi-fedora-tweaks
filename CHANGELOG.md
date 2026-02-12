@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [26.0.2] - 2026-02-12 "Status Bar UI Hotfix"
+
+### Fixed
+
+- Fix bottom status bar rendering artifacts where labels drew opaque blocks behind shortcut hints and version text.
+- Force transparent label backgrounds for status bar labels in both `modern.qss` and `light.qss`.
+
+---
+
 ## [26.0.1] - 2026-02-12 "Breadcrumb Bar UI Hotfix"
 
 ### Fixed

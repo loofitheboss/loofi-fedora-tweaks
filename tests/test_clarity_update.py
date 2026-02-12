@@ -24,11 +24,11 @@ class TestVersionModule(unittest.TestCase):
 
     def test_version_is_current(self):
         from version import __version__
-        self.assertEqual(__version__, "26.0.1")
+        self.assertEqual(__version__, "26.0.2")
 
     def test_version_codename(self):
         from version import __version_codename__
-        self.assertEqual(__version_codename__, "Breadcrumb Bar UI Hotfix")
+        self.assertEqual(__version_codename__, "Status Bar UI Hotfix")
 
     def test_app_name(self):
         from version import __app_name__

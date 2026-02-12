@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v26.0.1 "Breadcrumb Bar UI Hotfix"
+# Loofi Fedora Tweaks v26.0.2 "Status Bar UI Hotfix"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.1">
-    <img src="https://img.shields.io/badge/Release-v26.0.1-blue?style=for-the-badge&logo=github" alt="Release v26.0.1"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v26.0.2">
+    <img src="https://img.shields.io/badge/Release-v26.0.2-blue?style=for-the-badge&logo=github" alt="Release v26.0.2"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Plasma-6-purple?style=for-the-badge&logo=kde" alt="KDE Plasma"/>
@@ -21,18 +21,18 @@
 
 ---
 
-## What's New in v26.0.1 "Breadcrumb Bar UI Hotfix"
+## What's New in v26.0.2 "Status Bar UI Hotfix"
 
 ### UI Rendering Hotfix
 
-v26.0.1 is a focused visual fix release for the top breadcrumb bar.
+v26.0.2 is a focused visual fix release for the bottom status bar.
 
 **Highlights:**
-* Fix breadcrumb text rendering artifacts caused by label background inheritance
-* Ensure transparent breadcrumb labels in both dark and light themes
-* Keep behavior unchanged outside the breadcrumb bar styling
+* Fix status bar text rendering artifacts caused by label background inheritance
+* Ensure transparent status-bar labels in both dark and light themes
+* Keep behavior unchanged outside the status bar styling
 
-See full details in **[RELEASE-NOTES-v26.0.1.md](docs/releases/RELEASE-NOTES-v26.0.1.md)**.
+See full details in **[RELEASE-NOTES-v26.0.2.md](docs/releases/RELEASE-NOTES-v26.0.2.md)**.
 
 ---
 

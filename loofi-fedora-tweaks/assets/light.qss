@@ -359,6 +359,9 @@ QFrame#statusBar {
     background-color: #e6e9ef;
     border-top: none;
 }
+QFrame#statusBar QLabel {
+    background-color: transparent;
+}
 QLabel#statusText {
     color: #6c6f85;
     font-size: 8.25pt; /* HiDPI: was 11px, now 8.25pt (11/1.333) */
