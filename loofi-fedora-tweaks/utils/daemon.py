@@ -8,6 +8,10 @@ import signal
 import subprocess
 from pathlib import Path
 
+from utils.config_manager import ConfigManager
+from utils.plugin_base import PluginLoader
+from utils.plugin_installer import PluginInstaller
+
 
 class Daemon:
     """Background daemon for automated task execution."""
@@ -113,10 +117,6 @@ class Daemon:
     @classmethod
     def check_plugin_updates(cls):
         """Check for plugin updates and auto-update if enabled."""
-        from utils.plugin_installer import PluginInstaller
-        from utils.plugin_base import PluginLoader
-        from utils.config_manager import ConfigManager
-
         # Check if auto-update is enabled in config
         config = ConfigManager.load_config()
         if not config.get("plugin_auto_update", True):

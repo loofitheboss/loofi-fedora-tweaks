@@ -7,6 +7,8 @@ import logging
 import shutil
 import tarfile
 import tempfile
+import urllib.request
+import urllib.error
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
@@ -145,11 +147,14 @@ class PluginInstaller:
                 data = json.load(f)
 
             # Required fields
-            required = ["id", "name", "version", "description", "author", "entrypoint"]
+            required = ["id", "name", "version", "description", "author"]
             for field in required:
                 if field not in data:
                     logger.error("Missing required field '%s' in manifest", field)
                     return None
+            if "entrypoint" not in data and "entry_point" not in data:
+                logger.error("Missing required field 'entrypoint'/'entry_point' in manifest")
+                return None
 
             manifest = PluginManifest(
                 id=data["id"],
@@ -160,7 +165,6 @@ class PluginInstaller:
                 entry_point=data.get("entrypoint", data.get("entry_point", "plugin.py")),
                 icon=data.get("icon", "🔌"),
                 category=data.get("category", "Other"),
-                tags=data.get("tags", []),
                 requires=data.get("requires", []),
                 permissions=data.get("permissions", []),
                 homepage=data.get("homepage"),
@@ -242,14 +246,25 @@ class PluginInstaller:
             with tempfile.TemporaryDirectory() as temp_dir:
                 archive_path = Path(temp_dir) / f"{plugin_id}.loofi-plugin"
 
-                download_result = self.marketplace.download_plugin(plugin_id, archive_path, version)
-
-                if not download_result.success:
-                    return InstallerResult(
-                        success=False,
-                        plugin_id=plugin_id,
-                        error=download_result.error
+                if plugin_meta:
+                    # Metadata object provided by caller: download directly without marketplace re-query.
+                    req = urllib.request.Request(
+                        plugin_meta.download_url,
+                        headers={'User-Agent': 'Loofi-Fedora-Tweaks'}
                     )
+                    with urllib.request.urlopen(req, timeout=60) as response:
+                        archive_path.parent.mkdir(parents=True, exist_ok=True)
+                        with open(archive_path, 'wb') as f:
+                            f.write(response.read())
+                else:
+                    download_result = self.marketplace.download_plugin(plugin_id, archive_path, version)
+
+                    if not download_result.success:
+                        return InstallerResult(
+                            success=False,
+                            plugin_id=plugin_id,
+                            error=download_result.error
+                        )
 
                 # Verify checksum
                 logger.info("Verifying archive integrity")
@@ -271,8 +286,14 @@ class PluginInstaller:
                         error="Failed to extract plugin archive"
                     )
 
-                # Validate manifest
-                manifest = self._validate_manifest(extract_dir)
+                # Validate manifest (support archives with root directory)
+                install_source = extract_dir
+                manifest = self._validate_manifest(install_source)
+                if not manifest:
+                    subdirs = [p for p in extract_dir.iterdir() if p.is_dir()]
+                    if len(subdirs) == 1:
+                        install_source = subdirs[0]
+                        manifest = self._validate_manifest(install_source)
                 if not manifest:
                     return InstallerResult(
                         success=False,
@@ -291,7 +312,7 @@ class PluginInstaller:
 
                 # Move to final location
                 logger.info("Installing to %s", plugin_dir)
-                shutil.move(str(extract_dir), str(plugin_dir))
+                shutil.move(str(install_source), str(plugin_dir))
 
             # Update state
             state = self._load_state()

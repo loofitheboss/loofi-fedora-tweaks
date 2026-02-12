@@ -564,6 +564,16 @@ def cmd_plugin_marketplace(args):
     installer = PluginInstaller()
     use_json = getattr(args, 'json', False) or _json_output
 
+    def _resolve_plugin_id():
+        """Accept both modern `plugin_id` and legacy `plugin` argparse names."""
+        plugin_id = getattr(args, 'plugin_id', None)
+        if isinstance(plugin_id, str) and plugin_id:
+            return plugin_id
+        legacy = getattr(args, 'plugin', None)
+        if isinstance(legacy, str) and legacy:
+            return legacy
+        return None
+
     if args.action == "search":
         query = getattr(args, 'query', None) or ""
         category = getattr(args, 'category', None)
@@ -599,7 +609,7 @@ def cmd_plugin_marketplace(args):
         return 0
 
     if args.action == "info":
-        plugin_id = getattr(args, 'plugin_id', None)
+        plugin_id = _resolve_plugin_id()
         if not plugin_id:
             print("Error: Plugin ID required", file=sys.stderr)
             return 1
@@ -634,7 +644,7 @@ def cmd_plugin_marketplace(args):
         return 0
 
     if args.action == "install":
-        plugin_id = getattr(args, 'plugin_id', None)
+        plugin_id = _resolve_plugin_id()
         if not plugin_id:
             print("Error: Plugin ID required", file=sys.stderr)
             return 1
@@ -668,7 +678,7 @@ def cmd_plugin_marketplace(args):
             return 1
 
     if args.action == "uninstall":
-        plugin_id = getattr(args, 'plugin_id', None)
+        plugin_id = _resolve_plugin_id()
         if not plugin_id:
             print("Error: Plugin ID required", file=sys.stderr)
             return 1
@@ -686,7 +696,7 @@ def cmd_plugin_marketplace(args):
             return 1
 
     if args.action == "update":
-        plugin_id = getattr(args, 'plugin_id', None)
+        plugin_id = _resolve_plugin_id()
         if not plugin_id:
             print("Error: Plugin ID required", file=sys.stderr)
             return 1

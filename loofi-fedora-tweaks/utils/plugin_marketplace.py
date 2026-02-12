@@ -6,7 +6,7 @@ import json
 import logging
 import urllib.request
 import urllib.error
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -21,21 +21,30 @@ DEFAULT_BRANCH = "main"
 @dataclass
 class PluginMetadata:
     """Plugin metadata from marketplace index."""
-    id: str
-    name: str
-    description: str
-    version: str
-    author: str
-    category: str
-    icon: str
-    download_url: str
-    checksum_sha256: str
-    featured: bool
-    tags: List[str]
-    requires: List[str]  # Plugin dependencies
+    id: str = ""
+    name: str = ""
+    description: str = ""
+    version: str = "0.0.0"
+    author: str = ""
+    category: str = "General"
+    icon: str = "🔌"
+    download_url: str = ""
+    checksum_sha256: str = ""
+    featured: bool = False
+    tags: List[str] = field(default_factory=list)
+    requires: List[str] = field(default_factory=list)  # Plugin dependencies
     homepage: Optional[str] = None
     license: Optional[str] = None
     min_loofi_version: Optional[str] = None
+
+    def __post_init__(self):
+        """Backwards compatibility for call sites that provide only a subset of fields."""
+        if not self.id and self.name:
+            self.id = self.name.strip().lower().replace(" ", "-")
+        if self.tags is None:
+            self.tags = []
+        if self.requires is None:
+            self.requires = []
 
 
 @dataclass
@@ -120,9 +129,9 @@ class PluginMarketplace:
             required = ["id", "name", "description", "version", "author", "category",
                         "download_url", "checksum_sha256"]
 
-            for field in required:
-                if field not in entry:
-                    logger.warning("Missing required field '%s' in plugin entry", field)
+            for required_field in required:
+                if required_field not in entry:
+                    logger.warning("Missing required field '%s' in plugin entry", required_field)
                     return None
 
             return PluginMetadata(

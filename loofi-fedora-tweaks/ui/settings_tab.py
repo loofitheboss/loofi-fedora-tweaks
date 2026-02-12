@@ -9,7 +9,7 @@ Three sub-tabs inside an internal QTabWidget:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QTabWidget, QGroupBox, QLabel,
+    QApplication, QWidget, QVBoxLayout, QTabWidget, QGroupBox, QLabel,
     QPushButton, QComboBox, QCheckBox, QFormLayout, QScrollArea,
     QFrame, QMessageBox,
 )
@@ -37,7 +37,10 @@ class SettingsTab(QWidget, PluginInterface):
         super().__init__()
         self._main_window = None
         self._mgr = SettingsManager.instance()
-        # _init_ui() is deferred to set_context() so main_window is available
+        self._ui_initialized = False
+        # Guard against headless/non-Qt execution paths that import tabs without a QApplication.
+        if QApplication.instance() is not None:
+            self._init_ui()
 
     def metadata(self) -> PluginMetadata:
         return self._METADATA
@@ -47,11 +50,16 @@ class SettingsTab(QWidget, PluginInterface):
 
     def set_context(self, context: dict) -> None:
         self._main_window = context.get("main_window")
-        self._init_ui()
+        if not self._ui_initialized:
+            self._init_ui()
 
     # ------------------------------------------------------------------ UI --
 
     def _init_ui(self):
+        if self._ui_initialized:
+            return
+        self._ui_initialized = True
+
         outer = QVBoxLayout(self)
         outer.setContentsMargins(*CONTENT_MARGINS)
 

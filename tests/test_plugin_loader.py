@@ -204,7 +204,7 @@ class TestPluginLoaderLoadBuiltins:
 
 
 class TestPluginLoaderLoadExternal:
-    """Tests for load_external() — scheduled for v26.0."""
+    """Tests for load_external() in v26.0."""
 
     def setup_method(self):
         PluginRegistry.reset()
@@ -212,17 +212,30 @@ class TestPluginLoaderLoadExternal:
     def teardown_method(self):
         PluginRegistry.reset()
 
-    def test_load_external_raises_not_implemented(self):
-        """load_external() must raise NotImplementedError in v25.0."""
-        loader = PluginLoader(registry=PluginRegistry.instance())
-        with pytest.raises(NotImplementedError):
-            loader.load_external("/some/plugin/dir")
+    @patch("core.plugins.loader.PluginScanner")
+    def test_load_external_returns_empty_when_no_plugins(self, mock_scanner_cls):
+        """load_external() returns [] when scanner discovers nothing."""
+        mock_scanner = MagicMock()
+        mock_scanner.scan.return_value = []
+        mock_scanner_cls.return_value = mock_scanner
 
-    def test_load_external_error_message_mentions_v26(self):
-        """NotImplementedError message should reference v26.0."""
         loader = PluginLoader(registry=PluginRegistry.instance())
-        with pytest.raises(NotImplementedError, match="v26.0"):
-            loader.load_external("/tmp/plugins")
+        loaded = loader.load_external(directory="/some/plugin/dir")
+        assert loaded == []
+
+    @patch("core.plugins.loader.PluginScanner")
+    def test_load_external_uses_custom_directory(self, mock_scanner_cls):
+        """load_external() passes custom directory through to PluginScanner."""
+        mock_scanner = MagicMock()
+        mock_scanner.scan.return_value = []
+        mock_scanner_cls.return_value = mock_scanner
+
+        loader = PluginLoader(registry=PluginRegistry.instance())
+        loader.load_external(directory="/tmp/plugins")
+
+        mock_scanner_cls.assert_called_once()
+        scanner_arg = mock_scanner_cls.call_args[0][0]
+        assert str(scanner_arg).endswith("/tmp/plugins")
 
 
 class TestPluginLoaderDefaultDependencies:
