@@ -167,8 +167,9 @@ class AgentsTab(BaseTab):
             self.tr("Notify"), self.tr("Actions"),
         ])
         header = self.agent_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(7, QHeaderView.ResizeMode.Fixed)
+        if header is not None:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(7, QHeaderView.ResizeMode.Fixed)
         self.agent_table.setColumnWidth(7, 200)
         self.agent_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         layout.addWidget(self.agent_table)
@@ -271,7 +272,8 @@ class AgentsTab(BaseTab):
             self.tr("Result"), self.tr("Message"),
         ])
         header = self.activity_table.horizontalHeader()
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        if header is not None:
+            header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.activity_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         layout.addWidget(self.activity_table)
 

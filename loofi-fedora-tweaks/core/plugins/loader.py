@@ -185,7 +185,7 @@ class PluginLoader:
                     adapter.set_context(context)
 
                 # Check compatibility
-                compat_result = self._detector.check(adapter.metadata())
+                compat_result = self._detector.check_plugin_compat(adapter.metadata().compat)
 
                 if not compat_result.compatible:
                     log.warning(
@@ -308,13 +308,13 @@ class PluginLoader:
             if not plugin_instance:
                 raise RuntimeError("Plugin import failed")
 
-            plugin_instance.manifest = manifest
+            setattr(plugin_instance, 'manifest', manifest)
             adapter = PluginAdapter(plugin_instance)
 
             if self._external_context:
                 adapter.set_context(self._external_context)
 
-            compat_result = self._detector.check(adapter.metadata())
+            compat_result = self._detector.check_plugin_compat(adapter.metadata().compat)
             if not compat_result.compatible:
                 raise RuntimeError(f"Incompatible plugin: {compat_result.reason}")
 
@@ -414,7 +414,7 @@ class PluginLoader:
                     return None
 
                 # Instantiate plugin
-                plugin_instance = plugin_class()
+                plugin_instance: LoofiPlugin = plugin_class()
 
                 log.debug(
                     "Instantiated plugin class: %s from %s",

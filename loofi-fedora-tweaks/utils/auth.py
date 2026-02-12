@@ -51,7 +51,7 @@ class AuthManager:
 
     @classmethod
     def _hash_key(cls, api_key: str) -> str:
-        return bcrypt.hashpw(api_key.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        return bcrypt.hashpw(api_key.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")  # type: ignore[return-value]
 
     @classmethod
     def generate_api_key(cls) -> str:
@@ -71,7 +71,7 @@ class AuthManager:
         if not stored_hash or not bcrypt.checkpw(api_key.encode("utf-8"), stored_hash.encode("utf-8")):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
         payload = {"sub": "loofi-api", "exp": int(__import__("time").time()) + cls._TOKEN_LIFETIME_SECONDS}
-        return jwt.encode(payload, data["jwt_secret"], algorithm=cls._ALGORITHM)
+        return str(jwt.encode(payload, data["jwt_secret"], algorithm=cls._ALGORITHM))
 
     @classmethod
     def verify_token(cls, token: str) -> None:
@@ -89,4 +89,4 @@ class AuthManager:
         if not credentials or credentials.scheme.lower() != "bearer":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
         cls.verify_token(credentials.credentials)
-        return credentials.credentials
+        return str(credentials.credentials)

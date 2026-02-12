@@ -153,7 +153,8 @@ class AgentExecutor:
         handlers = AgentExecutor._get_operation_handlers()
         handler = handlers.get(operation)
         if handler:
-            return handler(settings)
+            result: AgentResult = handler(settings)
+            return result
         return AgentResult(
             success=False,
             message=f"Unknown operation: {operation}",
@@ -613,7 +614,7 @@ class AgentScheduler:
     """
 
     def __init__(self):
-        self._running = False
+        self._running: bool = False
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._on_result: Optional[Callable[[str, AgentResult], None]] = None

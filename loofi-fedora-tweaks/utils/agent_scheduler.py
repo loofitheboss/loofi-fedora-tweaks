@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from utils.agents import (
     AgentConfig,
@@ -75,7 +75,7 @@ class AgentScheduler:
 
         self._subscribed_agents[agent.agent_id] = agent
 
-    def _create_agent_callback(self, agent: AgentConfig) -> callable:
+    def _create_agent_callback(self, agent: AgentConfig) -> Callable:
         """
         Create an event callback for an agent.
 

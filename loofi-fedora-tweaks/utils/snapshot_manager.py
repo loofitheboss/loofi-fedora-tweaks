@@ -131,7 +131,7 @@ class SnapshotManager:
     # -----------------------------------------------------------------
 
     @staticmethod
-    def list_snapshots(backend: str = None) -> List[SnapshotInfo]:
+    def list_snapshots(backend: Optional[str] = None) -> List[SnapshotInfo]:
         """List existing snapshots for the given (or auto-detected) backend.
 
         Args:
@@ -401,7 +401,7 @@ class SnapshotManager:
     # -----------------------------------------------------------------
 
     @staticmethod
-    def create_snapshot(label: str, backend: str = None) -> Tuple[str, List[str], str]:
+    def create_snapshot(label: str, backend: Optional[str] = None) -> Tuple[str, List[str], str]:
         """Return an operation tuple to create a snapshot.
 
         Args:
@@ -449,7 +449,7 @@ class SnapshotManager:
     # -----------------------------------------------------------------
 
     @staticmethod
-    def delete_snapshot(snapshot_id: str, backend: str = None) -> Tuple[str, List[str], str]:
+    def delete_snapshot(snapshot_id: str, backend: Optional[str] = None) -> Tuple[str, List[str], str]:
         """Return an operation tuple to delete a snapshot.
 
         Args:
@@ -496,7 +496,7 @@ class SnapshotManager:
     # -----------------------------------------------------------------
 
     @staticmethod
-    def get_snapshot_count(backend: str = None) -> int:
+    def get_snapshot_count(backend: Optional[str] = None) -> int:
         """Return the number of snapshots for the given backend.
 
         This is a convenience wrapper around :meth:`list_snapshots`.
@@ -510,7 +510,7 @@ class SnapshotManager:
     @staticmethod
     def apply_retention(
         max_snapshots: int = 10,
-        backend: str = None,
+        backend: Optional[str] = None,
     ) -> List[Tuple[str, List[str], str]]:
         """Generate delete operations for snapshots exceeding *max_snapshots*.
 

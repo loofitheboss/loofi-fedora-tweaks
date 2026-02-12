@@ -133,7 +133,7 @@ class FirewallManager:
             if result.returncode != 0:
                 return {}
 
-            zones = {}
+            zones: dict[str, list[str]] = {}
             current_zone = None
             for line in result.stdout.strip().splitlines():
                 line = line.strip()

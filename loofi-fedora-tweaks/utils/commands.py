@@ -7,14 +7,18 @@ Ensures all privileged commands use argument arrays (never shell strings)
 to prevent command injection.
 """
 
+from typing import List, Tuple
+
 from utils.system import SystemManager
+
+CommandTuple = Tuple[str, List[str], str]
 
 
 class PrivilegedCommand:
     """Safe builder for pkexec-wrapped system commands."""
 
     @staticmethod
-    def dnf(action, *packages, flags=None):
+    def dnf(action: str, *packages: str, flags: list | None = None) -> CommandTuple:
         """Build a DNF command tuple (cmd, args, description).
 
         On Atomic systems, automatically uses rpm-ostree instead.
@@ -46,43 +50,43 @@ class PrivilegedCommand:
             return ("pkexec", args, desc)
 
     @staticmethod
-    def systemctl(action, service, user=False):
+    def systemctl(action: str, service: str, user: bool = False) -> CommandTuple:
         """Build a systemctl command tuple."""
         if user:
             return ("systemctl", ["--user", action, service], f"{action.title()} user service {service}...")
         return ("pkexec", ["systemctl", action, service], f"{action.title()} system service {service}...")
 
     @staticmethod
-    def sysctl(key, value):
+    def sysctl(key: str, value: str) -> CommandTuple:
         """Build a sysctl set command tuple."""
         return ("pkexec", ["sysctl", "-w", f"{key}={value}"], f"Setting {key} = {value}...")
 
     @staticmethod
-    def write_file(path, content):
+    def write_file(path: str, content: str) -> CommandTuple:
         """Write content to a file via pkexec tee."""
         return ("pkexec", ["tee", path], f"Writing to {path}...")
 
     @staticmethod
-    def flatpak(action, *args):
+    def flatpak(action: str, *args: str) -> CommandTuple:
         """Build a flatpak command tuple."""
         return ("flatpak", [action] + list(args), f"Flatpak {action}...")
 
     @staticmethod
-    def fwupd(action="update"):
+    def fwupd(action: str = "update") -> CommandTuple:
         """Build a fwupdmgr command tuple."""
         return ("pkexec", ["fwupdmgr", action, "-y"], f"Firmware {action}...")
 
     @staticmethod
-    def journal_vacuum(time="2weeks"):
+    def journal_vacuum(time: str = "2weeks") -> CommandTuple:
         """Build a journal vacuum command tuple."""
         return ("pkexec", ["journalctl", f"--vacuum-time={time}"], f"Vacuuming journal ({time})...")
 
     @staticmethod
-    def fstrim():
+    def fstrim() -> CommandTuple:
         """Build an SSD trim command tuple."""
         return ("pkexec", ["fstrim", "-av"], "Trimming SSD volumes...")
 
     @staticmethod
-    def rpm_rebuild():
+    def rpm_rebuild() -> CommandTuple:
         """Build an RPM database rebuild command tuple."""
         return ("pkexec", ["rpm", "--rebuilddb"], "Rebuilding RPM database...")

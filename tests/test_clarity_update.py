@@ -24,11 +24,11 @@ class TestVersionModule(unittest.TestCase):
 
     def test_version_is_current(self):
         from version import __version__
-        self.assertEqual(__version__, "27.0.0")
+        self.assertEqual(__version__, "28.0.0")
 
     def test_version_codename(self):
         from version import __version_codename__
-        self.assertEqual(__version_codename__, "Marketplace Enhancement")
+        self.assertEqual(__version_codename__, "Workflow Contract Reset")
 
     def test_app_name(self):
         from version import __app_name__

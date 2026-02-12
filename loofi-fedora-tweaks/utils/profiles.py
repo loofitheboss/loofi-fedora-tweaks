@@ -137,7 +137,7 @@ class ProfileManager:
 
         settings = profile.get("settings", {})
         errors = []
-        warnings = []
+        warnings: list[str] = []
 
         # Snapshot hook (best-effort, never blocks profile application).
         if create_snapshot:
@@ -297,7 +297,7 @@ class ProfileManager:
         try:
             with open(cls.STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return data.get("active_profile", "")
+            return str(data.get("active_profile", ""))
         except (FileNotFoundError, json.JSONDecodeError, OSError):
             return ""
 
@@ -318,7 +318,7 @@ class ProfileManager:
         if not name or not name.strip():
             return Result(False, "Profile name cannot be empty.")
 
-        settings = {}
+        settings: dict[str, object] = {}
 
         try:
             result = subprocess.run(
