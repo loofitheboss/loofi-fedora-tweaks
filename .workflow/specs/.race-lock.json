@@ -1,1 +1,5 @@
-{"version": "v25.0", "phase": "plan", "locked_at": "2026-02-11"}
+{
+	"version": "v28.0.0",
+	"started_at": "20260212_210000",
+	"status": "complete"
+}

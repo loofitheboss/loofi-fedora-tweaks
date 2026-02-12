@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [28.0.0] - 2026-02-12 "Workflow Contract Reset"
+
+### Changed
+
+- Reset workflow race lock and run manifest to v28.0.0 clean-slate baseline.
+- Align all planning artifacts with workflow runner task contract validation (v26+ rules).
+- Bump version strings to 28.0.0 in `version.py` and `.spec`.
+- Update README.md and release documentation for v28.0.0.
+
+### Added
+
+- Architecture blueprint (`arch-v28.0.0.md`) documenting artifact structure and validation rules.
+- Release notes draft and final release notes for v28.0.0 meta-version.
+- Planning checkpoint entry in run manifest for phase traceability.
+
+### Fixed
+
+- Clear residual v27 workflow state that could interfere with phase execution.
+
+---
+
 ## [27.0.0] - 2026-02-12 "Marketplace Enhancement"
 
 ### Added

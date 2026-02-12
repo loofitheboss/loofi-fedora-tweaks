@@ -15,6 +15,7 @@
 | v25.0.3 | Maintenance Update Crash Hotfix | DONE | Stabilize Maintenance update actions |
 | v26.0 | Plugin Marketplace | DONE | External plugins, marketplace, sandboxing |
 | v27.0 | Marketplace Enhancement | DONE | CDN index, ratings/reviews, badges, analytics, hot-reload, stronger sandbox |
+| v28.0 | Workflow Contract Reset | DONE | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
 
 ---
 
@@ -283,6 +284,35 @@
 ### Dependencies
 - v26.0 plugin marketplace baseline
 - v25.0 plugin architecture (PluginInterface/Registry/Loader)
+
+---
+
+## [DONE] v28.0 — Workflow Contract Reset
+
+### Scope
+- Establish clean-slate workflow state for a new cycle
+- Create runner-compatible P1 planning artifact format for v28
+- Align planning handoff assets with workflow runner contract checks
+
+### Deliverables
+- [x] `ROADMAP.md` marks exactly one ACTIVE target (v28.0)
+- [x] `.workflow/specs/tasks-v28.0.0.md` follows task contract markers
+- [x] `.workflow/specs/.race-lock.json` targets `v28.0.0` in active state
+- [x] `.workflow/reports/run-manifest-v28.0.0.json` initialized with runner schema
+- [x] Kickoff planning tasks include implementation, tests, and docs workstreams
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| Manager | Decompose v28 kickoff tasks and dependencies |
+| Arkitekt | Validate workflow artifact structure |
+| Builder | Implement workflow/runner integration deltas |
+| Test | Validate contract and workflow state checks |
+| Planner | Finalize docs + release-trace updates |
+
+### Dependencies
+- v27.0 completion artifacts
+- `scripts/workflow_runner.py` contract validation rules
 
 ---
 

@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v27.0.0 "Marketplace Enhancement"
+# Loofi Fedora Tweaks v28.0.0 "Workflow Contract Reset"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v27.0.0">
-    <img src="https://img.shields.io/badge/Release-v27.0.0-blue?style=for-the-badge&logo=github" alt="Release v27.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v28.0.0">
+    <img src="https://img.shields.io/badge/Release-v28.0.0-blue?style=for-the-badge&logo=github" alt="Release v28.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,17 +35,16 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v27.0.0?
+## What Is New in v28.0.0?
 
-`v27.0.0` ships the Marketplace Enhancement release:
+`v28.0.0` is a meta-version — no application changes. It resets workflow state:
 
-- CDN-first marketplace index with signed metadata and fallback provider behavior.
-- Ratings/reviews support in backend, Community tab, and CLI (`reviews`, `review-submit`, `rating`).
-- Verified publisher badges and trust-aware verification output in UI and CLI.
-- Opt-in plugin analytics pipeline (disabled by default) with anonymized batched events.
-- Plugin hot reload support with rollback-aware reload contracts and stronger isolation policy enforcement.
+- Clean-slate race lock and run manifest for v28 cycle.
+- All planning artifacts comply with workflow runner task contract validation.
+- Architecture blueprint documenting artifact structure and validation rules.
+- Version strings bumped across `version.py`, `.spec`, and documentation.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v27.0.0.md`](docs/releases/RELEASE-NOTES-v27.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v28.0.0.md`](docs/releases/RELEASE-NOTES-v28.0.0.md)
 
 ---
 

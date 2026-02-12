@@ -2,6 +2,12 @@
 
 Use this checklist before tagging a release.
 
+## v28.0.0 Kickoff Notes
+
+- Workflow state reset to v28.0.0 baseline (planning artifacts, race lock, run manifest).
+- Task contract validation enforced via workflow_runner.py markers and continuation fields.
+- Planning checkpoint recorded in run manifest for phase progression tracking.
+
 ---
 
 ## 1. Version Alignment
