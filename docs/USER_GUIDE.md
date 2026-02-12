@@ -1,28 +1,55 @@
-# Loofi Fedora Tweaks - User Guide
+# Loofi Fedora Tweaks - Detailed User Guide
 
 > **Version 26.0.2 "Status Bar UI Hotfix"**  
-> Practical guide for daily usage, automation, and troubleshooting.
+> A practical, detailed guide to using Loofi Fedora Tweaks effectively and safely.
 
 ---
 
 ## Table of Contents
 
-1. [Quick Start](#quick-start)
-2. [Launching and Modes](#launching-and-modes)
-3. [Navigation and Shortcuts](#navigation-and-shortcuts)
-4. [Permissions and Safety](#permissions-and-safety)
-5. [Fedora Variant Behavior](#fedora-variant-behavior)
-6. [Tab-by-Tab Guide](#tab-by-tab-guide)
-7. [CLI Reference (Grouped)](#cli-reference-grouped)
-8. [Plugin Marketplace](#plugin-marketplace)
-9. [Daemon and Web API](#daemon-and-web-api)
-10. [Files and Data Locations](#files-and-data-locations)
-11. [Troubleshooting and Support](#troubleshooting-and-support)
-12. [Screenshots](#screenshots)
+1. [What This App Does](#what-this-app-does)
+2. [Install and First Launch](#install-and-first-launch)
+3. [How the App Works Internally](#how-the-app-works-internally)
+4. [UI Layout and Navigation](#ui-layout-and-navigation)
+5. [Recommended Daily/Weekly Workflows](#recommended-dailyweekly-workflows)
+6. [Detailed Tab Guide](#detailed-tab-guide)
+7. [Plugin Marketplace and Community Features](#plugin-marketplace-and-community-features)
+8. [CLI Guide by Task](#cli-guide-by-task)
+9. [Configuration and Data Locations](#configuration-and-data-locations)
+10. [Troubleshooting and Support](#troubleshooting-and-support)
+11. [Screenshot Gallery](#screenshot-gallery)
 
 ---
 
-## Quick Start
+## What This App Does
+
+Loofi Fedora Tweaks is an all-in-one Fedora operations console with three key goals:
+
+- Expose system controls in a structured GUI.
+- Provide the same operations in CLI form for automation.
+- Keep risky operations safer with privilege prompts and confirmations.
+
+At the time of writing, the app ships with **26 built-in tabs** grouped by category:
+
+- Dashboard
+- Automation
+- System
+- Hardware
+- Software
+- Network
+- Security
+- Desktop
+- Tools
+- Settings
+
+It supports both:
+
+- Traditional Fedora systems (`dnf` based)
+- Atomic Fedora variants (`rpm-ostree` based)
+
+---
+
+## Install and First Launch
 
 ### Install
 
@@ -31,103 +58,180 @@
 curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
 ```
 
-Or install an RPM directly:
+Or install a release RPM directly:
 
 ```bash
 pkexec dnf install ./loofi-fedora-tweaks-*.noarch.rpm
 ```
 
-### First Launch
+### Launch
 
 ```bash
 loofi-fedora-tweaks
 ```
 
-On first launch, the setup wizard stores initial preferences in:
+### First-Run Wizard
+
+On first launch, the setup wizard helps with:
+
+- Hardware profile detection
+- Use-case selection (Gaming, Development, Daily Driver, Server, Minimal)
+- Initial profile persistence
+
+It writes:
 
 - `~/.config/loofi-fedora-tweaks/profile.json`
 - `~/.config/loofi-fedora-tweaks/first_run_complete`
 
 ---
 
-## Launching and Modes
+## How the App Works Internally
+
+### Runtime Modes
 
 | Mode | Command | Purpose |
 |------|---------|---------|
 | GUI | `loofi-fedora-tweaks` | Full desktop app |
-| CLI | `loofi-fedora-tweaks --cli <command>` | Scripting and terminal workflows |
-| Daemon | `loofi-fedora-tweaks --daemon` | Background automation service |
-| Web API | `loofi-fedora-tweaks --web` | Headless API usage |
+| CLI | `loofi-fedora-tweaks --cli <command>` | Scriptable operations |
+| Daemon | `loofi-fedora-tweaks --daemon` | Background automation |
+| Web API | `loofi-fedora-tweaks --web` | Headless remote integration |
 
-Optional alias:
+Optional convenience alias:
 
 ```bash
 alias loofi='loofi-fedora-tweaks --cli'
 ```
 
+### Startup Flow (GUI)
+
+High-level flow:
+
+1. `main.py` checks PyQt6 availability.
+2. Loads stylesheet and translations.
+3. Opens `MainWindow`.
+4. `MainWindow` uses plugin registry/loader to populate sidebar tabs dynamically.
+5. Each tab is wrapped in a lazy widget and initialized when first shown.
+
+What this means in practice:
+
+- Faster startup than initializing every tab immediately.
+- Better compatibility checks per tab/plugin.
+- A clean place to add future external plugins.
+
+### Command Execution Flow
+
+Most action tabs follow the same command pattern:
+
+1. UI triggers a utility function or operation tuple.
+2. A command runner executes asynchronously.
+3. Output is streamed into the tab’s Output Log.
+4. Exit code and errors are surfaced in the UI.
+
+### Privilege and Safety Model
+
+- Privileged operations use `pkexec` prompts.
+- Some risky actions show safety confirmations.
+- Snapshot prompts may appear before dangerous system changes where supported.
+
+### Package Manager Awareness
+
+The app detects platform mode automatically:
+
+- `dnf` on traditional Fedora
+- `rpm-ostree` on Atomic variants
+
+This affects behavior in Maintenance and package/update flows.
+
 ---
 
-## Navigation and Shortcuts
+## UI Layout and Navigation
 
-### Sidebar and Search
+### Main UI Regions
 
-- Tabs are grouped by category in the left sidebar.
-- Use the sidebar search field to filter tabs quickly.
-- Breadcrumb bar shows `Category > Tab > Description`.
+- Left sidebar: categories and tabs
+- Top breadcrumb: `Category > Tab > Description`
+- Center content area: active tab view
+- Bottom status bar: quick shortcut hints + version
 
 ### Keyboard Shortcuts
 
-- `Ctrl+K`: Command Palette
-- `Ctrl+Shift+K`: Quick Actions
-- `Ctrl+1..9`: Jump to category
-- `Ctrl+Tab`: Next tab
-- `Ctrl+Shift+Tab`: Previous tab
-- `F1`: Shortcut help dialog
-- `Ctrl+Q`: Quit app
+- `Ctrl+K` - Command Palette (feature/tab search)
+- `Ctrl+Shift+K` - Quick Actions dialog
+- `Ctrl+1..9` - Jump category
+- `Ctrl+Tab` - Next tab
+- `Ctrl+Shift+Tab` - Previous tab
+- `F1` - Shortcut help
+- `Ctrl+Q` - Quit
+
+### Home Screen Example
+
+![Home Dashboard](images/user-guide/home-dashboard.png)
+
+The Home tab gives a quick operational overview and links to frequent actions.
 
 ---
 
-## Permissions and Safety
+## Recommended Daily/Weekly Workflows
 
-Loofi uses `pkexec` for privileged operations.
+### Daily Health Check (2-3 minutes)
 
-- You are prompted only when an action needs elevated access.
-- Non-privileged actions run without elevation.
-- Privileged actions are routed through utility/operations layers.
+1. Open **Home** and check CPU/RAM/network trends.
+2. Open **System Monitor -> Processes** for runaway processes.
+3. Open **Security & Privacy** and refresh security score if needed.
 
-If a privileged action fails, verify:
+### Weekly Maintenance Cycle
 
-- `pkexec` is available: `which pkexec`
-- A polkit authentication agent is running in your session.
+1. Open **Maintenance -> Updates**.
+2. Run **Update All** (or run updates individually).
+3. Open **Maintenance -> Cleanup** and run:
+   - DNF cache clean
+   - Journal vacuum
+   - SSD trim
+4. Optionally create/refresh snapshots in **Snapshots**.
+
+### Security Baseline Pass
+
+1. Open **Security & Privacy**.
+2. Refresh score.
+3. Run port scan.
+4. Verify firewall status.
+5. Check telemetry and USB guard sections if relevant to your setup.
+
+### Before Risky Changes
+
+1. Create a snapshot in **Snapshots**.
+2. Export profile bundle in **Profiles**.
+3. Export support bundle from CLI:
+
+```bash
+loofi support-bundle
+```
 
 ---
 
-## Fedora Variant Behavior
+## Detailed Tab Guide
 
-Loofi automatically detects package-management mode:
+## Dashboard Category
 
-- Traditional Fedora: uses `dnf`
-- Atomic Fedora (Silverblue/Kinoite/etc.): uses `rpm-ostree` where applicable
+### Home
 
-Examples:
+Key capabilities:
 
-- Maintenance tab can show `Overlays` on Atomic systems.
-- Update behavior and layered package handling adapt by variant.
+- Live CPU and RAM sparkline metrics
+- Storage usage bars
+- Top process summary
+- Recent actions view
+- Quick action buttons for common navigation
 
----
+Notes:
 
-## Tab-by-Tab Guide
+- Fast metrics refresh about every 2 seconds.
+- Heavier sections refresh about every 10 seconds.
+- Quick actions mainly route you to relevant tabs for execution.
 
-### Dashboard
+## Automation Category
 
-#### Home
-
-- System overview with quick status and navigation actions.
-- Use as the main entry point for daily checks.
-
-### Automation
-
-#### Agents
+### Agents
 
 Sub-tabs:
 
@@ -136,70 +240,133 @@ Sub-tabs:
 - Create Agent
 - Activity Log
 
-Use this tab to define autonomous routines and review their recent activity.
+What you can do:
 
-#### Automation
+- View active/enabled/error counts
+- Start/stop scheduler
+- Enable/disable/run existing agents
+- Create agents from a natural-language goal
+
+### Automation
 
 Sub-tabs:
 
 - Scheduler
 - Replicator
 
-Use Scheduler for recurring tasks and Replicator for reproducible configuration/export workflows.
+Scheduler features:
 
-### System
+- Create scheduled tasks (cleanup/update/sync/preset actions)
+- Enable/disable/run/delete tasks
+- Manage background service state
 
-#### System Info
+Replicator features:
 
-- Host, kernel, hardware, uptime, and basic platform details.
+- Preview and export Ansible playbooks
+- Preview and export Kickstart files
 
-#### System Monitor
+## System Category
+
+### System Info
+
+- Host, OS, kernel, and hardware details in one place.
+
+### System Monitor
 
 Sub-tabs:
 
 - Performance
 - Processes
 
-Monitor CPU/RAM/network trends and inspect/act on processes.
+What to use it for:
 
-#### Health
+- Real-time usage and I/O trends
+- Process filtering and quick refresh
+- Process-level operational triage
 
-- Timeline-based health metrics and trend visibility.
-- Useful for capacity planning and anomaly checks.
+![System Monitor](images/user-guide/system-monitor.png)
 
-#### Logs
+### Health
 
-- Smart journal view with filters and error-pattern summaries.
-- Export logs for support or issue reporting.
+- Timeline-style health metrics for trend tracking over time.
+- Useful for detecting gradual degradations.
+
+### Logs
+
+Key features:
+
+- Error summary panel
+- Pattern detection table
+- Live log mode
+- Filtered log browsing and export
+
+Best practice:
+
+- Use `errors` view first, then browse raw logs when needed.
+
+## Hardware Category
 
 ### Hardware
 
-#### Hardware
+Key sections include:
 
-- CPU governor and power settings
-- GPU and fan controls (hardware-dependent)
-- Battery limits and fingerprint-related actions
+- CPU governor control
+- Power profile switching
+- GPU mode switching (where supported)
+- Fan controls (where tooling exists)
+- Audio service restart helper
+- Battery charge limits (80/100)
+- Fingerprint enrollment dialog
+- Bluetooth power/scan controls
 
-#### Performance
+Behavior notes:
 
-- Auto-tuner workflow with analyze/apply/history patterns.
+- Hardware capabilities vary by machine model and installed tools.
+- Missing toolchains show install/help actions instead of hidden controls.
 
-#### Storage
+### Performance
 
-- Disk/mount overview and SMART health checks.
+Auto-tuner workflow:
+
+1. Detect current workload.
+2. Review recommendation.
+3. Apply recommendation.
+4. Review tuning history.
+
+This is ideal when balancing battery life vs. responsiveness for changing workloads.
+
+### Storage
+
+Capabilities:
+
+- Physical disk and mount overview
+- SMART health view
+- TRIM execution
+- Filesystem check trigger
+
+Use this tab weekly if you do heavy I/O or maintain large local datasets.
+
+## Software Category
 
 ### Software
-
-#### Software
 
 Sub-tabs:
 
 - Applications
 - Repositories
 
-Install software and manage repository setup from one place.
+Applications:
 
-#### Maintenance
+- Curated installer buttons and install-state refresh.
+
+Repositories:
+
+- RPM Fusion enablement
+- Flathub enablement
+- Codec setup helpers
+- COPR helper actions
+
+### Maintenance
 
 Sub-tabs:
 
@@ -207,13 +374,39 @@ Sub-tabs:
 - Cleanup
 - Overlays (Atomic-only)
 
-Run updates, clean caches/journal, trim disks, and manage Atomic layers.
+Updates section:
 
-#### Snapshots
+- Update all queue (system + flatpak + firmware)
+- Individual update controls
+- Kernel list/remove helpers
 
-- Unified snapshot operations (Timeshift/Snapper/Btrfs backends).
+Cleanup section:
 
-#### Virtualization
+- DNF cache cleanup
+- Remove unused packages
+- Journal vacuum
+- SSD trim
+- RPM DB rebuild
+
+Overlays section (Atomic):
+
+- Layered package list
+- Remove selected package
+- Reset to base image
+- Reboot prompt for pending deployment
+
+![Maintenance Updates](images/user-guide/maintenance-updates.png)
+
+### Snapshots
+
+Unified snapshot management across available backends:
+
+- Detects backend availability
+- Create snapshot
+- Delete selected snapshot
+- Refresh timeline list
+
+### Virtualization
 
 Sub-tabs:
 
@@ -221,20 +414,41 @@ Sub-tabs:
 - GPU Passthrough
 - Disposable
 
-Manage VM lifecycle and passthrough setup tasks.
+VM operations:
 
-#### Development
+- List/start/stop/delete VMs
+- Quick-create flow from ISO
+
+GPU passthrough:
+
+- Prerequisite checks
+- Candidate GPU detection
+- Setup plan generation
+
+Disposable:
+
+- Base image management
+- Launch short-lived VM instances
+
+### Development
 
 Sub-tabs:
 
 - Containers
 - Developer Tools
 
-Container workflows (for example Distrobox) and toolchain setup helpers.
+Containers:
+
+- Distrobox-aware container list/create/enter/stop/delete
+
+Developer Tools:
+
+- Install/version-check: PyEnv, NVM, Rustup
+- VS Code extension profile actions
+
+## Network Category
 
 ### Network
-
-#### Network
 
 Sub-tabs:
 
@@ -243,9 +457,17 @@ Sub-tabs:
 - Privacy
 - Monitoring
 
-Covers interface visibility, DNS switching, network privacy controls, and live stats.
+Capabilities:
 
-#### Loofi Link
+- Active interface and Wi-Fi visibility
+- DNS provider switching and DNS resolution testing
+- MAC randomization toggle
+- Hostname privacy toggle
+- Bandwidth and active connection summary
+
+![Network Overview](images/user-guide/network-overview.png)
+
+### Loofi Link
 
 Sub-tabs:
 
@@ -253,38 +475,64 @@ Sub-tabs:
 - Clipboard
 - File Drop
 
-Peer discovery and local network sharing workflows.
+Common uses:
 
-### Security
+- Discover peers on local network
+- Sync clipboard to selected peer
+- Send files and handle incoming transfer decisions
 
-#### Security & Privacy
+## Security Category
 
-- Security score and audits
-- Port visibility and firewall tasks
-- USB/telemetry/privacy controls (where supported)
+### Security & Privacy
+
+Main functional areas:
+
+- Security score card
+- Port auditor (scan + block)
+- USB guard controls
+- App sandbox controls
+- Firewall actions
+- Telemetry package removal helper
+- Security update checks
+
+![Security and Privacy](images/user-guide/security-privacy.png)
+
+Operational tip:
+
+- Run a score refresh after major system updates or network/profile changes.
+
+## Desktop Category
 
 ### Desktop
-
-#### Desktop
 
 Sub-tabs:
 
 - Window Manager
 - Theming
 
-Desktop behavior, compositor/tiling, and theme-related settings.
+Typical uses:
 
-#### Profiles
+- Compositor/window behavior adjustments
+- Theme and desktop consistency controls
 
-- Save, apply, import, and export system profiles.
+### Profiles
 
-#### Gaming
+Common tasks:
 
-- Gaming-related setup and optimization helpers.
+- Apply built-in profile
+- Create custom profile from current state
+- Export/import single profiles
+- Export/import profile bundles
 
-### Tools
+Use profiles when moving between battery-saving and performance-heavy contexts.
 
-#### AI Lab
+### Gaming
+
+- Gaming-focused optimization shortcuts and helper actions.
+
+## Tools Category
+
+### AI Lab
 
 Sub-tabs:
 
@@ -292,22 +540,51 @@ Sub-tabs:
 - Voice
 - Knowledge
 
-Manage local AI models, speech workflows, and knowledge indexing/search.
+Models:
 
-#### State Teleport
+- View installed models
+- Download from catalog
+- Check RAM fit
 
-- Capture and restore workspace state packages.
+Voice:
 
-#### Diagnostics
+- Record and transcribe flow
+
+Knowledge:
+
+- Build/clear index
+- Scan indexable files
+- Query indexed content
+
+![AI Lab Models](images/user-guide/ai-lab-models.png)
+
+### State Teleport
+
+- Capture workspace state packages
+- List captured packages
+- Restore selected package
+
+### Diagnostics
 
 Sub-tabs:
 
 - Watchtower
 - Boot
 
-Service diagnostics, boot analysis, and system inspection tools.
+Watchtower:
 
-#### Community
+- Service status/actions
+- Boot-time summary
+- Error and failure overview
+- Support bundle export
+
+Boot:
+
+- Kernel parameter management
+- ZRAM controls
+- Secure Boot/MOK workflows
+
+### Community
 
 Sub-tabs:
 
@@ -315,11 +592,29 @@ Sub-tabs:
 - Marketplace
 - Plugins
 
-Includes preset sharing, marketplace browsing, and plugin enable/disable management.
+Presets:
+
+- Save/load/delete local presets
+- Import/export and gist sync
+
+Marketplace:
+
+- Search/filter community presets
+- Download and apply presets
+- Drift detection against baseline
+
+Plugins:
+
+- View loaded plugins
+- Enable/disable installed plugins
+
+![Community Presets](images/user-guide/community-presets.png)
+
+![Community Marketplace](images/user-guide/community-marketplace.png)
+
+## Settings Category
 
 ### Settings
-
-#### Settings
 
 Sub-tabs:
 
@@ -327,119 +622,30 @@ Sub-tabs:
 - Behavior
 - Advanced
 
-Configure app behavior such as startup preferences and UI options.
+What persists:
+
+- Theme mode
+- Start minimized
+- Desktop notifications
+- Dangerous action confirmations
+- Restore last tab
+- Log level
+- Update checks on startup
+
+Settings are stored in `~/.config/loofi-fedora-tweaks/settings.json`.
+
+![Settings Appearance](images/user-guide/settings-appearance.png)
 
 ---
 
-## CLI Reference (Grouped)
+## Plugin Marketplace and Community Features
 
-All commands below assume the alias:
+There are two related but different concepts:
 
-```bash
-alias loofi='loofi-fedora-tweaks --cli'
-```
+- **Community preset marketplace** (inside Community tab): configuration presets.
+- **Plugin marketplace** (`plugin-marketplace` CLI): installable plugins.
 
-### Core
-
-```bash
-loofi info
-loofi health
-loofi doctor
-loofi hardware
-loofi support-bundle
-```
-
-### Monitoring
-
-```bash
-loofi disk --details
-loofi processes --sort cpu -n 15
-loofi temperature
-loofi netmon --connections
-```
-
-### Maintenance and Tweaks
-
-```bash
-loofi cleanup all
-loofi cleanup journal --days 7
-loofi tweak power --profile balanced
-loofi tweak battery --limit 80
-loofi advanced swappiness --value 15
-```
-
-### Network and Security
-
-```bash
-loofi network dns --provider cloudflare
-loofi firewall status
-loofi firewall open-port 8080/tcp
-loofi security-audit
-```
-
-### Software and Services
-
-```bash
-loofi package search --query firefox --source all
-loofi package install vim
-loofi service list --filter failed
-loofi service restart sshd
-```
-
-### Hardware, Storage, Bluetooth
-
-```bash
-loofi storage disks
-loofi storage smart /dev/sda
-loofi storage trim
-loofi bluetooth devices
-loofi bluetooth scan --timeout 10
-```
-
-### Snapshots and Tuning
-
-```bash
-loofi snapshot backends
-loofi snapshot create --label before-updates
-loofi tuner analyze
-loofi tuner apply
-loofi logs errors --since "2h ago"
-```
-
-### Profiles and Health History
-
-```bash
-loofi profile list
-loofi profile apply gaming
-loofi profile export-all profiles.json --include-builtins
-loofi health-history show
-loofi health-history export health.json
-```
-
-### Automation and Advanced Tools
-
-```bash
-loofi agent list
-loofi agent create --goal "keep my system clean"
-loofi vm list
-loofi vfio check
-loofi mesh discover
-loofi teleport capture --path ~/workspace --target laptop
-```
-
-### JSON Output (Scripting)
-
-```bash
-loofi --json info
-loofi --json health
-loofi --json package search --query podman
-```
-
----
-
-## Plugin Marketplace
-
-CLI actions:
+### Plugin Marketplace CLI Actions
 
 - `search`
 - `info`
@@ -457,50 +663,129 @@ Examples:
 loofi plugin-marketplace search --query monitor
 loofi plugin-marketplace info cool-plugin
 loofi plugin-marketplace install cool-plugin --accept-permissions
-loofi plugin-marketplace reviews cool-plugin --limit 5
-loofi plugin-marketplace review-submit cool-plugin --reviewer loofi --rating 5 --title "Great" --comment "Works well"
+loofi plugin-marketplace reviews cool-plugin --limit 10
 loofi plugin-marketplace rating cool-plugin
 ```
 
-Notes:
+Tip:
 
-- Some plugins declare required permissions.
-- Use `--accept-permissions` for non-interactive installs.
-
----
-
-## Daemon and Web API
-
-### Daemon
-
-```bash
-loofi-fedora-tweaks --daemon
-```
-
-Use daemon mode for long-running scheduled tasks without opening the GUI.
-
-### Web API (Headless)
-
-```bash
-loofi-fedora-tweaks --web
-```
-
-API mode is intended for controlled environments and automation scenarios.
+- Use `--accept-permissions` for non-interactive install flows.
 
 ---
 
-## Files and Data Locations
+## CLI Guide by Task
 
-Common paths:
-
-- User config: `~/.config/loofi-fedora-tweaks/`
-- Startup log: `~/.local/share/loofi-fedora-tweaks/startup.log`
-- Runtime/app logs: typically under user journal and app config paths
-
-When sharing diagnostics, include:
+All examples below assume:
 
 ```bash
-loofi-fedora-tweaks --cli support-bundle
+alias loofi='loofi-fedora-tweaks --cli'
+```
+
+### System Overview and Diagnostics
+
+```bash
+loofi info
+loofi health
+loofi doctor
+loofi hardware
+loofi support-bundle
+```
+
+### Monitoring and Investigation
+
+```bash
+loofi disk --details
+loofi processes --sort cpu -n 15
+loofi temperature
+loofi netmon --connections
+loofi logs show --since "1h ago" --lines 200
+loofi logs errors --since "24h ago"
+```
+
+### Updates and Cleanup
+
+```bash
+loofi cleanup all
+loofi cleanup dnf
+loofi cleanup journal --days 7
+loofi cleanup trim
+```
+
+### Hardware and Performance
+
+```bash
+loofi tweak power --profile balanced
+loofi tweak battery --limit 80
+loofi advanced swappiness --value 15
+loofi tuner analyze
+loofi tuner apply
+```
+
+### Service and Package Administration
+
+```bash
+loofi service list --filter failed
+loofi service restart sshd
+loofi service logs sshd --lines 100
+loofi package search --query podman --source all
+loofi package install vim
+```
+
+### Security and Network
+
+```bash
+loofi security-audit
+loofi firewall status
+loofi firewall open-port 8080/tcp
+loofi network dns --provider cloudflare
+```
+
+### Storage, Bluetooth, and Snapshots
+
+```bash
+loofi storage disks
+loofi storage smart /dev/sda
+loofi storage trim
+loofi bluetooth devices
+loofi bluetooth scan --timeout 10
+loofi snapshot backends
+loofi snapshot create --label before-major-change
+```
+
+### Automation and Power Features
+
+```bash
+loofi agent list
+loofi agent create --goal "keep my system clean"
+loofi vm list
+loofi vfio check
+loofi mesh discover
+loofi teleport capture --path ~/workspace --target laptop
+```
+
+### JSON Output for Scripts
+
+```bash
+loofi --json info
+loofi --json health
+loofi --json package search --query firefox
+```
+
+---
+
+## Configuration and Data Locations
+
+Main user paths:
+
+- `~/.config/loofi-fedora-tweaks/profile.json`
+- `~/.config/loofi-fedora-tweaks/first_run_complete`
+- `~/.config/loofi-fedora-tweaks/settings.json`
+- `~/.local/share/loofi-fedora-tweaks/startup.log`
+
+For support/debug captures:
+
+```bash
+loofi support-bundle
 journalctl --user --since "1 hour ago"
 ```
 
@@ -508,24 +793,26 @@ journalctl --user --since "1 hour ago"
 
 ## Troubleshooting and Support
 
-Start with:
+Recommended escalation order:
 
-1. `loofi-fedora-tweaks --cli doctor`
-2. `loofi-fedora-tweaks --cli support-bundle`
-3. `docs/TROUBLESHOOTING.md`
+1. Run diagnostics:
+   - `loofi doctor`
+   - `loofi info`
+2. Export support bundle:
+   - `loofi support-bundle`
+3. Check detailed troubleshooting:
+   - `docs/TROUBLESHOOTING.md`
+4. Open GitHub issue with:
+   - Fedora version + desktop environment
+   - exact tab/command used
+   - expected vs actual result
+   - logs/support bundle details
 
-Then open an issue with:
-
-- Fedora version and desktop environment
-- Exact command or tab used
-- Error output and reproduction steps
-- Support bundle path (if generated)
-
-GitHub issues: <https://github.com/loofitheboss/loofi-fedora-tweaks/issues>
+Issue tracker: <https://github.com/loofitheboss/loofi-fedora-tweaks/issues>
 
 ---
 
-## Screenshots
+## Screenshot Gallery
 
 ### Home Dashboard
 
