@@ -7,6 +7,7 @@ Central documentation map for Loofi Fedora Tweaks.
 - `USER_GUIDE.md` - End-user walkthrough (GUI, CLI, modes, workflows)
 - `TROUBLESHOOTING.md` - Common issues and fixes
 - `CONTRIBUTING.md` - Development and contribution workflow
+- `images/user-guide/` - Current UI screenshots used in the user guide
 
 ## Product and Release Docs
 

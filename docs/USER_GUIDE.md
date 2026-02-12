@@ -18,6 +18,7 @@
 9. [Daemon and Web API](#daemon-and-web-api)
 10. [Files and Data Locations](#files-and-data-locations)
 11. [Troubleshooting and Support](#troubleshooting-and-support)
+12. [Screenshots](#screenshots)
 
 ---
 
@@ -521,3 +522,43 @@ Then open an issue with:
 - Support bundle path (if generated)
 
 GitHub issues: <https://github.com/loofitheboss/loofi-fedora-tweaks/issues>
+
+---
+
+## Screenshots
+
+### Home Dashboard
+
+![Home Dashboard](images/user-guide/home-dashboard.png)
+
+### System Monitor
+
+![System Monitor](images/user-guide/system-monitor.png)
+
+### Maintenance (Updates)
+
+![Maintenance Updates](images/user-guide/maintenance-updates.png)
+
+### Security & Privacy
+
+![Security and Privacy](images/user-guide/security-privacy.png)
+
+### Network Overview
+
+![Network Overview](images/user-guide/network-overview.png)
+
+### AI Lab
+
+![AI Lab Models](images/user-guide/ai-lab-models.png)
+
+### Community Presets
+
+![Community Presets](images/user-guide/community-presets.png)
+
+### Community Marketplace
+
+![Community Marketplace](images/user-guide/community-marketplace.png)
+
+### Settings
+
+![Settings Appearance](images/user-guide/settings-appearance.png)
