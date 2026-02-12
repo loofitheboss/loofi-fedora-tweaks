@@ -200,6 +200,7 @@ jobs:
           fi
           VERSION="${TAG#v}"
 
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git fetch --tags origin
           if ! git rev-parse "refs/tags/${TAG}" >/dev/null 2>&1; then
             git config user.name "github-actions[bot]"
