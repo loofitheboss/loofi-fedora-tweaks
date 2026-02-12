@@ -12,7 +12,7 @@ Use this before tagging a new release.
 ## Documentation
 
 2. Update `CHANGELOG.md` with full feature list.
-3. Update `release_notes.md` (root) and `docs/release_notes.md`.
+3. Update versioned release notes in `docs/releases/` and keep legacy notes in sync if still used.
 4. Update `README.md` — version badges, What's New section, CLI commands, test count.
 5. Update `docs/USER_GUIDE.md` — new feature sections, CLI reference, version header.
 6. Update `docs/CONTRIBUTING.md` — project structure, test counts.
@@ -31,7 +31,7 @@ Use this before tagging a new release.
 
 11. Build RPM locally:
     ```bash
-    ./build_rpm.sh
+    bash scripts/build_rpm.sh
     ```
 12. Verify RPM exists in `rpmbuild/RPMS/noarch/`.
 

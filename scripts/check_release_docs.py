@@ -42,6 +42,18 @@ def workflow_version_tag(version: str) -> str:
     return f"v{version}"
 
 
+def release_notes_candidates(root: Path, version: str) -> List[Path]:
+    name = f"RELEASE-NOTES-v{version}.md"
+    return [root / "docs" / "releases" / name, root / name]
+
+
+def resolve_release_notes_file(root: Path, version: str) -> Path:
+    for candidate in release_notes_candidates(root, version):
+        if candidate.exists():
+            return candidate
+    return release_notes_candidates(root, version)[0]
+
+
 def validate_release_docs(root: Path, *, require_logs: bool) -> List[str]:
     errors: List[str] = []
 
@@ -60,9 +72,10 @@ def validate_release_docs(root: Path, *, require_logs: bool) -> List[str]:
     if not README_FILE.exists() or not README_FILE.read_text(encoding="utf-8").strip():
         errors.append("README.md missing or empty")
 
-    notes_file = root / f"RELEASE-NOTES-v{py_version}.md"
+    notes_file = resolve_release_notes_file(root, py_version)
     if not notes_file.exists() or not notes_file.read_text(encoding="utf-8").strip():
-        errors.append(f"missing release notes: {notes_file.name}")
+        expected = release_notes_candidates(root, py_version)[0]
+        errors.append(f"missing release notes: {expected.relative_to(root)}")
 
     if require_logs:
         wf_tag = workflow_version_tag(py_version)

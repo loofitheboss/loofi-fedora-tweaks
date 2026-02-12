@@ -101,4 +101,4 @@ loofi agent templates         # Show available goal templates
 - `loofi-fedora-tweaks/ui/main_window.py` — Added Agents tab (26 total tabs)
 - `loofi-fedora-tweaks/cli/main.py` — Added `agent` subcommand
 - `CHANGELOG.md` — v18.0.0 entry
-- `release_notes.md` — v18.0.0 release notes
+- `docs/releases/release_notes.md` — v18.0.0 release notes

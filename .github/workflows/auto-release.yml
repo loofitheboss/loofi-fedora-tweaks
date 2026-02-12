@@ -220,10 +220,13 @@ jobs:
           TAG="${{ steps.release_meta.outputs.tag }}"
           VERSION="${{ steps.release_meta.outputs.version }}"
           CODENAME="${{ steps.release_meta.outputs.codename }}"
-          NOTES_FILE="RELEASE-NOTES-v${VERSION}.md"
+          NOTES_FILE="docs/releases/RELEASE-NOTES-v${VERSION}.md"
+          LEGACY_NOTES_FILE="RELEASE-NOTES-v${VERSION}.md"
 
           if [ -f "$NOTES_FILE" ]; then
             cp "$NOTES_FILE" /tmp/release-body.md
+          elif [ -f "$LEGACY_NOTES_FILE" ]; then
+            cp "$LEGACY_NOTES_FILE" /tmp/release-body.md
           else
             cat > /tmp/release-body.md <<EOF
           ## Loofi Fedora Tweaks ${TAG}${CODENAME:+ — ${CODENAME}}

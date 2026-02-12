@@ -10,7 +10,7 @@ INSTRUCTIONS:
 1. Reconcile task artifact + draft notes against implemented diff.
 2. Update `CHANGELOG.md` (Keep-a-Changelog categories).
 3. Update `README.md` only where behavior/commands changed.
-4. Create or update `RELEASE-NOTES-vXX.md`.
+4. Create or update `docs/releases/RELEASE-NOTES-vXX.md`.
 5. Keep entries concise and non-duplicative.
 
 RULES:

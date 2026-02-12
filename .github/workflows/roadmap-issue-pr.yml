@@ -103,4 +103,4 @@ jobs:
             - [ ] `.workflow/reports/run-manifest-${{ steps.tracker.outputs.version }}.json`
             - [ ] `CHANGELOG.md`
             - [ ] `README.md`
-            - [ ] `RELEASE-NOTES-${{ steps.tracker.outputs.version }}.md`
+            - [ ] `docs/releases/RELEASE-NOTES-${{ steps.tracker.outputs.version }}.md`

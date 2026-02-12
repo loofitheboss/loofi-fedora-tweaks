@@ -10,7 +10,7 @@
 - [ ] Web server tested and verified
 - [x] Systemd service file created: `loofi-fedora-tweaks.service`
 - [x] Nginx reverse proxy config created: `loofi-nginx.conf`
-- [x] Release announcement drafted: `RELEASE-ANNOUNCEMENT.md`
+- [x] Release announcement drafted: `docs/releases/RELEASE-ANNOUNCEMENT.md`
 
 ---
 
@@ -157,14 +157,14 @@ sudo firewall-cmd --reload
 ### Fedora Discussion
 - **Forum**: https://discussion.fedoraproject.org/c/desktop/gnome/19
 - **Title**: "Loofi Fedora Tweaks v20.0.2 'Synapse' - Tab Scroller Fix & Dependency Refresh"
-- **Content**: Use `RELEASE-ANNOUNCEMENT.md` (adapt formatting for forum)
+- **Content**: Use `docs/releases/RELEASE-ANNOUNCEMENT.md` (adapt formatting for forum)
 - **Tags**: #fedora-tweaks, #system-tools, #gnome
 
 ### Reddit
 - **Subreddit**: r/Fedora
 - **Title**: "Loofi Fedora Tweaks v20.0.2 'Synapse' - Tab Scroller Fix & Dependency Refresh"
 - **Flair**: "New Release"
-- **Content**: Use `RELEASE-ANNOUNCEMENT.md` (Reddit markdown format)
+- **Content**: Use `docs/releases/RELEASE-ANNOUNCEMENT.md` (Reddit markdown format)
 
 ### GitHub
 - [ ] Publish: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2

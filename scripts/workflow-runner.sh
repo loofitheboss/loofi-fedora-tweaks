@@ -26,6 +26,8 @@ TASKS_FILE="$ROOT/.workflow/specs/tasks-${VERSION_TAG}.md"
 TEST_REPORT_FILE="$ROOT/.workflow/reports/test-results-${VERSION_TAG}.json"
 VERSION_PY="$ROOT/loofi-fedora-tweaks/version.py"
 SPEC_FILE="$ROOT/loofi-fedora-tweaks.spec"
+NOTES_FILE="$ROOT/docs/releases/RELEASE-NOTES-${VERSION_TAG}.md"
+LEGACY_NOTES_FILE="$ROOT/RELEASE-NOTES-${VERSION_TAG}.md"
 
 # Colors
 RED='\033[0;31m'
@@ -58,10 +60,12 @@ from version import __version__; print(__version__)
         warn "CHANGELOG.md missing $VERSION_TAG entry"
     fi
 
-    if [ -f "$ROOT/RELEASE-NOTES-${VERSION_TAG}.md" ]; then
-        ok "Release notes exist"
+    if [ -f "$NOTES_FILE" ]; then
+        ok "Release notes exist: docs/releases/RELEASE-NOTES-${VERSION_TAG}.md"
+    elif [ -f "$LEGACY_NOTES_FILE" ]; then
+        ok "Release notes exist: RELEASE-NOTES-${VERSION_TAG}.md (legacy path)"
     else
-        warn "RELEASE-NOTES-${VERSION_TAG}.md missing"
+        warn "Release notes missing: docs/releases/RELEASE-NOTES-${VERSION_TAG}.md"
     fi
 
     if [ -f "$TASKS_FILE" ]; then ok "Task artifact exists"; else warn "Task artifact missing: $TASKS_FILE"; fi

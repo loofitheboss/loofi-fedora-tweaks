@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Test runner for v23.0 Architecture Hardening tests
-# Run with: bash test_v23_changes.sh
+# Run with: bash scripts/legacy/test_v23_changes.sh
 
 set -e
 
-PROJECT_DIR="/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPORT_DIR="$PROJECT_DIR/docs/reports/v23"
+mkdir -p "$REPORT_DIR"
+
 cd "$PROJECT_DIR"
 
 echo "=================================="
@@ -33,12 +37,12 @@ python3 -m pytest \
     tests/test_system_service.py \
     -v \
     --tb=short \
-    2>&1 | tee test_v23_output.log
+    2>&1 | tee "$REPORT_DIR/test_v23_output.log"
 echo
 
 # Test 3: Run full test suite
 echo "[3/4] Running full test suite..."
-python3 -m pytest tests/ -v --cov-fail-under=80 2>&1 | tee test_full_output.log
+python3 -m pytest tests/ -v --cov-fail-under=80 2>&1 | tee "$REPORT_DIR/test_full_output.log"
 echo
 
 # Test 4: Generate coverage report
@@ -51,15 +55,15 @@ python3 -m pytest \
     --cov=loofi-fedora-tweaks/services/package/service \
     --cov=loofi-fedora-tweaks/services/system/service \
     --cov-report=term-missing \
-    --cov-report=html \
-    2>&1 | tee test_coverage_output.log
+    --cov-report=html:"$REPORT_DIR/htmlcov" \
+    2>&1 | tee "$REPORT_DIR/test_coverage_output.log"
 echo
 
 echo "=================================="
 echo "Test run complete!"
 echo "Results saved to:"
-echo "  - test_v23_output.log"
-echo "  - test_full_output.log"
-echo "  - test_coverage_output.log"
-echo "  - htmlcov/ (coverage HTML report)"
+echo "  - docs/reports/v23/test_v23_output.log"
+echo "  - docs/reports/v23/test_full_output.log"
+echo "  - docs/reports/v23/test_coverage_output.log"
+echo "  - docs/reports/v23/htmlcov/ (coverage HTML report)"
 echo "=================================="

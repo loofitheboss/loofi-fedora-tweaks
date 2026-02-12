@@ -72,7 +72,7 @@ Tests for `services/system/service.py` — System-level operations
 ### 2. Test Documentation Created
 
 - ✅ `.github/TEST_REPORT_V23.md` — Comprehensive test report
-- ✅ `test_v23_changes.sh` — Test runner script
+- ✅ `scripts/legacy/test_v23_changes.sh` — Test runner script
 
 ---
 
@@ -114,7 +114,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=80
 
 ```bash
 cd "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks"
-bash test_v23_changes.sh
+bash scripts/legacy/test_v23_changes.sh
 ```
 
 ---
@@ -147,10 +147,10 @@ When tests run successfully:
 
 ### Documentation
 - `.github/TEST_REPORT_V23.md` — Detailed test report
-- `SUMMARY_V23_TESTS.md` — This file
+- `docs/reports/SUMMARY_V23_TESTS.md` — This file
 
 ### Scripts
-- `test_v23_changes.sh` — Automated test runner
+- `scripts/legacy/test_v23_changes.sh` — Automated test runner
 
 ---
 

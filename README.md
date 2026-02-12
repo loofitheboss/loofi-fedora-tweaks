@@ -34,7 +34,7 @@ v26.0 adds a complete plugin marketplace system so users can discover, install, 
 * Automatic dependency resolution with version constraints
 * `PluginAdapter` bridge for legacy `LoofiPlugin` compatibility
 
-See full details in **[RELEASE-NOTES-v26.0.0.md](RELEASE-NOTES-v26.0.0.md)**.
+See full details in **[RELEASE-NOTES-v26.0.0.md](docs/releases/RELEASE-NOTES-v26.0.0.md)**.
 
 ---
 
