@@ -14,10 +14,15 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 try:
-    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication, QWidget
     _HAS_QT_WIDGETS = True
 except ImportError:
     _HAS_QT_WIDGETS = False
+
+
+def _stub_widget(*_args, **_kwargs):
+    """Return a lightweight QWidget for tab-builder stubs."""
+    return QWidget()
 
 
 @unittest.skipUnless(_HAS_QT_WIDGETS, "PyQt6.QtWidgets not available (headless environment)")
@@ -106,16 +111,11 @@ class TestTabMargins(unittest.TestCase):
 
         tab.close()
 
-    def test_ai_enhanced_tab_margins(self):
+    @patch("ui.ai_enhanced_tab.AIEnhancedTab._create_models_tab", side_effect=_stub_widget)
+    @patch("ui.ai_enhanced_tab.AIEnhancedTab._create_voice_tab", side_effect=_stub_widget)
+    @patch("ui.ai_enhanced_tab.AIEnhancedTab._create_knowledge_tab", side_effect=_stub_widget)
+    def test_ai_enhanced_tab_margins(self, *_mocks):
         """Verify AI Lab tab has positive content margins."""
-        # Mock the AI-related managers to avoid import errors
-        mock_ai_models = MagicMock()
-        mock_ai_models.AIModelManager.get_system_ram.return_value = 16384
-        mock_ai_models.AIModelManager.get_recommended_model.return_value = {"name": "test", "size": "7B"}
-        sys.modules['utils.ai_models'] = mock_ai_models
-        sys.modules['utils.voice'] = MagicMock()
-        sys.modules['utils.context_rag'] = MagicMock()
-
         mod = importlib.import_module("ui.ai_enhanced_tab")
         AIEnhancedTab = mod.AIEnhancedTab
 
