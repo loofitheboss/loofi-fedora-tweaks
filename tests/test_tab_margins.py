@@ -51,23 +51,24 @@ class TestTabMargins(unittest.TestCase):
         margins = layout.getContentsMargins()
         return margins  # Returns (left, top, right, bottom)
 
-    def test_diagnostics_tab_margins(self):
-        """Verify diagnostics tab has positive content margins."""
-        mod = importlib.import_module("ui.diagnostics_tab")
-        DiagnosticsTab = mod.DiagnosticsTab
-
-        tab = DiagnosticsTab()
-        tab.show()
-        self.app.processEvents()
-
+    def _assert_positive_root_margins(self, tab, tab_name):
+        """Assert positive margins without forcing GUI event processing in CI."""
         margins = self._get_root_layout_margins(tab)
-        self.assertIsNotNone(margins, "DiagnosticsTab should have a root layout")
+        self.assertIsNotNone(margins, f"{tab_name} should have a root layout")
 
         left, top, right, bottom = margins
         self.assertGreater(left, 0, "Left margin should be > 0")
         self.assertGreater(top, 0, "Top margin should be > 0")
         self.assertGreater(right, 0, "Right margin should be > 0")
         self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+
+    def test_diagnostics_tab_margins(self):
+        """Verify diagnostics tab has positive content margins."""
+        mod = importlib.import_module("ui.diagnostics_tab")
+        DiagnosticsTab = mod.DiagnosticsTab
+
+        tab = DiagnosticsTab()
+        self._assert_positive_root_margins(tab, "DiagnosticsTab")
 
         tab.close()
 
@@ -77,17 +78,7 @@ class TestTabMargins(unittest.TestCase):
         DesktopTab = mod.DesktopTab
 
         tab = DesktopTab()
-        tab.show()
-        self.app.processEvents()
-
-        margins = self._get_root_layout_margins(tab)
-        self.assertIsNotNone(margins, "DesktopTab should have a root layout")
-
-        left, top, right, bottom = margins
-        self.assertGreater(left, 0, "Left margin should be > 0")
-        self.assertGreater(top, 0, "Top margin should be > 0")
-        self.assertGreater(right, 0, "Right margin should be > 0")
-        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+        self._assert_positive_root_margins(tab, "DesktopTab")
 
         tab.close()
 
@@ -97,17 +88,7 @@ class TestTabMargins(unittest.TestCase):
         SecurityTab = mod.SecurityTab
 
         tab = SecurityTab()
-        tab.show()
-        self.app.processEvents()
-
-        margins = self._get_root_layout_margins(tab)
-        self.assertIsNotNone(margins, "SecurityTab should have a root layout")
-
-        left, top, right, bottom = margins
-        self.assertGreater(left, 0, "Left margin should be > 0")
-        self.assertGreater(top, 0, "Top margin should be > 0")
-        self.assertGreater(right, 0, "Right margin should be > 0")
-        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+        self._assert_positive_root_margins(tab, "SecurityTab")
 
         tab.close()
 
@@ -120,17 +101,7 @@ class TestTabMargins(unittest.TestCase):
         AIEnhancedTab = mod.AIEnhancedTab
 
         tab = AIEnhancedTab()
-        tab.show()
-        self.app.processEvents()
-
-        margins = self._get_root_layout_margins(tab)
-        self.assertIsNotNone(margins, "AIEnhancedTab should have a root layout")
-
-        left, top, right, bottom = margins
-        self.assertGreater(left, 0, "Left margin should be > 0")
-        self.assertGreater(top, 0, "Top margin should be > 0")
-        self.assertGreater(right, 0, "Right margin should be > 0")
-        self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+        self._assert_positive_root_margins(tab, "AIEnhancedTab")
 
         tab.close()
 
@@ -157,17 +128,7 @@ class TestTabMargins(unittest.TestCase):
             SettingsTab = mod.SettingsTab
 
             tab = SettingsTab()
-            tab.show()
-            self.app.processEvents()
-
-            margins = self._get_root_layout_margins(tab)
-            self.assertIsNotNone(margins, "SettingsTab should have a root layout")
-
-            left, top, right, bottom = margins
-            self.assertGreater(left, 0, "Left margin should be > 0")
-            self.assertGreater(top, 0, "Top margin should be > 0")
-            self.assertGreater(right, 0, "Right margin should be > 0")
-            self.assertGreater(bottom, 0, "Bottom margin should be > 0")
+            self._assert_positive_root_margins(tab, "SettingsTab")
 
             tab.close()
 
