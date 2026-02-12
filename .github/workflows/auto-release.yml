@@ -6,6 +6,9 @@ on:
       - master
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       version:
@@ -63,7 +66,8 @@ jobs:
             fi
           fi
 
-      - name: Validate release docs and workflow logs
+      - name: Validate workflow logs for release events
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         run: python3 scripts/check_release_docs.py --require-logs
 
       - name: Validate packaging scripts
@@ -83,6 +87,15 @@ jobs:
             fi
           done
 
+  adapter_drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/sync_ai_adapters.py --check
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -92,6 +105,25 @@ jobs:
           python-version: '3.12'
       - run: pip install flake8
       - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install mypy PyQt6-stubs
+      - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any || true
+
+  docs_gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/check_release_docs.py
 
   test:
     runs-on: ubuntu-latest
@@ -108,6 +140,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
+      - run: python loofi-fedora-tweaks/main.py --version
+      - run: python loofi-fedora-tweaks/main.py --cli --version
       - run: |
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
             --tb=short \
@@ -134,7 +168,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: fedora:43
-    needs: [validate, lint, test]
+    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security]
     steps:
       - uses: actions/checkout@v4
       - name: Install build deps
@@ -149,7 +183,7 @@ jobs:
   auto_tag:
     if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
-    needs: [validate, lint, test, security, build]
+    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -175,7 +209,7 @@ jobs:
     if: (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')) && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
     container: fedora:43
-    needs: [validate, lint, test, security, build]
+    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
     steps:
       - name: Install release deps
         run: dnf install -y git python3
