@@ -8,6 +8,8 @@ on:
       - 'docs/**'
       - '**/*.md'
       - '.github/ISSUE_TEMPLATE/**'
+      - '.vscode/**'
+      - '.copilot/**'
   workflow_dispatch:
 
 permissions:
