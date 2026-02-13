@@ -136,6 +136,20 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 ---
 
+## Screenshots
+
+Current UI screenshots (v32) are maintained in:
+
+- [`docs/images/user-guide/README.md`](docs/images/user-guide/README.md)
+
+Preview gallery:
+
+![Home Dashboard](docs/images/user-guide/home-dashboard.png)
+![System Monitor](docs/images/user-guide/system-monitor.png)
+![Maintenance Updates](docs/images/user-guide/maintenance-updates.png)
+
+---
+
 ## CLI Quick Examples
 
 All commands below assume either:

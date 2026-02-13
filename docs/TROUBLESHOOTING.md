@@ -1,12 +1,12 @@
-# Troubleshooting Guide
+# Loofi Fedora Tweaks — Troubleshooting
 
-Common issues and fixes for Loofi Fedora Tweaks v26.x.
+Common issues and fixes for v32.x.
 
 ---
 
-## Quick Diagnostics First
+## 1) Quick Diagnostics
 
-Run these before deep troubleshooting:
+Run these first:
 
 ```bash
 loofi-fedora-tweaks --cli doctor
@@ -14,7 +14,7 @@ loofi-fedora-tweaks --cli info
 loofi-fedora-tweaks --cli support-bundle
 ```
 
-If CLI feels verbose, create an alias:
+Optional alias:
 
 ```bash
 alias loofi='loofi-fedora-tweaks --cli'
@@ -22,11 +22,9 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 ---
 
-## App Does Not Start
+## 2) App Does Not Start
 
-### `ModuleNotFoundError: No module named 'PyQt6'`
-
-Install PyQt6:
+### Missing PyQt6
 
 ```bash
 pkexec dnf install python3-pyqt6
@@ -34,21 +32,12 @@ pkexec dnf install python3-pyqt6
 
 ### Qt platform plugin errors (`wayland` / `xcb`)
 
-Install Wayland plugin package:
-
 ```bash
 pkexec dnf install qt6-qtwayland
-```
-
-For temporary X11 fallback:
-
-```bash
 QT_QPA_PLATFORM=xcb loofi-fedora-tweaks
 ```
 
-### Startup crash with no visible error
-
-Check startup log:
+### Startup crash without clear UI message
 
 ```bash
 tail -n 200 ~/.local/share/loofi-fedora-tweaks/startup.log
@@ -56,25 +45,17 @@ tail -n 200 ~/.local/share/loofi-fedora-tweaks/startup.log
 
 ---
 
-## CLI Command Fails
+## 3) CLI Command Fails
 
-### `loofi: command not found`
+### Command not found
 
-Default binary is `loofi-fedora-tweaks`. Use:
+Use full command:
 
 ```bash
 loofi-fedora-tweaks --cli info
 ```
 
-Or define:
-
-```bash
-alias loofi='loofi-fedora-tweaks --cli'
-```
-
-### Running from source gives import errors
-
-Run with proper `PYTHONPATH`:
+### Source-run import errors
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py --cli info
@@ -82,13 +63,13 @@ PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py --cli info
 
 ---
 
-## Privileged Action Fails
+## 4) Privileged Actions Fail
 
 Symptoms:
 
-- update/install/remove actions fail
-- service/firewall operations fail
-- permission prompts do not appear
+- updates/install/remove fail
+- service/firewall actions fail
+- no auth prompt appears
 
 Checks:
 
@@ -98,17 +79,13 @@ pkexec true
 ls /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
 ```
 
-Also ensure your desktop session has a running polkit authentication agent.
+Confirm a desktop polkit agent is running.
 
 ---
 
-## Updates or Cleanup Behave Differently on Atomic
+## 5) Atomic vs Traditional Behavior Differences
 
-On Atomic Fedora variants, package layering and updates use `rpm-ostree` semantics.
-
-- This is expected behavior.
-- `Maintenance -> Overlays` appears only on Atomic-capable systems.
-- Reboot may be required after some system updates.
+On Atomic Fedora, maintenance and package behavior uses `rpm-ostree` semantics.
 
 Check detected mode:
 
@@ -118,27 +95,21 @@ loofi-fedora-tweaks --cli info
 
 ---
 
-## Plugin Marketplace Issues
+## 6) Plugin Marketplace Issues
 
-### Search or info returns nothing
-
-Check network and query:
+Search test:
 
 ```bash
 loofi-fedora-tweaks --cli plugin-marketplace search --query monitor
 ```
 
-### Install requires permission acceptance
-
-Use non-interactive consent flag:
+Install with explicit permissions acceptance:
 
 ```bash
 loofi-fedora-tweaks --cli plugin-marketplace install <plugin-id> --accept-permissions
 ```
 
-### Reviews or ratings fail
-
-Verify plugin ID first:
+Inspect metadata first:
 
 ```bash
 loofi-fedora-tweaks --cli plugin-marketplace info <plugin-id>
@@ -146,48 +117,35 @@ loofi-fedora-tweaks --cli plugin-marketplace info <plugin-id>
 
 ---
 
-## Virtualization Problems
+## 7) Virtualization Problems
 
-### No VMs shown or libvirt errors
+libvirt status:
 
 ```bash
 systemctl status libvirtd
-systemctl list-units --type=service | rg libvirt
-```
-
-Enable libvirt if needed:
-
-```bash
 pkexec systemctl enable --now libvirtd
 ```
 
-### KVM acceleration unavailable
+KVM capability:
 
 ```bash
-lscpu | rg Virtualization
-lsmod | rg kvm
+lscpu | grep -i virtualization
+lsmod | grep -i kvm
 ```
 
 ---
 
-## Networking / Loofi Link Discovery Fails
+## 8) Loofi Link Discovery Fails
 
-### No peers discovered
-
-Check mDNS services:
+Check Avahi:
 
 ```bash
 systemctl status avahi-daemon
-```
-
-Install/start Avahi if missing:
-
-```bash
 pkexec dnf install avahi avahi-tools nss-mdns
 pkexec systemctl enable --now avahi-daemon
 ```
 
-### Firewall may block discovery
+Firewall mDNS allowance:
 
 ```bash
 pkexec firewall-cmd --permanent --add-service=mdns
@@ -196,22 +154,16 @@ pkexec firewall-cmd --reload
 
 ---
 
-## AI Lab Issues
+## 9) AI Lab Issues
 
-### Ollama not found
-
-Install and start Ollama separately, then reopen Loofi.
-
-Quick check:
+Check Ollama:
 
 ```bash
 ollama --version
 ollama list
 ```
 
-### Voice or knowledge indexing errors
-
-Check write permissions in user config area:
+Check config/data write access:
 
 ```bash
 ls -la ~/.config/loofi-fedora-tweaks/
@@ -219,17 +171,9 @@ ls -la ~/.config/loofi-fedora-tweaks/
 
 ---
 
-## Logs, Export, and Support Bundle
+## 10) Logs and Support Bundle
 
-### Log export fails with permission errors
-
-Export to a user-writable path:
-
-```bash
-loofi-fedora-tweaks --cli logs export /tmp/loofi-logs.txt
-```
-
-### Collect diagnostics for bug reports
+Export diagnostics:
 
 ```bash
 loofi-fedora-tweaks --cli support-bundle
@@ -238,14 +182,14 @@ journalctl --user --since "1 hour ago"
 
 ---
 
-## Still Stuck?
+## 11) Reporting Issues
 
-Open a GitHub issue and include:
+Include:
 
 1. Fedora version and desktop environment
-2. Exact command or tab/action used
-3. Full error output
-4. Reproduction steps
-5. Support bundle path
+2. exact tab/action or command
+3. full error output
+4. reproduction steps
+5. support bundle path
 
 Issues: <https://github.com/loofitheboss/loofi-fedora-tweaks/issues>

@@ -1,151 +1,107 @@
-# Loofi Fedora Tweaks - Beginner Quick Guide
+# Loofi Fedora Tweaks — Beginner Quick Guide
 
-> **Version 26.0.2 "Status Bar UI Hotfix"**  
-> Fast onboarding guide for new users.
+> Version 32.0.0 "Abyss"
 
----
-
-## Who This Is For
-
-Use this guide if you are new to Loofi and want to:
-
-- understand the layout quickly,
-- run safe first actions,
-- keep your Fedora system healthy without deep tuning.
-
-If you want full details, use `docs/USER_GUIDE.md`.
+Use this guide for a safe first run in under 10 minutes.
 
 ---
 
-## 1. Install and Launch
-
-Install:
+## 1) Install and Launch
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
-```
-
-Launch:
-
-```bash
 loofi-fedora-tweaks
 ```
 
-On first launch, complete the wizard (hardware + use-case profile).
+Optional CLI alias:
+
+```bash
+alias loofi='loofi-fedora-tweaks --cli'
+```
 
 ---
 
-## 2. Learn the Interface (30 seconds)
+## 2) Learn the UI in 30 Seconds
 
-Main areas:
-
-- Left sidebar: all categories and tabs.
-- Top breadcrumb: where you are (`Category > Tab`).
-- Center panel: active tools.
-- Bottom bar: shortcuts and version.
-
-![Home Dashboard](images/user-guide/home-dashboard.png)
+- Sidebar = categories and tabs
+- Main panel = active tools
+- Bottom area = status and shortcuts
 
 Useful shortcuts:
 
-- `Ctrl+K` search tabs/features
+- `Ctrl+K` command palette
 - `Ctrl+Shift+K` quick actions
-- `F1` shortcut help
+- `F1` help
+
+![Home Dashboard](images/user-guide/home-dashboard.png)
 
 ---
 
-## 3. First 5 Actions to Run
+## 3) First 5 Actions
 
-## Action 1: Check System Status
+### Action 1 — Check Health
 
 Open:
 
-- `Dashboard -> Home`
-- `System -> System Monitor`
+- **Overview → Home**
+- **Overview → System Monitor**
 
-Look for:
-
-- High CPU or RAM usage
-- Unexpected network traffic
+Look for high CPU/RAM/process spikes.
 
 ![System Monitor](images/user-guide/system-monitor.png)
 
-## Action 2: Update Safely
+### Action 2 — Run Updates
 
-Open:
-
-- `Software -> Maintenance -> Updates`
-
-Click:
-
-- `Update All (DNF + Flatpak + Firmware)`
+Open **Manage → Maintenance → Updates** and run **Update All**.
 
 Notes:
 
-- You may be prompted for admin authentication (`pkexec`).
-- On Atomic Fedora, update behavior adapts automatically.
+- Admin prompt uses `pkexec`
+- Atomic systems use `rpm-ostree` behavior automatically
 
 ![Maintenance Updates](images/user-guide/maintenance-updates.png)
 
-## Action 3: Clean Up Space
+### Action 3 — Clean Up
 
-Open:
+Open **Manage → Maintenance → Cleanup** and run:
 
-- `Software -> Maintenance -> Cleanup`
+- cache clean
+- journal vacuum
+- SSD trim (if applicable)
 
-Recommended buttons:
+### Action 4 — Security Pass
 
-- `Clean DNF Cache`
-- `Vacuum Journal`
-- `SSD Trim` (if SSD)
+Open **Network & Security → Security & Privacy**:
 
-## Action 4: Run Security Pass
-
-Open:
-
-- `Security -> Security & Privacy`
-
-Use:
-
-- `Refresh Score`
-- `Scan Ports`
-- Firewall status actions
+- refresh score
+- verify firewall status
+- run port scan if needed
 
 ![Security and Privacy](images/user-guide/security-privacy.png)
 
-## Action 5: Set Basic Preferences
+### Action 5 — Save Preferences
 
-Open:
+Open **Personalize → Settings** and configure:
 
-- `Settings -> Appearance`
-- `Settings -> Behavior`
-
-Recommended starter settings:
-
-- Enable update checks on start
-- Keep dangerous action confirmations enabled
+- update checks on startup
+- safety confirmations enabled
 
 ![Settings Appearance](images/user-guide/settings-appearance.png)
 
 ---
 
-## 4. Weekly Routine (Simple)
+## 4) Weekly Routine
 
-Once per week:
-
-1. `Maintenance -> Update All`
-2. `Maintenance -> Cleanup` actions
-3. `Security & Privacy -> Refresh Score`
-4. `System Monitor` quick check for heavy processes
+1. Run updates
+2. Run cleanup
+3. Refresh security score
+4. Quick check System Monitor
 
 ---
 
-## 5. Useful CLI (Optional)
-
-If you prefer terminal commands:
+## 5) Useful CLI Commands
 
 ```bash
-alias loofi='loofi-fedora-tweaks --cli'
 loofi info
 loofi health
 loofi doctor
@@ -155,13 +111,8 @@ loofi security-audit
 
 ---
 
-## 6. When to Use the Full Guide
+## 6) Next Docs
 
-Open `docs/USER_GUIDE.md` when you need:
-
-- detailed per-tab behavior,
-- plugin marketplace workflows,
-- daemon/web API usage,
-- advanced CLI operations.
-
-For issues, see `docs/TROUBLESHOOTING.md`.
+- Full user guide: `docs/USER_GUIDE.md`
+- Advanced operations: `docs/ADVANCED_ADMIN_GUIDE.md`
+- Troubleshooting: `docs/TROUBLESHOOTING.md`

@@ -9,7 +9,8 @@ Central documentation map for Loofi Fedora Tweaks.
 - `ADVANCED_ADMIN_GUIDE.md` - Admin/operator runbooks and advanced operations
 - `TROUBLESHOOTING.md` - Common issues and fixes
 - `CONTRIBUTING.md` - Development and contribution workflow
-- `images/user-guide/` - Current UI screenshots used in the user guide
+- `images/user-guide/README.md` - Screenshot catalog and naming map
+- `images/user-guide/` - Current UI screenshots used across user docs
 
 ## Product and Release Docs
 
@@ -32,3 +33,9 @@ Central documentation map for Loofi Fedora Tweaks.
 - `release_notes.md`
 
 These legacy files are kept for compatibility and historical context.
+
+## Documentation Maintenance Notes
+
+- User-facing guides are aligned to `v32.0.0 "Abyss"`.
+- Screenshot paths are standardized to `docs/images/user-guide/*.png`.
+- When replacing screenshots, keep filenames stable or update all guide references.
