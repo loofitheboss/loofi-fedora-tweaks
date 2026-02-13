@@ -113,7 +113,8 @@ def validate_task_contract(tasks_file: Path) -> list[str]:
 
     lines = tasks_file.read_text(encoding="utf-8").splitlines()
     issues: list[str] = []
-    task_indexes = [idx for idx, line in enumerate(lines) if line.startswith("- [") and "ID:" in line]
+    task_indexes = [idx for idx, line in enumerate(
+        lines) if line.startswith("- [") and "ID:" in line]
 
     if not task_indexes:
         return ["task artifact has no task entries with ID field"]
@@ -122,12 +123,14 @@ def validate_task_contract(tasks_file: Path) -> list[str]:
         line = lines[index]
         missing = [token for token in TASK_REQUIRED_MARKERS if token not in line]
         if missing:
-            issues.append(f"line {index + 1}: missing markers {', '.join(missing)}")
+            issues.append(
+                f"line {index + 1}: missing markers {', '.join(missing)}")
 
         continuation_window = lines[index + 1:index + 5]
         for token in TASK_REQUIRED_CONTINUATION:
             if not any(item.strip().startswith(token) for item in continuation_window):
-                issues.append(f"line {index + 1}: missing continuation field '{token}'")
+                issues.append(
+                    f"line {index + 1}: missing continuation field '{token}'")
     return issues
 
 
@@ -187,7 +190,8 @@ def archive_workspace() -> None:
     if not SPECS_DIR.exists():
         return
 
-    entries = [p for p in SPECS_DIR.iterdir() if p.name not in {".gitkeep", WRITER_LOCK_FILE.name}]
+    entries = [p for p in SPECS_DIR.iterdir() if p.name not in {
+        ".gitkeep", WRITER_LOCK_FILE.name}]
     if not entries:
         return
 
@@ -230,7 +234,8 @@ def load_writer_lock() -> dict[str, Any] | None:
     if not data:
         return None
 
-    required = {"assistant", "owner", "version", "phase", "acquired_at", "expires_at"}
+    required = {"assistant", "owner", "version",
+                "phase", "acquired_at", "expires_at"}
     if not required.issubset(data):
         return None
     return data
@@ -263,7 +268,8 @@ def ensure_writer_lock(
         existing = None
 
     if existing:
-        same_owner = existing.get("assistant") == assistant and existing.get("owner") == owner
+        same_owner = existing.get(
+            "assistant") == assistant and existing.get("owner") == owner
         same_version = existing.get("version") == version_tag
         if not same_owner:
             return (
@@ -292,8 +298,10 @@ def ensure_writer_lock(
         print(f"[workflow] WRITER LOCK (dry-run): {json.dumps(lock_data)}")
         return True, "ok"
 
-    WRITER_LOCK_FILE.write_text(json.dumps(lock_data, indent=2) + "\n", encoding="utf-8")
-    print(f"[workflow] WRITER LOCK: {assistant}:{owner} -> {version_tag}/{phase}")
+    WRITER_LOCK_FILE.write_text(json.dumps(
+        lock_data, indent=2) + "\n", encoding="utf-8")
+    print(
+        f"[workflow] WRITER LOCK: {assistant}:{owner} -> {version_tag}/{phase}")
     return True, "ok"
 
 
@@ -370,8 +378,56 @@ def write_review_output(review_path: Path, stdout: str, stderr: str, returncode:
         stdout.strip() or "(no output)",
     ]
     if stderr.strip():
-        payload.extend(["", "## STDERR", "", f"```text\n{stderr.strip()}\n```"])
+        payload.extend(
+            ["", "## STDERR", "", f"```text\n{stderr.strip()}\n```"])
     review_path.write_text("\n".join(payload) + "\n", encoding="utf-8")
+
+
+def resolve_model_for_assistant(assistant: str, model: str) -> str:
+    if assistant != "copilot":
+        return model
+
+    copilot_models = {
+        "gpt-5.3-codex": "gpt-5",
+        "gpt-4o": "gpt-4.1",
+        "gpt-4o-mini": "gpt-4.1",
+    }
+    return copilot_models.get(model, model)
+
+
+def build_agent_command(
+    assistant: str,
+    model: str,
+    sandbox: str,
+    combined_prompt: str,
+) -> tuple[list[str], bool, str]:
+    if assistant == "copilot":
+        resolved_model = resolve_model_for_assistant(assistant, model)
+        cmd = [
+            "copilot",
+            "--model",
+            resolved_model,
+            "-p",
+            combined_prompt,
+            "--allow-all",
+            "--no-ask-user",
+            "--add-dir",
+            str(ROOT),
+            "--stream",
+            "off",
+            "--no-color",
+        ]
+        display = (
+            "copilot "
+            f"--model {resolved_model} -p <prompt> --allow-all --no-ask-user "
+            f"--add-dir {ROOT} --stream off --no-color"
+        )
+        return cmd, False, display
+
+    cmd = ["codex", "exec", "--model", model,
+           "--sandbox", sandbox, "--cd", str(ROOT)]
+    display = " ".join(cmd)
+    return cmd, True, display
 
 
 def run_agent(
@@ -382,13 +438,16 @@ def run_agent(
     instruction: str,
     dry_run: bool,
     *,
+    assistant: str,
     mode: str,
     review_output: Path | None,
 ) -> tuple[int, dict[str, Any]]:
     sandbox = "read-only" if mode == "review" else "workspace-write"
 
-    if not dry_run and shutil.which("codex") is None:
-        return 127, {"status": "error", "error": "'codex' command not found in PATH"}
+    if not dry_run:
+        agent_binary = "copilot" if assistant == "copilot" else "codex"
+        if shutil.which(agent_binary) is None:
+            return 127, {"status": "error", "error": f"'{agent_binary}' command not found in PATH"}
 
     valid_inputs: list[Path] = []
     for path in inputs:
@@ -411,10 +470,12 @@ def run_agent(
         f"INPUT PATHS (read these from the repository):\n{input_paths}\n\n"
         f"EXECUTION INSTRUCTION:\n{instruction}\n"
     )
-    cmd = ["codex", "exec", "--model", model, "--sandbox", sandbox, "--cd", str(ROOT)]
+    cmd, uses_stdin_prompt, command_display = build_agent_command(
+        assistant, model, sandbox, combined_prompt)
 
     print(f"\n[workflow] Phase: {phase_name}")
     print(f"[workflow] Mode: {mode}")
+    print(f"[workflow] Assistant: {assistant}")
     print(f"[workflow] Model: {model}")
     print(f"[workflow] Prompt: {prompt_file}")
     print(f"[workflow] Instruction: {instruction}")
@@ -426,7 +487,7 @@ def run_agent(
         "prompt": str(prompt_file),
         "inputs": [str(path) for path in valid_inputs],
         "instruction": instruction,
-        "command": " ".join(cmd),
+        "command": command_display,
         "timestamp": isoformat_utc(),
         "status": "pending",
     }
@@ -438,21 +499,33 @@ def run_agent(
         return 0, metadata
 
     if mode == "review":
-        result = subprocess.run(cmd, input=combined_prompt, text=True, capture_output=True, check=False)
+        if uses_stdin_prompt:
+            result = subprocess.run(
+                cmd, input=combined_prompt, text=True, capture_output=True, check=False)
+        else:
+            result = subprocess.run(
+                cmd, text=True, capture_output=True, check=False)
         metadata["status"] = "success" if result.returncode == 0 else "failed"
         metadata["exit_code"] = result.returncode
         if review_output is not None:
-            write_review_output(review_output, result.stdout, result.stderr, result.returncode)
+            write_review_output(review_output, result.stdout,
+                                result.stderr, result.returncode)
             metadata["review_output"] = str(review_output)
         if result.returncode != 0:
-            print(f"ERROR: phase '{phase_name}' failed with exit code {result.returncode}", file=sys.stderr)
+            print(
+                f"ERROR: phase '{phase_name}' failed with exit code {result.returncode}", file=sys.stderr)
         return result.returncode, metadata
 
-    result = subprocess.run(cmd, input=combined_prompt, text=True, check=False)
+    if uses_stdin_prompt:
+        result = subprocess.run(
+            cmd, input=combined_prompt, text=True, check=False)
+    else:
+        result = subprocess.run(cmd, text=True, check=False)
     metadata["status"] = "success" if result.returncode == 0 else "failed"
     metadata["exit_code"] = result.returncode
     if result.returncode != 0:
-        print(f"ERROR: phase '{phase_name}' failed with exit code {result.returncode}", file=sys.stderr)
+        print(
+            f"ERROR: phase '{phase_name}' failed with exit code {result.returncode}", file=sys.stderr)
     return result.returncode, metadata
 
 
@@ -493,9 +566,11 @@ def run_phase(
             archive_workspace()
             create_lock(version_tag)
 
-        review_path = review_output_path(version_tag, assistant, phase) if mode == "review" else None
+        review_path = review_output_path(
+            version_tag, assistant, phase) if mode == "review" else None
         instruction = (
-            build_review_instruction(base_instruction, "P1 PLAN", issue, review_path)
+            build_review_instruction(
+                base_instruction, "P1 PLAN", issue, review_path)
             if mode == "review" and review_path
             else base_instruction
         )
@@ -506,10 +581,12 @@ def run_phase(
             prompt_file=PROMPTS_DIR / "plan.md",
             instruction=instruction,
             dry_run=dry_run,
+            assistant=assistant,
             mode=mode,
             review_output=review_path,
         )
-        metadata.update({"phase": phase, "artifacts": [str(artifacts["tasks"])], "issue": issue})
+        metadata.update({"phase": phase, "artifacts": [
+                        str(artifacts["tasks"])], "issue": issue})
         return code, metadata
 
     if mode == "write" and not skip_race_check:
@@ -578,9 +655,18 @@ def run_phase(
         "release": {
             "phase_name": "P7 RELEASE",
             "model": phase_models["release"],
-            "inputs": [ROOT / "loofi-fedora-tweaks" / "version.py", ROOT / "CHANGELOG.md"],
+            "inputs": [
+                ROOT / "loofi-fedora-tweaks" / "version.py",
+                ROOT / "CHANGELOG.md",
+                artifacts["tasks"],
+                artifacts["test_report"],
+                ROOT / "docs" / "releases" / f"RELEASE-NOTES-{version_tag}.md",
+            ],
             "prompt": PROMPTS_DIR / "release.md",
-            "instruction": f"Prepare release steps for {version_tag}.",
+            "instruction": (
+                f"Prepare release steps for {version_tag} using only the provided artifacts. "
+                "Do not execute shell commands, do not run tests, and do not modify repository files."
+            ),
             "artifacts": [artifacts["run_manifest"]],
         },
     }
@@ -589,9 +675,11 @@ def run_phase(
         return 2, {"phase": phase, "status": "error", "error": f"unknown phase '{phase}'", "timestamp": isoformat_utc()}
 
     config = phase_map[phase]
-    review_path = review_output_path(version_tag, assistant, phase) if mode == "review" else None
+    review_path = review_output_path(
+        version_tag, assistant, phase) if mode == "review" else None
     instruction = (
-        build_review_instruction(config["instruction"], config["phase_name"], issue, review_path)
+        build_review_instruction(
+            config["instruction"], config["phase_name"], issue, review_path)
         if mode == "review" and review_path
         else config["instruction"]
     )
@@ -603,6 +691,7 @@ def run_phase(
         prompt_file=config["prompt"],
         instruction=instruction,
         dry_run=dry_run,
+        assistant=assistant,
         mode=mode,
         review_output=review_path,
     )
@@ -620,20 +709,27 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Race-lock workflow runner")
     parser.add_argument(
         "--phase",
-        choices=["plan", "design", "build", "test", "doc", "package", "release", "all"],
+        choices=["plan", "design", "build", "test",
+                 "doc", "package", "release", "all"],
         required=False,
         help="Workflow phase to execute",
     )
     parser.add_argument("--target-version", help="Version, e.g. 24.0 or v24.0")
-    parser.add_argument("--dry-run", action="store_true", help="Print command instead of executing")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print command instead of executing")
 
-    parser.add_argument("--assistant", choices=["codex", "claude", "copilot"], default="codex")
+    parser.add_argument(
+        "--assistant", choices=["codex", "claude", "copilot"], default="codex")
     parser.add_argument("--mode", choices=["write", "review"], default="write")
     parser.add_argument("--issue", help="Optional issue id for traceability")
-    parser.add_argument("--owner", default=getpass.getuser(), help="Writer lock owner metadata")
-    parser.add_argument("--lock-ttl-minutes", type=int, default=120, help="Writer lock expiry in minutes")
-    parser.add_argument("--release-writer-lock", action="store_true", help="Release .writer-lock.json and exit")
-    parser.add_argument("--force-release-lock", action="store_true", help="Force-release writer lock")
+    parser.add_argument("--owner", default=getpass.getuser(),
+                        help="Writer lock owner metadata")
+    parser.add_argument("--lock-ttl-minutes", type=int,
+                        default=120, help="Writer lock expiry in minutes")
+    parser.add_argument("--release-writer-lock", action="store_true",
+                        help="Release .writer-lock.json and exit")
+    parser.add_argument("--force-release-lock",
+                        action="store_true", help="Force-release writer lock")
 
     args = parser.parse_args()
 
@@ -643,7 +739,8 @@ def main() -> int:
     REVIEWS_DIR.mkdir(parents=True, exist_ok=True)
 
     if args.release_writer_lock:
-        ok, message = release_writer_lock(args.assistant, args.owner, args.dry_run, args.force_release_lock)
+        ok, message = release_writer_lock(
+            args.assistant, args.owner, args.dry_run, args.force_release_lock)
         if ok:
             print(f"[workflow] {message}")
             return 0
@@ -651,7 +748,8 @@ def main() -> int:
         return 1
 
     if not args.phase or not args.target_version:
-        parser.error("--phase and --target-version are required unless --release-writer-lock is used")
+        parser.error(
+            "--phase and --target-version are required unless --release-writer-lock is used")
 
     try:
         version_tag = normalize_version_tag(args.target_version)
@@ -661,11 +759,13 @@ def main() -> int:
 
     phase_models = load_phase_models()
     manifest_path = artifact_paths(version_tag)["run_manifest"]
-    manifest_base = load_manifest(manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
+    manifest_base = load_manifest(
+        manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
 
     if args.phase == "all":
         for index, phase in enumerate(PHASE_ORDER):
-            skip_race_check = bool(args.dry_run and args.mode == "write" and index > 0)
+            skip_race_check = bool(
+                args.dry_run and args.mode == "write" and index > 0)
             code, entry = run_phase(
                 phase,
                 version_tag,
@@ -678,8 +778,10 @@ def main() -> int:
                 lock_ttl_minutes=args.lock_ttl_minutes,
                 skip_race_check=skip_race_check,
             )
-            append_manifest_entry(manifest_path, manifest_base, entry, args.dry_run)
-            manifest_base = load_manifest(manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
+            append_manifest_entry(
+                manifest_path, manifest_base, entry, args.dry_run)
+            manifest_base = load_manifest(
+                manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
             if code != 0:
                 return code
         return 0

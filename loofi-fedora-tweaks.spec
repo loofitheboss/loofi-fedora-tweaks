@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        29.0.0
+Version:        30.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,30 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Fri Feb 13 2026 Loofi <loofi@example.com> - 30.0.0-1
+- v30.0.0 Distribution & Reliability
+- Added packaging scripts: build_flatpak.sh, build_appimage.sh, build_sdist.sh
+- Added release notes for v30.0.0
+- Update checker reliability: structured assets, download pipeline, checksum verification
+- Marketplace offline mode with cache-first fallback
+- Rate limiter concurrency improvements
+- Auto-tuner history thread safety
+- CI quality gates: mypy/bandit blocking, coverage 75%, packaging jobs
+
+* Fri Feb 13 2026 Loofi <loofi@example.com> - 29.0.0-1
+- v29.0.0 Usability & Polish
+- Centralized error handler with global sys.excepthook override
+- Confirmation dialog for dangerous operations
+- Notification toast with animated slide-in
+- Status indicators on sidebar tabs
+- Settings reset per group
+- 151 test files, 3846+ tests, 76.8% coverage
+
+* Thu Feb 12 2026 Loofi <loofi@example.com> - 28.0.0-1
+- v28.0.0 Workflow Contract Reset
+- Clean-slate workflow state and runner-compatible planning artifacts
+- Architecture blueprint for artifact structure and validation rules
+
 * Thu Feb 12 2026 Loofi <loofi@example.com> - 27.0.0-1
 - v27.0.0 Marketplace Enhancement
 - Added CDN-first marketplace index with signed metadata and fallback behavior

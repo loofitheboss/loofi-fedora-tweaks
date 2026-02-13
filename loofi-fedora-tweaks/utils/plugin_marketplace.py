@@ -4,13 +4,14 @@ Part of v26.0 Phase 1 (T7).
 """
 import json
 import logging
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from core.plugins.integrity import IntegrityVerifier
+
 from utils.plugin_cdn_client import PluginCdnClient
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ DEFAULT_REPO_OWNER = "loofitheboss"
 DEFAULT_REPO_NAME = "loofi-plugins"
 DEFAULT_BRANCH = "main"
 DEFAULT_MARKETPLACE_API_BASE = "https://api.loofi.software/marketplace/v1"
+ERR_MARKETPLACE_OFFLINE = "marketplace_offline"
 
 
 @dataclass(frozen=True)
@@ -280,11 +282,13 @@ class PluginMarketplace:
                     MarketplaceReview(
                         plugin_id=str(entry.get("plugin_id", plugin_id)),
                         reviewer=str(entry.get("reviewer", "")),
-                        rating=self._coerce_int(entry.get("rating"), default=0),
+                        rating=self._coerce_int(
+                            entry.get("rating"), default=0),
                         title=str(entry.get("title", "")),
                         comment=str(entry.get("comment", "")),
                         created_at=str(entry.get("created_at", "")),
-                        updated_at=str(entry.get("updated_at")) if entry.get("updated_at") else None,
+                        updated_at=str(entry.get("updated_at")) if entry.get(
+                            "updated_at") else None,
                     )
                 )
 
@@ -359,10 +363,14 @@ class PluginMarketplace:
 
             aggregate = MarketplaceRatingAggregate(
                 plugin_id=plugin_id,
-                average_rating=float(data.get("average_rating", data.get("average", 0.0))),
-                rating_count=self._coerce_int(data.get("rating_count", data.get("count", 0))),
-                review_count=self._coerce_int(data.get("review_count", data.get("reviews", 0))),
-                breakdown={self._coerce_int(k): self._coerce_int(v) for k, v in breakdown_raw.items()},
+                average_rating=float(
+                    data.get("average_rating", data.get("average", 0.0))),
+                rating_count=self._coerce_int(
+                    data.get("rating_count", data.get("count", 0))),
+                review_count=self._coerce_int(
+                    data.get("review_count", data.get("reviews", 0))),
+                breakdown={self._coerce_int(k): self._coerce_int(
+                    v) for k, v in breakdown_raw.items()},
             )
             return MarketplaceResult(success=True, data=aggregate)
         except urllib.error.HTTPError as exc:
@@ -391,11 +399,14 @@ class PluginMarketplace:
 
             for required_field in required:
                 if required_field not in entry:
-                    logger.warning("Missing required field '%s' in plugin entry", required_field)
+                    logger.warning(
+                        "Missing required field '%s' in plugin entry", required_field)
                     return None
 
-            rating_average, rating_count, review_count = self._extract_rating_fields(entry)
-            verified_publisher, publisher_id, publisher_badge = self._extract_publisher_fields(entry)
+            rating_average, rating_count, review_count = self._extract_rating_fields(
+                entry)
+            verified_publisher, publisher_id, publisher_badge = self._extract_publisher_fields(
+                entry)
 
             return PluginMetadata(
                 id=entry["id"],
@@ -432,7 +443,8 @@ class PluginMarketplace:
         if not isinstance(ratings, dict):
             ratings = {}
 
-        average_rating_raw = ratings.get("average", entry.get("rating_average"))
+        average_rating_raw = ratings.get(
+            "average", entry.get("rating_average"))
         average_rating = None
         if average_rating_raw is not None:
             try:
@@ -442,9 +454,11 @@ class PluginMarketplace:
 
         return (
             average_rating,
-            PluginMarketplace._coerce_int(ratings.get("count", entry.get("rating_count", 0))),
+            PluginMarketplace._coerce_int(ratings.get(
+                "count", entry.get("rating_count", 0))),
             PluginMarketplace._coerce_int(
-                ratings.get("review_count", ratings.get("reviews", entry.get("review_count", 0)))
+                ratings.get("review_count", ratings.get(
+                    "reviews", entry.get("review_count", 0)))
             ),
         )
 
@@ -455,12 +469,16 @@ class PluginMarketplace:
         if not isinstance(verification, dict):
             verification = {}
 
-        publisher_id_raw = verification.get("publisher_id", entry.get("publisher_id"))
-        publisher_badge_raw = verification.get("badge", entry.get("publisher_badge"))
+        publisher_id_raw = verification.get(
+            "publisher_id", entry.get("publisher_id"))
+        publisher_badge_raw = verification.get(
+            "badge", entry.get("publisher_badge"))
         publisher_id = str(publisher_id_raw) if publisher_id_raw else None
-        publisher_badge = str(publisher_badge_raw) if publisher_badge_raw else None
+        publisher_badge = str(
+            publisher_badge_raw) if publisher_badge_raw else None
 
-        declared_verified = bool(verification.get("verified", entry.get("verified_publisher", False)))
+        declared_verified = bool(verification.get(
+            "verified", entry.get("verified_publisher", False)))
         signed_markers_present = (
             "signature" in verification
             or "trust_chain" in verification
@@ -474,7 +492,8 @@ class PluginMarketplace:
                 signature=str(verification.get("signature", "") or ""),
                 trust_chain=verification.get("trust_chain", []),
             )
-            verified_state = bool(verification_result.success and verification_result.signature_valid)
+            verified_state = bool(
+                verification_result.success and verification_result.signature_valid)
             if declared_verified and not verified_state:
                 logger.warning(
                     "Publisher verification rejected for plugin '%s': %s",
@@ -507,7 +526,8 @@ class PluginMarketplace:
         """
         # Return cached data if available
         if not force_refresh and self._cache is not None:
-            logger.debug("Returning cached plugin index (%d plugins)", len(self._cache))
+            logger.debug(
+                "Returning cached plugin index (%d plugins)", len(self._cache))
             return MarketplaceResult(success=True, data=self._cache, source="cache")
 
         try:
@@ -523,12 +543,14 @@ class PluginMarketplace:
                 logger.info("Fetched plugin index from CDN")
             else:
                 fallback_url = f"{self.base_url}/plugins.json"
-                logger.warning("CDN unavailable or invalid index, falling back to %s", fallback_url)
+                logger.warning(
+                    "CDN unavailable or invalid index, falling back to %s", fallback_url)
                 data = self._fetch_json(fallback_url)
 
             if not data:
                 if self._cache is not None:
-                    logger.warning("Marketplace network unavailable; returning cached index")
+                    logger.warning(
+                        "Marketplace network unavailable; returning cached index")
                     return MarketplaceResult(
                         success=True,
                         data=self._cache,
@@ -537,7 +559,7 @@ class PluginMarketplace:
                     )
                 return MarketplaceResult(
                     success=False,
-                    error="Failed to fetch plugin index (network error or invalid JSON)",
+                    error=ERR_MARKETPLACE_OFFLINE,
                     offline=True,
                     source="network",
                 )
@@ -681,10 +703,12 @@ class PluginMarketplace:
 
             # Version check (if specific version requested)
             if version and plugin.version != version:
-                logger.warning("Requested version %s, but marketplace has %s", version, plugin.version)
+                logger.warning(
+                    "Requested version %s, but marketplace has %s", version, plugin.version)
                 # Could implement version-specific downloads later
 
-            logger.info("Downloading %s v%s from %s", plugin_id, plugin.version, plugin.download_url)
+            logger.info("Downloading %s v%s from %s", plugin_id,
+                        plugin.version, plugin.download_url)
 
             # Download archive
             req = urllib.request.Request(

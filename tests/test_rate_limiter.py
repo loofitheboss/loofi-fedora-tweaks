@@ -41,3 +41,18 @@ def test_parallel_waits_complete_without_spin_errors():
     assert len(results) == 8
     assert all(isinstance(item, bool) for item in results)
     assert any(results)
+
+
+def test_wait_immediate_when_tokens_already_available():
+    limiter = TokenBucketRateLimiter(rate=100.0, capacity=3)
+    ok = limiter.wait(tokens=1, timeout=0.1)
+    assert ok is True
+
+
+def test_available_tokens_is_bounded_by_capacity():
+    limiter = TokenBucketRateLimiter(rate=1000.0, capacity=2)
+    time.sleep(0.01)
+    tokens = limiter.available_tokens
+
+    assert tokens <= 2
+    assert tokens >= 0

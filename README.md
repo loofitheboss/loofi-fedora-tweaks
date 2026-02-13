@@ -47,6 +47,20 @@ It is designed to be practical for both casual users and advanced users:
 
 Full notes: [`docs/releases/RELEASE-NOTES-v30.0.0.md`](docs/releases/RELEASE-NOTES-v30.0.0.md)
 
+Verification commands used for v30 reliability/distribution closeout:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python -m pytest \
+  tests/test_update_checker.py \
+  tests/test_plugin_marketplace.py \
+  tests/test_packaging_scripts.py \
+  tests/test_rate_limiter.py \
+  tests/test_auto_tuner.py -v
+
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
+  --cov=loofi-fedora-tweaks --cov-fail-under=75
+```
+
 ---
 
 ## What Is New in v29.0.0?
@@ -63,6 +77,7 @@ Full notes: [`docs/releases/RELEASE-NOTES-v30.0.0.md`](docs/releases/RELEASE-NOT
 - **Settings reset per group** — "Reset Appearance" and "Reset Behavior" buttons in Settings tab.
 - **Keyboard accessibility** — Sidebar keyboard focus restored with StrongFocus policy.
 - **95 new tests** across 5 test files covering all v29 features.
+- **3846+ total tests** across 151 test files with 76.8% line coverage.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v29.0.0.md`](docs/releases/RELEASE-NOTES-v29.0.0.md)
 
@@ -224,7 +239,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3846 passing, 76.8% coverage
 ```
 
 Build RPM:

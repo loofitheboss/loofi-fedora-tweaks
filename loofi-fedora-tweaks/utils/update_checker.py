@@ -2,13 +2,13 @@
 App update checker - fetches latest release from GitHub API.
 Part of v14.0 "Horizon Update".
 """
+import hashlib
 import json
 import logging
-import hashlib
 import os
 import subprocess
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -17,6 +17,13 @@ logger = logging.getLogger(__name__)
 
 GITHUB_REPO = "loofitheboss/loofi-fedora-tweaks"
 RELEASES_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
+ERR_NO_UPDATE = "no_update_available"
+ERR_NO_ASSET = "no_supported_asset"
+ERR_DOWNLOAD_FAILED = "download_failed"
+ERR_CHECKSUM_MISMATCH = "checksum_mismatch"
+ERR_SIGNATURE_FAILED = "signature_verification_failed"
+ERR_NETWORK = "network_unavailable"
 
 
 @dataclass
@@ -61,6 +68,20 @@ class DownloadResult:
     error: Optional[str] = None
 
 
+@dataclass
+class AutoUpdateResult:
+    """Result of end-to-end update orchestration."""
+    success: bool
+    stage: str
+    update_info: Optional[UpdateInfo] = None
+    selected_asset: Optional[UpdateAsset] = None
+    download: Optional[DownloadResult] = None
+    verify: Optional[VerifyResult] = None
+    offline: bool = False
+    source: str = "network"
+    error: Optional[str] = None
+
+
 class UpdateChecker:
     """Check for application updates via GitHub releases API."""
 
@@ -86,7 +107,8 @@ class UpdateChecker:
         try:
             req = urllib.request.Request(
                 RELEASES_URL,
-                headers={"Accept": "application/vnd.github.v3+json", "User-Agent": "loofi-fedora-tweaks"},
+                headers={"Accept": "application/vnd.github.v3+json",
+                         "User-Agent": "loofi-fedora-tweaks"},
             )
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -98,7 +120,8 @@ class UpdateChecker:
             assets = [
                 UpdateAsset(
                     name=str(asset.get("name", "") or ""),
-                    download_url=str(asset.get("browser_download_url", "") or ""),
+                    download_url=str(
+                        asset.get("browser_download_url", "") or ""),
                     size=int(asset.get("size", 0) or 0),
                     content_type=str(asset.get("content_type", "") or ""),
                 )
@@ -146,7 +169,8 @@ class UpdateChecker:
     @staticmethod
     def select_download_asset(
         assets: List[UpdateAsset],
-        preferred_ext: Tuple[str, ...] = (".rpm", ".flatpak", ".AppImage", ".tar.gz"),
+        preferred_ext: Tuple[str, ...] = (
+            ".rpm", ".flatpak", ".AppImage", ".tar.gz"),
     ) -> Optional[UpdateAsset]:
         """Select a preferred asset based on extension ordering."""
         if not assets:
@@ -158,6 +182,100 @@ class UpdateChecker:
                 if asset.name.lower().endswith(ext):
                     return asset
         return assets[0]
+
+    @staticmethod
+    def resolve_artifact_preference(
+        package_manager: str,
+        explicit_channel: str = "auto",
+    ) -> Tuple[str, ...]:
+        """Resolve asset extension preference order for current system/update channel."""
+        default_dnf = (".rpm", ".flatpak", ".AppImage", ".tar.gz")
+        default_ostree = (".flatpak", ".AppImage", ".rpm", ".tar.gz")
+
+        if explicit_channel == "rpm":
+            return default_dnf
+        if explicit_channel == "flatpak":
+            return (".flatpak", ".rpm", ".AppImage", ".tar.gz")
+        if explicit_channel == "appimage":
+            return (".AppImage", ".flatpak", ".rpm", ".tar.gz")
+
+        return default_ostree if package_manager == "rpm-ostree" else default_dnf
+
+    @staticmethod
+    def run_auto_update(
+        artifact_preference: Tuple[str, ...],
+        target_dir: str,
+        timeout: int = 30,
+        use_cache: bool = True,
+        expected_sha256: str = "",
+        signature_path: Optional[str] = None,
+        public_key_path: Optional[str] = None,
+    ) -> AutoUpdateResult:
+        """Run full update flow: check, select, download, verify."""
+        info = UpdateChecker.check_for_updates(
+            timeout=timeout, use_cache=use_cache)
+        if info is None:
+            return AutoUpdateResult(success=False, stage="check", error=ERR_NETWORK, offline=True, source="network")
+
+        base_result = {
+            "update_info": info,
+            "offline": info.offline,
+            "source": info.source,
+        }
+
+        if not info.is_newer:
+            return AutoUpdateResult(success=False, stage="check", error=ERR_NO_UPDATE, **base_result)
+
+        selected_asset = UpdateChecker.select_download_asset(
+            info.assets, preferred_ext=artifact_preference)
+        if selected_asset is None:
+            return AutoUpdateResult(success=False, stage="select", error=ERR_NO_ASSET, **base_result)
+
+        download_result = UpdateChecker.download_update(
+            selected_asset, target_dir, timeout=timeout)
+        if not download_result.ok or not download_result.file_path:
+            return AutoUpdateResult(
+                success=False,
+                stage="download",
+                selected_asset=selected_asset,
+                download=download_result,
+                error=ERR_DOWNLOAD_FAILED,
+                **base_result,
+            )
+
+        verify_result = UpdateChecker.verify_download(
+            file_path=download_result.file_path,
+            expected_sha256=expected_sha256,
+            signature_path=signature_path,
+            public_key_path=public_key_path,
+        )
+        if not verify_result.ok:
+            if verify_result.method == "sha256":
+                mapped_error = ERR_CHECKSUM_MISMATCH
+            elif verify_result.method == "signature":
+                mapped_error = ERR_SIGNATURE_FAILED
+            else:
+                mapped_error = verify_result.error or ERR_SIGNATURE_FAILED
+
+            return AutoUpdateResult(
+                success=False,
+                stage="verify",
+                selected_asset=selected_asset,
+                download=download_result,
+                verify=verify_result,
+                error=mapped_error,
+                **base_result,
+            )
+
+        return AutoUpdateResult(
+            success=True,
+            stage="complete",
+            selected_asset=selected_asset,
+            download=download_result,
+            verify=verify_result,
+            error=None,
+            **base_result,
+        )
 
     @staticmethod
     def download_update(asset: UpdateAsset, target_dir: str, timeout: int = 30) -> DownloadResult:
@@ -203,7 +321,8 @@ class UpdateChecker:
 
             command = ["gpg", "--verify", signature_path, file_path]
             try:
-                result = subprocess.run(command, capture_output=True, text=True, check=False)
+                result = subprocess.run(
+                    command, capture_output=True, text=True, check=False)
             except OSError as exc:
                 return VerifyResult(ok=False, method=method, error=f"Signature verification failed: {exc}")
 

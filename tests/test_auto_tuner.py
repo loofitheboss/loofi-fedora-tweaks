@@ -1,14 +1,19 @@
 """Tests for performance auto-tuner."""
-import unittest
-import sys
-import os
+from utils.auto_tuner import (
+    AutoTuner,
+    TuningHistoryEntry,
+    TuningRecommendation,
+    WorkloadProfile,
+)
 import json
+import os
+import sys
 import threading
-from unittest.mock import patch, MagicMock, mock_open, call
+import unittest
+from unittest.mock import MagicMock, call, mock_open, patch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
-
-from utils.auto_tuner import AutoTuner, WorkloadProfile, TuningRecommendation, TuningHistoryEntry
+sys.path.insert(0, os.path.join(os.path.dirname(
+    __file__), "..", "loofi-fedora-tweaks"))
 
 
 class TestWorkloadProfile(unittest.TestCase):
@@ -278,7 +283,8 @@ class TestRecommend(unittest.TestCase):
     @patch('utils.auto_tuner.AutoTuner.detect_workload')
     def test_recommend_auto_detect(self, mock_detect):
         """Test recommend calls detect_workload when workload is None."""
-        mock_detect.return_value = WorkloadProfile("idle", 3.0, 15.0, 0.2, "Idle.")
+        mock_detect.return_value = WorkloadProfile(
+            "idle", 3.0, 15.0, 0.2, "Idle.")
         rec = AutoTuner.recommend(None)
         mock_detect.assert_called_once()
         self.assertEqual(rec.workload, "idle")
@@ -303,7 +309,8 @@ class TestApplyMethods(unittest.TestCase):
 
     def test_apply_recommendation_returns_tuple(self):
         """Test apply_recommendation returns (str, list, str) 3-tuple."""
-        rec = TuningRecommendation("performance", 10, "none", "never", "Gaming.", "gaming")
+        rec = TuningRecommendation(
+            "performance", 10, "none", "never", "Gaming.", "gaming")
         result = AutoTuner.apply_recommendation(rec)
         self.assertIsInstance(result, tuple)
         self.assertEqual(len(result), 3)
@@ -322,7 +329,8 @@ class TestApplyMethods(unittest.TestCase):
 
     def test_apply_recommendation_uses_pkexec(self):
         """Test apply_recommendation command starts with pkexec."""
-        rec = TuningRecommendation("performance", 10, "none", "never", "Gaming.", "gaming")
+        rec = TuningRecommendation(
+            "performance", 10, "none", "never", "Gaming.", "gaming")
         cmd, args, desc = AutoTuner.apply_recommendation(rec)
         self.assertEqual(cmd, "pkexec")
         self.assertIn("performance", " ".join(args))
@@ -403,8 +411,9 @@ class TestTuningHistory(unittest.TestCase):
         self.assertFalse(result[1].applied)
 
     @patch('utils.auto_tuner.os.makedirs')
+    @patch('utils.auto_tuner.os.replace')
     @patch('utils.auto_tuner.os.path.isfile', return_value=False)
-    def test_save_entry(self, mock_isfile, mock_makedirs):
+    def test_save_entry(self, mock_isfile, mock_replace, mock_makedirs):
         """Test save_tuning_entry writes JSON to disk."""
         entry = TuningHistoryEntry(
             timestamp=1700000000.0,
@@ -417,6 +426,7 @@ class TestTuningHistory(unittest.TestCase):
             AutoTuner.save_tuning_entry(entry)
 
         mock_makedirs.assert_called_once()
+        mock_replace.assert_called_once()
         m.assert_called_once()
         handle = m()
         written = "".join(c.args[0] for c in handle.write.call_args_list)
@@ -425,8 +435,9 @@ class TestTuningHistory(unittest.TestCase):
         self.assertEqual(parsed[0]["workload"], "idle")
 
     @patch('utils.auto_tuner.os.makedirs')
+    @patch('utils.auto_tuner.os.replace')
     @patch('utils.auto_tuner.os.path.isfile', return_value=True)
-    def test_history_max_50(self, mock_isfile, mock_makedirs):
+    def test_history_max_50(self, mock_isfile, mock_replace, mock_makedirs):
         """Test tuning history is truncated to 50 entries."""
         existing = [
             {
@@ -453,6 +464,7 @@ class TestTuningHistory(unittest.TestCase):
         self.assertLessEqual(len(parsed), 50)
         # Last entry should be our new one
         self.assertEqual(parsed[-1]["workload"], "heavy")
+        mock_replace.assert_called_once()
 
     @patch('utils.auto_tuner.os.path.isfile', return_value=True)
     def test_history_corrupted_json(self, mock_isfile):
@@ -566,6 +578,86 @@ class TestInternalHelpers(unittest.TestCase):
         result = AutoTuner._read_io_scheduler()
         self.assertEqual(result, "unknown")
 
+    @patch('utils.auto_tuner.AutoTuner._read_io_scheduler', return_value="mq-deadline")
+    @patch('utils.auto_tuner.os.path.exists', return_value=True)
+    @patch('builtins.open', side_effect=OSError("denied"))
+    def test_get_current_settings_handles_open_oserrors(self, mock_open_fn, mock_exists, mock_io_sched):
+        """Test get_current_settings keeps defaults when file reads raise OSError."""
+        settings = AutoTuner.get_current_settings()
+        self.assertEqual(settings["governor"], "unknown")
+        self.assertEqual(settings["swappiness"], -1)
+        self.assertEqual(settings["thp"], "unknown")
+
+    @patch('utils.auto_tuner.time.sleep')
+    @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times')
+    def test_read_cpu_percent_second_snapshot_missing(self, mock_agg, mock_sleep):
+        """Test _read_cpu_percent returns 0 when second snapshot is missing."""
+        mock_agg.side_effect = [[100, 0, 0, 900, 0, 0, 0, 0], None]
+        result = AutoTuner._read_cpu_percent()
+        self.assertEqual(result, 0.0)
+
+    @patch('utils.auto_tuner.time.sleep')
+    @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times')
+    def test_read_cpu_percent_total_delta_non_positive(self, mock_agg, mock_sleep):
+        """Test _read_cpu_percent returns 0 for non-positive total delta."""
+        snap = [100, 0, 0, 900, 0, 0, 0, 0]
+        mock_agg.side_effect = [snap, snap]
+        result = AutoTuner._read_cpu_percent()
+        self.assertEqual(result, 0.0)
+
+    @patch('utils.auto_tuner.time.sleep', side_effect=RuntimeError("sleep failed"))
+    @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times', return_value=[100, 0, 0, 900, 0, 0, 0, 0])
+    def test_read_cpu_percent_exception_path(self, mock_agg, mock_sleep):
+        """Test _read_cpu_percent catches unexpected exceptions and returns 0."""
+        result = AutoTuner._read_cpu_percent()
+        self.assertEqual(result, 0.0)
+
+    @patch('utils.auto_tuner.time.sleep')
+    @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times')
+    def test_read_io_wait_branch_paths(self, mock_agg, mock_sleep):
+        """Test _read_io_wait handles short snapshots and non-positive deltas."""
+        mock_agg.side_effect = [None]
+        self.assertEqual(AutoTuner._read_io_wait(), 0.0)
+
+        mock_agg.side_effect = [[1, 2, 3, 4], [1, 2, 3, 4]]
+        self.assertEqual(AutoTuner._read_io_wait(), 0.0)
+
+        snap = [100, 0, 0, 900, 10, 0, 0, 0]
+        mock_agg.side_effect = [snap, snap]
+        self.assertEqual(AutoTuner._read_io_wait(), 0.0)
+
+    @patch('utils.auto_tuner.time.sleep', side_effect=RuntimeError("sleep failed"))
+    @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times', return_value=[100, 0, 0, 900, 10, 0, 0, 0])
+    def test_read_io_wait_exception_path(self, mock_agg, mock_sleep):
+        """Test _read_io_wait catches unexpected exception and returns 0."""
+        self.assertEqual(AutoTuner._read_io_wait(), 0.0)
+
+    @patch('utils.auto_tuner.os.listdir', side_effect=OSError("boom"))
+    @patch('utils.auto_tuner.os.path.isdir', return_value=True)
+    def test_find_first_block_device_oserror(self, mock_isdir, mock_listdir):
+        """Test _find_first_block_device returns empty on OSError."""
+        self.assertEqual(AutoTuner._find_first_block_device(), "")
+
+    @patch('utils.auto_tuner.AutoTuner._find_first_block_device', return_value='sda')
+    @patch('utils.auto_tuner.os.path.exists', return_value=False)
+    def test_read_io_scheduler_missing_path(self, mock_exists, mock_find):
+        """Test _read_io_scheduler returns unknown when scheduler file is missing."""
+        self.assertEqual(AutoTuner._read_io_scheduler(), "unknown")
+
+    @patch('utils.auto_tuner.AutoTuner._find_first_block_device', return_value='sda')
+    @patch('utils.auto_tuner.os.path.exists', return_value=True)
+    @patch('builtins.open', mock_open(read_data='kyber'))
+    def test_read_io_scheduler_without_brackets(self, mock_exists, mock_find):
+        """Test _read_io_scheduler falls back to full content when no bracket token exists."""
+        self.assertEqual(AutoTuner._read_io_scheduler(), "kyber")
+
+    @patch('utils.auto_tuner.AutoTuner._find_first_block_device', return_value='sda')
+    @patch('utils.auto_tuner.os.path.exists', return_value=True)
+    @patch('builtins.open', side_effect=OSError('denied'))
+    def test_read_io_scheduler_oserror(self, mock_open_fn, mock_exists, mock_find):
+        """Test _read_io_scheduler returns unknown on OSError."""
+        self.assertEqual(AutoTuner._read_io_scheduler(), "unknown")
+
 
 class TestAutoTunerConcurrency(unittest.TestCase):
     """Concurrency-focused tests for tuning history operations."""
@@ -573,6 +665,7 @@ class TestAutoTunerConcurrency(unittest.TestCase):
     @patch('utils.auto_tuner._CONFIG_DIR', '/tmp/loofi-test-config')
     @patch('utils.auto_tuner._HISTORY_PATH', '/tmp/loofi-test-config/tuning_history.json')
     @patch('utils.auto_tuner.os.makedirs')
+    @patch('utils.auto_tuner.os.replace')
     @patch('builtins.open', new_callable=mock_open, read_data='[]')
     @patch('utils.auto_tuner.os.path.isfile', return_value=True)
     @patch('utils.auto_tuner.json.dump')
@@ -583,6 +676,7 @@ class TestAutoTunerConcurrency(unittest.TestCase):
         mock_json_dump,
         mock_isfile,
         mock_file,
+        mock_replace,
         mock_makedirs,
     ):
         """Concurrent save/read operations do not raise and keep bounded writes."""

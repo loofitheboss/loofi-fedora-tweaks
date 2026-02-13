@@ -169,7 +169,7 @@ Two files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (1514 passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (3846 passing, 76.8% coverage)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 

@@ -93,7 +93,7 @@ if ConfirmActionDialog.confirm(self, "Delete all snapshots", "This cannot be und
 - **Both paths**: Test success AND failure for every operation
 - **No root**: Tests run in CI without privileges or network
 - **Path setup**: `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))`
-- **Coverage target**: 65% (v29), 75% (v30), 80% (v31)
+- **Coverage target**: 75% (v29 achieved: 76.8%), 80% (v30), 85% (v31)
 
 ---
 

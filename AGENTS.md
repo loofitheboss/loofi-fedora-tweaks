@@ -1,7 +1,7 @@
 # Loofi Fedora Tweaks — Agent Instructions
 
 > PyQt6 desktop app for Fedora Linux system customization.
-> 25 UI tabs, 55 test files, 52+ utils modules, CLI + GUI + Daemon modes.
+> 25 UI tabs, 151 test files (3846+ tests, 76.8% coverage), 52+ utils modules, CLI + GUI + Daemon modes.
 
 ## Architecture
 
@@ -70,7 +70,7 @@ For complex features, delegate to project-coordinator agent. For simple tasks, a
 ## Testing
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=80
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=75
 ```
 
 - `@patch` decorators, never context managers

@@ -10,8 +10,8 @@ You are the primary AI developer for Loofi Fedora Tweaks.
 Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## PROJECT OVERVIEW
-- PyQt6-based desktop app for Fedora Linux (current: v24.0.0)
-- 25 UI tabs, 55 test files (1514+ tests), 52+ utils modules
+- PyQt6-based desktop app for Fedora Linux (current: v29.0.0)
+- 25 UI tabs, 151 test files (3846+ tests, 76.8% coverage), 52+ utils modules
 - Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`)
 - Agent-based workflow defined in `.github/claude-agents/`
 

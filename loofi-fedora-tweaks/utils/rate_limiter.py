@@ -26,15 +26,20 @@ class TokenBucketRateLimiter:
         self._tokens = float(capacity)
         self._last_refill = time.monotonic()
         self._lock = threading.Lock()
-        self._wait_event = threading.Event()
+
+    def _refill_locked(self, now: float) -> None:
+        """Refill token bucket. Caller must hold _lock."""
+        elapsed = now - self._last_refill
+        if elapsed <= 0:
+            return
+        self._tokens = min(self.capacity, self._tokens + elapsed * self.rate)
+        self._last_refill = now
 
     def acquire(self, tokens: int = 1) -> bool:
         """Try to acquire tokens. Returns True if allowed, False if rate limited."""
         with self._lock:
             now = time.monotonic()
-            elapsed = now - self._last_refill
-            self._tokens = min(self.capacity, self._tokens + elapsed * self.rate)
-            self._last_refill = now
+            self._refill_locked(now)
 
             if self._tokens >= tokens:
                 self._tokens -= tokens
@@ -51,32 +56,33 @@ class TokenBucketRateLimiter:
         Returns:
             True if tokens acquired, False if timed out.
         """
-        start_time = time.monotonic()
-        deadline = start_time + timeout
+        deadline = time.monotonic() + max(0.0, timeout)
         while True:
-            if self.acquire(tokens):
-                return True
-
-            now = time.monotonic()
-            if now >= deadline:
-                return False
-
             with self._lock:
-                if self._tokens >= tokens:
-                    sleep_time = 0.0
-                elif self.rate <= 0:
-                    sleep_time = deadline - now
-                else:
-                    needed = max(0.0, float(tokens) - self._tokens)
-                    sleep_time = needed / self.rate
+                now = time.monotonic()
+                self._refill_locked(now)
 
-            bounded_sleep = max(0.0, min(0.25, sleep_time, deadline - now))
-            self._wait_event.wait(bounded_sleep)
+                if self._tokens >= tokens:
+                    self._tokens -= tokens
+                    return True
+
+                remaining = deadline - now
+                if remaining <= 0:
+                    return False
+
+                if self.rate <= 0:
+                    sleep_time = remaining
+                else:
+                    needed_tokens = max(0.0, float(tokens) - self._tokens)
+                    sleep_time = needed_tokens / self.rate
+
+            bounded_sleep = max(0.0, min(0.25, sleep_time, remaining))
+            time.sleep(bounded_sleep)
 
     @property
     def available_tokens(self) -> float:
         """Current number of available tokens."""
         with self._lock:
             now = time.monotonic()
-            elapsed = now - self._last_refill
-            return min(self.capacity, self._tokens + elapsed * self.rate)
+            self._refill_locked(now)
+            return self._tokens
