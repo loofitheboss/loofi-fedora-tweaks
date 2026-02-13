@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox,
 )
 
+from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
 from utils.health_timeline import HealthTimeline
 from core.plugins.interface import PluginInterface
@@ -145,6 +146,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
             QHeaderView.ResizeMode.Stretch
         )
         self.metrics_table.setMaximumHeight(250)
+        BaseTab.configure_table(self.metrics_table)
         table_layout.addWidget(self.metrics_table)
         layout.addWidget(table_group)
 

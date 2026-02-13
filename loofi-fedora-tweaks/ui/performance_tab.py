@@ -145,6 +145,7 @@ class PerformanceTab(BaseTab):
         )
         self.history_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.history_table.setMaximumHeight(180)
+        BaseTab.configure_table(self.history_table)
         hl_layout.addWidget(self.history_table)
 
         layout.addWidget(history_group)

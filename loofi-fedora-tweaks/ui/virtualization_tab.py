@@ -21,6 +21,7 @@ from utils.virtualization import VirtualizationManager
 from utils.vm_manager import VMManager, VM_FLAVORS
 from utils.vfio import VFIOAssistant
 from utils.disposable_vm import DisposableVMManager
+from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
@@ -134,6 +135,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         self.vm_table.setEditTriggers(
             QTableWidget.EditTrigger.NoEditTriggers
         )
+        BaseTab.configure_table(self.vm_table)
         layout.addWidget(self.vm_table)
 
         # Action buttons

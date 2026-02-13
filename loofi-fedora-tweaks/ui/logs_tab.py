@@ -100,6 +100,7 @@ class LogsTab(BaseTab):
         )
         self.pattern_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.pattern_table.setMaximumHeight(150)
+        BaseTab.configure_table(self.pattern_table)
         pg_layout.addWidget(self.pattern_table)
 
         layout.addWidget(pattern_group)
@@ -191,6 +192,7 @@ class LogsTab(BaseTab):
         hdr.setSectionResizeMode(2, QHeaderView.ResizeMode.Interactive)
         hdr.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         self.log_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.log_table)
         bl_layout.addWidget(self.log_table)
 
         layout.addWidget(browse_group)

@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
 
+from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
 from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
@@ -194,6 +195,7 @@ class SecurityTab(QWidget, PluginInterface):
             QHeaderView.ResizeMode.Stretch
         )
         self.port_table.setMaximumHeight(150)
+        BaseTab.configure_table(self.port_table)
         layout.addWidget(self.port_table)
 
         self._refresh_ports()
@@ -362,7 +364,7 @@ class SecurityTab(QWidget, PluginInterface):
 
             status_item = QTableWidgetItem("⚠️ Risk" if port.is_risky else "✅ OK")
             if port.is_risky:
-                status_item.setForeground(QColor("#e74c3c"))
+                status_item.setForeground(QColor("#f38ba8"))
             self.port_table.setItem(row, 4, status_item)
 
     def _block_port(self):

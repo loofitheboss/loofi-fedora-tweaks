@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
 )
 
+from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
 from utils.state_teleport import StateTeleportManager
 from utils.file_drop import FileDropManager
@@ -168,6 +169,7 @@ class TeleportTab(QWidget, PluginInterface):
         self.packages_table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows
         )
+        BaseTab.configure_table(self.packages_table)
         layout.addWidget(self.packages_table)
 
         # Action buttons

@@ -293,29 +293,57 @@ QToolTip {
 /* Table / Tree Views (Process Manager, Services, etc.) */
 QTableWidget, QTreeWidget, QTableView, QTreeView {
     background-color: #1e1e2e;
-    alternate-background-color: #232336;
-    color: #cdd6f4;
+    alternate-background-color: #252540;
+    color: #e4e8f4;
     border: 1px solid #45475a;
     border-radius: 6px;
     gridline-color: #45475a;
     selection-background-color: #585b70;
     selection-color: #ffffff;
     padding: 2px;
+    font-size: 10.5pt;
 }
 
 QTableWidget::item, QTreeWidget::item {
-    padding: 4px 6px;
+    color: #e4e8f4;
+    padding: 6px 8px;
+    min-height: 28px;
+    border-bottom: 1px solid #313244;
+}
+
+QTableWidget::item:alternate, QTreeWidget::item:alternate {
+    background-color: #252540;
+}
+
+QTableWidget::item:selected, QTreeWidget::item:selected {
+    background-color: #585b70;
+    color: #ffffff;
+}
+
+/* Hide vertical header (row numbers) for cleaner look */
+QHeaderView:vertical {
+    background-color: #1e1e2e;
+    border: none;
+}
+
+QHeaderView::section:vertical {
+    background-color: #1e1e2e;
+    color: #6c7086;
+    border: none;
+    border-bottom: 1px solid #313244;
+    padding: 4px;
+    font-size: 9pt;
 }
 
 QHeaderView::section {
     background-color: #313244;
-    color: #cdd6f4;
+    color: #e4e8f4;
     border: none;
     border-bottom: 2px solid #89b4fa;
     border-right: 1px solid #45475a;
-    padding: 8px 10px;
+    padding: 10px 12px;
     font-weight: bold;
-    font-size: 10pt;
+    font-size: 10.5pt;
 }
 
 /* Menu / Context Menu */

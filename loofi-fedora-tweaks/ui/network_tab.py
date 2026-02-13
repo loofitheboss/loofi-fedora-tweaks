@@ -97,6 +97,7 @@ class NetworkTab(BaseTab):
         ])
         self.iface_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.iface_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.iface_table)
         iface_layout.addWidget(self.iface_table)
 
         btn_row = QHBoxLayout()
@@ -116,8 +117,7 @@ class NetworkTab(BaseTab):
             self.tr("SSID"), self.tr("Signal"), self.tr("Security"), self.tr("Status"),
         ])
         self.wifi_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        wifi_layout.addWidget(self.wifi_table)
+        self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)        BaseTab.configure_table(self.wifi_table)        wifi_layout.addWidget(self.wifi_table)
 
         wifi_btn_row = QHBoxLayout()
         btn_scan_wifi = QPushButton(self.tr("Scan Wi-Fi"))
@@ -144,8 +144,7 @@ class NetworkTab(BaseTab):
             self.tr("Name"), self.tr("Type"), self.tr("Status"),
         ])
         self.vpn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        vpn_layout.addWidget(self.vpn_table)
+        self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)        BaseTab.configure_table(self.vpn_table)        vpn_layout.addWidget(self.vpn_table)
 
         vpn_btn_row = QHBoxLayout()
         btn_refresh_vpn = QPushButton(self.tr("Refresh VPN"))
@@ -304,6 +303,7 @@ class NetworkTab(BaseTab):
         ])
         self.traffic_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.traffic_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.traffic_table)
         traffic_layout.addWidget(self.traffic_table)
         container.addWidget(traffic_group)
 
@@ -318,6 +318,7 @@ class NetworkTab(BaseTab):
         ])
         self.conn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.conn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.conn_table)
         conn_layout.addWidget(self.conn_table)
 
         conn_btn_row = QHBoxLayout()

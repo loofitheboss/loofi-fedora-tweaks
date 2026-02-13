@@ -98,6 +98,7 @@ class SnapshotTab(BaseTab):
         )
         self.snap_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.snap_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        BaseTab.configure_table(self.snap_table)
         sl_layout.addWidget(self.snap_table)
 
         layout.addWidget(snap_group)

@@ -172,6 +172,7 @@ class AgentsTab(BaseTab):
             header.setSectionResizeMode(7, QHeaderView.ResizeMode.Fixed)
         self.agent_table.setColumnWidth(7, 200)
         self.agent_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        BaseTab.configure_table(self.agent_table)
         layout.addWidget(self.agent_table)
 
         # Action buttons
@@ -275,6 +276,7 @@ class AgentsTab(BaseTab):
         if header is not None:
             header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.activity_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        BaseTab.configure_table(self.activity_table)
         layout.addWidget(self.activity_table)
 
         btn_layout = QHBoxLayout()
@@ -359,9 +361,9 @@ class AgentsTab(BaseTab):
 
             status_item = QTableWidgetItem(state.status.value)
             if state.status.value == "running":
-                status_item.setForeground(Qt.GlobalColor.green)
+                status_item.setForeground(QColor("#a6e3a1"))
             elif state.status.value == "error":
-                status_item.setForeground(Qt.GlobalColor.red)
+                status_item.setForeground(QColor("#f38ba8"))
             self.agent_table.setItem(row, 2, status_item)
 
             self.agent_table.setItem(row, 3, QTableWidgetItem(str(state.run_count)))

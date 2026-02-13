@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QFrame, QMessageBox
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
@@ -556,7 +557,7 @@ class _OverlaysSubTab(QWidget):
             item = QListWidgetItem(
                 self.tr("No layered packages (clean base image)")
             )
-            item.setForeground(Qt.GlobalColor.darkGray)
+            item.setForeground(QColor("#a6adc8"))
             self.packages_list.addItem(item)
 
         # Check for pending reboot

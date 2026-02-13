@@ -7,8 +7,10 @@ Provides:
 - Shared output area (QTextEdit)
 - Common run_command / append_output / command_finished pattern
 - Section builder helper
+- configure_table() for consistent table styling
 
 v25.0: Implements PluginInterface as a mixin for plugin architecture support.
+v31.0.2: Added configure_table() for readable data rows across all tabs.
 """
 
 import logging
@@ -16,6 +18,7 @@ import logging
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit
 )
+from PyQt6.QtGui import QColor, QPalette
 from utils.command_runner import CommandRunner
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
@@ -129,3 +132,33 @@ class BaseTab(*_BaseTabBases):
     def set_context(self, context: dict) -> None:
         """Store context for tabs that need MainWindow or executor references."""
         self._plugin_context = context
+
+    @staticmethod
+    def configure_table(table):
+        """Apply consistent table styling for readable data rows.
+
+        Call this after creating any QTableWidget to ensure:
+        - Alternating row colors for scanability
+        - Proper row height for readability
+        - Clean appearance (no row numbers)
+        - Explicit text color via palette for data rows
+
+        Usage::
+
+            self.my_table = QTableWidget(0, 4)
+            BaseTab.configure_table(self.my_table)
+        """
+        table.setAlternatingRowColors(True)
+        table.verticalHeader().setVisible(False)
+        table.verticalHeader().setDefaultSectionSize(36)
+        table.setShowGrid(True)
+
+        # Force text color via palette — QSS alone doesn't always apply to items
+        pal = table.palette()
+        pal.setColor(QPalette.ColorRole.Text, QColor("#e4e8f4"))
+        pal.setColor(QPalette.ColorRole.WindowText, QColor("#e4e8f4"))
+        pal.setColor(QPalette.ColorRole.Base, QColor("#1e1e2e"))
+        pal.setColor(QPalette.ColorRole.AlternateBase, QColor("#252540"))
+        pal.setColor(QPalette.ColorRole.Highlight, QColor("#585b70"))
+        pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
+        table.setPalette(pal)

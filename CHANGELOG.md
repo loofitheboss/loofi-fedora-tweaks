@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [31.0.2] - 2026-02-13 "Smart UX" (Hotfix)
+
+### Fixed
+
+- **Table Data Row Visibility**: Added `configure_table()` helper to `BaseTab` — forces bright text color via QPalette, sets alternating row colors, proper 36px row height, and hides vertical header row numbers. Applied to all 17 tables across 10 tab files.
+- **QSS Table Item Styling**: Added explicit `QTableWidget::item` color (`#e4e8f4`), min-height, border-bottom separator, and `:alternate` / `:selected` pseudo-state styling. Increased font size to 10.5pt.
+- **Vertical Header Styling**: Added QSS for `QHeaderView:vertical` and `QHeaderView::section:vertical` to clean up row number columns.
+- **Off-theme setForeground colors**: Replaced `Qt.GlobalColor.darkGray` (maintenance), `Qt.GlobalColor.gray` (automation), `Qt.GlobalColor.green/red` (agents), `#e74c3c` (security), `#27ae60/#c0392b` (doctor) with Catppuccin-compatible equivalents.
+
+---
+
 ## [31.0.1] - 2026-02-13 "Smart UX" (Hotfix)
 
 ### Fixed

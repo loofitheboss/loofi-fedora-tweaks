@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QCheckBox, QTabWidget, QScrollArea, QFrame
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
@@ -271,7 +272,7 @@ class AutomationTab(BaseTab):
             item = QListWidgetItem(
                 self.tr("No scheduled tasks. Click 'Add Task' to create one.")
             )
-            item.setForeground(Qt.GlobalColor.gray)
+            item.setForeground(QColor("#a6adc8"))
             self.task_list.addItem(item)
             return
 
