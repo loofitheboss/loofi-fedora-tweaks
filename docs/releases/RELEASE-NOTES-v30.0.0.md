@@ -2,7 +2,7 @@
 
 > **Codename**: Distribution & Reliability
 > **Release date**: 2026-02-13
-> **Status**: Draft
+> **Status**: Validated
 
 ## Highlights
 - Added packaging scripts for Flatpak, AppImage, and sdist outputs.
@@ -31,9 +31,25 @@
 - Targeted v30 reliability/packaging tests pass:
   - `tests/test_packaging_scripts.py`
   - `tests/test_update_checker.py`
-  - `tests/test_plugin_marketplace_cdn.py`
+  - `tests/test_plugin_marketplace.py`
   - `tests/test_rate_limiter.py`
   - `tests/test_auto_tuner.py`
+
+Verification commands:
+
+```bash
+PYTHONPATH=loofi-fedora-tweaks python -m pytest \
+  tests/test_update_checker.py \
+  tests/test_plugin_marketplace.py \
+  tests/test_packaging_scripts.py \
+  tests/test_rate_limiter.py \
+  tests/test_auto_tuner.py -v
+
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
+  --cov=loofi-fedora-tweaks --cov-fail-under=75
+```
+
+Latest targeted clean run result: **156 passed, 0 failed**.
 
 ## Known Limitations
 - Packaging scripts require host tools to be pre-installed and available in `PATH`.

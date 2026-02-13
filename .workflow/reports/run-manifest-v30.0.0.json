@@ -5,7 +5,7 @@
   "mode": "write",
   "issue": "v30-closeout-clean-run",
   "started_at": "2026-02-13T00:48:35Z",
-  "updated_at": "2026-02-13T00:54:48Z",
+  "updated_at": "2026-02-13T08:27:52Z",
   "phases": [
     {
       "phase": "plan",
@@ -106,6 +106,100 @@
         "missing task artifact: /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/specs/tasks-v30.0.0.md"
       ],
       "timestamp": "2026-02-13T00:54:48Z"
+    },
+    {
+      "phase_name": "P7 RELEASE",
+      "mode": "write",
+      "model": "gpt-5.3-codex",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/release.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks/version.py",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md"
+      ],
+      "instruction": "Prepare release steps for v30.0.0.",
+      "command": "codex exec --model gpt-5.3-codex --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-13T07:48:57Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "release",
+      "artifacts": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/reports/run-manifest-v30.0.0.json"
+      ],
+      "issue": null
+    },
+    {
+      "phase_name": "P6 PACKAGE",
+      "mode": "write",
+      "model": "gpt-4o-mini",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/package.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks/version.py",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks.spec"
+      ],
+      "instruction": "Validate packaging metadata for v30.0.0.",
+      "command": "codex exec --model gpt-4o-mini --sandbox workspace-write --cd /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks",
+      "timestamp": "2026-02-13T07:52:04Z",
+      "status": "failed",
+      "exit_code": 1,
+      "phase": "package",
+      "artifacts": [],
+      "issue": null
+    },
+    {
+      "phase_name": "P6 PACKAGE",
+      "mode": "write",
+      "model": "claude-opus-4.6",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/package.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks/version.py",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks.spec"
+      ],
+      "instruction": "Validate packaging metadata for v30.0.0.",
+      "command": "copilot --model claude-opus-4.6 -p <prompt> --allow-all --add-dir /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks --stream off --no-color",
+      "timestamp": "2026-02-13T08:05:33Z",
+      "status": "success",
+      "exit_code": 0,
+      "phase": "package",
+      "artifacts": [],
+      "issue": "v30-closeout-clean-run"
+    },
+    {
+      "phase_name": "P6 PACKAGE",
+      "mode": "write",
+      "model": "claude-opus-4.6",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/package.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks/version.py",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks.spec"
+      ],
+      "instruction": "Validate packaging metadata for v30.0.0.",
+      "command": "copilot --model claude-opus-4.6 -p <prompt> --allow-all --add-dir /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks --stream off --no-color",
+      "timestamp": "2026-02-13T08:07:37Z",
+      "status": "success",
+      "exit_code": 0,
+      "phase": "package",
+      "artifacts": [],
+      "issue": "v30-closeout-clean-run"
+    },
+    {
+      "phase_name": "P7 RELEASE",
+      "mode": "write",
+      "model": "claude-opus-4.6",
+      "prompt": "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.github/workflow/prompts/release.md",
+      "inputs": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/loofi-fedora-tweaks/version.py",
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/CHANGELOG.md"
+      ],
+      "instruction": "Prepare release steps for v30.0.0.",
+      "command": "copilot --model claude-opus-4.6 -p <prompt> --allow-all --add-dir /home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks --stream off --no-color",
+      "timestamp": "2026-02-13T08:09:41Z",
+      "status": "success",
+      "exit_code": 0,
+      "phase": "release",
+      "artifacts": [
+        "/home/loofi/Dokument/loofi fedora 43 v1/loofi-fedora-tweaks/.workflow/reports/run-manifest-v30.0.0.json"
+      ],
+      "issue": "v30-closeout-clean-run"
     }
   ]
 }

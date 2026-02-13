@@ -329,6 +329,6 @@ if __name__ == '__main__':
 
 ## Test Status
 
-Current test suite: **1420+ tests passing** across 51 test files
+Current test suite: **3846+ tests passing** across 151 test files (76.8% line coverage)
 
-Goal: Maintain 100% pass rate, add tests for all new code.
+Goal: Maintain 100% pass rate, 75%+ coverage floor, add tests for all new code.

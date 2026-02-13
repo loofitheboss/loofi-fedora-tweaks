@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - **Packaging scripts**: Added `scripts/build_flatpak.sh`, `scripts/build_appimage.sh`, `scripts/build_sdist.sh`, plus root `build_flatpak.sh` wrapper and `pyproject.toml` metadata for source builds.
 - **Release notes**: Added `docs/releases/RELEASE-NOTES-v30.0.0.md` for v30 distribution/reliability scope.
-- **Targeted regression tests**: Added/expanded packaging and reliability tests in `tests/test_packaging_scripts.py`, `tests/test_rate_limiter.py`, `tests/test_update_checker.py`, and `tests/test_plugin_marketplace_cdn.py`.
+- **Targeted regression tests**: Added/expanded packaging and reliability tests in `tests/test_packaging_scripts.py`, `tests/test_rate_limiter.py`, `tests/test_update_checker.py`, `tests/test_plugin_marketplace.py`, and `tests/test_auto_tuner.py`.
 
 ### Changed
 
@@ -17,6 +17,11 @@ All notable changes to this project will be documented in this file.
 - **Rate limiter concurrency** (`utils/rate_limiter.py`): Replaced polling-style waits with event-bounded waits to reduce busy-loop behavior.
 - **Auto-tuner history thread safety** (`utils/auto_tuner.py`): Added lock-protected history read/write path for concurrent usage stability.
 - **CI quality gates** (`.github/workflows/ci.yml`): Enforced blocking `mypy`/`bandit`, raised coverage gate to 75%, and added Flatpak/AppImage/sdist packaging jobs.
+
+### Validation
+
+- **Touched reliability/distribution suite**: One-pass targeted run succeeded (`156 passed, 0 failed`) across `tests/test_update_checker.py`, `tests/test_plugin_marketplace.py`, `tests/test_packaging_scripts.py`, `tests/test_rate_limiter.py`, and `tests/test_auto_tuner.py`.
+- **Coverage gate contract**: Repository-wide verification command remains `PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov=loofi-fedora-tweaks --cov-fail-under=75`.
 
 ## [29.0.0] - 2026-02-13 "Usability & Polish"
 
@@ -29,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - **Status indicators on tabs**: Live colored dots (🟢🟡🔴) on Maintenance and Storage sidebar items reflecting update availability and disk usage.
 - **Settings reset per group**: "↩ Reset Appearance" and "↩ Reset Behavior" buttons in Settings tab. New `SettingsManager.reset_group()` method resets only specified keys.
 - **95 new tests** across 5 test files: `test_error_handler.py` (24), `test_confirm_dialog.py` (10), `test_notification_toast.py` (16), `test_v29_features.py` (17), `test_settings_extended_v29.py` (14).
+- **Comprehensive test coverage campaign**: 151 test files, 3846+ tests passing, 76.8% line coverage (up from ~57.8%). Added deep tests for CLI, plugins, hardware, focus mode, marketplace, command runner, UI tab initialization (16 tabs), and more.
 - **Roadmap v29–v31**: Three-version roadmap added covering Usability, Distribution, and Smart UX.
 
 ### Changed

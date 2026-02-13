@@ -8,6 +8,7 @@ so that tests never touch the real system.
 
 import os
 import sys
+import subprocess
 import tempfile
 import shutil
 
@@ -19,6 +20,61 @@ from unittest.mock import patch, MagicMock
 
 # Ensure the app source is on the path for all test modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
+
+
+# ── Block real privilege-escalation calls during tests ─────────────────
+# Safety net: if any test forgets to mock subprocess, this prevents pkexec
+# and sudo from actually prompting for a password or modifying the system.
+_BLOCKED_BINARIES = {"pkexec", "sudo"}
+
+_real_subprocess_run = subprocess.run
+_real_subprocess_popen = subprocess.Popen
+
+
+def _guarded_run(*args, **kwargs):
+    """Wrapper around subprocess.run that blocks pkexec/sudo calls."""
+    cmd = args[0] if args else kwargs.get("args", [])
+    if isinstance(cmd, (list, tuple)) and cmd:
+        binary = os.path.basename(str(cmd[0]))
+        if binary in _BLOCKED_BINARIES:
+            return MagicMock(returncode=1, stdout="", stderr="blocked by test harness")
+    elif isinstance(cmd, str):
+        first_word = cmd.split()[0] if cmd.strip() else ""
+        if os.path.basename(first_word) in _BLOCKED_BINARIES:
+            return MagicMock(returncode=1, stdout="", stderr="blocked by test harness")
+    return _real_subprocess_run(*args, **kwargs)
+
+
+def _guarded_popen(*args, **kwargs):
+    """Wrapper around subprocess.Popen that blocks pkexec/sudo calls."""
+    cmd = args[0] if args else kwargs.get("args", [])
+    if isinstance(cmd, (list, tuple)) and cmd:
+        binary = os.path.basename(str(cmd[0]))
+        if binary in _BLOCKED_BINARIES:
+            mock_proc = MagicMock()
+            mock_proc.returncode = 1
+            mock_proc.stdout = MagicMock(read=MagicMock(return_value=b""))
+            mock_proc.stderr = MagicMock(read=MagicMock(return_value=b"blocked by test harness"))
+            mock_proc.communicate.return_value = (b"", b"blocked by test harness")
+            mock_proc.wait.return_value = 1
+            mock_proc.poll.return_value = 1
+            return mock_proc
+    elif isinstance(cmd, str):
+        first_word = cmd.split()[0] if cmd.strip() else ""
+        if os.path.basename(first_word) in _BLOCKED_BINARIES:
+            mock_proc = MagicMock()
+            mock_proc.returncode = 1
+            mock_proc.communicate.return_value = (b"", b"blocked by test harness")
+            mock_proc.wait.return_value = 1
+            mock_proc.poll.return_value = 1
+            return mock_proc
+    return _real_subprocess_popen(*args, **kwargs)
+
+
+# Monkey-patch subprocess at import time so ALL tests are protected,
+# regardless of whether they use @patch or the mock_subprocess fixture.
+subprocess.run = _guarded_run
+subprocess.Popen = _guarded_popen
 
 
 # ── Session-scoped QApplication singleton ──────────────────────────────

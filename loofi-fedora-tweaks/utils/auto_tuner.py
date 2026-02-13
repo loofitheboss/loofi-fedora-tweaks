@@ -373,9 +373,13 @@ class AutoTuner:
 
             try:
                 os.makedirs(_CONFIG_DIR, exist_ok=True)
-                with open(_HISTORY_PATH, "w") as f:
-                    json.dump([asdict(e) for e in history], f, indent=2)
-                logger.info("Saved tuning entry for workload '%s'.", entry.workload)
+                temp_path = f"{_HISTORY_PATH}.tmp.{os.getpid()}.{threading.get_ident()}"
+                with open(temp_path, "w") as temp_file:
+                    json.dump([asdict(history_entry)
+                              for history_entry in history], temp_file, indent=2)
+                os.replace(temp_path, _HISTORY_PATH)
+                logger.info(
+                    "Saved tuning entry for workload '%s'.", entry.workload)
             except OSError as exc:
                 logger.error("Failed to save tuning history: %s", exc)
 
