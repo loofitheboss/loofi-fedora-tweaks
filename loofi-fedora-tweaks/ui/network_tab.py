@@ -117,7 +117,9 @@ class NetworkTab(BaseTab):
             self.tr("SSID"), self.tr("Signal"), self.tr("Security"), self.tr("Status"),
         ])
         self.wifi_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)        BaseTab.configure_table(self.wifi_table)        wifi_layout.addWidget(self.wifi_table)
+        self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.wifi_table)
+        wifi_layout.addWidget(self.wifi_table)
 
         wifi_btn_row = QHBoxLayout()
         btn_scan_wifi = QPushButton(self.tr("Scan Wi-Fi"))
@@ -144,7 +146,9 @@ class NetworkTab(BaseTab):
             self.tr("Name"), self.tr("Type"), self.tr("Status"),
         ])
         self.vpn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)        BaseTab.configure_table(self.vpn_table)        vpn_layout.addWidget(self.vpn_table)
+        self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        BaseTab.configure_table(self.vpn_table)
+        vpn_layout.addWidget(self.vpn_table)
 
         vpn_btn_row = QHBoxLayout()
         btn_refresh_vpn = QPushButton(self.tr("Refresh VPN"))
