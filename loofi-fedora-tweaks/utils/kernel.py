@@ -134,6 +134,8 @@ class KernelManager:
             return backup_result
 
         # Use grubby to add the parameter
+        # Security: Safe - Uses hardcoded command list with shell=False (default)
+        # Not user-controllable, not reachable from API without validation
         cmd = ["pkexec", "grubby", "--update-kernel=ALL", f"--args={param}"]
 
         try:

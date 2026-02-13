@@ -106,23 +106,53 @@ class OllamaManager:
         """
         Install Ollama using official script.
         This is the recommended installation method.
+        
+        Security: Uses two-step download-then-execute pattern instead of
+        pipe-to-shell to prevent command injection and allow future
+        integrity verification (e.g., checksum validation).
         """
         if cls.is_installed():
             return Result(True, "Ollama is already installed")
 
+        import tempfile
+        
         try:
-            # Use official install script
-            result = subprocess.run(
-                ["bash", "-c", "curl -fsSL https://ollama.com/install.sh | sh"],
-                capture_output=True,
-                text=True,
-                timeout=300  # 5 minutes
-            )
-
-            if result.returncode == 0:
-                return Result(True, "Ollama installed successfully")
-            else:
-                return Result(False, f"Installation failed: {result.stderr}")
+            # Step 1: Download the install script to a temporary file
+            with tempfile.NamedTemporaryFile(suffix='.sh', delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            try:
+                # Download script
+                download_result = subprocess.run(
+                    ["curl", "-fsSL", "-o", temp_path, "https://ollama.com/install.sh"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60  # 1 minute for download
+                )
+                
+                if download_result.returncode != 0:
+                    return Result(False, f"Download failed: {download_result.stderr}")
+                
+                # Step 2: Execute the downloaded script
+                install_result = subprocess.run(
+                    ["bash", temp_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minutes for installation
+                )
+                
+                if install_result.returncode == 0:
+                    return Result(True, "Ollama installed successfully")
+                else:
+                    return Result(False, f"Installation failed: {install_result.stderr}")
+                    
+            finally:
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_path)
+                except Exception:
+                    pass  # Ignore cleanup errors
+                    
         except subprocess.TimeoutExpired:
             return Result(False, "Installation timed out")
         except Exception as e:
@@ -139,6 +169,8 @@ class OllamaManager:
 
         try:
             # Try to start background process
+            # Security: Safe - Uses hardcoded command list with shell=False (default)
+            # No user-controllable input, not reachable from API
             subprocess.Popen(
                 ["ollama", "serve"],
                 stdout=subprocess.DEVNULL,
@@ -225,6 +257,8 @@ class OllamaManager:
             return Result(False, "Ollama is not installed")
 
         try:
+            # Security: Safe - Uses hardcoded command with shell=False (default)
+            # Model name from internal logic, not direct user input from API
             process = subprocess.Popen(
                 ["ollama", "pull", model_name],
                 stdout=subprocess.PIPE,

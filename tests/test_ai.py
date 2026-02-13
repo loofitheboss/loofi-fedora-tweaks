@@ -41,8 +41,78 @@ class TestOllamaManager(unittest.TestCase):
 
     @patch('utils.ai.OllamaManager.is_installed', return_value=False)
     @patch('utils.ai.subprocess.run')
+    @patch('utils.ai.os.unlink')
+    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    def test_install_success(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
+        """Test successful Ollama installation."""
+        # Mock temp file
+        mock_temp_file = MagicMock()
+        mock_temp_file.name = '/tmp/ollama_install.sh'
+        mock_temp.return_value.__enter__.return_value = mock_temp_file
+        
+        # Mock successful download and install
+        mock_run.side_effect = [
+            MagicMock(returncode=0),  # download
+            MagicMock(returncode=0),  # install
+        ]
+        
+        result = OllamaManager.install()
+        self.assertTrue(result.success)
+        self.assertIn("successfully", result.message.lower())
+        
+        # Verify two-step process was used
+        self.assertEqual(mock_run.call_count, 2)
+        # First call should be curl download
+        first_call = mock_run.call_args_list[0][0][0]
+        self.assertEqual(first_call[0], "curl")
+        self.assertIn("-o", first_call)
+        # Second call should be bash execution
+        second_call = mock_run.call_args_list[1][0][0]
+        self.assertEqual(second_call[0], "bash")
+
+    @patch('utils.ai.OllamaManager.is_installed', return_value=False)
+    @patch('utils.ai.subprocess.run')
+    @patch('utils.ai.os.unlink')
+    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    def test_install_download_failure(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
+        """Test Ollama installation when download fails."""
+        # Mock temp file
+        mock_temp_file = MagicMock()
+        mock_temp_file.name = '/tmp/ollama_install.sh'
+        mock_temp.return_value.__enter__.return_value = mock_temp_file
+        
+        # Mock failed download
+        mock_run.return_value = MagicMock(returncode=1, stderr="Download error")
+        
+        result = OllamaManager.install()
+        self.assertFalse(result.success)
+        self.assertIn("download failed", result.message.lower())
+
+    @patch('utils.ai.OllamaManager.is_installed', return_value=False)
+    @patch('utils.ai.subprocess.run')
+    @patch('utils.ai.os.unlink')
+    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    def test_install_execution_failure(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
+        """Test Ollama installation when script execution fails."""
+        # Mock temp file
+        mock_temp_file = MagicMock()
+        mock_temp_file.name = '/tmp/ollama_install.sh'
+        mock_temp.return_value.__enter__.return_value = mock_temp_file
+        
+        # Mock successful download but failed install
+        mock_run.side_effect = [
+            MagicMock(returncode=0),  # download succeeds
+            MagicMock(returncode=1, stderr="Install error"),  # install fails
+        ]
+        
+        result = OllamaManager.install()
+        self.assertFalse(result.success)
+        self.assertIn("installation failed", result.message.lower())
+
+    @patch('utils.ai.OllamaManager.is_installed', return_value=False)
+    @patch('utils.ai.subprocess.run')
     def test_install_timeout(self, mock_run, mock_is_installed):
-        mock_run.side_effect = TimeoutExpired(cmd='bash', timeout=1)
+        mock_run.side_effect = TimeoutExpired(cmd='curl', timeout=1)
         result = OllamaManager.install()
         self.assertFalse(result.success)
         self.assertIn("timed out", result.message.lower())

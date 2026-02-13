@@ -73,6 +73,8 @@ class ZramManager:
 
         # Check if ZRAM is active
         try:
+            # Security: Safe - Uses hardcoded command list with shell=False (default)
+            # Not user-controllable, not reachable from API
             result = subprocess.run(
                 ["zramctl", "--noheadings", "--raw"],
                 capture_output=True, text=True, check=False

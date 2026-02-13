@@ -103,6 +103,8 @@ class SandboxManager:
             return Result(True, "Firejail is already installed")
 
         try:
+            # Security: Safe - Uses hardcoded command list with shell=False (default)
+            # Not user-controllable, not reachable from API without validation
             result = subprocess.run(
                 ["pkexec", "dnf", "install", "firejail", "-y"],
                 capture_output=True,
@@ -180,6 +182,8 @@ class SandboxManager:
 
         try:
             # Start process in background
+            # Security: Safe - Uses hardcoded command list with shell=False (default)
+            # firejail command itself is hardcoded, only sandboxed app command varies
             process = subprocess.Popen(
                 firejail_cmd,
                 stdout=subprocess.DEVNULL,
