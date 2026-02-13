@@ -397,14 +397,16 @@ class TestFirstRunWizard(unittest.TestCase):
         self.assertEqual(w._selected_use_case, "daily")
         w.close()
 
-    @patch("os.path.exists", return_value=False)
-    def test_needs_first_run_no_file(self, mock_exists):
+    @patch("ui.wizard._FIRST_RUN_SENTINEL")
+    def test_needs_first_run_no_file(self, mock_sentinel):
+        mock_sentinel.exists.return_value = False
         from ui.wizard import needs_first_run
         result = needs_first_run()
         self.assertTrue(result)
 
-    @patch("os.path.exists", return_value=True)
-    def test_needs_first_run_file_exists(self, mock_exists):
+    @patch("ui.wizard._FIRST_RUN_SENTINEL")
+    def test_needs_first_run_file_exists(self, mock_sentinel):
+        mock_sentinel.exists.return_value = True
         from ui.wizard import needs_first_run
         result = needs_first_run()
         self.assertFalse(result)

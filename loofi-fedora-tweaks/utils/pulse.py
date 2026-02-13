@@ -208,9 +208,10 @@ class SystemPulse(QObject):
                 ["upower", "-i", "/org/freedesktop/UPower/devices/line_power_AC0"],
                 capture_output=True, text=True, check=False, timeout=5
             )
-            if "online: yes" in result.stdout.lower():
+            output = " ".join(result.stdout.lower().split())
+            if "online: yes" in output:
                 return PowerState.AC.value
-            elif "online: no" in result.stdout.lower():
+            elif "online: no" in output:
                 return PowerState.BATTERY.value
         except Exception as e:
             logger.debug("[Pulse] Failed power state via upower: %s", e)

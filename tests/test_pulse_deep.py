@@ -20,12 +20,12 @@ from utils.pulse import MonitorInfo, NetworkState, PowerState, SystemPulse
 # ---------------------------------------------------------------------------
 class TestGetPowerState(unittest.TestCase):
 
-    @patch("subprocess.run")
+    @patch("utils.pulse.subprocess.run")
     def test_ac_via_upower(self, mock_run):
         mock_run.return_value = MagicMock(stdout="  online:             yes\n")
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
-    @patch("subprocess.run")
+    @patch("utils.pulse.subprocess.run")
     def test_battery_via_upower(self, mock_run):
         mock_run.return_value = MagicMock(stdout="  online:             no\n")
         result = SystemPulse.get_power_state()
@@ -33,20 +33,20 @@ class TestGetPowerState(unittest.TestCase):
         # exist on the test host they may override. Accept either.
         self.assertIn(result, (PowerState.BATTERY.value, PowerState.AC.value))
 
-    @patch("os.path.exists", return_value=True)
+    @patch("utils.pulse.os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="1\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
     def test_ac_via_sysfs(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
-    @patch("os.path.exists", return_value=True)
+    @patch("utils.pulse.os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="0\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
     def test_battery_via_sysfs(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.BATTERY.value)
 
-    @patch("os.path.exists", return_value=False)
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.os.path.exists", return_value=False)
+    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
     def test_unknown_fallback(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.UNKNOWN.value)
 

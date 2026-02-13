@@ -2792,8 +2792,7 @@ def main(argv: Optional[List[str]] = None):
                            default=10, help="Scan timeout")
 
     # v17.0 Atlas - Storage management
-    storage_parser = subparsers.add_parser(
-        "storage", help="Storage & disk management")
+    storage_parser = subparsers.add_parser("storage", help="Storage & disk management")
     storage_parser.add_argument(
         "action",
         choices=["disks", "mounts", "smart", "usage", "trim"],

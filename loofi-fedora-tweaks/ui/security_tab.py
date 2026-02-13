@@ -30,7 +30,7 @@ from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
 
-class SecurityTab(QWidget, PluginInterface):
+class SecurityTab(BaseTab):
     """Security tab for system hardening and auditing."""
 
     _METADATA = PluginMetadata(

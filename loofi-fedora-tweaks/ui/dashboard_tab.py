@@ -617,7 +617,7 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _go_to_tab(self, tab_name: str):
         """Navigate to a named tab via MainWindow."""
-        if tab_name and hasattr(self.main_window, "switch_to_tab"):
+        if tab_name and self.main_window is not None and hasattr(self.main_window, "switch_to_tab"):
             self.main_window.switch_to_tab(tab_name)
 
     def _go_maintenance(self):
