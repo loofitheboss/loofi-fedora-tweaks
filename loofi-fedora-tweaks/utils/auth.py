@@ -51,7 +51,8 @@ class AuthManager:
 
     @classmethod
     def _hash_key(cls, api_key: str) -> str:
-        return bcrypt.hashpw(api_key.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")  # type: ignore[return-value]
+        result = bcrypt.hashpw(api_key.encode("utf-8"), bcrypt.gensalt())  # type: ignore[no-any-return]
+        return str(result.decode("utf-8"))
 
     @classmethod
     def generate_api_key(cls) -> str:

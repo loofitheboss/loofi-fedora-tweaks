@@ -241,10 +241,12 @@ class AnsibleExporter:
         }]
 
         # Convert to YAML (manual formatting for readability)
-        import yaml  # type: ignore[import-untyped]
         try:
-            yaml_content: str = yaml.dump(playbook, default_flow_style=False, sort_keys=False,
-                                     allow_unicode=True, width=120)
+            import yaml  # type: ignore[import-untyped]
+            yaml_content: str = yaml.dump(
+                playbook, default_flow_style=False, sort_keys=False,
+                allow_unicode=True, width=120,
+            )
         except ImportError:
             # Fallback to json if yaml not available
             yaml_content = json.dumps(playbook, indent=2)

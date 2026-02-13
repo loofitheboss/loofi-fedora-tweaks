@@ -1,11 +1,13 @@
 # Loofi Fedora Tweaks — AI Coding Instructions
 
-> **Version**: See `loofi-fedora-tweaks/version.py` for current version. See `ROADMAP.md` for active development phase.
+> **Version**: v32.0.0 "Abyss" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
+> See `ROADMAP.md` for active development phase.
 
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
-- **GUI** (default): `MainWindow` sidebar with 25 lazy-loaded tabs
+- **GUI** (default): `MainWindow` sidebar with 26 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
 
@@ -13,7 +15,7 @@ PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fe
 ```
 ui/*_tab.py      -> GUI tabs (PyQt6 widgets, inherit BaseTab for command tabs)
 ui/base_tab.py   -> BaseTab class (shared CommandRunner wiring, output area)
-utils/*.py       -> Business logic, system commands, all reusable ops
+utils/*.py       -> Business logic (100+ modules), system commands, all reusable ops
 utils/commands.py -> PrivilegedCommand builder (safe pkexec, no shell strings)
 utils/errors.py  -> Error hierarchy (LoofiError, DnfLockedError, etc.)
 cli/main.py      -> CLI that calls into utils/ (never into ui/)
@@ -23,36 +25,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## Tab Layout (25 tabs)
+## Tab Layout (26 tabs)
 
-The app has 25 tabs:
-
-| Tab | Consolidates | File |
-|-----|-------------|------|
-| Home | Dashboard | `dashboard_tab.py` |
-| System Info | System info | `system_info_tab.py` |
-| System Monitor | Performance + Processes | `monitor_tab.py` |
-| Maintenance | Updates + Cleanup + Overlays | `maintenance_tab.py` |
-| Hardware | Hardware + HP Tweaks + Bluetooth | `hardware_tab.py` |
-| Software | Apps + Repos | `software_tab.py` |
-| Security & Privacy | Security + Privacy | `security_tab.py` |
-| Network | Connections + DNS + Privacy + Monitoring | `network_tab.py` |
-| Gaming | Gaming | `gaming_tab.py` |
-| Desktop | Director + Theming | `desktop_tab.py` |
-| Development | Containers + Developer | `development_tab.py` |
-| AI Lab | AI Enhanced | `ai_enhanced_tab.py` |
-| Automation | Scheduler + Replicator + Pulse | `automation_tab.py` |
-| Community | Presets + Marketplace | `community_tab.py` |
-| Diagnostics | Watchtower + Boot | `diagnostics_tab.py` |
-| Virtualization | VMs + VFIO + Disposable | `virtualization_tab.py` |
-| Loofi Link | Mesh + Clipboard + File Drop | `mesh_tab.py` |
-| State Teleport | Workspace Capture/Restore | `teleport_tab.py` |
-| Performance | Auto-Tuner | `performance_tab.py` |
-| Snapshots | Snapshot Timeline | `snapshot_tab.py` |
-| Logs | Smart Log Viewer | `logs_tab.py` |
-| Storage | Disks + Mounts + SMART | `storage_tab.py` |
-| Quick Actions | Command Palette (Ctrl+Shift+K) | `quick_actions_tab.py` |
-
+See `ARCHITECTURE.md` § Tab Layout for the full 26-tab table.
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
 ## Critical Patterns
@@ -177,15 +152,11 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (3846 pas
 
 ## Testing Conventions
 
-- Framework: `unittest` + `unittest.mock` (plus shared fixtures in `tests/conftest.py`)
+- Framework: `unittest` + `unittest.mock` (157 test files, 3846+ tests, 76.8% coverage)
 - **All system calls must be mocked** — tests run without root, without real packages
-- Test files add `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))` at top
-- Mock targets: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`, `builtins.open`
-- Verify both success and failure paths (e.g., `CalledProcessError`, `FileNotFoundError`)
-- Use `@patch` decorators, not context managers, for consistency with existing tests
-- Test new v12+ modules: vm_manager, vfio, mesh_discovery, state_teleport, ai_models, voice, context_rag
-- Test v15 modules: auto_tuner, snapshot_manager, smart_logs, quick_actions
-- Test v17 modules: bluetooth, storage, performance_tab, snapshot_tab, logs_tab, storage_tab, network_tab (overhaul)
+- See `ARCHITECTURE.md` § Testing Rules for full details
+- Use `@patch` decorators, not context managers
+- Verify both success and failure paths
 
 ## CI/CD
 
