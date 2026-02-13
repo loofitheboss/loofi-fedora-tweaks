@@ -24,7 +24,7 @@ Every task entry must include: `ID:`, `Files:`, `Dep:`, `Agent:`, `Description:`
 - Do NOT release without `CHANGELOG`, `README`, and release notes
 
 ### Current State
-- **Done**: v32.0.0 "Abyss"
+- **Done**: v33.0.0 "Bastion"
 - **Active/Next**: v33.0 (Testing & CI Hardening)
 - **Source of truth**: `ROADMAP.md`
 

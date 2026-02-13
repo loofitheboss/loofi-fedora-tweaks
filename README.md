@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v32.0.0 "Abyss"
+# Loofi Fedora Tweaks v33.0.0 "Bastion"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v32.0.0">
-    <img src="https://img.shields.io/badge/Release-v32.0.0-blue?style=for-the-badge&logo=github" alt="Release v32.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v33.0.0">
+    <img src="https://img.shields.io/badge/Release-v33.0.0-blue?style=for-the-badge&logo=github" alt="Release v33.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,17 +35,20 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v33.0.0?
+
+`v33.0.0 "Bastion"` is a testing and CI hardening release — zero type errors, all tests passing, strict CI gates:
+
+- **Zero mypy errors** — Fixed 163 type errors across 40+ source files. Added `from __future__ import annotations`, proper type annotations, `cast()` calls for Qt types.
+- **3953+ tests passing** — Resolved all pre-existing test failures. Fixed SecurityTab static method calls, pulse.py upower parsing, and test isolation issues.
+- **Strict CI gates** — All CI gates enforced with no `continue-on-error` — typecheck, test, lint, docs all blocking.
+- **Type-safety baseline** — Clean mypy baseline established for future development.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v33.0.0.md`](docs/releases/RELEASE-NOTES-v33.0.0.md)
+
+---
+
 ## What Is New in v32.0.0?
-
-`v32.0.0 "Abyss"` is a full visual redesign — new theme, reorganized navigation, and polished UI across every tab:
-
-- **Loofi Abyss theme** — Purpose-built dark palette (`#0b0e14` base, `#39c5cf` teal accent, `#b78eff` header purple) with matching light variant. Replaces Catppuccin.
-- **Activity-based categories** — 10 categories consolidated to 8 logical groups: Overview, Manage, Hardware, Network & Security, Personalize, Developer, Automation, Health & Logs.
-- **Category icons** — Emoji prefixes on sidebar category headers for instant visual scanning.
-- **Sidebar collapse toggle** — `≡` / `✕` button to collapse/expand the sidebar; remembers state.
-- **Deterministic tab ordering** — Explicit `CATEGORY_ORDER` dict enforces consistent sidebar sort across sessions.
-- **QSS overhaul** — Both `modern.qss` and `light.qss` rewritten from scratch; dead `style.qss` removed.
-- **Color migration** — All inline Catppuccin hex codes replaced across 30+ source files (notifications, health score, quick actions, and more).
 
 Full notes: [`docs/releases/RELEASE-NOTES-v32.0.0.md`](docs/releases/RELEASE-NOTES-v32.0.0.md)
 
@@ -54,26 +57,6 @@ Full notes: [`docs/releases/RELEASE-NOTES-v32.0.0.md`](docs/releases/RELEASE-NOT
 ## What Is New in v31.0.0?
 
 Full notes: [`docs/releases/RELEASE-NOTES-v31.0.0.md`](docs/releases/RELEASE-NOTES-v31.0.0.md)
-
----
-
-## What Is New in v29.0.0?
-
-`v29.0.0` delivers the usability features originally scoped in v22.0, plus cross-cutting UX polish:
-
-- **Centralized error handler** — Global `sys.excepthook` override catches unhandled errors, shows recovery hints for known `LoofiError` types.
-- **Confirmation dialogs** — `ConfirmActionDialog` for dangerous operations with undo hints, snapshot checkbox, and "don't ask again" toggle.
-- **Notification toasts** — Animated slide-in notifications with category-based colors and auto-hide.
-- **Sidebar search** — Enhanced to match tab descriptions, badges, and categories (not just names).
-- **Status indicators** — Live colored dots on Maintenance/Storage sidebar items showing update availability and disk usage.
-- **Theme-aware sparklines** — Dashboard SparkLine widget reads palette colors instead of hardcoded values.
-- **CORS lockdown** — Web API restricted to localhost origins only.
-- **Settings reset per group** — "Reset Appearance" and "Reset Behavior" buttons in Settings tab.
-- **Keyboard accessibility** — Sidebar keyboard focus restored with StrongFocus policy.
-- **95 new tests** across 5 test files covering all v29 features.
-- **3846+ total tests** across 151 test files with 76.8% line coverage.
-
-Full notes: [`docs/releases/RELEASE-NOTES-v29.0.0.md`](docs/releases/RELEASE-NOTES-v29.0.0.md)
 
 ---
 
@@ -245,7 +228,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3968+ passing
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3953+ passing
 ```
 
 Lint:

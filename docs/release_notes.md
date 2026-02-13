@@ -5,6 +5,11 @@
 
 ## Current Release
 
+- **v33.0.0 "Bastion"**
+- Full notes: `docs/releases/RELEASE-NOTES-v33.0.0.md`
+
+## Previous Release
+
 - **v32.0.0 "Abyss"**
 - Full notes: `docs/releases/RELEASE-NOTES-v32.0.0.md`
 

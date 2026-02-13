@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — User Guide
 
-> Version 32.0.0 "Abyss"
+> Version 33.0.0 "Bastion"
 
 This guide covers daily use of Loofi Fedora Tweaks in GUI and CLI mode.
 

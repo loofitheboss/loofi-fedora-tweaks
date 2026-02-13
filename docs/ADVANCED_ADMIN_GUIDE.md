@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — Advanced Admin Guide
 
-> Version 32.0.0 "Abyss"
+> Version 33.0.0 "Bastion"
 
 Operational runbook for power users and Fedora admins.
 

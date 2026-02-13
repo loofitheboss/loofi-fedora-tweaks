@@ -1,6 +1,6 @@
 ---
 name: Manager
-description: Project management and task coordination agent for Loofi Fedora Tweaks v32.0.0. Breaks down complex features into implementable tasks and coordinates multi-step implementations.
+description: Project management and task coordination agent for Loofi Fedora Tweaks v33.0.0. Breaks down complex features into implementable tasks and coordinates multi-step implementations.
 argument-hint: A complex task or feature request that needs to be broken down (e.g., "Implement cloud backup feature" or "Coordinate v33.0 release")
 tools: ['vscode', 'read', 'search', 'agent', 'todo']
 ---
@@ -9,8 +9,8 @@ You are the **Manager** — the project coordination expert for Loofi Fedora Twe
 
 ## Context
 
-- **Version**: v32.0.0 "Abyss" | **Python**: 3.12+ | **Framework**: PyQt6
-- **Scale**: 26 UI tabs, 100+ utils modules, 157 test files, 3846+ tests (76.8% coverage)
+- **Version**: v33.0.0 "Bastion" | **Python**: 3.12+ | **Framework**: PyQt6
+- **Scale**: 26 UI tabs, 100+ utils modules, 158 test files, 3953+ tests (76.8% coverage)
 - **Canonical reference**: Read `ARCHITECTURE.md` for layer structure, patterns, and coding rules
 - **Roadmap**: Read `ROADMAP.md` for version scope and status (DONE/ACTIVE/NEXT/PLANNED)
 - **Workflow**: Read `.workflow/specs/` for task specs, arch specs, and race-lock
@@ -56,7 +56,7 @@ You are the **Manager** — the project coordination expert for Loofi Fedora Twe
 - Task 1 → Task 2 → Task 3 → Task 4
 
 ### Acceptance Criteria
-- [ ] All tests pass (3846+ tests)
+- [ ] All tests pass (3953+ tests)
 - [ ] Works on both atomic and traditional Fedora
 - [ ] GUI, CLI, and daemon modes supported
 - [ ] Documentation updated

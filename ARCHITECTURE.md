@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 32.0.0 "Abyss" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 33.0.0 "Bastion" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -45,7 +45,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── plugins/                  # Third-party plugin directory
 └── resources/                # Static resources
 
-tests/                        # 157 test files, 3846+ tests (76.8% coverage)
+tests/                        # 158 test files, 3953+ tests (76.8% coverage)
 scripts/                      # Build, workflow, CI scripts
 config/                       # Global config templates
 docs/                         # User guide, release notes, checklists

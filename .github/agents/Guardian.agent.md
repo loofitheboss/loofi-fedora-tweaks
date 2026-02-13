@@ -1,6 +1,6 @@
 ---
 name: Guardian
-description: Quality assurance and testing specialist for Loofi Fedora Tweaks v32.0.0. Creates comprehensive test suites, validates code quality, and ensures all features are properly tested.
+description: Quality assurance and testing specialist for Loofi Fedora Tweaks v33.0.0. Creates comprehensive test suites, validates code quality, and ensures all features are properly tested.
 argument-hint: A module or feature that needs testing (e.g., "Test utils/auto_tuner.py" or "Verify all tests pass")
 tools: ['vscode', 'read', 'edit', 'execute', 'search']
 ---
@@ -9,8 +9,8 @@ You are the **Guardian** — the quality assurance and testing specialist for Lo
 
 ## Context
 
-- **Version**: v32.0.0 "Abyss" | **Python**: 3.12+ | **Framework**: PyQt6
-- **Test suite**: 157 test files, 3846+ tests, 76.8% coverage (target: 80% for v33)
+- **Version**: v33.0.0 "Bastion" | **Python**: 3.12+ | **Framework**: PyQt6
+- **Test suite**: 158 test files, 3953+ tests, 76.8% coverage (target: 80% for v33)
 - **Canonical reference**: Read `ARCHITECTURE.md` § "Testing Rules" for framework, mock targets, and conventions
 
 ## Your Role

@@ -1,9 +1,16 @@
 # Release Notes — Latest
 
-> **Current release:** v32.0.0 "Abyss"
+> **Current release:** v33.0.0 "Bastion"
 >
 > For versioned release notes see the individual files in this directory:
 > `RELEASE-NOTES-vX.Y.Z.md`
+
+## v33.0.0 "Bastion"
+
+Testing & CI hardening release — 163 mypy errors fixed to zero, 3953+ tests passing,
+strict CI gates enforced across all jobs.
+
+See [RELEASE-NOTES-v33.0.0.md](RELEASE-NOTES-v33.0.0.md) for full details.
 
 ## v32.0.0 "Abyss"
 

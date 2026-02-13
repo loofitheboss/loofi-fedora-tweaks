@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — Beginner Quick Guide
 
-> Version 32.0.0 "Abyss"
+> Version 33.0.0 "Bastion"
 
 Use this guide for a safe first run in under 10 minutes.
 
