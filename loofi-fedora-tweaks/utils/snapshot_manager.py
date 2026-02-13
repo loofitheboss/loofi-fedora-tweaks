@@ -12,6 +12,7 @@ import subprocess
 import time
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
+import re
 
 from utils.commands import PrivilegedCommand  # noqa: F401 — keep for pattern consistency
 
@@ -31,6 +32,27 @@ class SnapshotInfo:
     timestamp: float
     size_str: str
     description: str
+
+
+def _sanitize_label(label: str, max_length: int = 80) -> str:
+    """
+    Sanitise a human-provided label for safe use in snapshot tools.
+
+    Keeps only characters from a conservative allowlist and enforces
+    a maximum length so that the resulting string is suitable for use
+    as a command-line argument and, where applicable, a path segment.
+    """
+    # Normalise whitespace and ensure we have a string
+    text = (label or "").strip()
+    # Replace disallowed characters with underscore
+    text = re.sub(r"[^A-Za-z0-9_.-]", "_", text)
+    # Enforce maximum length
+    if len(text) > max_length:
+        text = text[:max_length]
+    # Ensure non-empty
+    if not text:
+        text = "snapshot"
+    return text
 
 
 @dataclass
@@ -412,6 +434,9 @@ class SnapshotManager:
             ``(command, args_list, description)`` — the standard Loofi
             operation tuple ready for :class:`CommandRunner`.
         """
+        # Ensure the label is safe before using it in any command line
+        safe_label = _sanitize_label(label)
+
         if backend is None:
             backend = SnapshotManager.get_preferred_backend()
         if backend is None:
@@ -421,20 +446,19 @@ class SnapshotManager:
         if backend == "timeshift":
             return (
                 "pkexec",
-                ["timeshift", "--create", "--comments", label],
-                f"Creating Timeshift snapshot '{label}'...",
+                ["timeshift", "--create", "--comments", safe_label],
+                f"Creating Timeshift snapshot '{safe_label}'...",
             )
 
         if backend == "snapper":
             return (
                 "pkexec",
-                ["snapper", "create", "--description", label],
-                f"Creating Snapper snapshot '{label}'...",
+                ["snapper", "create", "--description", safe_label],
+                f"Creating Snapper snapshot '{safe_label}'...",
             )
 
         if backend == "btrfs":
-            # Sanitise label for use as a path component
-            safe_label = label.replace("/", "_").replace(" ", "_")
+            # safe_label is already sanitised for path usage
             return (
                 "pkexec",
                 ["btrfs", "subvolume", "snapshot", "/", f"/.snapshots/{safe_label}"],
