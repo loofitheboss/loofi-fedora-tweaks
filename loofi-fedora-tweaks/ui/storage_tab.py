@@ -163,37 +163,51 @@ class StorageTab(BaseTab):
         """Refresh physical disk table."""
         try:
             disks = StorageManager.list_disks()
+            self.disk_table.clearSpans()
             self.disk_table.setRowCount(0)
+
+            if not disks:
+                self.set_table_empty_state(self.disk_table, self.tr("No disks detected"))
+                return
+
             for disk in disks:
                 row = self.disk_table.rowCount()
                 self.disk_table.insertRow(row)
-                self.disk_table.setItem(row, 0, QTableWidgetItem(disk.path))
-                self.disk_table.setItem(row, 1, QTableWidgetItem(disk.model or "—"))
-                self.disk_table.setItem(row, 2, QTableWidgetItem(disk.size))
-                self.disk_table.setItem(row, 3, QTableWidgetItem(
+                self.disk_table.setItem(row, 0, self.make_table_item(disk.path))
+                self.disk_table.setItem(row, 1, self.make_table_item(disk.model or "—"))
+                self.disk_table.setItem(row, 2, self.make_table_item(disk.size))
+                self.disk_table.setItem(row, 3, self.make_table_item(
                     "NVMe" if "nvme" in disk.name else "SATA/USB"
                 ))
-                self.disk_table.setItem(row, 4, QTableWidgetItem(
+                self.disk_table.setItem(row, 4, self.make_table_item(
                     "Yes" if disk.rm else "No"
                 ))
         except Exception as exc:
+            self.set_table_empty_state(self.disk_table, self.tr("Failed to load disks"), color="#f38ba8")
             self.append_output(f"Error listing disks: {exc}\n")
 
     def _refresh_mounts(self):
         """Refresh mount point table."""
         try:
             mounts = StorageManager.list_mounts()
+            self.mount_table.clearSpans()
             self.mount_table.setRowCount(0)
+
+            if not mounts:
+                self.set_table_empty_state(self.mount_table, self.tr("No mount points found"))
+                return
+
             for mount in mounts:
                 row = self.mount_table.rowCount()
                 self.mount_table.insertRow(row)
-                self.mount_table.setItem(row, 0, QTableWidgetItem(mount.source))
-                self.mount_table.setItem(row, 1, QTableWidgetItem(mount.target))
-                self.mount_table.setItem(row, 2, QTableWidgetItem(mount.fstype))
-                self.mount_table.setItem(row, 3, QTableWidgetItem(mount.size))
-                self.mount_table.setItem(row, 4, QTableWidgetItem(mount.used))
-                self.mount_table.setItem(row, 5, QTableWidgetItem(mount.use_percent))
+                self.mount_table.setItem(row, 0, self.make_table_item(mount.source))
+                self.mount_table.setItem(row, 1, self.make_table_item(mount.target))
+                self.mount_table.setItem(row, 2, self.make_table_item(mount.fstype))
+                self.mount_table.setItem(row, 3, self.make_table_item(mount.size))
+                self.mount_table.setItem(row, 4, self.make_table_item(mount.used))
+                self.mount_table.setItem(row, 5, self.make_table_item(mount.use_percent))
         except Exception as exc:
+            self.set_table_empty_state(self.mount_table, self.tr("Failed to load mount points"), color="#f38ba8")
             self.append_output(f"Error listing mounts: {exc}\n")
 
     def _check_smart(self):

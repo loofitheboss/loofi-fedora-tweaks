@@ -168,15 +168,20 @@ class VirtualizationTab(QWidget, PluginInterface):
 
     def _refresh_vm_list(self):
         """Reload the VM table from virsh."""
+        self.vm_table.clearSpans()
         self.vm_table.setRowCount(0)
         vms = VMManager.list_vms()
+        if not vms:
+            self.set_table_empty_state(self.vm_table, self.tr("No virtual machines found"))
+            self.log(self.tr("VM list refreshed (0 VMs)."))
+            return
         for vm in vms:
             row = self.vm_table.rowCount()
             self.vm_table.insertRow(row)
-            self.vm_table.setItem(row, 0, QTableWidgetItem(vm.name))
-            self.vm_table.setItem(row, 1, QTableWidgetItem(vm.state))
-            self.vm_table.setItem(row, 2, QTableWidgetItem(str(vm.memory_mb)))
-            self.vm_table.setItem(row, 3, QTableWidgetItem(str(vm.vcpus)))
+            self.vm_table.setItem(row, 0, self.make_table_item(vm.name))
+            self.vm_table.setItem(row, 1, self.make_table_item(vm.state))
+            self.vm_table.setItem(row, 2, self.make_table_item(str(vm.memory_mb)))
+            self.vm_table.setItem(row, 3, self.make_table_item(str(vm.vcpus)))
         self.log(self.tr("VM list refreshed ({} VMs).").format(len(vms)))
 
     def _get_selected_vm_name(self) -> str:

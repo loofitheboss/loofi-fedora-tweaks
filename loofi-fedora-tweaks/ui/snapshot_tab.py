@@ -136,24 +136,31 @@ class SnapshotTab(BaseTab):
         """Reload the snapshot table."""
         try:
             snapshots = SnapshotManager.list_snapshots()
+            self.snap_table.clearSpans()
             self.snap_table.setRowCount(0)
+
+            if not snapshots:
+                self.set_table_empty_state(self.snap_table, self.tr("No snapshots found"))
+                self.append_output("Found 0 snapshot(s)\n")
+                return
 
             for snap in snapshots:
                 row = self.snap_table.rowCount()
                 self.snap_table.insertRow(row)
-                self.snap_table.setItem(row, 0, QTableWidgetItem(snap.id))
-                self.snap_table.setItem(row, 1, QTableWidgetItem(snap.label))
-                self.snap_table.setItem(row, 2, QTableWidgetItem(snap.backend))
+                self.snap_table.setItem(row, 0, self.make_table_item(snap.id))
+                self.snap_table.setItem(row, 1, self.make_table_item(snap.label))
+                self.snap_table.setItem(row, 2, self.make_table_item(snap.backend))
 
                 ts_str = datetime.fromtimestamp(snap.timestamp).strftime(
                     "%Y-%m-%d %H:%M"
                 ) if snap.timestamp else "—"
-                self.snap_table.setItem(row, 3, QTableWidgetItem(ts_str))
-                self.snap_table.setItem(row, 4, QTableWidgetItem(snap.size_str))
+                self.snap_table.setItem(row, 3, self.make_table_item(ts_str))
+                self.snap_table.setItem(row, 4, self.make_table_item(snap.size_str))
 
             count = self.snap_table.rowCount()
             self.append_output(f"Found {count} snapshot(s)\n")
         except Exception as exc:
+            self.set_table_empty_state(self.snap_table, self.tr("Failed to load snapshots"), color="#f38ba8")
             self.append_output(f"Error listing snapshots: {exc}\n")
 
     def _create_snapshot(self):

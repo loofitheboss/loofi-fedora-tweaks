@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [31.0.3] - 2026-02-13 "Smart UX" (Hotfix)
+
+### Fixed
+
+- **Network Tab Visibility** (`ui/network_tab.py`): Added explicit per-cell table item foreground coloring and visible empty-state rows, so table bodies never appear blank when data is missing/unavailable.
+- **Storage Tab Visibility** (`ui/storage_tab.py`): Added empty-state rows for disks/mount points and explicit cell text coloring to avoid header-only tables.
+- **Cross-tab Table Reliability** (`ui/base_tab.py`): Added reusable `make_table_item()` and `set_table_empty_state()` helpers for consistent readable table content and full-width empty messages.
+- **Additional Table Tabs**: Applied same empty-state + explicit item rendering pattern to Security (`ui/security_tab.py`), Virtualization (`ui/virtualization_tab.py`), Snapshots (`ui/snapshot_tab.py`), Performance (`ui/performance_tab.py`), and Logs (`ui/logs_tab.py`).
+
+---
+
 ## [31.0.2] - 2026-02-13 "Smart UX" (Hotfix)
 
 ### Fixed

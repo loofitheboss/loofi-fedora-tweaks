@@ -14,6 +14,7 @@ import os
 import subprocess
 
 from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QComboBox, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
     QMessageBox, QPushButton, QTabWidget, QTableWidget,
@@ -359,6 +360,21 @@ class NetworkTab(BaseTab):
         self.check_mac_status()
         self._check_hostname_privacy()
 
+    @staticmethod
+    def _make_table_item(text: str) -> QTableWidgetItem:
+        """Create a table item with explicit readable foreground color."""
+        item = QTableWidgetItem(str(text))
+        item.setForeground(QColor("#e4e8f4"))
+        return item
+
+    def _set_empty_table_state(self, table: QTableWidget, message: str):
+        """Render a visible one-row empty state message for table bodies."""
+        table.clearSpans()
+        table.setRowCount(1)
+        table.setItem(0, 0, self._make_table_item(message))
+        if table.columnCount() > 1:
+            table.setSpan(0, 0, 1, table.columnCount())
+
     def _on_tab_changed(self, index):
         """Start/stop monitoring timer based on active sub-tab."""
         if index == 3:  # Monitoring tab
@@ -375,17 +391,23 @@ class NetworkTab(BaseTab):
         """Load network interfaces from NetworkMonitor."""
         try:
             interfaces = NetworkMonitor.get_all_interfaces()
+            self.iface_table.clearSpans()
+            if not interfaces:
+                self._set_empty_table_state(self.iface_table, self.tr("No active interfaces detected"))
+                return
+
             self.iface_table.setRowCount(len(interfaces))
             for i, iface in enumerate(interfaces):
-                self.iface_table.setItem(i, 0, QTableWidgetItem(iface.name))
-                self.iface_table.setItem(i, 1, QTableWidgetItem(iface.type.capitalize()))
+                self.iface_table.setItem(i, 0, self._make_table_item(iface.name))
+                self.iface_table.setItem(i, 1, self._make_table_item(iface.type.capitalize()))
                 status = "🟢 Up" if iface.is_up else "🔴 Down"
-                self.iface_table.setItem(i, 2, QTableWidgetItem(status))
-                self.iface_table.setItem(i, 3, QTableWidgetItem(iface.ip_address or "—"))
+                self.iface_table.setItem(i, 2, self._make_table_item(status))
+                self.iface_table.setItem(i, 3, self._make_table_item(iface.ip_address or "—"))
                 mac = self._get_mac_address(iface.name)
-                self.iface_table.setItem(i, 4, QTableWidgetItem(mac))
+                self.iface_table.setItem(i, 4, self._make_table_item(mac))
         except Exception as e:
             logger.error("Failed to load interfaces: %s", e)
+            self._set_empty_table_state(self.iface_table, self.tr("Failed to load interfaces"))
 
     @staticmethod
     def _get_mac_address(iface_name):
@@ -404,20 +426,29 @@ class NetworkTab(BaseTab):
                 capture_output=True, text=True, timeout=15
             )
             lines = [line for line in result.stdout.strip().splitlines() if line.strip()]
-            self.wifi_table.setRowCount(len(lines))
-            for i, line in enumerate(lines):
+            rows: list[tuple[str, str, str, str]] = []
+            for line in lines:
                 parts = line.split(":")
                 if len(parts) >= 4:
                     ssid = parts[0] or "(Hidden)"
                     signal = f"{parts[1]}%"
                     security = parts[2] or "Open"
                     active = "Connected" if parts[3] == "yes" else ""
-                    self.wifi_table.setItem(i, 0, QTableWidgetItem(ssid))
-                    self.wifi_table.setItem(i, 1, QTableWidgetItem(signal))
-                    self.wifi_table.setItem(i, 2, QTableWidgetItem(security))
-                    self.wifi_table.setItem(i, 3, QTableWidgetItem(active))
+                    rows.append((ssid, signal, security, active))
+
+            self.wifi_table.clearSpans()
+            if not rows:
+                self._set_empty_table_state(self.wifi_table, self.tr("No Wi-Fi networks found"))
+            else:
+                self.wifi_table.setRowCount(len(rows))
+                for i, row in enumerate(rows):
+                    self.wifi_table.setItem(i, 0, self._make_table_item(row[0]))
+                    self.wifi_table.setItem(i, 1, self._make_table_item(row[1]))
+                    self.wifi_table.setItem(i, 2, self._make_table_item(row[2]))
+                    self.wifi_table.setItem(i, 3, self._make_table_item(row[3]))
             self.append_output(self.tr("WiFi scan complete. {} networks found.\n").format(len(lines)))
         except Exception as e:
+            self._set_empty_table_state(self.wifi_table, self.tr("Wi-Fi scan failed"))
             self.append_output(self.tr("WiFi scan failed: {}\n").format(e))
 
     def _connect_wifi(self):
@@ -448,19 +479,20 @@ class NetworkTab(BaseTab):
             vpn_lines = [line for line in result.stdout.strip().splitlines()
                          if "vpn" in line.lower() or "wireguard" in line.lower()
                          or "openvpn" in line.lower()]
+            self.vpn_table.clearSpans()
             self.vpn_table.setRowCount(len(vpn_lines))
             for i, line in enumerate(vpn_lines):
                 parts = line.split(":")
                 if len(parts) >= 3:
-                    self.vpn_table.setItem(i, 0, QTableWidgetItem(parts[0]))
-                    self.vpn_table.setItem(i, 1, QTableWidgetItem(parts[1]))
+                    self.vpn_table.setItem(i, 0, self._make_table_item(parts[0]))
+                    self.vpn_table.setItem(i, 1, self._make_table_item(parts[1]))
                     status = "🟢 Active" if parts[2] == "yes" else "Inactive"
-                    self.vpn_table.setItem(i, 2, QTableWidgetItem(status))
+                    self.vpn_table.setItem(i, 2, self._make_table_item(status))
             if not vpn_lines:
-                self.vpn_table.setRowCount(1)
-                self.vpn_table.setItem(0, 0, QTableWidgetItem(self.tr("No VPN connections configured")))
+                self._set_empty_table_state(self.vpn_table, self.tr("No VPN connections configured"))
         except Exception as e:
             logger.debug("Failed to load VPN: %s", e)
+            self._set_empty_table_state(self.vpn_table, self.tr("Failed to load VPN connections"))
 
     # ------------------------------------------------------------------ #
     #  DNS sub-tab
@@ -680,35 +712,43 @@ class NetworkTab(BaseTab):
             # Per-interface traffic
             interfaces = NetworkMonitor.get_all_interfaces()
             non_lo = [i for i in interfaces if i.type != "loopback"]
-            self.traffic_table.setRowCount(len(non_lo))
-            for i, iface in enumerate(non_lo):
-                self.traffic_table.setItem(i, 0, QTableWidgetItem(iface.name))
-                self.traffic_table.setItem(i, 1, QTableWidgetItem(iface.type.capitalize()))
-                self.traffic_table.setItem(i, 2, QTableWidgetItem(iface.bytes_sent_human))
-                self.traffic_table.setItem(i, 3, QTableWidgetItem(iface.bytes_recv_human))
-                self.traffic_table.setItem(i, 4, QTableWidgetItem(iface.send_rate_human))
-                self.traffic_table.setItem(i, 5, QTableWidgetItem(iface.recv_rate_human))
+            self.traffic_table.clearSpans()
+            if not non_lo:
+                self._set_empty_table_state(self.traffic_table, self.tr("No network traffic data available"))
+            else:
+                self.traffic_table.setRowCount(len(non_lo))
+                for i, iface in enumerate(non_lo):
+                    self.traffic_table.setItem(i, 0, self._make_table_item(iface.name))
+                    self.traffic_table.setItem(i, 1, self._make_table_item(iface.type.capitalize()))
+                    self.traffic_table.setItem(i, 2, self._make_table_item(iface.bytes_sent_human))
+                    self.traffic_table.setItem(i, 3, self._make_table_item(iface.bytes_recv_human))
+                    self.traffic_table.setItem(i, 4, self._make_table_item(iface.send_rate_human))
+                    self.traffic_table.setItem(i, 5, self._make_table_item(iface.recv_rate_human))
 
             # Active connections
             connections = NetworkMonitor.get_active_connections()
             # Show only ESTABLISHED and LISTEN, limit to 100
             filtered = [c for c in connections
                         if c.state in ("ESTABLISHED", "LISTEN")][:100]
-            self.conn_table.setRowCount(len(filtered))
-            for i, conn in enumerate(filtered):
-                self.conn_table.setItem(i, 0, QTableWidgetItem(conn.protocol))
-                self.conn_table.setItem(i, 1, QTableWidgetItem(
-                    f"{conn.local_addr}:{conn.local_port}"
-                ))
-                self.conn_table.setItem(i, 2, QTableWidgetItem(
-                    f"{conn.remote_addr}:{conn.remote_port}"
-                ))
-                self.conn_table.setItem(i, 3, QTableWidgetItem(conn.state))
-                self.conn_table.setItem(i, 4, QTableWidgetItem(
-                    str(conn.pid) if conn.pid else "—"
-                ))
-                self.conn_table.setItem(i, 5, QTableWidgetItem(
-                    conn.process_name or "—"
-                ))
+            self.conn_table.clearSpans()
+            if not filtered:
+                self._set_empty_table_state(self.conn_table, self.tr("No active connections"))
+            else:
+                self.conn_table.setRowCount(len(filtered))
+                for i, conn in enumerate(filtered):
+                    self.conn_table.setItem(i, 0, self._make_table_item(conn.protocol))
+                    self.conn_table.setItem(i, 1, self._make_table_item(
+                        f"{conn.local_addr}:{conn.local_port}"
+                    ))
+                    self.conn_table.setItem(i, 2, self._make_table_item(
+                        f"{conn.remote_addr}:{conn.remote_port}"
+                    ))
+                    self.conn_table.setItem(i, 3, self._make_table_item(conn.state))
+                    self.conn_table.setItem(i, 4, self._make_table_item(
+                        str(conn.pid) if conn.pid else "—"
+                    ))
+                    self.conn_table.setItem(i, 5, self._make_table_item(
+                        conn.process_name or "—"
+                    ))
         except Exception as e:
             logger.error("Monitoring refresh failed: %s", e)

@@ -214,12 +214,16 @@ class LogsTab(BaseTab):
             self.lbl_errors.setText(str(summary.error_count))
 
             # Patterns
+            self.pattern_table.clearSpans()
             self.pattern_table.setRowCount(0)
-            for pattern_name, count in summary.detected_patterns:
-                row = self.pattern_table.rowCount()
-                self.pattern_table.insertRow(row)
-                self.pattern_table.setItem(row, 0, QTableWidgetItem(pattern_name))
-                self.pattern_table.setItem(row, 1, QTableWidgetItem(str(count)))
+            if not summary.detected_patterns:
+                self.set_table_empty_state(self.pattern_table, self.tr("No known log patterns detected"))
+            else:
+                for pattern_name, count in summary.detected_patterns:
+                    row = self.pattern_table.rowCount()
+                    self.pattern_table.insertRow(row)
+                    self.pattern_table.setItem(row, 0, self.make_table_item(pattern_name))
+                    self.pattern_table.setItem(row, 1, self.make_table_item(str(count)))
 
             # Populate unit combo from top units
             current_text = self.unit_combo.currentText()
@@ -237,6 +241,7 @@ class LogsTab(BaseTab):
                 self.unit_combo.setCurrentIndex(idx)
 
         except Exception as exc:
+            self.set_table_empty_state(self.pattern_table, self.tr("Failed to load log summary"), color="#f38ba8")
             self.append_output(f"Error loading summary: {exc}\n")
 
     def _fetch_logs(self):
@@ -256,24 +261,27 @@ class LogsTab(BaseTab):
                 since="24h ago"
             )
 
+            self.log_table.clearSpans()
             self.log_table.setRowCount(0)
+            if not entries:
+                self.set_table_empty_state(self.log_table, self.tr("No log entries for current filters"))
             for entry in entries:
                 row = self.log_table.rowCount()
                 self.log_table.insertRow(row)
 
-                self.log_table.setItem(row, 0, QTableWidgetItem(entry.timestamp))
+                self.log_table.setItem(row, 0, self.make_table_item(entry.timestamp))
 
-                unit_item = QTableWidgetItem(entry.unit)
+                unit_item = self.make_table_item(entry.unit)
                 self.log_table.setItem(row, 1, unit_item)
 
-                prio_item = QTableWidgetItem(entry.priority_label)
+                prio_item = self.make_table_item(entry.priority_label)
                 if entry.priority <= 2:
                     prio_item.setForeground(QColor("#f38ba8"))
                 elif entry.priority <= 4:
                     prio_item.setForeground(QColor("#fab387"))
                 self.log_table.setItem(row, 2, prio_item)
 
-                msg_item = QTableWidgetItem(entry.message[:200])
+                msg_item = self.make_table_item(entry.message[:200])
                 if entry.pattern_match:
                     msg_item.setForeground(QColor("#f38ba8"))
                     msg_item.setToolTip(f"Pattern: {entry.pattern_match}")
@@ -281,6 +289,7 @@ class LogsTab(BaseTab):
 
             self.append_output(f"Fetched {len(entries)} log entries\n")
         except Exception as exc:
+            self.set_table_empty_state(self.log_table, self.tr("Failed to fetch logs"), color="#f38ba8")
             self.append_output(f"Error fetching logs: {exc}\n")
 
     def _export_logs(self):

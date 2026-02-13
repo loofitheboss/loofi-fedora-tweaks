@@ -16,7 +16,7 @@ v31.0.2: Added configure_table() for readable data rows across all tabs.
 import logging
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit
+    QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit, QTableWidget, QTableWidgetItem
 )
 from PyQt6.QtGui import QColor, QPalette
 from utils.command_runner import CommandRunner
@@ -162,3 +162,19 @@ class BaseTab(*_BaseTabBases):
         pal.setColor(QPalette.ColorRole.Highlight, QColor("#585b70"))
         pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
         table.setPalette(pal)
+
+    @staticmethod
+    def make_table_item(text, color: str = "#e4e8f4") -> QTableWidgetItem:
+        """Create a table item with explicit foreground color for readability."""
+        item = QTableWidgetItem(str(text))
+        item.setForeground(QColor(color))
+        return item
+
+    @staticmethod
+    def set_table_empty_state(table: QTableWidget, message: str, color: str = "#a6adc8") -> None:
+        """Render a single full-width empty-state row in a table."""
+        table.clearSpans()
+        table.setRowCount(1)
+        table.setItem(0, 0, BaseTab.make_table_item(message, color=color))
+        if table.columnCount() > 1:
+            table.setSpan(0, 0, 1, table.columnCount())

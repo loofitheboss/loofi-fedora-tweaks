@@ -223,20 +223,26 @@ class PerformanceTab(BaseTab):
         """Update the history table."""
         try:
             history = AutoTuner.get_tuning_history()
+            self.history_table.clearSpans()
             self.history_table.setRowCount(0)
-            for entry in reversed(history[-10:]):
+            recent = list(reversed(history[-10:]))
+            if not recent:
+                self.set_table_empty_state(self.history_table, self.tr("No tuning history yet"))
+                return
+
+            for entry in recent:
                 row = self.history_table.rowCount()
                 self.history_table.insertRow(row)
 
                 from datetime import datetime
                 ts = datetime.fromtimestamp(entry.timestamp).strftime("%Y-%m-%d %H:%M")
-                self.history_table.setItem(row, 0, QTableWidgetItem(ts))
-                self.history_table.setItem(row, 1, QTableWidgetItem(entry.workload))
-                self.history_table.setItem(row, 2, QTableWidgetItem(
+                self.history_table.setItem(row, 0, self.make_table_item(ts))
+                self.history_table.setItem(row, 1, self.make_table_item(entry.workload))
+                self.history_table.setItem(row, 2, self.make_table_item(
                     "✅" if entry.applied else "❌"
                 ))
                 recs = entry.recommendations
                 summary = f"gov={recs.get('governor', '?')}, swap={recs.get('swappiness', '?')}"
-                self.history_table.setItem(row, 3, QTableWidgetItem(summary))
+                self.history_table.setItem(row, 3, self.make_table_item(summary))
         except Exception:
-            pass
+            self.set_table_empty_state(self.history_table, self.tr("Failed to load tuning history"), color="#f38ba8")

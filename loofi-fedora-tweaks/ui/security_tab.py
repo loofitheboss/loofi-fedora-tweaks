@@ -349,18 +349,23 @@ class SecurityTab(QWidget, PluginInterface):
 
     def _refresh_ports(self):
         """Refresh port list."""
+        self.port_table.clearSpans()
         self.port_table.setRowCount(0)
 
         ports = PortAuditor.scan_ports()
+
+        if not ports:
+            self.set_table_empty_state(self.port_table, self.tr("No open ports detected"))
+            return
 
         for port in ports:
             row = self.port_table.rowCount()
             self.port_table.insertRow(row)
 
-            self.port_table.setItem(row, 0, QTableWidgetItem(str(port.port)))
-            self.port_table.setItem(row, 1, QTableWidgetItem(port.protocol))
-            self.port_table.setItem(row, 2, QTableWidgetItem(port.address))
-            self.port_table.setItem(row, 3, QTableWidgetItem(port.process))
+            self.port_table.setItem(row, 0, self.make_table_item(str(port.port)))
+            self.port_table.setItem(row, 1, self.make_table_item(port.protocol))
+            self.port_table.setItem(row, 2, self.make_table_item(port.address))
+            self.port_table.setItem(row, 3, self.make_table_item(port.process))
 
             status_item = QTableWidgetItem("⚠️ Risk" if port.is_risky else "✅ OK")
             if port.is_risky:
