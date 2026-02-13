@@ -64,21 +64,21 @@ class ConfirmActionDialog(QDialog):
         # Separator
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet("color: #45475a;")
+        sep.setStyleSheet("color: #2d3348;")
         layout.addWidget(sep)
 
         # Description
         if description:
             desc_label = QLabel(description)
             desc_label.setWordWrap(True)
-            desc_label.setStyleSheet("color: #a6adc8; font-size: 13px;")
+            desc_label.setStyleSheet("color: #9da7bf; font-size: 13px;")
             layout.addWidget(desc_label)
 
         # Undo hint
         if undo_hint:
             undo_frame = QFrame()
             undo_frame.setStyleSheet(
-                "QFrame { background-color: #1e1e2e; border: 1px solid #45475a; "
+                "QFrame { background-color: #0b0e14; border: 1px solid #2d3348; "
                 "border-radius: 8px; padding: 10px; }"
             )
             undo_layout = QHBoxLayout(undo_frame)
@@ -88,7 +88,7 @@ class ConfirmActionDialog(QDialog):
             undo_layout.addWidget(undo_icon)
             undo_text = QLabel(undo_hint)
             undo_text.setWordWrap(True)
-            undo_text.setStyleSheet("color: #89b4fa; font-size: 12px;")
+            undo_text.setStyleSheet("color: #39c5cf; font-size: 12px;")
             undo_layout.addWidget(undo_text, 1)
             layout.addWidget(undo_frame)
 
@@ -104,7 +104,7 @@ class ConfirmActionDialog(QDialog):
 
         # Don't ask again checkbox
         self.dont_ask_cb = QCheckBox(self.tr("Don't ask for confirmation again"))
-        self.dont_ask_cb.setStyleSheet("font-size: 11px; color: #585b70;")
+        self.dont_ask_cb.setStyleSheet("font-size: 11px; color: #5c6578;")
         layout.addWidget(self.dont_ask_cb)
 
         # Buttons

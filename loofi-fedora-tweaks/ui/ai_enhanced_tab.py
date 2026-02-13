@@ -96,10 +96,10 @@ class AIEnhancedTab(QWidget, PluginInterface):
         id="ai_lab",
         name="AI Lab",
         description="AI model management, voice transcription, and knowledge base indexing.",
-        category="Tools",
+        category="Developer",
         icon="🧠",
         badge="advanced",
-        order=10,
+        order=30,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -174,7 +174,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
                 rec_label = QLabel(
                     self.tr("Recommended model: {} ({})").format(rec["name"], rec["size"])
                 )
-                rec_label.setStyleSheet("color: #a6e3a1; font-weight: bold;")
+                rec_label.setStyleSheet("color: #3dd68c; font-weight: bold;")
                 ram_layout.addWidget(rec_label)
 
         layout.addWidget(ram_group)
@@ -450,7 +450,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
         self.index_path_label = QLabel(
             self.tr("Index location: {}").format(ContextRAGManager.get_index_path())
         )
-        self.index_path_label.setStyleSheet("color: #bac2de; font-size: 11px;")
+        self.index_path_label.setStyleSheet("color: #9da7bf; font-size: 11px;")
         status_layout.addWidget(self.index_path_label)
 
         # Action buttons

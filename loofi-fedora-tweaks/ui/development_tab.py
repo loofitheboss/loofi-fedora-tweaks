@@ -66,10 +66,10 @@ class DevelopmentTab(BaseTab):
         id="development",
         name="Development",
         description="Container management and developer tools including language version managers and VS Code extensions.",
-        category="Software",
+        category="Developer",
         icon="🛠️",
         badge="",
-        order=50,
+        order=10,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -135,7 +135,7 @@ class DevelopmentTab(BaseTab):
         header_layout.addWidget(header)
 
         self.container_status_label = QLabel()
-        self.container_status_label.setStyleSheet("color: #bac2de;")
+        self.container_status_label.setStyleSheet("color: #9da7bf;")
         header_layout.addWidget(self.container_status_label)
         header_layout.addStretch()
         ct_layout.addLayout(header_layout)
@@ -255,7 +255,7 @@ class DevelopmentTab(BaseTab):
             "Containers share your home directory by default. "
             "Double-click a container to enter it."
         ))
-        help_label.setStyleSheet("color: #bac2de; font-size: 11px;")
+        help_label.setStyleSheet("color: #9da7bf; font-size: 11px;")
         help_label.setWordWrap(True)
         layout.addWidget(help_label)
 
@@ -484,7 +484,7 @@ class DevelopmentTab(BaseTab):
             "Install version managers to run multiple language versions without affecting system packages."
         ))
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #bac2de;")
+        info_label.setStyleSheet("color: #9da7bf;")
         layout.addWidget(info_label)
 
         # PyEnv
@@ -540,7 +540,7 @@ class DevelopmentTab(BaseTab):
             "Install recommended extensions for different development profiles."
         ))
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #bac2de;")
+        info_label.setStyleSheet("color: #9da7bf;")
         layout.addWidget(info_label)
 
         # Profile selector

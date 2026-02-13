@@ -34,10 +34,10 @@ class VirtualizationTab(QWidget, PluginInterface):
         id="virtualization",
         name="Virtualization",
         description="VM lifecycle management, GPU passthrough setup, and disposable virtual machines.",
-        category="Software",
+        category="Developer",
         icon="🖥️",
         badge="advanced",
-        order=40,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -64,8 +64,8 @@ class VirtualizationTab(QWidget, PluginInterface):
         # ---- Top banner: virt status summary ----
         self.banner_label = QLabel(self.tr("Loading virtualization status..."))
         self.banner_label.setStyleSheet(
-            "font-size: 12px; padding: 6px; background: #1e1e2e; "
-            "border-radius: 4px; color: #cdd6f4;"
+            "font-size: 12px; padding: 6px; background: #0b0e14; "
+            "border-radius: 4px; color: #e6edf3;"
         )
         self.banner_label.setWordWrap(True)
         main_layout.addWidget(self.banner_label)

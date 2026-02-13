@@ -31,10 +31,10 @@ class HealthTimelineTab(QWidget, PluginInterface):
         id="health",
         name="Health",
         description="System health metrics timeline for tracking CPU, RAM, disk, and thermal trends.",
-        category="System",
+        category="Health & Logs",
         icon="📈",
         badge="",
-        order=30,
+        order=10,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -71,7 +71,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
             "export data for analysis."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #bac2de; font-size: 12px;")
+        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
         layout.addWidget(description)
 
         # Summary section
@@ -80,8 +80,8 @@ class HealthTimelineTab(QWidget, PluginInterface):
         self.summary_label = QLabel(self.tr("Loading..."))
         self.summary_label.setWordWrap(True)
         self.summary_label.setStyleSheet(
-            "font-size: 12px; padding: 8px; background: #1e1e2e; "
-            "border-radius: 4px; color: #cdd6f4;"
+            "font-size: 12px; padding: 8px; background: #0b0e14; "
+            "border-radius: 4px; color: #e6edf3;"
         )
         summary_layout.addWidget(self.summary_label)
         layout.addWidget(summary_group)
@@ -156,8 +156,8 @@ class HealthTimelineTab(QWidget, PluginInterface):
         self.anomaly_label = QLabel(self.tr("No anomalies detected."))
         self.anomaly_label.setWordWrap(True)
         self.anomaly_label.setStyleSheet(
-            "font-size: 12px; padding: 8px; background: #1e1e2e; "
-            "border-radius: 4px; color: #cdd6f4;"
+            "font-size: 12px; padding: 8px; background: #0b0e14; "
+            "border-radius: 4px; color: #e6edf3;"
         )
         anomaly_layout.addWidget(self.anomaly_label)
 

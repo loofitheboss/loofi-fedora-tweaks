@@ -158,9 +158,9 @@ class BaseTab(*_BaseTabBases):
         pal = table.palette()
         pal.setColor(QPalette.ColorRole.Text, QColor("#e4e8f4"))
         pal.setColor(QPalette.ColorRole.WindowText, QColor("#e4e8f4"))
-        pal.setColor(QPalette.ColorRole.Base, QColor("#1e1e2e"))
+        pal.setColor(QPalette.ColorRole.Base, QColor("#0b0e14"))
         pal.setColor(QPalette.ColorRole.AlternateBase, QColor("#252540"))
-        pal.setColor(QPalette.ColorRole.Highlight, QColor("#585b70"))
+        pal.setColor(QPalette.ColorRole.Highlight, QColor("#5c6578"))
         pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
         table.setPalette(pal)
 
@@ -172,7 +172,7 @@ class BaseTab(*_BaseTabBases):
         return item
 
     @staticmethod
-    def set_table_empty_state(table: QTableWidget, message: str, color: str = "#a6adc8") -> None:
+    def set_table_empty_state(table: QTableWidget, message: str, color: str = "#9da7bf") -> None:
         """Render a single full-width empty-state row in a table."""
         table.clearSpans()
         table.setRowCount(1)

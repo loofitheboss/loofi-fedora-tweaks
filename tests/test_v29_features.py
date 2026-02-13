@@ -413,7 +413,7 @@ class TestNotificationToastCategoryFallback(unittest.TestCase):
 
     def test_unknown_category_returns_default_colour(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        default = "#89b4fa"
+        default = "#39c5cf"
         result = _CATEGORY_COLORS.get("totally_unknown", default)
         self.assertEqual(result, default)
 

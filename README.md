@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v31.0.0 "Smart UX"
+# Loofi Fedora Tweaks v32.0.0 "Abyss"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v31.0.0">
-    <img src="https://img.shields.io/badge/Release-v31.0.0-blue?style=for-the-badge&logo=github" alt="Release v31.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v32.0.0">
+    <img src="https://img.shields.io/badge/Release-v32.0.0-blue?style=for-the-badge&logo=github" alt="Release v32.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,19 +35,23 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v32.0.0?
+
+`v32.0.0 "Abyss"` is a full visual redesign — new theme, reorganized navigation, and polished UI across every tab:
+
+- **Loofi Abyss theme** — Purpose-built dark palette (`#0b0e14` base, `#39c5cf` teal accent, `#b78eff` header purple) with matching light variant. Replaces Catppuccin.
+- **Activity-based categories** — 10 categories consolidated to 8 logical groups: Overview, Manage, Hardware, Network & Security, Personalize, Developer, Automation, Health & Logs.
+- **Category icons** — Emoji prefixes on sidebar category headers for instant visual scanning.
+- **Sidebar collapse toggle** — `≡` / `✕` button to collapse/expand the sidebar; remembers state.
+- **Deterministic tab ordering** — Explicit `CATEGORY_ORDER` dict enforces consistent sidebar sort across sessions.
+- **QSS overhaul** — Both `modern.qss` and `light.qss` rewritten from scratch; dead `style.qss` removed.
+- **Color migration** — All inline Catppuccin hex codes replaced across 30+ source files (notifications, health score, quick actions, and more).
+
+Full notes: [`docs/releases/RELEASE-NOTES-v32.0.0.md`](docs/releases/RELEASE-NOTES-v32.0.0.md)
+
+---
+
 ## What Is New in v31.0.0?
-
-`v31.0.0` focuses on smart UX — making the app smarter about what matters and faster to use:
-
-- **System Health Score** — Dashboard widget with weighted 0–100 score (CPU, RAM, disk, uptime, updates), letter grade (A–F), and actionable recommendations.
-- **Batch Operations** — Select multiple packages in the Software tab and install/remove in one operation. Supports both dnf and rpm-ostree.
-- **System Report Export** — Export system info as Markdown or styled HTML from the System Info tab.
-- **Favorite Tabs** — Right-click sidebar items to pin favorites; persisted across sessions.
-- **Configurable Quick Actions** — Dashboard quick action buttons are now user-configurable.
-- **i18n Scaffolding** — Qt Linguist translation infrastructure with English and Swedish stubs.
-- **Plugin Template Script** — `scripts/create_plugin.sh` scaffolds complete plugin directories.
-- **Accessibility Level 2** — `setAccessibleName`/`setAccessibleDescription` on navigation and interactive widgets.
-- **95 new tests** across 6 test files; 3968+ total tests passing.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v31.0.0.md`](docs/releases/RELEASE-NOTES-v31.0.0.md)
 
@@ -121,16 +125,14 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 | Category | Tabs |
 |----------|------|
-| Dashboard | Home |
-| Automation | Agents, Automation |
-| System | System Info, System Monitor, Health, Logs |
-| Hardware | Hardware, Performance, Storage |
-| Software | Software, Maintenance, Snapshots, Virtualization, Development |
-| Network | Network, Loofi Link |
-| Security | Security & Privacy |
-| Desktop | Desktop, Profiles, Gaming |
-| Tools | AI Lab, State Teleport, Diagnostics, Community |
-| Settings | Settings |
+| 🏠 Overview | Home, System Info, System Monitor |
+| 📦 Manage | Software, Maintenance, Snapshots, Virtualization |
+| 🔧 Hardware | Hardware, Performance, Storage, Gaming |
+| 🌐 Network & Security | Network, Loofi Link, Security & Privacy |
+| 🎨 Personalize | Desktop, Profiles, Settings |
+| 💻 Developer | Development, AI Lab, State Teleport |
+| 🤖 Automation | Agents, Automation |
+| 📊 Health & Logs | Health, Logs, Diagnostics, Community |
 
 ---
 
@@ -229,7 +231,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3846 passing, 76.8% coverage
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3968+ passing
 ```
 
 Build RPM:

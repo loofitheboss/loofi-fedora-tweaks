@@ -26,7 +26,7 @@ class PerformanceTab(BaseTab):
         name="Performance",
         description="Auto-tuner engine for workload detection, kernel tunables, and performance recommendations.",
         category="Hardware",
-        icon="⚙️",
+        icon="🚀",
         badge="advanced",
         order=20,
     )
@@ -121,7 +121,7 @@ class PerformanceTab(BaseTab):
 
         self.lbl_rec_details = QLabel("")
         self.lbl_rec_details.setWordWrap(True)
-        self.lbl_rec_details.setStyleSheet("color: #a6adc8;")
+        self.lbl_rec_details.setStyleSheet("color: #9da7bf;")
         rec_layout.addWidget(self.lbl_rec_details)
 
         btn_apply = QPushButton(self.tr("⚡ Apply Recommendation"))
@@ -245,4 +245,4 @@ class PerformanceTab(BaseTab):
                 summary = f"gov={recs.get('governor', '?')}, swap={recs.get('swappiness', '?')}"
                 self.history_table.setItem(row, 3, self.make_table_item(summary))
         except Exception:
-            self.set_table_empty_state(self.history_table, self.tr("Failed to load tuning history"), color="#f38ba8")
+            self.set_table_empty_state(self.history_table, self.tr("Failed to load tuning history"), color="#e8556d")

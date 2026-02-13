@@ -4,6 +4,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [32.0.0] - 2026-02-13 "Abyss"
+
+### Added
+
+- **New "Loofi Abyss" Color Palette**: Complete visual redesign replacing the Catppuccin Mocha/Latte themes with a custom deep-ocean-inspired palette. Dark theme: base `#0b0e14`, accent `#39c5cf` (teal), header `#b78eff` (purple). Light theme: base `#f4f6f9`, accent `#0e8a93`, header `#7c5ec4`.
+- **Activity-Based Category Navigation**: Reorganized 26 tabs from 10 categories to 8 logical activity-based groups: Overview, Manage, Hardware, Network & Security, Personalize, Developer, Automation, Health & Logs.
+- **Category Icons**: Each sidebar category now displays an emoji icon prefix (🏠 Overview, 📦 Manage, 🔧 Hardware, 🌐 Network & Security, 🎨 Personalize, 💻 Developer, 🤖 Automation, 📊 Health & Logs).
+- **Sidebar Collapse Toggle**: New toggle button to collapse/expand the sidebar, freeing content area space.
+- **Explicit Category Sort Order**: `CATEGORY_ORDER` dict in `core/plugins/registry.py` replaces alphabetical sorting with intentional ordering.
+
+### Changed
+
+- **QSS Dark Theme** (`assets/modern.qss`): Full rewrite (~560 lines) with Abyss dark palette, fixed `QTreeWidget#sidebar` selectors (previously targeting dead `QListWidget`), improved card/button/tab/scrollbar/breadcrumb/status bar styling.
+- **QSS Light Theme** (`assets/light.qss`): Full rewrite with matching Abyss light variant.
+- **26 Tab Locations**: Dashboard → Overview; System Info, Monitor, Health Timeline, Logs → Overview/Health & Logs; Software, Maintenance, Snapshots, Storage → Manage; Hardware, Performance, Gaming → Hardware; Network, Security, Mesh → Network & Security; Desktop, Profiles, Settings → Personalize; Development, Virtualization, AI Lab, Diagnostics → Developer; Agents, Automation, Teleport, Community → Automation.
+- **Notification Toast Colors**: Updated `_CATEGORY_COLORS` dict with Abyss palette and expanded to cover all 8 new categories plus legacy aliases.
+- **Health Score Colors**: Grade A–F colors updated from Catppuccin to Abyss equivalents.
+- **Quick Actions Colors**: Dashboard quick action button colors updated to Abyss palette.
+- **All Inline Colors**: Batch-migrated 17 Catppuccin color codes to Abyss equivalents across 30+ Python source files (UI tabs, wizards, dialogs, panels, palettes).
+
+### Removed
+
+- **Dead `style.qss`**: Removed unreachable legacy stylesheet file.
+- **Catppuccin Mocha palette**: All `#89b4fa`, `#cba6f7`, `#f38ba8`, `#1e1e2e`, etc. codes replaced.
+
+### Fixed
+
+- **Sidebar QSS Mismatch**: QSS was targeting `QListWidget` for sidebar styling, but the actual widget is `QTreeWidget#sidebar`. Sidebar now correctly receives all intended styles.
+
+---
+
 ## [31.0.5] - 2026-02-13 "Smart UX" (Hotfix)
 
 ### Fixed

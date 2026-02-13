@@ -17,13 +17,21 @@ from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 from PyQt6.QtGui import QPainter, QColor, QPainterPath
 
 
-# Category → accent color mapping
+# Category → accent color mapping (Abyss palette)
 _CATEGORY_COLORS = {
-    "general": "#89b4fa",
-    "health": "#a6e3a1",
-    "profile": "#cba6f7",
-    "security": "#f38ba8",
-    "system": "#f9e2af",
+    "general": "#39c5cf",       # teal accent
+    "overview": "#39c5cf",      # teal
+    "manage": "#b78eff",        # purple
+    "hardware": "#e8b84d",      # amber
+    "network & security": "#e8556d",  # coral
+    "personalize": "#b78eff",   # purple
+    "developer": "#3dd68c",     # green
+    "automation": "#39c5cf",    # teal
+    "health & logs": "#3dd68c", # green
+    "health": "#3dd68c",
+    "profile": "#b78eff",
+    "security": "#e8556d",
+    "system": "#e8b84d",
 }
 
 
@@ -45,7 +53,7 @@ class NotificationToast(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
 
-        self._accent_color = QColor("#89b4fa")
+        self._accent_color = QColor("#39c5cf")
         self._auto_hide_timer = QTimer(self)
         self._auto_hide_timer.setSingleShot(True)
         self._auto_hide_timer.timeout.connect(self._slide_out)
@@ -68,12 +76,12 @@ class NotificationToast(QWidget):
 
         self._title_label = QLabel("")
         self._title_label.setStyleSheet(
-            "font-weight: bold; font-size: 13px; color: #cdd6f4;"
+            "font-weight: bold; font-size: 13px; color: #e6edf3;"
         )
         text_col.addWidget(self._title_label)
 
         self._message_label = QLabel("")
-        self._message_label.setStyleSheet("font-size: 11px; color: #a6adc8;")
+        self._message_label.setStyleSheet("font-size: 11px; color: #9da7bf;")
         self._message_label.setWordWrap(True)
         text_col.addWidget(self._message_label)
 
@@ -83,8 +91,8 @@ class NotificationToast(QWidget):
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(24, 24)
         close_btn.setStyleSheet(
-            "QPushButton { border: none; color: #585b70; font-size: 14px; }"
-            "QPushButton:hover { color: #f38ba8; }"
+            "QPushButton { border: none; color: #5c6578; font-size: 14px; }"
+            "QPushButton:hover { color: #e8556d; }"
         )
         close_btn.clicked.connect(self._slide_out)
         layout.addWidget(close_btn, 0, Qt.AlignmentFlag.AlignTop)
@@ -98,7 +106,7 @@ class NotificationToast(QWidget):
         """Display a toast notification with slide-in animation."""
         self._title_label.setText(title)
         self._message_label.setText(message[:120])  # Truncate long messages
-        self._accent_color = QColor(_CATEGORY_COLORS.get(category, "#89b4fa"))
+        self._accent_color = QColor(_CATEGORY_COLORS.get(category, "#39c5cf"))
 
         # Position at top-right of parent
         if self.parent():
@@ -150,7 +158,7 @@ class NotificationToast(QWidget):
         # Background
         path = QPainterPath()
         path.addRoundedRect(0.0, 0.0, float(self.width()), float(self.height()), 10.0, 10.0)
-        painter.fillPath(path, QColor("#313244"))
+        painter.fillPath(path, QColor("#1c2030"))
 
         # Left accent bar
         accent_path = QPainterPath()
@@ -158,7 +166,7 @@ class NotificationToast(QWidget):
         painter.fillPath(accent_path, self._accent_color)
 
         # Border
-        painter.setPen(QColor("#45475a"))
+        painter.setPen(QColor("#2d3348"))
         painter.drawPath(path)
 
         painter.end()

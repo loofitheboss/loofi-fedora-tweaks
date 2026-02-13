@@ -23,10 +23,10 @@ class StorageTab(BaseTab):
         id="storage",
         name="Storage",
         description="Disk information, SMART health monitoring, and filesystem management.",
-        category="Hardware",
+        category="Manage",
         icon="💾",
         badge="",
-        order=30,
+        order=40,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -185,7 +185,7 @@ class StorageTab(BaseTab):
                     "Yes" if disk.rm else "No"
                 ))
         except Exception as exc:
-            self.set_table_empty_state(self.disk_table, self.tr("Failed to load disks"), color="#f38ba8")
+            self.set_table_empty_state(self.disk_table, self.tr("Failed to load disks"), color="#e8556d")
             self.append_output(f"Error listing disks: {exc}\n")
 
     def _refresh_mounts(self):
@@ -209,7 +209,7 @@ class StorageTab(BaseTab):
                 self.mount_table.setItem(row, 4, self.make_table_item(mount.used))
                 self.mount_table.setItem(row, 5, self.make_table_item(mount.use_percent))
         except Exception as exc:
-            self.set_table_empty_state(self.mount_table, self.tr("Failed to load mount points"), color="#f38ba8")
+            self.set_table_empty_state(self.mount_table, self.tr("Failed to load mount points"), color="#e8556d")
             self.append_output(f"Error listing mounts: {exc}\n")
 
     def _check_smart(self):
@@ -232,10 +232,10 @@ class StorageTab(BaseTab):
 
             if health.health_passed:
                 self.lbl_smart_health.setText("✅ PASSED")
-                self.lbl_smart_health.setStyleSheet("color: #a6e3a1; font-weight: bold;")
+                self.lbl_smart_health.setStyleSheet("color: #3dd68c; font-weight: bold;")
             else:
                 self.lbl_smart_health.setText("❌ FAILED")
-                self.lbl_smart_health.setStyleSheet("color: #f38ba8; font-weight: bold;")
+                self.lbl_smart_health.setStyleSheet("color: #e8556d; font-weight: bold;")
 
             self.lbl_smart_temp.setText(
                 f"{health.temperature_c}°C" if health.temperature_c else "—"
@@ -247,7 +247,7 @@ class StorageTab(BaseTab):
             realloc = health.reallocated_sectors
             self.lbl_smart_realloc.setText(str(realloc))
             if realloc > 0:
-                self.lbl_smart_realloc.setStyleSheet("color: #fab387; font-weight: bold;")
+                self.lbl_smart_realloc.setStyleSheet("color: #e89840; font-weight: bold;")
             else:
                 self.lbl_smart_realloc.setStyleSheet("")
 

@@ -26,10 +26,10 @@ class LogsTab(BaseTab):
         id="logs",
         name="Logs",
         description="Smart log viewer with pattern detection, error summary, and log export.",
-        category="System",
+        category="Health & Logs",
         icon="📋",
         badge="advanced",
-        order=40,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -65,17 +65,17 @@ class LogsTab(BaseTab):
         sg_layout.addWidget(self.lbl_total, 0, 1)
 
         self.lbl_critical = QLabel("—")
-        self.lbl_critical.setStyleSheet("color: #f38ba8; font-weight: bold;")
+        self.lbl_critical.setStyleSheet("color: #e8556d; font-weight: bold;")
         sg_layout.addWidget(QLabel(self.tr("Critical:")), 0, 2)
         sg_layout.addWidget(self.lbl_critical, 0, 3)
 
         self.lbl_warning = QLabel("—")
-        self.lbl_warning.setStyleSheet("color: #fab387;")
+        self.lbl_warning.setStyleSheet("color: #e89840;")
         sg_layout.addWidget(QLabel(self.tr("Warnings:")), 1, 0)
         sg_layout.addWidget(self.lbl_warning, 1, 1)
 
         self.lbl_errors = QLabel("—")
-        self.lbl_errors.setStyleSheet("color: #f38ba8;")
+        self.lbl_errors.setStyleSheet("color: #e8556d;")
         sg_layout.addWidget(QLabel(self.tr("Errors:")), 1, 2)
         sg_layout.addWidget(self.lbl_errors, 1, 3)
 
@@ -241,7 +241,7 @@ class LogsTab(BaseTab):
                 self.unit_combo.setCurrentIndex(idx)
 
         except Exception as exc:
-            self.set_table_empty_state(self.pattern_table, self.tr("Failed to load log summary"), color="#f38ba8")
+            self.set_table_empty_state(self.pattern_table, self.tr("Failed to load log summary"), color="#e8556d")
             self.append_output(f"Error loading summary: {exc}\n")
 
     def _fetch_logs(self):
@@ -276,20 +276,20 @@ class LogsTab(BaseTab):
 
                 prio_item = self.make_table_item(entry.priority_label)
                 if entry.priority <= 2:
-                    prio_item.setForeground(QColor("#f38ba8"))
+                    prio_item.setForeground(QColor("#e8556d"))
                 elif entry.priority <= 4:
-                    prio_item.setForeground(QColor("#fab387"))
+                    prio_item.setForeground(QColor("#e89840"))
                 self.log_table.setItem(row, 2, prio_item)
 
                 msg_item = self.make_table_item(entry.message[:200])
                 if entry.pattern_match:
-                    msg_item.setForeground(QColor("#f38ba8"))
+                    msg_item.setForeground(QColor("#e8556d"))
                     msg_item.setToolTip(f"Pattern: {entry.pattern_match}")
                 self.log_table.setItem(row, 3, msg_item)
 
             self.append_output(f"Fetched {len(entries)} log entries\n")
         except Exception as exc:
-            self.set_table_empty_state(self.log_table, self.tr("Failed to fetch logs"), color="#f38ba8")
+            self.set_table_empty_state(self.log_table, self.tr("Failed to fetch logs"), color="#e8556d")
             self.append_output(f"Error fetching logs: {exc}\n")
 
     def _export_logs(self):

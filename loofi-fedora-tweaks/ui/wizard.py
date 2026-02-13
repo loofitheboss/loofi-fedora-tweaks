@@ -225,7 +225,7 @@ class FirstRunWizard(QDialog):
         # Step indicator
         self._step_label = QLabel()
         self._step_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._step_label.setStyleSheet("color: #89b4fa; font-weight: bold;")
+        self._step_label.setStyleSheet("color: #39c5cf; font-weight: bold;")
         root_layout.addWidget(self._step_label)
 
         # Stacked pages ------------------------------------------------
@@ -255,7 +255,7 @@ class FirstRunWizard(QDialog):
         self._btn_next = QPushButton(self.tr("Next \u2192"))
         self._btn_next.setFixedWidth(100)
         self._btn_next.setStyleSheet(
-            "background-color: #89b4fa; color: #1e1e2e; font-weight: bold; "
+            "background-color: #39c5cf; color: #0b0e14; font-weight: bold; "
             "border-radius: 6px; padding: 6px;"
         )
         self._btn_next.clicked.connect(self._go_next)
@@ -289,20 +289,20 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #a6adc8;")
+        desc.setStyleSheet("color: #9da7bf;")
         layout.addWidget(desc)
 
         # Detection card
         card = QFrame()
         card.setStyleSheet(
-            "QFrame { background-color: #313244; border-radius: 10px; padding: 16px; }"
+            "QFrame { background-color: #1c2030; border-radius: 10px; padding: 16px; }"
         )
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(10)
 
         self._lbl_detected_summary = QLabel()
         self._lbl_detected_summary.setStyleSheet(
-            "font-size: 15px; font-weight: bold; color: #a6e3a1;"
+            "font-size: 15px; font-weight: bold; color: #3dd68c;"
         )
         card_layout.addWidget(self._lbl_detected_summary)
 
@@ -345,7 +345,7 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #a6adc8;")
+        desc.setStyleSheet("color: #9da7bf;")
         layout.addWidget(desc)
 
         # Scroll area for radio options (future-proof)
@@ -399,13 +399,13 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #a6adc8;")
+        desc.setStyleSheet("color: #9da7bf;")
         layout.addWidget(desc)
 
         # Summary card
         card = QFrame()
         card.setStyleSheet(
-            "QFrame { background-color: #313244; border-radius: 10px; padding: 16px; }"
+            "QFrame { background-color: #1c2030; border-radius: 10px; padding: 16px; }"
         )
         card_layout = QVBoxLayout(card)
 
@@ -437,13 +437,13 @@ class FirstRunWizard(QDialog):
         if index < 2:
             self._btn_next.setText(self.tr("Next \u2192"))
             self._btn_next.setStyleSheet(
-                "background-color: #89b4fa; color: #1e1e2e; font-weight: bold; "
+                "background-color: #39c5cf; color: #0b0e14; font-weight: bold; "
                 "border-radius: 6px; padding: 6px;"
             )
         else:
             self._btn_next.setText(self.tr("\u2705 Apply"))
             self._btn_next.setStyleSheet(
-                "background-color: #a6e3a1; color: #1e1e2e; font-weight: bold; "
+                "background-color: #3dd68c; color: #0b0e14; font-weight: bold; "
                 "border-radius: 6px; padding: 6px;"
             )
 

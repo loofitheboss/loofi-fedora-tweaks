@@ -5,7 +5,7 @@ Main Window - v25.0 "Plugin Architecture"
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
-    QStackedWidget, QLabel, QFrame, QTreeWidgetItemIterator, QScrollArea
+    QStackedWidget, QLabel, QFrame, QTreeWidgetItemIterator, QScrollArea, QPushButton
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QShortcut, QKeySequence, QFontMetrics
@@ -17,6 +17,7 @@ from utils.config_manager import ConfigManager
 from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
 from core.plugins import PluginRegistry, PluginInterface
 from core.plugins.metadata import PluginMetadata, CompatStatus
+from core.plugins.registry import CATEGORY_ICONS
 from utils.favorites import FavoritesManager
 from version import __version__
 import os
@@ -114,6 +115,19 @@ class MainWindow(QMainWindow):
         )
         self.sidebar_search.textChanged.connect(self._filter_sidebar)
         sidebar_layout.addWidget(self.sidebar_search)
+
+        # Sidebar collapse toggle
+        self._sidebar_toggle = QPushButton("◀")
+        self._sidebar_toggle.setObjectName("sidebarToggle")
+        self._sidebar_toggle.setFixedHeight(int(self._line_height * 2))
+        self._sidebar_toggle.setToolTip(self.tr("Collapse sidebar"))
+        self._sidebar_toggle.clicked.connect(self._toggle_sidebar)
+        sidebar_layout.addWidget(self._sidebar_toggle)
+
+        # Track sidebar expanded width and state
+        self._sidebar_container = sidebar_container
+        self._sidebar_expanded_width = sidebar_width
+        self._sidebar_collapsed = False
 
         # Sidebar tree
         self.sidebar = QTreeWidget()
@@ -385,17 +399,22 @@ class MainWindow(QMainWindow):
         disabled: bool = False,
         disabled_reason: str = "",
     ) -> None:
+        # Build display label for category (with icon prefix if available)
+        cat_icon = CATEGORY_ICONS.get(category, "")
+        cat_label = f"{cat_icon}  {category}" if cat_icon else category
+
         # Find or create category item
         category_item = None
         for i in range(self.sidebar.topLevelItemCount()):
             item = self.sidebar.topLevelItem(i)
-            if item.text(0) == category:
+            if item.text(0) == cat_label or item.data(0, _ROLE_DESC) == category:
                 category_item = item
                 break
 
         if not category_item:
             category_item = QTreeWidgetItem(self.sidebar)
-            category_item.setText(0, category)
+            category_item.setText(0, cat_label)
+            category_item.setData(0, _ROLE_DESC, category)  # Store raw category name
             category_item.setExpanded(True)
 
         # Badge suffix
@@ -467,7 +486,10 @@ class MainWindow(QMainWindow):
     def _update_breadcrumb(self, item):
         """Update breadcrumb bar with current category > page."""
         parent = item.parent()
-        category = parent.text(0) if parent else ""
+        # Use raw category name (stored in _ROLE_DESC on category items) for clean breadcrumb
+        category = ""
+        if parent:
+            category = parent.data(0, _ROLE_DESC) or parent.text(0)
         # Strip badge suffixes for display
         raw = item.text(0)
         page_name = raw.replace("  ★", "").replace("  ⚙", "")
@@ -538,6 +560,23 @@ class MainWindow(QMainWindow):
             category.setHidden(not category_visible)
             if category_visible:
                 category.setExpanded(True)
+
+    def _toggle_sidebar(self):
+        """Toggle sidebar between expanded and collapsed states."""
+        if self._sidebar_collapsed:
+            self._sidebar_container.setFixedWidth(self._sidebar_expanded_width)
+            self.sidebar.setVisible(True)
+            self.sidebar_search.setVisible(True)
+            self._sidebar_toggle.setText("◀")
+            self._sidebar_toggle.setToolTip(self.tr("Collapse sidebar"))
+            self._sidebar_collapsed = False
+        else:
+            self._sidebar_container.setFixedWidth(int(self._line_height * 3))
+            self.sidebar.setVisible(False)
+            self.sidebar_search.setVisible(False)
+            self._sidebar_toggle.setText("▶")
+            self._sidebar_toggle.setToolTip(self.tr("Expand sidebar"))
+            self._sidebar_collapsed = True
 
     def _setup_keyboard_shortcuts(self):
         """Register keyboard shortcuts for tab navigation."""
@@ -624,14 +663,14 @@ class MainWindow(QMainWindow):
         self.notif_bell.setText("\U0001f514")  # Bell emoji
         self.notif_bell.setStyleSheet(
             "QToolButton { border: none; font-size: 20px; padding: 5px; }"
-            "QToolButton:hover { background-color: #313244; border-radius: 6px; }"
+            "QToolButton:hover { background-color: #1c2030; border-radius: 6px; }"
         )
         self.notif_bell.clicked.connect(self._toggle_notification_panel)
 
         # Unread count badge
         self._notif_badge = QLabel("0")
         self._notif_badge.setStyleSheet(
-            "background-color: #f38ba8; color: #1e1e2e; border-radius: 8px; "
+            "background-color: #e8556d; color: #0b0e14; border-radius: 8px; "
             "padding: 1px 6px; font-size: 10px; font-weight: bold;"
         )
         self._notif_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)

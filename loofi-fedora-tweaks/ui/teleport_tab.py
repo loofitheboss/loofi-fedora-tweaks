@@ -34,10 +34,10 @@ class TeleportTab(QWidget, PluginInterface):
         id="teleport",
         name="State Teleport",
         description="Capture and restore workspace state including git repos and environment snapshots.",
-        category="Tools",
+        category="Automation",
         icon="📡",
         badge="advanced",
-        order=20,
+        order=30,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -74,7 +74,7 @@ class TeleportTab(QWidget, PluginInterface):
             "terminal state, and environment."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #bac2de; font-size: 12px;")
+        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
         layout.addWidget(description)
 
         # Capture section
@@ -143,7 +143,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Capture summary label
         self.capture_summary = QLabel(self.tr("No state captured yet."))
         self.capture_summary.setWordWrap(True)
-        self.capture_summary.setStyleSheet("color: #bac2de;")
+        self.capture_summary.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.capture_summary)
 
         return group
@@ -212,7 +212,7 @@ class TeleportTab(QWidget, PluginInterface):
             self.tr("No incoming teleport. Import a package file to begin.")
         )
         self.restore_preview.setWordWrap(True)
-        self.restore_preview.setStyleSheet("color: #bac2de;")
+        self.restore_preview.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.restore_preview)
 
         # Apply button

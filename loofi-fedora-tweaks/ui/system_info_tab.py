@@ -17,10 +17,10 @@ class SystemInfoTab(QWidget, PluginInterface):
         id="system_info",
         name="System Info",
         description="Detailed system information including hardware specs, kernel, and uptime.",
-        category="System",
+        category="Overview",
         icon="ℹ️",
         badge="recommended",
-        order=10,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:

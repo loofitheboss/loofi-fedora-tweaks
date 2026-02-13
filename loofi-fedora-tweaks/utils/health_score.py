@@ -22,12 +22,12 @@ class HealthScore:
     def color(self) -> str:
         """Return color code based on grade."""
         return {
-            "A": "#a6e3a1",
-            "B": "#94e2d5",
-            "C": "#f9e2af",
-            "D": "#fab387",
-            "F": "#f38ba8",
-        }.get(self.grade, "#cdd6f4")
+            "A": "#3dd68c",
+            "B": "#39c5cf",
+            "C": "#e8b84d",
+            "D": "#e89840",
+            "F": "#e8556d",
+        }.get(self.grade, "#e6edf3")
 
 
 class HealthScoreManager:

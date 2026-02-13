@@ -25,27 +25,27 @@ class TestHealthScore(unittest.TestCase):
     def test_health_score_color_grade_a(self):
         """Grade A returns green color."""
         hs = HealthScore(score=95, grade="A", components={}, recommendations=[])
-        self.assertEqual(hs.color, "#a6e3a1")
+        self.assertEqual(hs.color, "#3dd68c")
 
     def test_health_score_color_grade_b(self):
         """Grade B returns teal color."""
         hs = HealthScore(score=80, grade="B", components={}, recommendations=[])
-        self.assertEqual(hs.color, "#94e2d5")
+        self.assertEqual(hs.color, "#39c5cf")
 
     def test_health_score_color_grade_c(self):
         """Grade C returns yellow color."""
         hs = HealthScore(score=65, grade="C", components={}, recommendations=[])
-        self.assertEqual(hs.color, "#f9e2af")
+        self.assertEqual(hs.color, "#e8b84d")
 
     def test_health_score_color_grade_d(self):
         """Grade D returns orange color."""
         hs = HealthScore(score=45, grade="D", components={}, recommendations=[])
-        self.assertEqual(hs.color, "#fab387")
+        self.assertEqual(hs.color, "#e89840")
 
     def test_health_score_color_grade_f(self):
         """Grade F returns red color."""
         hs = HealthScore(score=20, grade="F", components={}, recommendations=[])
-        self.assertEqual(hs.color, "#f38ba8")
+        self.assertEqual(hs.color, "#e8556d")
 
     def test_health_score_default_recommendations(self):
         """HealthScore has empty recommendations by default."""

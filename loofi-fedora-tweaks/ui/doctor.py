@@ -70,10 +70,10 @@ class DependencyDoctor(QDialog):
 
             if path:
                 item.setIcon(QIcon.fromTheme("emblem-default"))  # Checkmark usually
-                item.setForeground(QColor("#a6e3a1"))  # Green
+                item.setForeground(QColor("#3dd68c"))  # Green
             else:
                 item.setIcon(QIcon.fromTheme("emblem-important"))  # Warning/X
-                item.setForeground(QColor("#f38ba8"))  # Red
+                item.setForeground(QColor("#e8556d"))  # Red
                 self.missing_tools.append(tool)
 
             self.tool_list.addItem(item)

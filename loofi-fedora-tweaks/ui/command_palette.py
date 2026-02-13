@@ -196,8 +196,8 @@ class CommandPalette(QDialog):
         # Dark overlay style
         self.setStyleSheet("""
             QDialog {
-                background-color: #1e1e2e;
-                border: 1px solid #45475a;
+                background-color: #0b0e14;
+                border: 1px solid #2d3348;
                 border-radius: 12px;
             }
         """)
@@ -216,15 +216,15 @@ class CommandPalette(QDialog):
         self._search_input.setFont(input_font)
         self._search_input.setStyleSheet("""
             QLineEdit {
-                background-color: #313244;
-                color: #cdd6f4;
-                border: 1px solid #585b70;
+                background-color: #1c2030;
+                color: #e6edf3;
+                border: 1px solid #5c6578;
                 border-radius: 8px;
                 padding: 10px 14px;
-                selection-background-color: #89b4fa;
+                selection-background-color: #39c5cf;
             }
             QLineEdit:focus {
-                border: 1px solid #89b4fa;
+                border: 1px solid #39c5cf;
             }
         """)
         self._search_input.textChanged.connect(self._on_text_changed)
@@ -239,8 +239,8 @@ class CommandPalette(QDialog):
         self._results_list = QListWidget()
         self._results_list.setStyleSheet("""
             QListWidget {
-                background-color: #1e1e2e;
-                color: #cdd6f4;
+                background-color: #0b0e14;
+                color: #e6edf3;
                 border: none;
                 outline: none;
                 font-size: 13px;
@@ -251,8 +251,8 @@ class CommandPalette(QDialog):
                 margin: 1px 0px;
             }
             QListWidget::item:selected {
-                background-color: #313244;
-                color: #89b4fa;
+                background-color: #1c2030;
+                color: #39c5cf;
             }
             QListWidget::item:hover {
                 background-color: #2a2b3d;
@@ -268,7 +268,7 @@ class CommandPalette(QDialog):
             self.tr("\u2191\u2193 Navigate    \u23ce Enter    Esc Close")
         )
         footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer.setStyleSheet("color: #585b70; font-size: 10px; padding-top: 2px;")
+        footer.setStyleSheet("color: #5c6578; font-size: 10px; padding-top: 2px;")
         layout.addWidget(footer)
 
         # Center on parent

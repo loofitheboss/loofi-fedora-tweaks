@@ -146,7 +146,7 @@ class HardwareTab(QWidget, PluginInterface):
         card = QGroupBox(f"{icon} {title}")
         card.setStyleSheet("""
             QGroupBox {
-                background-color: #313244;
+                background-color: #1c2030;
                 border-radius: 12px;
                 padding: 20px;
                 font-weight: bold;
@@ -167,7 +167,7 @@ class HardwareTab(QWidget, PluginInterface):
         # Current frequency display
         freq = HardwareManager.get_cpu_frequency()
         self.lbl_cpu_freq = QLabel(self.tr("Current: {} MHz / {} MHz").format(freq['current'], freq['max']))
-        self.lbl_cpu_freq.setStyleSheet("color: #a6adc8;")
+        self.lbl_cpu_freq.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_cpu_freq)
 
         # Governor dropdown
@@ -189,7 +189,7 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Description
         desc = QLabel(self.tr("Controls CPU frequency scaling policy"))
-        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
         layout.addWidget(desc)
 
         return card
@@ -220,16 +220,16 @@ class HardwareTab(QWidget, PluginInterface):
         # Current profile
         current = HardwareManager.get_power_profile()
         self.lbl_power_profile = QLabel(self.tr("Current: {}").format(current.title()))
-        self.lbl_power_profile.setStyleSheet("color: #a6adc8;")
+        self.lbl_power_profile.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_power_profile)
 
         # Profile buttons
         btn_layout = QHBoxLayout()
 
         profiles = [
-            ("🔋 Saver", "power-saver", "#a6e3a1"),
-            ("⚖️ Balanced", "balanced", "#89b4fa"),
-            ("⚡ Performance", "performance", "#f38ba8")
+            ("🔋 Saver", "power-saver", "#3dd68c"),
+            ("⚖️ Balanced", "balanced", "#39c5cf"),
+            ("⚡ Performance", "performance", "#e8556d")
         ]
 
         for label, profile, color in profiles:
@@ -244,7 +244,7 @@ class HardwareTab(QWidget, PluginInterface):
                 }}
                 QPushButton:hover {{
                     background-color: {color};
-                    color: #1e1e2e;
+                    color: #0b0e14;
                 }}
             """)
             btn.clicked.connect(lambda checked, p=profile: self.set_power_profile(p))
@@ -282,16 +282,16 @@ class HardwareTab(QWidget, PluginInterface):
         # Current mode
         current = HardwareManager.get_gpu_mode()
         self.lbl_gpu_mode = QLabel(self.tr("Current: {}").format(current.title()))
-        self.lbl_gpu_mode.setStyleSheet("color: #a6adc8;")
+        self.lbl_gpu_mode.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_gpu_mode)
 
         # Mode buttons
         btn_layout = QHBoxLayout()
 
         modes = [
-            ("☀️ Integrated", "integrated", "#a6e3a1"),
-            ("🔀 Hybrid", "hybrid", "#89b4fa"),
-            ("🚀 NVIDIA", "nvidia", "#f38ba8")
+            ("☀️ Integrated", "integrated", "#3dd68c"),
+            ("🔀 Hybrid", "hybrid", "#39c5cf"),
+            ("🚀 NVIDIA", "nvidia", "#e8556d")
         ]
 
         for label, mode, color in modes:
@@ -306,7 +306,7 @@ class HardwareTab(QWidget, PluginInterface):
                 }}
                 QPushButton:hover {{
                     background-color: {color};
-                    color: #1e1e2e;
+                    color: #0b0e14;
                 }}
             """)
             btn.clicked.connect(lambda checked, m=mode: self.set_gpu_mode(m))
@@ -316,7 +316,7 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Warning
         warn = QLabel(self.tr("⚠️ Requires logout/reboot"))
-        warn.setStyleSheet("color: #f9e2af; font-size: 11px;")
+        warn.setStyleSheet("color: #e8b84d; font-size: 11px;")
         layout.addWidget(warn)
 
         return card
@@ -361,7 +361,7 @@ class HardwareTab(QWidget, PluginInterface):
         # Current status
         status = HardwareManager.get_fan_status()
         self.lbl_fan_status = QLabel(self.tr("Speed: {}% | Temp: {}°C").format(int(status['speed']), int(status['temperature'])))
-        self.lbl_fan_status.setStyleSheet("color: #a6adc8;")
+        self.lbl_fan_status.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_fan_status)
 
         # Fan speed slider
@@ -421,7 +421,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Restart Pipewire audio services if sound is not working"))
-        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -445,7 +445,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Limit battery charge to extend battery lifespan"))
-        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -488,7 +488,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Enroll your fingerprint for authentication"))
-        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -513,12 +513,12 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Adapter status
         self.lbl_bt_status = QLabel(self.tr("Bluetooth: detecting..."))
-        self.lbl_bt_status.setStyleSheet("color: #a6adc8;")
+        self.lbl_bt_status.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_bt_status)
 
         # Device list (compact)
         self.lbl_bt_devices = QLabel(self.tr("Paired devices: —"))
-        self.lbl_bt_devices.setStyleSheet("color: #a6adc8; font-size: 11px;")
+        self.lbl_bt_devices.setStyleSheet("color: #9da7bf; font-size: 11px;")
         self.lbl_bt_devices.setWordWrap(True)
         layout.addWidget(self.lbl_bt_devices)
 

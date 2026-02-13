@@ -26,7 +26,11 @@ class TestCategoryColorMapping(unittest.TestCase):
 
     def test_all_categories_have_colours(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        expected = {"general", "health", "profile", "security", "system"}
+        expected = {
+            "general", "health", "profile", "security", "system",
+            "overview", "manage", "hardware", "network & security",
+            "personalize", "developer", "automation", "health & logs",
+        }
         self.assertEqual(set(_CATEGORY_COLORS.keys()), expected)
 
     def test_colours_are_valid_hex(self):
@@ -40,16 +44,16 @@ class TestCategoryColorMapping(unittest.TestCase):
 
     def test_security_is_red_ish(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        # Security should use a red/warning-ish colour (f38ba8)
-        self.assertEqual(_CATEGORY_COLORS["security"], "#f38ba8")
+        # Security should use a coral/red colour (Abyss palette)
+        self.assertEqual(_CATEGORY_COLORS["security"], "#e8556d")
 
     def test_health_is_green_ish(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        self.assertEqual(_CATEGORY_COLORS["health"], "#a6e3a1")
+        self.assertEqual(_CATEGORY_COLORS["health"], "#3dd68c")
 
     def test_system_is_yellow_ish(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        self.assertEqual(_CATEGORY_COLORS["system"], "#f9e2af")
+        self.assertEqual(_CATEGORY_COLORS["system"], "#e8b84d")
 
 
 class TestNotificationToastConstants(unittest.TestCase):
@@ -155,7 +159,7 @@ class TestShowToastLogic(unittest.TestCase):
 
         toast = self._make_mock_toast()
         NotificationToast.show_toast(toast, "Title", "Msg", "nonexistent")
-        # Should fall back to default (#89b4fa) without crashing
+        # Should fall back to default (#39c5cf) without crashing
         self.assertIsNotNone(toast._accent_color)
 
     def test_show_toast_with_parent_positions_correctly(self):

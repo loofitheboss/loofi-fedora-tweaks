@@ -73,10 +73,10 @@ class MiniGraph(QWidget):
         h = self.height()
 
         # Background
-        painter.fillRect(0, 0, w, h, QColor("#1e1e2e"))
+        painter.fillRect(0, 0, w, h, QColor("#0b0e14"))
 
         # Subtle horizontal grid lines
-        grid_pen = QPen(QColor("#45475a"))
+        grid_pen = QPen(QColor("#2d3348"))
         grid_pen.setWidth(1)
         painter.setPen(grid_pen)
         for i in range(1, 4):
@@ -231,10 +231,10 @@ class DualMiniGraph(QWidget):
         h = self.height()
 
         # Background
-        painter.fillRect(0, 0, w, h, QColor("#1e1e2e"))
+        painter.fillRect(0, 0, w, h, QColor("#0b0e14"))
 
         # Grid lines
-        grid_pen = QPen(QColor("#45475a"))
+        grid_pen = QPen(QColor("#2d3348"))
         grid_pen.setWidth(1)
         painter.setPen(grid_pen)
         for i in range(1, 4):
@@ -275,17 +275,17 @@ class _CoreBar(QWidget):
         h = self.height()
 
         # Background slot
-        painter.fillRect(0, 0, w, h, QColor("#1e1e2e"))
+        painter.fillRect(0, 0, w, h, QColor("#0b0e14"))
 
         # Filled portion from bottom
         fill_h = int(h * self._value / 100.0)
         if fill_h > 0:
             if self._value < 60:
-                color = QColor("#a6e3a1")
+                color = QColor("#3dd68c")
             elif self._value < 85:
-                color = QColor("#f9e2af")
+                color = QColor("#e8b84d")
             else:
-                color = QColor("#f38ba8")
+                color = QColor("#e8556d")
             painter.fillRect(0, h - fill_h, w, fill_h, color)
 
         painter.end()
@@ -356,7 +356,7 @@ class _PerformanceSubTab(QWidget):
         card = QGroupBox(f"{icon} {title}")
         card.setStyleSheet("""
             QGroupBox {
-                background-color: #313244;
+                background-color: #1c2030;
                 border-radius: 12px;
                 padding: 20px;
                 font-weight: bold;
@@ -373,7 +373,7 @@ class _PerformanceSubTab(QWidget):
         card = self._create_card(self.tr("CPU Usage"), "\U0001f7e2")
         card_layout = QVBoxLayout(card)
 
-        self.cpu_graph = MiniGraph("#a6e3a1")
+        self.cpu_graph = MiniGraph("#3dd68c")
         self.cpu_graph.set_max_value(100.0)
         card_layout.addWidget(self.cpu_graph)
 
@@ -384,7 +384,7 @@ class _PerformanceSubTab(QWidget):
         card_layout.addLayout(self.cpu_core_layout)
 
         self.lbl_cpu = QLabel(self.tr("CPU: --% | Cores: --"))
-        self.lbl_cpu.setStyleSheet("color: #a6adc8; font-size: 12px;")
+        self.lbl_cpu.setStyleSheet("color: #9da7bf; font-size: 12px;")
         card_layout.addWidget(self.lbl_cpu)
 
         return card
@@ -394,12 +394,12 @@ class _PerformanceSubTab(QWidget):
         card = self._create_card(self.tr("Memory Usage"), "\U0001f535")
         card_layout = QVBoxLayout(card)
 
-        self.mem_graph = MiniGraph("#89b4fa")
+        self.mem_graph = MiniGraph("#39c5cf")
         self.mem_graph.set_max_value(100.0)
         card_layout.addWidget(self.mem_graph)
 
         self.lbl_mem = QLabel(self.tr("Memory: --% | --/--"))
-        self.lbl_mem.setStyleSheet("color: #a6adc8; font-size: 12px;")
+        self.lbl_mem.setStyleSheet("color: #9da7bf; font-size: 12px;")
         card_layout.addWidget(self.lbl_mem)
 
         return card
@@ -409,24 +409,24 @@ class _PerformanceSubTab(QWidget):
         card = self._create_card(self.tr("Network I/O"), "\U0001f7e3")
         card_layout = QVBoxLayout(card)
 
-        self.net_graph = DualMiniGraph("#cba6f7", "#b4befe")
+        self.net_graph = DualMiniGraph("#b78eff", "#4dd9e3")
         card_layout.addWidget(self.net_graph)
 
         # Legend
         legend_layout = QHBoxLayout()
         recv_dot = QLabel("\u25cf")
-        recv_dot.setStyleSheet("color: #cba6f7; font-size: 10px;")
+        recv_dot.setStyleSheet("color: #b78eff; font-size: 10px;")
         legend_layout.addWidget(recv_dot)
         legend_layout.addWidget(QLabel(self.tr("Recv")))
         send_dot = QLabel("\u25cf")
-        send_dot.setStyleSheet("color: #b4befe; font-size: 10px;")
+        send_dot.setStyleSheet("color: #4dd9e3; font-size: 10px;")
         legend_layout.addWidget(send_dot)
         legend_layout.addWidget(QLabel(self.tr("Send")))
         legend_layout.addStretch()
         card_layout.addLayout(legend_layout)
 
         self.lbl_net = QLabel(self.tr("Net: -- | --"))
-        self.lbl_net.setStyleSheet("color: #a6adc8; font-size: 12px;")
+        self.lbl_net.setStyleSheet("color: #9da7bf; font-size: 12px;")
         card_layout.addWidget(self.lbl_net)
 
         return card
@@ -436,24 +436,24 @@ class _PerformanceSubTab(QWidget):
         card = self._create_card(self.tr("Disk I/O"), "\U0001f7e1")
         card_layout = QVBoxLayout(card)
 
-        self.disk_graph = DualMiniGraph("#f9e2af", "#fab387")
+        self.disk_graph = DualMiniGraph("#e8b84d", "#e89840")
         card_layout.addWidget(self.disk_graph)
 
         # Legend
         legend_layout = QHBoxLayout()
         read_dot = QLabel("\u25cf")
-        read_dot.setStyleSheet("color: #f9e2af; font-size: 10px;")
+        read_dot.setStyleSheet("color: #e8b84d; font-size: 10px;")
         legend_layout.addWidget(read_dot)
         legend_layout.addWidget(QLabel(self.tr("Read")))
         write_dot = QLabel("\u25cf")
-        write_dot.setStyleSheet("color: #fab387; font-size: 10px;")
+        write_dot.setStyleSheet("color: #e89840; font-size: 10px;")
         legend_layout.addWidget(write_dot)
         legend_layout.addWidget(QLabel(self.tr("Write")))
         legend_layout.addStretch()
         card_layout.addLayout(legend_layout)
 
         self.lbl_disk = QLabel(self.tr("Disk: -- | --"))
-        self.lbl_disk.setStyleSheet("color: #a6adc8; font-size: 12px;")
+        self.lbl_disk.setStyleSheet("color: #9da7bf; font-size: 12px;")
         card_layout.addWidget(self.lbl_disk)
 
         return card
@@ -565,17 +565,17 @@ class _ProcessesSubTab(QWidget):
     """
 
     # Catppuccin Mocha colour constants
-    COLOR_BASE = "#1e1e2e"
-    COLOR_SURFACE0 = "#313244"
-    COLOR_SURFACE1 = "#45475a"
-    COLOR_SUBTEXT0 = "#a6adc8"
-    COLOR_TEXT = "#cdd6f4"
-    COLOR_BLUE = "#89b4fa"
-    COLOR_GREEN = "#a6e3a1"
-    COLOR_RED = "#f38ba8"
-    COLOR_YELLOW = "#f9e2af"
-    COLOR_MAUVE = "#cba6f7"
-    COLOR_PEACH = "#fab387"
+    COLOR_BASE = "#0b0e14"
+    COLOR_SURFACE0 = "#1c2030"
+    COLOR_SURFACE1 = "#2d3348"
+    COLOR_SUBTEXT0 = "#9da7bf"
+    COLOR_TEXT = "#e6edf3"
+    COLOR_BLUE = "#39c5cf"
+    COLOR_GREEN = "#3dd68c"
+    COLOR_RED = "#e8556d"
+    COLOR_YELLOW = "#e8b84d"
+    COLOR_MAUVE = "#b78eff"
+    COLOR_PEACH = "#e89840"
 
     def __init__(self):
         super().__init__()
@@ -1036,10 +1036,10 @@ class MonitorTab(QWidget, PluginInterface):
         id="monitor",
         name="System Monitor",
         description="Live CPU, memory, and process monitoring with performance graphs.",
-        category="System",
+        category="Overview",
         icon="📊",
         badge="recommended",
-        order=20,
+        order=30,
     )
 
     def metadata(self) -> PluginMetadata:

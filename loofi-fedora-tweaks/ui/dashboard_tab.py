@@ -145,7 +145,7 @@ class HealthScoreWidget(QWidget):
         radius = 48
 
         # Background arc
-        bg_pen = QPen(QColor("#313244"))
+        bg_pen = QPen(QColor("#1c2030"))
         bg_pen.setWidth(8)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
@@ -161,7 +161,7 @@ class HealthScoreWidget(QWidget):
             painter.drawArc(cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, span)
 
         # Score text
-        painter.setPen(QColor("#cdd6f4"))
+        painter.setPen(QColor("#e6edf3"))
         from PyQt6.QtGui import QFont
         font = QFont()
         font.setPixelSize(22)
@@ -179,7 +179,7 @@ class HealthScoreWidget(QWidget):
         font.setPixelSize(11)
         font.setBold(False)
         painter.setFont(font)
-        painter.setPen(QColor("#a6adc8"))
+        painter.setPen(QColor("#9da7bf"))
         painter.drawText(0, h - 20, w, 20, Qt.AlignmentFlag.AlignCenter, "Health Score")
 
         painter.end()
@@ -196,7 +196,7 @@ class DashboardTab(QWidget, PluginInterface):
         id="dashboard",
         name="Home",
         description="Live system overview with graphs, metrics, and quick actions.",
-        category="Dashboard",
+        category="Overview",
         icon="🏠",
         badge="recommended",
         order=10,
@@ -310,7 +310,7 @@ class DashboardTab(QWidget, PluginInterface):
         rec_layout.addWidget(self._health_title)
 
         self._health_recs = QLabel(self.tr("Calculating..."))
-        self._health_recs.setStyleSheet("font-size: 12px; color: #a6adc8;")
+        self._health_recs.setStyleSheet("font-size: 12px; color: #9da7bf;")
         self._health_recs.setWordWrap(True)
         rec_layout.addWidget(self._health_recs)
         rec_layout.addStretch()
@@ -333,7 +333,7 @@ class DashboardTab(QWidget, PluginInterface):
         self.lbl_cpu = QLabel("🔥 CPU: —")
         self.lbl_cpu.setStyleSheet("font-weight: bold; font-size: 13px;")
         cpu_inner.addWidget(self.lbl_cpu)
-        self.spark_cpu = SparkLine("#f38ba8")
+        self.spark_cpu = SparkLine("#e8556d")
         cpu_inner.addWidget(self.spark_cpu)
         row.addWidget(cpu_card)
 
@@ -343,7 +343,7 @@ class DashboardTab(QWidget, PluginInterface):
         self.lbl_ram = QLabel("🧠 RAM: —")
         self.lbl_ram.setStyleSheet("font-weight: bold; font-size: 13px;")
         ram_inner.addWidget(self.lbl_ram)
-        self.spark_ram = SparkLine("#89b4fa")
+        self.spark_ram = SparkLine("#39c5cf")
         ram_inner.addWidget(self.spark_ram)
         row.addWidget(ram_card)
 
@@ -354,7 +354,7 @@ class DashboardTab(QWidget, PluginInterface):
         self.lbl_net.setStyleSheet("font-weight: bold; font-size: 13px;")
         net_inner.addWidget(self.lbl_net)
         self.lbl_net_detail = QLabel("↓ 0 B/s   ↑ 0 B/s")
-        self.lbl_net_detail.setStyleSheet("color: #a6adc8; font-size: 12px;")
+        self.lbl_net_detail.setStyleSheet("color: #9da7bf; font-size: 12px;")
         net_inner.addWidget(self.lbl_net_detail)
         net_inner.addStretch()
         row.addWidget(net_card)
@@ -392,20 +392,20 @@ class DashboardTab(QWidget, PluginInterface):
             total = usage.total_human if hasattr(usage, 'total_human') else "?"
 
             lbl = QLabel(f"{mp}  —  {free} free / {total}")
-            lbl.setStyleSheet("font-size: 12px; color: #cdd6f4;")
+            lbl.setStyleSheet("font-size: 12px; color: #e6edf3;")
             bar = QProgressBar()
             bar.setRange(0, 100)
             bar.setValue(int(percent))
             bar.setFixedHeight(14)
             bar.setTextVisible(False)
             if percent >= 90:
-                color = "#f38ba8"
+                color = "#e8556d"
             elif percent >= 75:
-                color = "#f9e2af"
+                color = "#e8b84d"
             else:
-                color = "#a6e3a1"
+                color = "#3dd68c"
             bar.setStyleSheet(
-                f"QProgressBar {{ background: #313244; border-radius: 7px; }}"
+                f"QProgressBar {{ background: #1c2030; border-radius: 7px; }}"
                 f"QProgressBar::chunk {{ background: {color}; border-radius: 7px; }}"
             )
             self.storage_inner.addWidget(lbl)
@@ -425,7 +425,7 @@ class DashboardTab(QWidget, PluginInterface):
         self.process_labels: list = []
         for _ in range(5):
             lbl = QLabel("—")
-            lbl.setStyleSheet("font-size: 12px; color: #cdd6f4; font-family: monospace;")
+            lbl.setStyleSheet("font-size: 12px; color: #e6edf3; font-family: monospace;")
             inner.addWidget(lbl)
             self.process_labels.append(lbl)
         self._inner.addWidget(card)
@@ -466,7 +466,7 @@ class DashboardTab(QWidget, PluginInterface):
         self.history_labels: list = []
         for _ in range(5):
             lbl = QLabel("—")
-            lbl.setStyleSheet("font-size: 12px; color: #a6adc8;")
+            lbl.setStyleSheet("font-size: 12px; color: #9da7bf;")
             inner.addWidget(lbl)
             self.history_labels.append(lbl)
         self._inner.addWidget(card)
@@ -520,7 +520,7 @@ class DashboardTab(QWidget, PluginInterface):
             btn = self._action_btn(
                 action.get("label", "Action"),
                 action.get("icon", "⚡"),
-                action.get("color", "#89b4fa"),
+                action.get("color", "#39c5cf"),
                 lambda checked, t=target: self._go_to_tab(t),
             )
             self._quick_actions_grid.addWidget(btn, row, col)
@@ -535,7 +535,7 @@ class DashboardTab(QWidget, PluginInterface):
         if cpu:
             pct = cpu.load_percent
             self.spark_cpu.add_value(pct)
-            color = "#f38ba8" if pct >= 80 else "#f9e2af" if pct >= 50 else "#a6e3a1"
+            color = "#e8556d" if pct >= 80 else "#e8b84d" if pct >= 50 else "#3dd68c"
             self.lbl_cpu.setText(f"🔥 CPU: {pct:.0f}%")
             self.lbl_cpu.setStyleSheet(
                 f"font-weight: bold; font-size: 13px; color: {color};"
@@ -545,7 +545,7 @@ class DashboardTab(QWidget, PluginInterface):
         if mem:
             pct = mem.percent_used
             self.spark_ram.add_value(pct)
-            color = "#f38ba8" if pct >= 85 else "#f9e2af" if pct >= 65 else "#a6e3a1"
+            color = "#e8556d" if pct >= 85 else "#e8b84d" if pct >= 65 else "#3dd68c"
             self.lbl_ram.setText(
                 f"🧠 RAM: {mem.used_human} / {mem.total_human} ({pct:.0f}%)"
             )

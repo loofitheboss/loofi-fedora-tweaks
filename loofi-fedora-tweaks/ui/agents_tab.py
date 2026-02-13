@@ -361,9 +361,9 @@ class AgentsTab(BaseTab):
 
             status_item = QTableWidgetItem(state.status.value)
             if state.status.value == "running":
-                status_item.setForeground(QColor("#a6e3a1"))
+                status_item.setForeground(QColor("#3dd68c"))
             elif state.status.value == "error":
-                status_item.setForeground(QColor("#f38ba8"))
+                status_item.setForeground(QColor("#e8556d"))
             self.agent_table.setItem(row, 2, status_item)
 
             self.agent_table.setItem(row, 3, QTableWidgetItem(str(state.run_count)))

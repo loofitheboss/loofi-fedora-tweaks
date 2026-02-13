@@ -25,7 +25,7 @@ class GamingTab(BaseTab):
         id="gaming",
         name="Gaming",
         description="Gaming optimization tools including driver setup and performance tweaks.",
-        category="Desktop",
+        category="Hardware",
         icon="🎮",
         badge="",
         order=30,

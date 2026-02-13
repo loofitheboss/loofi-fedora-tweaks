@@ -25,7 +25,7 @@ class SnapshotTab(BaseTab):
         id="snapshots",
         name="Snapshots",
         description="Unified snapshot management across Timeshift, Snapper, and Btrfs backends.",
-        category="Software",
+        category="Manage",
         icon="📸",
         badge="advanced",
         order=30,
@@ -129,10 +129,10 @@ class SnapshotTab(BaseTab):
                 b = backend_map.get(name)
                 if b and b.available:
                     label.setText(f"✅ {b.version or 'installed'}")
-                    label.setStyleSheet("color: #a6e3a1;")
+                    label.setStyleSheet("color: #3dd68c;")
                 else:
                     label.setText("❌ Not found")
-                    label.setStyleSheet("color: #f38ba8;")
+                    label.setStyleSheet("color: #e8556d;")
         except Exception as exc:
             self.append_output(f"Backend check failed: {exc}\n")
 
@@ -164,7 +164,7 @@ class SnapshotTab(BaseTab):
             count = self.snap_table.rowCount()
             self.append_output(f"Found {count} snapshot(s)\n")
         except Exception as exc:
-            self.set_table_empty_state(self.snap_table, self.tr("Failed to load snapshots"), color="#f38ba8")
+            self.set_table_empty_state(self.snap_table, self.tr("Failed to load snapshots"), color="#e8556d")
             self.append_output(f"Error listing snapshots: {exc}\n")
 
     def _create_snapshot(self):

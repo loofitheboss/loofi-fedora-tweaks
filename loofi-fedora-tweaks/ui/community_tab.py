@@ -65,7 +65,7 @@ class CommunityTab(QWidget, PluginInterface):
         id="community",
         name="Community",
         description="Browse and apply community presets and configurations from the marketplace.",
-        category="Tools",
+        category="Automation",
         icon="🌍",
         badge="",
         order=40,
@@ -375,7 +375,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Status label
         self.lbl_community_status = QLabel(self.tr("Click 'Refresh' to load community presets."))
-        self.lbl_community_status.setStyleSheet("color: #a6adc8;")
+        self.lbl_community_status.setStyleSheet("color: #9da7bf;")
         layout.addWidget(self.lbl_community_status)
 
         # Buttons
@@ -540,17 +540,17 @@ class CommunityTab(QWidget, PluginInterface):
             self.lbl_sync_status.setText(
                 self.tr("Connected | Gist ID: {}...").format(gist_id[:8])
             )
-            self.lbl_sync_status.setStyleSheet("color: #a6e3a1;")
+            self.lbl_sync_status.setStyleSheet("color: #3dd68c;")
         elif token:
             self.lbl_sync_status.setText(
                 self.tr("Token set, but no Gist yet. Push to create one.")
             )
-            self.lbl_sync_status.setStyleSheet("color: #f9e2af;")
+            self.lbl_sync_status.setStyleSheet("color: #e8b84d;")
         else:
             self.lbl_sync_status.setText(
                 self.tr("Not configured. Add your GitHub Personal Access Token.")
             )
-            self.lbl_sync_status.setStyleSheet("color: #f38ba8;")
+            self.lbl_sync_status.setStyleSheet("color: #e8556d;")
 
     def save_token(self):
         """Save GitHub Personal Access Token."""
@@ -706,7 +706,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.marketplace_plugin_list = self.marketplace_preset_list
 
         self.marketplace_status_label = QLabel(self.tr("Loading..."))
-        self.marketplace_status_label.setStyleSheet("color: #bac2de;")
+        self.marketplace_status_label.setStyleSheet("color: #9da7bf;")
         list_layout.addWidget(self.marketplace_status_label)
 
         layout.addWidget(list_group)
@@ -720,7 +720,7 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addWidget(self.detail_name)
 
         self.detail_author = QLabel("")
-        self.detail_author.setStyleSheet("color: #bac2de;")
+        self.detail_author.setStyleSheet("color: #9da7bf;")
         details_layout.addWidget(self.detail_author)
 
         self.detail_desc = QLabel("")
@@ -731,11 +731,11 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addWidget(self.detail_stats)
 
         self.detail_verification = QLabel("")
-        self.detail_verification.setStyleSheet("color: #bac2de;")
+        self.detail_verification.setStyleSheet("color: #9da7bf;")
         details_layout.addWidget(self.detail_verification)
 
         self.detail_rating_summary = QLabel("")
-        self.detail_rating_summary.setStyleSheet("color: #bac2de;")
+        self.detail_rating_summary.setStyleSheet("color: #9da7bf;")
         details_layout.addWidget(self.detail_rating_summary)
 
         # Action buttons
@@ -763,7 +763,7 @@ class CommunityTab(QWidget, PluginInterface):
         reviews_layout = QVBoxLayout(reviews_group)
 
         self.reviews_summary_label = QLabel(self.tr("Select a preset to view ratings and reviews."))
-        self.reviews_summary_label.setStyleSheet("color: #bac2de;")
+        self.reviews_summary_label.setStyleSheet("color: #9da7bf;")
         reviews_layout.addWidget(self.reviews_summary_label)
 
         self.reviews_text = QTextEdit()
@@ -798,7 +798,7 @@ class CommunityTab(QWidget, PluginInterface):
         review_actions_layout.addWidget(self.submit_review_btn)
 
         self.review_feedback_label = QLabel("")
-        self.review_feedback_label.setStyleSheet("color: #bac2de;")
+        self.review_feedback_label.setStyleSheet("color: #9da7bf;")
         review_actions_layout.addWidget(self.review_feedback_label)
         review_actions_layout.addStretch()
         reviews_layout.addLayout(review_actions_layout)
@@ -816,7 +816,7 @@ class CommunityTab(QWidget, PluginInterface):
         analytics_layout.addWidget(self.analytics_opt_in_checkbox)
 
         self.analytics_status_label = QLabel("")
-        self.analytics_status_label.setStyleSheet("color: #bac2de;")
+        self.analytics_status_label.setStyleSheet("color: #9da7bf;")
         analytics_layout.addWidget(self.analytics_status_label)
         self._update_analytics_status_label(self.plugin_analytics.is_enabled())
 
@@ -956,7 +956,7 @@ class CommunityTab(QWidget, PluginInterface):
 
     def _set_review_feedback(self, message: str, success: bool):
         """Show inline review form feedback with simple success/error coloring."""
-        color = "#a6e3a1" if success else "#f38ba8"
+        color = "#3dd68c" if success else "#e8556d"
         self.review_feedback_label.setStyleSheet(f"color: {color};")
         self.review_feedback_label.setText(message)
 

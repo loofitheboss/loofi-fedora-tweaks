@@ -21,6 +21,33 @@
 | v29.0 | Usability & Polish | DONE | UX polish, skipped v22 scope, error handling, accessibility, CORS |
 | v30.0 | Distribution & Reliability | DONE | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
 | v31.0 | Smart UX | DONE | Health score, i18n, batch ops, export report, plugin template |
+| v32.0 | Abyss | DONE | Full visual redesign, activity-based categories, Abyss theme |
+
+---
+
+## [DONE] v32.0 — Abyss
+
+### Scope
+
+- Full visual redesign with purpose-built Abyss dark/light theme
+- Reorganize 10 navigation categories into 8 activity-based groups
+- Sidebar collapse toggle
+- Deterministic category ordering via CATEGORY_ORDER
+- Migrate all inline Catppuccin colors to Abyss palette
+- Remove dead style.qss
+
+### Deliverables
+
+- [x] Abyss dark theme (modern.qss rewrite, ~560 lines)
+- [x] Abyss light theme (light.qss rewrite)
+- [x] 8 activity-based categories with emoji icons
+- [x] CATEGORY_ORDER + CATEGORY_ICONS in registry.py
+- [x] Sidebar collapse toggle (≡/✕ button)
+- [x] 26 tab metadata files updated
+- [x] Notification toast, health score, quick action colors migrated
+- [x] 30+ files batch color migration (Catppuccin → Abyss)
+- [x] Dead style.qss removed
+- [x] CHANGELOG + README + release notes
 
 ---
 

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        31.0.5
+Version:        32.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 

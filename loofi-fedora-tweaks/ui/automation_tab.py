@@ -251,15 +251,15 @@ class AutomationTab(BaseTab):
 
         if is_running:
             self.lbl_service_status.setText(self.tr("Service is running"))
-            self.lbl_service_status.setStyleSheet("color: #a6e3a1; font-weight: bold;")
+            self.lbl_service_status.setStyleSheet("color: #3dd68c; font-weight: bold;")
             self.btn_service_toggle.setText(self.tr("Stop Service"))
         elif is_enabled:
             self.lbl_service_status.setText(self.tr("Service is enabled but not running"))
-            self.lbl_service_status.setStyleSheet("color: #f9e2af; font-weight: bold;")
+            self.lbl_service_status.setStyleSheet("color: #e8b84d; font-weight: bold;")
             self.btn_service_toggle.setText(self.tr("Start Service"))
         else:
             self.lbl_service_status.setText(self.tr("Service is not enabled"))
-            self.lbl_service_status.setStyleSheet("color: #f38ba8; font-weight: bold;")
+            self.lbl_service_status.setStyleSheet("color: #e8556d; font-weight: bold;")
             self.btn_service_toggle.setText(self.tr("Enable & Start"))
 
     def refresh_task_list(self):
@@ -272,7 +272,7 @@ class AutomationTab(BaseTab):
             item = QListWidgetItem(
                 self.tr("No scheduled tasks. Click 'Add Task' to create one.")
             )
-            item.setForeground(QColor("#a6adc8"))
+            item.setForeground(QColor("#9da7bf"))
             self.task_list.addItem(item)
             return
 
@@ -452,7 +452,7 @@ class AutomationTab(BaseTab):
             "No Loofi needed on the target - just standard tools."
         ))
         info.setWordWrap(True)
-        info.setStyleSheet("color: #bac2de; margin-bottom: 10px;")
+        info.setStyleSheet("color: #9da7bf; margin-bottom: 10px;")
         rep_layout.addWidget(info)
 
         # Ansible section
@@ -476,7 +476,7 @@ class AutomationTab(BaseTab):
             "Flatpaks, and applies your settings on any Fedora/RHEL machine."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #bac2de;")
+        desc.setStyleSheet("color: #9da7bf;")
         layout.addWidget(desc)
 
         # Options
@@ -505,7 +505,7 @@ class AutomationTab(BaseTab):
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
-        export_btn.setStyleSheet("background-color: #a6e3a1; color: #1e1e2e; font-weight: bold;")
+        export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
         export_btn.clicked.connect(self._export_ansible)
         btn_layout.addWidget(export_btn)
 
@@ -524,7 +524,7 @@ class AutomationTab(BaseTab):
             "Use this with inst.ks= during installation."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #bac2de;")
+        desc.setStyleSheet("color: #9da7bf;")
         layout.addWidget(desc)
 
         # Options
@@ -549,7 +549,7 @@ class AutomationTab(BaseTab):
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
-        export_btn.setStyleSheet("background-color: #a6e3a1; color: #1e1e2e; font-weight: bold;")
+        export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
         export_btn.clicked.connect(self._export_kickstart)
         btn_layout.addWidget(export_btn)
 

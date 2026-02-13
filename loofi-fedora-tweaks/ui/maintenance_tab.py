@@ -320,7 +320,7 @@ class _CleanupSubTab(QWidget):
         cleanup_layout.addWidget(btn_dnf_clean)
 
         btn_autoremove = QPushButton(self.tr("Remove Unused Packages (Risky)"))
-        btn_autoremove.setStyleSheet("color: #f38ba8;")
+        btn_autoremove.setStyleSheet("color: #e8556d;")
         btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
 
@@ -458,7 +458,7 @@ class _OverlaysSubTab(QWidget):
         info_frame = QFrame()
         info_frame.setStyleSheet("""
             QFrame {
-                background-color: #313244;
+                background-color: #1c2030;
                 border-radius: 12px;
                 padding: 15px;
             }
@@ -476,7 +476,7 @@ class _OverlaysSubTab(QWidget):
             "Layered packages are RPMs installed on top of the base OS image.\n"
             "Changes require a reboot to fully apply."
         ))
-        desc_label.setStyleSheet("color: #a6adc8;")
+        desc_label.setStyleSheet("color: #9da7bf;")
         info_layout.addWidget(desc_label)
 
         # Pending Reboot Warning
@@ -484,7 +484,7 @@ class _OverlaysSubTab(QWidget):
             self.tr("\u26a0\ufe0f Pending changes require reboot!")
         )
         self.reboot_warning.setStyleSheet(
-            "color: #f9e2af; font-weight: bold;"
+            "color: #e8b84d; font-weight: bold;"
         )
         self.reboot_warning.setVisible(False)
         info_layout.addWidget(self.reboot_warning)
@@ -527,8 +527,8 @@ class _OverlaysSubTab(QWidget):
         )
         self.btn_reboot.setStyleSheet("""
             QPushButton {
-                background-color: #f38ba8;
-                color: #1e1e2e;
+                background-color: #e8556d;
+                color: #0b0e14;
                 font-weight: bold;
                 padding: 12px;
                 border-radius: 8px;
@@ -557,7 +557,7 @@ class _OverlaysSubTab(QWidget):
             item = QListWidgetItem(
                 self.tr("No layered packages (clean base image)")
             )
-            item.setForeground(QColor("#a6adc8"))
+            item.setForeground(QColor("#9da7bf"))
             self.packages_list.addItem(item)
 
         # Check for pending reboot
@@ -657,7 +657,7 @@ class MaintenanceTab(BaseTab):
         id="maintenance",
         name="Maintenance",
         description="System updates, cache cleanup, and overlay management for Fedora.",
-        category="Software",
+        category="Manage",
         icon="🔧",
         badge="recommended",
         order=20,

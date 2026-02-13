@@ -30,7 +30,7 @@ class ProfilesTab(QWidget, PluginInterface):
         id="profiles",
         name="Profiles",
         description="System profile quick-switch for applying and managing configuration profiles.",
-        category="Desktop",
+        category="Personalize",
         icon="👤",
         badge="",
         order=20,
@@ -69,14 +69,14 @@ class ProfilesTab(QWidget, PluginInterface):
             "notifications, and more."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #bac2de; font-size: 12px;")
+        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
         layout.addWidget(description)
 
         # Active profile indicator
         self.active_label = QLabel(self.tr("Active profile: None"))
         self.active_label.setStyleSheet(
-            "font-size: 13px; padding: 8px; background: #1e1e2e; "
-            "border-radius: 4px; color: #cdd6f4;"
+            "font-size: 13px; padding: 8px; background: #0b0e14; "
+            "border-radius: 4px; color: #e6edf3;"
         )
         layout.addWidget(self.active_label)
 
@@ -167,20 +167,20 @@ class ProfilesTab(QWidget, PluginInterface):
         card = QFrame()
         card.setFrameShape(QFrame.Shape.StyledPanel)
         card.setStyleSheet(
-            "QFrame { background: #1e1e2e; border-radius: 8px; padding: 10px; }"
+            "QFrame { background: #0b0e14; border-radius: 8px; padding: 10px; }"
         )
 
         layout = QVBoxLayout(card)
 
         # Icon + Name
         title = QLabel(f"{profile.get('icon', '')}  {profile.get('name', 'Unknown')}")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #cdd6f4;")
+        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #e6edf3;")
         layout.addWidget(title)
 
         # Description
         desc = QLabel(profile.get("description", ""))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #bac2de; font-size: 11px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
         layout.addWidget(desc)
 
         # Type badge

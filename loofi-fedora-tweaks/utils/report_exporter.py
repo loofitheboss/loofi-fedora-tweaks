@@ -168,12 +168,12 @@ class ReportExporter:
     <style>
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                max-width: 800px; margin: 40px auto; padding: 0 20px;
-               background: #1e1e2e; color: #cdd6f4; }}
-        h1 {{ color: #89b4fa; border-bottom: 2px solid #313244; padding-bottom: 12px; }}
+               background: #0b0e14; color: #e6edf3; }}
+        h1 {{ color: #39c5cf; border-bottom: 2px solid #1c2030; padding-bottom: 12px; }}
         table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
-        th, td {{ padding: 10px 16px; text-align: left; border-bottom: 1px solid #313244; }}
-        th {{ background: #313244; color: #89b4fa; }}
-        tr:hover {{ background: #313244; }}
+        th, td {{ padding: 10px 16px; text-align: left; border-bottom: 1px solid #1c2030; }}
+        th {{ background: #1c2030; color: #39c5cf; }}
+        tr:hover {{ background: #1c2030; }}
         .footer {{ color: #6c7086; font-size: 0.85em; margin-top: 30px; }}
     </style>
 </head>

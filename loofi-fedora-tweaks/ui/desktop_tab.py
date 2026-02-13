@@ -29,7 +29,7 @@ class DesktopTab(BaseTab):
         id="desktop",
         name="Desktop",
         description="Window manager configuration, tiling setup, theming, and dotfile synchronization.",
-        category="Desktop",
+        category="Personalize",
         icon="🎨",
         badge="",
         order=10,
@@ -142,7 +142,7 @@ class DesktopTab(BaseTab):
             info = QLabel(self.tr("Install Hyprland, Sway, or KDE for tiling support."))
 
         info.setWordWrap(True)
-        info.setStyleSheet("color: #bac2de; font-size: 11px;")
+        info.setStyleSheet("color: #9da7bf; font-size: 11px;")
         layout.addWidget(info)
 
         return group

@@ -69,7 +69,7 @@ class PermissionConsentDialog(QDialog):
         dangerous_perms = {"system:execute", "system:packages", "system:services", "system:files"}
         if any(p in dangerous_perms for p in self.plugin_package.manifest.permissions):
             html_lines.append(
-                "<p style='color: #f38ba8; font-weight: bold;'>"
+                "<p style='color: #e8556d; font-weight: bold;'>"
                 "⚠️ Warning: This plugin requests elevated system permissions. "
                 "Only grant access if you trust the plugin author."
                 "</p>"
@@ -85,7 +85,7 @@ class PermissionConsentDialog(QDialog):
         publisher_state = "Verified" if verified else "Unverified"
         if publisher_badge:
             publisher_state = f"{publisher_state} ({publisher_badge})"
-        publisher_color = "#a6e3a1" if verified else "#f38ba8"
+        publisher_color = "#3dd68c" if verified else "#e8556d"
         html_lines.append(
             f"<p><b>Publisher:</b> {publisher_id} "
             f"<span style='color: {publisher_color}; font-weight: bold;'>[{publisher_state}]</span></p>"

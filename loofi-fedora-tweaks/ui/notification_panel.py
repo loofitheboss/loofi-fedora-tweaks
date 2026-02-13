@@ -19,7 +19,7 @@ class NotificationCard(QFrame):
         self.notification = notification
         self.setFrameShape(QFrame.Shape.StyledPanel)
         self.setStyleSheet(
-            "QFrame { border: 1px solid #45475a; border-radius: 8px; padding: 8px; margin: 2px; }"
+            "QFrame { border: 1px solid #2d3348; border-radius: 8px; padding: 8px; margin: 2px; }"
         )
 
         layout = QVBoxLayout(self)
@@ -32,7 +32,7 @@ class NotificationCard(QFrame):
 
         dismiss_btn = QPushButton("x")
         dismiss_btn.setFixedSize(20, 20)
-        dismiss_btn.setStyleSheet("QPushButton { border: none; color: #a6adc8; } QPushButton:hover { color: #f38ba8; }")
+        dismiss_btn.setStyleSheet("QPushButton { border: none; color: #9da7bf; } QPushButton:hover { color: #e8556d; }")
         if on_dismiss:
             dismiss_btn.clicked.connect(lambda: on_dismiss(notification.id))
         header.addWidget(dismiss_btn)
@@ -41,7 +41,7 @@ class NotificationCard(QFrame):
         # Message
         msg = QLabel(notification.message)
         msg.setWordWrap(True)
-        msg.setStyleSheet("color: #a6adc8;")
+        msg.setStyleSheet("color: #9da7bf;")
         layout.addWidget(msg)
 
         # Timestamp
@@ -56,7 +56,7 @@ class NotificationCard(QFrame):
             time_str = f"{elapsed // 86400}d ago"
 
         ts = QLabel(time_str)
-        ts.setStyleSheet("color: #585b70; font-size: 11px;")
+        ts.setStyleSheet("color: #5c6578; font-size: 11px;")
         layout.addWidget(ts)
 
 
@@ -79,14 +79,14 @@ class NotificationPanel(QWidget):
 
         self.badge = QLabel("0")
         self.badge.setStyleSheet(
-            "background-color: #f38ba8; color: #1e1e2e; border-radius: 10px; "
+            "background-color: #e8556d; color: #0b0e14; border-radius: 10px; "
             "padding: 2px 8px; font-size: 12px; font-weight: bold;"
         )
         header.addWidget(self.badge)
         header.addStretch()
 
         mark_read_btn = QPushButton(self.tr("Mark all read"))
-        mark_read_btn.setStyleSheet("QPushButton { border: none; color: #89b4fa; } QPushButton:hover { color: #b4befe; }")
+        mark_read_btn.setStyleSheet("QPushButton { border: none; color: #39c5cf; } QPushButton:hover { color: #4dd9e3; }")
         mark_read_btn.clicked.connect(self._mark_all_read)
         header.addWidget(mark_read_btn)
 
@@ -124,7 +124,7 @@ class NotificationPanel(QWidget):
         if not notifications:
             empty = QLabel(self.tr("No notifications"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #585b70; padding: 40px;")
+            empty.setStyleSheet("color: #5c6578; padding: 40px;")
             self.cards_layout.addWidget(empty)
         else:
             for notif in notifications:

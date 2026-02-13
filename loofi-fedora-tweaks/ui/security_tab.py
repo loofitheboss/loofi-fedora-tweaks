@@ -37,10 +37,10 @@ class SecurityTab(QWidget, PluginInterface):
         id="security",
         name="Security & Privacy",
         description="Security hardening including firewall, USB guard, port auditing, and telemetry removal.",
-        category="Security",
+        category="Network & Security",
         icon="🛡️",
         badge="recommended",
-        order=10,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:
@@ -169,7 +169,7 @@ class SecurityTab(QWidget, PluginInterface):
 
             for rec in score_data["recommendations"][:3]:  # Limit to 3
                 rec_item = QLabel(f"  ⚠️ {rec}")
-                rec_item.setStyleSheet("color: #fab387; font-size: 11px;")
+                rec_item.setStyleSheet("color: #e89840; font-size: 11px;")
                 rec_item.setWordWrap(True)
                 layout.addWidget(rec_item)
 
@@ -238,7 +238,7 @@ class SecurityTab(QWidget, PluginInterface):
                 "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
             ))
             info.setWordWrap(True)
-            info.setStyleSheet("color: #bac2de; font-size: 11px;")
+            info.setStyleSheet("color: #9da7bf; font-size: 11px;")
             layout.addWidget(info)
         else:
             # Device list
@@ -369,7 +369,7 @@ class SecurityTab(QWidget, PluginInterface):
 
             status_item = QTableWidgetItem("⚠️ Risk" if port.is_risky else "✅ OK")
             if port.is_risky:
-                status_item.setForeground(QColor("#f38ba8"))
+                status_item.setForeground(QColor("#e8556d"))
             self.port_table.setItem(row, 4, status_item)
 
     def _block_port(self):

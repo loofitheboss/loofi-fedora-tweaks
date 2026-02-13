@@ -2,6 +2,31 @@ from __future__ import annotations
 from typing import Iterator
 from core.plugins.interface import PluginInterface
 
+# Explicit category ordering — controls sidebar top-to-bottom sequence.
+# Lower value = higher in sidebar.  Categories not listed sort after all listed ones.
+CATEGORY_ORDER: dict[str, int] = {
+    "Overview": 0,
+    "Manage": 1,
+    "Hardware": 2,
+    "Network & Security": 3,
+    "Personalize": 4,
+    "Developer": 5,
+    "Automation": 6,
+    "Health & Logs": 7,
+}
+
+# Category icons — prepended to category headers in the sidebar tree.
+CATEGORY_ICONS: dict[str, str] = {
+    "Overview": "📊",
+    "Manage": "🔧",
+    "Hardware": "🖥️",
+    "Network & Security": "🌐",
+    "Personalize": "🎨",
+    "Developer": "🛠️",
+    "Automation": "🤖",
+    "Health & Logs": "📋",
+}
+
 
 class PluginRegistry:
     """
@@ -67,10 +92,10 @@ class PluginRegistry:
         return seen
 
     def _sort_order(self) -> None:
-        """Re-sort _order list by (category_first_seen_index, plugin.order, insertion)."""
-        # Stable sort by order field within insertion order
+        """Re-sort _order list by (CATEGORY_ORDER rank, plugin.order, insertion)."""
+        _fallback = max(CATEGORY_ORDER.values()) + 1 if CATEGORY_ORDER else 0
         self._order.sort(key=lambda pid: (
-            self._plugins[pid].metadata().category,
+            CATEGORY_ORDER.get(self._plugins[pid].metadata().category, _fallback),
             self._plugins[pid].metadata().order,
         ))
 

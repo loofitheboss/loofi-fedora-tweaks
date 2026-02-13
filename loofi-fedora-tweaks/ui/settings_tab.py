@@ -27,10 +27,10 @@ class SettingsTab(QWidget, PluginInterface):
         id="settings",
         name="Settings",
         description="Configure appearance, behavior, and advanced application options.",
-        category="Settings",
+        category="Personalize",
         icon="⚙️",
         badge="",
-        order=10,
+        order=30,
     )
 
     def __init__(self):
@@ -83,7 +83,7 @@ class SettingsTab(QWidget, PluginInterface):
             "Changes are saved automatically."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #bac2de; font-size: 12px;")
+        desc.setStyleSheet("color: #9da7bf; font-size: 12px;")
         layout.addWidget(desc)
 
         # Internal sub-tabs
