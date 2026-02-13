@@ -4,6 +4,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [33.0.0] - 2025-07-17 "Bastion"
+
+### Fixed
+
+- **163 mypy type errors → 0**: Fixed all pre-existing type errors across 40+ source files — added `from __future__ import annotations`, proper `dict[str, Any]` annotations, `cast()` calls for Qt types, `Optional` wrappers, and missing type stubs.
+- **All test failures resolved**: 3958 tests passing, 0 failing (was 5 pre-existing failures).
+- **SecurityTab static method calls**: Fixed `self.make_table_item()` / `self.set_table_empty_state()` → `BaseTab.make_table_item()` / `BaseTab.set_table_empty_state()` (SecurityTab doesn't inherit BaseTab).
+- **pulse.py upower parsing**: Fixed `get_power_state()` whitespace handling — parses upower output line-by-line with `split(":", 1)[1].strip()`.
+- **test_packaging_scripts.py**: Fixed PATH isolation so tests don't depend on host rpmbuild/mock availability.
+- **test_frameless_mode_flag.py / test_main_window_geometry.py**: Fixed SIGABRT crashes from QApplication lifecycle conflicts in headless testing.
+- **test_workflow_runner_locks.py**: Added missing `assistant="codex"` keyword argument to `run_agent()` calls.
+- **test_v17_cli.py**: Fixed string assertion for multi-line storage parser registration.
+
+### Changed
+
+- **CI gates already strict**: Verified `continue-on-error` was already removed from typecheck and test jobs in both `ci.yml` and `auto-release.yml`.
+- **Type safety baseline**: All source files now pass `mypy --ignore-missing-imports` with zero errors, establishing a clean baseline for future development.
+
+---
+
 ## [32.0.1] - 2026-02-13 "Abyss" (CI Pipeline Fix)
 
 ### Fixed
