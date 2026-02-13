@@ -15,6 +15,7 @@ v31.0.2: Added configure_table() for readable data rows across all tabs.
 
 import logging
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit, QTableWidget, QTableWidgetItem
 )
@@ -175,6 +176,8 @@ class BaseTab(*_BaseTabBases):
         """Render a single full-width empty-state row in a table."""
         table.clearSpans()
         table.setRowCount(1)
-        table.setItem(0, 0, BaseTab.make_table_item(message, color=color))
-        if table.columnCount() > 1:
-            table.setSpan(0, 0, 1, table.columnCount())
+        msg_item = BaseTab.make_table_item(message, color=color)
+        msg_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        table.setItem(0, 0, msg_item)
+        for col in range(1, table.columnCount()):
+            table.setItem(0, col, BaseTab.make_table_item("", color=color))

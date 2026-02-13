@@ -99,6 +99,7 @@ class NetworkTab(BaseTab):
         self.iface_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.iface_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.iface_table)
+        self.set_table_empty_state(self.iface_table, self.tr("Loading interfaces..."))
         iface_layout.addWidget(self.iface_table)
 
         btn_row = QHBoxLayout()
@@ -120,6 +121,7 @@ class NetworkTab(BaseTab):
         self.wifi_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.wifi_table)
+        self.set_table_empty_state(self.wifi_table, self.tr("Click 'Scan Wi-Fi' to list networks"))
         wifi_layout.addWidget(self.wifi_table)
 
         wifi_btn_row = QHBoxLayout()
@@ -149,6 +151,7 @@ class NetworkTab(BaseTab):
         self.vpn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.vpn_table)
+        self.set_table_empty_state(self.vpn_table, self.tr("Loading VPN connections..."))
         vpn_layout.addWidget(self.vpn_table)
 
         vpn_btn_row = QHBoxLayout()
@@ -309,6 +312,7 @@ class NetworkTab(BaseTab):
         self.traffic_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.traffic_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.traffic_table)
+        self.set_table_empty_state(self.traffic_table, self.tr("Switch to Monitoring to load traffic"))
         traffic_layout.addWidget(self.traffic_table)
         container.addWidget(traffic_group)
 
@@ -324,6 +328,7 @@ class NetworkTab(BaseTab):
         self.conn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.conn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.conn_table)
+        self.set_table_empty_state(self.conn_table, self.tr("Switch to Monitoring to load connections"))
         conn_layout.addWidget(self.conn_table)
 
         conn_btn_row = QHBoxLayout()

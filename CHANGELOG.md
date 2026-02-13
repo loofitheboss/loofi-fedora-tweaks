@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [31.0.4] - 2026-02-13 "Smart UX" (Hotfix)
+
+### Fixed
+
+- **Persistent Blank Table Bodies**: Reworked empty-state rendering to avoid `setSpan()` for placeholder rows (which could render inconsistently with the active Qt style), using explicit first-cell message + filler cells instead.
+- **Storage Startup UX** (`ui/storage_tab.py`): Added immediate placeholders (`Loading disks...`, `Loading mount points...`) so table bodies are always visible before refresh completes.
+- **Network Startup UX** (`ui/network_tab.py`): Added immediate placeholders for Interfaces/Wi-Fi/VPN/Monitoring tables to prevent header-only appearance on first paint.
+- **Shared Table Helpers** (`ui/base_tab.py`): Added robust alignment/painting behavior for empty rows to guarantee visibility in dark theme.
+
+---
+
 ## [31.0.3] - 2026-02-13 "Smart UX" (Hotfix)
 
 ### Fixed

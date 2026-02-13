@@ -66,6 +66,7 @@ class StorageTab(BaseTab):
         self.disk_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.disk_table.setMaximumHeight(140)
         BaseTab.configure_table(self.disk_table)
+        self.set_table_empty_state(self.disk_table, self.tr("Loading disks..."))
         dl_layout.addWidget(self.disk_table)
 
         disk_btn_layout = QHBoxLayout()
@@ -96,6 +97,7 @@ class StorageTab(BaseTab):
         )
         self.mount_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.mount_table)
+        self.set_table_empty_state(self.mount_table, self.tr("Loading mount points..."))
         ml_layout.addWidget(self.mount_table)
 
         layout.addWidget(mount_group)
