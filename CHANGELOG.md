@@ -20,6 +20,12 @@ All notable changes to this project will be documented in this file.
 - **auto-release.yml**: `release` job condition now includes `github.ref == 'refs/heads/master'` trigger. Build/auto_tag/release chain uses `!cancelled() && !failure()` guards. Tag resolution has 3-way fallback (tag push → manual dispatch → validate output).
 - **ci.yml**: Matching `continue-on-error` for typecheck/test consistency with auto-release pipeline.
 
+### Documentation
+
+- Full user-facing documentation refresh to v32 UX/navigation model: `README.md`, `docs/USER_GUIDE.md`, `docs/BEGINNER_QUICK_GUIDE.md`, `docs/ADVANCED_ADMIN_GUIDE.md`, `docs/TROUBLESHOOTING.md`, and `docs/README.md`.
+- Added screenshot catalog and standardized screenshot references: `docs/images/user-guide/README.md`.
+- Updated release notes index files for current release navigation: `docs/release_notes.md` and `docs/releases/RELEASE_NOTES.md`.
+
 ---
 
 ## [32.0.0] - 2026-02-13 "Abyss"
