@@ -1,15 +1,16 @@
 """
-Dashboard Tab v2 — Live system overview with graphs.
-Part of v16.0 "Horizon".
+Dashboard Tab v3 — Live system overview with graphs.
+Part of v16.0 "Horizon", v31.0 "Smart UX" updates.
 
 Features:
 - Welcome header with system variant badge
+- v31.0: System health score gauge
 - Live CPU & RAM sparkline graphs (refreshed every 2s)
 - Storage breakdown per mount point
 - Network speed indicator (upload/download)
 - Top 5 processes by CPU
 - Recent actions feed from HistoryManager
-- Quick Actions grid (Clean Cache, Update All, Power Profile, Gaming Mode)
+- v31.0: Configurable Quick Actions grid
 """
 
 from collections import deque
@@ -30,6 +31,8 @@ from utils.system import SystemManager
 from utils.disk import DiskManager
 from utils.monitor import SystemMonitor
 from utils.history import HistoryManager
+from utils.health_score import HealthScoreManager
+from utils.quick_actions_config import QuickActionsConfig
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +114,79 @@ class SparkLine(QWidget):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard Tab v2
+# Health Score Widget (v31.0 Smart UX)
+# ---------------------------------------------------------------------------
+
+class HealthScoreWidget(QWidget):
+    """Circular gauge showing aggregate system health score."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._score = 0
+        self._grade = "—"
+        self._color = QColor("#6c7086")
+        self._recommendations: list = []
+        self.setFixedSize(120, 140)
+
+    def set_score(self, score: int, grade: str, color: str, recommendations: list):
+        """Update the displayed health score."""
+        self._score = score
+        self._grade = grade
+        self._color = QColor(color)
+        self._recommendations = recommendations
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        w, h = self.width(), self.height()
+        cx, cy = w // 2, 60
+        radius = 48
+
+        # Background arc
+        bg_pen = QPen(QColor("#313244"))
+        bg_pen.setWidth(8)
+        bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        painter.setPen(bg_pen)
+        painter.drawArc(cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, -270 * 16)
+
+        # Score arc
+        if self._score > 0:
+            score_pen = QPen(self._color)
+            score_pen.setWidth(8)
+            score_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            painter.setPen(score_pen)
+            span = int(-270 * 16 * self._score / 100)
+            painter.drawArc(cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, span)
+
+        # Score text
+        painter.setPen(QColor("#cdd6f4"))
+        from PyQt6.QtGui import QFont
+        font = QFont()
+        font.setPixelSize(22)
+        font.setBold(True)
+        painter.setFont(font)
+        painter.drawText(cx - 20, cy - 8, 40, 30, Qt.AlignmentFlag.AlignCenter, str(self._score))
+
+        # Grade text
+        font.setPixelSize(14)
+        painter.setFont(font)
+        painter.setPen(self._color)
+        painter.drawText(cx - 20, cy + 18, 40, 20, Qt.AlignmentFlag.AlignCenter, self._grade)
+
+        # Label
+        font.setPixelSize(11)
+        font.setBold(False)
+        painter.setFont(font)
+        painter.setPen(QColor("#a6adc8"))
+        painter.drawText(0, h - 20, w, 20, Qt.AlignmentFlag.AlignCenter, "Health Score")
+
+        painter.end()
+
+
+# ---------------------------------------------------------------------------
+# Dashboard Tab v3
 # ---------------------------------------------------------------------------
 
 class DashboardTab(QWidget, PluginInterface):
@@ -154,6 +229,7 @@ class DashboardTab(QWidget, PluginInterface):
         self._inner.setSpacing(16)
 
         self._build_header()
+        self._build_health_score()
         self._build_live_metrics()
         self._build_storage_section()
         self._build_top_processes()
@@ -209,10 +285,39 @@ class DashboardTab(QWidget, PluginInterface):
         rb_layout.addStretch()
         reboot_btn = QPushButton(self.tr("🔁 Reboot Now"))
         reboot_btn.setObjectName("rebootButton")
+        reboot_btn.setAccessibleName(self.tr("Reboot system now"))
         reboot_btn.clicked.connect(self._reboot)
         rb_layout.addWidget(reboot_btn)
         self._inner.addWidget(self.reboot_banner)
         self.reboot_banner.setVisible(SystemManager.has_pending_deployment())
+
+    # ==================================================================
+    # Health Score (v31.0 Smart UX)
+    # ==================================================================
+
+    def _build_health_score(self):
+        """Build the health score card."""
+        card = self._card()
+        card_layout = QHBoxLayout(card)
+
+        self._health_gauge = HealthScoreWidget()
+        card_layout.addWidget(self._health_gauge)
+
+        # Recommendations area
+        rec_layout = QVBoxLayout()
+        self._health_title = QLabel(self.tr("System Health"))
+        self._health_title.setStyleSheet("font-weight: bold; font-size: 14px;")
+        rec_layout.addWidget(self._health_title)
+
+        self._health_recs = QLabel(self.tr("Calculating..."))
+        self._health_recs.setStyleSheet("font-size: 12px; color: #a6adc8;")
+        self._health_recs.setWordWrap(True)
+        rec_layout.addWidget(self._health_recs)
+        rec_layout.addStretch()
+
+        card_layout.addLayout(rec_layout)
+        card_layout.setStretch(1, 1)
+        self._inner.addWidget(card)
 
     # ==================================================================
     # Live Metrics Row (CPU graph + RAM graph + Network speed)
@@ -383,7 +488,7 @@ class DashboardTab(QWidget, PluginInterface):
             pass
 
     # ==================================================================
-    # Quick Actions
+    # Quick Actions (v31.0: configurable)
     # ==================================================================
 
     def _build_quick_actions(self):
@@ -393,23 +498,32 @@ class DashboardTab(QWidget, PluginInterface):
         )
         self._inner.addWidget(section_label)
 
-        grid = QGridLayout()
-        grid.setSpacing(12)
+        self._quick_actions_grid = QGridLayout()
+        self._quick_actions_grid.setSpacing(12)
+        self._refresh_quick_actions()
 
-        grid.addWidget(
-            self._action_btn(self.tr("Clean Cache"), "🧹", "#f9e2af",
-                             self._go_maintenance), 0, 0)
-        grid.addWidget(
-            self._action_btn(self.tr("Update All"), "🔄", "#89b4fa",
-                             self._go_maintenance), 0, 1)
-        grid.addWidget(
-            self._action_btn(self.tr("Power Profile"), "🔋", "#a6e3a1",
-                             self._go_hardware), 1, 0)
-        grid.addWidget(
-            self._action_btn(self.tr("Gaming Mode"), "🎮", "#f38ba8",
-                             self._go_gaming), 1, 1)
+        self._inner.addLayout(self._quick_actions_grid)
 
-        self._inner.addLayout(grid)
+    def _refresh_quick_actions(self):
+        """Rebuild quick actions grid from config."""
+        # Clear existing
+        while self._quick_actions_grid.count():
+            item = self._quick_actions_grid.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
+
+        actions = QuickActionsConfig.get_actions()
+        for i, action in enumerate(actions[:8]):  # Max 8 actions in 2x4 grid
+            row, col = divmod(i, 2)
+            target = action.get("target_tab", "")
+            btn = self._action_btn(
+                action.get("label", "Action"),
+                action.get("icon", "⚡"),
+                action.get("color", "#89b4fa"),
+                lambda checked, t=target: self._go_to_tab(t),
+            )
+            self._quick_actions_grid.addWidget(btn, row, col)
 
     # ==================================================================
     # Timer callbacks
@@ -446,6 +560,7 @@ class DashboardTab(QWidget, PluginInterface):
         self._refresh_storage()
         self._refresh_processes()
         self._refresh_history()
+        self._refresh_health_score()
 
     # ==================================================================
     # Network
@@ -500,6 +615,11 @@ class DashboardTab(QWidget, PluginInterface):
     # Quick Action callbacks
     # ==================================================================
 
+    def _go_to_tab(self, tab_name: str):
+        """Navigate to a named tab via MainWindow."""
+        if tab_name and hasattr(self.main_window, "switch_to_tab"):
+            self.main_window.switch_to_tab(tab_name)
+
     def _go_maintenance(self):
         if hasattr(self.main_window, "switch_to_tab"):
             self.main_window.switch_to_tab("Maintenance")
@@ -511,6 +631,23 @@ class DashboardTab(QWidget, PluginInterface):
     def _go_gaming(self):
         if hasattr(self.main_window, "switch_to_tab"):
             self.main_window.switch_to_tab("Gaming")
+
+    # ==================================================================
+    # Health Score refresh (v31.0)
+    # ==================================================================
+
+    def _refresh_health_score(self):
+        """Refresh the health score gauge."""
+        try:
+            hs = HealthScoreManager.calculate()
+            self._health_gauge.set_score(hs.score, hs.grade, hs.color, hs.recommendations)
+            if hs.recommendations:
+                recs_text = "\n".join(f"• {r}" for r in hs.recommendations[:3])
+            else:
+                recs_text = "✅ System is healthy — no issues detected"
+            self._health_recs.setText(recs_text)
+        except Exception:
+            self._health_recs.setText("Could not calculate health score")
 
     # ==================================================================
     # Helpers

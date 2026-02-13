@@ -1,39 +1,39 @@
 {
-  "version": "v30.0",
-  "phase": "P4_TEST",
-  "date": "2026-02-13",
-  "generated_at": "2026-02-13T08:20:00Z",
-  "scope": "v30.0 Distribution & Reliability",
-  "status": "pass",
-  "summary": {
-    "total_tests": 156,
-    "passed": 156,
-    "failed": 0,
-    "errors": 0,
-    "pass_rate": "100%"
-  },
-  "commands": [
-    {
-      "cmd": "pytest tests/test_update_checker.py tests/test_plugin_marketplace.py tests/test_packaging_scripts.py tests/test_rate_limiter.py tests/test_auto_tuner.py",
-      "result": "passed",
-      "passed": 156,
-      "failed": 0
-    }
-  ],
-  "test_files": [
-    "tests/test_update_checker.py",
-    "tests/test_plugin_marketplace.py",
-    "tests/test_packaging_scripts.py",
-    "tests/test_rate_limiter.py",
-    "tests/test_auto_tuner.py"
-  ],
-  "changed_files": [
-    "loofi-fedora-tweaks/utils/update_checker.py",
-    "loofi-fedora-tweaks/utils/plugin_marketplace.py",
-    "loofi-fedora-tweaks/utils/rate_limiter.py",
-    "loofi-fedora-tweaks/utils/auto_tuner.py",
-    "pyproject.toml",
-    "loofi-fedora-tweaks/version.py",
-    "loofi-fedora-tweaks.spec"
-  ]
+    "version": "v30.0",
+    "phase": "P4_TEST",
+    "date": "2026-02-13",
+    "generated_at": "2026-02-13T08:20:00Z",
+    "scope": "v30.0 Distribution & Reliability",
+    "status": "pass",
+    "summary": {
+        "total_tests": 156,
+        "passed": 156,
+        "failed": 0,
+        "errors": 0,
+        "pass_rate": "100%"
+    },
+    "commands": [
+        {
+            "cmd": "pytest tests/test_update_checker.py tests/test_plugin_marketplace.py tests/test_packaging_scripts.py tests/test_rate_limiter.py tests/test_auto_tuner.py",
+            "result": "passed",
+            "passed": 156,
+            "failed": 0
+        }
+    ],
+    "test_files": [
+        "tests/test_update_checker.py",
+        "tests/test_plugin_marketplace.py",
+        "tests/test_packaging_scripts.py",
+        "tests/test_rate_limiter.py",
+        "tests/test_auto_tuner.py"
+    ],
+    "changed_files": [
+        "loofi-fedora-tweaks/utils/update_checker.py",
+        "loofi-fedora-tweaks/utils/plugin_marketplace.py",
+        "loofi-fedora-tweaks/utils/rate_limiter.py",
+        "loofi-fedora-tweaks/utils/auto_tuner.py",
+        "pyproject.toml",
+        "loofi-fedora-tweaks/version.py",
+        "loofi-fedora-tweaks.spec"
+    ]
 }

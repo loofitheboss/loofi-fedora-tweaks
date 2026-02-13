@@ -1,6 +1,35 @@
 # Changelog
 
+<!-- markdownlint-configure-file {"MD024": {"siblings_only": true}} -->
+
 All notable changes to this project will be documented in this file.
+
+## [31.0.0] - 2026-02-13 "Smart UX"
+
+### Added
+
+- **System Health Score** (`utils/health_score.py`): Weighted 0–100 health score aggregating CPU, RAM, disk, uptime, and pending updates. Dashboard displays a circular gauge with letter grade (A–F) and actionable recommendations.
+- **i18n Scaffolding** (`utils/i18n.py`): Qt Linguist translation workflow with `I18nManager` — locale detection, `.qm` file loading, preference persistence. Ready for community translations.
+- **Batch Operations** (`utils/batch_ops.py`): Batch install/remove/update for Software tab with package validation. Supports both `dnf` and `rpm-ostree` (Atomic Fedora).
+- **System Report Export** (`utils/report_exporter.py`): Export system info as Markdown or styled HTML from the System Info tab. Reports include hostname, kernel, CPU, RAM, disk, battery, desktop, and uptime.
+- **Favorite Tabs** (`utils/favorites.py`): Pin any sidebar tab as a favorite — persisted to `~/.config/loofi-fedora-tweaks/favorites.json`. Right-click sidebar context menu to add/remove.
+- **Configurable Quick Actions** (`utils/quick_actions_config.py`): Dashboard quick actions grid now reads from user config. Default: Clean Cache, Update All, Power Profile, Gaming Mode.
+- **Plugin Template Script** (`scripts/create_plugin.sh`): Scaffolds new plugin directories with `plugin.py`, `metadata.json`, `README.md`, and test stub. Usage: `bash scripts/create_plugin.sh my-plugin`.
+- **Accessibility Level 2**: `setAccessibleName` / `setAccessibleDescription` on sidebar search, sidebar tree, dashboard reboot button, health score widget, export controls, and batch operation buttons.
+- **95 new tests** across 6 test files: `test_health_score.py` (30), `test_i18n.py` (12), `test_batch_ops.py` (14), `test_report_exporter.py` (10), `test_favorites.py` (14), `test_quick_actions_config.py` (15).
+
+### Changed
+
+- **Dashboard tab** (`ui/dashboard_tab.py`): Added health score circular gauge widget and configurable quick actions grid replacing hardcoded buttons.
+- **System Info tab** (`ui/system_info_tab.py`): Added export format selector (Markdown/HTML) and "Export Report" button.
+- **Software tab** (`ui/software_tab.py`): Added checkboxes per app row and batch install/remove toolbar buttons.
+- **Main Window** (`ui/main_window.py`): Added ⭐ Favorites sidebar category, right-click context menu for toggling favorites, and accessible names on navigation widgets.
+
+### Validation
+
+- **v31 test suite**: 95 passed, 0 failed across all 6 new test files.
+- **Lint**: All 6 new modules pass flake8 (max-line-length=150).
+- **Coverage target**: 80% (v31 goal).
 
 ## [30.0.0] - 2026-02-13 "Distribution & Reliability"
 
@@ -247,6 +276,7 @@ All notable changes to this project will be documented in this file.
 ## [21.0.1] - 2026-02-09
 
 ### Fixed
+
 - **Packaging**: Removed python-jose test dependency that blocked RPM installation on Fedora
 - **Tests**: Use PyJWT's `ExpiredSignatureError` instead of importing from python-jose
 - Runtime code already correctly uses PyJWT; this fix aligns test dependencies
@@ -361,7 +391,7 @@ All notable changes to this project will be documented in this file.
   - cleanup.json, security.json, thermal.json behavior
   - Rate limiting, event triggers, command execution, dry-run mode
 
-**Total: 66 new tests passing**
+#### Total: 66 new tests passing
 
 ### New Files
 
@@ -1018,7 +1048,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [9.0.0] - 2026-02-07 "Director Update"
+## [9.0.0] - 2026-02-07 "Director Update (Window Management)"
 
 ### Added
 
