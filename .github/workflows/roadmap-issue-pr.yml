@@ -25,10 +25,14 @@ jobs:
 
       - name: Build roadmap tracker artifact
         id: tracker
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
-          ISSUE_NUMBER="${{ github.event.issue.number }}"
-          ISSUE_TITLE="${{ github.event.issue.title }}"
-          ISSUE_URL="${{ github.event.issue.html_url }}"
+          ISSUE_NUMBER="${ISSUE_NUMBER}"
+          ISSUE_TITLE="${ISSUE_TITLE}"
+          ISSUE_URL="${ISSUE_URL}"
           ISSUE_BODY=$(python3 - <<'PY'
           import json
           import os
