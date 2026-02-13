@@ -83,7 +83,7 @@ class SettingsTab(QWidget, PluginInterface):
             "Changes are saved automatically."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #888; font-size: 12px;")
+        desc.setStyleSheet("color: #bac2de; font-size: 12px;")
         layout.addWidget(desc)
 
         # Internal sub-tabs

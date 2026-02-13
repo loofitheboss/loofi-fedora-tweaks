@@ -451,7 +451,7 @@ class AutomationTab(BaseTab):
             "No Loofi needed on the target - just standard tools."
         ))
         info.setWordWrap(True)
-        info.setStyleSheet("color: #888; margin-bottom: 10px;")
+        info.setStyleSheet("color: #bac2de; margin-bottom: 10px;")
         rep_layout.addWidget(info)
 
         # Ansible section
@@ -475,7 +475,7 @@ class AutomationTab(BaseTab):
             "Flatpaks, and applies your settings on any Fedora/RHEL machine."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #888;")
+        desc.setStyleSheet("color: #bac2de;")
         layout.addWidget(desc)
 
         # Options
@@ -504,7 +504,7 @@ class AutomationTab(BaseTab):
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
-        export_btn.setStyleSheet("background-color: #28a745; color: white;")
+        export_btn.setStyleSheet("background-color: #a6e3a1; color: #1e1e2e; font-weight: bold;")
         export_btn.clicked.connect(self._export_ansible)
         btn_layout.addWidget(export_btn)
 
@@ -523,7 +523,7 @@ class AutomationTab(BaseTab):
             "Use this with inst.ks= during installation."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #888;")
+        desc.setStyleSheet("color: #bac2de;")
         layout.addWidget(desc)
 
         # Options
@@ -548,7 +548,7 @@ class AutomationTab(BaseTab):
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
-        export_btn.setStyleSheet("background-color: #28a745; color: white;")
+        export_btn.setStyleSheet("background-color: #a6e3a1; color: #1e1e2e; font-weight: bold;")
         export_btn.clicked.connect(self._export_kickstart)
         btn_layout.addWidget(export_btn)
 

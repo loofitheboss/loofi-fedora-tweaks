@@ -73,7 +73,7 @@ class TeleportTab(QWidget, PluginInterface):
             "terminal state, and environment."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #888; font-size: 12px;")
+        description.setStyleSheet("color: #bac2de; font-size: 12px;")
         layout.addWidget(description)
 
         # Capture section
@@ -142,7 +142,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Capture summary label
         self.capture_summary = QLabel(self.tr("No state captured yet."))
         self.capture_summary.setWordWrap(True)
-        self.capture_summary.setStyleSheet("color: #888;")
+        self.capture_summary.setStyleSheet("color: #bac2de;")
         layout.addWidget(self.capture_summary)
 
         return group
@@ -210,7 +210,7 @@ class TeleportTab(QWidget, PluginInterface):
             self.tr("No incoming teleport. Import a package file to begin.")
         )
         self.restore_preview.setWordWrap(True)
-        self.restore_preview.setStyleSheet("color: #888;")
+        self.restore_preview.setStyleSheet("color: #bac2de;")
         layout.addWidget(self.restore_preview)
 
         # Apply button

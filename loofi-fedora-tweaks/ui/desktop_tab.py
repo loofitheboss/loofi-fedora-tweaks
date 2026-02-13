@@ -84,7 +84,7 @@ class DesktopTab(BaseTab):
 
         # Header
         header = QLabel(self.tr("Window Management"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #9b59b6;")
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         wm_layout.addWidget(header)
 
         # Compositor detection
@@ -142,7 +142,7 @@ class DesktopTab(BaseTab):
             info = QLabel(self.tr("Install Hyprland, Sway, or KDE for tiling support."))
 
         info.setWordWrap(True)
-        info.setStyleSheet("color: #888; font-size: 11px;")
+        info.setStyleSheet("color: #bac2de; font-size: 11px;")
         layout.addWidget(info)
 
         return group

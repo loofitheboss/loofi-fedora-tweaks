@@ -375,7 +375,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Status label
         self.lbl_community_status = QLabel(self.tr("Click 'Refresh' to load community presets."))
-        self.lbl_community_status.setStyleSheet("color: #6c7086;")
+        self.lbl_community_status.setStyleSheet("color: #a6adc8;")
         layout.addWidget(self.lbl_community_status)
 
         # Buttons
@@ -667,7 +667,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("Community Preset Marketplace"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
 
         # Search and Filter
@@ -706,7 +706,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.marketplace_plugin_list = self.marketplace_preset_list
 
         self.marketplace_status_label = QLabel(self.tr("Loading..."))
-        self.marketplace_status_label.setStyleSheet("color: #888;")
+        self.marketplace_status_label.setStyleSheet("color: #bac2de;")
         list_layout.addWidget(self.marketplace_status_label)
 
         layout.addWidget(list_group)
@@ -720,7 +720,7 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addWidget(self.detail_name)
 
         self.detail_author = QLabel("")
-        self.detail_author.setStyleSheet("color: #888;")
+        self.detail_author.setStyleSheet("color: #bac2de;")
         details_layout.addWidget(self.detail_author)
 
         self.detail_desc = QLabel("")
@@ -731,11 +731,11 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addWidget(self.detail_stats)
 
         self.detail_verification = QLabel("")
-        self.detail_verification.setStyleSheet("color: #888;")
+        self.detail_verification.setStyleSheet("color: #bac2de;")
         details_layout.addWidget(self.detail_verification)
 
         self.detail_rating_summary = QLabel("")
-        self.detail_rating_summary.setStyleSheet("color: #888;")
+        self.detail_rating_summary.setStyleSheet("color: #bac2de;")
         details_layout.addWidget(self.detail_rating_summary)
 
         # Action buttons
@@ -763,7 +763,7 @@ class CommunityTab(QWidget, PluginInterface):
         reviews_layout = QVBoxLayout(reviews_group)
 
         self.reviews_summary_label = QLabel(self.tr("Select a preset to view ratings and reviews."))
-        self.reviews_summary_label.setStyleSheet("color: #888;")
+        self.reviews_summary_label.setStyleSheet("color: #bac2de;")
         reviews_layout.addWidget(self.reviews_summary_label)
 
         self.reviews_text = QTextEdit()
@@ -798,7 +798,7 @@ class CommunityTab(QWidget, PluginInterface):
         review_actions_layout.addWidget(self.submit_review_btn)
 
         self.review_feedback_label = QLabel("")
-        self.review_feedback_label.setStyleSheet("color: #888;")
+        self.review_feedback_label.setStyleSheet("color: #bac2de;")
         review_actions_layout.addWidget(self.review_feedback_label)
         review_actions_layout.addStretch()
         reviews_layout.addLayout(review_actions_layout)
@@ -816,7 +816,7 @@ class CommunityTab(QWidget, PluginInterface):
         analytics_layout.addWidget(self.analytics_opt_in_checkbox)
 
         self.analytics_status_label = QLabel("")
-        self.analytics_status_label.setStyleSheet("color: #888;")
+        self.analytics_status_label.setStyleSheet("color: #bac2de;")
         analytics_layout.addWidget(self.analytics_status_label)
         self._update_analytics_status_label(self.plugin_analytics.is_enabled())
 

@@ -4,6 +4,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [31.0.1] - 2026-02-13 "Smart UX" (Hotfix)
+
+### Fixed
+
+- **QSS Global Styles** (`assets/modern.qss`): Improved table readability — brighter headers with blue accent border, better alternating row contrast, sharper gridlines, white selection text, and item padding.
+- **Group Boxes**: Added visible card borders and pill-shaped title backgrounds for clearer section separation.
+- **Buttons**: Stronger border contrast, blue hover accent, bolder font weight, and minimum height for better touch targets.
+- **Input Fields**: Blue focus ring and improved border visibility.
+- **Output Area**: New terminal-style look with dark background, green monospace text, and rounded border.
+- **Low-contrast text**: Replaced `#888` (26 instances across 12 tabs) with readable `#bac2de` (Catppuccin Subtext1).
+- **Off-theme colors**: Replaced `color: red` (maintenance), `#e67e22` (security), `#82e0aa` (AI), `#28a745` (automation), `#9b59b6` (desktop), `#6c7086` (hardware, community) with proper Catppuccin theme equivalents.
+- **Inconsistent headers**: Added missing `#a277ff` accent color to maintenance, security, software, and community tab headers.
+
+---
+
 ## [31.0.0] - 2026-02-13 "Smart UX"
 
 ### Added

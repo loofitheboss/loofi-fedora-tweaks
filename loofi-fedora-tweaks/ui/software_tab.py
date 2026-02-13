@@ -282,7 +282,7 @@ class _RepositoriesSubTab(QWidget):
 
         # Header
         header = QLabel(self.tr("Repository Management"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
 
         # RPM Fusion Group

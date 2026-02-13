@@ -70,7 +70,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
             "export data for analysis."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #888; font-size: 12px;")
+        description.setStyleSheet("color: #bac2de; font-size: 12px;")
         layout.addWidget(description)
 
         # Summary section
