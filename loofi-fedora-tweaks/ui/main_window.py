@@ -767,10 +767,7 @@ class MainWindow(QMainWindow):
         dot = dots.get(status, "")
 
         iterator = QTreeWidgetItemIterator(self.sidebar)
-        while iterator.value():
-            item = iterator.value()
-            if item is None:
-                break
+        while (item := iterator.value()) is not None:
             if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
                 # Strip any existing status dot, add new one
                 text = item.text(0)
