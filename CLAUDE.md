@@ -5,11 +5,12 @@ You are Claude Code operating inside this repository.
 Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## KEY FILES (READ THESE, DON'T REPEAT THEIR CONTENT)
-- `ROADMAP.md` — Version scope, status, deliverables, agent assignments
-- `.github/agents/` — Canonical agent definitions (VS Code Copilot format)
-- `.github/claude-agents/` — Agent definitions (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
-- `.github/copilot-instructions.md` — Architecture and patterns reference
-- `AGENTS.md` — Quick reference for agent system and architecture
+- `ARCHITECTURE.md` — Canonical architecture, layer rules, tab layout, patterns
+- `ROADMAP.md` — Version scope, status, deliverables
+- `.github/agents/` — 8 VS Code agents (canonical definitions)
+- `.github/claude-agents/` — 7 Claude agents (adapters, synced via sync_ai_adapters.py)
+- `AGENTS.md` — Quick reference for agent system
+- `.github/instructions/` — AI instructions (primary, workflow, test, copilot)
 
 ## TOKEN DISCIPLINE (CRITICAL)
 - Read context files once, reference by name after

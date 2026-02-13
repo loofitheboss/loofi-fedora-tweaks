@@ -1,7 +1,8 @@
 # Loofi Fedora Tweaks — Agent Instructions
 
 > PyQt6 desktop app for Fedora Linux system customization.
-> 25 UI tabs, 151 test files (3846+ tests, 76.8% coverage), 52+ utils modules, CLI + GUI + Daemon modes.
+> 26 UI tabs, 157 test files (3846+ tests, 76.8% coverage), 100+ utils modules, CLI + GUI + Daemon modes.
+> See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
 
 ## Architecture
 

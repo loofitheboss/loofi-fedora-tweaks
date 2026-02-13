@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
-"""Sync Claude/Copilot/Codex adapter files from canonical .github sources."""
+"""Sync Claude/Copilot/Codex adapter files from canonical .github sources.
+
+Modes:
+    (default)   Copy canonical files to adapter targets
+    --check     Verify drift without writing
+    --render    Substitute {{variable}} templates in agent/instruction files
+                using values from .project-stats.json (run project_stats.py first)
+"""
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 ROOT = Path(__file__).resolve().parent.parent
+STATS_FILE = ROOT / ".project-stats.json"
+TEMPLATE_VAR_RE = re.compile(r"\{\{(\w+)\}\}")
 
 
 @dataclass(frozen=True)
@@ -161,6 +173,75 @@ def archive_legacy_workflow(check: bool, diffs: list[str]) -> None:
     shutil.move(str(legacy_file), str(archive_file))
 
 
+# ---------------------------------------------------------------------------
+# Template rendering
+# ---------------------------------------------------------------------------
+
+# Files that contain {{variable}} templates to be rendered
+RENDERABLE_FILES = [
+    ".github/agents/Arkitekt.agent.md",
+    ".github/agents/Builder.agent.md",
+    ".github/agents/CodeGen.agent.md",
+    ".github/agents/Guardian.agent.md",
+    ".github/agents/Manager.agent.md",
+    ".github/agents/Planner.agent.md",
+    ".github/agents/Sculptor.agent.md",
+    ".github/agents/Test.agent.md",
+    ".github/instructions/primary.instructions.md",
+    ".github/instructions/workflow.instructions.md",
+    ".github/copilot-instructions.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+]
+
+
+def load_stats() -> dict[str, str]:
+    """Load stats from .project-stats.json, regenerating if missing."""
+    if not STATS_FILE.exists():
+        # Try to generate it
+        stats_script = ROOT / "scripts" / "project_stats.py"
+        if stats_script.exists():
+            subprocess.run(
+                [sys.executable, str(stats_script)],
+                cwd=str(ROOT),
+                check=True,
+            )
+    if not STATS_FILE.exists():
+        print("[sync-ai] ERROR: .project-stats.json not found. Run: python3 scripts/project_stats.py")
+        sys.exit(1)
+
+    raw = json.loads(STATS_FILE.read_text(encoding="utf-8"))
+    # Flatten all values to strings for template substitution
+    return {k: str(v) for k, v in raw.items() if not isinstance(v, list)}
+
+
+def render_templates(check: bool) -> list[str]:
+    """Substitute {{variable}} placeholders in renderable files."""
+    stats = load_stats()
+    diffs: list[str] = []
+
+    for rel_path in RENDERABLE_FILES:
+        full_path = ROOT / rel_path
+        if not full_path.exists():
+            continue
+
+        original = full_path.read_text(encoding="utf-8")
+        rendered = TEMPLATE_VAR_RE.sub(
+            lambda m: stats.get(m.group(1), m.group(0)), original
+        )
+
+        if original != rendered:
+            # Count how many substitutions were made
+            old_vars = TEMPLATE_VAR_RE.findall(original)
+            new_vars = TEMPLATE_VAR_RE.findall(rendered)
+            substituted = len(old_vars) - len(new_vars)
+            diffs.append(f"rendered {substituted} template(s) in {rel_path}")
+            if not check:
+                full_path.write_text(rendered, encoding="utf-8")
+
+    return diffs
+
+
 def run(check: bool) -> list[str]:
     diffs: list[str] = []
 
@@ -178,21 +259,33 @@ def run(check: bool) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sync AI adapter files from canonical .github sources")
     parser.add_argument("--check", action="store_true", help="Only verify drift; do not write changes")
+    parser.add_argument("--render", action="store_true",
+                        help="Substitute {{variable}} templates using .project-stats.json")
     args = parser.parse_args()
 
-    diffs = run(check=args.check)
-    if not diffs:
-        print("[sync-ai] OK: adapters are in sync")
+    all_diffs: list[str] = []
+
+    if args.render:
+        render_diffs = render_templates(check=args.check)
+        all_diffs.extend(render_diffs)
+    else:
+        sync_diffs = run(check=args.check)
+        all_diffs.extend(sync_diffs)
+
+    if not all_diffs:
+        mode = "render" if args.render else "sync"
+        print(f"[sync-ai] OK: {mode} — no changes needed")
         return 0
 
     if args.check:
         print("[sync-ai] DRIFT DETECTED:")
-        for item in diffs:
+        for item in all_diffs:
             print(f"- {item}")
         return 1
 
-    print("[sync-ai] Updated adapter files:")
-    for item in diffs:
+    action = "Rendered" if args.render else "Updated"
+    print(f"[sync-ai] {action} adapter files:")
+    for item in all_diffs:
         print(f"- {item}")
     return 0
 

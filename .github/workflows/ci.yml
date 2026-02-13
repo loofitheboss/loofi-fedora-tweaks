@@ -61,7 +61,6 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -75,7 +74,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: true
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
@@ -107,6 +105,19 @@ jobs:
         with:
           name: test-results
           path: test-results.xml
+
+  stats_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
+      - run: python3 scripts/project_stats.py
+      - run: python3 scripts/project_stats.py --check
 
   security:
     runs-on: ubuntu-latest

@@ -5,11 +5,17 @@
       "url": "https://api.githubcopilot.com/mcp/",
       "toolsets": [
         "pull_requests",
-        "code_security", 
+        "code_security",
         "secret_protection",
         "issues",
         "repos"
       ]
+    },
+    "loofi-workflow": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp_workflow_server.py"],
+      "cwd": "${workspaceFolder}"
     }
   }
 }

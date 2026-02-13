@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 try:
-    import tomllib  # Python 3.11+
+    import tomllib  # Python 3.12+
 except ModuleNotFoundError:  # pragma: no cover
     tomllib = None  # type: ignore[assignment]
 
@@ -424,6 +424,35 @@ def build_agent_command(
         )
         return cmd, False, display
 
+    if assistant == "claude":
+        # Claude Code CLI: claude -p <prompt> --allowedTools '*' --model <model>
+        claude_model_map = {
+            "gpt-5.3-codex": "claude-sonnet-4-20250514",
+            "gpt-4o": "claude-sonnet-4-20250514",
+            "gpt-4o-mini": "claude-haiku-3-5-20241022",
+            "claude-opus-4-20250514": "claude-opus-4-20250514",
+            "claude-sonnet-4-20250514": "claude-sonnet-4-20250514",
+            "claude-haiku-3-5-20241022": "claude-haiku-3-5-20241022",
+        }
+        resolved_model = claude_model_map.get(model, "claude-sonnet-4-20250514")
+        write_tools = "Edit,Write,Bash,Read,MultiEdit"
+        read_tools = "Read,Bash"
+        allowed_tools = read_tools if sandbox == "read-only" else write_tools
+        cmd = [
+            "claude",
+            "-p",
+            combined_prompt,
+            "--allowedTools",
+            allowed_tools,
+            "--model",
+            resolved_model,
+        ]
+        display = (
+            f"claude -p <prompt> --allowedTools {allowed_tools} "
+            f"--model {resolved_model}"
+        )
+        return cmd, False, display
+
     cmd = ["codex", "exec", "--model", model,
            "--sandbox", sandbox, "--cd", str(ROOT)]
     display = " ".join(cmd)
@@ -529,6 +558,39 @@ def run_agent(
     return result.returncode, metadata
 
 
+def validate_phase_ordering(phase: str, version_tag: str) -> tuple[bool, str]:
+    """Enforce strict phase ordering: each phase requires all prior phases to be completed.
+
+    Checks the run manifest for prior phase completion. Returns (ok, reason).
+    Use --force-phase to bypass this check.
+    """
+    if phase == "plan":
+        return True, "ok"  # plan is always allowed
+
+    manifest_path = artifact_paths(version_tag)["run_manifest"]
+    manifest = load_json_file(manifest_path)
+
+    completed_phases: set[str] = set()
+    if manifest and isinstance(manifest.get("phases"), list):
+        for entry in manifest["phases"]:
+            if (isinstance(entry, dict)
+                    and entry.get("status") == "success"
+                    and isinstance(entry.get("phase"), str)):
+                completed_phases.add(entry["phase"])
+
+    phase_idx = PHASE_ORDER.index(phase)
+    required_phases = PHASE_ORDER[:phase_idx]
+    missing = [p for p in required_phases if p not in completed_phases]
+
+    if missing:
+        return (
+            False,
+            f"phase '{phase}' requires prior phases to complete first: "
+            f"{', '.join(missing)}. Use --force-phase to bypass.",
+        )
+    return True, "ok"
+
+
 def run_phase(
     phase: str,
     version_tag: str,
@@ -541,11 +603,18 @@ def run_phase(
     issue: str | None,
     lock_ttl_minutes: int,
     skip_race_check: bool = False,
+    force_phase: bool = False,
 ) -> tuple[int, dict[str, Any]]:
     artifacts = artifact_paths(version_tag)
     roadmap = ROOT / "ROADMAP.md"
     agents_md = ROOT / "AGENTS.md"
     memory = ROOT / ".github" / "agent-memory" / "project-coordinator" / "MEMORY.md"
+
+    # Phase ordering enforcement (write mode only)
+    if mode == "write" and not force_phase:
+        phase_ok, phase_reason = validate_phase_ordering(phase, version_tag)
+        if not phase_ok:
+            return 1, {"phase": phase, "status": "blocked", "error": phase_reason, "timestamp": isoformat_utc()}
 
     if mode == "write":
         ok, reason = ensure_writer_lock(
@@ -730,6 +799,8 @@ def main() -> int:
                         help="Release .writer-lock.json and exit")
     parser.add_argument("--force-release-lock",
                         action="store_true", help="Force-release writer lock")
+    parser.add_argument("--force-phase", action="store_true",
+                        help="Bypass strict phase ordering enforcement")
 
     args = parser.parse_args()
 
@@ -777,6 +848,7 @@ def main() -> int:
                 issue=args.issue,
                 lock_ttl_minutes=args.lock_ttl_minutes,
                 skip_race_check=skip_race_check,
+                force_phase=True,  # "all" mode runs sequentially, no ordering check needed
             )
             append_manifest_entry(
                 manifest_path, manifest_base, entry, args.dry_run)
@@ -796,6 +868,7 @@ def main() -> int:
         owner=args.owner,
         issue=args.issue,
         lock_ttl_minutes=args.lock_ttl_minutes,
+        force_phase=args.force_phase,
     )
     append_manifest_entry(manifest_path, manifest_base, entry, args.dry_run)
     return code

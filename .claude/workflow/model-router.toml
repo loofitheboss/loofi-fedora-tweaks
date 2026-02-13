@@ -1,16 +1,23 @@
 # Machine-readable phase -> model routing.
 # Keep this aligned with .github/workflow/model-router.md.
+# Rule: brain for planning/design, labor for code/tests, labor-light for docs/packaging.
 
 [tiers]
 brain = "gpt-5.3-codex"
 labor = "gpt-4o"
 labor_light = "gpt-4o-mini"
 
+# Claude equivalents (used by workflow_runner.py for Claude CLI)
+[tiers.claude]
+brain = "claude-sonnet-4"
+labor = "claude-sonnet-4"
+labor_light = "claude-haiku-3.5"
+
 [phases]
-plan = "gpt-5.3-codex"
-design = "gpt-5.3-codex"
-build = "gpt-5.3-codex"
-test = "gpt-5.3-codex"
-doc = "gpt-5.3-codex"
-package = "claude-opus-4.6"
-release = "claude-opus-4.6"
+plan = "gpt-5.3-codex"      # brain — bad plans are expensive
+design = "gpt-5.3-codex"    # brain — architecture mistakes cascade
+build = "gpt-4o"            # labor — strong coding at lower cost
+test = "gpt-4o"             # labor — good for mock-heavy tests
+doc = "gpt-4o-mini"         # labor-light — low-risk text
+package = "gpt-4o-mini"     # labor-light — checklist/metadata
+release = "gpt-4o-mini"     # labor-light — procedural execution

@@ -10,17 +10,19 @@ You are the primary AI developer for Loofi Fedora Tweaks.
 Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## PROJECT OVERVIEW
-- PyQt6-based desktop app for Fedora Linux (current: v29.0.0)
-- 25 UI tabs, 151 test files (3846+ tests, 76.8% coverage), 52+ utils modules
+- PyQt6-based desktop app for Fedora Linux (current: v32.0.0 "Abyss")
+- 26 UI tabs, 157 test files (3846+ tests, 76.8% coverage), 100+ utils modules
 - Three entry modes: GUI (default), CLI (`--cli`), Daemon (`--daemon`)
-- Agent-based workflow defined in `.github/claude-agents/`
+- Architecture: `ARCHITECTURE.md` (canonical reference — read once, never duplicate)
+- Agent-based workflow defined in `.github/agents/` (VS Code) and `.github/claude-agents/` (Claude)
 
 ## KEY FILES (READ ONCE, REFERENCE BY NAME)
+- `ARCHITECTURE.md` — Canonical architecture, layer rules, tab layout, patterns
 - `ROADMAP.md` — Version scope, status, deliverables
-- `.github/claude-agents/` — 7 specialized agents (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
-- `AGENTS.md` — Quick reference for agent system and architecture
-- `.github/copilot-instructions.md` — Architecture and patterns reference
-- `.github/instructions/` — Primary AI instructions (primary, workflow, test)
+- `.github/agents/` — 8 VS Code agents (canonical definitions)
+- `.github/claude-agents/` — 7 Claude agents (adapters, synced via sync_ai_adapters.py)
+- `AGENTS.md` — Quick reference for agent system
+- `.github/instructions/` — AI instructions (primary, workflow, test, copilot)
 
 ## TOKEN DISCIPLINE (CRITICAL)
 - Read context files once, reference by name after
@@ -49,24 +51,17 @@ All agent definitions: `.github/claude-agents/*.md`
 - Avoid overengineering and unnecessary abstractions
 
 ## CODE QUALITY
-- Python 3.11+ compatible
+- Python 3.12+ compatible (pyproject.toml: requires-python >= 3.12)
 - PyQt6 best practices
-- Clear separation of UI, logic, and system interaction
+- Clear separation of UI, logic, and system interaction (see ARCHITECTURE.md § Layer Rules)
 - Minimal dependencies
 
 ## CRITICAL PATTERNS (NEVER VIOLATE)
+See `ARCHITECTURE.md` § Critical Patterns for full details. Summary:
 1. **PrivilegedCommand**: Returns `Tuple[str, List[str], str]` — ALWAYS unpack before subprocess.run()
-   ```python
-   binary, args, _ = PrivilegedCommand.dnf("install", "pkg")
-   cmd = [binary] + args  # Never pass tuple directly
-   ```
-
-2. **BaseTab**: All command tabs inherit from `BaseTab` (ui/base_tab.py) for CommandRunner wiring
-
+2. **BaseTab**: All command tabs inherit from `BaseTab` for CommandRunner wiring
 3. **Package Manager**: Use `SystemManager.get_package_manager()` — NEVER hardcode `dnf`
-
 4. **Privilege Escalation**: Use `pkexec` only, NEVER `sudo`
-
 5. **Atomic Fedora**: Always branch on `SystemManager.is_atomic()` for dnf vs rpm-ostree
 
 ## TESTING RULES
