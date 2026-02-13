@@ -531,7 +531,7 @@ class _BootSubTab(QWidget):
         self.current_params_label = QLabel()
         self.current_params_label.setWordWrap(True)
         self.current_params_label.setStyleSheet(
-            "color: #888; font-size: 11px;"
+            "color: #bac2de; font-size: 11px;"
         )
         current_layout.addWidget(self.current_params_label, 1)
         layout.addLayout(current_layout)
@@ -686,7 +686,7 @@ class _BootSubTab(QWidget):
             "modules (NVIDIA, VirtualBox) when Secure Boot is enabled."
         ))
         help_label.setWordWrap(True)
-        help_label.setStyleSheet("color: #888; font-size: 11px;")
+        help_label.setStyleSheet("color: #bac2de; font-size: 11px;")
         layout.addWidget(help_label)
 
         return group

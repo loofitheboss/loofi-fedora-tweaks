@@ -189,7 +189,7 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Description
         desc = QLabel(self.tr("Controls CPU frequency scaling policy"))
-        desc.setStyleSheet("color: #6c7086; font-size: 11px;")
+        desc.setStyleSheet("color: #a6adc8; font-size: 11px;")
         layout.addWidget(desc)
 
         return card

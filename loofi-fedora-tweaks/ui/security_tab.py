@@ -86,7 +86,7 @@ class SecurityTab(QWidget, PluginInterface):
         # Header
         header = QLabel(self.tr("🛡️ Security Center"))
         # Keep header color theme-driven to avoid hardcoded red accents.
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
 
         # Security Score
@@ -168,7 +168,7 @@ class SecurityTab(QWidget, PluginInterface):
 
             for rec in score_data["recommendations"][:3]:  # Limit to 3
                 rec_item = QLabel(f"  ⚠️ {rec}")
-                rec_item.setStyleSheet("color: #e67e22; font-size: 11px;")
+                rec_item.setStyleSheet("color: #fab387; font-size: 11px;")
                 rec_item.setWordWrap(True)
                 layout.addWidget(rec_item)
 
@@ -236,7 +236,7 @@ class SecurityTab(QWidget, PluginInterface):
                 "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
             ))
             info.setWordWrap(True)
-            info.setStyleSheet("color: #888; font-size: 11px;")
+            info.setStyleSheet("color: #bac2de; font-size: 11px;")
             layout.addWidget(info)
         else:
             # Device list

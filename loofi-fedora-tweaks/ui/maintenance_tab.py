@@ -46,7 +46,7 @@ class _UpdatesSubTab(QWidget):
 
         # Header
         header = QLabel(self.tr("System Updates"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
         layout.addWidget(header)
 
         # Update All Button (Prominent)
@@ -319,7 +319,7 @@ class _CleanupSubTab(QWidget):
         cleanup_layout.addWidget(btn_dnf_clean)
 
         btn_autoremove = QPushButton(self.tr("Remove Unused Packages (Risky)"))
-        btn_autoremove.setStyleSheet("color: red;")
+        btn_autoremove.setStyleSheet("color: #f38ba8;")
         btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
 

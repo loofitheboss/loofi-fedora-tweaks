@@ -69,7 +69,7 @@ class ProfilesTab(QWidget, PluginInterface):
             "notifications, and more."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #888; font-size: 12px;")
+        description.setStyleSheet("color: #bac2de; font-size: 12px;")
         layout.addWidget(description)
 
         # Active profile indicator
@@ -180,7 +180,7 @@ class ProfilesTab(QWidget, PluginInterface):
         # Description
         desc = QLabel(profile.get("description", ""))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #888; font-size: 11px;")
+        desc.setStyleSheet("color: #bac2de; font-size: 11px;")
         layout.addWidget(desc)
 
         # Type badge
