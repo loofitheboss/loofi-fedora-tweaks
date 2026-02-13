@@ -1,17 +1,34 @@
-## Loofi Fedora Tweaks v25.0.2
+# Release Notes — Latest
 
-Patch release focused on reliability and CI/testability for the plugin architecture.
+> **Current release:** v32.0.0 "Abyss"
+>
+> For versioned release notes see the individual files in this directory:
+> `RELEASE-NOTES-vX.Y.Z.md`
 
-### Fixed
+## v32.0.0 "Abyss"
 
-- Removed hard runtime Qt dependency from `core/plugins/interface.py` so non-UI plugin/core imports work in headless environments.
-- Hardened `ui/base_tab.py` inheritance fallback to avoid metaclass/MRO failures when Qt types are mocked.
-- Updated `tests/test_frameless_mode_flag.py` to skip cleanly when PyQt6 system libraries are unavailable.
-- Updated stale legacy test assertions to reflect plugin-driven tab registration and current version metadata.
+Full visual redesign — new Abyss dark/light theme, activity-based navigation (8 categories),
+sidebar collapse toggle, and Catppuccin color migration across 30+ files.
 
-### Validation
+See [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) for full details.
 
-- `1824 passed`, `122 skipped` test outcomes on the release branch.
-- Lint is clean with project flake8 configuration.
+### v32.0.1 — CI Pipeline Fix
 
-Tag: `v25.0.2`
+- Fixed auto-release pipeline (GITHUB_TOKEN anti-recursion workaround)
+- Fixed 9 lint errors across 8 files
+- Fixed adapter drift sync
+- Fixed security scan (tarfile B202 + skip list)
+- Fixed test collection crash (`from __future__ import annotations` in containers.py)
+- Added `continue-on-error` for soft-gate jobs (typecheck, test)
+- Improved workflow with release deduplication, smart build conditions, test artifacts
+
+## Previous Releases
+
+| Version | Codename | Notes |
+|---------|----------|-------|
+| v31.0.0 | — | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
+| v30.0.0 | — | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
+| v29.0.0 | — | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |
+| v28.0.0 | — | [RELEASE-NOTES-v28.0.0.md](RELEASE-NOTES-v28.0.0.md) |
+| v27.0.0 | — | [RELEASE-NOTES-v27.0.0.md](RELEASE-NOTES-v27.0.0.md) |
+| v26.0.2 | — | [RELEASE-NOTES-v26.0.2.md](RELEASE-NOTES-v26.0.2.md) |
