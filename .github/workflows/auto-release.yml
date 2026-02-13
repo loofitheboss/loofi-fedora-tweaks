@@ -250,13 +250,18 @@ jobs:
           echo "Created and pushed ${TAG}"
 
   release:
-    if: (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.version != '')) && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+    if: |
+      !cancelled() && !failure() &&
+      (github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
+      (startsWith(github.ref, 'refs/tags/v') ||
+       (github.event_name == 'workflow_dispatch' && inputs.version != '') ||
+       github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     container: fedora:43
     timeout-minutes: 20
     permissions:
       contents: write
-    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
+    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build, auto_tag]
     steps:
       - name: Install release deps
         run: dnf install -y git python3
@@ -276,8 +281,10 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
             TAG="${GITHUB_REF#refs/tags/}"
-          else
+          elif [ -n "${{ inputs.version }}" ]; then
             TAG="v${{ inputs.version }}"
+          else
+            TAG="${{ needs.validate.outputs.tag }}"
           fi
           VERSION="${TAG#v}"
 
