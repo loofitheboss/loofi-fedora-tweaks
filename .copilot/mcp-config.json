@@ -1,11 +1,11 @@
 {
-  "servers": {
+  "mcpServers": {
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "toolsets": [
         "pull_requests",
-        "code_security", 
+        "code_security",
         "secret_protection",
         "issues",
         "repos"

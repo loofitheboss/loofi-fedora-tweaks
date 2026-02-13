@@ -200,3 +200,25 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (3846 pas
 - **Dependencies:** `DependencyDoctor` (`ui/doctor.py`) runs at startup to check for critical tools (`dnf`, `pkexec`)
 - **First-run:** `ui/wizard.py` runs on first launch, saves profile to `~/.config/loofi-fedora-tweaks/profile.json`
 - **Command palette:** `ui/command_palette.py` activated via Ctrl+K shortcut
+
+## MCP Server Integration
+
+The repository uses GitHub's MCP (Model Context Protocol) server for AI-assisted workflows:
+
+- **VS Code config**: `.vscode/mcp.json`
+- **Copilot CLI config**: `.copilot/mcp-config.json`
+- **Toolsets**: `pull_requests`, `code_security`, `secret_protection`, `issues`, `repos`
+
+### Automated Bot Workflows
+
+| Workflow | Trigger | What It Does |
+|----------|---------|--------------|
+| `pr-security-bot.yml` | PR to master | Bandit + pip-audit + Trivy + detect-secrets scan, posts summary comment |
+| `bot-automation.yml` | PR/Issue opened, weekly cron | Auto-label by file path/keywords, stale cleanup |
+| `auto-merge-dependabot.yml` | Dependabot PR | Auto-approve + auto-merge patch-level dependency updates |
+
+### Security Scan Details
+
+- Bandit skips: B404, B603, B602 (subprocess-related, handled by PrivilegedCommand pattern)
+- Scan scope: `loofi-fedora-tweaks/` directory only
+- Reports uploaded as workflow artifacts on every PR

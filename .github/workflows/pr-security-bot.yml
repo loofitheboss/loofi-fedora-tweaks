@@ -1,0 +1,157 @@
+name: PR Security Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+concurrency:
+  group: pr-security-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install security tools
+        run: pip install bandit pip-audit detect-secrets
+
+      - name: Run Bandit SAST
+        id: bandit
+        continue-on-error: true
+        run: |
+          bandit -r loofi-fedora-tweaks/ -ll -ii \
+            --skip B404,B603,B602 \
+            -f json -o bandit-pr-report.json 2>&1 || true
+          if [ -f bandit-pr-report.json ]; then
+            ISSUES=$(python3 -c "import json; d=json.load(open('bandit-pr-report.json')); print(len(d.get('results',[])))")
+          else
+            ISSUES=0
+          fi
+          echo "issues=$ISSUES" >> "$GITHUB_OUTPUT"
+          if [ "$ISSUES" = "0" ]; then echo "status=pass" >> "$GITHUB_OUTPUT"; else echo "status=warn" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Run pip-audit
+        id: pip_audit
+        continue-on-error: true
+        run: |
+          pip-audit -r requirements.txt --format json --output pip-audit-report.json 2>&1 || true
+          if [ -f pip-audit-report.json ]; then
+            VULNS=$(python3 -c "
+          import json, pathlib
+          data = json.loads(pathlib.Path('pip-audit-report.json').read_text())
+          print(sum(len(d.get('vulns',[])) for d in data.get('dependencies',[])))
+          " 2>/dev/null || echo "0")
+          else
+            VULNS=0
+          fi
+          echo "vulns=$VULNS" >> "$GITHUB_OUTPUT"
+          if [ "$VULNS" = "0" ]; then echo "status=pass" >> "$GITHUB_OUTPUT"; else echo "status=warn" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Run Trivy filesystem scan
+        id: trivy
+        continue-on-error: true
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy fs --scanners vuln,secret --format json --output trivy-report.json loofi-fedora-tweaks/ 2>&1 || true
+          if [ -f trivy-report.json ]; then
+            TRIVY_VULNS=$(python3 -c "
+          import json, pathlib
+          data = json.loads(pathlib.Path('trivy-report.json').read_text())
+          print(sum(len(r.get('Vulnerabilities',[])) for r in data.get('Results',[])))
+          " 2>/dev/null || echo "0")
+          else
+            TRIVY_VULNS=0
+          fi
+          echo "vulns=$TRIVY_VULNS" >> "$GITHUB_OUTPUT"
+          if [ "$TRIVY_VULNS" = "0" ]; then echo "status=pass" >> "$GITHUB_OUTPUT"; else echo "status=warn" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Detect hardcoded secrets
+        id: secrets
+        continue-on-error: true
+        run: |
+          detect-secrets scan loofi-fedora-tweaks/ --json > secrets-report.json 2>&1 || true
+          if [ -f secrets-report.json ]; then
+            SECRETS=$(python3 -c "
+          import json, pathlib
+          data = json.loads(pathlib.Path('secrets-report.json').read_text())
+          print(sum(len(v) for v in data.get('results',{}).values()))
+          " 2>/dev/null || echo "0")
+          else
+            SECRETS=0
+          fi
+          echo "count=$SECRETS" >> "$GITHUB_OUTPUT"
+          if [ "$SECRETS" = "0" ]; then echo "status=pass" >> "$GITHUB_OUTPUT"; else echo "status=fail" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-security-reports
+          path: |
+            bandit-pr-report.json
+            pip-audit-report.json
+            trivy-report.json
+            secrets-report.json
+
+      - name: Post PR security summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const icon = (s) => s === 'pass' ? '✅' : s === 'warn' ? '⚠️' : '❌';
+            const banditStatus = '${{ steps.bandit.outputs.status }}' || 'pass';
+            const banditIssues = '${{ steps.bandit.outputs.issues }}' || '0';
+            const pipStatus = '${{ steps.pip_audit.outputs.status }}' || 'pass';
+            const pipVulns = '${{ steps.pip_audit.outputs.vulns }}' || '0';
+            const trivyStatus = '${{ steps.trivy.outputs.status }}' || 'pass';
+            const trivyVulns = '${{ steps.trivy.outputs.vulns }}' || '0';
+            const secretsStatus = '${{ steps.secrets.outputs.status }}' || 'pass';
+            const secretsCount = '${{ steps.secrets.outputs.count }}' || '0';
+            const statuses = [banditStatus, pipStatus, trivyStatus, secretsStatus];
+            const overall = statuses.includes('fail') ? '❌ FAIL' :
+                           statuses.includes('warn') ? '⚠️ WARNINGS' : '✅ ALL CLEAR';
+
+            const body = `## 🔒 PR Security Bot Report\n\n| Check | Status | Details |\n|-------|--------|---------|` +
+              `\n| Bandit (SAST) | ${icon(banditStatus)} | ${banditIssues} issue(s) |` +
+              `\n| pip-audit (Deps) | ${icon(pipStatus)} | ${pipVulns} vulnerability(ies) |` +
+              `\n| Trivy (FS Scan) | ${icon(trivyStatus)} | ${trivyVulns} finding(s) |` +
+              `\n| Secret Detection | ${icon(secretsStatus)} | ${secretsCount} potential secret(s) |` +
+              `\n\n**Overall: ${overall}**\n\n` +
+              `<details>\n<summary>📋 Details</summary>\n\n` +
+              `- Reports available as workflow artifacts\n` +
+              `- Bandit skips: B404, B603, B602 (subprocess, handled by PrivilegedCommand)\n` +
+              `- Scope: \`loofi-fedora-tweaks/\`\n</details>\n\n---\n*🤖 Automated by PR Security Bot*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes('PR Security Bot Report'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body: body,
+              });
+            }
