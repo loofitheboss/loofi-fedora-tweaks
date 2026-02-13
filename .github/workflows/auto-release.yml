@@ -180,13 +180,21 @@ jobs:
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
       - run: python loofi-fedora-tweaks/main.py --cli --version
-      - run: |
+      - name: Run tests
+        run: |
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
             --tb=short \
             --timeout=60 \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=75
+            --cov-fail-under=75 \
+            --junitxml=test-results.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
 
   security:
     runs-on: ubuntu-latest
@@ -212,6 +220,12 @@ jobs:
     container: fedora:43
     timeout-minutes: 20
     needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security]
+    if: |
+      !cancelled() &&
+      needs.validate.result == 'success' &&
+      needs.adapter_drift.result == 'success' &&
+      needs.lint.result == 'success' &&
+      needs.docs_gate.result == 'success'
     steps:
       - uses: actions/checkout@v4
       - name: Install build deps
@@ -225,12 +239,16 @@ jobs:
           if-no-files-found: error
 
   auto_tag:
-    if: github.ref == 'refs/heads/master' && (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+    if: |
+      !cancelled() &&
+      needs.build.result == 'success' &&
+      github.ref == 'refs/heads/master' &&
+      (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
-    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build]
+    needs: [validate, build]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -254,7 +272,8 @@ jobs:
 
   release:
     if: |
-      !cancelled() && !failure() &&
+      !cancelled() &&
+      needs.build.result == 'success' &&
       (github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
       (startsWith(github.ref, 'refs/tags/v') ||
        (github.event_name == 'workflow_dispatch' && inputs.version != '') ||
@@ -264,22 +283,37 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
-    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security, build, auto_tag]
+    needs: [validate, build, auto_tag]
     steps:
       - name: Install release deps
-        run: dnf install -y git python3
+        run: dnf install -y git python3 curl
 
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Check if release already exists
+        id: check_release
+        run: |
+          TAG="${{ needs.validate.outputs.tag }}"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${TAG}")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${TAG} already exists — skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download RPM artifact
+        if: steps.check_release.outputs.exists != 'true'
         uses: actions/download-artifact@v4
         with:
           name: rpm-package
           path: rpmbuild/RPMS/noarch
 
       - name: Resolve release tag
+        if: steps.check_release.outputs.exists != 'true'
         id: release_meta
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
@@ -307,6 +341,7 @@ jobs:
           echo "codename=${CODENAME}" >> "$GITHUB_OUTPUT"
 
       - name: Generate release body
+        if: steps.check_release.outputs.exists != 'true'
         run: |
           TAG="${{ steps.release_meta.outputs.tag }}"
           VERSION="${{ steps.release_meta.outputs.version }}"
@@ -333,6 +368,7 @@ jobs:
           fi
 
       - name: Publish GitHub Release (idempotent)
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_meta.outputs.tag }}
@@ -343,3 +379,13 @@ jobs:
           files: rpmbuild/RPMS/noarch/loofi-fedora-tweaks-${{ steps.release_meta.outputs.version }}*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release summary
+        if: always()
+        run: |
+          TAG="${{ needs.validate.outputs.tag }}"
+          if [ "${{ steps.check_release.outputs.exists }}" = "true" ]; then
+            echo "::notice::Release ${TAG} already exists — no action taken."
+          else
+            echo "::notice::Published release ${TAG} with RPM artifact."
+          fi

@@ -41,6 +41,8 @@ repo/
 
 # Test caches
 .pytest_cache/
+.mypy_cache/
+.mypy.cache/
 .coverage
 htmlcov/
 .tox/

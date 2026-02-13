@@ -92,13 +92,21 @@ jobs:
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
       - run: python loofi-fedora-tweaks/main.py --cli --version
-      - run: |
+      - name: Run tests
+        run: |
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
             --tb=short \
             --timeout=60 \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=75
+            --cov-fail-under=75 \
+            --junitxml=test-results.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results.xml
 
   security:
     runs-on: ubuntu-latest

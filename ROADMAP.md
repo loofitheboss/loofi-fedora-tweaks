@@ -22,6 +22,42 @@
 | v30.0 | Distribution & Reliability | DONE | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
 | v31.0 | Smart UX | DONE | Health score, i18n, batch ops, export report, plugin template |
 | v32.0 | Abyss | DONE | Full visual redesign, activity-based categories, Abyss theme |
+| v33.0 | — | NEXT | Testing & type safety debt, CI pipeline hardening |
+
+---
+
+## [NEXT] v33.0 — Testing & CI Hardening
+
+### Scope
+
+- Fix all pre-existing mypy type errors so typecheck gate is strict
+- Fix all pre-existing test failures (target: 100% pass rate)
+- Raise coverage to 80%+
+- Remove `continue-on-error` from typecheck and test gates
+- Add test result summary annotations to CI
+- Add release smoke test job (--version + --cli --version after RPM install)
+
+### Deliverables
+
+- [ ] Fix mypy errors (Linux-only APIs, type annotations, missing stubs)
+- [ ] Fix remaining test failures (6 pre-existing)
+- [ ] Coverage ≥ 80% (currently 76.8%)
+- [ ] Remove continue-on-error from typecheck/test in auto-release.yml and ci.yml
+- [ ] Add pytest --junitxml + dorny/test-reporter for PR annotations
+- [ ] RPM install smoke test in release job
+- [ ] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Guardian | Fix mypy errors, fix failing tests, coverage fill |
+| Builder | Type annotation improvements |
+| Planner | CI pipeline improvements, release checklist |
+
+### Dependencies
+
+- v32.0 Abyss (clean baseline)
 
 ---
 

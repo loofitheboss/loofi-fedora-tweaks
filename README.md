@@ -234,11 +234,57 @@ Run tests:
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3968+ passing
 ```
 
+Lint:
+
+```bash
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+```
+
+Type check:
+
+```bash
+mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
+```
+
+Security scan:
+
+```bash
+bandit -r loofi-fedora-tweaks/ -ll -ii --skip B103,B104,B108,B310,B404,B603,B602
+```
+
 Build RPM:
 
 ```bash
 bash scripts/build_rpm.sh
 ```
+
+---
+
+## CI/CD Pipeline
+
+Every push to `master` and every pull request runs through two pipelines:
+
+| Pipeline | File | Purpose |
+|----------|------|---------|
+| CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, packaging |
+| Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → build → tag → publish |
+
+### Auto Release Flow
+
+```
+push to master
+  → validate (version alignment, packaging scripts)
+  → adapter_drift, lint, typecheck, test, security, docs_gate (parallel)
+  → build (RPM in Fedora 43 container)
+  → auto_tag (creates vX.Y.Z tag if missing)
+  → release (publishes GitHub Release with RPM artifact)
+```
+
+The pipeline automatically tags and publishes releases when code lands on `master` with a new version in `version.py`. No manual tagging required.
+
+### Manual Release
+
+Use **workflow_dispatch** with the version number for manual control. Set `dry_run: true` to validate without publishing.
 
 ---
 

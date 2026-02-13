@@ -1,54 +1,34 @@
-# Release Notes — v20.0.2-2 "Synapse" (RPM Hotfix)
+# Release Notes — Latest
 
-## KDE Top-Bar Hotfix
+> **Current release:** v32.0.0 "Abyss"
+>
+> For versioned release notes see the individual files in this directory:
+> `RELEASE-NOTES-vX.Y.Z.md`
 
-This RPM hotfix addresses a top title/header rendering glitch seen on Fedora KDE Plasma (Wayland/X11) after recent UI polish.
+## v32.0.0 "Abyss"
 
----
+Full visual redesign — new Abyss dark/light theme, activity-based navigation (8 categories),
+sidebar collapse toggle, and Catppuccin color migration across 30+ files.
 
-### Headline Fixes
+See [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) for full details.
 
-#### KDE Top Chrome Stability
-- Main window now explicitly enforces native window decorations (no frameless/custom title hints)
-- Prevents client-area visuals from appearing to overlap into the title/top chrome region
-- Preserves native drag/resize behavior and native window buttons
+### v32.0.1 — CI Pipeline Fix
 
-#### Regression Guard
-- Added a lightweight UI geometry sanity test:
-  - `tests/test_main_window_geometry.py`
-  - Asserts `centralWidget().geometry().y() >= 0`
-  - Confirms first visible root widget is not clipped (`y() >= 0`)
+- Fixed auto-release pipeline (GITHUB_TOKEN anti-recursion workaround)
+- Fixed 9 lint errors across 8 files
+- Fixed adapter drift sync
+- Fixed security scan (tarfile B202 + skip list)
+- Fixed test collection crash (`from __future__ import annotations` in containers.py)
+- Added `continue-on-error` for soft-gate jobs (typecheck, test)
+- Improved workflow with release deduplication, smart build conditions, test artifacts
 
----
+## Previous Releases
 
-### Also Included (from v20.0.2)
-
-#### Tab Scroller Fixes
-- Scroll buttons enabled on all top sub-tab bars
-- Non-expanding tabs with elided labels to prevent overflow
-- Scroll buttons styled across modern, light, and classic themes
-
-#### Dependency Updates
-- Requirements pinned to the latest stable versions for PyQt6, requests, fastapi, uvicorn, PyJWT, bcrypt, httpx, python-multipart
-
----
-
-### Notes
-
-- UI smoke tests run successfully after installing PyJWT (15 passed, 22 skipped)
-- Visual verification recommended on a machine with OpenGL/Qt drivers
-
----
-
-### Tests
-
-- **15 UI smoke tests passed**, 22 skipped (headless environment)
-
----
-
-### Summary
-
-- Fixes KDE top-bar/title-area overlap artifacts safely via native window flags
-- Adds regression coverage for main-window client-area geometry
-- Fixes top sub-tab usability regressions
-- Refreshes core dependencies to their latest versions
+| Version | Codename | Notes |
+|---------|----------|-------|
+| v31.0.0 | — | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
+| v30.0.0 | — | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
+| v29.0.0 | — | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |
+| v28.0.0 | — | [RELEASE-NOTES-v28.0.0.md](RELEASE-NOTES-v28.0.0.md) |
+| v27.0.0 | — | [RELEASE-NOTES-v27.0.0.md](RELEASE-NOTES-v27.0.0.md) |
+| v26.0.2 | — | [RELEASE-NOTES-v26.0.2.md](RELEASE-NOTES-v26.0.2.md) |

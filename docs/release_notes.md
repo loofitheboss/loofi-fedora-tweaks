@@ -1,5 +1,36 @@
 # Release Notes
 
+## v32.0.0 "Abyss" - February 2026
+
+Full visual redesign of Loofi Fedora Tweaks.
+
+### Highlights
+
+- **Abyss Theme**: New purpose-built dark palette replacing Catppuccin. Base `#0b0e14`, accent `#39c5cf` (teal), header `#b78eff` (purple). Matching light variant included.
+- **Activity-Based Navigation**: 10 categories consolidated to 8 logical groups with emoji icons
+- **Sidebar Collapse Toggle**: `≡`/`✕` button to collapse/expand sidebar (0–220px)
+- **Color Migration**: 17 Catppuccin hex codes replaced across 30+ files
+- **QSS Rewrite**: Both `modern.qss` (~560 lines) and `light.qss` rewritten from scratch
+
+### Changed Files
+
+- `assets/modern.qss`, `assets/light.qss` — full rewrite
+- `assets/style.qss` — deleted
+- `core/plugins/registry.py` — CATEGORY_ORDER, CATEGORY_ICONS
+- `ui/main_window.py` — sidebar collapse toggle, category icon prefixes
+- All 26 tab metadata files — category and order fields updated
+- 30+ Python files — inline color migration
+
+### v32.0.1 — CI Pipeline Fix
+
+- Fixed auto-release pipeline (GITHUB_TOKEN anti-recursion workaround)
+- Fixed 9 lint errors, adapter drift, security scan, test collection crash
+- Added `continue-on-error` for soft-gate jobs (typecheck, test)
+- Improved workflows: release deduplication, smart build conditions, test artifacts
+- Rewrote release checklist for automated pipeline
+
+---
+
 ## v31.0.0 "Smart UX" - February 2026
 
 Smart UX release adds user experience intelligence to the app.
