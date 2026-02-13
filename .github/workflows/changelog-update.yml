@@ -40,7 +40,32 @@ jobs:
               let changelog = fs.readFileSync(path, 'utf8');
               const marker = '## [Unreleased]';
               if (changelog.includes(marker)) {
-                changelog = changelog.replace(marker, `${marker}\n\n${category}\n${entry}`);
+                const unreleasedStart = changelog.indexOf(marker);
+                const nextSectionIndex = changelog.indexOf('\n## ', unreleasedStart + marker.length);
+                const beforeUnreleased = changelog.slice(0, unreleasedStart);
+                const unreleasedSection = nextSectionIndex === -1
+                  ? changelog.slice(unreleasedStart)
+                  : changelog.slice(unreleasedStart, nextSectionIndex);
+                const afterUnreleased = nextSectionIndex === -1
+                  ? ''
+                  : changelog.slice(nextSectionIndex);
+
+                let updatedUnreleasedSection;
+                if (unreleasedSection.includes(category)) {
+                  // Category header already exists in [Unreleased]; add entry under that header.
+                  updatedUnreleasedSection = unreleasedSection.replace(
+                    category,
+                    `${category}\n${entry}`
+                  );
+                } else {
+                  // No category header yet under [Unreleased]; add header and entry.
+                  updatedUnreleasedSection = unreleasedSection.replace(
+                    marker,
+                    `${marker}\n\n${category}\n${entry}`
+                  );
+                }
+
+                changelog = beforeUnreleased + updatedUnreleasedSection + afterUnreleased;
               } else {
                 changelog = `# Changelog\n\n## [Unreleased]\n\n${category}\n${entry}\n\n` + changelog;
               }
