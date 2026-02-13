@@ -1,0 +1,48 @@
+{
+    "version": "v31.0",
+    "phase": "P4_TEST",
+    "date": "2026-02-13",
+    "generated_at": "2026-02-13T00:00:00Z",
+    "scope": "v31.0 Smart UX",
+    "status": "pass",
+    "summary": {
+        "total_tests": 95,
+        "passed": 95,
+        "failed": 0,
+        "errors": 0,
+        "pass_rate": "100%"
+    },
+    "commands": [
+        {
+            "cmd": "pytest tests/test_health_score.py tests/test_i18n.py tests/test_batch_ops.py tests/test_report_exporter.py tests/test_favorites.py tests/test_quick_actions_config.py -q",
+            "result": "passed",
+            "passed": 95,
+            "failed": 0
+        }
+    ],
+    "test_files": [
+        "tests/test_health_score.py",
+        "tests/test_i18n.py",
+        "tests/test_batch_ops.py",
+        "tests/test_report_exporter.py",
+        "tests/test_favorites.py",
+        "tests/test_quick_actions_config.py"
+    ],
+    "changed_files": [
+        "loofi-fedora-tweaks/utils/health_score.py",
+        "loofi-fedora-tweaks/utils/i18n.py",
+        "loofi-fedora-tweaks/utils/batch_ops.py",
+        "loofi-fedora-tweaks/utils/report_exporter.py",
+        "loofi-fedora-tweaks/utils/favorites.py",
+        "loofi-fedora-tweaks/utils/quick_actions_config.py",
+        "loofi-fedora-tweaks/ui/dashboard_tab.py",
+        "loofi-fedora-tweaks/ui/system_info_tab.py",
+        "loofi-fedora-tweaks/ui/software_tab.py",
+        "loofi-fedora-tweaks/ui/main_window.py",
+        "scripts/create_plugin.sh",
+        "loofi-fedora-tweaks/version.py",
+        "loofi-fedora-tweaks.spec",
+        "CHANGELOG.md",
+        "docs/releases/RELEASE-NOTES-v31.0.0.md"
+    ]
+}
