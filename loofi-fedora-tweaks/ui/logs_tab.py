@@ -8,7 +8,7 @@ and log export. Uses SmartLogViewer from utils/smart_logs.py.
 
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
+    QGroupBox, QTableWidget, QHeaderView,
     QComboBox, QSpinBox, QFileDialog, QGridLayout, QTextEdit,
     QWidget
 )

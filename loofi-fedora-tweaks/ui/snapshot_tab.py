@@ -8,7 +8,7 @@ Uses SnapshotManager from utils/snapshot_manager.py.
 
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
+    QGroupBox, QTableWidget, QHeaderView,
     QInputDialog, QMessageBox, QGridLayout, QWidget
 )
 from PyQt6.QtCore import QTimer

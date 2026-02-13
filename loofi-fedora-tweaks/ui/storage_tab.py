@@ -7,7 +7,7 @@ Uses StorageManager from utils/storage.py for lsblk, smartctl, df, and fsck.
 
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
+    QGroupBox, QTableWidget, QHeaderView,
     QMessageBox, QGridLayout, QWidget
 )
 from PyQt6.QtCore import QTimer

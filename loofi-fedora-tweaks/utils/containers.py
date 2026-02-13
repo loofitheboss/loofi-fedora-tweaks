@@ -3,6 +3,8 @@ Container management utilities for Distrobox.
 Part of v7.1 "Developer" update.
 """
 
+from __future__ import annotations
+
 import subprocess
 import shutil
 import re

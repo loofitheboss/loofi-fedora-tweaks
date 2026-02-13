@@ -8,7 +8,7 @@ and tuning history. Uses AutoTuner from utils/auto_tuner.py.
 
 from PyQt6.QtWidgets import (
     QVBoxLayout, QLabel, QPushButton, QGroupBox,
-    QGridLayout, QTableWidget, QTableWidgetItem, QHeaderView,
+    QGridLayout, QTableWidget, QHeaderView,
     QWidget
 )
 from PyQt6.QtCore import QTimer

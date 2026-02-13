@@ -10,7 +10,7 @@ Three sub-tabs wrapped in a QTabWidget:
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTabWidget, QTableWidget, QTableWidgetItem,
+    QPushButton, QTabWidget, QTableWidget,
     QHeaderView, QComboBox, QLineEdit, QTextEdit, QScrollArea,
     QFrame, QMessageBox, QFileDialog, QTreeWidget, QTreeWidgetItem,
     QListWidget, QListWidgetItem, QDialog, QFormLayout, QSpinBox,

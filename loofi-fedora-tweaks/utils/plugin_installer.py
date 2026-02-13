@@ -102,7 +102,7 @@ class PluginInstaller:
                         logger.error("Security: Invalid path in archive: %s", member.name)
                         return False
 
-                tar.extractall(destination)
+                tar.extractall(destination, filter='data')  # nosec B202
 
             logger.info("Extraction complete")
             return True

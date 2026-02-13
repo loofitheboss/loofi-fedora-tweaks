@@ -27,7 +27,7 @@ _CATEGORY_COLORS = {
     "personalize": "#b78eff",   # purple
     "developer": "#3dd68c",     # green
     "automation": "#39c5cf",    # teal
-    "health & logs": "#3dd68c", # green
+    "health & logs": "#3dd68c",  # green
     "health": "#3dd68c",
     "profile": "#b78eff",
     "security": "#e8556d",

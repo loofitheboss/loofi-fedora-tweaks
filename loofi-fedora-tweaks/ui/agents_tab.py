@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QMessageBox, QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QColor, QFont
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
