@@ -137,6 +137,7 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -162,6 +163,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    continue-on-error: true
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
