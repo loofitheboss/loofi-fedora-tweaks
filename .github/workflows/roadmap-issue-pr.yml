@@ -87,7 +87,7 @@ jobs:
           echo "tracker_file=${TRACKER_FILE}" >> "$GITHUB_OUTPUT"
 
       - name: Create or update roadmap draft PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: roadmap/issue-${{ github.event.issue.number }}
           delete-branch: false
