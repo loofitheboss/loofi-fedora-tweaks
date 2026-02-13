@@ -35,8 +35,9 @@ jobs:
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ \
             --cov=loofi-fedora-tweaks \
             --cov-report=json:coverage.json \
-            --timeout=60 -q || true
+            --timeout=60 -q
       - name: Comment coverage on PR
+        if: ${{ always() }}
         uses: actions/github-script@v7
         with:
           script: |
