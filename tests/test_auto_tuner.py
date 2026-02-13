@@ -3,6 +3,7 @@ import unittest
 import sys
 import os
 import json
+import threading
 from unittest.mock import patch, MagicMock, mock_open, call
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
@@ -564,6 +565,59 @@ class TestInternalHelpers(unittest.TestCase):
         """Test _read_io_scheduler returns 'unknown' with no device."""
         result = AutoTuner._read_io_scheduler()
         self.assertEqual(result, "unknown")
+
+
+class TestAutoTunerConcurrency(unittest.TestCase):
+    """Concurrency-focused tests for tuning history operations."""
+
+    @patch('utils.auto_tuner._CONFIG_DIR', '/tmp/loofi-test-config')
+    @patch('utils.auto_tuner._HISTORY_PATH', '/tmp/loofi-test-config/tuning_history.json')
+    @patch('utils.auto_tuner.os.makedirs')
+    @patch('builtins.open', new_callable=mock_open, read_data='[]')
+    @patch('utils.auto_tuner.os.path.isfile', return_value=True)
+    @patch('utils.auto_tuner.json.dump')
+    @patch('utils.auto_tuner.json.load', return_value=[])
+    def test_concurrent_save_and_read_consistency(
+        self,
+        mock_json_load,
+        mock_json_dump,
+        mock_isfile,
+        mock_file,
+        mock_makedirs,
+    ):
+        """Concurrent save/read operations do not raise and keep bounded writes."""
+        errors = []
+
+        def _save_worker(index):
+            try:
+                entry = TuningHistoryEntry(
+                    timestamp=float(index),
+                    workload="gaming",
+                    recommendations={"governor": "performance"},
+                    applied=True,
+                )
+                AutoTuner.save_tuning_entry(entry)
+            except Exception as exc:
+                errors.append(exc)
+
+        def _read_worker():
+            try:
+                AutoTuner.get_tuning_history()
+            except Exception as exc:
+                errors.append(exc)
+
+        threads = []
+        for idx in range(5):
+            threads.append(threading.Thread(target=_save_worker, args=(idx,)))
+            threads.append(threading.Thread(target=_read_worker))
+
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(timeout=2.0)
+
+        self.assertEqual(errors, [])
+        self.assertGreaterEqual(mock_json_dump.call_count, 1)
 
 
 if __name__ == '__main__':

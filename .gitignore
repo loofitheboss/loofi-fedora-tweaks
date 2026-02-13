@@ -20,6 +20,8 @@ venv/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
+!.vscode/mcp.json
+!.vscode/mcp.env.example
 *.swp
 *.swo
 *~

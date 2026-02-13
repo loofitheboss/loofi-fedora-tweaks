@@ -106,3 +106,15 @@ class TestPluginMarketplaceCdnProvider:
         assert result.success is False
         assert result.data is None
         assert result.error is not None
+
+    @patch.object(PluginMarketplace, "_fetch_json")
+    def test_offline_uses_existing_cache(self, mock_fetch_json):
+        mock_fetch_json.return_value = None
+        mp = PluginMarketplace()
+        mp._cache = [mp._parse_plugin_entry(_signed_index("cached-offline")["plugins"][0])]
+
+        result = mp.fetch_index(force_refresh=True)
+
+        assert result.success is True
+        assert result.offline is True
+        assert result.source == "cache"

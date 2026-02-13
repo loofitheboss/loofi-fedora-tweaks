@@ -60,8 +60,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install mypy PyQt6-stubs
-      - continue-on-error: true
-        run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
+      - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
 
   test:
     runs-on: ubuntu-latest
@@ -88,7 +87,7 @@ jobs:
             --timeout=60 \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=50
+            --cov-fail-under=75
 
   security:
     runs-on: ubuntu-latest
@@ -101,10 +100,62 @@ jobs:
           cache: 'pip'
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install bandit
-      - continue-on-error: true
-        run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json
+      - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-report
           path: bandit-report.json
+
+  package_flatpak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y flatpak flatpak-builder
+      - run: bash scripts/build_flatpak.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: flatpak-artifacts
+          path: dist/flatpak
+
+  package_appimage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y appstream wget fuse
+      - run: |
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
+          chmod +x linuxdeploy
+          sudo mv linuxdeploy /usr/local/bin/linuxdeploy
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/appimagetool
+      - run: bash scripts/build_appimage.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: appimage-artifacts
+          path: dist/appimage
+
+  package_sdist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
+      - run: pip install build setuptools wheel
+      - run: bash scripts/build_sdist.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sdist-artifacts
+          path: dist/*.tar.gz

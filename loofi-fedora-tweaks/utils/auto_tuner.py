@@ -11,6 +11,7 @@ PrivilegedCommand so they use pkexec argument arrays — never shell strings.
 import json
 import logging
 import os
+import threading
 import time
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Tuple
@@ -60,6 +61,7 @@ _CONFIG_DIR = os.path.join(
 )
 _HISTORY_PATH = os.path.join(_CONFIG_DIR, "tuning_history.json")
 _MAX_HISTORY = 50
+_HISTORY_LOCK = threading.RLock()
 
 # Workload → tunable mapping
 _WORKLOAD_MAP: Dict[str, dict] = {
@@ -333,27 +335,28 @@ class AutoTuner:
 
         Returns an empty list when the file does not exist or is corrupt.
         """
-        try:
-            if not os.path.isfile(_HISTORY_PATH):
-                return []
-            with open(_HISTORY_PATH, "r") as f:
-                data = json.load(f)
-            if not isinstance(data, list):
-                return []
-            entries: List[TuningHistoryEntry] = []
-            for item in data:
-                entries.append(
-                    TuningHistoryEntry(
-                        timestamp=float(item.get("timestamp", 0)),
-                        workload=str(item.get("workload", "unknown")),
-                        recommendations=item.get("recommendations", {}),
-                        applied=bool(item.get("applied", False)),
+        with _HISTORY_LOCK:
+            try:
+                if not os.path.isfile(_HISTORY_PATH):
+                    return []
+                with open(_HISTORY_PATH, "r") as f:
+                    data = json.load(f)
+                if not isinstance(data, list):
+                    return []
+                entries: List[TuningHistoryEntry] = []
+                for item in data:
+                    entries.append(
+                        TuningHistoryEntry(
+                            timestamp=float(item.get("timestamp", 0)),
+                            workload=str(item.get("workload", "unknown")),
+                            recommendations=item.get("recommendations", {}),
+                            applied=bool(item.get("applied", False)),
+                        )
                     )
-                )
-            return entries
-        except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
-            logger.debug("Failed to read tuning history: %s", exc)
-            return []
+                return entries
+            except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
+                logger.debug("Failed to read tuning history: %s", exc)
+                return []
 
     @staticmethod
     def save_tuning_entry(entry: TuningHistoryEntry) -> None:
@@ -361,20 +364,20 @@ class AutoTuner:
         Append a TuningHistoryEntry to the history file.
         Keeps at most ``_MAX_HISTORY`` (50) entries, discarding the oldest.
         """
-        history = AutoTuner.get_tuning_history()
-        history.append(entry)
+        with _HISTORY_LOCK:
+            history = AutoTuner.get_tuning_history()
+            history.append(entry)
 
-        # Trim to max entries
-        if len(history) > _MAX_HISTORY:
-            history = history[-_MAX_HISTORY:]
+            if len(history) > _MAX_HISTORY:
+                history = history[-_MAX_HISTORY:]
 
-        try:
-            os.makedirs(_CONFIG_DIR, exist_ok=True)
-            with open(_HISTORY_PATH, "w") as f:
-                json.dump([asdict(e) for e in history], f, indent=2)
-            logger.info("Saved tuning entry for workload '%s'.", entry.workload)
-        except OSError as exc:
-            logger.error("Failed to save tuning history: %s", exc)
+            try:
+                os.makedirs(_CONFIG_DIR, exist_ok=True)
+                with open(_HISTORY_PATH, "w") as f:
+                    json.dump([asdict(e) for e in history], f, indent=2)
+                logger.info("Saved tuning entry for workload '%s'.", entry.workload)
+            except OSError as exc:
+                logger.error("Failed to save tuning history: %s", exc)
 
     # ==================== INTERNAL HELPERS ====================
 

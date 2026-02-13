@@ -26,6 +26,7 @@ class TokenBucketRateLimiter:
         self._tokens = float(capacity)
         self._last_refill = time.monotonic()
         self._lock = threading.Lock()
+        self._wait_event = threading.Event()
 
     def acquire(self, tokens: int = 1) -> bool:
         """Try to acquire tokens. Returns True if allowed, False if rate limited."""
@@ -50,12 +51,27 @@ class TokenBucketRateLimiter:
         Returns:
             True if tokens acquired, False if timed out.
         """
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
+        start_time = time.monotonic()
+        deadline = start_time + timeout
+        while True:
             if self.acquire(tokens):
                 return True
-            time.sleep(0.05)
-        return False
+
+            now = time.monotonic()
+            if now >= deadline:
+                return False
+
+            with self._lock:
+                if self._tokens >= tokens:
+                    sleep_time = 0.0
+                elif self.rate <= 0:
+                    sleep_time = deadline - now
+                else:
+                    needed = max(0.0, float(tokens) - self._tokens)
+                    sleep_time = needed / self.rate
+
+            bounded_sleep = max(0.0, min(0.25, sleep_time, deadline - now))
+            self._wait_event.wait(bounded_sleep)
 
     @property
     def available_tokens(self) -> float:

@@ -1,14 +1,22 @@
 """Tests for update checker."""
 import json
+import os
+import sys
+import tempfile
 import urllib.error
 import unittest
-from unittest.mock import patch, MagicMock
-import sys
-import os
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
-from utils.update_checker import UpdateChecker, UpdateInfo
+from utils.update_checker import (
+    DownloadResult,
+    UpdateAsset,
+    UpdateChecker,
+    UpdateInfo,
+    VerifyResult,
+)
 
 
 class TestParseVersion(unittest.TestCase):
@@ -29,6 +37,9 @@ class TestParseVersion(unittest.TestCase):
 
 
 class TestCheckForUpdates(unittest.TestCase):
+    def setUp(self):
+        UpdateChecker._cached_info = None
+
     @patch("utils.update_checker.urllib.request.urlopen")
     @patch("utils.update_checker.__import__", create=True)
     def test_newer_version_available(self, mock_import, mock_urlopen):
@@ -55,6 +66,94 @@ class TestCheckForUpdates(unittest.TestCase):
     def test_network_failure_returns_none(self, mock_urlopen):
         info = UpdateChecker.check_for_updates(timeout=1)
         self.assertIsNone(info)
+
+    @patch("utils.update_checker.urllib.request.urlopen", side_effect=urllib.error.URLError("offline"))
+    def test_network_failure_returns_cached_offline_info(self, mock_urlopen):
+        UpdateChecker._cached_info = UpdateInfo(
+            current_version="29.0.0",
+            latest_version="30.0.0",
+            release_notes="Cached",
+            download_url="https://example.invalid/release",
+            is_newer=True,
+        )
+
+        info = UpdateChecker.check_for_updates(timeout=1, use_cache=True)
+        self.assertIsNotNone(info)
+        self.assertTrue(info.offline)
+        self.assertEqual(info.source, "cache")
+
+
+class TestUpdateAssetPipeline(unittest.TestCase):
+    def test_select_download_asset_prefers_rpm(self):
+        assets = [
+            UpdateAsset(name="loofi.tar.gz", download_url="https://example.invalid/a"),
+            UpdateAsset(name="loofi.rpm", download_url="https://example.invalid/b"),
+        ]
+        selected = UpdateChecker.select_download_asset(assets)
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.name, "loofi.rpm")
+
+    @patch("utils.update_checker.urllib.request.urlopen")
+    def test_download_update_success(self, mock_urlopen):
+        payload = b"artifact"
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = payload
+        mock_resp.__enter__.return_value = mock_resp
+        mock_resp.__exit__.return_value = False
+        mock_urlopen.return_value = mock_resp
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = UpdateChecker.download_update(
+                UpdateAsset(name="loofi.rpm", download_url="https://example.invalid/pkg"),
+                temp_dir,
+                timeout=2,
+            )
+
+            self.assertIsInstance(result, DownloadResult)
+            self.assertTrue(result.ok)
+            self.assertTrue(os.path.exists(result.file_path))
+
+    @patch("utils.update_checker.urllib.request.urlopen", side_effect=urllib.error.URLError("offline"))
+    def test_download_update_failure(self, mock_urlopen):
+        result = UpdateChecker.download_update(
+            UpdateAsset(name="loofi.rpm", download_url="https://example.invalid/pkg"),
+            "/tmp/loofi-does-not-matter",
+            timeout=1,
+        )
+        self.assertFalse(result.ok)
+        self.assertIsNotNone(result.error)
+
+    @patch("utils.update_checker.subprocess.run")
+    def test_verify_download_checksum_and_signature(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stderr="")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact = os.path.join(temp_dir, "artifact.rpm")
+            signature = os.path.join(temp_dir, "artifact.sig")
+            Path(artifact).write_bytes(b"data")
+            Path(signature).write_bytes(b"sig")
+
+            digest = "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
+            result = UpdateChecker.verify_download(
+                artifact,
+                expected_sha256=digest,
+                signature_path=signature,
+            )
+
+            self.assertIsInstance(result, VerifyResult)
+            self.assertTrue(result.ok)
+
+    def test_verify_download_checksum_mismatch_fails_closed(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact = os.path.join(temp_dir, "artifact.rpm")
+            Path(artifact).write_bytes(b"data")
+
+            result = UpdateChecker.verify_download(
+                artifact,
+                expected_sha256="0" * 64,
+            )
+
+            self.assertFalse(result.ok)
+            self.assertIn("mismatch", result.error.lower())
 
 
 class TestUpdateInfo(unittest.TestCase):

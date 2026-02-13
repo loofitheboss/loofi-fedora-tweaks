@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loofi_fedora_tweaks"
+version = "29.0.0"
+description = "Loofi Fedora Tweaks"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Loofi" }]
+
+[tool.setuptools]
+packages = []
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.json", "*.yml", "*.yaml", "*.desktop", "*.service", "*.policy"]

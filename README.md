@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v29.0.0 "Usability & Polish"
+# Loofi Fedora Tweaks v30.0.0 "Distribution & Reliability"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v29.0.0">
-    <img src="https://img.shields.io/badge/Release-v29.0.0-blue?style=for-the-badge&logo=github" alt="Release v29.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v30.0.0">
+    <img src="https://img.shields.io/badge/Release-v30.0.0-blue?style=for-the-badge&logo=github" alt="Release v30.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -32,6 +32,20 @@ It is designed to be practical for both casual users and advanced users:
 - Optional headless web API mode.
 - Privileged actions routed through `pkexec` prompts.
 - Automatic detection of Traditional Fedora (`dnf`) and Atomic Fedora (`rpm-ostree`).
+
+---
+
+## What Is New in v30.0.0?
+
+`v30.0.0` focuses on distribution and reliability:
+
+- **Packaging scripts** — Added deterministic build paths for Flatpak, AppImage, and source distribution.
+- **Offline resilience** — Update checker and plugin marketplace now support cache-aware offline fallback behavior.
+- **Safe update pipeline** — Added asset selection, download workflow, and fail-closed verification for checksums/signatures.
+- **Concurrency hardening** — Improved rate limiter waiting behavior and synchronized auto-tuner history operations.
+- **CI hardening** — `mypy` and `bandit` are blocking, coverage floor is 75%, and packaging jobs run in CI.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v30.0.0.md`](docs/releases/RELEASE-NOTES-v30.0.0.md)
 
 ---
 

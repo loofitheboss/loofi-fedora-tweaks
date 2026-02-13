@@ -1,0 +1,18 @@
+{
+	"servers": {
+		"io.github.github/github-mcp-server": {
+			"type": "stdio",
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"--env-file",
+				".vscode/mcp.env",
+				"ghcr.io/github/github-mcp-server:0.30.3"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.30.3"
+		}
+	}
+}

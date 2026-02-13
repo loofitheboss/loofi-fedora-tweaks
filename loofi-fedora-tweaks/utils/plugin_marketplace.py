@@ -112,6 +112,8 @@ class MarketplaceResult:
     success: bool
     data: Optional[Any] = None
     error: Optional[str] = None
+    offline: bool = False
+    source: str = "network"
 
 
 class PluginMarketplace:
@@ -506,7 +508,7 @@ class PluginMarketplace:
         # Return cached data if available
         if not force_refresh and self._cache is not None:
             logger.debug("Returning cached plugin index (%d plugins)", len(self._cache))
-            return MarketplaceResult(success=True, data=self._cache)
+            return MarketplaceResult(success=True, data=self._cache, source="cache")
 
         try:
             data = self.cdn_client.fetch_index(
@@ -525,9 +527,19 @@ class PluginMarketplace:
                 data = self._fetch_json(fallback_url)
 
             if not data:
+                if self._cache is not None:
+                    logger.warning("Marketplace network unavailable; returning cached index")
+                    return MarketplaceResult(
+                        success=True,
+                        data=self._cache,
+                        offline=True,
+                        source="cache",
+                    )
                 return MarketplaceResult(
                     success=False,
-                    error="Failed to fetch plugin index (network error or invalid JSON)"
+                    error="Failed to fetch plugin index (network error or invalid JSON)",
+                    offline=True,
+                    source="network",
                 )
 
             if "plugins" not in data:
@@ -548,13 +560,15 @@ class PluginMarketplace:
             # Cache the result
             self._cache = plugins
 
-            return MarketplaceResult(success=True, data=plugins)
+            return MarketplaceResult(success=True, data=plugins, source="network")
 
         except Exception as exc:
             logger.error("Failed to fetch plugin index: %s", exc)
             return MarketplaceResult(
                 success=False,
-                error=f"Failed to fetch index: {exc}"
+                error=f"Failed to fetch index: {exc}",
+                offline=True,
+                source="network",
             )
 
     def search(self, query: str = "", category: Optional[str] = None) -> MarketplaceResult:

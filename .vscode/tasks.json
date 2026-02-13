@@ -127,6 +127,15 @@
         "validate"
       ],
       "problemMatcher": []
+    },
+    {
+      "label": "MCP: GitHub Health Check",
+      "type": "shell",
+      "command": "scripts/mcp_github_health_check.sh",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [

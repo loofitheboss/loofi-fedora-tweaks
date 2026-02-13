@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [30.0.0] - 2026-02-13 "Distribution & Reliability"
+
+### Added
+
+- **Packaging scripts**: Added `scripts/build_flatpak.sh`, `scripts/build_appimage.sh`, `scripts/build_sdist.sh`, plus root `build_flatpak.sh` wrapper and `pyproject.toml` metadata for source builds.
+- **Release notes**: Added `docs/releases/RELEASE-NOTES-v30.0.0.md` for v30 distribution/reliability scope.
+- **Targeted regression tests**: Added/expanded packaging and reliability tests in `tests/test_packaging_scripts.py`, `tests/test_rate_limiter.py`, `tests/test_update_checker.py`, and `tests/test_plugin_marketplace_cdn.py`.
+
+### Changed
+
+- **Update checker reliability** (`utils/update_checker.py`): Added structured update assets, download pipeline, and fail-closed checksum/signature verification with offline/cache-aware behavior.
+- **Marketplace offline mode** (`utils/plugin_marketplace.py`): Added explicit `offline/source` result metadata and cache-first fallback on network failures.
+- **Rate limiter concurrency** (`utils/rate_limiter.py`): Replaced polling-style waits with event-bounded waits to reduce busy-loop behavior.
+- **Auto-tuner history thread safety** (`utils/auto_tuner.py`): Added lock-protected history read/write path for concurrent usage stability.
+- **CI quality gates** (`.github/workflows/ci.yml`): Enforced blocking `mypy`/`bandit`, raised coverage gate to 75%, and added Flatpak/AppImage/sdist packaging jobs.
+
 ## [29.0.0] - 2026-02-13 "Usability & Polish"
 
 ### Added
