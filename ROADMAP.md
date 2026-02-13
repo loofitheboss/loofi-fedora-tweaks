@@ -1,5 +1,7 @@
 # Loofi Fedora Tweaks — Roadmap
 
+<!-- markdownlint-configure-file {"MD024": {"siblings_only": true}, "MD060": false} -->
+
 > Machine-parseable roadmap. Agents read this to determine scope, status, and sequencing.
 > Format: `[STATUS]` where STATUS = DONE | ACTIVE | NEXT | PLANNED
 
@@ -18,7 +20,7 @@
 | v28.0 | Workflow Contract Reset | DONE | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
 | v29.0 | Usability & Polish | DONE | UX polish, skipped v22 scope, error handling, accessibility, CORS |
 | v30.0 | Distribution & Reliability | DONE | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
-| v31.0 | Smart UX | ACTIVE | Health score, i18n, batch ops, export report, plugin template |
+| v31.0 | Smart UX | DONE | Health score, i18n, batch ops, export report, plugin template |
 
 ---
 
@@ -434,7 +436,7 @@
 
 ---
 
-## [ACTIVE] v31.0 — Smart UX
+## [DONE] v31.0 — Smart UX
 
 ### Scope
 
@@ -450,16 +452,16 @@
 
 ### Deliverables
 
-- [ ] Health score widget on Dashboard
-- [ ] i18n infrastructure (ts/qm extraction, locale loading)
-- [ ] Batch install/remove in Software tab
-- [ ] Export report button in System Info tab
-- [ ] create_plugin.sh scaffold script
-- [ ] Favorite tabs persistence + sidebar pinning
-- [ ] Configurable quick actions grid
-- [ ] setAccessibleName/Description across all interactive widgets
-- [ ] Target 80% CI coverage
-- [ ] CHANGELOG + README + release notes
+- [x] Health score widget on Dashboard
+- [x] i18n infrastructure (ts/qm extraction, locale loading)
+- [x] Batch install/remove in Software tab
+- [x] Export report button in System Info tab
+- [x] create_plugin.sh scaffold script
+- [x] Favorite tabs persistence + sidebar pinning
+- [x] Configurable quick actions grid
+- [x] setAccessibleName/Description across all interactive widgets
+- [x] Target 80% CI coverage
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 

@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v30.0.0 "Distribution & Reliability"
+# Loofi Fedora Tweaks v31.0.0 "Smart UX"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v30.0.0">
-    <img src="https://img.shields.io/badge/Release-v30.0.0-blue?style=for-the-badge&logo=github" alt="Release v30.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v31.0.0">
+    <img src="https://img.shields.io/badge/Release-v31.0.0-blue?style=for-the-badge&logo=github" alt="Release v31.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,31 +35,21 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v30.0.0?
+## What Is New in v31.0.0?
 
-`v30.0.0` focuses on distribution and reliability:
+`v31.0.0` focuses on smart UX — making the app smarter about what matters and faster to use:
 
-- **Packaging scripts** — Added deterministic build paths for Flatpak, AppImage, and source distribution.
-- **Offline resilience** — Update checker and plugin marketplace now support cache-aware offline fallback behavior.
-- **Safe update pipeline** — Added asset selection, download workflow, and fail-closed verification for checksums/signatures.
-- **Concurrency hardening** — Improved rate limiter waiting behavior and synchronized auto-tuner history operations.
-- **CI hardening** — `mypy` and `bandit` are blocking, coverage floor is 75%, and packaging jobs run in CI.
+- **System Health Score** — Dashboard widget with weighted 0–100 score (CPU, RAM, disk, uptime, updates), letter grade (A–F), and actionable recommendations.
+- **Batch Operations** — Select multiple packages in the Software tab and install/remove in one operation. Supports both dnf and rpm-ostree.
+- **System Report Export** — Export system info as Markdown or styled HTML from the System Info tab.
+- **Favorite Tabs** — Right-click sidebar items to pin favorites; persisted across sessions.
+- **Configurable Quick Actions** — Dashboard quick action buttons are now user-configurable.
+- **i18n Scaffolding** — Qt Linguist translation infrastructure with English and Swedish stubs.
+- **Plugin Template Script** — `scripts/create_plugin.sh` scaffolds complete plugin directories.
+- **Accessibility Level 2** — `setAccessibleName`/`setAccessibleDescription` on navigation and interactive widgets.
+- **95 new tests** across 6 test files; 3968+ total tests passing.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v30.0.0.md`](docs/releases/RELEASE-NOTES-v30.0.0.md)
-
-Verification commands used for v30 reliability/distribution closeout:
-
-```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest \
-  tests/test_update_checker.py \
-  tests/test_plugin_marketplace.py \
-  tests/test_packaging_scripts.py \
-  tests/test_rate_limiter.py \
-  tests/test_auto_tuner.py -v
-
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
-  --cov=loofi-fedora-tweaks --cov-fail-under=75
-```
+Full notes: [`docs/releases/RELEASE-NOTES-v31.0.0.md`](docs/releases/RELEASE-NOTES-v31.0.0.md)
 
 ---
 

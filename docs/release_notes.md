@@ -1,5 +1,34 @@
 # Release Notes
 
+## v31.0.0 "Smart UX" - February 2026
+
+Smart UX release adds user experience intelligence to the app.
+
+### Highlights
+
+- **System Health Score**: Dashboard widget with weighted 0–100 score, letter grade, and actionable recommendations
+- **Batch Operations**: Multi-select install/remove in Software tab (dnf + rpm-ostree)
+- **System Report Export**: Markdown and HTML export from System Info tab
+- **Favorite Tabs**: Pin sidebar items for quick access, persisted across sessions
+- **Configurable Quick Actions**: User-configurable dashboard action buttons
+- **i18n Scaffolding**: Qt Linguist translation infrastructure (English + Swedish)
+- **Plugin Template Script**: `scripts/create_plugin.sh` for scaffolding new plugins
+- **Accessibility Level 2**: `setAccessibleName`/`setAccessibleDescription` on interactive widgets
+
+### New Files
+
+- `utils/health_score.py`, `utils/i18n.py`, `utils/batch_ops.py`
+- `utils/report_exporter.py`, `utils/favorites.py`, `utils/quick_actions_config.py`
+- `scripts/create_plugin.sh`
+- 6 test files (95 tests total)
+
+### Upgrade Notes
+
+- No breaking changes from v30.0.0
+- New config files created automatically in `~/.config/loofi-fedora-tweaks/`
+
+---
+
 ## v20.0.2-2 "Synapse" - February 2026 (RPM Hotfix)
 
 This packaging hotfix resolves a top title/header rendering glitch reported on Fedora KDE Plasma (Wayland/X11) after recent UI polish work.
