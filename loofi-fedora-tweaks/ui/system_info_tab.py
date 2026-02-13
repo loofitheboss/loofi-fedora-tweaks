@@ -1,10 +1,14 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QGridLayout
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QGridLayout,
+    QPushButton, QComboBox, QFileDialog
+)
 from PyQt6.QtCore import QTimer
 import subprocess
 import os
 
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from utils.report_exporter import ReportExporter
 
 
 class SystemInfoTab(QWidget, PluginInterface):
@@ -55,6 +59,23 @@ class SystemInfoTab(QWidget, PluginInterface):
             info_layout.addWidget(val, i, 1)
 
         layout.addWidget(info_group)
+
+        # v31.0: Export Report section
+        export_layout = QHBoxLayout()
+        export_layout.addStretch()
+
+        self.export_format = QComboBox()
+        self.export_format.addItems(["Markdown", "HTML"])
+        self.export_format.setAccessibleName(self.tr("Export format"))
+        export_layout.addWidget(QLabel(self.tr("Format:")))
+        export_layout.addWidget(self.export_format)
+
+        btn_export = QPushButton(self.tr("📄 Export Report"))
+        btn_export.setAccessibleName(self.tr("Export system report"))
+        btn_export.clicked.connect(self._export_report)
+        export_layout.addWidget(btn_export)
+
+        layout.addLayout(export_layout)
         layout.addStretch()
 
         # Refresh info on load
@@ -87,3 +108,21 @@ class SystemInfoTab(QWidget, PluginInterface):
                 self.labels["battery"].setText(self.tr("No battery detected"))
         except Exception:
             pass
+
+    def _export_report(self):
+        """Export system report as Markdown or HTML."""
+        fmt = "html" if self.export_format.currentText() == "HTML" else "markdown"
+        ext = ".html" if fmt == "html" else ".md"
+        default_name = f"system-report{ext}"
+
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            self.tr("Save System Report"),
+            os.path.expanduser(f"~/Documents/{default_name}"),
+            self.tr("HTML files (*.html);;Markdown files (*.md);;All files (*)"),
+        )
+        if path:
+            try:
+                ReportExporter.save_report(path, fmt)
+            except Exception:
+                pass
