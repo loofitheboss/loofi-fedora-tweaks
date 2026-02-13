@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [31.0.5] - 2026-02-13 "Smart UX" (Hotfix)
+
+### Fixed
+
+- **Startup Auth Popup Removed** (`ui/snapshot_tab.py`): Stopped automatic snapshot list refresh at startup, which was triggering `snapper list` privilege prompts during app launch.
+- **Alternative Snapshot Check**: Snapshot backend health is still checked automatically (non-privileged), while full snapshot listing now runs only on explicit `Refresh` action.
+- **Snapshot Table UX**: Added clear initial placeholder message in Snapshot table: `Click Refresh to load snapshots (authentication may be required)`.
+
+---
+
 ## [31.0.4] - 2026-02-13 "Smart UX" (Hotfix)
 
 ### Fixed

@@ -40,7 +40,7 @@ class SnapshotTab(BaseTab):
     def __init__(self):
         super().__init__()
         self.init_ui()
-        QTimer.singleShot(200, self._refresh_all)
+        QTimer.singleShot(200, self._refresh_backends)
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -99,6 +99,10 @@ class SnapshotTab(BaseTab):
         self.snap_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.snap_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         BaseTab.configure_table(self.snap_table)
+        self.set_table_empty_state(
+            self.snap_table,
+            self.tr("Click Refresh to load snapshots (authentication may be required)")
+        )
         sl_layout.addWidget(self.snap_table)
 
         layout.addWidget(snap_group)
@@ -112,7 +116,7 @@ class SnapshotTab(BaseTab):
     # ============================================================
 
     def _refresh_all(self):
-        """Refresh backends and snapshot list."""
+        """Refresh backends and snapshot list (explicit user action)."""
         self._refresh_backends()
         self._refresh_snapshots()
 
