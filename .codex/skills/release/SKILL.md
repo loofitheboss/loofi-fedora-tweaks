@@ -17,9 +17,11 @@ description: Execute documentation, packaging, and release phases (P5-P7) for a 
 1. Verify version alignment
 2. Validate `scripts/build_rpm.sh` is executable
 3. Check other build scripts exist
+4. **Generate workflow reports**: `python3 scripts/generate_workflow_reports.py`
+5. `git add .workflow/reports/` — include reports in commit
 
 ## P7: Release
-1. Commit all changes
+1. Commit all changes (including workflow reports)
 2. Create tag: `v{VERSION}`
 3. Push tag (triggers `.github/workflows/auto-release.yml`)
 4. Update `ROADMAP.md`: version status → DONE

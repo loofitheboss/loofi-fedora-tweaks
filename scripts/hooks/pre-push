@@ -1,0 +1,24 @@
+#!/bin/bash
+# Pre-push hook: when pushing a v* tag, ensure workflow reports exist.
+# Install: cp scripts/hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+
+while read local_ref local_sha remote_ref remote_sha; do
+    # Only check when pushing a version tag
+    if [[ "$remote_ref" == refs/tags/v* ]]; then
+        echo "[pre-push] Detected version tag push: ${remote_ref#refs/tags/}"
+        echo "[pre-push] Checking workflow reports..."
+
+        if ! python3 scripts/generate_workflow_reports.py --check; then
+            echo ""
+            echo "[pre-push] ERROR: Workflow reports missing!"
+            echo "[pre-push] Run: python3 scripts/generate_workflow_reports.py"
+            echo "[pre-push] Then: git add .workflow/reports/ && git commit --amend --no-edit"
+            echo "[pre-push] Then retry the push."
+            exit 1
+        fi
+
+        echo "[pre-push] Workflow reports OK"
+    fi
+done
+
+exit 0

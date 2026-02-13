@@ -82,6 +82,12 @@ jobs:
             fi
           fi
 
+      - name: Generate workflow reports if missing
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        run: |
+          python3 scripts/generate_workflow_reports.py --check || \
+            python3 scripts/generate_workflow_reports.py --skip-tests
+
       - name: Validate workflow logs for release events
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         run: python3 scripts/check_release_docs.py --require-logs
