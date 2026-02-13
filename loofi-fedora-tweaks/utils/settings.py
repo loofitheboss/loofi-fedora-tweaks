@@ -129,6 +129,14 @@ class SettingsManager:
         self._settings = asdict(AppSettings())
         self.save()
 
+    def reset_group(self, keys: list) -> None:
+        """Reset a specific group of setting keys to their defaults and persist."""
+        defaults = asdict(AppSettings())
+        for key in keys:
+            if key in defaults:
+                self._settings[key] = defaults[key]
+        self.save()
+
     def all(self) -> dict:
         """Return a shallow copy of the current settings dict."""
         return dict(self._settings)

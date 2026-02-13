@@ -16,6 +16,9 @@
 | v26.0 | Plugin Marketplace | DONE | External plugins, marketplace, sandboxing |
 | v27.0 | Marketplace Enhancement | DONE | CDN index, ratings/reviews, badges, analytics, hot-reload, stronger sandbox |
 | v28.0 | Workflow Contract Reset | DONE | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
+| v29.0 | Usability & Polish | DONE | UX polish, skipped v22 scope, error handling, accessibility, CORS |
+| v30.0 | Distribution & Reliability | NEXT | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
+| v31.0 | Smart UX | PLANNED | Health score, i18n, batch ops, export report, plugin template |
 
 ---
 
@@ -313,6 +316,122 @@
 ### Dependencies
 - v27.0 completion artifacts
 - `scripts/workflow_runner.py` contract validation rules
+
+---
+
+## [DONE] v29.0 — Usability & Polish
+
+### Scope
+- Reclaim skipped v22.0 features (search, status indicators, confirm dialogs, reset per group)
+- Centralized error handler with recovery hints
+- In-app notification toast UI
+- Dashboard sparkline theme-awareness
+- Web API CORS lockdown
+- Keyboard accessibility pass
+- CI coverage raised to 65%
+
+### Deliverables
+- [x] Centralized error handler (sys.excepthook + LoofiError routing)
+- [x] ConfirmActionDialog for dangerous operations
+- [x] Notification toast wired to NotificationCenter
+- [x] Sidebar search enhanced with description/tag matching
+- [x] Status indicators (colored dots) on sidebar items
+- [x] Dashboard SparkLine reads palette instead of hardcoded colors
+- [x] Web API CORS restricted to localhost
+- [x] Sidebar keyboard focus restored
+- [x] Settings reset per group buttons
+- [x] Tab smoke tests for untested tabs (target: 65% coverage)
+- [x] CHANGELOG + README + release notes
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| CodeGen | Error handler, confirm dialog, CORS, sparkline fix |
+| Sculptor | Notification toast, sidebar indicators, accessibility |
+| Builder | Settings reset per group |
+| Guardian | Tab smoke tests |
+| Planner | Docs, packaging, release |
+
+### Dependencies
+- v28.0 workflow state (clean baseline)
+
+---
+
+## [NEXT] v30.0 — Distribution & Reliability
+
+### Scope
+- Implement Flatpak packaging (build_flatpak.sh)
+- Implement AppImage packaging (build_appimage.sh)
+- Implement sdist packaging (build_sdist.sh + pyproject.toml)
+- Auto-update flow (detect + download + verify)
+- CI: add Flatpak + AppImage build jobs, enforce mypy + bandit
+- Rate limiter and auto-tuner thread safety fixes
+- Offline mode for marketplace/update checker
+- CI coverage raised to 75%
+
+### Deliverables
+- [ ] build_flatpak.sh implemented
+- [ ] build_appimage.sh implemented
+- [ ] build_sdist.sh + pyproject.toml
+- [ ] Auto-update flow in update_checker.py
+- [ ] CI Flatpak/AppImage build jobs
+- [ ] mypy + bandit enforced (no continue-on-error)
+- [ ] Rate limiter threading.Event fix
+- [ ] Auto-tuner thread safety guard
+- [ ] Offline mode for marketplace/update checker
+- [ ] Tests for untested utils modules (target: 75% coverage)
+- [ ] CHANGELOG + README + release notes
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| Builder | Packaging scripts, auto-update, offline mode |
+| Arkitekt | pyproject.toml design, CI pipeline |
+| Guardian | Coverage gap analysis + tests |
+| Planner | Release checklist |
+
+### Dependencies
+- v29.0 usability polish
+
+---
+
+## [PLANNED] v31.0 — Smart UX
+
+### Scope
+- System health score (aggregate dashboard metric)
+- i18n scaffolding (Qt Linguist workflow, English + Swedish)
+- Batch operations in Software/Maintenance tabs
+- Export system report (Markdown/HTML)
+- Plugin starter template script
+- Favorite/pinned tabs
+- Configurable Dashboard quick actions
+- Accessibility level 2 (accessible names, Orca testing)
+- CI coverage raised to 80%
+
+### Deliverables
+- [ ] Health score widget on Dashboard
+- [ ] i18n infrastructure (ts/qm extraction, locale loading)
+- [ ] Batch install/remove in Software tab
+- [ ] Export report button in System Info tab
+- [ ] create_plugin.sh scaffold script
+- [ ] Favorite tabs persistence + sidebar pinning
+- [ ] Configurable quick actions grid
+- [ ] setAccessibleName/Description across all interactive widgets
+- [ ] Target 80% CI coverage
+- [ ] CHANGELOG + README + release notes
+
+### Agent Assignment
+| Agent | Task |
+|-------|------|
+| Arkitekt | Health score design, i18n architecture |
+| Builder | Health aggregation, export report, batch ops |
+| Sculptor | Dashboard health widget, favorites UI, quick actions config |
+| CodeGen | Plugin template script, i18n tooling |
+| Guardian | Orca screen reader testing, coverage fill |
+| Planner | Release planning |
+
+### Dependencies
+- v30.0 distribution infrastructure
 
 ---
 

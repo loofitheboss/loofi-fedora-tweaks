@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [29.0.0] - 2026-02-13 "Usability & Polish"
+
+### Added
+
+- **Centralized error handler** (`utils/error_handler.py`): Global `sys.excepthook` override that catches unhandled `LoofiError` subtypes, shows user-friendly dialogs with recovery hints, and logs to NotificationCenter.
+- **Confirmation dialog** (`ui/confirm_dialog.py`): Rich `ConfirmActionDialog` for dangerous operations with action description, undo hints, optional snapshot checkbox, and "don't ask again" toggle. Integrates with `SettingsManager.confirm_dangerous_actions`.
+- **Notification toast** (`ui/notification_toast.py`): Animated slide-in toast widget with category-based accent colors, auto-hide timer, and smooth slide animations. Wired to `MainWindow.show_toast()`.
+- **Notification badge**: Unread count badge on the bell icon in the breadcrumb bar, auto-refreshed every 5 seconds.
+- **Status indicators on tabs**: Live colored dots (🟢🟡🔴) on Maintenance and Storage sidebar items reflecting update availability and disk usage.
+- **Settings reset per group**: "↩ Reset Appearance" and "↩ Reset Behavior" buttons in Settings tab. New `SettingsManager.reset_group()` method resets only specified keys.
+- **95 new tests** across 5 test files: `test_error_handler.py` (24), `test_confirm_dialog.py` (10), `test_notification_toast.py` (16), `test_v29_features.py` (17), `test_settings_extended_v29.py` (14).
+- **Roadmap v29–v31**: Three-version roadmap added covering Usability, Distribution, and Smart UX.
+
+### Changed
+
+- **Sidebar search enhanced**: Now matches tab descriptions and badge data in addition to names. More discoverable for general users.
+- **Sidebar keyboard focus restored**: Changed `FocusPolicy.NoFocus` to `StrongFocus` on sidebar `QTreeWidget`, enabling keyboard navigation with Tab/arrow keys.
+- **Dashboard SparkLine theme-aware**: Replaced hardcoded `#1e1e2e` background with `palette().color(backgroundRole())` so sparklines render correctly in both dark and light themes.
+- **Web API CORS locked down**: Restricted CORS origins from wildcard `["*"]` to `["http://localhost:8000", "http://127.0.0.1:8000"]`. Prevents cross-origin abuse in production.
+
+### New Files (4)
+
+- `utils/error_handler.py` — Centralized error handler
+- `ui/confirm_dialog.py` — Confirmation dialog widget
+- `ui/notification_toast.py` — Animated toast notifications
+- `tests/test_error_handler.py`, `tests/test_confirm_dialog.py`, `tests/test_notification_toast.py`, `tests/test_v29_features.py`, `tests/test_settings_extended_v29.py`
+
 ## [28.0.0] - 2026-02-12 "Workflow Contract Reset"
 
 ### Changed

@@ -118,6 +118,12 @@ class SettingsTab(QWidget, PluginInterface):
         self.follow_system_cb.toggled.connect(self._on_follow_system_toggled)
         form.addRow("", self.follow_system_cb)
 
+        # v29.0: Reset appearance to defaults
+        reset_appearance_btn = QPushButton(self.tr("↩ Reset Appearance"))
+        reset_appearance_btn.setToolTip(self.tr("Reset theme settings to defaults"))
+        reset_appearance_btn.clicked.connect(self._reset_appearance)
+        form.addRow("", reset_appearance_btn)
+
         return page
 
     # ----------------------------------------------------------- Behavior --
@@ -154,6 +160,12 @@ class SettingsTab(QWidget, PluginInterface):
             lambda v: self._toggle_setting("restore_last_tab", v)
         )
         form.addRow("", self.restore_tab_cb)
+
+        # v29.0: Reset behavior to defaults
+        reset_behavior_btn = QPushButton(self.tr("↩ Reset Behavior"))
+        reset_behavior_btn.setToolTip(self.tr("Reset behavior settings to defaults"))
+        reset_behavior_btn.clicked.connect(self._reset_behavior)
+        form.addRow("", reset_behavior_btn)
 
         return page
 
@@ -243,3 +255,24 @@ class SettingsTab(QWidget, PluginInterface):
 
         if self._main_window and hasattr(self._main_window, "load_theme"):
             self._main_window.load_theme(self._mgr.get("theme"))
+
+    # ---------------------------------------- v29.0 Reset per group --
+
+    def _reset_appearance(self):
+        """Reset appearance settings to defaults."""
+        self._mgr.reset_group(["theme", "follow_system_theme"])
+        self.theme_combo.setCurrentText(self._mgr.get("theme"))
+        self.follow_system_cb.setChecked(self._mgr.get("follow_system_theme"))
+        if self._main_window and hasattr(self._main_window, "load_theme"):
+            self._main_window.load_theme(self._mgr.get("theme"))
+
+    def _reset_behavior(self):
+        """Reset behavior settings to defaults."""
+        self._mgr.reset_group([
+            "start_minimized", "show_notifications",
+            "confirm_dangerous_actions", "restore_last_tab", "last_tab_index",
+        ])
+        self.start_minimized_cb.setChecked(self._mgr.get("start_minimized"))
+        self.notifications_cb.setChecked(self._mgr.get("show_notifications"))
+        self.confirm_cb.setChecked(self._mgr.get("confirm_dangerous_actions"))
+        self.restore_tab_cb.setChecked(self._mgr.get("restore_last_tab"))

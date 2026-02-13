@@ -24,6 +24,7 @@ import logging
 # Custom data roles for sidebar items
 _ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
 _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
+_ROLE_STATUS = Qt.ItemDataRole.UserRole + 3  # "ok" | "warning" | "error" | ""
 
 
 class DisabledPluginPage(QWidget):
@@ -114,7 +115,7 @@ class MainWindow(QMainWindow):
         # Sidebar tree
         self.sidebar = QTreeWidget()
         self.sidebar.setObjectName("sidebar")
-        self.sidebar.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.sidebar.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.sidebar.setHeaderHidden(True)
         self.sidebar.setIndentation(20)
         self.sidebar.setRootIsDecorated(True)
@@ -230,6 +231,14 @@ class MainWindow(QMainWindow):
 
         # v13.5 UX Polish - notification bell
         self._setup_notification_bell()
+
+        # v29.0 - Status indicators refresh (every 30s)
+        from PyQt6.QtCore import QTimer
+        self._status_timer = QTimer(self)
+        self._status_timer.timeout.connect(self._refresh_status_indicators)
+        self._status_timer.start(30000)
+        # Delay initial refresh to avoid startup slowdown
+        QTimer.singleShot(5000, self._refresh_status_indicators)
 
         # First-run wizard
         self._check_first_run()
@@ -416,7 +425,7 @@ class MainWindow(QMainWindow):
             pass
 
     def _filter_sidebar(self, text: str):
-        """Filter sidebar items by search text."""
+        """Filter sidebar items by name, description, badge, and category."""
         search = text.lower()
 
         # Iterate top-level categories
@@ -424,10 +433,15 @@ class MainWindow(QMainWindow):
             category = self.sidebar.topLevelItem(i)
             category_visible = False
 
-            # Check children
+            # Check children (name + description + badge data)
             for j in range(category.childCount()):
                 child = category.child(j)
-                if search in child.text(0).lower():
+                name_match = search in child.text(0).lower()
+                desc = (child.data(0, _ROLE_DESC) or "").lower()
+                desc_match = search in desc
+                badge = (child.data(0, _ROLE_BADGE) or "").lower()
+                badge_match = search in badge
+                if name_match or desc_match or badge_match:
                     child.setHidden(False)
                     category_visible = True
                 else:
@@ -436,8 +450,6 @@ class MainWindow(QMainWindow):
             # Check category itself
             if search in category.text(0).lower():
                 category_visible = True
-                # Show all children if category matches? Or just show category?
-                # Let's show all children if category matches
                 for j in range(category.childCount()):
                     category.child(j).setHidden(False)
 
@@ -520,9 +532,12 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, self.tr("Keyboard Shortcuts"), shortcuts)
 
     def _setup_notification_bell(self):
-        """Add notification bell to the header area."""
+        """Add notification bell with unread count badge to the breadcrumb bar."""
         from PyQt6.QtWidgets import QToolButton
         self.notif_panel = None
+        self._toast_widget = None
+
+        # Bell button
         self.notif_bell = QToolButton()
         self.notif_bell.setText("\U0001f514")  # Bell emoji
         self.notif_bell.setStyleSheet(
@@ -530,6 +545,28 @@ class MainWindow(QMainWindow):
             "QToolButton:hover { background-color: #313244; border-radius: 6px; }"
         )
         self.notif_bell.clicked.connect(self._toggle_notification_panel)
+
+        # Unread count badge
+        self._notif_badge = QLabel("0")
+        self._notif_badge.setStyleSheet(
+            "background-color: #f38ba8; color: #1e1e2e; border-radius: 8px; "
+            "padding: 1px 6px; font-size: 10px; font-weight: bold;"
+        )
+        self._notif_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._notif_badge.setVisible(False)
+
+        # Add bell + badge to breadcrumb bar
+        bc_layout = self._breadcrumb_frame.layout()
+        if bc_layout:
+            bc_layout.addWidget(self._notif_badge)
+            bc_layout.addWidget(self.notif_bell)
+
+        # Timer to refresh unread count (every 5s)
+        from PyQt6.QtCore import QTimer
+        self._notif_timer = QTimer(self)
+        self._notif_timer.timeout.connect(self._refresh_notif_badge)
+        self._notif_timer.start(5000)
+        self._refresh_notif_badge()
 
     def _toggle_notification_panel(self):
         """Toggle the notification panel."""
@@ -547,6 +584,84 @@ class MainWindow(QMainWindow):
             self.notif_panel.move(x, y)
             self.notif_panel.show()
             self.notif_panel.raise_()
+        self._refresh_notif_badge()
+
+    def _refresh_notif_badge(self):
+        """Update the unread notification count badge."""
+        try:
+            from utils.notification_center import NotificationCenter
+            nc = NotificationCenter()
+            count = nc.get_unread_count()
+            if count > 0:
+                self._notif_badge.setText(str(min(count, 99)))
+                self._notif_badge.setVisible(True)
+            else:
+                self._notif_badge.setVisible(False)
+        except Exception:
+            self._notif_badge.setVisible(False)
+
+    def show_toast(self, title: str, message: str, category: str = "general"):
+        """Show an animated toast notification at the top-right."""
+        try:
+            from ui.notification_toast import NotificationToast
+            if self._toast_widget is None:
+                self._toast_widget = NotificationToast(self)
+            self._toast_widget.show_toast(title, message, category)
+            # Refresh badge since a new notification likely exists
+            self._refresh_notif_badge()
+        except Exception:
+            pass
+
+    def _refresh_status_indicators(self):
+        """Update sidebar status indicators from live system data (v29.0)."""
+        try:
+            # Maintenance: check for updates
+            from utils.update_checker import UpdateChecker
+            update_info = UpdateChecker.check()
+            if update_info and update_info.is_newer:
+                self._set_tab_status("Maintenance", "warning", "Updates available")
+            else:
+                self._set_tab_status("Maintenance", "ok", "Up to date")
+        except Exception:
+            self._set_tab_status("Maintenance", "", "")
+
+        try:
+            # Storage: check disk space
+            from utils.disk import DiskManager
+            usage = DiskManager.get_disk_usage("/")
+            if usage and hasattr(usage, 'percent_used'):
+                if usage.percent_used >= 90:
+                    self._set_tab_status("Storage", "error", f"Disk {usage.percent_used:.0f}% full")
+                elif usage.percent_used >= 75:
+                    self._set_tab_status("Storage", "warning", f"Disk {usage.percent_used:.0f}% used")
+                else:
+                    self._set_tab_status("Storage", "ok", "Healthy")
+        except Exception:
+            self._set_tab_status("Storage", "", "")
+
+    def _set_tab_status(self, tab_name: str, status: str, tooltip: str = ""):
+        """Set a colored status indicator on a sidebar tab item."""
+        # Status dot unicode
+        dots = {"ok": "🟢", "warning": "🟡", "error": "🔴"}
+        dot = dots.get(status, "")
+
+        iterator = QTreeWidgetItemIterator(self.sidebar)
+        while iterator.value():
+            item = iterator.value()
+            if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
+                # Strip any existing status dot, add new one
+                text = item.text(0)
+                for d in dots.values():
+                    text = text.replace(f" {d}", "")
+                if dot:
+                    text = f"{text} {dot}"
+                item.setText(0, text)
+                item.setData(0, _ROLE_STATUS, status)
+                if tooltip:
+                    existing = item.data(0, _ROLE_DESC) or ""
+                    item.setToolTip(0, f"{existing}\n[{tooltip}]" if existing else tooltip)
+                break
+            iterator += 1
 
     def _setup_quick_actions(self):
         """Register Ctrl+Shift+K shortcut for Quick Actions bar."""

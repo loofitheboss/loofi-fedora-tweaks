@@ -67,8 +67,9 @@ class SparkLine(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         w, h = self.width(), self.height()
 
-        # Background
-        painter.fillRect(0, 0, w, h, QColor("#1e1e2e"))
+        # v29.0: Use palette background instead of hardcoded dark color
+        bg_color = self.palette().color(self.backgroundRole())
+        painter.fillRect(0, 0, w, h, bg_color)
 
         values = list(self._values)
         count = len(values)

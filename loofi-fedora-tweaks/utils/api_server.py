@@ -27,9 +27,15 @@ class APIServer:
 
     def _create_app(self) -> FastAPI:
         app = FastAPI(title="Loofi Web API", version="20.0.0")
+        # v29.0: CORS restricted to localhost (was wildcard)
+        allowed_origins = [
+            f"http://{self.host}:{self.port}",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+        ]
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=allowed_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"]

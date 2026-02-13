@@ -21,6 +21,26 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 
+# ── Session-scoped QApplication singleton ──────────────────────────────
+# Prevents multiple QApplication instances across test files, which causes
+# Qt assertion crashes (IOT/abort) in PyQt6 offscreen mode.
+_qapp_instance = None
+
+
+@pytest.fixture(scope="session", autouse=True)
+def qapp():
+    """Ensure exactly one QApplication exists for the entire test session."""
+    global _qapp_instance
+    try:
+        from PyQt6.QtWidgets import QApplication
+        _qapp_instance = QApplication.instance()
+        if _qapp_instance is None:
+            _qapp_instance = QApplication([])
+        yield _qapp_instance
+    except ImportError:
+        yield None
+
+
 @pytest.fixture
 def mock_subprocess():
     """Patch subprocess.run and subprocess.check_output with MagicMock.

@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v28.0.0 "Workflow Contract Reset"
+# Loofi Fedora Tweaks v29.0.0 "Usability & Polish"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v28.0.0">
-    <img src="https://img.shields.io/badge/Release-v28.0.0-blue?style=for-the-badge&logo=github" alt="Release v28.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v29.0.0">
+    <img src="https://img.shields.io/badge/Release-v29.0.0-blue?style=for-the-badge&logo=github" alt="Release v29.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,16 +35,22 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v28.0.0?
+## What Is New in v29.0.0?
 
-`v28.0.0` is a meta-version — no application changes. It resets workflow state:
+`v29.0.0` delivers the usability features originally scoped in v22.0, plus cross-cutting UX polish:
 
-- Clean-slate race lock and run manifest for v28 cycle.
-- All planning artifacts comply with workflow runner task contract validation.
-- Architecture blueprint documenting artifact structure and validation rules.
-- Version strings bumped across `version.py`, `.spec`, and documentation.
+- **Centralized error handler** — Global `sys.excepthook` override catches unhandled errors, shows recovery hints for known `LoofiError` types.
+- **Confirmation dialogs** — `ConfirmActionDialog` for dangerous operations with undo hints, snapshot checkbox, and "don't ask again" toggle.
+- **Notification toasts** — Animated slide-in notifications with category-based colors and auto-hide.
+- **Sidebar search** — Enhanced to match tab descriptions, badges, and categories (not just names).
+- **Status indicators** — Live colored dots on Maintenance/Storage sidebar items showing update availability and disk usage.
+- **Theme-aware sparklines** — Dashboard SparkLine widget reads palette colors instead of hardcoded values.
+- **CORS lockdown** — Web API restricted to localhost origins only.
+- **Settings reset per group** — "Reset Appearance" and "Reset Behavior" buttons in Settings tab.
+- **Keyboard accessibility** — Sidebar keyboard focus restored with StrongFocus policy.
+- **95 new tests** across 5 test files covering all v29 features.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v28.0.0.md`](docs/releases/RELEASE-NOTES-v28.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v29.0.0.md`](docs/releases/RELEASE-NOTES-v29.0.0.md)
 
 ---
 

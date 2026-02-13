@@ -127,6 +127,10 @@ def main():
         try:
             app = QApplication(sys.argv)
 
+            # Install centralized error handler (v29.0)
+            from utils.error_handler import install_error_handler
+            install_error_handler()
+
             # Load translations based on system locale
             locale = QLocale.system().name()
             translator = QTranslator()
