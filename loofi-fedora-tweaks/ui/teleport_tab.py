@@ -164,7 +164,8 @@ class TeleportTab(QWidget, PluginInterface):
             self.tr("Size"),
         ])
         header = self.packages_table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        if header is not None:
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.packages_table.setMaximumHeight(180)
         self.packages_table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows

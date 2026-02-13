@@ -4,19 +4,19 @@ on:
   push:
     branches: [master]
     paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.vscode/**'
-      - '.copilot/**'
+      - "docs/**"
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".vscode/**"
+      - ".copilot/**"
   pull_request:
     branches: [master]
     paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.vscode/**'
-      - '.copilot/**'
+      - "docs/**"
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".vscode/**"
+      - ".copilot/**"
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: '3.12'
+  PYTHON_VERSION: "3.12"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/ci.yml
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/sync_ai_adapters.py --check
 
@@ -53,7 +53,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install flake8
       - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install mypy PyQt6-stubs
       - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
@@ -85,7 +85,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - run: python loofi-fedora-tweaks/main.py --version
@@ -114,7 +114,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/project_stats.py
       - run: python3 scripts/project_stats.py --check
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install bandit
       - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B103,B104,B108,B310,B404,B603,B602 -f json -o bandit-report.json
@@ -184,7 +184,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install build setuptools wheel
       - run: bash scripts/build_sdist.sh

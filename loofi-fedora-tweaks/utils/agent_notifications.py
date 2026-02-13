@@ -157,7 +157,7 @@ class AgentNotifier:
                 return "high"
             severity = result.data.get("severity", "info")
             if severity in SEVERITY_RANKS:
-                return severity
+                return str(severity)
         if not result.success:
             return "medium"
         return "info"

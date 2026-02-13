@@ -126,9 +126,11 @@ class VirtualizationTab(QWidget, PluginInterface):
             self.tr("Name"), self.tr("State"),
             self.tr("RAM (MB)"), self.tr("vCPUs"),
         ])
-        self.vm_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        header = self.vm_table.horizontalHeader()
+        if header is not None:
+            header.setSectionResizeMode(
+                QHeaderView.ResizeMode.Stretch
+            )
         self.vm_table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows
         )

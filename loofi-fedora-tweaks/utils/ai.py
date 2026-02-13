@@ -95,6 +95,7 @@ class OllamaManager:
                 result = subprocess.run(
                     ["pgrep", "-x", "ollama"],
                     capture_output=True,
+                    text=True,
                     timeout=5
                 )
                 return result.returncode == 0
@@ -233,10 +234,11 @@ class OllamaManager:
             )
 
             output = []
-            for line in process.stdout:
-                output.append(line.strip())
-                if callback:
-                    callback(line.strip())
+            if process.stdout:
+                for line in process.stdout:
+                    output.append(line.strip())
+                    if callback:
+                        callback(line.strip())
 
             process.wait()
 

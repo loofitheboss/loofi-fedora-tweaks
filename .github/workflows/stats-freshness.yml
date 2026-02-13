@@ -1,30 +1,30 @@
 name: Stats Freshness Check
 
 on:
-  schedule:
-    # Weekly on Monday at 06:00 UTC
-    - cron: '0 6 * * 1'
-  workflow_dispatch:
+    schedule:
+        # Weekly on Monday at 06:00 UTC
+        - cron: "0 6 * * 1"
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  stats-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
+    stats-check:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
 
-      - name: Generate project stats
-        run: python3 scripts/project_stats.py
+            - name: Generate project stats
+              run: python3 scripts/project_stats.py
 
-      - name: Check stats freshness
-        run: python3 scripts/project_stats.py --check
+            - name: Check stats freshness
+              run: python3 scripts/project_stats.py --check
 
-      - name: Show stats summary
-        run: python3 scripts/project_stats.py --markdown
+            - name: Show stats summary
+              run: python3 scripts/project_stats.py --markdown

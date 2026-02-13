@@ -12,7 +12,7 @@ import subprocess
 import shutil
 import os
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 from pathlib import Path
 
 
@@ -53,7 +53,7 @@ class TilingManager:
     }
 
     # Workspace templates
-    WORKSPACE_TEMPLATES = {
+    WORKSPACE_TEMPLATES: dict[str, dict[str, Any]] = {
         "development": {
             "name": "Development",
             "workspaces": {
@@ -118,7 +118,7 @@ class TilingManager:
     @classmethod
     def get_keybindings(cls) -> list[dict]:
         """Get current keybindings from compositor config."""
-        bindings = []
+        bindings: list[dict[str, str]] = []
         config_path = cls.get_config_path()
 
         if not config_path.exists():
@@ -236,7 +236,7 @@ class TilingManager:
         config_lines.append("")
 
         if cls.is_hyprland():
-            for ws_num, ws_config in template["workspaces"].items():
+            for ws_num, ws_config in template["workspaces"].items():  # type: ignore[union-attr]
                 config_lines.append(f"# Workspace {ws_num}: {ws_config['name']}")
                 for app in ws_config["apps"]:
                     config_lines.append(
@@ -244,7 +244,7 @@ class TilingManager:
                     )
             config_lines.append("")
         elif cls.is_sway():
-            for ws_num, ws_config in template["workspaces"].items():
+            for ws_num, ws_config in template["workspaces"].items():  # type: ignore[union-attr]
                 config_lines.append(f"# Workspace {ws_num}: {ws_config['name']}")
                 for app in ws_config["apps"]:
                     config_lines.append(

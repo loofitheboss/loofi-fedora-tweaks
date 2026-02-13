@@ -191,7 +191,7 @@ class SecurityTab(QWidget, PluginInterface):
         self.port_table.setHorizontalHeaderLabels([
             "Port", "Protocol", "Address", "Process", "Status"
         ])
-        self.port_table.horizontalHeader().setSectionResizeMode(
+        self.port_table.horizontalHeader().setSectionResizeMode(  # type: ignore[union-attr]
             QHeaderView.ResizeMode.Stretch
         )
         self.port_table.setMaximumHeight(150)
@@ -355,17 +355,17 @@ class SecurityTab(QWidget, PluginInterface):
         ports = PortAuditor.scan_ports()
 
         if not ports:
-            self.set_table_empty_state(self.port_table, self.tr("No open ports detected"))
+            BaseTab.set_table_empty_state(self.port_table, self.tr("No open ports detected"))
             return
 
         for port in ports:
             row = self.port_table.rowCount()
             self.port_table.insertRow(row)
 
-            self.port_table.setItem(row, 0, self.make_table_item(str(port.port)))
-            self.port_table.setItem(row, 1, self.make_table_item(port.protocol))
-            self.port_table.setItem(row, 2, self.make_table_item(port.address))
-            self.port_table.setItem(row, 3, self.make_table_item(port.process))
+            self.port_table.setItem(row, 0, BaseTab.make_table_item(str(port.port)))
+            self.port_table.setItem(row, 1, BaseTab.make_table_item(port.protocol))
+            self.port_table.setItem(row, 2, BaseTab.make_table_item(port.address))
+            self.port_table.setItem(row, 3, BaseTab.make_table_item(port.process))
 
             status_item = QTableWidgetItem("⚠️ Risk" if port.is_risky else "✅ OK")
             if port.is_risky:

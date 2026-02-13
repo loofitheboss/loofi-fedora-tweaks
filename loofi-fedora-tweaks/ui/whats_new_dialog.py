@@ -106,7 +106,7 @@ class WhatsNewDialog(QDialog):
 
     @property
     def dont_show_again(self) -> bool:
-        return self._dont_show
+        return bool(self._dont_show)
 
     @staticmethod
     def should_show() -> bool:
@@ -115,7 +115,7 @@ class WhatsNewDialog(QDialog):
             from utils.settings import SettingsManager
             mgr = SettingsManager.instance()
             last_seen = mgr.get("last_seen_version", "0.0.0")
-            return last_seen != __version__
+            return bool(last_seen != __version__)
         except Exception:
             return True
 

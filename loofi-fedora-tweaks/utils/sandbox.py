@@ -10,7 +10,7 @@ import subprocess
 import shutil
 import os
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 from pathlib import Path
 
 
@@ -131,8 +131,8 @@ class SandboxManager:
         ]
 
         for dir_path in profile_dirs:
-            if os.path.exists(dir_path):
-                for f in os.listdir(dir_path):
+            if os.path.exists(str(dir_path)):
+                for f in os.listdir(str(dir_path)):
                     if f.endswith(".profile"):
                         profiles.append(f.replace(".profile", ""))
 
@@ -254,7 +254,7 @@ Categories=Security;
     @classmethod
     def get_sandbox_status(cls, pid: int) -> dict:
         """Check if a process is running in a sandbox."""
-        status = {
+        status: dict[str, Any] = {
             "running": False,
             "sandboxed": False,
             "restrictions": []

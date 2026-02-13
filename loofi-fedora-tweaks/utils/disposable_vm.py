@@ -132,7 +132,7 @@ class DisposableVMManager:
     # ==================== LAUNCH ====================
 
     @classmethod
-    def launch_disposable(cls, name: str = None, snapshot: bool = True) -> Result:
+    def launch_disposable(cls, name: str = None, snapshot: bool = True) -> Result:  # type: ignore[assignment]
         """Launch a disposable VM.
 
         If *snapshot* is True, a QCOW2 overlay is created on top of the base

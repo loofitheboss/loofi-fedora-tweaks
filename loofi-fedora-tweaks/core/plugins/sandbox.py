@@ -386,8 +386,8 @@ class PluginSandbox:
                 _check_privileged_command(cmd, *args, **kwargs)
                 return original_popen(cmd, *args, **kwargs)
 
-            subprocess_module.run = _wrapped_run
-            subprocess_module.Popen = _wrapped_popen
+            subprocess_module.run = _wrapped_run  # type: ignore[attr-defined]
+            subprocess_module.Popen = _wrapped_popen  # type: ignore[attr-defined]
 
             # Wrap other convenience functions
             if hasattr(subprocess_module, "check_call"):
@@ -397,7 +397,7 @@ class PluginSandbox:
                 def _wrapped_check_call(cmd, *args, **kwargs):
                     _check_privileged_command(cmd, *args, **kwargs)
                     return original_check_call(cmd, *args, **kwargs)
-                subprocess_module.check_call = _wrapped_check_call
+                subprocess_module.check_call = _wrapped_check_call  # type: ignore[attr-defined]
 
             if hasattr(subprocess_module, "check_output"):
                 original_check_output = subprocess_module.check_output
@@ -406,7 +406,7 @@ class PluginSandbox:
                 def _wrapped_check_output(cmd, *args, **kwargs):
                     _check_privileged_command(cmd, *args, **kwargs)
                     return original_check_output(cmd, *args, **kwargs)
-                subprocess_module.check_output = _wrapped_check_output
+                subprocess_module.check_output = _wrapped_check_output  # type: ignore[attr-defined]
 
         return subprocess_module
 
@@ -433,13 +433,13 @@ class PluginSandbox:
                 if plugin_module:
                     # Store original open
                     if not hasattr(plugin_module, "_sandbox_original_open"):
-                        plugin_module._sandbox_original_open = open
+                        plugin_module._sandbox_original_open = open  # type: ignore[attr-defined]
 
                     # Install wrapped open
                     setattr(
                         plugin_module,
                         "open",
-                        self.wrap_open(plugin_module._sandbox_original_open)
+                        self.wrap_open(plugin_module._sandbox_original_open)  # type: ignore[attr-defined]
                     )
 
             # Note: subprocess wrapping happens at import time via RestrictedImporter

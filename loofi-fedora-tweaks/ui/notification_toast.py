@@ -111,7 +111,7 @@ class NotificationToast(QWidget):
         # Position at top-right of parent
         if self.parent():
             parent = self.parent()
-            x = parent.width() - self.TOAST_WIDTH - 16
+            x = parent.width() - self.TOAST_WIDTH - 16  # type: ignore[union-attr]
             y_start = -self.TOAST_HEIGHT
             y_end = 60  # Below breadcrumb bar
 

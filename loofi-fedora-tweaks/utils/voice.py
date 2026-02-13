@@ -15,6 +15,7 @@ import subprocess
 import shutil
 import os
 import tempfile
+from typing import Any, Optional
 
 from utils.containers import Result
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 # Whisper model sizes and their RAM requirements in MB
-WHISPER_MODELS = {
+WHISPER_MODELS: dict[str, dict[str, Any]] = {
     "tiny": {
         "name": "Tiny",
         "size_mb": 75,
@@ -111,7 +112,7 @@ class VoiceManager:
             Dict with 'available' (bool), 'devices' (list of str),
             and 'default' (str or None).
         """
-        info = {
+        info: dict[str, Any] = {
             "available": False,
             "devices": [],
             "default": None,
@@ -164,12 +165,12 @@ class VoiceManager:
         # Sort by ram_required descending to pick the most capable that fits
         candidates = sorted(
             WHISPER_MODELS.items(),
-            key=lambda item: item[1]["ram_required"],
+            key=lambda item: int(item[1]["ram_required"]),
             reverse=True,
         )
 
         for model_name, info in candidates:
-            if info["ram_required"] <= available_ram_mb:
+            if int(info["ram_required"]) <= available_ram_mb:
                 return model_name
 
         # Fallback to the smallest model
@@ -228,7 +229,7 @@ class VoiceManager:
             return Result(False, f"Transcription error: {e}")
 
     @staticmethod
-    def record_audio(duration_seconds: int = 5, output_path: str = None) -> str:
+    def record_audio(duration_seconds: int = 5, output_path: Optional[str] = None) -> str:
         """
         Record audio from the default microphone.
 

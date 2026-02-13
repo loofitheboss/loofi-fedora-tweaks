@@ -11,7 +11,7 @@ import urllib.request
 import urllib.error
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from core.plugins.integrity import IntegrityVerifier
 from core.plugins.package import PluginManifest
@@ -30,7 +30,7 @@ class InstallerResult:
     error: Optional[str] = None
     installed_path: Optional[Path] = None
     backup_path: Optional[Path] = None
-    data: Optional[Dict] = None  # Additional data for specific operations
+    data: Optional[Any] = None  # Additional data for specific operations
 
 
 class PluginInstaller:
@@ -64,7 +64,8 @@ class PluginInstaller:
 
         try:
             with open(self.state_file, 'r') as f:
-                return json.load(f)
+                state: Dict[str, Dict] = json.load(f)
+                return state
         except Exception as exc:
             logger.error("Failed to load state: %s", exc)
             return {}

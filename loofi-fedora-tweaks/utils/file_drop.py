@@ -321,7 +321,7 @@ class FileDropManager:
     _http_shared_key = None
 
     @classmethod
-    def start_receive_server(cls, port: int, save_dir: str, shared_key: bytes = None, bind_address: str = "127.0.0.1") -> bool:
+    def start_receive_server(cls, port: int, save_dir: str, shared_key: bytes = None, bind_address: str = "127.0.0.1") -> bool:  # type: ignore[assignment]
         """Start an HTTP server for receiving file uploads.
 
         Accepts POST requests to /upload with file data. The file is saved
@@ -455,7 +455,7 @@ class FileDropManager:
         return True
 
     @staticmethod
-    def send_file(host: str, port: int, file_path: str, shared_key: bytes = None) -> Result:
+    def send_file(host: str, port: int, file_path: str, shared_key: bytes = None) -> Result:  # type: ignore[assignment]
         """Send a file to a peer via HTTP POST.
 
         Uploads the file to http://host:port/upload with filename and

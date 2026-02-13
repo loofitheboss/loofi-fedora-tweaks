@@ -10,7 +10,7 @@ synchronization mechanism, causing massive drift.
 
 ### 1. Stats Introspection Engine (`scripts/project_stats.py`)
 
-- Reads live data from codebase: version.py, ui/*_tab.py, tests/test_*.py, utils/*.py
+- Reads live data from codebase: version.py, ui/**tab.py, tests/test**.py, utils/*.py
 - Outputs `.project-stats.json` (gitignored — regenerated on demand)
 - `--check` mode for CI gates
 - Foundation for template rendering and drift detection

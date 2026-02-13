@@ -149,7 +149,7 @@ class AgentsTab(BaseTab):
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lay.addWidget(title_label)
 
-        box._value_label = val_label
+        box._value_label = val_label  # type: ignore[attr-defined]
         return box
 
     # ==================== My Agents Sub-Tab ====================

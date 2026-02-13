@@ -363,7 +363,8 @@ def handle_validate_release(args: dict) -> dict:
                 capture_output=True,
                 text=True,
                 timeout=300,
-                env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT / "loofi-fedora-tweaks")},
+                env={**os.environ,
+                     "PYTHONPATH": str(PROJECT_ROOT / "loofi-fedora-tweaks")},
             )
             test_passed = result.returncode == 0
             # Extract summary line
@@ -448,7 +449,8 @@ def handle_phase_status(args: dict) -> dict:
     manifest_file = REPORTS_DIR / f"run-manifest-{version}.json"
     manifest = read_json(manifest_file)
 
-    all_phases = ["plan", "design", "build", "test", "document", "package", "release"]
+    all_phases = ["plan", "design", "build",
+                  "test", "document", "package", "release"]
 
     if not manifest or "phases" not in manifest:
         return {
@@ -567,7 +569,7 @@ def process_message(msg: dict) -> dict | None:
 def main():
     """Main loop — read JSON-RPC messages from stdin, write responses to stdout."""
     # Use stderr for logging to avoid polluting the protocol stream
-    log = lambda msg: sys.stderr.write(f"[loofi-workflow] {msg}\n")  # noqa: E731
+    def log(msg): return sys.stderr.write(f"[loofi-workflow] {msg}\n")  # noqa: E731
     log("MCP Workflow Server starting...")
 
     # Read from stdin line by line (each line is a JSON-RPC message)

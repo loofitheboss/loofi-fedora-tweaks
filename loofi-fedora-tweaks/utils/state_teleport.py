@@ -69,7 +69,7 @@ class StateTeleportManager:
     # ==================== CAPTURE ====================
 
     @classmethod
-    def capture_vscode_state(cls, workspace_path: str = None) -> dict:
+    def capture_vscode_state(cls, workspace_path: str = None) -> dict:  # type: ignore[assignment]
         """Capture VS Code workspace state.
 
         Reads .vscode/ settings, detects extensions, and collects
@@ -285,7 +285,7 @@ class StateTeleportManager:
         return filtered
 
     @classmethod
-    def capture_full_state(cls, workspace_path: str = None) -> WorkspaceState:
+    def capture_full_state(cls, workspace_path: str = None) -> WorkspaceState:  # type: ignore[assignment]
         """Capture a full workspace snapshot combining all sub-captures.
 
         Args:

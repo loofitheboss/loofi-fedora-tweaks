@@ -769,6 +769,8 @@ class MainWindow(QMainWindow):
         iterator = QTreeWidgetItemIterator(self.sidebar)
         while iterator.value():
             item = iterator.value()
+            if item is None:
+                break
             if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
                 # Strip any existing status dot, add new one
                 text = item.text(0)
@@ -927,7 +929,7 @@ class MainWindow(QMainWindow):
                 stylesheet = fh.read()
             from PyQt6.QtWidgets import QApplication
             app = QApplication.instance()
-            if app:
+            if isinstance(app, QApplication):
                 app.setStyleSheet(stylesheet)
         except OSError:
             pass

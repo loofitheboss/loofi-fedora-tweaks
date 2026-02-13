@@ -224,7 +224,7 @@ class PluginManifest:
         Returns:
             Pretty-printed JSON string
         """
-        data = {
+        data: dict[str, Any] = {
             "id": self.id,
             "name": self.name,
             "version": self.version,

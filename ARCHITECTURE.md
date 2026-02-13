@@ -221,6 +221,7 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 ## Version Management
 
 Two files MUST stay in sync:
+
 - `loofi-fedora-tweaks/version.py` — `__version__`, `__version_codename__`
 - `loofi-fedora-tweaks.spec` — `Version:`
 

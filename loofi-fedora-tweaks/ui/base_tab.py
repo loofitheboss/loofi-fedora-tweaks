@@ -40,12 +40,12 @@ _BaseWidget = QWidget if isinstance(QWidget, type) else object
 
 
 if _BaseWidget is object:
-    _BaseTabBases = (PluginInterface,)
+    _BaseTabBases: tuple[type, ...] = (PluginInterface,)
 else:
     _BaseTabBases = (_BaseWidget, PluginInterface)
 
 
-class BaseTab(*_BaseTabBases):
+class BaseTab(*_BaseTabBases):  # type: ignore[misc]
     """Common base class for all tabs that execute system commands."""
 
     # Subclasses MUST override _METADATA with their own PluginMetadata

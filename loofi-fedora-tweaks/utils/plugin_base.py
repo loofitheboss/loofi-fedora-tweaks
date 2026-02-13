@@ -13,7 +13,7 @@ v14.0 additions:
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Callable, Dict, List, Optional, Any
 from pathlib import Path
 import importlib.util
 import json
@@ -76,7 +76,7 @@ class LoofiPlugin(ABC):
         """
 
     @abstractmethod
-    def get_cli_commands(self) -> Dict[str, callable]:
+    def get_cli_commands(self) -> Dict[str, Callable]:
         """
         Return dictionary of CLI commands this plugin provides.
 
@@ -129,7 +129,8 @@ class PluginLoader:
 
     def _load_state(self) -> Dict[str, Any]:
         try:
-            return json.loads(self.STATE_FILE.read_text())
+            data: Dict[str, Any] = json.loads(self.STATE_FILE.read_text())
+            return data
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to load plugin state: %s", e)
             return {"enabled": {}}
@@ -192,7 +193,7 @@ class PluginLoader:
 
     def list_plugins(self) -> List[Dict[str, Any]]:
         """List discovered plugins with manifest data and enabled state."""
-        plugins = []
+        plugins: List[Dict[str, Any]] = []
         for name in self.discover_plugins():
             plugin_dir = self.PLUGINS_DIR / name
             manifest = self._load_manifest(plugin_dir)
@@ -210,7 +211,7 @@ class PluginLoader:
         Returns:
             List of plugin directory names.
         """
-        plugins = []
+        plugins: list[str] = []
 
         if not self.PLUGINS_DIR.exists():
             return plugins
@@ -338,7 +339,7 @@ class PluginLoader:
         denied = [p for p in requested if p not in VALID_PERMISSIONS]
         return {"granted": granted, "denied": denied}
 
-    def check_for_updates(self, plugin_name: str = None) -> list[dict]:
+    def check_for_updates(self, plugin_name: Optional[str] = None) -> list[dict]:
         """
         Check for plugin updates by fetching update_url metadata.
 
@@ -389,7 +390,7 @@ class PluginLoader:
 
         return results
 
-    def get_all_cli_commands(self) -> Dict[str, callable]:
+    def get_all_cli_commands(self) -> Dict[str, Callable]:
         """
         Get CLI commands from all loaded plugins.
 

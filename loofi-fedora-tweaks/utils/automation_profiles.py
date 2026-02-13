@@ -87,7 +87,8 @@ class AutomationProfiles:
         cls.ensure_config()
         try:
             with open(cls.CONFIG_FILE, "r") as f:
-                return json.load(f)
+                config: Dict[str, Any] = json.load(f)
+                return config
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to load automation config: %s", e)
             return {"enabled": True, "rules": []}
@@ -102,7 +103,7 @@ class AutomationProfiles:
     @classmethod
     def is_enabled(cls) -> bool:
         """Check if automation system is enabled."""
-        return cls.load_config().get("enabled", True)
+        return bool(cls.load_config().get("enabled", True))
 
     @classmethod
     def set_enabled(cls, enabled: bool):
@@ -124,7 +125,8 @@ class AutomationProfiles:
             List of rule dicts
         """
         config = cls.load_config()
-        return config.get("rules", [])
+        rules: List[Dict[str, Any]] = config.get("rules", [])
+        return rules
 
     @classmethod
     def get_rule(cls, rule_id: str) -> Optional[Dict[str, Any]]:
@@ -246,7 +248,8 @@ class AutomationProfiles:
     @classmethod
     def get_home_wifi_ssids(cls) -> List[str]:
         """Get list of home Wi-Fi network SSIDs."""
-        return cls.load_config().get("home_wifi_ssids", [])
+        ssids: List[str] = cls.load_config().get("home_wifi_ssids", [])
+        return ssids
 
     # -------------------------------------------------------------------------
     # Validation & Simulation
@@ -331,7 +334,7 @@ class AutomationProfiles:
             results.append({
                 "rule_id": rule.get("id"),
                 "rule_name": rule.get("name"),
-                "result": cls.dry_run_action(rule.get("action"), rule.get("action_params", {}))
+                "result": cls.dry_run_action(str(rule.get("action", "")), rule.get("action_params", {}))
             })
         return {
             "success": True,
@@ -362,7 +365,7 @@ class AutomationProfiles:
         results = []
 
         for rule in rules:
-            result = cls.execute_action(rule.get("action"), rule.get("action_params", {}))
+            result = cls.execute_action(str(rule.get("action", "")), rule.get("action_params", {}))
             results.append({
                 "rule_id": rule.get("id"),
                 "rule_name": rule.get("name"),
@@ -438,7 +441,8 @@ class AutomationProfiles:
         governor = params.get("governor", "schedutil")
         try:
             from utils.hardware import HardwareManager
-            return HardwareManager.set_governor(governor)
+            success = HardwareManager.set_governor(governor)
+            return {"success": success, "message": f"CPU governor set to '{governor}'" if success else "Failed to set governor"}
         except ImportError:
             # Fallback implementation
             try:
@@ -516,8 +520,8 @@ class AutomationProfiles:
         """Enable tiling window manager scripts."""
         script_name = params.get("script", "polonium")
         try:
-            from utils.kwin_tiling import KWinTiling
-            return KWinTiling.enable_script(script_name)
+            from utils.kwin_tiling import KWinTiling  # type: ignore[attr-defined]
+            return KWinTiling.enable_script(script_name)  # type: ignore[no-any-return]
         except ImportError:
             # Fallback: try kwriteconfig5
             try:
@@ -540,8 +544,8 @@ class AutomationProfiles:
         """Disable tiling window manager scripts."""
         script_name = params.get("script", "polonium")
         try:
-            from utils.kwin_tiling import KWinTiling
-            return KWinTiling.disable_script(script_name)
+            from utils.kwin_tiling import KWinTiling  # type: ignore[attr-defined]
+            return KWinTiling.disable_script(script_name)  # type: ignore[no-any-return]
         except ImportError:
             try:
                 subprocess.run([

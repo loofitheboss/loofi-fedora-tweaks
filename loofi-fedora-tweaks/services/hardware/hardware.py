@@ -8,7 +8,7 @@ import os
 import glob
 import subprocess
 import shutil
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -390,7 +390,7 @@ done
             - npu_amd: bool - AMD Ryzen AI NPU detected
             - details: dict - Additional hardware details
         """
-        caps = {
+        caps: dict[str, Any] = {
             "cuda": False,
             "rocm": False,
             "npu_intel": False,

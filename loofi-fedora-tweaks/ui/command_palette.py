@@ -372,8 +372,10 @@ class CommandPalette(QDialog):
 
     # -- Key handling ---------------------------------------------------
 
-    def keyPressEvent(self, event: QKeyEvent):
+    def keyPressEvent(self, event: QKeyEvent | None):  # type: ignore[override]
         """Handle Up/Down arrows, Enter, and Escape."""
+        if event is None:
+            return
         key = event.key()
 
         if key == Qt.Key.Key_Escape:

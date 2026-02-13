@@ -8,7 +8,7 @@ Uses CommandWorker for async operations, delegates to existing utils.
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from core.executor.action_result import ActionResult
 from core.workers.command_worker import CommandWorker
@@ -30,7 +30,7 @@ class DnfPackageService(BasePackageService):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Install packages using DNF with pkexec."""
         if not packages:
@@ -64,7 +64,7 @@ class DnfPackageService(BasePackageService):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Remove packages using DNF with pkexec."""
         if not packages:
@@ -86,7 +86,7 @@ class DnfPackageService(BasePackageService):
         packages: Optional[List[str]] = None,
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Update packages using DNF with pkexec."""
         if packages:
@@ -168,7 +168,7 @@ class RpmOstreePackageService(BasePackageService):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Install packages using rpm-ostree with --apply-live if possible."""
         if not packages:
@@ -211,7 +211,7 @@ class RpmOstreePackageService(BasePackageService):
         packages: List[str],
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Remove packages using rpm-ostree."""
         if not packages:
@@ -241,7 +241,7 @@ class RpmOstreePackageService(BasePackageService):
         packages: Optional[List[str]] = None,
         *,
         description: str = "",
-        callback: Optional[callable] = None
+        callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Update system using rpm-ostree upgrade."""
         if packages:

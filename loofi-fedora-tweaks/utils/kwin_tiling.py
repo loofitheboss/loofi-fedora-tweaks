@@ -316,7 +316,7 @@ class KWinManager:
     @classmethod
     def get_window_list(cls) -> list[dict]:
         """Get list of open windows."""
-        windows = []
+        windows: list[dict[str, str]] = []
 
         try:
             result = subprocess.run(

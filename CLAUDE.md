@@ -1,10 +1,12 @@
 # Claude Code Instructions — Loofi Fedora Tweaks
 
 ## ROLE
+
 You are Claude Code operating inside this repository.
 Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## KEY FILES (READ THESE, DON'T REPEAT THEIR CONTENT)
+
 - `ARCHITECTURE.md` — Canonical architecture, layer rules, tab layout, patterns
 - `ROADMAP.md` — Version scope, status, deliverables
 - `.github/agents/` — 8 VS Code agents (canonical definitions)
@@ -13,6 +15,7 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 - `.github/instructions/` — AI instructions (primary, workflow, test, copilot)
 
 ## TOKEN DISCIPLINE (CRITICAL)
+
 - Read context files once, reference by name after
 - Bullet lists only. No paragraphs.
 - Max 10 lines per response section
@@ -33,14 +36,17 @@ Canonical definitions live in `.github/agents/*.agent.md`. Claude-specific adapt
 - **frontend-integration-builder** — UI/UX tabs, CLI commands, wiring
 - **release-planner** — Roadmap and release planning
 
-### Using Agents:
+### Using Agents
+
 1. Read `ROADMAP.md` for the ACTIVE version
 2. For complex features: delegate to project-coordinator agent
 3. For simple tasks: act directly
 4. Always follow existing patterns in codebase
 
 ## RELEASE RULES
+
 For every vX.Y.0:
+
 - Update version in `version.py` and `.spec`
 - Complete CHANGELOG with all changes
 - Update README with new features
@@ -48,6 +54,7 @@ For every vX.Y.0:
 - Build RPM and verify installation
 
 ## OUTPUT FORMAT
+
 1. **Checklist** (done/pending per phase)
 2. **Agent Summary** (1 line per agent)
 3. **Changes** (max 10 bullets)
@@ -57,9 +64,11 @@ For every vX.Y.0:
 No essays. No filler.
 
 ## MODEL ROUTING (COST OPTIMIZATION)
+
 See `.github/workflow/model-router.md` for full rules.
 
 **Quick reference:**
+
 - **haiku**: docs, formatting, version bumps, git ops, checklists
 - **sonnet**: logic, tests, UI, reviews, single-module refactors
 - **opus**: multi-file architecture, debugging, plugin design, planning
@@ -67,6 +76,7 @@ See `.github/workflow/model-router.md` for full rules.
 **Target: 60% of work on haiku, 30% sonnet, 10% opus**
 
 ## CONTEXT COMPRESSION RULES
+
 1. Read context files once, reference by name after
 2. ROADMAP.md is truth — don't copy scope into prompts
 3. Use bullet lists only, no paragraphs

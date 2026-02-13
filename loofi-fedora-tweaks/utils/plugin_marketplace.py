@@ -165,7 +165,8 @@ class PluginMarketplace:
 
             with urllib.request.urlopen(req, timeout=timeout) as response:
                 data = response.read()
-                return json.loads(data.decode('utf-8'))
+                result: Dict = json.loads(data.decode('utf-8'))
+                return result
 
         except urllib.error.HTTPError as exc:
             logger.error("HTTP error fetching %s: %s", url, exc)
@@ -197,7 +198,8 @@ class PluginMarketplace:
                 body = response.read().decode("utf-8")
                 if not body:
                     return {}
-                return json.loads(body)
+                parsed: Dict = json.loads(body)
+                return parsed
         except urllib.error.HTTPError as exc:
             logger.error("HTTP error posting to %s: %s", url, exc)
             raise
@@ -364,7 +366,7 @@ class PluginMarketplace:
             aggregate = MarketplaceRatingAggregate(
                 plugin_id=plugin_id,
                 average_rating=float(
-                    data.get("average_rating", data.get("average", 0.0))),
+                    data.get("average_rating", data.get("average", 0.0)) or 0.0),
                 rating_count=self._coerce_int(
                     data.get("rating_count", data.get("count", 0))),
                 review_count=self._coerce_int(
@@ -676,7 +678,8 @@ class PluginMarketplace:
         """
         result = self.get_plugin(plugin_id)
         if result.success and result.data:
-            return result.data[0]
+            plugin: Optional[PluginMetadata] = result.data[0]
+            return plugin
         return None
 
     def download_plugin(self, plugin_id: str, destination: Path, version: Optional[str] = None) -> MarketplaceResult:

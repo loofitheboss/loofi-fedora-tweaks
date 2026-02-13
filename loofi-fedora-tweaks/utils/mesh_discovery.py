@@ -101,7 +101,7 @@ class MeshDiscovery:
         try:
             hostname = socket.gethostname()
             for info in socket.getaddrinfo(hostname, None, socket.AF_INET):
-                addr = info[4][0]
+                addr = str(info[4][0])
                 if not addr.startswith("127.") and addr not in ips:
                     ips.append(addr)
         except (socket.gaierror, OSError):

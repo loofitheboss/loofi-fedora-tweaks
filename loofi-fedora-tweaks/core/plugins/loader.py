@@ -175,7 +175,7 @@ class PluginLoader:
                     continue
 
                 # Attach manifest to plugin instance (PluginAdapter expects this)
-                plugin_instance.manifest = manifest
+                plugin_instance.manifest = manifest  # type: ignore[attr-defined]
 
                 # Wrap legacy plugin with adapter
                 adapter = PluginAdapter(plugin_instance)

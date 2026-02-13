@@ -12,7 +12,7 @@ import re
 import shutil
 import subprocess
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ class VMInfo:
 # Quick-Create flavour presets
 # ---------------------------------------------------------------------------
 
-VM_FLAVORS = {
+VM_FLAVORS: dict[str, dict[str, Any]] = {
     "windows11": {
         "label": "Windows 11",
         "ram_mb": 4096,
@@ -258,14 +258,14 @@ class VMManager:
         flavor = dict(VM_FLAVORS[flavor_key])
         flavor.update(overrides)
 
-        ram_mb = flavor.get("ram_mb", 2048)
-        vcpus = flavor.get("vcpus", 2)
-        disk_gb = flavor.get("disk_gb", 20)
-        os_variant = flavor.get("os_variant", "generic")
+        ram_mb = int(flavor.get("ram_mb", 2048))
+        vcpus = int(flavor.get("vcpus", 2))
+        disk_gb = int(flavor.get("disk_gb", 20))
+        os_variant = str(flavor.get("os_variant", "generic"))
 
         disk_path = os.path.join(cls.get_default_storage_pool(), f"{name}.qcow2")
 
-        cmd = [
+        cmd: list[str] = [
             "virt-install",
             "--name", name,
             "--ram", str(ram_mb),

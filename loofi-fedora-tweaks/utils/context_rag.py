@@ -150,7 +150,7 @@ class ContextRAGManager:
         return chunks
 
     @staticmethod
-    def _resolve_paths(paths: list = None) -> list:
+    def _resolve_paths(paths: list = None) -> list:  # type: ignore[assignment]
         """
         Resolve INDEXABLE_PATHS to actual file paths.
 
@@ -282,7 +282,7 @@ class ContextRAGManager:
         }
 
     @staticmethod
-    def build_index(paths: list = None, callback=None) -> Result:
+    def build_index(paths: list = None, callback=None) -> Result:  # type: ignore[assignment]
         """
         Build the search index from the specified or default paths.
 
@@ -509,6 +509,6 @@ class ContextRAGManager:
         try:
             with open(index_file, "r") as f:
                 index = json.load(f)
-            return index.get("total_chunks", 0) > 0
+            return bool(index.get("total_chunks", 0) > 0)
         except (OSError, json.JSONDecodeError):
             return False

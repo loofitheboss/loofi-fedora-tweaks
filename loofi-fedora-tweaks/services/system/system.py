@@ -6,6 +6,7 @@ Handles detection of Fedora Atomic variants (Silverblue, Kinoite, etc.)
 import os
 import subprocess
 import shutil
+from typing import Any
 
 
 class SystemManager:
@@ -113,8 +114,9 @@ class SystemManager:
                     # Get the booted deployment
                     for dep in deployments:
                         if dep.get("booted", False):
-                            return dep.get("requested-local-packages", []) + \
+                            pkgs: list[Any] = dep.get("requested-local-packages", []) + \
                                 dep.get("requested-packages", [])
+                            return pkgs
         except Exception:
             pass
 

@@ -84,7 +84,7 @@ class FactoryReset:
             return Result(
                 success=True,
                 message=f"Backup created: {name} ({copied} files)",
-                data=backup_path,
+                data=backup_path,  # type: ignore[arg-type]
             )
 
         except OSError as exc:
@@ -94,7 +94,7 @@ class FactoryReset:
     @staticmethod
     def list_backups() -> List[BackupInfo]:
         """List all available configuration backups."""
-        backups = []
+        backups: List[BackupInfo] = []
 
         if not os.path.isdir(BACKUP_DIR):
             return backups

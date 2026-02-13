@@ -192,6 +192,7 @@ def test_run_agent_fails_when_codex_missing(mock_which, tmp_path):
         prompt_file=prompt_file,
         instruction="Write test report",
         dry_run=False,
+        assistant="codex",
         mode="write",
         review_output=None,
     )
@@ -226,6 +227,7 @@ def test_run_agent_review_mode_writes_report(mock_which, mock_run, tmp_path):
         prompt_file=prompt_file,
         instruction="Write test report",
         dry_run=False,
+        assistant="codex",
         mode="review",
         review_output=review_output,
     )

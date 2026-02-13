@@ -33,6 +33,10 @@ def test_build_flatpak_missing_dependency(tmp_path):
     env = _base_env(tmp_path)
     (tmp_path / "bin").mkdir(parents=True, exist_ok=True)
 
+    # Restrict PATH to only contain the tmp bin dir so real flatpak-builder
+    # is not found.  Keep basic system utilities available via coreutils stubs.
+    env["PATH"] = str(tmp_path / "bin")
+
     result = subprocess.run(
         [BASH, "scripts/build_flatpak.sh"],
         cwd=ROOT,

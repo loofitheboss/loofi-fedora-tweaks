@@ -106,7 +106,8 @@ def update_race_lock(new_version: str, dry_run: bool) -> list[str]:
 
     lock = json.loads(RACE_LOCK.read_text(encoding="utf-8"))
     old_ver = lock.get("target_version", "unknown")
-    new_ver = f"v{new_version}" if not new_version.startswith("v") else new_version
+    new_ver = f"v{new_version}" if not new_version.startswith(
+        "v") else new_version
 
     if old_ver != new_ver:
         lock["target_version"] = new_ver
@@ -115,7 +116,8 @@ def update_race_lock(new_version: str, dry_run: bool) -> list[str]:
         changes.append(f"  race-lock: {old_ver} → {new_ver}")
 
         if not dry_run:
-            RACE_LOCK.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+            RACE_LOCK.write_text(json.dumps(
+                lock, indent=2) + "\n", encoding="utf-8")
 
     return changes
 
@@ -165,15 +167,18 @@ def render_templates(dry_run: bool) -> list[str]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Bump version across all project files.")
+    parser = argparse.ArgumentParser(
+        description="Bump version across all project files.")
     parser.add_argument("version", help="New version (e.g. 33.0.0)")
     parser.add_argument("--codename", help="Version codename (e.g. 'Nexus')")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Show what would change without writing")
     args = parser.parse_args()
 
     # Validate version format
     if not re.match(r'^\d+\.\d+\.\d+$', args.version):
-        print(f"ERROR: Invalid version format '{args.version}'. Expected X.Y.Z")
+        print(
+            f"ERROR: Invalid version format '{args.version}'. Expected X.Y.Z")
         sys.exit(1)
 
     current_ver, current_codename = read_current_version()
@@ -185,7 +190,8 @@ def main():
     all_changes: list[str] = []
 
     # 1. version.py
-    all_changes.extend(update_version_py(args.version, args.codename, args.dry_run))
+    all_changes.extend(update_version_py(
+        args.version, args.codename, args.dry_run))
 
     # 2. .spec
     all_changes.extend(update_spec(args.version, args.dry_run))
@@ -210,7 +216,8 @@ def main():
     if args.dry_run:
         print("\nNo files were modified (dry-run mode).")
     else:
-        print(f"\nVersion bumped to {args.version} across {len(all_changes)} targets.")
+        print(
+            f"\nVersion bumped to {args.version} across {len(all_changes)} targets.")
 
 
 if __name__ == "__main__":

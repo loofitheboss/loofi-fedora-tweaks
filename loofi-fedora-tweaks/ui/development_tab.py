@@ -31,7 +31,7 @@ class InstallWorker(QThread):
     """Background worker for developer tool installations."""
     finished = pyqtSignal(str, bool, str)  # tool, success, message
 
-    def __init__(self, tool: str, extra_args: dict = None):
+    def __init__(self, tool: str, extra_args: dict = None):  # type: ignore[assignment]
         super().__init__()
         self.tool = tool
         self.extra_args = extra_args or {}
@@ -301,7 +301,8 @@ class DevelopmentTab(BaseTab):
         """Get the currently selected container name."""
         current = self.container_list.currentItem()
         if current:
-            return current.data(Qt.ItemDataRole.UserRole)
+            value = current.data(Qt.ItemDataRole.UserRole)
+            return str(value) if value is not None else None
         return None
 
     def _show_context_menu(self, position):

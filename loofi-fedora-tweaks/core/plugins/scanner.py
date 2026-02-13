@@ -25,7 +25,7 @@ Usage:
 
 from __future__ import annotations
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import Any, List, Tuple, Optional
 from dataclasses import dataclass
 import hashlib
 import json
@@ -325,7 +325,8 @@ class PluginScanner:
             return {"enabled": {}}
 
         try:
-            return json.loads(self.state_file.read_text(encoding="utf-8"))
+            state: dict[str, Any] = json.loads(self.state_file.read_text(encoding="utf-8"))
+            return state
         except (OSError, json.JSONDecodeError) as exc:
             logger.warning("Failed to load plugin state: %s", exc)
             return {"enabled": {}}
@@ -349,12 +350,12 @@ class PluginScanner:
             # New format: {plugin_id: {"enabled": bool}}
             plugin_data = state[plugin_id]
             if isinstance(plugin_data, dict) and "enabled" in plugin_data:
-                return plugin_data["enabled"]
+                return bool(plugin_data["enabled"])
 
         # Old format: {"enabled": {plugin_id: bool}}
         enabled_map = state.get("enabled", {})
         if plugin_id in enabled_map:
-            return enabled_map[plugin_id]
+            return bool(enabled_map[plugin_id])
 
         # Default is enabled if not in state
         return True

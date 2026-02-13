@@ -14,7 +14,7 @@ Usage:
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 import re
 
 from PyQt6.QtWidgets import QWidget
@@ -263,7 +263,7 @@ class PluginAdapter(PluginInterface):
             )
             return True
 
-    def get_cli_commands(self) -> dict[str, callable]:
+    def get_cli_commands(self) -> dict[str, Callable]:  # type: ignore[type-arg]
         """
         Expose CLI commands from wrapped plugin.
 

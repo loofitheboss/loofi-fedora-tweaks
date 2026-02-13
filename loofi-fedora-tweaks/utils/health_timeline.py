@@ -17,6 +17,7 @@ import sqlite3
 import statistics
 import subprocess
 import time
+from typing import Optional
 
 from utils.containers import Result
 
@@ -34,7 +35,7 @@ class HealthTimeline:
     DB_PATH = os.path.expanduser("~/.local/share/loofi-fedora-tweaks/health_timeline.db")
     DEFAULT_RETENTION_DAYS = 30
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: Optional[str] = None):
         """
         Initialise HealthTimeline with an optional database path override.
 
@@ -43,7 +44,7 @@ class HealthTimeline:
                      Pass \":memory:\" for in-memory testing.
         """
         self.db_path = db_path or self.DB_PATH
-        self._conn = None  # Persistent connection for :memory: databases
+        self._conn: Optional[sqlite3.Connection] = None  # Persistent connection for :memory: databases
         self._init_db()
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -56,7 +57,7 @@ class HealthTimeline:
         if self.db_path == ":memory:":
             if self._conn is None:
                 self._conn = sqlite3.connect(":memory:")
-            return self._conn
+            return self._conn  # type: ignore[return-value]
         return sqlite3.connect(self.db_path)
 
     def _close_conn(self, conn: sqlite3.Connection) -> None:
@@ -98,7 +99,7 @@ class HealthTimeline:
         metric_type: str,
         value: float,
         unit: str = "",
-        metadata: dict = None,
+        metadata: Optional[dict] = None,
     ) -> Result:
         """
         Record a single metric data point.
@@ -287,7 +288,7 @@ class HealthTimeline:
 
     # ==================== MAINTENANCE ====================
 
-    def prune_old_data(self, days: int = None) -> Result:
+    def prune_old_data(self, days: Optional[int] = None) -> Result:
         """
         Delete metrics older than the specified number of days.
 
@@ -355,12 +356,12 @@ class HealthTimeline:
             elif format == "csv":
                 with open(output_path, "w", newline="") as f:
                     if rows:
-                        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
-                        writer.writeheader()
-                        writer.writerows(rows)
+                        dict_writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+                        dict_writer.writeheader()
+                        dict_writer.writerows(rows)
                     else:
-                        writer = csv.writer(f)
-                        writer.writerow(["id", "timestamp", "metric_type", "value", "unit", "metadata"])
+                        plain_writer = csv.writer(f)
+                        plain_writer.writerow(["id", "timestamp", "metric_type", "value", "unit", "metadata"])
 
             return Result(
                 True,

@@ -120,6 +120,7 @@ def _loofi_excepthook(exc_type: Type[BaseException], exc_value: BaseException, e
 
     # Show dialog (only for Exception subclasses, not SystemExit etc.)
     if issubclass(exc_type, Exception):
+        assert isinstance(exc_value, Exception)
         _show_error_dialog(exc_value)
 
 

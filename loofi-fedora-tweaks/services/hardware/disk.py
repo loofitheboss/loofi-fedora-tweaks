@@ -53,11 +53,12 @@ class DiskManager:
     @staticmethod
     def bytes_to_human(num_bytes: int) -> str:
         """Convert bytes to human-readable format."""
+        value: float = float(num_bytes)
         for unit in ("B", "KB", "MB", "GB", "TB"):
-            if abs(num_bytes) < 1024:
-                return f"{num_bytes:.1f} {unit}"
-            num_bytes /= 1024
-        return f"{num_bytes:.1f} PB"
+            if abs(value) < 1024:
+                return f"{value:.1f} {unit}"
+            value /= 1024
+        return f"{value:.1f} PB"
 
     @staticmethod
     def get_disk_usage(path: str = "/") -> Optional[DiskUsage]:
@@ -91,7 +92,7 @@ class DiskManager:
         Returns:
             List of DiskUsage objects for each mount point.
         """
-        results = []
+        results: List[DiskUsage] = []
         try:
             output = subprocess.run(
                 ["df", "-B1", "--output=target,size,used,avail,pcent,source"],
@@ -185,7 +186,7 @@ class DiskManager:
         Returns:
             List of LargeDirectory objects, sorted by size descending.
         """
-        results = []
+        results: List[LargeDirectory] = []
         try:
             output = subprocess.run(
                 ["du", "-B1", f"--max-depth={max_depth}", path],

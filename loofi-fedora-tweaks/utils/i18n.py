@@ -112,7 +112,7 @@ class I18nManager:
             if os.path.isfile(config_path):
                 with open(config_path, "r") as f:
                     settings = json.load(f)
-                return settings.get("locale", "en")
+                return str(settings.get("locale", "en"))
         except Exception:
             pass
         return "en"

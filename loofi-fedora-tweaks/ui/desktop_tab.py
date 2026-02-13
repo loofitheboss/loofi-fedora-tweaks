@@ -207,7 +207,7 @@ class DesktopTab(BaseTab):
 
         self.template_combo = QComboBox()
         for key, template in TilingManager.WORKSPACE_TEMPLATES.items():
-            self.template_combo.addItem(template["name"], key)
+            self.template_combo.addItem(str(template["name"]), key)
         template_layout.addWidget(self.template_combo)
 
         preview_btn = QPushButton(self.tr("Preview"))

@@ -11,7 +11,7 @@ Handles installation of version managers:
 import subprocess
 import shutil
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 from pathlib import Path
 
 
@@ -32,7 +32,7 @@ class DevToolsManager:
     """
 
     # Installation scripts (official sources)
-    INSTALLERS = {
+    INSTALLERS: dict[str, dict[str, Any]] = {
         "pyenv": {
             "name": "PyEnv",
             "check_cmd": "pyenv",

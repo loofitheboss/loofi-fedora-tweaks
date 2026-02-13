@@ -434,7 +434,8 @@ def build_agent_command(
             "claude-sonnet-4-20250514": "claude-sonnet-4-20250514",
             "claude-haiku-3-5-20241022": "claude-haiku-3-5-20241022",
         }
-        resolved_model = claude_model_map.get(model, "claude-sonnet-4-20250514")
+        resolved_model = claude_model_map.get(
+            model, "claude-sonnet-4-20250514")
         write_tools = "Edit,Write,Bash,Read,MultiEdit"
         read_tools = "Read,Bash"
         allowed_tools = read_tools if sandbox == "read-only" else write_tools

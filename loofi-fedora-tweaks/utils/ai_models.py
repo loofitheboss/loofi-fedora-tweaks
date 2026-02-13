@@ -12,7 +12,7 @@ Provides:
 import subprocess
 import shutil
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -24,7 +24,7 @@ class Result:
 
 
 # Recommended quantized models optimized for local use on constrained hardware
-RECOMMENDED_MODELS = {
+RECOMMENDED_MODELS: dict[str, dict[str, Any]] = {
     "llama3.2:1b": {
         "name": "Llama 3.2 (1B)",
         "size": "1.3 GB",
@@ -151,12 +151,12 @@ class AIModelManager:
         # Sort by ram_required descending so we pick the most capable first
         candidates = sorted(
             RECOMMENDED_MODELS.items(),
-            key=lambda item: item[1]["ram_required"],
+            key=lambda item: int(item[1]["ram_required"]),
             reverse=True,
         )
 
         for model_id, info in candidates:
-            if info["ram_required"] <= available_ram_mb:
+            if int(info["ram_required"]) <= available_ram_mb:
                 return {
                     "id": model_id,
                     "name": info["name"],
@@ -194,11 +194,12 @@ class AIModelManager:
             )
 
             output_lines = []
-            for line in process.stdout:
-                stripped = line.strip()
-                output_lines.append(stripped)
-                if callback:
-                    callback(stripped)
+            if process.stdout:
+                for line in process.stdout:
+                    stripped = line.strip()
+                    output_lines.append(stripped)
+                    if callback:
+                        callback(stripped)
 
             process.wait()
 
@@ -275,7 +276,7 @@ class AIModelManager:
         """
         # Check if it's in our catalog first
         if model_name in RECOMMENDED_MODELS:
-            return RECOMMENDED_MODELS[model_name]["ram_required"]
+            return int(RECOMMENDED_MODELS[model_name]["ram_required"])
 
         # Try to parse parameter count from the name
         name_lower = model_name.lower()

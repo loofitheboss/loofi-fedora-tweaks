@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -217,7 +217,7 @@ class UpdateChecker:
         if info is None:
             return AutoUpdateResult(success=False, stage="check", error=ERR_NETWORK, offline=True, source="network")
 
-        base_result = {
+        base_result: dict[str, Any] = {
             "update_info": info,
             "offline": info.offline,
             "source": info.source,

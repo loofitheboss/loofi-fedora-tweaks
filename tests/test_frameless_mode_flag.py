@@ -11,8 +11,15 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock
 
-# Skip in CI environments (Qt offscreen crashes with SIGABRT on headless runners)
-_IN_CI = os.environ.get("CI", "") == "true" or os.environ.get("GITHUB_ACTIONS", "") == "true"
+# Skip in CI or offscreen environments — creating real MainWindow spawns
+# EventBus threads that leak and cause SIGABRT when running the full suite.
+# Logic is already covered by test_frameless_logic.py (no Qt needed).
+_SKIP_REASON = "Skipped — real MainWindow leaks EventBus threads. Logic covered by test_frameless_logic.py"
+_SKIP = (
+    os.environ.get("CI", "") == "true"
+    or os.environ.get("GITHUB_ACTIONS", "") == "true"
+    or os.environ.get("QT_QPA_PLATFORM", "") == "offscreen"
+)
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 try:
@@ -21,7 +28,7 @@ except ImportError:
     QApplication = None
 
 
-@unittest.skipIf(_IN_CI, "Skipped in CI — Qt widget tests crash on headless runners. Logic covered by test_frameless_logic.py")
+@unittest.skipIf(_SKIP, _SKIP_REASON)
 class TestFramelessModeFlag(unittest.TestCase):
     """Test frameless mode feature flag logic."""
 

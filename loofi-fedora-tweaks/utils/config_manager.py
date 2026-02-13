@@ -78,7 +78,7 @@ class ConfigManager:
     @classmethod
     def gather_repo_settings(cls) -> dict:
         """Gather enabled repositories."""
-        repos = {"enabled": [], "disabled": []}
+        repos: dict[str, list[str]] = {"enabled": [], "disabled": []}
 
         try:
             result = subprocess.run(
@@ -266,7 +266,8 @@ class ConfigManager:
         """Load saved config."""
         try:
             with open(cls.CONFIG_FILE, "r") as f:
-                return json.load(f)
+                config: dict = json.load(f)
+                return config
         except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to load config: %s", e)
             return None

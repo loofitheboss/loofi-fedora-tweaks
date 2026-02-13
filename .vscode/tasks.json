@@ -141,9 +141,17 @@
       "label": "Dev: Run Tests",
       "type": "shell",
       "command": "python3",
-      "args": ["-m", "pytest", "tests/", "-v", "--tb=short"],
+      "args": [
+        "-m",
+        "pytest",
+        "tests/",
+        "-v",
+        "--tb=short"
+      ],
       "options": {
-        "env": { "PYTHONPATH": "loofi-fedora-tweaks" }
+        "env": {
+          "PYTHONPATH": "loofi-fedora-tweaks"
+        }
       },
       "group": "test",
       "problemMatcher": []
@@ -152,7 +160,11 @@
       "label": "Dev: Lint",
       "type": "shell",
       "command": "flake8",
-      "args": ["loofi-fedora-tweaks/", "--max-line-length=150", "--ignore=E501,W503,E402,E722"],
+      "args": [
+        "loofi-fedora-tweaks/",
+        "--max-line-length=150",
+        "--ignore=E501,W503,E402,E722"
+      ],
       "group": "test",
       "problemMatcher": []
     },
@@ -160,7 +172,11 @@
       "label": "Dev: Typecheck",
       "type": "shell",
       "command": "mypy",
-      "args": ["loofi-fedora-tweaks/", "--ignore-missing-imports", "--no-error-summary"],
+      "args": [
+        "loofi-fedora-tweaks/",
+        "--ignore-missing-imports",
+        "--no-error-summary"
+      ],
       "group": "test",
       "problemMatcher": []
     },
@@ -168,21 +184,31 @@
       "label": "Dev: Project Stats",
       "type": "shell",
       "command": "python3",
-      "args": ["scripts/project_stats.py", "--markdown"],
+      "args": [
+        "scripts/project_stats.py",
+        "--markdown"
+      ],
       "problemMatcher": []
     },
     {
       "label": "Dev: Render Templates",
       "type": "shell",
       "command": "python3",
-      "args": ["scripts/sync_ai_adapters.py", "--render"],
+      "args": [
+        "scripts/sync_ai_adapters.py",
+        "--render"
+      ],
       "problemMatcher": []
     },
     {
       "label": "Dev: Bump Version (dry-run)",
       "type": "shell",
       "command": "python3",
-      "args": ["scripts/bump_version.py", "--dry-run", "${input:bumpVersion}"],
+      "args": [
+        "scripts/bump_version.py",
+        "--dry-run",
+        "${input:bumpVersion}"
+      ],
       "problemMatcher": []
     }
   ],

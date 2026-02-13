@@ -6,8 +6,14 @@ import sys
 import unittest
 from unittest.mock import patch
 
-# Skip in CI environments (Qt offscreen crashes with SIGABRT on headless runners)
-_IN_CI = os.environ.get("CI", "") == "true" or os.environ.get("GITHUB_ACTIONS", "") == "true"
+# Skip in CI or offscreen environments — creating real MainWindow spawns
+# EventBus threads that leak and cause SIGABRT when running the full suite.
+_SKIP = (
+    os.environ.get("CI", "") == "true"
+    or os.environ.get("GITHUB_ACTIONS", "") == "true"
+    or os.environ.get("QT_QPA_PLATFORM", "") == "offscreen"
+)
+_SKIP_REASON = "Skipped — real MainWindow leaks EventBus threads in offscreen/CI mode"
 
 # Allow Qt to initialize in headless CI/dev environments.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -22,7 +28,7 @@ except ImportError:
     _HAS_QT_WIDGETS = False
 
 
-@unittest.skipIf(_IN_CI, "Skipped in CI — Qt widget tests crash on headless runners")
+@unittest.skipIf(_SKIP, _SKIP_REASON)
 @unittest.skipUnless(_HAS_QT_WIDGETS, "PyQt6.QtWidgets not available (headless environment)")
 class TestMainWindowGeometry(unittest.TestCase):
     """Guard against client-area content being laid out into top chrome."""

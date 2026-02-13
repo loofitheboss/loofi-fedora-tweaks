@@ -119,7 +119,8 @@ def sync_directory(mapping: DirMapping, check: bool, diffs: list[str]) -> None:
         return
 
     source_files = list(iter_relative_files(mapping.source))
-    target_files = list(iter_relative_files(mapping.target)) if mapping.target.exists() else []
+    target_files = list(iter_relative_files(mapping.target)
+                        ) if mapping.target.exists() else []
 
     for rel in source_files:
         source_file = mapping.source / rel
@@ -161,7 +162,8 @@ def write_codex_adapter_manifest(check: bool, diffs: list[str]) -> None:
 
 def archive_legacy_workflow(check: bool, diffs: list[str]) -> None:
     legacy_file = ROOT / ".claude" / "workflow" / "tasks-v23.0.md"
-    archive_file = ROOT / ".claude" / "archive" / "workflow-legacy" / "tasks-v23.0.md"
+    archive_file = ROOT / ".claude" / "archive" / \
+        "workflow-legacy" / "tasks-v23.0.md"
     if not legacy_file.exists():
         return
 
@@ -207,7 +209,8 @@ def load_stats() -> dict[str, str]:
                 check=True,
             )
     if not STATS_FILE.exists():
-        print("[sync-ai] ERROR: .project-stats.json not found. Run: python3 scripts/project_stats.py")
+        print(
+            "[sync-ai] ERROR: .project-stats.json not found. Run: python3 scripts/project_stats.py")
         sys.exit(1)
 
     raw = json.loads(STATS_FILE.read_text(encoding="utf-8"))
@@ -257,8 +260,10 @@ def run(check: bool) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Sync AI adapter files from canonical .github sources")
-    parser.add_argument("--check", action="store_true", help="Only verify drift; do not write changes")
+    parser = argparse.ArgumentParser(
+        description="Sync AI adapter files from canonical .github sources")
+    parser.add_argument("--check", action="store_true",
+                        help="Only verify drift; do not write changes")
     parser.add_argument("--render", action="store_true",
                         help="Substitute {{variable}} templates using .project-stats.json")
     args = parser.parse_args()

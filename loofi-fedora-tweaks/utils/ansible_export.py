@@ -73,7 +73,7 @@ class AnsibleExporter:
     @classmethod
     def _get_gnome_settings(cls) -> dict[str, Any]:
         """Get relevant GNOME/GTK settings."""
-        settings = {}
+        settings: dict[str, Any] = {}
 
         if not shutil.which("gsettings"):
             return settings
@@ -153,7 +153,7 @@ class AnsibleExporter:
             YAML playbook as string.
         """
         tasks = []
-        vars_section = {}
+        vars_section: dict[str, Any] = {}
 
         # Header comment with disclaimer
         header = f"""---
@@ -241,9 +241,9 @@ class AnsibleExporter:
         }]
 
         # Convert to YAML (manual formatting for readability)
-        import yaml
+        import yaml  # type: ignore[import-untyped]
         try:
-            yaml_content = yaml.dump(playbook, default_flow_style=False, sort_keys=False,
+            yaml_content: str = yaml.dump(playbook, default_flow_style=False, sort_keys=False,
                                      allow_unicode=True, width=120)
         except ImportError:
             # Fallback to json if yaml not available
