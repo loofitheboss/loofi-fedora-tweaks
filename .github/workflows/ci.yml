@@ -103,7 +103,7 @@ jobs:
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install bandit
       - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B404,B603,B602 -f json -o bandit-report.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: security-report
@@ -117,7 +117,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install -y flatpak flatpak-builder
       - run: bash scripts/build_flatpak.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: flatpak-artifacts
@@ -138,7 +138,7 @@ jobs:
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/appimagetool
       - run: bash scripts/build_appimage.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: appimage-artifacts
@@ -156,7 +156,7 @@ jobs:
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install build setuptools wheel
       - run: bash scripts/build_sdist.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: sdist-artifacts
