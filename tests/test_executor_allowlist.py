@@ -2,6 +2,8 @@
 Tests for API executor command allowlist validation (Security Fix).
 Verifies that only allowed commands can be executed via the API.
 """
+from __future__ import annotations
+
 import unittest
 import sys
 import os

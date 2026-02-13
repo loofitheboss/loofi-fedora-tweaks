@@ -42,7 +42,7 @@ class TestOllamaManager(unittest.TestCase):
     @patch('utils.ai.OllamaManager.is_installed', return_value=False)
     @patch('utils.ai.subprocess.run')
     @patch('utils.ai.os.unlink')
-    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    @patch('tempfile.NamedTemporaryFile')
     def test_install_success(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
         """Test successful Ollama installation."""
         # Mock temp file
@@ -73,7 +73,7 @@ class TestOllamaManager(unittest.TestCase):
     @patch('utils.ai.OllamaManager.is_installed', return_value=False)
     @patch('utils.ai.subprocess.run')
     @patch('utils.ai.os.unlink')
-    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    @patch('tempfile.NamedTemporaryFile')
     def test_install_download_failure(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
         """Test Ollama installation when download fails."""
         # Mock temp file
@@ -91,7 +91,7 @@ class TestOllamaManager(unittest.TestCase):
     @patch('utils.ai.OllamaManager.is_installed', return_value=False)
     @patch('utils.ai.subprocess.run')
     @patch('utils.ai.os.unlink')
-    @patch('utils.ai.tempfile.NamedTemporaryFile')
+    @patch('tempfile.NamedTemporaryFile')
     def test_install_execution_failure(self, mock_temp, mock_unlink, mock_run, mock_is_installed):
         """Test Ollama installation when script execution fails."""
         # Mock temp file
