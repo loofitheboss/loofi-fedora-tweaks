@@ -17,6 +17,7 @@ from utils.config_manager import ConfigManager
 from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
 from core.plugins import PluginRegistry, PluginInterface
 from core.plugins.metadata import PluginMetadata, CompatStatus
+from utils.favorites import FavoritesManager
 from version import __version__
 import os
 import logging
@@ -103,6 +104,8 @@ class MainWindow(QMainWindow):
         self.sidebar_search = QLineEdit()
         self.sidebar_search.setPlaceholderText(self.tr("Search tabs..."))
         self.sidebar_search.setClearButtonEnabled(True)
+        self.sidebar_search.setAccessibleName(self.tr("Search tabs"))
+        self.sidebar_search.setAccessibleDescription(self.tr("Filter sidebar tabs by name or description"))
         # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
         search_height = int(self._line_height * 2 + 28)
         self.sidebar_search.setFixedHeight(search_height)
@@ -117,11 +120,15 @@ class MainWindow(QMainWindow):
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.sidebar.setHeaderHidden(True)
+        self.sidebar.setAccessibleName(self.tr("Navigation sidebar"))
         self.sidebar.setIndentation(20)
         self.sidebar.setRootIsDecorated(True)
         self.sidebar.setUniformRowHeights(True)
         self.sidebar.setAnimated(True)
         self.sidebar.currentItemChanged.connect(self.change_page)
+        # v31.0: Context menu for favorites
+        self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
         sidebar_layout.addWidget(self.sidebar)
 
         # Sidebar footer
@@ -202,6 +209,9 @@ class MainWindow(QMainWindow):
             "executor": None,                 # populated after executor init
         }
         self._build_sidebar_from_registry(context)
+
+        # v31.0: Build favorites section at top of sidebar
+        self._build_favorites_section()
 
         # Expand first category by default (Dashboard)
         if self.sidebar.topLevelItemCount() > 0:
@@ -291,6 +301,78 @@ class MainWindow(QMainWindow):
             self.pulse_thread.start()
         except Exception:
             pass
+
+    def _build_favorites_section(self):
+        """Build a ⭐ Favorites category at the top of the sidebar with pinned tabs."""
+        favorites = FavoritesManager.get_favorites()
+        if not favorites:
+            return
+
+        # Create Favorites category at position 0
+        fav_category = QTreeWidgetItem()
+        fav_category.setText(0, "⭐ Favorites")
+        fav_category.setExpanded(True)
+        self.sidebar.insertTopLevelItem(0, fav_category)
+
+        # Find matching page widgets and duplicate entries under Favorites
+        for fav_id in favorites:
+            for name, widget in self.pages.items():
+                # Match by tab name (case-insensitive)
+                if name.lower().replace(" ", "_") == fav_id or name.lower() == fav_id:
+                    item = QTreeWidgetItem(fav_category)
+                    item.setText(0, f"📌  {name}")
+                    item.setData(0, _ROLE_DESC, f"Pinned: {name}")
+
+                    # Find the original widget in the content area
+                    for i in range(self.sidebar.topLevelItemCount()):
+                        cat = self.sidebar.topLevelItem(i)
+                        if cat == fav_category:
+                            continue
+                        for j in range(cat.childCount()):
+                            child = cat.child(j)
+                            if name in child.text(0) and child.data(0, Qt.ItemDataRole.UserRole):
+                                item.setData(0, Qt.ItemDataRole.UserRole,
+                                             child.data(0, Qt.ItemDataRole.UserRole))
+                                break
+                    break
+
+    def _sidebar_context_menu(self, pos):
+        """Show context menu for sidebar items with favorite toggle."""
+        item = self.sidebar.itemAt(pos)
+        if not item or not item.data(0, Qt.ItemDataRole.UserRole):
+            return
+
+        from PyQt6.QtWidgets import QMenu
+
+        # Extract tab name (strip icon prefix and badge suffixes)
+        raw_name = item.text(0).replace("  ★", "").replace("  ⚙", "")
+        # Remove emoji prefix (first 2-3 chars + spaces)
+        parts = raw_name.split("  ", 1)
+        tab_name = parts[1] if len(parts) > 1 else raw_name.strip()
+        tab_id = tab_name.lower().replace(" ", "_")
+
+        menu = QMenu(self)
+        is_fav = FavoritesManager.is_favorite(tab_id)
+
+        if is_fav:
+            action = menu.addAction(self.tr("⭐ Remove from Favorites"))
+        else:
+            action = menu.addAction(self.tr("⭐ Add to Favorites"))
+
+        result = menu.exec(self.sidebar.mapToGlobal(pos))
+        if result == action:
+            FavoritesManager.toggle_favorite(tab_id)
+            self._rebuild_favorites_section()
+
+    def _rebuild_favorites_section(self):
+        """Remove and rebuild the favorites section."""
+        # Remove existing favorites category
+        for i in range(self.sidebar.topLevelItemCount()):
+            item = self.sidebar.topLevelItem(i)
+            if item and "Favorites" in item.text(0):
+                self.sidebar.takeTopLevelItem(i)
+                break
+        self._build_favorites_section()
 
     def add_page(
         self,

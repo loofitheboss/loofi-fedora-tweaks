@@ -8,12 +8,13 @@ original AppsTab and ReposTab.
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
-    QGroupBox, QScrollArea, QFrame, QTabWidget
+    QGroupBox, QScrollArea, QFrame, QTabWidget, QCheckBox
 )
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
+from utils.batch_ops import BatchOpsManager
 from core.plugins.metadata import PluginMetadata
 
 import shlex
@@ -49,6 +50,22 @@ class _ApplicationsSubTab(QWidget):
         header_layout.addWidget(btn_refresh)
         layout.addLayout(header_layout)
 
+        # v31.0: Batch action buttons
+        batch_layout = QHBoxLayout()
+        batch_layout.addStretch()
+        self.btn_batch_install = QPushButton(self.tr("📥 Install Selected"))
+        self.btn_batch_install.setAccessibleName(self.tr("Install selected packages"))
+        self.btn_batch_install.clicked.connect(self._batch_install)
+        self.btn_batch_install.setEnabled(False)
+        batch_layout.addWidget(self.btn_batch_install)
+
+        self.btn_batch_remove = QPushButton(self.tr("🗑️ Remove Selected"))
+        self.btn_batch_remove.setAccessibleName(self.tr("Remove selected packages"))
+        self.btn_batch_remove.clicked.connect(self._batch_remove)
+        self.btn_batch_remove.setEnabled(False)
+        batch_layout.addWidget(self.btn_batch_remove)
+        layout.addLayout(batch_layout)
+
         # Scroll Area for apps list
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -56,6 +73,11 @@ class _ApplicationsSubTab(QWidget):
         self.scroll_layout = QVBoxLayout()
         self.scroll_content.setLayout(self.scroll_layout)
         scroll.setWidget(self.scroll_content)
+
+        layout.addWidget(scroll)
+
+        # Track checkboxes for batch selection
+        self._app_checkboxes: list = []
 
         layout.addWidget(scroll)
 
@@ -101,12 +123,14 @@ class _ApplicationsSubTab(QWidget):
             if widget:
                 widget.deleteLater()
 
+        self._app_checkboxes.clear()
         for app in self.apps:
             self.add_app_row(self.scroll_layout, app)
         self.scroll_layout.addStretch()
+        self._update_batch_buttons()
 
     def add_app_row(self, layout, app_data):
-        """Add a single app row with name, description, and install button."""
+        """Add a single app row with checkbox, name, description, and install button."""
         row_widget = QFrame()
         row_widget.setFrameShape(QFrame.Shape.StyledPanel)
         row_layout = QHBoxLayout()
@@ -115,6 +139,13 @@ class _ApplicationsSubTab(QWidget):
         # Defensive access for potentially missing keys
         app_name = app_data.get("name", "Unknown App")
         app_desc = app_data.get("desc", app_data.get("description", ""))
+
+        # v31.0: Batch selection checkbox
+        chk = QCheckBox()
+        chk.setAccessibleName(self.tr("Select {}").format(app_name))
+        chk.stateChanged.connect(self._update_batch_buttons)
+        row_layout.addWidget(chk)
+        self._app_checkboxes.append((chk, app_data))
 
         lbl_name = QLabel(f"<b>{app_name}</b>")
         lbl_desc = QLabel(app_desc)
@@ -179,6 +210,54 @@ class _ApplicationsSubTab(QWidget):
         # Refresh list to update status if installation succeeded
         if exit_code == 0:
             self.refresh_list()
+
+    # v31.0: Batch operations
+
+    def _update_batch_buttons(self, _state=None):
+        """Enable/disable batch buttons based on selection."""
+        selected = self._get_selected_packages()
+        has_selection = len(selected) > 0
+        self.btn_batch_install.setEnabled(has_selection)
+        self.btn_batch_remove.setEnabled(has_selection)
+
+    def _get_selected_packages(self) -> list:
+        """Return list of package names from checked checkboxes."""
+        packages = []
+        for chk, app_data in self._app_checkboxes:
+            if chk.isChecked():
+                # Use cmd args to extract package name, fallback to app name
+                name = app_data.get("name", "")
+                args = app_data.get("args", [])
+                if args:
+                    # Last arg is usually the package name
+                    packages.append(args[-1])
+                elif name:
+                    packages.append(name.lower().replace(" ", "-"))
+        return packages
+
+    def _batch_install(self):
+        """Install all selected packages."""
+        packages = self._get_selected_packages()
+        if not packages:
+            return
+        self.output_area.clear()
+        self.append_output(
+            self.tr("Batch installing: {}\n").format(", ".join(packages))
+        )
+        binary, args, desc = BatchOpsManager.batch_install(packages)
+        self.runner.run_command(binary, args)
+
+    def _batch_remove(self):
+        """Remove all selected packages."""
+        packages = self._get_selected_packages()
+        if not packages:
+            return
+        self.output_area.clear()
+        self.append_output(
+            self.tr("Batch removing: {}\n").format(", ".join(packages))
+        )
+        binary, args, desc = BatchOpsManager.batch_remove(packages)
+        self.runner.run_command(binary, args)
 
 
 # ---------------------------------------------------------------------------

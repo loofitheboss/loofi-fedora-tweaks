@@ -18,13 +18,14 @@
 | v28.0 | Workflow Contract Reset | DONE | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
 | v29.0 | Usability & Polish | DONE | UX polish, skipped v22 scope, error handling, accessibility, CORS |
 | v30.0 | Distribution & Reliability | DONE | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
-| v31.0 | Smart UX | NEXT | Health score, i18n, batch ops, export report, plugin template |
+| v31.0 | Smart UX | ACTIVE | Health score, i18n, batch ops, export report, plugin template |
 
 ---
 
 ## [DONE] v21.0 — UX Stabilization & Layout Integrity
 
 ### Scope
+
 - Fix title/top-bar overlap
 - Scope QTabBar scroller styling
 - Enforce consistent root layout margins
@@ -32,6 +33,7 @@
 - No frameless hacks unless fully implemented
 
 ### Deliverables
+
 - [x] Top bar glitch fixed
 - [x] QSS scoped to QTabBar
 - [x] Layout margins consistent (16px)
@@ -45,12 +47,14 @@
 ## [DONE] v23.0 — Architecture Hardening
 
 ### Scope
+
 - Introduce `ui/`, `core/`, `services/`, `utils/` boundaries
 - Single subprocess wrapper (BaseActionExecutor)
 - QThread/QRunnable for long ops
 - GitHub Actions: lint + test + RPM build
 
 ### Deliverables
+
 - [x] BaseActionExecutor ABC in core/executor/
 - [x] ActionResult wrapper
 - [x] Service layer directories created
@@ -61,6 +65,7 @@
 - [x] CHANGELOG + README finalized
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Arkitekt | Approve folder structure, executor design |
@@ -74,6 +79,7 @@
 ## [SKIPPED] v22.0 — Usability & Workflow Enhancements
 
 ### Scope
+
 - Search/filter tweaks across all tabs
 - Applied status indicators (visual feedback)
 - Reset per group
@@ -81,6 +87,7 @@
 - Persistent preferences
 
 ### Deliverables
+
 - [ ] Search bar in sidebar/toolbar
 - [ ] Filter logic across tab content
 - [ ] Status badges on applied tweaks
@@ -91,6 +98,7 @@
 - [ ] CHANGELOG + README + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Manager | Define search + status plan |
@@ -108,12 +116,14 @@
 ## [DONE] v24.0 — Advanced Power Features
 
 ### Scope
+
 - Profiles (save/load tweak configurations)
 - JSON import/export
 - Live log panel
 - System snapshot before apply
 
 ### Deliverables
+
 - [x] Profile dataclass + storage
 - [x] Save/load profile UI
 - [x] JSON export/import endpoints
@@ -124,6 +134,7 @@
 - [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Builder | Profiles, JSON export/import |
@@ -142,6 +153,7 @@
 ## [DONE] v25.0 — Plugin Architecture + UI Redesign
 
 ### Scope
+
 - Tweaks self-register as modules
 - Dynamic loading
 - Clear API boundary
@@ -150,6 +162,7 @@
 - Sidebar redesign
 
 ### Deliverables
+
 - [x] Plugin interface definition
 - [x] Plugin loader implementation
 - [x] Plugin registration tests
@@ -161,6 +174,7 @@
 - [x] CHANGELOG + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Arkitekt | Define plugin interface |
@@ -180,11 +194,13 @@
 ## [DONE] v25.0.3 — Maintenance Update Crash Hotfix
 
 ### Scope
+
 - Fix Maintenance update action crash on button press
 - Keep update flow consistent with existing command runner behavior
 - Add regression coverage for update command selection/queue startup
 
 ### Deliverables
+
 - [x] Update handlers use stable command-runner execution path
 - [x] `Update All` starts with system package-manager update step
 - [x] Regression tests for maintenance update flow
@@ -193,6 +209,7 @@
 ## [DONE] v26.0 — Plugin Marketplace
 
 ### Scope
+
 - Unified plugin system (bridge core/plugins ↔ utils/plugin_base)
 - External plugin loading, install/uninstall engine
 - Plugin package format (.loofi-plugin archive)
@@ -205,6 +222,7 @@
 - Plugin auto-update service
 
 ### Deliverables
+
 - [x] PluginAdapter (wraps LoofiPlugin as PluginInterface)
 - [x] PluginPackage dataclass + archive format spec
 - [x] PluginSandbox (permission enforcement layer)
@@ -223,6 +241,7 @@
 - [x] RPM built and tested (v26.0.0)
 
 ### Phases
+
 | Phase | Tasks | Status | Gate |
 |-------|-------|--------|------|
 | Foundation | T1–T8: Adapter, package, sandbox, loader, installer, integrity, marketplace API, resolver | ✅ DONE | All core modules importable, unit tests pass |
@@ -231,6 +250,7 @@
 | Release | T23–T27: Version, docs, changelog, RPM | ✅ DONE | v26.0.0 released (2026-02-12) |
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Arkitekt | PluginAdapter design, package format spec |
@@ -241,10 +261,12 @@
 | Planner | Version bump, PLUGIN_SDK.md, CHANGELOG, release notes |
 
 ### Dependencies
+
 - v25.0 plugin architecture (PluginInterface, PluginRegistry, PluginLoader)
 - v24.0 profiles (plugin configs)
 
 ### New Files (17)
+
 - `core/plugins/adapter.py`, `package.py`, `sandbox.py`, `scanner.py`, `integrity.py`, `resolver.py`
 - `utils/plugin_installer.py`, `plugin_marketplace.py`, `plugin_updater.py`
 - `ui/plugin_detail_dialog.py`, `permission_dialog.py`
@@ -255,6 +277,7 @@
 ## [DONE] v27.0 — Marketplace Enhancement
 
 ### Scope
+
 - Replace GitHub-based marketplace index with dedicated CDN-backed index
 - Add plugin ratings and reviews (read/write integration)
 - Add verified publisher badges
@@ -263,6 +286,7 @@
 - Strengthen plugin sandbox with OS-level isolation
 
 ### Deliverables
+
 - [x] CDN marketplace client + signed index schema
 - [x] Marketplace API/provider abstraction updated to CDN-first with fallback
 - [x] Ratings/reviews models and backend integration
@@ -275,6 +299,7 @@
 - [x] CHANGELOG + README + release notes + RPM validation
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Arkitekt | CDN/index contract, isolation design |
@@ -285,6 +310,7 @@
 | Planner | Versioning, docs, release checklist and packaging |
 
 ### Dependencies
+
 - v26.0 plugin marketplace baseline
 - v25.0 plugin architecture (PluginInterface/Registry/Loader)
 
@@ -293,11 +319,13 @@
 ## [DONE] v28.0 — Workflow Contract Reset
 
 ### Scope
+
 - Establish clean-slate workflow state for a new cycle
 - Create runner-compatible P1 planning artifact format for v28
 - Align planning handoff assets with workflow runner contract checks
 
 ### Deliverables
+
 - [x] `ROADMAP.md` marks exactly one ACTIVE target (v28.0)
 - [x] `.workflow/specs/tasks-v28.0.0.md` follows task contract markers
 - [x] `.workflow/specs/.race-lock.json` targets `v28.0.0` in active state
@@ -305,6 +333,7 @@
 - [x] Kickoff planning tasks include implementation, tests, and docs workstreams
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Manager | Decompose v28 kickoff tasks and dependencies |
@@ -314,6 +343,7 @@
 | Planner | Finalize docs + release-trace updates |
 
 ### Dependencies
+
 - v27.0 completion artifacts
 - `scripts/workflow_runner.py` contract validation rules
 
@@ -322,6 +352,7 @@
 ## [DONE] v29.0 — Usability & Polish
 
 ### Scope
+
 - Reclaim skipped v22.0 features (search, status indicators, confirm dialogs, reset per group)
 - Centralized error handler with recovery hints
 - In-app notification toast UI
@@ -331,6 +362,7 @@
 - CI coverage raised to 75%+ (achieved: 76.8%)
 
 ### Deliverables
+
 - [x] Centralized error handler (sys.excepthook + LoofiError routing)
 - [x] ConfirmActionDialog for dangerous operations
 - [x] Notification toast wired to NotificationCenter
@@ -345,6 +377,7 @@
 - [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | CodeGen | Error handler, confirm dialog, CORS, sparkline fix |
@@ -354,6 +387,7 @@
 | Planner | Docs, packaging, release |
 
 ### Dependencies
+
 - v28.0 workflow state (clean baseline)
 
 ---
@@ -361,6 +395,7 @@
 ## [DONE] v30.0 — Distribution & Reliability
 
 ### Scope
+
 - Implement Flatpak packaging (build_flatpak.sh)
 - Implement AppImage packaging (build_appimage.sh)
 - Implement sdist packaging (build_sdist.sh + pyproject.toml)
@@ -371,6 +406,7 @@
 - CI coverage maintained at 75%+ (baseline: 76.8%)
 
 ### Deliverables
+
 - [x] build_flatpak.sh implemented
 - [x] build_appimage.sh implemented
 - [x] build_sdist.sh + pyproject.toml
@@ -384,6 +420,7 @@
 - [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Builder | Packaging scripts, auto-update, offline mode |
@@ -392,13 +429,15 @@
 | Planner | Release checklist |
 
 ### Dependencies
+
 - v29.0 usability polish
 
 ---
 
-## [PLANNED] v31.0 — Smart UX
+## [ACTIVE] v31.0 — Smart UX
 
 ### Scope
+
 - System health score (aggregate dashboard metric)
 - i18n scaffolding (Qt Linguist workflow, English + Swedish)
 - Batch operations in Software/Maintenance tabs
@@ -410,6 +449,7 @@
 - CI coverage raised to 80%
 
 ### Deliverables
+
 - [ ] Health score widget on Dashboard
 - [ ] i18n infrastructure (ts/qm extraction, locale loading)
 - [ ] Batch install/remove in Software tab
@@ -422,6 +462,7 @@
 - [ ] CHANGELOG + README + release notes
 
 ### Agent Assignment
+
 | Agent | Task |
 |-------|------|
 | Arkitekt | Health score design, i18n architecture |
@@ -432,6 +473,7 @@
 | Planner | Release planning |
 
 ### Dependencies
+
 - v30.0 distribution infrastructure
 
 ---
