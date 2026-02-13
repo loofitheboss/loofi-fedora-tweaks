@@ -1,5 +1,7 @@
 # Loofi Fedora Tweaks — AI Coding Instructions
 
+> **Version**: See `loofi-fedora-tweaks/version.py` for current version. See `ROADMAP.md` for active development phase.
+
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
@@ -21,9 +23,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## V17.0 Tab Layout (25 tabs)
+## Tab Layout (25 tabs)
 
-The app has 25 tabs as of v17.0:
+The app has 25 tabs:
 
 | Tab | Consolidates | File |
 |-----|-------------|------|

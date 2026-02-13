@@ -6,6 +6,7 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 
 ## KEY FILES (READ THESE, DON'T REPEAT THEIR CONTENT)
 - `ROADMAP.md` — Version scope, status, deliverables, agent assignments
+- `.github/agents/` — Canonical agent definitions (VS Code Copilot format)
 - `.github/claude-agents/` — Agent definitions (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
 - `.github/copilot-instructions.md` — Architecture and patterns reference
 - `AGENTS.md` — Quick reference for agent system and architecture
@@ -20,6 +21,9 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 ## AGENT SYSTEM
 
 7 specialized agents in `.github/claude-agents/`:
+
+Canonical definitions live in `.github/agents/*.agent.md`. Claude-specific adapters are in `.github/claude-agents/`.
+
 - **project-coordinator** — Task decomposition, coordination, dependency ordering
 - **architecture-advisor** — Architectural design, module structure
 - **test-writer** — Test creation, mocking, coverage
@@ -62,7 +66,6 @@ See `.github/workflow/model-router.md` for full rules.
 **Target: 60% of work on haiku, 30% sonnet, 10% opus**
 
 ## CONTEXT COMPRESSION RULES
-1. CONTEXT COMPRESSION RULES
 1. Read context files once, reference by name after
 2. ROADMAP.md is truth — don't copy scope into prompts
 3. Use bullet lists only, no paragraphs

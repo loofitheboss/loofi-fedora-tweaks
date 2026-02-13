@@ -16,3 +16,13 @@ packages = []
 
 [tool.setuptools.package-data]
 "*" = ["*.md", "*.json", "*.yml", "*.yaml", "*.desktop", "*.service", "*.policy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 60
+addopts = "-v --tb=short"
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_return_any = true
+no_error_summary = true
