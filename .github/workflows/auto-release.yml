@@ -253,9 +253,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder
-      - name: Add Flathub remote
+      - name: Add Flathub remote and install SDK
         run: |
           sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y --noninteractive flathub org.kde.Platform//6.6 org.kde.Sdk//6.6
       - name: Build Flatpak
         run: bash scripts/build_flatpak.sh
       - uses: actions/upload-artifact@v4
