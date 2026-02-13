@@ -94,7 +94,7 @@ jobs:
 
       - name: Validate packaging scripts
         run: |
-          for script in scripts/build_rpm.sh scripts/build_flatpak.sh scripts/build_appimage.sh scripts/build_sdist.sh; do
+          for script in scripts/build_rpm.sh scripts/build_flatpak.sh scripts/build_sdist.sh; do
             if [ -f "$script" ]; then
               echo "✓ $script exists"
               if [ -x "$script" ]; then
@@ -265,36 +265,6 @@ jobs:
           path: dist/flatpak/*.flatpak
           if-no-files-found: warn
 
-  build_appimage:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    continue-on-error: true
-    needs: [validate, adapter_drift, lint]
-    if: |
-      !cancelled() &&
-      needs.validate.result == 'success' &&
-      needs.lint.result == 'success'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install AppImage tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y appstream wget fuse libfuse2
-          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
-          chmod +x linuxdeploy
-          sudo mv linuxdeploy /usr/local/bin/linuxdeploy
-          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-          chmod +x appimagetool
-          sudo mv appimagetool /usr/local/bin/appimagetool
-      - name: Build AppImage
-        run: bash scripts/build_appimage.sh
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: appimage-package
-          path: dist/appimage/*.AppImage
-          if-no-files-found: warn
-
   build_sdist:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -331,7 +301,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-    needs: [validate, build, build_flatpak, build_appimage, build_sdist]
+    needs: [validate, build, build_flatpak, build_sdist]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -367,7 +337,7 @@ jobs:
     permissions:
       contents: write
     needs:
-      [validate, build, auto_tag, build_flatpak, build_appimage, build_sdist]
+      [validate, build, auto_tag, build_flatpak, build_sdist]
     steps:
       - name: Install release deps
         run: dnf install -y git python3 curl
@@ -402,14 +372,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: flatpak-package
-          path: release-assets
-
-      - name: Download AppImage artifact
-        if: steps.check_release.outputs.exists != 'true'
-        continue-on-error: true
-        uses: actions/download-artifact@v4
-        with:
-          name: appimage-package
           path: release-assets
 
       - name: Download sdist artifact

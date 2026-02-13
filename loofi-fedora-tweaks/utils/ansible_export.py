@@ -334,13 +334,14 @@ Edit `site.yml` to add or remove packages, apps, or settings before running.
             # Try basic YAML validation
             try:
                 import yaml
+            except ImportError:
+                return Result(True, "Unable to validate (yaml/ansible-lint not available)")
+            try:
                 with open(path) as f:
                     yaml.safe_load(f)
                 return Result(True, "YAML syntax is valid (ansible-lint not installed)")
             except yaml.YAMLError as e:
                 return Result(False, f"YAML syntax error: {e}")
-            except ImportError:
-                return Result(True, "Unable to validate (yaml/ansible-lint not available)")
 
         try:
             result = subprocess.run(
