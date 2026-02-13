@@ -67,6 +67,21 @@ For complex features, delegate to project-coordinator agent. For simple tasks, a
 - **`.github/claude-agents/`** — Agent definitions with role, tools, and workflows
 - **`.github/copilot-instructions.md`** — Architecture and patterns reference
 
+## VS Code Copilot Agents
+
+Agent definitions for VS Code Copilot Chat in `.github/agents/`:
+
+- **Arkitekt** — Architecture design (equivalent: architecture-advisor)
+- **Builder** — Backend implementation (equivalent: backend-builder)
+- **CodeGen** — Code generation (equivalent: code-implementer)
+- **Guardian** — Security and quality gates
+- **Manager** — Project coordination (equivalent: project-coordinator)
+- **Planner** — Release planning (equivalent: release-planner)
+- **Sculptor** — Frontend/UI integration (equivalent: frontend-integration-builder)
+- **Test** — Test creation and coverage (equivalent: test-writer)
+
+These are the canonical agent definitions. Claude agents in `.github/claude-agents/` are adapters generated from these.
+
 ## Testing
 
 ```bash

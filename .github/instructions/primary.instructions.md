@@ -20,7 +20,7 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 - `.github/claude-agents/` — 7 specialized agents (project-coordinator, architecture-advisor, test-writer, code-implementer, backend-builder, frontend-integration-builder, release-planner)
 - `AGENTS.md` — Quick reference for agent system and architecture
 - `.github/copilot-instructions.md` — Architecture and patterns reference
-- `.github/instructions/` — Primary AI instructions (claude 4.6, test)
+- `.github/instructions/` — Primary AI instructions (primary, workflow, test)
 
 ## TOKEN DISCIPLINE (CRITICAL)
 - Read context files once, reference by name after

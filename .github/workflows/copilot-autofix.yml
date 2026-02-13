@@ -1,0 +1,24 @@
+name: Copilot Auto-Fix
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  copilot-fix:
+    if: contains(github.event.issue.labels.*.name, 'copilot-fix')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/copilot-swe-agent@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          model: "claude-sonnet-4"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
