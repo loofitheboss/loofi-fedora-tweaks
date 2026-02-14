@@ -6,7 +6,7 @@
 
 ## Architecture
 
-```
+```text
 loofi-fedora-tweaks/
 ├── ui/*_tab.py       # PyQt6 tabs (inherit BaseTab)
 ├── utils/*.py        # Business logic (@staticmethod, operations tuples)

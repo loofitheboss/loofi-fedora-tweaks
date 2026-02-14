@@ -28,11 +28,11 @@ from subprocess import CalledProcessError
 # Add parent directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.[module] import [Class]
+from utils.example_module import ExampleClass
 from utils.errors import LoofiError, CommandFailedError
 
-class Test[Class](unittest.TestCase):
-    """Tests for [Class]."""
+class TestExampleClass(unittest.TestCase):
+    """Tests for ExampleClass."""
     
     def setUp(self):
         """Set up test fixtures if needed."""

@@ -23,7 +23,7 @@ sidebar behavior, and inline color palette have all been rebuilt from scratch.
 Previous 10 categories consolidated into 8 logical groups:
 
 | Category | Emoji | Tabs |
-|----------|-------|------|
+| ---------- | ------- | ------ |
 | Overview | 🏠 | Home, System Info, System Monitor |
 | Manage | 📦 | Software, Maintenance, Snapshots, Virtualization |
 | Hardware | 🔧 | Hardware, Performance, Storage, Gaming |

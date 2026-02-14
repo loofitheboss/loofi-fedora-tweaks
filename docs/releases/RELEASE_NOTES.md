@@ -39,7 +39,7 @@ See [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) for full details.
 ## Previous Releases
 
 | Version | Codename | Notes |
-|---------|----------|-------|
+| --------- | ---------- | ------- |
 | v31.0.0 | — | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
 | v30.0.0 | — | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
 | v29.0.0 | — | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |

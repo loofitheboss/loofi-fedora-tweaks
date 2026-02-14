@@ -264,18 +264,25 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _build_header(self):
         row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+
+        left_col = QVBoxLayout()
+        left_col.setContentsMargins(0, 0, 0, 0)
+        left_col.setSpacing(4)
 
         header = QLabel(self.tr("Welcome back, Loofi! 👋"))
         header.setObjectName("header")
-        row.addWidget(header)
-
-        row.addStretch()
+        left_col.addWidget(header)
 
         variant = SystemManager.get_variant_name()
         pkg_mgr = SystemManager.get_package_manager()
         badge = QLabel(f"💻 {variant} ({pkg_mgr})")
         badge.setObjectName("systemBadge")
-        row.addWidget(badge)
+        left_col.addWidget(badge, alignment=Qt.AlignmentFlag.AlignLeft)
+
+        row.addLayout(left_col)
+        row.addStretch()
         self._inner.addLayout(row)
 
         # Reboot banner (Atomic only)

@@ -7,7 +7,7 @@
 
 ## Project Structure
 
-```
+```text
 loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── main.py                   # Entry point — GUI (default), CLI (--cli), Daemon (--daemon)
 ├── version.py                # __version__, __version_codename__, __app_name__
@@ -58,7 +58,7 @@ completions/                  # Shell completions (bash, zsh)
 ## Three Entry Modes
 
 | Mode | Flag | Module | Purpose |
-|------|------|--------|---------|
+| ------ | ------ | -------- | --------- |
 | **GUI** | (default) | `main.py` → `MainWindow` | PyQt6 desktop app with 26 lazy-loaded tabs |
 | **CLI** | `--cli` | `cli/main.py` | Subcommands with `--json` output |
 | **Daemon** | `--daemon` | `utils/daemon.py` | Background scheduler |
@@ -66,7 +66,7 @@ completions/                  # Shell completions (bash, zsh)
 ## Layer Rules (STRICT)
 
 | Layer | Path | Allowed | Forbidden |
-|-------|------|---------|-----------|
+| ------- | ------ | --------- | ----------- |
 | **UI** | `ui/*_tab.py` | PyQt6 widgets, signals, BaseTab | `subprocess`, business logic, `import utils` for ops |
 | **Utils** | `utils/*.py` | Business logic, subprocess, system calls | `import PyQt6`, UI references |
 | **CLI** | `cli/main.py` | Argument parsing, calls utils/ | `import ui`, PyQt6 |
@@ -77,7 +77,7 @@ completions/                  # Shell completions (bash, zsh)
 ## Tab Layout (26 Tabs)
 
 | # | Tab | File | Consolidates |
-|---|-----|------|-------------|
+| --- | ----- | ------ | ------------- |
 | 1 | Home | `dashboard_tab.py` | Dashboard |
 | 2 | System Info | `system_info_tab.py` | System details |
 | 3 | System Monitor | `monitor_tab.py` | Performance + Processes |

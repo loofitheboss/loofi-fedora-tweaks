@@ -702,9 +702,16 @@ class MainWindow(QMainWindow):
             self.notif_panel.hide()
         else:
             self.notif_panel.refresh()
-            # Position at top-right
+            # Position below breadcrumb and above status bar
             x = self.width() - self.notif_panel.width() - 10
-            y = 40
+            breadcrumb_bottom = self._breadcrumb_frame.geometry().bottom()
+            y = breadcrumb_bottom + 6
+
+            status_height = self._status_frame.height() if hasattr(self, "_status_frame") else 0
+            max_y = self.height() - status_height - self.notif_panel.height() - 6
+            y = max(y, 6)
+            y = min(y, max_y)
+
             self.notif_panel.move(x, y)
             self.notif_panel.show()
             self.notif_panel.raise_()
