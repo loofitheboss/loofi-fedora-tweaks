@@ -7,9 +7,17 @@ Uses SnapshotManager from utils/snapshot_manager.py.
 """
 
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QHeaderView,
-    QInputDialog, QMessageBox, QGridLayout, QWidget
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QGroupBox,
+    QTableWidget,
+    QHeaderView,
+    QInputDialog,
+    QMessageBox,
+    QGridLayout,
+    QWidget,
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
@@ -93,10 +101,15 @@ class SnapshotTab(BaseTab):
         self.snap_table = QTableWidget()
         self.snap_table.setAccessibleName(self.tr("Snapshot Timeline"))
         self.snap_table.setColumnCount(5)
-        self.snap_table.setHorizontalHeaderLabels([
-            self.tr("ID"), self.tr("Label"), self.tr("Backend"),
-            self.tr("Time"), self.tr("Size")
-        ])
+        self.snap_table.setHorizontalHeaderLabels(
+            [
+                self.tr("ID"),
+                self.tr("Label"),
+                self.tr("Backend"),
+                self.tr("Time"),
+                self.tr("Size"),
+            ]
+        )
         self.snap_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
@@ -105,7 +118,7 @@ class SnapshotTab(BaseTab):
         BaseTab.configure_table(self.snap_table)
         self.set_table_empty_state(
             self.snap_table,
-            self.tr("Click Refresh to load snapshots (authentication may be required)")
+            self.tr("Click Refresh to load snapshots (authentication may be required)"),
         )
         sl_layout.addWidget(self.snap_table)
 
@@ -137,8 +150,9 @@ class SnapshotTab(BaseTab):
                 else:
                     label.setText("❌ Not found")
                     label.setObjectName("snapBackendMissing")
-                label.style().unpolish(label)
-                label.style().polish(label)
+                if label.style() is not None:
+                    label.style().unpolish(label)
+                    label.style().polish(label)
         except Exception as exc:
             self.append_output(f"Backend check failed: {exc}\n")
 
@@ -150,7 +164,9 @@ class SnapshotTab(BaseTab):
             self.snap_table.setRowCount(0)
 
             if not snapshots:
-                self.set_table_empty_state(self.snap_table, self.tr("No snapshots found"))
+                self.set_table_empty_state(
+                    self.snap_table, self.tr("No snapshots found")
+                )
                 self.append_output("Found 0 snapshot(s)\n")
                 return
 
@@ -161,23 +177,26 @@ class SnapshotTab(BaseTab):
                 self.snap_table.setItem(row, 1, self.make_table_item(snap.label))
                 self.snap_table.setItem(row, 2, self.make_table_item(snap.backend))
 
-                ts_str = datetime.fromtimestamp(snap.timestamp).strftime(
-                    "%Y-%m-%d %H:%M"
-                ) if snap.timestamp else "—"
+                ts_str = (
+                    datetime.fromtimestamp(snap.timestamp).strftime("%Y-%m-%d %H:%M")
+                    if snap.timestamp
+                    else "—"
+                )
                 self.snap_table.setItem(row, 3, self.make_table_item(ts_str))
                 self.snap_table.setItem(row, 4, self.make_table_item(snap.size_str))
 
             count = self.snap_table.rowCount()
             self.append_output(f"Found {count} snapshot(s)\n")
         except Exception as exc:
-            self.set_table_empty_state(self.snap_table, self.tr("Failed to load snapshots"), color="#e8556d")
+            self.set_table_empty_state(
+                self.snap_table, self.tr("Failed to load snapshots"), color="#e8556d"
+            )
             self.append_output(f"Error listing snapshots: {exc}\n")
 
     def _create_snapshot(self):
         """Create a new snapshot."""
         label, ok = QInputDialog.getText(
-            self, self.tr("Create Snapshot"),
-            self.tr("Snapshot label:")
+            self, self.tr("Create Snapshot"), self.tr("Snapshot label:")
         )
         if not ok or not label.strip():
             return
@@ -194,8 +213,7 @@ class SnapshotTab(BaseTab):
         row = self.snap_table.currentRow()
         if row < 0:
             QMessageBox.warning(
-                self, self.tr("No Selection"),
-                self.tr("Select a snapshot to delete.")
+                self, self.tr("No Selection"), self.tr("Select a snapshot to delete.")
             )
             return
 
@@ -203,9 +221,10 @@ class SnapshotTab(BaseTab):
         backend = self.snap_table.item(row, 2).text()
 
         confirm = QMessageBox.question(
-            self, self.tr("Confirm Delete"),
+            self,
+            self.tr("Confirm Delete"),
             self.tr(f"Delete snapshot '{snap_id}' from {backend}?"),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if confirm != QMessageBox.StandardButton.Yes:
             return

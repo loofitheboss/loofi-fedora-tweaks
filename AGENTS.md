@@ -1,114 +1,217 @@
 # Loofi Fedora Tweaks — Agent Instructions
 
 > PyQt6 desktop app for Fedora Linux system customization.
-> 26 UI tabs, 158 test files (3953+ tests, 76.8% coverage), 100+ utils modules, CLI + GUI + Daemon modes.
-> See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
+> Python 3.12+ | 26 UI tabs | 158 test files (3953+ tests, 76.8% coverage) | 100+ utils modules
+> Canonical references: `ARCHITECTURE.md` (structure), `ROADMAP.md` (scope), `.github/copilot-instructions.md` (patterns)
 
-## Architecture
+## Build, Lint, Test Commands
 
-```text
-loofi-fedora-tweaks/
-├── ui/*_tab.py       # PyQt6 tabs (inherit BaseTab)
-├── utils/*.py        # Business logic (@staticmethod, operations tuples)
-├── core/executor/    # BaseActionExecutor + ActionResult
-├── services/         # Service layer (WIP)
-├── cli/main.py       # CLI (calls utils/, never ui/)
-├── config/           # apps.json, polkit policy, systemd
-└── version.py        # __version__, __version_codename__
-tests/                # unittest + mock, @patch decorators, no root
-scripts/              # build_rpm.sh, workflow-runner.sh
+```bash
+# Run full test suite
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
+
+# Run a single test file
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_commands.py -v
+
+# Run a single test method
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_commands.py::TestPrivilegedCommandBuilders::test_dnf_install -v
+
+# Run tests with coverage
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov=loofi-fedora-tweaks --cov-report=term-missing --cov-fail-under=75
+
+# Lint
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+
+# Type check
+mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary
+
+# Build RPM
+bash scripts/build_rpm.sh
+
+# Dev run
+./run.sh
 ```
 
-## Critical Rules
+## Project Layout
 
-1. **Never use `sudo`** — only `pkexec` via `PrivilegedCommand`
+```
+loofi-fedora-tweaks/          # Source root (set as PYTHONPATH)
+├── ui/*_tab.py               # PyQt6 tabs (inherit BaseTab)
+├── ui/base_tab.py            # BaseTab: shared CommandRunner, output_area
+├── utils/*.py                # Business logic (@staticmethod, operations tuples)
+├── utils/commands.py         # PrivilegedCommand builder (pkexec)
+├── utils/errors.py           # LoofiError hierarchy (code, hint, recoverable)
+├── core/executor/            # BaseActionExecutor + ActionResult
+├── cli/main.py               # CLI entry (calls utils/, never ui/)
+├── config/                   # apps.json, polkit policy, systemd
+└── version.py                # __version__, __version_codename__
+tests/                        # unittest + mock, @patch decorators, no root
+scripts/                      # build_rpm.sh, MCP servers, workflow tools
+.github/agents/               # 8 VS Code Copilot agents (canonical)
+.github/claude-agents/        # 7 Claude agents (adapters)
+.github/instructions/         # AI instructions + hardening guide
+```
+
+## Code Style
+
+### Imports
+Ordered: stdlib, blank line, third-party, blank line, local. Alphabetical within groups.
+```python
+import logging
+import subprocess
+from typing import List, Optional, Tuple
+
+from PyQt6.QtWidgets import QVBoxLayout, QLabel
+
+from utils.commands import PrivilegedCommand
+from utils.errors import LoofiError
+```
+
+### Logging
+```python
+from utils.log import get_logger       # preferred (in utils/)
+logger = get_logger(__name__)
+
+import logging                          # acceptable (in ui/)
+logger = logging.getLogger(__name__)
+```
+Use `%s` formatting in log calls, never f-strings: `logger.debug("Failed: %s", e)`
+
+### Type Hints
+- Inline annotations on all public methods (PEP 484)
+- `Tuple[str, List[str], str]` for operations tuples (aliased as `CommandTuple`)
+- `Optional[X]` or `X | None` (both accepted, PEP 604 preferred for new code)
+- Return type on every public function
+
+### Docstrings
+Google-style. Module-level docstring on every file.
+```python
+"""One-line summary.
+
+Args:
+    param: Description.
+
+Returns:
+    Description of return value.
+"""
+```
+
+### Naming Conventions
+| Element | Convention | Example |
+|---------|-----------|---------|
+| Files | `snake_case.py` | `network_utils.py` |
+| Tab files | `*_tab.py` | `hardware_tab.py` |
+| Test files | `test_*.py` | `test_commands.py` |
+| Classes | `PascalCase` | `NetworkUtils`, `BaseTab` |
+| Exceptions | `PascalCase` + `Error` | `DnfLockedError` |
+| Methods | `snake_case` | `scan_wifi()` |
+| Private | `_leading_underscore` | `_derive_action_name()` |
+| Constants | `UPPER_SNAKE_CASE` | `POLKIT_MAP` |
+| Type aliases | `PascalCase` | `CommandTuple` |
+| Test classes | `Test` + `PascalCase` | `TestScanWifi` |
+| Test methods | `test_what_scenario` | `test_dnf_install` |
+
+### Error Handling
+```python
+try:
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+except (subprocess.SubprocessError, OSError) as e:
+    logger.debug("Descriptive msg: %s", e)
+    return []  # safe default: [], "", None, False
+```
+Use typed exceptions from `utils/errors.py`. Each has `code`, `hint`, `recoverable`.
+
+## Critical Rules (Never Violate)
+
+1. **Never `sudo`** — only `pkexec` via `PrivilegedCommand`
 2. **Never hardcode `dnf`** — use `SystemManager.get_package_manager()`
-3. **Never put subprocess calls in UI code** — extract to `utils/`
-4. **Always mock system calls in tests** — use `@patch` decorators
-5. **Always unpack PrivilegedCommand tuples** before `subprocess.run()`
-6. **Version sync**: `version.py` and `.spec` must match
-7. **Subprocess timeouts**: All subprocess calls MUST include `timeout` parameter
-8. **Audit logging**: Privileged actions must be logged (timestamp, action, params, exit code)
-9. **Stabilization gate**: No new major features until Phase 1–2 hardening is complete
-
-> **MANDATORY**: See `.github/instructions/system_hardening_and_stabilization_guide.md` for full stabilization rules.
+3. **Never subprocess in UI** — extract to `utils/`, call via `CommandRunner`
+4. **Always unpack PrivilegedCommand** — `binary, args, desc = PrivilegedCommand.dnf(...)`
+5. **Always `timeout=N`** on every `subprocess.run()` / `check_output()` call
+6. **Always branch on `SystemManager.is_atomic()`** for dnf vs rpm-ostree
+7. **Version sync** — `version.py` and `.spec` must match
+8. **Audit log** privileged actions (timestamp, action, params, exit code)
+9. **Stabilization gate** — no new major features until Phase 1-2 complete
+10. **Never `shell=True`** in subprocess calls
 
 ## Key Patterns
 
 ```python
-# PrivilegedCommand (ALWAYS unpack)
+# PrivilegedCommand — always unpack the tuple
 from utils.commands import PrivilegedCommand
 binary, args, desc = PrivilegedCommand.dnf("install", "package")
 cmd = [binary] + args  # ["pkexec", "dnf", "install", "-y", "package"]
 
-# BaseTab for UI
+# Utils class — all @staticmethod, no instance state
+class FeatureManager:
+    @staticmethod
+    def operation() -> Tuple[str, List[str], str]:
+        return ("pkexec", ["dnf", "clean", "all"], "Cleaning...")
+
+# UI tab — inherit BaseTab
 from ui.base_tab import BaseTab
 class MyTab(BaseTab):
-    def __init__(self): super().__init__()
+    def __init__(self):
+        super().__init__()  # gives self.output_area, self.runner, self.run_command()
 
-# Operations tuple from utils
-@staticmethod
-def clean_cache() -> Tuple[str, List[str], str]:
-    return ("pkexec", ["dnf", "clean", "all"], "Cleaning...")
-
-# Atomic Fedora detection
+# Atomic detection
 pm = SystemManager.get_package_manager()  # "dnf" or "rpm-ostree"
 ```
 
+## Testing Rules
+
+```python
+"""Tests for utils/module.py"""
+import unittest
+import sys
+import os
+from unittest.mock import patch, MagicMock, mock_open
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
+
+from utils.module import Manager
+
+class TestManager(unittest.TestCase):
+    """Tests for Manager operations."""
+
+    @patch('utils.module.subprocess.run')
+    def test_operation_success(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout='OK')
+        result = Manager.operation()
+        self.assertIsNotNone(result)
+        mock_run.assert_called_once()
+
+    @patch('utils.module.subprocess.run')
+    def test_operation_failure(self, mock_run):
+        mock_run.side_effect = subprocess.SubprocessError("fail")
+        result = Manager.operation()
+        self.assertEqual(result, [])  # safe default
+```
+
+- **`@patch` decorators only** — never context managers
+- Patch the module-under-test namespace: `'utils.module.subprocess.run'`
+- Mock: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`, `builtins.open`
+- Test both success AND failure paths
+- Test both dnf and rpm-ostree paths where applicable
+- No root needed — all system calls mocked
+
 ## Agent System
 
-Agent definitions in `.github/claude-agents/`. 7 specialized agents:
+For complex multi-step tasks, delegate to agents in `.github/claude-agents/`:
+- **project-coordinator** — task decomposition, dependency ordering
+- **architecture-advisor** — design, module structure
+- **backend-builder** — utils/ modules, system integration
+- **code-implementer** — general implementation
+- **frontend-integration-builder** — UI tabs, CLI commands
+- **test-writer** — test creation, coverage
+- **release-planner** — roadmap, releases
 
-- **project-coordinator** — Task decomposition, coordination, dependency ordering
-- **architecture-advisor** — Architectural design, module structure
-- **test-writer** — Test creation, mocking, coverage
-- **code-implementer** — Code generation, implementation
-- **backend-builder** — Backend logic, utils/ modules, system integration
-- **frontend-integration-builder** — UI/UX tabs, CLI commands, wiring
-- **release-planner** — Roadmap and release planning
+VS Code equivalents in `.github/agents/`: Arkitekt, Builder, CodeGen, Guardian, Manager, Planner, Sculptor, Test.
 
-For complex features, delegate to project-coordinator agent. For simple tasks, act directly.
+## Stabilization Directive
 
-- **ROADMAP.md** — Version scope, status (DONE/ACTIVE/NEXT/PLANNED)
-- **`.github/claude-agents/`** — Agent definitions with role, tools, and workflows
-- **`.github/copilot-instructions.md`** — Architecture and patterns reference
-
-## VS Code Copilot Agents
-
-Agent definitions for VS Code Copilot Chat in `.github/agents/`:
-
-- **Arkitekt** — Architecture design (equivalent: architecture-advisor)
-- **Builder** — Backend implementation (equivalent: backend-builder)
-- **CodeGen** — Code generation (equivalent: code-implementer)
-- **Guardian** — Security and quality gates
-- **Manager** — Project coordination (equivalent: project-coordinator)
-- **Planner** — Release planning (equivalent: release-planner)
-- **Sculptor** — Frontend/UI integration (equivalent: frontend-integration-builder)
-- **Test** — Test creation and coverage (equivalent: test-writer)
-
-These are the canonical agent definitions. Claude agents in `.github/claude-agents/` are adapters generated from these.
-
-## Testing
-
-```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --cov-fail-under=75
-```
-
-- `@patch` decorators, never context managers
-- Mock: `subprocess.run`, `subprocess.check_output`, `shutil.which`, `os.path.exists`
-- Both success AND failure paths
-- No root needed
-
-## Build
-
-```bash
-bash scripts/build_rpm.sh        # Build RPM
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
-```
-
-## Style
-
-- Concise. No essays. Bullet lists.
-- Max 10 lines per response section
-- Minimal diffs — only change what's needed
-- Existing patterns over new abstractions
+See `.github/instructions/system_hardening_and_stabilization_guide.md`:
+- No new major features until Phase 1-2 hardening complete
+- Refactor before expanding. Safety over velocity.
+- Never expand root-level capability without: validation, audit log, rollback strategy
+- If unsure, default to restrictive behavior

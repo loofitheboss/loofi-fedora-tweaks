@@ -13,9 +13,18 @@ import os
 from pathlib import Path
 
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QStackedWidget, QWidget, QRadioButton, QButtonGroup,
-    QFrame, QScrollArea, QCheckBox,
+    QDialog,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QStackedWidget,
+    QWidget,
+    QRadioButton,
+    QButtonGroup,
+    QFrame,
+    QScrollArea,
+    QCheckBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -51,6 +60,7 @@ def _save_profile(profile_data: dict):
 
 
 # Helpers for hardware detection -----------------------------------------
+
 
 def _read_file(path: str) -> str:
     """Safely read a sysfs / procfs file."""
@@ -94,9 +104,8 @@ def _detect_gpu_vendor() -> str:
 
 def _has_battery() -> bool:
     """Return True if any battery sysfs node exists."""
-    return (
-        os.path.exists("/sys/class/power_supply/BAT0")
-        or os.path.exists("/sys/class/power_supply/BAT1")
+    return os.path.exists("/sys/class/power_supply/BAT0") or os.path.exists(
+        "/sys/class/power_supply/BAT1"
     )
 
 
@@ -132,6 +141,7 @@ USE_CASES = {
 
 
 # Summary of what gets configured per use-case + hardware ----------------
+
 
 def _build_summary(hw_profile_key: str, hw_profile: dict, use_case: str) -> str:
     """Return a human-readable summary of planned configuration."""
@@ -182,6 +192,7 @@ def _build_summary(hw_profile_key: str, hw_profile: dict, use_case: str) -> str:
 # Wizard dialog
 # =======================================================================
 
+
 class FirstRunWizard(QDialog):
     """Five-step first-run wizard v2: Detect -> Choose -> Health -> Actions -> Apply."""
 
@@ -192,9 +203,7 @@ class FirstRunWizard(QDialog):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Loofi Fedora Tweaks - Setup Wizard"))
         self.setFixedSize(620, 560)
-        self.setWindowFlags(
-            self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint
-        )
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
 
         # Detected hardware (populated in step 1)
         self._hw_key = ""
@@ -436,8 +445,9 @@ class FirstRunWizard(QDialog):
         else:
             self._btn_next.setText(self.tr("\u2705 Apply"))
             self._btn_next.setProperty("wizardMode", "apply")
-        self._btn_next.style().unpolish(self._btn_next)
-        self._btn_next.style().polish(self._btn_next)
+        if self._btn_next.style() is not None:
+            self._btn_next.style().unpolish(self._btn_next)
+            self._btn_next.style().polish(self._btn_next)
 
         # Populate contents when entering a step
         if index == 0:
@@ -533,7 +543,11 @@ class FirstRunWizard(QDialog):
         self._lbl_gpu.setText(
             self.tr("\U0001f3a8  GPU vendor: {gpu}").format(gpu=self._gpu_vendor)
         )
-        form_factor = self.tr("Laptop (battery detected)") if self._is_laptop else self.tr("Desktop")
+        form_factor = (
+            self.tr("Laptop (battery detected)")
+            if self._is_laptop
+            else self.tr("Desktop")
+        )
         self._lbl_form.setText(
             self.tr("\U0001f50c  Form factor: {form}").format(form=form_factor)
         )
@@ -648,13 +662,25 @@ class FirstRunWizard(QDialog):
         # 1. Disk space
         try:
             stat = os.statvfs("/")
-            free_gb = (stat.f_bavail * stat.f_frsize) / (1024 ** 3)
-            total_gb = (stat.f_blocks * stat.f_frsize) / (1024 ** 3)
+            free_gb = (stat.f_bavail * stat.f_frsize) / (1024**3)
+            total_gb = (stat.f_blocks * stat.f_frsize) / (1024**3)
             pct_used = ((total_gb - free_gb) / total_gb * 100) if total_gb else 0
             if free_gb < 5:
-                checks.append(("⚠️", f"Low disk space: {free_gb:.1f} GB free ({pct_used:.0f}% used)", "warning"))
+                checks.append(
+                    (
+                        "⚠️",
+                        f"Low disk space: {free_gb:.1f} GB free ({pct_used:.0f}% used)",
+                        "warning",
+                    )
+                )
             else:
-                checks.append(("✅", f"Disk space OK: {free_gb:.1f} GB free ({pct_used:.0f}% used)", "ok"))
+                checks.append(
+                    (
+                        "✅",
+                        f"Disk space OK: {free_gb:.1f} GB free ({pct_used:.0f}% used)",
+                        "ok",
+                    )
+                )
             self._health_results["disk_free_gb"] = round(free_gb, 1)
         except OSError:
             checks.append(("❓", "Could not check disk space", "unknown"))
@@ -664,12 +690,16 @@ class FirstRunWizard(QDialog):
             try:
                 result = subprocess.run(
                     ["dnf", "check", "--duplicates"],
-                    capture_output=True, text=True, timeout=10
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
                 )
                 if result.returncode == 0:
                     checks.append(("✅", "Package state healthy (no duplicates)", "ok"))
                 else:
-                    checks.append(("⚠️", "Package issues detected (duplicates found)", "warning"))
+                    checks.append(
+                        ("⚠️", "Package issues detected (duplicates found)", "warning")
+                    )
                 self._health_results["pkg_healthy"] = result.returncode == 0
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 checks.append(("❓", "Could not check package state", "unknown"))
@@ -681,13 +711,17 @@ class FirstRunWizard(QDialog):
             try:
                 result = subprocess.run(
                     ["firewall-cmd", "--state"],
-                    capture_output=True, text=True, timeout=5
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
                 )
                 if "running" in result.stdout.lower():
                     checks.append(("✅", "Firewall is running", "ok"))
                 else:
                     checks.append(("⚠️", "Firewall is NOT running", "warning"))
-                self._health_results["firewall_running"] = "running" in result.stdout.lower()
+                self._health_results["firewall_running"] = (
+                    "running" in result.stdout.lower()
+                )
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 checks.append(("❓", "Could not check firewall status", "unknown"))
         else:
@@ -699,7 +733,9 @@ class FirstRunWizard(QDialog):
             checks.append(("✅", f"Backup tool available: {tool}", "ok"))
             self._health_results["backup_tool"] = tool
         else:
-            checks.append(("⚠️", "No backup tool installed (timeshift/snapper)", "warning"))
+            checks.append(
+                ("⚠️", "No backup tool installed (timeshift/snapper)", "warning")
+            )
             self._health_results["backup_tool"] = None
 
         # 5. SELinux status
@@ -720,7 +756,12 @@ class FirstRunWizard(QDialog):
         for icon, text, level in checks:
             lbl = QLabel(f"  {icon}  {text}")
             lbl.setWordWrap(True)
-            _health_names = {"ok": "wizardHealthOk", "warning": "wizardHealthWarning", "info": "wizardHealthInfo", "unknown": "wizardHealthUnknown"}
+            _health_names = {
+                "ok": "wizardHealthOk",
+                "warning": "wizardHealthWarning",
+                "info": "wizardHealthInfo",
+                "unknown": "wizardHealthUnknown",
+            }
             lbl.setObjectName(_health_names.get(level, "wizardHealthUnknown"))
             self._health_layout.insertWidget(self._health_layout.count() - 1, lbl)
 
@@ -739,47 +780,59 @@ class FirstRunWizard(QDialog):
 
         # Based on health check results
         if results.get("disk_free_gb", 999) < 10:
-            recommendations.append({
-                "text": "Run disk cleanup (remove old kernels, clear caches)",
-                "risk": "LOW",
-                "checked": True,
-            })
+            recommendations.append(
+                {
+                    "text": "Run disk cleanup (remove old kernels, clear caches)",
+                    "risk": "LOW",
+                    "checked": True,
+                }
+            )
 
         if results.get("pkg_healthy") is False:
-            recommendations.append({
-                "text": "Fix package duplicates (dnf check --duplicates)",
-                "risk": "MEDIUM",
-                "checked": True,
-            })
+            recommendations.append(
+                {
+                    "text": "Fix package duplicates (dnf check --duplicates)",
+                    "risk": "MEDIUM",
+                    "checked": True,
+                }
+            )
 
         if results.get("firewall_running") is False:
-            recommendations.append({
-                "text": "Enable firewall (firewalld)",
-                "risk": "LOW",
-                "checked": True,
-            })
+            recommendations.append(
+                {
+                    "text": "Enable firewall (firewalld)",
+                    "risk": "LOW",
+                    "checked": True,
+                }
+            )
 
         if results.get("backup_tool") is None:
-            recommendations.append({
-                "text": "Install backup tool (timeshift recommended)",
-                "risk": "LOW",
-                "checked": True,
-            })
+            recommendations.append(
+                {
+                    "text": "Install backup tool (timeshift recommended)",
+                    "risk": "LOW",
+                    "checked": True,
+                }
+            )
 
         selinux = results.get("selinux", "")
         if selinux and selinux != "Enforcing":
-            recommendations.append({
-                "text": f"SELinux is {selinux} — consider enabling Enforcing mode",
-                "risk": "MEDIUM",
-                "checked": False,
-            })
+            recommendations.append(
+                {
+                    "text": f"SELinux is {selinux} — consider enabling Enforcing mode",
+                    "risk": "MEDIUM",
+                    "checked": False,
+                }
+            )
 
         # Always suggest these
-        recommendations.append({
-            "text": "Configure automatic system snapshots before updates",
-            "risk": "LOW",
-            "checked": True,
-        })
+        recommendations.append(
+            {
+                "text": "Configure automatic system snapshots before updates",
+                "risk": "LOW",
+                "checked": True,
+            }
+        )
 
         if not recommendations:
             lbl = QLabel(self.tr("  ✅ Your system looks great! No actions needed."))
@@ -788,7 +841,11 @@ class FirstRunWizard(QDialog):
             return
 
         for rec in recommendations:
-            _action_names = {"LOW": "wizardActionLow", "MEDIUM": "wizardActionMedium", "HIGH": "wizardActionHigh"}
+            _action_names = {
+                "LOW": "wizardActionLow",
+                "MEDIUM": "wizardActionMedium",
+                "HIGH": "wizardActionHigh",
+            }
             cb = QCheckBox(f"  [{rec['risk']}] {rec['text']}")
             cb.setChecked(rec["checked"])
             cb.setObjectName(_action_names.get(rec["risk"], "wizardActionLow"))

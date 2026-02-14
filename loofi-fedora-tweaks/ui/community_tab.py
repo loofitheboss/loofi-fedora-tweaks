@@ -8,10 +8,22 @@ Sub-tabs:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QListWidget, QMessageBox, QInputDialog, QGroupBox,
-    QTabWidget, QFileDialog, QLineEdit, QListWidgetItem, QComboBox,
-    QTextEdit, QCheckBox
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QMessageBox,
+    QInputDialog,
+    QGroupBox,
+    QTabWidget,
+    QFileDialog,
+    QLineEdit,
+    QListWidgetItem,
+    QComboBox,
+    QTextEdit,
+    QCheckBox,
 )
 from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
 
@@ -33,6 +45,7 @@ from core.plugins.metadata import PluginMetadata
 
 class FetchPresetsThread(QThread):
     """Background thread for fetching community presets (from PresetsTab)."""
+
     finished = pyqtSignal(bool, object)
 
     def run(self):
@@ -42,9 +55,12 @@ class FetchPresetsThread(QThread):
 
 class FetchMarketplaceThread(QThread):
     """Background thread for fetching marketplace data (from MarketplaceTab)."""
+
     finished = pyqtSignal(object)
 
-    def __init__(self, marketplace: PresetMarketplace, category: str = "", query: str = ""):
+    def __init__(
+        self, marketplace: PresetMarketplace, category: str = "", query: str = ""
+    ):
         super().__init__()
         self.marketplace = marketplace
         self.category = category
@@ -107,24 +123,16 @@ class CommunityTab(QWidget, PluginInterface):
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Presets (from PresetsTab)
-        self.sub_tabs.addTab(
-            self._create_presets_tab(), self.tr("Presets")
-        )
+        self.sub_tabs.addTab(self._create_presets_tab(), self.tr("Presets"))
 
         # Sub-tab 2: Marketplace (from MarketplaceTab)
-        self.sub_tabs.addTab(
-            self._create_marketplace_tab(), self.tr("Marketplace")
-        )
+        self.sub_tabs.addTab(self._create_marketplace_tab(), self.tr("Marketplace"))
 
         # Sub-tab 3: Plugins
-        self.sub_tabs.addTab(
-            self._create_plugins_tab(), self.tr("Plugins")
-        )
+        self.sub_tabs.addTab(self._create_plugins_tab(), self.tr("Plugins"))
 
         # Sub-tab 4: Featured Plugins (v37.0 Pinnacle)
-        self.sub_tabs.addTab(
-            self._create_featured_tab(), self.tr("Featured")
-        )
+        self.sub_tabs.addTab(self._create_featured_tab(), self.tr("Featured"))
 
     # ================================================================
     # PRESETS SUB-TAB (from PresetsTab)
@@ -319,6 +327,7 @@ class CommunityTab(QWidget, PluginInterface):
         """Load curated plugins from marketplace."""
         try:
             from utils.plugin_marketplace import PluginMarketplace
+
             curated = PluginMarketplace.get_curated_plugins()
             self.featured_list.clear()
             for p in curated:
@@ -336,9 +345,7 @@ class CommunityTab(QWidget, PluginInterface):
                 )
         except Exception as e:
             self.featured_list.clear()
-            self.featured_list.addItem(
-                QListWidgetItem(f"Error: {e}")
-            )
+            self.featured_list.addItem(QListWidgetItem(f"Error: {e}"))
 
     def _on_featured_selected(self, current, previous):
         """Show details for selected featured plugin."""
@@ -370,7 +377,9 @@ class CommunityTab(QWidget, PluginInterface):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        layout.addWidget(QLabel(self.tr("Save and restore your system configuration presets.")))
+        layout.addWidget(
+            QLabel(self.tr("Save and restore your system configuration presets."))
+        )
 
         # List Area
         self.list_widget = QListWidget()
@@ -415,11 +424,14 @@ class CommunityTab(QWidget, PluginInterface):
             if self.manager.save_preset(name):
                 self.refresh_list()
                 QMessageBox.information(
-                    self, self.tr("Success"),
-                    self.tr("Preset '{}' saved successfully.").format(name)
+                    self,
+                    self.tr("Success"),
+                    self.tr("Preset '{}' saved successfully.").format(name),
                 )
             else:
-                QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to save preset."))
+                QMessageBox.warning(
+                    self, self.tr("Error"), self.tr("Failed to save preset.")
+                )
 
     def load_preset(self):
         """Load selected preset."""
@@ -434,13 +446,15 @@ class CommunityTab(QWidget, PluginInterface):
         data = self.manager.load_preset(name)
         if data:
             QMessageBox.information(
-                self, self.tr("Success"),
-                self.tr("Preset '{}' loaded.\nSettings applied.").format(name)
+                self,
+                self.tr("Success"),
+                self.tr("Preset '{}' loaded.\nSettings applied.").format(name),
             )
         else:
             QMessageBox.warning(
-                self, self.tr("Error"),
-                self.tr("Failed to load preset '{}'.").format(name)
+                self,
+                self.tr("Error"),
+                self.tr("Failed to load preset '{}'.").format(name),
             )
 
     def delete_preset(self):
@@ -451,14 +465,15 @@ class CommunityTab(QWidget, PluginInterface):
 
         name = item.text()
         confirm = QMessageBox.question(
-            self, self.tr("Confirm Delete"),
-            self.tr("Delete preset '{}'?").format(name)
+            self, self.tr("Confirm Delete"), self.tr("Delete preset '{}'?").format(name)
         )
         if confirm == QMessageBox.StandardButton.Yes:
             if self.manager.delete_preset(name):
                 self.refresh_list()
             else:
-                QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to delete preset."))
+                QMessageBox.warning(
+                    self, self.tr("Error"), self.tr("Failed to delete preset.")
+                )
 
     # -- Community Presets --
 
@@ -467,14 +482,18 @@ class CommunityTab(QWidget, PluginInterface):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        layout.addWidget(QLabel(self.tr("Browse and download presets shared by the community.")))
+        layout.addWidget(
+            QLabel(self.tr("Browse and download presets shared by the community."))
+        )
 
         # Community presets list
         self.community_list = QListWidget()
         layout.addWidget(self.community_list)
 
         # Status label
-        self.lbl_community_status = QLabel(self.tr("Click 'Refresh' to load community presets."))
+        self.lbl_community_status = QLabel(
+            self.tr("Click 'Refresh' to load community presets.")
+        )
         self.lbl_community_status.setObjectName("communityStatusLabel")
         layout.addWidget(self.lbl_community_status)
 
@@ -519,8 +538,8 @@ class CommunityTab(QWidget, PluginInterface):
                 for preset in presets:
                     item = QListWidgetItem(
                         self.tr("{} - by {}").format(
-                            preset.get('name', 'Unknown'),
-                            preset.get('author', 'anonymous')
+                            preset.get("name", "Unknown"),
+                            preset.get("author", "anonymous"),
                         )
                     )
                     item.setData(Qt.ItemDataRole.UserRole, preset)
@@ -551,8 +570,9 @@ class CommunityTab(QWidget, PluginInterface):
             )
             self.refresh_list()
             QMessageBox.information(
-                self, self.tr("Success"),
-                self.tr("Preset '{}' downloaded and saved!").format(preset.get('name'))
+                self,
+                self.tr("Success"),
+                self.tr("Preset '{}' downloaded and saved!").format(preset.get("name")),
             )
         else:
             QMessageBox.warning(self, self.tr("Download Failed"), result)
@@ -568,9 +588,11 @@ class CommunityTab(QWidget, PluginInterface):
         export_group = QGroupBox(self.tr("Export / Import"))
         export_layout = QVBoxLayout(export_group)
 
-        export_layout.addWidget(QLabel(self.tr(
-            "Backup all your settings to a file, or restore from a backup."
-        )))
+        export_layout.addWidget(
+            QLabel(
+                self.tr("Backup all your settings to a file, or restore from a backup.")
+            )
+        )
 
         btn_row = QHBoxLayout()
 
@@ -591,9 +613,13 @@ class CommunityTab(QWidget, PluginInterface):
         cloud_group = QGroupBox(self.tr("GitHub Gist Sync"))
         cloud_layout = QVBoxLayout(cloud_group)
 
-        cloud_layout.addWidget(QLabel(self.tr(
-            "Sync your config to a private GitHub Gist for cross-machine access."
-        )))
+        cloud_layout.addWidget(
+            QLabel(
+                self.tr(
+                    "Sync your config to a private GitHub Gist for cross-machine access."
+                )
+            )
+        )
 
         # Token status
         self.lbl_sync_status = QLabel()
@@ -650,50 +676,63 @@ class CommunityTab(QWidget, PluginInterface):
                 self.tr("Connected | Gist ID: {}...").format(gist_id[:8])
             )
             self.lbl_sync_status.setProperty("state", "connected")
-            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
-            self.lbl_sync_status.style().polish(self.lbl_sync_status)
+            if self.lbl_sync_status.style() is not None:
+                self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+                self.lbl_sync_status.style().polish(self.lbl_sync_status)
         elif token:
             self.lbl_sync_status.setText(
                 self.tr("Token set, but no Gist yet. Push to create one.")
             )
             self.lbl_sync_status.setProperty("state", "partial")
-            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
-            self.lbl_sync_status.style().polish(self.lbl_sync_status)
+            if self.lbl_sync_status.style() is not None:
+                self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+                self.lbl_sync_status.style().polish(self.lbl_sync_status)
         else:
             self.lbl_sync_status.setText(
                 self.tr("Not configured. Add your GitHub Personal Access Token.")
             )
             self.lbl_sync_status.setProperty("state", "error")
-            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
-            self.lbl_sync_status.style().polish(self.lbl_sync_status)
+            if self.lbl_sync_status.style() is not None:
+                self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+                self.lbl_sync_status.style().polish(self.lbl_sync_status)
 
     def save_token(self):
         """Save GitHub Personal Access Token."""
         token = self.txt_token.text()
         if token.startswith("\u2022"):
-            QMessageBox.information(self, self.tr("Info"), self.tr("Token already saved."))
+            QMessageBox.information(
+                self, self.tr("Info"), self.tr("Token already saved.")
+            )
             return
 
         if not token or not token.startswith("ghp_"):
             QMessageBox.warning(
-                self, self.tr("Invalid Token"),
-                self.tr("Please enter a valid GitHub Personal Access Token (starts with 'ghp_').")
+                self,
+                self.tr("Invalid Token"),
+                self.tr(
+                    "Please enter a valid GitHub Personal Access Token (starts with 'ghp_')."
+                ),
             )
             return
 
         if CloudSyncManager.save_gist_token(token):
             self.txt_token.setText("••••••••••••••••")
             self.update_sync_status()
-            QMessageBox.information(self, self.tr("Success"), self.tr("Token saved securely."))
+            QMessageBox.information(
+                self, self.tr("Success"), self.tr("Token saved securely.")
+            )
         else:
-            QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to save token."))
+            QMessageBox.warning(
+                self, self.tr("Error"), self.tr("Failed to save token.")
+            )
 
     def export_config(self):
         """Export configuration to file."""
         path, _ = QFileDialog.getSaveFileName(
-            self, self.tr("Export Configuration"),
+            self,
+            self.tr("Export Configuration"),
             "loofi-fedora-tweaks-backup.json",
-            self.tr("JSON Files (*.json)")
+            self.tr("JSON Files (*.json)"),
         )
         if path:
             success, message = ConfigManager.export_to_file(path)
@@ -705,14 +744,13 @@ class CommunityTab(QWidget, PluginInterface):
     def import_config(self):
         """Import configuration from file."""
         path, _ = QFileDialog.getOpenFileName(
-            self, self.tr("Import Configuration"),
-            "",
-            self.tr("JSON Files (*.json)")
+            self, self.tr("Import Configuration"), "", self.tr("JSON Files (*.json)")
         )
         if path:
             confirm = QMessageBox.question(
-                self, self.tr("Confirm Import"),
-                self.tr("This will apply settings from the backup file. Continue?")
+                self,
+                self.tr("Confirm Import"),
+                self.tr("This will apply settings from the backup file. Continue?"),
             )
             if confirm == QMessageBox.StandardButton.Yes:
                 success, message = ConfigManager.import_from_file(path)
@@ -726,8 +764,9 @@ class CommunityTab(QWidget, PluginInterface):
         """Push configuration to GitHub Gist."""
         if not CloudSyncManager.get_gist_token():
             QMessageBox.warning(
-                self, self.tr("Not Configured"),
-                self.tr("Please add your GitHub token first.")
+                self,
+                self.tr("Not Configured"),
+                self.tr("Please add your GitHub token first."),
             )
             return
 
@@ -745,8 +784,9 @@ class CommunityTab(QWidget, PluginInterface):
         gist_id = CloudSyncManager.get_gist_id()
         if not gist_id:
             gist_id, ok = QInputDialog.getText(
-                self, self.tr("Enter Gist ID"),
-                self.tr("Enter the Gist ID to pull from:")
+                self,
+                self.tr("Enter Gist ID"),
+                self.tr("Enter the Gist ID to pull from:"),
             )
             if not ok or not gist_id:
                 return
@@ -755,10 +795,11 @@ class CommunityTab(QWidget, PluginInterface):
 
         if success:
             confirm = QMessageBox.question(
-                self, self.tr("Apply Config?"),
+                self,
+                self.tr("Apply Config?"),
                 self.tr("Downloaded config from '{}'. Apply these settings?").format(
-                    result.get('system', {}).get('hostname', 'unknown')
-                )
+                    result.get("system", {}).get("hostname", "unknown")
+                ),
             )
             if confirm == QMessageBox.StandardButton.Yes:
                 apply_success, apply_msg = ConfigManager.import_all(result)
@@ -819,7 +860,9 @@ class CommunityTab(QWidget, PluginInterface):
         list_layout = QVBoxLayout(list_group)
 
         self.marketplace_preset_list = QListWidget()
-        self.marketplace_preset_list.itemClicked.connect(self.on_marketplace_preset_selected)
+        self.marketplace_preset_list.itemClicked.connect(
+            self.on_marketplace_preset_selected
+        )
         list_layout.addWidget(self.marketplace_preset_list)
         # Compatibility alias used by plugin marketplace tests.
         self.marketplace_plugin_list = self.marketplace_preset_list
@@ -883,7 +926,9 @@ class CommunityTab(QWidget, PluginInterface):
         reviews_group = QGroupBox(self.tr("Ratings & Reviews"))
         reviews_layout = QVBoxLayout(reviews_group)
 
-        self.reviews_summary_label = QLabel(self.tr("Select a preset to view ratings and reviews."))
+        self.reviews_summary_label = QLabel(
+            self.tr("Select a preset to view ratings and reviews.")
+        )
         self.reviews_summary_label.setObjectName("communityReviewsSummary")
         reviews_layout.addWidget(self.reviews_summary_label)
 
@@ -901,7 +946,9 @@ class CommunityTab(QWidget, PluginInterface):
         self.review_rating_combo = QComboBox()
         self.review_rating_combo.setAccessibleName(self.tr("Review rating"))
         for rating in range(5, 0, -1):
-            self.review_rating_combo.addItem(self.tr("{} star(s)").format(rating), rating)
+            self.review_rating_combo.addItem(
+                self.tr("{} star(s)").format(rating), rating
+            )
         review_form_row_1.addWidget(self.review_rating_combo)
         reviews_layout.addLayout(review_form_row_1)
 
@@ -911,7 +958,9 @@ class CommunityTab(QWidget, PluginInterface):
         reviews_layout.addWidget(self.review_title_input)
 
         self.review_comment_input = QTextEdit()
-        self.review_comment_input.setPlaceholderText(self.tr("Write your review (optional)"))
+        self.review_comment_input.setPlaceholderText(
+            self.tr("Write your review (optional)")
+        )
         self.review_comment_input.setMaximumHeight(90)
         reviews_layout.addWidget(self.review_comment_input)
 
@@ -936,9 +985,13 @@ class CommunityTab(QWidget, PluginInterface):
         self.analytics_opt_in_checkbox = QCheckBox(
             self.tr("Share anonymous plugin marketplace usage analytics")
         )
-        self.analytics_opt_in_checkbox.setAccessibleName(self.tr("Share anonymous plugin marketplace usage analytics"))
+        self.analytics_opt_in_checkbox.setAccessibleName(
+            self.tr("Share anonymous plugin marketplace usage analytics")
+        )
         self.analytics_opt_in_checkbox.setChecked(self.plugin_analytics.is_enabled())
-        self.analytics_opt_in_checkbox.stateChanged.connect(self._on_analytics_opt_in_changed)
+        self.analytics_opt_in_checkbox.stateChanged.connect(
+            self._on_analytics_opt_in_changed
+        )
         analytics_layout.addWidget(self.analytics_opt_in_checkbox)
 
         self.analytics_status_label = QLabel("")
@@ -983,7 +1036,9 @@ class CommunityTab(QWidget, PluginInterface):
             results = self.plugin_marketplace.search_plugins()
         else:
             result = self.plugin_marketplace.search()
-            results = result.data if result and getattr(result, "success", False) else []
+            results = (
+                result.data if result and getattr(result, "success", False) else []
+            )
 
         if results:
             self.selected_marketplace_plugin = results[0]
@@ -1018,7 +1073,9 @@ class CommunityTab(QWidget, PluginInterface):
         self.marketplace_preset_list.clear()
 
         self.fetch_marketplace_thread = FetchMarketplaceThread(self.marketplace)
-        self.fetch_marketplace_thread.finished.connect(self.on_marketplace_fetch_complete)
+        self.fetch_marketplace_thread.finished.connect(
+            self.on_marketplace_fetch_complete
+        )
         self.fetch_marketplace_thread.start()
 
     def on_marketplace_fetch_complete(self, result: MarketplaceResult):
@@ -1071,14 +1128,20 @@ class CommunityTab(QWidget, PluginInterface):
 
         verified = bool(getattr(plugin_meta, "verified_publisher", False))
         badge = getattr(plugin_meta, "publisher_badge", "") or ""
-        badge_text = self.tr("Verified {}").format(f"({badge})" if badge else "") if verified else self.tr("Unverified")
+        badge_text = (
+            self.tr("Verified {}").format(f"({badge})" if badge else "")
+            if verified
+            else self.tr("Unverified")
+        )
 
         average = getattr(plugin_meta, "rating_average", None)
         review_count = getattr(plugin_meta, "review_count", 0) or 0
         if average is None:
             rating_text = self.tr("No rating")
         else:
-            rating_text = self.tr("{:.1f}/5 ({} reviews)").format(float(average), int(review_count))
+            rating_text = self.tr("{:.1f}/5 ({} reviews)").format(
+                float(average), int(review_count)
+            )
 
         return f"{badge_text} | {rating_text}"
 
@@ -1086,15 +1149,24 @@ class CommunityTab(QWidget, PluginInterface):
         """Show inline review form feedback with simple success/error coloring."""
         state = "success" if success else "error"
         self.review_feedback_label.setProperty("state", state)
-        self.review_feedback_label.style().unpolish(self.review_feedback_label)
-        self.review_feedback_label.style().polish(self.review_feedback_label)
+        if self.review_feedback_label.style() is not None:
+            _style = self.review_feedback_label.style()
+            assert _style is not None
+            _style.unpolish(self.review_feedback_label)
+            _style.polish(self.review_feedback_label)
         self.review_feedback_label.setText(message)
 
     def _update_analytics_status_label(self, enabled: bool):
         if enabled:
-            self.analytics_status_label.setText(self.tr("Enabled: only anonymized marketplace usage events are sent in batches."))
+            self.analytics_status_label.setText(
+                self.tr(
+                    "Enabled: only anonymized marketplace usage events are sent in batches."
+                )
+            )
         else:
-            self.analytics_status_label.setText(self.tr("Disabled: no usage analytics events are collected or sent."))
+            self.analytics_status_label.setText(
+                self.tr("Disabled: no usage analytics events are collected or sent.")
+            )
 
     def _on_analytics_opt_in_changed(self, state):
         """Persist analytics consent and update local status copy."""
@@ -1102,7 +1174,9 @@ class CommunityTab(QWidget, PluginInterface):
         self.plugin_analytics.set_enabled(enabled)
         self._update_analytics_status_label(enabled)
 
-    def _track_analytics_event(self, event_type: str, action: str, plugin_id: str = "", metadata=None):
+    def _track_analytics_event(
+        self, event_type: str, action: str, plugin_id: str = "", metadata=None
+    ):
         """Best-effort analytics tracking; never block primary UI actions."""
         self.plugin_analytics.track_event(
             event_type=event_type,
@@ -1119,30 +1193,48 @@ class CommunityTab(QWidget, PluginInterface):
         if not self.selected_marketplace_plugin_id:
             return
 
-        aggregate_result = self.plugin_marketplace.get_rating_aggregate(self.selected_marketplace_plugin_id)
+        aggregate_result = self.plugin_marketplace.get_rating_aggregate(
+            self.selected_marketplace_plugin_id
+        )
         if aggregate_result.success and aggregate_result.data:
             aggregate = aggregate_result.data
             self.reviews_summary_label.setText(
                 self.tr("Average: {:.1f}/5 from {} ratings ({} reviews)").format(
-                    aggregate.average_rating, aggregate.rating_count, aggregate.review_count
+                    aggregate.average_rating,
+                    aggregate.rating_count,
+                    aggregate.review_count,
                 )
             )
             self.detail_rating_summary.setText(
                 self.tr("Rating: {:.1f}/5 | {} ratings | {} reviews").format(
-                    aggregate.average_rating, aggregate.rating_count, aggregate.review_count
+                    aggregate.average_rating,
+                    aggregate.rating_count,
+                    aggregate.review_count,
                 )
             )
         else:
-            self.reviews_summary_label.setText(self.tr("Ratings unavailable: {}").format(aggregate_result.error or "unknown"))
+            self.reviews_summary_label.setText(
+                self.tr("Ratings unavailable: {}").format(
+                    aggregate_result.error or "unknown"
+                )
+            )
 
-        reviews_result = self.plugin_marketplace.fetch_reviews(self.selected_marketplace_plugin_id, limit=5, offset=0)
+        reviews_result = self.plugin_marketplace.fetch_reviews(
+            self.selected_marketplace_plugin_id, limit=5, offset=0
+        )
         if not reviews_result.success:
-            self.reviews_text.setPlainText(self.tr("Unable to load reviews: {}").format(reviews_result.error or "unknown"))
+            self.reviews_text.setPlainText(
+                self.tr("Unable to load reviews: {}").format(
+                    reviews_result.error or "unknown"
+                )
+            )
             return
 
         reviews = reviews_result.data or []
         if not reviews:
-            self.reviews_text.setPlainText(self.tr("No reviews yet. Be the first to submit one."))
+            self.reviews_text.setPlainText(
+                self.tr("No reviews yet. Be the first to submit one.")
+            )
             return
 
         lines = []
@@ -1165,7 +1257,9 @@ class CommunityTab(QWidget, PluginInterface):
             plugin_meta = self._resolve_plugin_metadata_for_preset(preset)
             badge_rating = self._build_badge_rating_summary(plugin_meta)
             item = QListWidgetItem(
-                self.tr("{stars} stars | {name} by {author}\n   [{category}] {desc}...\n   {badge_rating}").format(
+                self.tr(
+                    "{stars} stars | {name} by {author}\n   [{category}] {desc}...\n   {badge_rating}"
+                ).format(
                     stars=preset.stars,
                     name=preset.name,
                     author=preset.author,
@@ -1196,7 +1290,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.detail_desc.setText(preset.description)
         self.detail_stats.setText(
             self.tr("{} stars | {} downloads | Tags: {}").format(
-                preset.stars, preset.download_count, ', '.join(preset.tags)
+                preset.stars, preset.download_count, ", ".join(preset.tags)
             )
         )
         plugin_meta = self._resolve_plugin_metadata_for_preset(preset)
@@ -1227,8 +1321,12 @@ class CommunityTab(QWidget, PluginInterface):
             else:
                 self.detail_rating_summary.setText(self.tr("Rating: No ratings yet"))
         else:
-            self.detail_verification.setText(self.tr("Publisher verification unavailable for this preset"))
-            self.detail_rating_summary.setText(self.tr("Rating data unavailable for this preset"))
+            self.detail_verification.setText(
+                self.tr("Publisher verification unavailable for this preset")
+            )
+            self.detail_rating_summary.setText(
+                self.tr("Rating data unavailable for this preset")
+            )
 
         self.submit_review_btn.setEnabled(bool(self.selected_marketplace_plugin_id))
         self._set_review_feedback("", True)
@@ -1237,7 +1335,10 @@ class CommunityTab(QWidget, PluginInterface):
             event_type="marketplace",
             action="select_preset",
             plugin_id=self.selected_marketplace_plugin_id or "",
-            metadata={"category": getattr(preset, "category", ""), "has_metadata": bool(plugin_meta)},
+            metadata={
+                "category": getattr(preset, "category", ""),
+                "has_metadata": bool(plugin_meta),
+            },
         )
 
         self.download_btn.setEnabled(True)
@@ -1246,7 +1347,10 @@ class CommunityTab(QWidget, PluginInterface):
     def submit_marketplace_review(self):
         """Submit a review for the selected marketplace plugin with inline validation feedback."""
         if not self.selected_marketplace_plugin_id:
-            self._set_review_feedback(self.tr("Select a preset with marketplace plugin metadata first."), False)
+            self._set_review_feedback(
+                self.tr("Select a preset with marketplace plugin metadata first."),
+                False,
+            )
             return
 
         reviewer = self.review_reviewer_input.text().strip()
@@ -1261,10 +1365,14 @@ class CommunityTab(QWidget, PluginInterface):
             self._set_review_feedback(self.tr("Rating must be between 1 and 5."), False)
             return
         if len(title) > 120:
-            self._set_review_feedback(self.tr("Title must be at most 120 characters."), False)
+            self._set_review_feedback(
+                self.tr("Title must be at most 120 characters."), False
+            )
             return
         if len(comment) > 5000:
-            self._set_review_feedback(self.tr("Comment must be at most 5000 characters."), False)
+            self._set_review_feedback(
+                self.tr("Comment must be at most 5000 characters."), False
+            )
             return
 
         result = self.plugin_marketplace.submit_review(
@@ -1293,7 +1401,9 @@ class CommunityTab(QWidget, PluginInterface):
             plugin_id=self.selected_marketplace_plugin_id,
             metadata={"status": "error"},
         )
-        self._set_review_feedback(self.tr("Review submit failed: {}").format(result.error or "unknown"), False)
+        self._set_review_feedback(
+            self.tr("Review submit failed: {}").format(result.error or "unknown"), False
+        )
 
     def search_presets(self):
         """Search for presets in the marketplace."""
@@ -1305,7 +1415,9 @@ class CommunityTab(QWidget, PluginInterface):
         self.fetch_marketplace_thread = FetchMarketplaceThread(
             self.marketplace, category, query
         )
-        self.fetch_marketplace_thread.finished.connect(self.on_marketplace_fetch_complete)
+        self.fetch_marketplace_thread.finished.connect(
+            self.on_marketplace_fetch_complete
+        )
         self.fetch_marketplace_thread.start()
 
     def filter_by_category(self):
@@ -1314,7 +1426,7 @@ class CommunityTab(QWidget, PluginInterface):
 
     def download_marketplace_preset(self):
         """Download the selected marketplace preset."""
-        if not hasattr(self, 'selected_preset'):
+        if not hasattr(self, "selected_preset"):
             return
 
         result = self.marketplace.download_preset(self.selected_preset)
@@ -1327,10 +1439,11 @@ class CommunityTab(QWidget, PluginInterface):
                 metadata={"status": "success"},
             )
             QMessageBox.information(
-                self, self.tr("Downloaded"),
+                self,
+                self.tr("Downloaded"),
                 self.tr("Preset '{}' downloaded successfully!").format(
                     self.selected_preset.name
-                )
+                ),
             )
         else:
             self._track_analytics_event(
@@ -1343,7 +1456,7 @@ class CommunityTab(QWidget, PluginInterface):
 
     def download_and_apply(self):
         """Download and apply the selected marketplace preset."""
-        if not hasattr(self, 'selected_preset'):
+        if not hasattr(self, "selected_preset"):
             return
 
         result = self.marketplace.download_preset(self.selected_preset)
@@ -1363,10 +1476,11 @@ class CommunityTab(QWidget, PluginInterface):
                     self.update_drift_status()
 
                     QMessageBox.information(
-                        self, self.tr("Applied"),
-                        self.tr("Preset '{}' applied! Baseline saved for drift detection.").format(
-                            self.selected_preset.name
-                        )
+                        self,
+                        self.tr("Applied"),
+                        self.tr(
+                            "Preset '{}' applied! Baseline saved for drift detection."
+                        ).format(self.selected_preset.name),
                     )
                 else:
                     QMessageBox.warning(
@@ -1381,29 +1495,36 @@ class CommunityTab(QWidget, PluginInterface):
 
         if not report:
             QMessageBox.information(
-                self, self.tr("No Baseline"),
-                self.tr("No baseline set. Apply a preset first.")
+                self,
+                self.tr("No Baseline"),
+                self.tr("No baseline set. Apply a preset first."),
             )
             return
 
         if report.is_drifted:
-            items_text = "\n".join([
-                self.tr("[{}] {}: {} -> {}").format(
-                    d.category, d.setting, d.expected, d.actual
-                )
-                for d in report.items[:10]
-            ])
+            items_text = "\n".join(
+                [
+                    self.tr("[{}] {}: {} -> {}").format(
+                        d.category, d.setting, d.expected, d.actual
+                    )
+                    for d in report.items[:10]
+                ]
+            )
 
             QMessageBox.warning(
-                self, self.tr("Drift Detected"),
+                self,
+                self.tr("Drift Detected"),
                 self.tr("Found {} changes since preset '{}' was applied:\n\n{}").format(
                     report.drift_count, report.preset_name, items_text
-                )
+                ),
             )
         else:
             QMessageBox.information(
-                self, self.tr("No Drift"),
-                self.tr("Configuration matches preset '{}'.").format(report.preset_name)
+                self,
+                self.tr("No Drift"),
+                self.tr("Configuration matches preset '{}'.").format(
+                    report.preset_name
+                ),
             )
 
         self.update_drift_status()
@@ -1420,8 +1541,7 @@ class CommunityTab(QWidget, PluginInterface):
         if snapshot:
             self.drift_status.setText(
                 self.tr("Baseline: '{}' (set {})").format(
-                    snapshot.preset_name,
-                    snapshot.timestamp[:10]
+                    snapshot.preset_name, snapshot.timestamp[:10]
                 )
             )
         else:

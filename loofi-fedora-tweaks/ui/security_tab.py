@@ -12,10 +12,22 @@ Features:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QScrollArea, QFrame, QTableWidget, QTableWidgetItem,
-    QHeaderView, QCheckBox
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QComboBox,
+    QTextEdit,
+    QScrollArea,
+    QFrame,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QCheckBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
@@ -62,7 +74,7 @@ class SecurityTab(QWidget, PluginInterface):
 
     def _on_privacy_output(self, text):
         """Handle output from privacy commands."""
-        self.log(text.rstrip('\n'))
+        self.log(text.rstrip("\n"))
 
     def _on_privacy_command_finished(self, exit_code):
         """Handle privacy command completion."""
@@ -150,8 +162,11 @@ class SecurityTab(QWidget, PluginInterface):
         score_label = QLabel(f"{score}/100 - {rating}")
         score_label.setObjectName("secScoreLabel")
         score_label.setProperty("scoreLevel", score_level)
-        score_label.style().unpolish(score_label)
-        score_label.style().polish(score_label)
+        if score_label.style() is not None:
+            _style = score_label.style()
+            assert _style is not None
+            _style.unpolish(score_label)
+            _style.polish(score_label)
         layout.addWidget(score_label)
 
         # Stats
@@ -192,9 +207,9 @@ class SecurityTab(QWidget, PluginInterface):
         # Port table
         self.port_table = QTableWidget()
         self.port_table.setColumnCount(5)
-        self.port_table.setHorizontalHeaderLabels([
-            "Port", "Protocol", "Address", "Process", "Status"
-        ])
+        self.port_table.setHorizontalHeaderLabels(
+            ["Port", "Protocol", "Address", "Process", "Status"]
+        )
         self.port_table.horizontalHeader().setSectionResizeMode(  # type: ignore[union-attr]
             QHeaderView.ResizeMode.Stretch
         )
@@ -231,7 +246,11 @@ class SecurityTab(QWidget, PluginInterface):
         installed = USBGuardManager.is_installed()
         running = USBGuardManager.is_running() if installed else False
 
-        status_text = "✅ Active" if running else ("❌ Stopped" if installed else "📥 Not Installed")
+        status_text = (
+            "✅ Active"
+            if running
+            else ("❌ Stopped" if installed else "📥 Not Installed")
+        )
         self.usb_status = QLabel(f"Status: {status_text}")
         layout.addWidget(self.usb_status)
 
@@ -241,9 +260,11 @@ class SecurityTab(QWidget, PluginInterface):
             install_btn.clicked.connect(self._install_usbguard)
             layout.addWidget(install_btn)
 
-            info = QLabel(self.tr(
-                "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
-            ))
+            info = QLabel(
+                self.tr(
+                    "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
+                )
+            )
             info.setWordWrap(True)
             info.setObjectName("secUsbInfo")
             layout.addWidget(info)
@@ -314,7 +335,9 @@ class SecurityTab(QWidget, PluginInterface):
 
             for app, desc in list(SandboxManager.FIREJAIL_PROFILES.items())[:4]:
                 btn = QPushButton(app.capitalize())
-                btn.setAccessibleName(self.tr("Launch {} sandboxed").format(app.capitalize()))
+                btn.setAccessibleName(
+                    self.tr("Launch {} sandboxed").format(app.capitalize())
+                )
                 btn.setToolTip(f"Launch {app} in sandbox")
                 btn.clicked.connect(lambda checked, a=app: self._launch_sandboxed(a))
                 profiles_layout.addWidget(btn)
@@ -372,7 +395,9 @@ class SecurityTab(QWidget, PluginInterface):
         ports = PortAuditor.scan_ports()
 
         if not ports:
-            BaseTab.set_table_empty_state(self.port_table, self.tr("No open ports detected"))
+            BaseTab.set_table_empty_state(
+                self.port_table, self.tr("No open ports detected")
+            )
             return
 
         for port in ports:
@@ -415,7 +440,7 @@ class SecurityTab(QWidget, PluginInterface):
 
     def _refresh_usb_devices(self):
         """Refresh USB device list."""
-        if not hasattr(self, 'usb_list'):
+        if not hasattr(self, "usb_list"):
             return
 
         self.usb_list.clear()
@@ -465,13 +490,19 @@ class SecurityTab(QWidget, PluginInterface):
 
     def _launch_sandboxed(self, app: str):
         """Launch an app in sandbox."""
-        no_net = self.no_network_check.isChecked() if hasattr(self, 'no_network_check') else False
-        private = self.private_home_check.isChecked() if hasattr(self, 'private_home_check') else False
+        no_net = (
+            self.no_network_check.isChecked()
+            if hasattr(self, "no_network_check")
+            else False
+        )
+        private = (
+            self.private_home_check.isChecked()
+            if hasattr(self, "private_home_check")
+            else False
+        )
 
         result = SandboxManager.run_sandboxed(
-            [app],
-            no_network=no_net,
-            private_home=private
+            [app], no_network=no_net, private_home=private
         )
         self.log(result.message)
 
@@ -486,9 +517,7 @@ class SecurityTab(QWidget, PluginInterface):
         private = self.private_home_check.isChecked()
 
         result = SandboxManager.run_sandboxed(
-            cmd.split(),
-            no_network=no_net,
-            private_home=private
+            cmd.split(), no_network=no_net, private_home=private
         )
         self.log(result.message)
 
@@ -503,8 +532,9 @@ class SecurityTab(QWidget, PluginInterface):
         btn_fw_status.setAccessibleName(self.tr("Check Firewall Status"))
         btn_fw_status.clicked.connect(
             lambda: self._run_privacy_command(
-                "systemctl", ["status", "firewalld"],
-                self.tr("Checking Firewall Status...")
+                "systemctl",
+                ["status", "firewalld"],
+                self.tr("Checking Firewall Status..."),
             )
         )
         fw_layout.addWidget(btn_fw_status)
@@ -513,8 +543,9 @@ class SecurityTab(QWidget, PluginInterface):
         btn_fw_enable.setAccessibleName(self.tr("Enable Firewall"))
         btn_fw_enable.clicked.connect(
             lambda: self._run_privacy_command(
-                "pkexec", ["systemctl", "enable", "--now", "firewalld"],
-                self.tr("Enabling Firewall...")
+                "pkexec",
+                ["systemctl", "enable", "--now", "firewalld"],
+                self.tr("Enabling Firewall..."),
             )
         )
         fw_layout.addWidget(btn_fw_enable)
@@ -523,8 +554,9 @@ class SecurityTab(QWidget, PluginInterface):
         btn_fw_disable.setAccessibleName(self.tr("Disable Firewall"))
         btn_fw_disable.clicked.connect(
             lambda: self._run_privacy_command(
-                "pkexec", ["systemctl", "disable", "--now", "firewalld"],
-                self.tr("Disabling Firewall...")
+                "pkexec",
+                ["systemctl", "disable", "--now", "firewalld"],
+                self.tr("Disabling Firewall..."),
             )
         )
         fw_layout.addWidget(btn_fw_disable)
@@ -543,8 +575,9 @@ class SecurityTab(QWidget, PluginInterface):
         tele_cmd = "dnf remove -y abrt* gnome-abrt* || true"
         btn_remove_tele.clicked.connect(
             lambda: self._run_privacy_command(
-                "pkexec", ["sh", "-c", tele_cmd],
-                self.tr("Removing Telemetry Packages...")
+                "pkexec",
+                ["sh", "-c", tele_cmd],
+                self.tr("Removing Telemetry Packages..."),
             )
         )
         tele_layout.addWidget(btn_remove_tele)
@@ -562,8 +595,9 @@ class SecurityTab(QWidget, PluginInterface):
         btn_check_updates.setAccessibleName(self.tr("Check for Security Updates"))
         btn_check_updates.clicked.connect(
             lambda: self._run_privacy_command(
-                "dnf", ["check-update", "--security"],
-                self.tr("Checking for Security Updates...")
+                "dnf",
+                ["check-update", "--security"],
+                self.tr("Checking for Security Updates..."),
             )
         )
         sec_layout.addWidget(btn_check_updates)

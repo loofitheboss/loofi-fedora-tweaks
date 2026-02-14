@@ -39,7 +39,7 @@ from ui.lazy_widget import LazyWidget
 logger = get_logger(__name__)
 
 # Custom data roles for sidebar items
-_ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
+_ROLE_DESC = Qt.ItemDataRole.UserRole + 1  # Tab description string
 _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 _ROLE_STATUS = Qt.ItemDataRole.UserRole + 3  # "ok" | "warning" | "error" | ""
 
@@ -117,12 +117,14 @@ class MainWindow(QMainWindow):
 
         # Search box
         from PyQt6.QtWidgets import QLineEdit
+
         self.sidebar_search = QLineEdit()
         self.sidebar_search.setPlaceholderText(self.tr("Search tabs..."))
         self.sidebar_search.setClearButtonEnabled(True)
         self.sidebar_search.setAccessibleName(self.tr("Search tabs"))
         self.sidebar_search.setAccessibleDescription(
-            self.tr("Filter sidebar tabs by name or description"))
+            self.tr("Filter sidebar tabs by name or description")
+        )
         # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
         search_height = int(self._line_height * 2 + 28)
         self.sidebar_search.setFixedHeight(search_height)
@@ -155,10 +157,8 @@ class MainWindow(QMainWindow):
         self.sidebar.setAnimated(True)
         self.sidebar.currentItemChanged.connect(self.change_page)
         # v31.0: Context menu for favorites
-        self.sidebar.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.CustomContextMenu)
-        self.sidebar.customContextMenuRequested.connect(
-            self._sidebar_context_menu)
+        self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
         sidebar_layout.addWidget(self.sidebar)
 
         # Sidebar footer
@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
         context = {
             "main_window": self,
             "config_manager": ConfigManager,  # class, not instance
-            "executor": None,                 # populated after executor init
+            "executor": None,  # populated after executor init
         }
         self._build_sidebar_from_registry(context)
 
@@ -286,6 +286,7 @@ class MainWindow(QMainWindow):
 
         # v29.0 - Status indicators refresh (every 30s)
         from PyQt6.QtCore import QTimer
+
         self._status_timer = QTimer(self)
         self._status_timer.timeout.connect(self._refresh_status_indicators)
         self._status_timer.start(30000)
@@ -372,9 +373,14 @@ class MainWindow(QMainWindow):
                             continue
                         for j in range(cat.childCount()):
                             child = cat.child(j)
-                            if name in child.text(0) and child.data(0, Qt.ItemDataRole.UserRole):
-                                item.setData(0, Qt.ItemDataRole.UserRole,
-                                             child.data(0, Qt.ItemDataRole.UserRole))
+                            if name in child.text(0) and child.data(
+                                0, Qt.ItemDataRole.UserRole
+                            ):
+                                item.setData(
+                                    0,
+                                    Qt.ItemDataRole.UserRole,
+                                    child.data(0, Qt.ItemDataRole.UserRole),
+                                )
                                 break
                     break
 
@@ -467,9 +473,14 @@ class MainWindow(QMainWindow):
                 badge=badge,
             )
             page_widget = self._wrap_page_widget(
-                DisabledPluginPage(placeholder_meta, disabled_reason))
+                DisabledPluginPage(placeholder_meta, disabled_reason)
+            )
             item.setDisabled(True)
-            tooltip = disabled_reason if disabled_reason else f"{name} is not available on this system."
+            tooltip = (
+                disabled_reason
+                if disabled_reason
+                else f"{name} is not available on this system."
+            )
             item.setToolTip(0, tooltip)
         else:
             page_widget = self._wrap_page_widget(widget)
@@ -494,8 +505,7 @@ class MainWindow(QMainWindow):
         scroll.setObjectName("pageScroll")
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setWidget(widget)
         return scroll
@@ -562,25 +572,30 @@ class MainWindow(QMainWindow):
             self.show_status_toast(self.tr("Undo failed"), error=True)
         self._undo_btn.setVisible(False)
 
-    def show_status_toast(self, message: str, error: bool = False, duration: int = 3000):
+    def show_status_toast(
+        self, message: str, error: bool = False, duration: int = 3000
+    ):
         """Show a temporary status-bar toast notification (v38.0)."""
         self._status_label.setText(message)
         if error:
             self._status_label.setProperty("toast", "error")
         else:
             self._status_label.setProperty("toast", "success")
-        self._status_label.style().unpolish(self._status_label)
-        self._status_label.style().polish(self._status_label)
+        if self._status_label.style() is not None:
+            self._status_label.style().unpolish(self._status_label)
+            self._status_label.style().polish(self._status_label)
 
         from PyQt6.QtCore import QTimer
+
         QTimer.singleShot(duration, self._clear_toast)
 
     def _clear_toast(self):
         """Clear toast styling from the status bar."""
         self._status_label.setText("")
         self._status_label.setProperty("toast", "")
-        self._status_label.style().unpolish(self._status_label)
-        self._status_label.style().polish(self._status_label)
+        if self._status_label.style() is not None:
+            self._status_label.style().unpolish(self._status_label)
+            self._status_label.style().polish(self._status_label)
 
     def switch_to_tab(self, name):
         """Helper for Dashboard and Command Palette to switch tabs."""
@@ -603,6 +618,7 @@ class MainWindow(QMainWindow):
         """Show the command palette dialog."""
         try:
             from ui.command_palette import CommandPalette
+
             palette = CommandPalette(self.switch_to_tab, self)
             palette.exec()
         except ImportError:
@@ -663,8 +679,7 @@ class MainWindow(QMainWindow):
         # Ctrl+1 through Ctrl+9 - switch to category 1-9
         for i in range(1, 10):
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
-            shortcut.activated.connect(
-                lambda idx=i - 1: self._select_category(idx))
+            shortcut.activated.connect(lambda idx=i - 1: self._select_category(idx))
 
         # Ctrl+Tab - next tab
         next_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
@@ -713,8 +728,7 @@ class MainWindow(QMainWindow):
             self.sidebar.setCurrentItem(prev_item)
         else:
             # Wrap around to bottom
-            last_top = self.sidebar.topLevelItem(
-                self.sidebar.topLevelItemCount() - 1)
+            last_top = self.sidebar.topLevelItem(self.sidebar.topLevelItemCount() - 1)
             # Find last visible item
             while last_top.childCount() > 0 and last_top.isExpanded():
                 last_top = last_top.child(last_top.childCount() - 1)
@@ -723,6 +737,7 @@ class MainWindow(QMainWindow):
     def _show_shortcut_help(self):
         """Show keyboard shortcuts help dialog."""
         from PyQt6.QtWidgets import QMessageBox
+
         shortcuts = (
             "Ctrl+K — Command Palette\n"
             "Ctrl+Shift+K — Quick Actions\n"
@@ -737,6 +752,7 @@ class MainWindow(QMainWindow):
     def _setup_notification_bell(self):
         """Add notification bell with unread count badge to the breadcrumb bar."""
         from PyQt6.QtWidgets import QToolButton
+
         self.notif_panel = None
         self._toast_widget = None
 
@@ -761,6 +777,7 @@ class MainWindow(QMainWindow):
 
         # Timer to refresh unread count (every 5s)
         from PyQt6.QtCore import QTimer
+
         self._notif_timer = QTimer(self)
         self._notif_timer.timeout.connect(self._refresh_notif_badge)
         self._notif_timer.start(5000)
@@ -770,6 +787,7 @@ class MainWindow(QMainWindow):
         """Toggle the notification panel."""
         if self.notif_panel is None:
             from ui.notification_panel import NotificationPanel
+
             self.notif_panel = NotificationPanel(self)
 
         if self.notif_panel.isVisible():
@@ -782,7 +800,9 @@ class MainWindow(QMainWindow):
             panel_w = panel.PANEL_WIDTH
             margin = panel.EDGE_MARGIN
             breadcrumb_bottom = self._breadcrumb_frame.geometry().bottom()
-            status_height = self._status_frame.height() if hasattr(self, "_status_frame") else 0
+            status_height = (
+                self._status_frame.height() if hasattr(self, "_status_frame") else 0
+            )
             window_w = self.width()
             window_h = self.height()
 
@@ -794,8 +814,10 @@ class MainWindow(QMainWindow):
 
             # Available height: from y to bottom minus status bar and margin
             available_h = window_h - y - status_height - margin
-            capped_h = max(panel.MIN_HEIGHT, min(
-                panel.sizeHint().height(), available_h, panel.MAX_HEIGHT))
+            capped_h = max(
+                panel.MIN_HEIGHT,
+                min(panel.sizeHint().height(), available_h, panel.MAX_HEIGHT),
+            )
 
             panel.setFixedHeight(capped_h)
             panel.move(x, y)
@@ -807,6 +829,7 @@ class MainWindow(QMainWindow):
         """Update the unread notification count badge."""
         try:
             from utils.notification_center import NotificationCenter
+
             nc = NotificationCenter()
             count = nc.get_unread_count()
             if count > 0:
@@ -821,6 +844,7 @@ class MainWindow(QMainWindow):
         """Show an animated toast notification at the top-right."""
         try:
             from ui.notification_toast import NotificationToast
+
             if self._toast_widget is None:
                 self._toast_widget = NotificationToast(self)
             self._toast_widget.show_toast(title, message, category)
@@ -834,10 +858,10 @@ class MainWindow(QMainWindow):
         try:
             # Maintenance: check for updates
             from utils.update_checker import UpdateChecker
+
             update_info = UpdateChecker.check()
             if update_info and update_info.is_newer:
-                self._set_tab_status(
-                    "Maintenance", "warning", "Updates available")
+                self._set_tab_status("Maintenance", "warning", "Updates available")
             else:
                 self._set_tab_status("Maintenance", "ok", "Up to date")
         except Exception:
@@ -846,14 +870,17 @@ class MainWindow(QMainWindow):
         try:
             # Storage: check disk space
             from services.hardware import DiskManager
+
             usage = DiskManager.get_disk_usage("/")
-            if usage and hasattr(usage, 'percent_used'):
+            if usage and hasattr(usage, "percent_used"):
                 if usage.percent_used >= 90:
                     self._set_tab_status(
-                        "Storage", "error", f"Disk {usage.percent_used:.0f}% full")
+                        "Storage", "error", f"Disk {usage.percent_used:.0f}% full"
+                    )
                 elif usage.percent_used >= 75:
                     self._set_tab_status(
-                        "Storage", "warning", f"Disk {usage.percent_used:.0f}% used")
+                        "Storage", "warning", f"Disk {usage.percent_used:.0f}% used"
+                    )
                 else:
                     self._set_tab_status("Storage", "ok", "Healthy")
         except Exception:
@@ -882,7 +909,8 @@ class MainWindow(QMainWindow):
                 if tooltip:
                     existing = item.data(0, _ROLE_DESC) or ""
                     item.setToolTip(
-                        0, f"{existing}\n[{tooltip}]" if existing else tooltip)
+                        0, f"{existing}\n[{tooltip}]" if existing else tooltip
+                    )
                 break
             iterator += 1
 
@@ -899,6 +927,7 @@ class MainWindow(QMainWindow):
                 QuickActionsBar,
                 register_default_actions,
             )
+
             registry = QuickActionRegistry.instance()
             if not registry.get_all():
                 register_default_actions(registry, main_window=self)
@@ -915,11 +944,11 @@ class MainWindow(QMainWindow):
         if not os.path.exists(first_run_file):
             try:
                 from ui.wizard import FirstRunWizard
+
                 wizard = FirstRunWizard(self)
                 wizard.exec()
             except ImportError:
-                logger.debug(
-                    "First-run wizard module not available", exc_info=True)
+                logger.debug("First-run wizard module not available", exc_info=True)
 
     def setup_tray(self):
         from PyQt6.QtGui import QAction, QIcon
@@ -927,13 +956,17 @@ class MainWindow(QMainWindow):
 
         if QSystemTrayIcon.isSystemTrayAvailable():
             self.tray_icon = QSystemTrayIcon(self)
-            icon_path = os.path.join(os.path.dirname(
-                __file__), "..", "assets", "loofi-fedora-tweaks.png")
+            icon_path = os.path.join(
+                os.path.dirname(__file__), "..", "assets", "loofi-fedora-tweaks.png"
+            )
             if os.path.exists(icon_path):
                 self.tray_icon.setIcon(QIcon(icon_path))
             else:
-                self.tray_icon.setIcon(self.style().standardIcon(
-                    self.style().StandardPixmap.SP_ComputerIcon))
+                self.tray_icon.setIcon(
+                    self.style().standardIcon(
+                        self.style().StandardPixmap.SP_ComputerIcon
+                    )
+                )
 
             tray_menu = QMenu()
             show_action = QAction(self.tr("Show"), self)
@@ -969,7 +1002,7 @@ class MainWindow(QMainWindow):
                 self.tr("Focus Mode"),
                 message,
                 self.tray_icon.MessageIcon.Information,
-                2000
+                2000,
             )
 
     def quit_app(self):
@@ -980,6 +1013,7 @@ class MainWindow(QMainWindow):
         if self.tray_icon:
             self.tray_icon.hide()
         from PyQt6.QtWidgets import QApplication
+
         QApplication.quit()
 
     def closeEvent(self, event):
@@ -989,7 +1023,7 @@ class MainWindow(QMainWindow):
                 self.tr("Loofi Fedora Tweaks"),
                 self.tr("Minimized to tray."),
                 self.tray_icon.MessageIcon.Information,
-                2000
+                2000,
             )
             event.ignore()
         else:
@@ -999,12 +1033,12 @@ class MainWindow(QMainWindow):
                     try:
                         page.cleanup()
                     except Exception:
-                        logger.debug(
-                            "Failed to cleanup page on close", exc_info=True)
+                        logger.debug("Failed to cleanup page on close", exc_info=True)
             event.accept()
 
     def check_dependencies(self):
         import shutil
+
         critical = ["dnf", "pkexec"]
         missing = [tool for tool in critical if not shutil.which(tool)]
         if missing:
@@ -1012,6 +1046,7 @@ class MainWindow(QMainWindow):
 
     def show_doctor(self):
         from ui.doctor import DependencyDoctor
+
         doctor = DependencyDoctor(self)
         doctor.exec()
 
@@ -1036,6 +1071,7 @@ class MainWindow(QMainWindow):
             with open(qss_path, "r") as fh:
                 stylesheet = fh.read()
             from PyQt6.QtWidgets import QApplication
+
             app = QApplication.instance()
             if isinstance(app, QApplication):
                 app.setStyleSheet(stylesheet)
@@ -1051,6 +1087,7 @@ class MainWindow(QMainWindow):
         Returns ``"dark"`` when detection fails.
         """
         from utils.desktop_utils import DesktopUtils
+
         return DesktopUtils.detect_color_scheme()
 
     def _get_frameless_mode_flag(self) -> bool:

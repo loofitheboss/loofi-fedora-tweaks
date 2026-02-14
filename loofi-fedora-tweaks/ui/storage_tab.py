@@ -6,9 +6,16 @@ Uses StorageManager from utils/storage.py for lsblk, smartctl, df, and fsck.
 """
 
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QHeaderView,
-    QMessageBox, QGridLayout, QWidget
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QGroupBox,
+    QTableWidget,
+    QHeaderView,
+    QMessageBox,
+    QGridLayout,
+    QWidget,
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
@@ -55,10 +62,15 @@ class StorageTab(BaseTab):
 
         self.disk_table = QTableWidget()
         self.disk_table.setColumnCount(5)
-        self.disk_table.setHorizontalHeaderLabels([
-            self.tr("Device"), self.tr("Model"), self.tr("Size"),
-            self.tr("Type"), self.tr("Removable")
-        ])
+        self.disk_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Device"),
+                self.tr("Model"),
+                self.tr("Size"),
+                self.tr("Type"),
+                self.tr("Removable"),
+            ]
+        )
         self.disk_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
@@ -90,10 +102,16 @@ class StorageTab(BaseTab):
 
         self.mount_table = QTableWidget()
         self.mount_table.setColumnCount(6)
-        self.mount_table.setHorizontalHeaderLabels([
-            self.tr("Device"), self.tr("Mount Point"), self.tr("Filesystem"),
-            self.tr("Size"), self.tr("Used"), self.tr("Usage")
-        ])
+        self.mount_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Device"),
+                self.tr("Mount Point"),
+                self.tr("Filesystem"),
+                self.tr("Size"),
+                self.tr("Used"),
+                self.tr("Usage"),
+            ]
+        )
         self.mount_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
@@ -175,7 +193,9 @@ class StorageTab(BaseTab):
             self.disk_table.setRowCount(0)
 
             if not disks:
-                self.set_table_empty_state(self.disk_table, self.tr("No disks detected"))
+                self.set_table_empty_state(
+                    self.disk_table, self.tr("No disks detected")
+                )
                 return
 
             for disk in disks:
@@ -184,14 +204,18 @@ class StorageTab(BaseTab):
                 self.disk_table.setItem(row, 0, self.make_table_item(disk.path))
                 self.disk_table.setItem(row, 1, self.make_table_item(disk.model or "—"))
                 self.disk_table.setItem(row, 2, self.make_table_item(disk.size))
-                self.disk_table.setItem(row, 3, self.make_table_item(
-                    "NVMe" if "nvme" in disk.name else "SATA/USB"
-                ))
-                self.disk_table.setItem(row, 4, self.make_table_item(
-                    "Yes" if disk.rm else "No"
-                ))
+                self.disk_table.setItem(
+                    row,
+                    3,
+                    self.make_table_item("NVMe" if "nvme" in disk.name else "SATA/USB"),
+                )
+                self.disk_table.setItem(
+                    row, 4, self.make_table_item("Yes" if disk.rm else "No")
+                )
         except Exception as exc:
-            self.set_table_empty_state(self.disk_table, self.tr("Failed to load disks"), color="#e8556d")
+            self.set_table_empty_state(
+                self.disk_table, self.tr("Failed to load disks"), color="#e8556d"
+            )
             self.append_output(f"Error listing disks: {exc}\n")
 
     def _refresh_mounts(self):
@@ -202,7 +226,9 @@ class StorageTab(BaseTab):
             self.mount_table.setRowCount(0)
 
             if not mounts:
-                self.set_table_empty_state(self.mount_table, self.tr("No mount points found"))
+                self.set_table_empty_state(
+                    self.mount_table, self.tr("No mount points found")
+                )
                 return
 
             for mount in mounts:
@@ -213,9 +239,15 @@ class StorageTab(BaseTab):
                 self.mount_table.setItem(row, 2, self.make_table_item(mount.fstype))
                 self.mount_table.setItem(row, 3, self.make_table_item(mount.size))
                 self.mount_table.setItem(row, 4, self.make_table_item(mount.used))
-                self.mount_table.setItem(row, 5, self.make_table_item(mount.use_percent))
+                self.mount_table.setItem(
+                    row, 5, self.make_table_item(mount.use_percent)
+                )
         except Exception as exc:
-            self.set_table_empty_state(self.mount_table, self.tr("Failed to load mount points"), color="#e8556d")
+            self.set_table_empty_state(
+                self.mount_table,
+                self.tr("Failed to load mount points"),
+                color="#e8556d",
+            )
             self.append_output(f"Error listing mounts: {exc}\n")
 
     def _check_smart(self):
@@ -223,8 +255,9 @@ class StorageTab(BaseTab):
         row = self.disk_table.currentRow()
         if row < 0:
             QMessageBox.warning(
-                self, self.tr("No Selection"),
-                self.tr("Select a disk to check SMART health.")
+                self,
+                self.tr("No Selection"),
+                self.tr("Select a disk to check SMART health."),
             )
             return
 
@@ -242,8 +275,9 @@ class StorageTab(BaseTab):
             else:
                 self.lbl_smart_health.setText("❌ FAILED")
                 self.lbl_smart_health.setProperty("smartState", "failed")
-            self.lbl_smart_health.style().unpolish(self.lbl_smart_health)
-            self.lbl_smart_health.style().polish(self.lbl_smart_health)
+            if self.lbl_smart_health.style() is not None:
+                self.lbl_smart_health.style().unpolish(self.lbl_smart_health)
+                self.lbl_smart_health.style().polish(self.lbl_smart_health)
 
             self.lbl_smart_temp.setText(
                 f"{health.temperature_c}°C" if health.temperature_c else "—"
@@ -258,8 +292,9 @@ class StorageTab(BaseTab):
                 self.lbl_smart_realloc.setProperty("reallocState", "warning")
             else:
                 self.lbl_smart_realloc.setProperty("reallocState", "ok")
-            self.lbl_smart_realloc.style().unpolish(self.lbl_smart_realloc)
-            self.lbl_smart_realloc.style().polish(self.lbl_smart_realloc)
+            if self.lbl_smart_realloc.style() is not None:
+                self.lbl_smart_realloc.style().unpolish(self.lbl_smart_realloc)
+                self.lbl_smart_realloc.style().polish(self.lbl_smart_realloc)
 
             self.append_output(f"SMART check complete for {device}\n")
         except Exception as exc:
@@ -268,9 +303,10 @@ class StorageTab(BaseTab):
     def _trim_ssd(self):
         """Run fstrim on all SSDs."""
         confirm = QMessageBox.question(
-            self, self.tr("Trim SSDs"),
+            self,
+            self.tr("Trim SSDs"),
             self.tr("Run fstrim on all mounted filesystems?"),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if confirm != QMessageBox.StandardButton.Yes:
             return
@@ -288,8 +324,7 @@ class StorageTab(BaseTab):
         row = self.mount_table.currentRow()
         if row < 0:
             QMessageBox.warning(
-                self, self.tr("No Selection"),
-                self.tr("Select a mount point to check.")
+                self, self.tr("No Selection"), self.tr("Select a mount point to check.")
             )
             return
 
@@ -297,9 +332,12 @@ class StorageTab(BaseTab):
         target = self.mount_table.item(row, 1).text()
 
         QMessageBox.information(
-            self, self.tr("Filesystem Check"),
-            self.tr(f"Running read-only check on {device} ({target}).\n"
-                    "For a full repair, unmount first.")
+            self,
+            self.tr("Filesystem Check"),
+            self.tr(
+                f"Running read-only check on {device} ({target}).\n"
+                "For a full repair, unmount first."
+            ),
         )
 
         self.append_output(f"Checking {device}...\n")

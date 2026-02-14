@@ -8,10 +8,23 @@ Sub-tabs:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QGroupBox,
-    QMessageBox, QDialog, QFormLayout, QComboBox, QLineEdit,
-    QCheckBox, QTabWidget, QScrollArea, QFrame
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QGroupBox,
+    QMessageBox,
+    QDialog,
+    QFormLayout,
+    QComboBox,
+    QLineEdit,
+    QCheckBox,
+    QTabWidget,
+    QScrollArea,
+    QFrame,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
@@ -45,8 +58,12 @@ class AddTaskDialog(QDialog):
         self.cmb_action = QComboBox()
         self.cmb_action.setAccessibleName(self.tr("Task action"))
         self.cmb_action.addItem(self.tr("System Cleanup"), TaskAction.CLEANUP.value)
-        self.cmb_action.addItem(self.tr("Check for Updates"), TaskAction.UPDATE_CHECK.value)
-        self.cmb_action.addItem(self.tr("Sync Config to Cloud"), TaskAction.SYNC_CONFIG.value)
+        self.cmb_action.addItem(
+            self.tr("Check for Updates"), TaskAction.UPDATE_CHECK.value
+        )
+        self.cmb_action.addItem(
+            self.tr("Sync Config to Cloud"), TaskAction.SYNC_CONFIG.value
+        )
         self.cmb_action.addItem(self.tr("Apply Preset"), TaskAction.APPLY_PRESET.value)
         self.cmb_action.currentIndexChanged.connect(self.on_action_changed)
         layout.addRow(self.tr("Action:"), self.cmb_action)
@@ -91,6 +108,7 @@ class AddTaskDialog(QDialog):
     def load_presets(self):
         """Load available presets into combo box."""
         from utils.presets import PresetManager
+
         manager = PresetManager()
         presets = manager.list_presets()
         self.cmb_preset.addItems(presets)
@@ -113,7 +131,7 @@ class AddTaskDialog(QDialog):
             action=self.cmb_action.currentData(),
             schedule=self.cmb_schedule.currentData(),
             enabled=True,
-            preset_name=preset_name
+            preset_name=preset_name,
         )
 
 
@@ -154,14 +172,10 @@ class AutomationTab(BaseTab):
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Scheduler (from SchedulerTab)
-        self.sub_tabs.addTab(
-            self._create_scheduler_tab(), self.tr("Scheduler")
-        )
+        self.sub_tabs.addTab(self._create_scheduler_tab(), self.tr("Scheduler"))
 
         # Sub-tab 2: Replicator (from ReplicatorTab)
-        self.sub_tabs.addTab(
-            self._create_replicator_tab(), self.tr("Replicator")
-        )
+        self.sub_tabs.addTab(self._create_replicator_tab(), self.tr("Replicator"))
 
         # Shared output area at bottom
         self.add_output_section(layout)
@@ -182,9 +196,9 @@ class AutomationTab(BaseTab):
         header.setObjectName("header")
         layout.addWidget(header)
 
-        layout.addWidget(QLabel(self.tr(
-            "Automate tasks like cleanup, updates, and syncing."
-        )))
+        layout.addWidget(
+            QLabel(self.tr("Automate tasks like cleanup, updates, and syncing."))
+        )
 
         # Service status
         self._create_service_section(layout)
@@ -266,15 +280,18 @@ class AutomationTab(BaseTab):
             self.lbl_service_status.setProperty("serviceState", "running")
             self.btn_service_toggle.setText(self.tr("Stop Service"))
         elif is_enabled:
-            self.lbl_service_status.setText(self.tr("Service is enabled but not running"))
+            self.lbl_service_status.setText(
+                self.tr("Service is enabled but not running")
+            )
             self.lbl_service_status.setProperty("serviceState", "enabled")
             self.btn_service_toggle.setText(self.tr("Start Service"))
         else:
             self.lbl_service_status.setText(self.tr("Service is not enabled"))
             self.lbl_service_status.setProperty("serviceState", "disabled")
             self.btn_service_toggle.setText(self.tr("Enable & Start"))
-        self.lbl_service_status.style().unpolish(self.lbl_service_status)
-        self.lbl_service_status.style().polish(self.lbl_service_status)
+        if self.lbl_service_status.style() is not None:
+            self.lbl_service_status.style().unpolish(self.lbl_service_status)
+            self.lbl_service_status.style().polish(self.lbl_service_status)
 
     def refresh_task_list(self):
         """Update task list display."""
@@ -296,8 +313,12 @@ class AutomationTab(BaseTab):
             action_icon = self._get_action_icon(task.action)
 
             text = self.tr("[{}] {} | {} {} | {} {}").format(
-                status, task.name, action_icon, task.action,
-                schedule_icon, task.schedule
+                status,
+                task.name,
+                action_icon,
+                task.action,
+                schedule_icon,
+                task.schedule,
             )
 
             if task.last_run:
@@ -310,16 +331,22 @@ class AutomationTab(BaseTab):
     def _get_schedule_icon(self, schedule: str) -> str:
         """Get icon for schedule type."""
         icons = {
-            "hourly": "Hourly", "daily": "Daily", "weekly": "Weekly",
-            "on_boot": "Boot", "on_battery": "Battery", "on_ac": "AC"
+            "hourly": "Hourly",
+            "daily": "Daily",
+            "weekly": "Weekly",
+            "on_boot": "Boot",
+            "on_battery": "Battery",
+            "on_ac": "AC",
         }
         return icons.get(schedule, schedule)
 
     def _get_action_icon(self, action: str) -> str:
         """Get icon for action type."""
         icons = {
-            "cleanup": "Cleanup", "update_check": "Update",
-            "sync_config": "Sync", "apply_preset": "Preset"
+            "cleanup": "Cleanup",
+            "update_check": "Update",
+            "sync_config": "Sync",
+            "apply_preset": "Preset",
         }
         return icons.get(action, action)
 
@@ -328,24 +355,28 @@ class AutomationTab(BaseTab):
         if TaskScheduler.is_service_running() or TaskScheduler.is_service_enabled():
             if TaskScheduler.disable_service():
                 QMessageBox.information(
-                    self, self.tr("Service Disabled"),
-                    self.tr("Background service has been stopped.")
+                    self,
+                    self.tr("Service Disabled"),
+                    self.tr("Background service has been stopped."),
                 )
             else:
                 QMessageBox.warning(
-                    self, self.tr("Error"),
-                    self.tr("Failed to stop service.")
+                    self, self.tr("Error"), self.tr("Failed to stop service.")
                 )
         else:
             if TaskScheduler.enable_service():
                 QMessageBox.information(
-                    self, self.tr("Service Enabled"),
-                    self.tr("Background service is now running.")
+                    self,
+                    self.tr("Service Enabled"),
+                    self.tr("Background service is now running."),
                 )
             else:
                 QMessageBox.warning(
-                    self, self.tr("Error"),
-                    self.tr("Failed to start service. Make sure the service file is installed.")
+                    self,
+                    self.tr("Error"),
+                    self.tr(
+                        "Failed to start service. Make sure the service file is installed."
+                    ),
                 )
 
         self.refresh_service_status()
@@ -359,21 +390,20 @@ class AutomationTab(BaseTab):
 
             if not task.name:
                 QMessageBox.warning(
-                    self, self.tr("Invalid Task"),
-                    self.tr("Please enter a task name.")
+                    self, self.tr("Invalid Task"), self.tr("Please enter a task name.")
                 )
                 return
 
             if TaskScheduler.add_task(task):
                 self.refresh_task_list()
                 QMessageBox.information(
-                    self, self.tr("Task Added"),
-                    self.tr("Task '{}' has been scheduled.").format(task.name)
+                    self,
+                    self.tr("Task Added"),
+                    self.tr("Task '{}' has been scheduled.").format(task.name),
                 )
             else:
                 QMessageBox.warning(
-                    self, self.tr("Error"),
-                    self.tr("Failed to add task.")
+                    self, self.tr("Error"), self.tr("Failed to add task.")
                 )
 
     def toggle_task(self):
@@ -405,8 +435,9 @@ class AutomationTab(BaseTab):
             return
 
         confirm = QMessageBox.question(
-            self, self.tr("Run Task Now?"),
-            self.tr("Run '{}' immediately?").format(task.name)
+            self,
+            self.tr("Run Task Now?"),
+            self.tr("Run '{}' immediately?").format(task.name),
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
@@ -430,8 +461,9 @@ class AutomationTab(BaseTab):
             return
 
         confirm = QMessageBox.question(
-            self, self.tr("Delete Task?"),
-            self.tr("Delete scheduled task '{}'?").format(task.name)
+            self,
+            self.tr("Delete Task?"),
+            self.tr("Delete scheduled task '{}'?").format(task.name),
         )
 
         if confirm == QMessageBox.StandardButton.Yes:
@@ -461,10 +493,12 @@ class AutomationTab(BaseTab):
         header.setObjectName("header")
         rep_layout.addWidget(header)
 
-        info = QLabel(self.tr(
-            "Export your system configuration to recreate it on any machine.\n"
-            "No Loofi needed on the target - just standard tools."
-        ))
+        info = QLabel(
+            self.tr(
+                "Export your system configuration to recreate it on any machine.\n"
+                "No Loofi needed on the target - just standard tools."
+            )
+        )
         info.setWordWrap(True)
         info.setObjectName("autoReplicatorInfo")
         rep_layout.addWidget(info)
@@ -485,10 +519,12 @@ class AutomationTab(BaseTab):
         group = QGroupBox(self.tr("Ansible Playbook"))
         layout = QVBoxLayout(group)
 
-        desc = QLabel(self.tr(
-            "Generate a standard Ansible playbook that installs your packages, "
-            "Flatpaks, and applies your settings on any Fedora/RHEL machine."
-        ))
+        desc = QLabel(
+            self.tr(
+                "Generate a standard Ansible playbook that installs your packages, "
+                "Flatpaks, and applies your settings on any Fedora/RHEL machine."
+            )
+        )
         desc.setWordWrap(True)
         desc.setObjectName("autoAnsibleDesc")
         layout.addWidget(desc)
@@ -538,10 +574,12 @@ class AutomationTab(BaseTab):
         group = QGroupBox(self.tr("Kickstart File"))
         layout = QVBoxLayout(group)
 
-        desc = QLabel(self.tr(
-            "Generate an Anaconda Kickstart file for automated Fedora installation. "
-            "Use this with inst.ks= during installation."
-        ))
+        desc = QLabel(
+            self.tr(
+                "Generate an Anaconda Kickstart file for automated Fedora installation. "
+                "Use this with inst.ks= during installation."
+            )
+        )
         desc.setWordWrap(True)
         desc.setObjectName("autoKickstartDesc")
         layout.addWidget(desc)
@@ -588,7 +626,7 @@ class AutomationTab(BaseTab):
         content = AnsibleExporter.generate_playbook(
             include_packages=self.ansible_packages.isChecked(),
             include_flatpaks=self.ansible_flatpaks.isChecked(),
-            include_settings=self.ansible_settings.isChecked()
+            include_settings=self.ansible_settings.isChecked(),
         )
         self.output_area.setText(content[:3000] + "\n\n... (truncated)")
         self.append_output(
@@ -600,7 +638,7 @@ class AutomationTab(BaseTab):
         result = AnsibleExporter.save_playbook(
             include_packages=self.ansible_packages.isChecked(),
             include_flatpaks=self.ansible_flatpaks.isChecked(),
-            include_settings=self.ansible_settings.isChecked()
+            include_settings=self.ansible_settings.isChecked(),
         )
 
         self.append_output(result.message + "\n")
@@ -614,14 +652,14 @@ class AutomationTab(BaseTab):
                     "Run with:\n"
                     "  cd ~/loofi-playbook\n"
                     "  ansible-playbook site.yml --ask-become-pass"
-                ).format(result.data['path'])
+                ).format(result.data["path"]),
             )
 
     def _preview_kickstart(self):
         """Preview the generated Kickstart file."""
         content = KickstartGenerator.generate_kickstart(
             include_packages=self.ks_packages.isChecked(),
-            include_flatpaks=self.ks_flatpaks.isChecked()
+            include_flatpaks=self.ks_flatpaks.isChecked(),
         )
         self.output_area.setText(content[:3000] + "\n\n... (truncated)")
         self.append_output(
@@ -632,7 +670,7 @@ class AutomationTab(BaseTab):
         """Export Kickstart file."""
         result = KickstartGenerator.save_kickstart(
             include_packages=self.ks_packages.isChecked(),
-            include_flatpaks=self.ks_flatpaks.isChecked()
+            include_flatpaks=self.ks_flatpaks.isChecked(),
         )
 
         self.append_output(result.message + "\n")
@@ -645,5 +683,5 @@ class AutomationTab(BaseTab):
                     "Kickstart saved to:\n{}\n\n"
                     "Use during installation with:\n"
                     "  inst.ks=file:///path/to/loofi.ks"
-                ).format(result.data['path'])
+                ).format(result.data["path"]),
             )
