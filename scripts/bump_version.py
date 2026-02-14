@@ -5,13 +5,16 @@ bump_version.py — Version bump cascade for Loofi Fedora Tweaks.
 Updates version across all files that reference it:
 1. loofi-fedora-tweaks/version.py  (__version__, __version_codename__)
 2. loofi-fedora-tweaks.spec        (Version:)
-3. .workflow/specs/.race-lock.json (target_version)
-4. Regenerates project stats       (scripts/project_stats.py)
-5. Re-renders templates            (scripts/sync_ai_adapters.py --render)
+3. pyproject.toml                  (version)
+4. .workflow/specs/.race-lock.json (target_version)
+5. Regenerates project stats       (scripts/project_stats.py)
+6. Re-renders templates            (scripts/sync_ai_adapters.py --render)
+7. Scaffolds release notes         (docs/releases/RELEASE-NOTES-vX.Y.Z.md)
+8. Scans tests for hardcoded versions (warns if found)
 
 Usage:
-  python3 scripts/bump_version.py 33.0.0 --codename "Nexus"
-  python3 scripts/bump_version.py 33.0.0 --dry-run
+  python3 scripts/bump_version.py 41.0.0 --codename "Scaffold"
+  python3 scripts/bump_version.py 41.0.0 --dry-run
 """
 
 import argparse
@@ -22,12 +25,26 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 VERSION_FILE = PROJECT_ROOT / "loofi-fedora-tweaks" / "version.py"
 SPEC_FILE = PROJECT_ROOT / "loofi-fedora-tweaks.spec"
+PYPROJECT_FILE = PROJECT_ROOT / "pyproject.toml"
 RACE_LOCK = PROJECT_ROOT / ".workflow" / "specs" / ".race-lock.json"
 STATS_SCRIPT = PROJECT_ROOT / "scripts" / "project_stats.py"
 SYNC_SCRIPT = PROJECT_ROOT / "scripts" / "sync_ai_adapters.py"
+TESTS_DIR = PROJECT_ROOT / "tests"
+RELEASE_NOTES_DIR = PROJECT_ROOT / "docs" / "releases"
+
+# Patterns that indicate hardcoded version strings in test files.
+# Matches assertEqual/assertIn/etc. with quoted version-like strings.
+HARDCODED_VERSION_RE = re.compile(
+    r"""(?:assertEqual|assertIn|assert\s).*["']\d+\.\d+\.\d+["']"""
+)
+# Matches assertEqual with quoted codename-like single words (capitalized).
+HARDCODED_CODENAME_RE = re.compile(
+    r"""assertEqual.*__version_codename__.*["'][A-Z]\w+["']"""
+)
 
 
 def read_current_version() -> tuple[str, str]:
@@ -43,7 +60,9 @@ def read_current_version() -> tuple[str, str]:
     return version, codename
 
 
-def update_version_py(new_version: str, codename: str | None, dry_run: bool) -> list[str]:
+def update_version_py(
+    new_version: str, codename: str | None, dry_run: bool
+) -> list[str]:
     """Update version.py."""
     text = VERSION_FILE.read_text(encoding="utf-8")
     changes = []
@@ -56,7 +75,7 @@ def update_version_py(new_version: str, codename: str | None, dry_run: bool) -> 
         flags=re.MULTILINE,
     )
     if new_text != text:
-        changes.append(f"  version.py: __version__ → {new_version}")
+        changes.append(f"  version.py: __version__ -> {new_version}")
     text = new_text
 
     # Replace __version_codename__ if provided
@@ -68,7 +87,7 @@ def update_version_py(new_version: str, codename: str | None, dry_run: bool) -> 
             flags=re.MULTILINE,
         )
         if new_text != text:
-            changes.append(f"  version.py: __version_codename__ → {codename}")
+            changes.append(f"  version.py: __version_codename__ -> {codename}")
         text = new_text
 
     if not dry_run and changes:
@@ -83,13 +102,13 @@ def update_spec(new_version: str, dry_run: bool) -> list[str]:
     changes = []
 
     new_text = re.sub(
-        r'^(Version:\s*).*$',
-        f'\\g<1>{new_version}',
+        r"^(Version:\s*).*$",
+        f"\\g<1>{new_version}",
         text,
         flags=re.MULTILINE,
     )
     if new_text != text:
-        changes.append(f"  .spec: Version → {new_version}")
+        changes.append(f"  .spec: Version -> {new_version}")
 
     if not dry_run and changes:
         SPEC_FILE.write_text(new_text, encoding="utf-8")
@@ -97,27 +116,49 @@ def update_spec(new_version: str, dry_run: bool) -> list[str]:
     return changes
 
 
+def update_pyproject(new_version: str, dry_run: bool) -> list[str]:
+    """Update pyproject.toml version field."""
+    changes: list[str] = []
+    if not PYPROJECT_FILE.exists():
+        changes.append("  pyproject.toml: file not found (skipped)")
+        return changes
+
+    text = PYPROJECT_FILE.read_text(encoding="utf-8")
+
+    new_text = re.sub(
+        r'^(version\s*=\s*")[^"]*(")',
+        f"\\g<1>{new_version}\\2",
+        text,
+        flags=re.MULTILINE,
+    )
+    if new_text != text:
+        changes.append(f"  pyproject.toml: version -> {new_version}")
+
+    if not dry_run and changes:
+        PYPROJECT_FILE.write_text(new_text, encoding="utf-8")
+
+    return changes
+
+
 def update_race_lock(new_version: str, dry_run: bool) -> list[str]:
     """Update race-lock target version."""
-    changes = []
+    changes: list[str] = []
     if not RACE_LOCK.exists():
         changes.append("  race-lock: file not found (skipped)")
         return changes
 
     lock = json.loads(RACE_LOCK.read_text(encoding="utf-8"))
     old_ver = lock.get("target_version", "unknown")
-    new_ver = f"v{new_version}" if not new_version.startswith(
-        "v") else new_version
+    new_ver = f"v{new_version}" if not new_version.startswith("v") else new_version
 
     if old_ver != new_ver:
         lock["target_version"] = new_ver
         lock["status"] = "active"
         lock["bumped_at"] = datetime.now(timezone.utc).isoformat()
-        changes.append(f"  race-lock: {old_ver} → {new_ver}")
+        changes.append(f"  race-lock: {old_ver} -> {new_ver}")
 
         if not dry_run:
-            RACE_LOCK.write_text(json.dumps(
-                lock, indent=2) + "\n", encoding="utf-8")
+            RACE_LOCK.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
 
     return changes
 
@@ -166,44 +207,151 @@ def render_templates(dry_run: bool) -> list[str]:
         return [f"  templates: failed ({e})"]
 
 
-def main():
+def scaffold_release_notes(
+    new_version: str, codename: str | None, dry_run: bool
+) -> list[str]:
+    """Create a skeleton release notes file if one does not already exist."""
+    changes: list[str] = []
+    notes_file = RELEASE_NOTES_DIR / f"RELEASE-NOTES-v{new_version}.md"
+
+    if notes_file.exists():
+        changes.append(f"  release notes: already exists ({notes_file.name})")
+        return changes
+
+    title = f"v{new_version}"
+    if codename:
+        title += f' "{codename}"'
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    skeleton = (
+        f"# Release Notes -- {title}\n"
+        f"\n"
+        f"**Release Date:** {today}\n"
+        f"**Codename:** {codename or 'TBD'}\n"
+        f"**Theme:** TODO — one-line summary of the release theme\n"
+        f"\n"
+        f"## Summary\n"
+        f"\n"
+        f"TODO — 2-3 sentence overview.\n"
+        f"\n"
+        f"## Highlights\n"
+        f"\n"
+        f"- TODO\n"
+        f"\n"
+        f"## Changes\n"
+        f"\n"
+        f"### Changed\n"
+        f"\n"
+        f"- TODO\n"
+        f"\n"
+        f"### Added\n"
+        f"\n"
+        f"- TODO\n"
+        f"\n"
+        f"### Fixed\n"
+        f"\n"
+        f"- TODO\n"
+        f"\n"
+        f"## Stats\n"
+        f"\n"
+        f"- **Tests:** TODO passed, TODO skipped, 0 failed\n"
+        f"- **Lint:** 0 errors\n"
+        f"- **Coverage:** TODO%\n"
+        f"\n"
+        f"## Upgrade Notes\n"
+        f"\n"
+        f'TODO — or "No user-facing changes."\n'
+    )
+
+    changes.append(f"  release notes: scaffolded {notes_file.name}")
+
+    if not dry_run:
+        RELEASE_NOTES_DIR.mkdir(parents=True, exist_ok=True)
+        notes_file.write_text(skeleton, encoding="utf-8")
+
+    return changes
+
+
+def scan_stale_version_tests(old_version: str, old_codename: str) -> list[str]:
+    """Scan tests/ for hardcoded version or codename strings that will break after bump.
+
+    Returns a list of warnings (never blocks the bump).
+    """
+    warnings: list[str] = []
+    if not TESTS_DIR.exists():
+        return warnings
+
+    for test_file in sorted(TESTS_DIR.glob("test_*.py")):
+        try:
+            content = test_file.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        for lineno, line in enumerate(content.splitlines(), start=1):
+            # Check for hardcoded old version in assertions
+            if old_version in line and HARDCODED_VERSION_RE.search(line):
+                warnings.append(
+                    f"  WARNING: {test_file.name}:{lineno} "
+                    f'hardcodes version "{old_version}"'
+                )
+            # Check for hardcoded old codename in assertions
+            if old_codename in line and HARDCODED_CODENAME_RE.search(line):
+                warnings.append(
+                    f"  WARNING: {test_file.name}:{lineno} "
+                    f'hardcodes codename "{old_codename}"'
+                )
+
+    return warnings
+
+
+def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Bump version across all project files.")
-    parser.add_argument("version", help="New version (e.g. 33.0.0)")
-    parser.add_argument("--codename", help="Version codename (e.g. 'Nexus')")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Show what would change without writing")
+        description="Bump version across all project files."
+    )
+    parser.add_argument("version", help="New version (e.g. 41.0.0)")
+    parser.add_argument("--codename", help="Version codename (e.g. 'Scaffold')")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would change without writing"
+    )
     args = parser.parse_args()
 
     # Validate version format
-    if not re.match(r'^\d+\.\d+\.\d+$', args.version):
-        print(
-            f"ERROR: Invalid version format '{args.version}'. Expected X.Y.Z")
-        sys.exit(1)
+    if not re.match(r"^\d+\.\d+\.\d+$", args.version):
+        print(f"ERROR: Invalid version format '{args.version}'. Expected X.Y.Z")
+        return 1
 
     current_ver, current_codename = read_current_version()
-    print(f"{'[DRY RUN] ' if args.dry_run else ''}Bumping version: {current_ver} → {args.version}")
+    print(
+        f"{'[DRY RUN] ' if args.dry_run else ''}Bumping version: {current_ver} -> {args.version}"
+    )
     if args.codename:
-        print(f"  Codename: {current_codename} → {args.codename}")
+        print(f"  Codename: {current_codename} -> {args.codename}")
     print()
 
     all_changes: list[str] = []
 
     # 1. version.py
-    all_changes.extend(update_version_py(
-        args.version, args.codename, args.dry_run))
+    all_changes.extend(update_version_py(args.version, args.codename, args.dry_run))
 
     # 2. .spec
     all_changes.extend(update_spec(args.version, args.dry_run))
 
-    # 3. race-lock
+    # 3. pyproject.toml
+    all_changes.extend(update_pyproject(args.version, args.dry_run))
+
+    # 4. race-lock
     all_changes.extend(update_race_lock(args.version, args.dry_run))
 
-    # 4. Stats
+    # 5. Stats
     all_changes.extend(regenerate_stats(args.dry_run))
 
-    # 5. Templates
+    # 6. Templates
     all_changes.extend(render_templates(args.dry_run))
+
+    # 7. Release notes scaffold
+    all_changes.extend(
+        scaffold_release_notes(args.version, args.codename, args.dry_run)
+    )
 
     # Summary
     print("Changes:")
@@ -213,12 +361,22 @@ def main():
     if not all_changes:
         print("  (no changes needed)")
 
+    # 8. Scan for stale version tests (advisory, never blocks)
+    stale_warnings = scan_stale_version_tests(current_ver, current_codename)
+    if stale_warnings:
+        print(f"\nStale version references in tests ({len(stale_warnings)}):")
+        for w in stale_warnings:
+            print(w)
+        print("  Fix: replace hardcoded version assertions with dynamic checks.")
+        print("  See: AGENTS.md rule #11 (no hardcoded versions in tests).")
+
     if args.dry_run:
         print("\nNo files were modified (dry-run mode).")
     else:
-        print(
-            f"\nVersion bumped to {args.version} across {len(all_changes)} targets.")
+        print(f"\nVersion bumped to {args.version} across {len(all_changes)} targets.")
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

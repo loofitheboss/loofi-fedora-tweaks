@@ -129,10 +129,12 @@ Use typed exceptions from `utils/errors.py`. Each has `code`, `hint`, `recoverab
 4. **Always unpack PrivilegedCommand** — `binary, args, desc = PrivilegedCommand.dnf(...)`
 5. **Always `timeout=N`** on every `subprocess.run()` / `check_output()` call
 6. **Always branch on `SystemManager.is_atomic()`** for dnf vs rpm-ostree
-7. **Version sync** — `version.py` and `.spec` must match
+7. **Version sync** — `version.py`, `.spec`, and `pyproject.toml` must match (use `scripts/bump_version.py`)
 8. **Audit log** privileged actions (timestamp, action, params, exit code)
 9. **Stabilization gate** — no new major features until Phase 1-2 complete
 10. **Never `shell=True`** in subprocess calls
+11. **Never hardcode versions in tests** — use dynamic assertions (non-empty, semver format); CI `docs_gate` blocks hardcoded version/codename assertions
+12. **Always scaffold release notes** — run `bump_version.py` which creates `docs/releases/RELEASE-NOTES-vX.Y.Z.md`
 
 ## Key Patterns
 
