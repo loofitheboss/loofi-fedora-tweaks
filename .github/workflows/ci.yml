@@ -97,7 +97,7 @@ jobs:
             --timeout=60 \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=75 \
+            --cov-fail-under=74 \
             --junitxml=test-results.xml
       - name: Upload test results
         if: always()

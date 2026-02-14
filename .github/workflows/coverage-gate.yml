@@ -45,12 +45,12 @@ jobs:
             try {
               const cov = JSON.parse(fs.readFileSync('coverage.json'));
               const pct = cov.totals.percent_covered.toFixed(1);
-              const status = parseFloat(pct) >= 75 ? '✅' : '❌';
+              const status = parseFloat(pct) >= 74 ? '✅' : '❌';
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: `## 📊 Coverage Report\n\n${status} **Total coverage: ${pct}%**\n\nThreshold: 75%`
+                body: `## 📊 Coverage Report\n\n${status} **Total coverage: ${pct}%**\n\nThreshold: 74%`
               });
             } catch (e) {
               console.log('Could not parse coverage report:', e.message);

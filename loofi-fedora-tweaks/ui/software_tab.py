@@ -395,24 +395,6 @@ class _RepositoriesSubTab(QWidget):
             args,
             self.tr("Installing Multimedia Codecs..."),
         )
-        self.run_command(
-            "pkexec",
-            ["sh", "-c", cmd],
-            self.tr("Enabling RPM Fusion repositories..."),
-        )
-
-    def install_multimedia_codecs(self):
-        cmd = (
-            "dnf groupupdate -y multimedia "
-            "--setop='install_weak_deps=False' "
-            "--exclude=PackageKit-gstreamer-plugin && "
-            "dnf groupupdate -y sound-and-video"
-        )
-        self.run_command(
-            "pkexec",
-            ["sh", "-c", cmd],
-            self.tr("Installing Multimedia Codecs..."),
-        )
 
     def enable_flathub(self):
         self.run_command(

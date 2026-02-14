@@ -438,7 +438,7 @@ class NetworkMonitor:
             # host byte order (little-endian on x86).
             if len(host_hex) != 32:
                 return (host_hex, port)
-            words = [host_hex[i : i + 8] for i in range(0, 32, 8)]
+            words = [host_hex[i:i + 8] for i in range(0, 32, 8)]
             byte_groups = []
             for word in words:
                 # Convert each 4-byte word from little-endian

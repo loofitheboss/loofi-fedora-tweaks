@@ -102,7 +102,7 @@ class ProcessManager:
             end = content.rindex(")")
             name = content[start:end]
             # Fields after the closing parenthesis
-            fields = content[end + 2 :].split()
+            fields = content[end + 2:].split()
         except (ValueError, IndexError):
             return None
 

@@ -156,7 +156,10 @@ class TweakOps:
 
         Note: systemctl enable must be run separately after install.
         """
-        return PrivilegedCommand.dnf("install", "nbfc-linux")
+        result: Tuple[str, List[str], str] = PrivilegedCommand.dnf(
+            "install", "nbfc-linux"
+        )
+        return result
 
     @staticmethod
     def set_fan_profile(profile: str) -> Tuple[str, List[str], str]:
