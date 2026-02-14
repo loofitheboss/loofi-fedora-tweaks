@@ -6,7 +6,7 @@ import os
 # Add source path to sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.disk import DiskManager, DiskUsage, LargeDirectory
+from services.hardware import DiskManager, DiskUsage, LargeDirectory
 from utils.monitor import SystemMonitor, MemoryInfo, CpuInfo, SystemHealth
 
 

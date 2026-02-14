@@ -58,9 +58,7 @@ class ProfilesTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("System Profiles"))
-        header.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #a277ff;"
-        )
+        header.setObjectName("header")
         layout.addWidget(header)
 
         description = QLabel(self.tr(
@@ -69,15 +67,12 @@ class ProfilesTab(QWidget, PluginInterface):
             "notifications, and more."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        description.setObjectName("profileDesc")
         layout.addWidget(description)
 
         # Active profile indicator
         self.active_label = QLabel(self.tr("Active profile: None"))
-        self.active_label.setStyleSheet(
-            "font-size: 13px; padding: 8px; background: #0b0e14; "
-            "border-radius: 4px; color: #e6edf3;"
-        )
+        self.active_label.setObjectName("profileActiveLabel")
         layout.addWidget(self.active_label)
 
         # Profile cards grid
@@ -172,27 +167,25 @@ class ProfilesTab(QWidget, PluginInterface):
         """Create a visual card widget for a single profile."""
         card = QFrame()
         card.setFrameShape(QFrame.Shape.StyledPanel)
-        card.setStyleSheet(
-            "QFrame { background: #0b0e14; border-radius: 8px; padding: 10px; }"
-        )
+        card.setObjectName("profileCard")
 
         layout = QVBoxLayout(card)
 
         # Icon + Name
         title = QLabel(f"{profile.get('icon', '')}  {profile.get('name', 'Unknown')}")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #e6edf3;")
+        title.setObjectName("profileCardTitle")
         layout.addWidget(title)
 
         # Description
         desc = QLabel(profile.get("description", ""))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("profileCardDesc")
         layout.addWidget(desc)
 
         # Type badge
         badge_text = self.tr("Built-in") if profile.get("builtin") else self.tr("Custom")
         badge = QLabel(badge_text)
-        badge.setStyleSheet("color: #a277ff; font-size: 10px;")
+        badge.setObjectName("profileCardBadge")
         layout.addWidget(badge)
 
         # Buttons

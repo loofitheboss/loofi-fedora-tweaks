@@ -268,7 +268,7 @@ class TestHardwareTabBluetooth(unittest.TestCase):
         )
         with open(filepath, 'r') as f:
             source = f.read()
-        self.assertIn("from utils.bluetooth import BluetoothManager", source)
+        self.assertIn("from services.hardware import BluetoothManager", source)
         self.assertIn("create_bluetooth_card", source)
         self.assertIn("_bt_power_on", source)
         self.assertIn("_bt_power_off", source)

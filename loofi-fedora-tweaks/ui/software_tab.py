@@ -161,9 +161,7 @@ class _ApplicationsSubTab(QWidget):
         if is_installed:
             btn_install.setText(self.tr("Installed"))
             btn_install.setEnabled(False)
-            btn_install.setStyleSheet(
-                "background-color: #2ecc71; color: white;"
-            )
+            btn_install.setObjectName("swInstalledBtn")
         else:
             btn_install.clicked.connect(
                 lambda checked, app=app_data: self.install_app(app)
@@ -275,7 +273,7 @@ class _RepositoriesSubTab(QWidget):
 
         # Header
         header = QLabel(self.tr("Repository Management"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("swReposHeader")
         layout.addWidget(header)
 
         # RPM Fusion Group
@@ -456,7 +454,7 @@ class SoftwareTab(BaseTab):
         layout.setSpacing(15)
 
         header = QLabel(self.tr("Flatpak Manager"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("swFlatpakHeader")
         layout.addWidget(header)
 
         # Size overview

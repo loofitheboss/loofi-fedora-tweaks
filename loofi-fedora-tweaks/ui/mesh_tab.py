@@ -68,7 +68,7 @@ class MeshTab(QWidget, PluginInterface):
         ip_text = ", ".join(local_ips) if local_ips else self.tr("No network interfaces detected")
 
         self.lbl_device_name = QLabel(self.tr("Device Name: {}").format(device_name))
-        self.lbl_device_name.setStyleSheet("font-weight: bold;")
+        self.lbl_device_name.setObjectName("meshDeviceName")
         banner_layout.addWidget(self.lbl_device_name)
 
         self.lbl_local_ips = QLabel(self.tr("Local IPs: {}").format(ip_text))
@@ -183,7 +183,7 @@ class MeshTab(QWidget, PluginInterface):
 
         pair_row = QHBoxLayout()
         self.lbl_pairing_code = QLabel(self.tr("Pairing Code: ------"))
-        self.lbl_pairing_code.setStyleSheet("font-family: monospace; font-size: 16px;")
+        self.lbl_pairing_code.setObjectName("meshPairingCode")
         pair_row.addWidget(self.lbl_pairing_code)
 
         btn_generate = QPushButton(self.tr("Generate Code"))
@@ -218,9 +218,7 @@ class MeshTab(QWidget, PluginInterface):
         )
         self.lbl_drop.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_drop.setMinimumHeight(80)
-        self.lbl_drop.setStyleSheet(
-            "border: 2px dashed #666; border-radius: 8px; padding: 20px; color: #aaa;"
-        )
+        self.lbl_drop.setObjectName("meshDropZone")
         drop_layout.addWidget(self.lbl_drop)
 
         file_btn_row = QHBoxLayout()

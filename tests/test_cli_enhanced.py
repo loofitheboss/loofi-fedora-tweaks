@@ -17,8 +17,8 @@ from cli.main import (
     cmd_advanced, cmd_network, run_operation,
 )
 from utils.operations import OperationResult
-from utils.processes import ProcessInfo
-from utils.temperature import TemperatureSensor
+from services.system import ProcessInfo
+from services.hardware import TemperatureSensor
 from utils.network_monitor import InterfaceStats
 
 

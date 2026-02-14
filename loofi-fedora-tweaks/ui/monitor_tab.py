@@ -25,7 +25,7 @@ from PyQt6.QtGui import (
 )
 
 from utils.performance import PerformanceCollector
-from utils.processes import ProcessManager
+from services.system import ProcessManager
 from ui.tab_utils import configure_top_tabs
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
@@ -357,18 +357,7 @@ class _PerformanceSubTab(QWidget):
     def _create_card(self, title: str, icon: str) -> QGroupBox:
         """Create a styled card group box matching the Catppuccin Mocha theme."""
         card = QGroupBox(f"{icon} {title}")
-        card.setStyleSheet("""
-            QGroupBox {
-                background-color: #1c2030;
-                border-radius: 12px;
-                padding: 20px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QGroupBox::title {
-                padding: 10px;
-            }
-        """)
+        card.setObjectName("monitorCard")
         return card
 
     def _create_cpu_card(self) -> QGroupBox:
@@ -387,7 +376,7 @@ class _PerformanceSubTab(QWidget):
         card_layout.addLayout(self.cpu_core_layout)
 
         self.lbl_cpu = QLabel(self.tr("CPU: --% | Cores: --"))
-        self.lbl_cpu.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        self.lbl_cpu.setObjectName("monitorCpuLabel")
         card_layout.addWidget(self.lbl_cpu)
 
         return card
@@ -402,7 +391,7 @@ class _PerformanceSubTab(QWidget):
         card_layout.addWidget(self.mem_graph)
 
         self.lbl_mem = QLabel(self.tr("Memory: --% | --/--"))
-        self.lbl_mem.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        self.lbl_mem.setObjectName("monitorMemLabel")
         card_layout.addWidget(self.lbl_mem)
 
         return card
@@ -418,18 +407,18 @@ class _PerformanceSubTab(QWidget):
         # Legend
         legend_layout = QHBoxLayout()
         recv_dot = QLabel("\u25cf")
-        recv_dot.setStyleSheet("color: #b78eff; font-size: 10px;")
+        recv_dot.setObjectName("monitorNetRecvDot")
         legend_layout.addWidget(recv_dot)
         legend_layout.addWidget(QLabel(self.tr("Recv")))
         send_dot = QLabel("\u25cf")
-        send_dot.setStyleSheet("color: #4dd9e3; font-size: 10px;")
+        send_dot.setObjectName("monitorNetSendDot")
         legend_layout.addWidget(send_dot)
         legend_layout.addWidget(QLabel(self.tr("Send")))
         legend_layout.addStretch()
         card_layout.addLayout(legend_layout)
 
         self.lbl_net = QLabel(self.tr("Net: -- | --"))
-        self.lbl_net.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        self.lbl_net.setObjectName("monitorNetLabel")
         card_layout.addWidget(self.lbl_net)
 
         return card
@@ -445,18 +434,18 @@ class _PerformanceSubTab(QWidget):
         # Legend
         legend_layout = QHBoxLayout()
         read_dot = QLabel("\u25cf")
-        read_dot.setStyleSheet("color: #e8b84d; font-size: 10px;")
+        read_dot.setObjectName("monitorDiskReadDot")
         legend_layout.addWidget(read_dot)
         legend_layout.addWidget(QLabel(self.tr("Read")))
         write_dot = QLabel("\u25cf")
-        write_dot.setStyleSheet("color: #e89840; font-size: 10px;")
+        write_dot.setObjectName("monitorDiskWriteDot")
         legend_layout.addWidget(write_dot)
         legend_layout.addWidget(QLabel(self.tr("Write")))
         legend_layout.addStretch()
         card_layout.addLayout(legend_layout)
 
         self.lbl_disk = QLabel(self.tr("Disk: -- | --"))
-        self.lbl_disk.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        self.lbl_disk.setObjectName("monitorDiskLabel")
         card_layout.addWidget(self.lbl_disk)
 
         return card
@@ -618,24 +607,14 @@ class _ProcessesSubTab(QWidget):
 
         # Summary bar
         self.summary_frame = QFrame()
-        self.summary_frame.setStyleSheet(f"""
-            QFrame {{
-                background-color: {self.COLOR_SURFACE0};
-                border-radius: 8px;
-                padding: 10px;
-            }}
-        """)
+        self.summary_frame.setObjectName("monitorSummaryFrame")
         summary_layout = QHBoxLayout(self.summary_frame)
         summary_layout.setContentsMargins(15, 8, 15, 8)
 
         self.lbl_summary = QLabel(
             self.tr("Total: 0 | Running: 0 | Sleeping: 0 | Zombie: 0")
         )
-        self.lbl_summary.setStyleSheet(f"""
-            color: {self.COLOR_SUBTEXT0};
-            font-size: 13px;
-            font-weight: bold;
-        """)
+        self.lbl_summary.setObjectName("monitorSummaryLabel")
         summary_layout.addWidget(self.lbl_summary)
         summary_layout.addStretch()
         layout.addWidget(self.summary_frame)
@@ -653,19 +632,7 @@ class _ProcessesSubTab(QWidget):
         self.sort_combo.addItem(self.tr("PID"), "pid")
         self.sort_combo.setCurrentIndex(0)
         self.sort_combo.currentIndexChanged.connect(self._on_sort_changed)
-        self.sort_combo.setStyleSheet(f"""
-            QComboBox {{
-                background-color: {self.COLOR_SURFACE0};
-                border: 1px solid {self.COLOR_SURFACE1};
-                border-radius: 6px;
-                padding: 5px 10px;
-                color: {self.COLOR_TEXT};
-                min-width: 100px;
-            }}
-            QComboBox::drop-down {{
-                border: none;
-            }}
-        """)
+        self.sort_combo.setObjectName("monitorSortCombo")
         controls_layout.addWidget(self.sort_combo)
 
         controls_layout.addStretch()
@@ -675,44 +642,14 @@ class _ProcessesSubTab(QWidget):
         self.btn_toggle_filter.setAccessibleName(self.tr("My Processes"))
         self.btn_toggle_filter.setCheckable(True)
         self.btn_toggle_filter.setChecked(False)
-        self.btn_toggle_filter.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.COLOR_SURFACE0};
-                border: 1px solid {self.COLOR_SURFACE1};
-                color: {self.COLOR_TEXT};
-                padding: 6px 14px;
-                border-radius: 6px;
-            }}
-            QPushButton:checked {{
-                background-color: {self.COLOR_BLUE};
-                color: {self.COLOR_BASE};
-                border: 1px solid {self.COLOR_BLUE};
-            }}
-            QPushButton:hover {{
-                background-color: {self.COLOR_SURFACE1};
-            }}
-            QPushButton:checked:hover {{
-                background-color: {self.COLOR_BLUE};
-            }}
-        """)
+        self.btn_toggle_filter.setObjectName("monitorFilterToggle")
         self.btn_toggle_filter.toggled.connect(self._on_filter_toggled)
         controls_layout.addWidget(self.btn_toggle_filter)
 
         # Refresh button
         btn_refresh = QPushButton(self.tr("Refresh"))
         btn_refresh.setAccessibleName(self.tr("Refresh"))
-        btn_refresh.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.COLOR_SURFACE0};
-                border: 1px solid {self.COLOR_SURFACE1};
-                color: {self.COLOR_TEXT};
-                padding: 6px 14px;
-                border-radius: 6px;
-            }}
-            QPushButton:hover {{
-                background-color: {self.COLOR_SURFACE1};
-            }}
-        """)
+        btn_refresh.setObjectName("monitorRefreshBtn")
         btn_refresh.clicked.connect(self.refresh_processes)
         controls_layout.addWidget(btn_refresh)
 
@@ -755,34 +692,7 @@ class _ProcessesSubTab(QWidget):
         tree_header.setStretchLastSection(False)
         tree_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
-        self.process_tree.setStyleSheet(f"""
-            QTreeWidget {{
-                background-color: {self.COLOR_SURFACE0};
-                border: 1px solid {self.COLOR_SURFACE1};
-                border-radius: 8px;
-                color: {self.COLOR_TEXT};
-                font-family: monospace;
-                font-size: 12px;
-            }}
-            QTreeWidget::item {{
-                padding: 4px 2px;
-            }}
-            QTreeWidget::item:selected {{
-                background-color: {self.COLOR_SURFACE1};
-            }}
-            QHeaderView::section {{
-                background-color: {self.COLOR_BASE};
-                color: {self.COLOR_SUBTEXT0};
-                border: none;
-                border-bottom: 1px solid {self.COLOR_SURFACE1};
-                padding: 6px 4px;
-                font-weight: bold;
-                font-size: 12px;
-            }}
-            QTreeWidget::item:alternate {{
-                background-color: {self.COLOR_BASE};
-            }}
-        """)
+        self.process_tree.setObjectName("monitorProcessTree")
 
         layout.addWidget(self.process_tree)
 
@@ -921,27 +831,7 @@ class _ProcessesSubTab(QWidget):
             return
 
         menu = QMenu(self)
-        menu.setStyleSheet(f"""
-            QMenu {{
-                background-color: {self.COLOR_SURFACE0};
-                border: 1px solid {self.COLOR_SURFACE1};
-                border-radius: 6px;
-                color: {self.COLOR_TEXT};
-                padding: 4px;
-            }}
-            QMenu::item {{
-                padding: 6px 20px;
-                border-radius: 4px;
-            }}
-            QMenu::item:selected {{
-                background-color: {self.COLOR_SURFACE1};
-            }}
-            QMenu::separator {{
-                height: 1px;
-                background-color: {self.COLOR_SURFACE1};
-                margin: 4px 8px;
-            }}
-        """)
+        menu.setObjectName("monitorContextMenu")
 
         # Kill (SIGTERM)
         action_term = menu.addAction(self.tr("Kill Process (SIGTERM)"))

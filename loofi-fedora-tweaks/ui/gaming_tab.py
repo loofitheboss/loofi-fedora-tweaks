@@ -43,7 +43,7 @@ class GamingTab(BaseTab):
 
         # Header
         header = QLabel(self.tr("Gaming Optimizations"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("gamingHeader")
         layout.addWidget(header)
 
         # Performance Tools Group

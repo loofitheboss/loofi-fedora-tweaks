@@ -67,7 +67,7 @@ class ConfigManager:
     @classmethod
     def gather_hardware_settings(cls) -> dict:
         """Gather current hardware settings."""
-        from utils.hardware import HardwareManager
+        from services.hardware import HardwareManager
 
         return {
             "cpu_governor": HardwareManager.get_current_governor(),
@@ -213,7 +213,7 @@ class ConfigManager:
         hardware = settings.get("hardware", {})
         if hardware.get("cpu_governor"):
             try:
-                from utils.hardware import HardwareManager
+                from services.hardware import HardwareManager
                 if HardwareManager.set_governor(hardware["cpu_governor"]):
                     applied.append("CPU Governor")
                 else:
@@ -224,7 +224,7 @@ class ConfigManager:
 
         if hardware.get("power_profile"):
             try:
-                from utils.hardware import HardwareManager
+                from services.hardware import HardwareManager
                 if HardwareManager.set_power_profile(hardware["power_profile"]):
                     applied.append("Power Profile")
                 else:

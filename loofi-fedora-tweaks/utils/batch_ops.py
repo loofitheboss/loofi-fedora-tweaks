@@ -5,7 +5,7 @@ Handles batch install/remove operations for Software and Maintenance tabs.
 
 from typing import List, Tuple
 
-from utils.system import SystemManager
+from services.system import SystemManager
 from utils.commands import PrivilegedCommand
 
 

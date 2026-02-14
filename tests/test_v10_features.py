@@ -17,7 +17,7 @@ from utils.errors import (
 )
 from utils.commands import PrivilegedCommand
 from utils.formatting import bytes_to_human, seconds_to_human, percent_bar, truncate
-from utils.hardware_profiles import (
+from services.hardware import (
     detect_hardware_profile, get_profile_label, get_all_profiles, PROFILES,
 )
 
@@ -387,7 +387,7 @@ class TestFormatting(unittest.TestCase):
 class TestHardwareProfiles(unittest.TestCase):
     """Tests for hardware profile detection via DMI data."""
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_hp_elitebook(self, mock_open, mock_exists):
         """HP EliteBook 840 G7 should match 'hp-elitebook' profile."""
@@ -402,7 +402,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertTrue(profile["battery_limit"])
         self.assertTrue(profile["fingerprint"])
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_thinkpad(self, mock_open, mock_exists):
         """Lenovo ThinkPad T14 should match 'thinkpad' profile."""
@@ -417,7 +417,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertTrue(profile["battery_limit"])
         self.assertEqual(profile["thermal_management"], "thinkpad_acpi")
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_dell_xps(self, mock_open, mock_exists):
         """Dell XPS 13 9310 should match 'dell-xps' profile."""
@@ -431,7 +431,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertEqual(key, "dell-xps")
         self.assertFalse(profile["nbfc"])
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_framework_laptop(self, mock_open, mock_exists):
         """Framework Laptop 13 should match 'framework' profile."""
@@ -445,7 +445,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertEqual(key, "framework")
         self.assertTrue(profile["battery_limit"])
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_asus_zenbook(self, mock_open, mock_exists):
         """ASUS ZenBook should match 'asus-zenbook' profile."""
@@ -459,7 +459,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertEqual(key, "asus-zenbook")
         self.assertFalse(profile["fingerprint"])
 
-    @patch('utils.hardware_profiles.os.path.exists')
+    @patch('services.hardware.hardware_profiles.os.path.exists')
     @patch('builtins.open')
     def test_fallback_generic_laptop(self, mock_open, mock_exists):
         """Unknown hardware with a battery falls back to 'generic-laptop'."""
@@ -470,7 +470,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertEqual(key, "generic-laptop")
         self.assertFalse(profile["battery_limit"])
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=False)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=False)
     @patch('builtins.open')
     def test_fallback_generic_desktop(self, mock_open, mock_exists):
         """Unknown hardware without battery falls back to 'generic-desktop'."""
@@ -480,7 +480,7 @@ class TestHardwareProfiles(unittest.TestCase):
         self.assertFalse(profile["battery_limit"])
         self.assertFalse(profile["nbfc"])
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_hp_probook(self, mock_open, mock_exists):
         """HP ProBook should match 'hp-probook' profile."""
@@ -493,7 +493,7 @@ class TestHardwareProfiles(unittest.TestCase):
         key, profile = detect_hardware_profile()
         self.assertEqual(key, "hp-probook")
 
-    @patch('utils.hardware_profiles.os.path.exists', return_value=True)
+    @patch('services.hardware.hardware_profiles.os.path.exists', return_value=True)
     @patch('builtins.open')
     def test_detect_dell_latitude(self, mock_open, mock_exists):
         """Dell Latitude should match 'dell-latitude' profile."""
@@ -535,7 +535,7 @@ class TestHardwareProfiles(unittest.TestCase):
     @patch('builtins.open', side_effect=FileNotFoundError)
     def test_detect_handles_missing_dmi(self, mock_open):
         """detect_hardware_profile handles missing DMI files gracefully."""
-        with patch('utils.hardware_profiles.os.path.exists', return_value=False):
+        with patch('services.hardware.hardware_profiles.os.path.exists', return_value=False):
             key, profile = detect_hardware_profile()
             self.assertIn(key, ("generic-laptop", "generic-desktop"))
 

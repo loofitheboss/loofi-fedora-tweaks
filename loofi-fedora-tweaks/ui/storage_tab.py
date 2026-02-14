@@ -45,7 +45,7 @@ class StorageTab(BaseTab):
         self.setLayout(layout)
 
         header = QLabel(self.tr("Storage & Disks"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # ==================== Disks ====================
@@ -135,6 +135,7 @@ class StorageTab(BaseTab):
         sl_layout.addWidget(self.lbl_smart_serial, 0, 3)
 
         self.lbl_smart_health = QLabel("—")
+        self.lbl_smart_health.setObjectName("storageSmartHealth")
         sl_layout.addWidget(QLabel(self.tr("Health:")), 1, 0)
         sl_layout.addWidget(self.lbl_smart_health, 1, 1)
 
@@ -147,6 +148,7 @@ class StorageTab(BaseTab):
         sl_layout.addWidget(self.lbl_smart_hours, 2, 1)
 
         self.lbl_smart_realloc = QLabel("—")
+        self.lbl_smart_realloc.setObjectName("storageSmartRealloc")
         sl_layout.addWidget(QLabel(self.tr("Reallocated Sectors:")), 2, 2)
         sl_layout.addWidget(self.lbl_smart_realloc, 2, 3)
 
@@ -236,10 +238,12 @@ class StorageTab(BaseTab):
 
             if health.health_passed:
                 self.lbl_smart_health.setText("✅ PASSED")
-                self.lbl_smart_health.setStyleSheet("color: #3dd68c; font-weight: bold;")
+                self.lbl_smart_health.setProperty("smartState", "passed")
             else:
                 self.lbl_smart_health.setText("❌ FAILED")
-                self.lbl_smart_health.setStyleSheet("color: #e8556d; font-weight: bold;")
+                self.lbl_smart_health.setProperty("smartState", "failed")
+            self.lbl_smart_health.style().unpolish(self.lbl_smart_health)
+            self.lbl_smart_health.style().polish(self.lbl_smart_health)
 
             self.lbl_smart_temp.setText(
                 f"{health.temperature_c}°C" if health.temperature_c else "—"
@@ -251,9 +255,11 @@ class StorageTab(BaseTab):
             realloc = health.reallocated_sectors
             self.lbl_smart_realloc.setText(str(realloc))
             if realloc > 0:
-                self.lbl_smart_realloc.setStyleSheet("color: #e89840; font-weight: bold;")
+                self.lbl_smart_realloc.setProperty("reallocState", "warning")
             else:
-                self.lbl_smart_realloc.setStyleSheet("")
+                self.lbl_smart_realloc.setProperty("reallocState", "ok")
+            self.lbl_smart_realloc.style().unpolish(self.lbl_smart_realloc)
+            self.lbl_smart_realloc.style().polish(self.lbl_smart_realloc)
 
             self.append_output(f"SMART check complete for {device}\n")
         except Exception as exc:

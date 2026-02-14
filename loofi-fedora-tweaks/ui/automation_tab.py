@@ -201,6 +201,7 @@ class AutomationTab(BaseTab):
         layout = QHBoxLayout(group)
 
         self.lbl_service_status = QLabel()
+        self.lbl_service_status.setObjectName("autoServiceStatus")
         layout.addWidget(self.lbl_service_status)
 
         layout.addStretch()
@@ -262,16 +263,18 @@ class AutomationTab(BaseTab):
 
         if is_running:
             self.lbl_service_status.setText(self.tr("Service is running"))
-            self.lbl_service_status.setStyleSheet("color: #3dd68c; font-weight: bold;")
+            self.lbl_service_status.setProperty("serviceState", "running")
             self.btn_service_toggle.setText(self.tr("Stop Service"))
         elif is_enabled:
             self.lbl_service_status.setText(self.tr("Service is enabled but not running"))
-            self.lbl_service_status.setStyleSheet("color: #e8b84d; font-weight: bold;")
+            self.lbl_service_status.setProperty("serviceState", "enabled")
             self.btn_service_toggle.setText(self.tr("Start Service"))
         else:
             self.lbl_service_status.setText(self.tr("Service is not enabled"))
-            self.lbl_service_status.setStyleSheet("color: #e8556d; font-weight: bold;")
+            self.lbl_service_status.setProperty("serviceState", "disabled")
             self.btn_service_toggle.setText(self.tr("Enable & Start"))
+        self.lbl_service_status.style().unpolish(self.lbl_service_status)
+        self.lbl_service_status.style().polish(self.lbl_service_status)
 
     def refresh_task_list(self):
         """Update task list display."""
@@ -455,7 +458,7 @@ class AutomationTab(BaseTab):
 
         # Header
         header = QLabel(self.tr("Replicator - Infrastructure as Code"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         rep_layout.addWidget(header)
 
         info = QLabel(self.tr(
@@ -463,7 +466,7 @@ class AutomationTab(BaseTab):
             "No Loofi needed on the target - just standard tools."
         ))
         info.setWordWrap(True)
-        info.setStyleSheet("color: #9da7bf; margin-bottom: 10px;")
+        info.setObjectName("autoReplicatorInfo")
         rep_layout.addWidget(info)
 
         # Ansible section
@@ -487,7 +490,7 @@ class AutomationTab(BaseTab):
             "Flatpaks, and applies your settings on any Fedora/RHEL machine."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("autoAnsibleDesc")
         layout.addWidget(desc)
 
         # Options
@@ -521,7 +524,7 @@ class AutomationTab(BaseTab):
 
         export_btn = QPushButton(self.tr("Export"))
         export_btn.setAccessibleName(self.tr("Export Ansible playbook"))
-        export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
+        export_btn.setObjectName("autoAnsibleExportBtn")
         export_btn.clicked.connect(self._export_ansible)
         btn_layout.addWidget(export_btn)
 
@@ -540,7 +543,7 @@ class AutomationTab(BaseTab):
             "Use this with inst.ks= during installation."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("autoKickstartDesc")
         layout.addWidget(desc)
 
         # Options
@@ -569,7 +572,7 @@ class AutomationTab(BaseTab):
 
         export_btn = QPushButton(self.tr("Export"))
         export_btn.setAccessibleName(self.tr("Export Kickstart file"))
-        export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
+        export_btn.setObjectName("autoKickstartExportBtn")
         export_btn.clicked.connect(self._export_kickstart)
         btn_layout.addWidget(export_btn)
 

@@ -28,6 +28,51 @@
 | v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
 | v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
 | v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
+| v39.0 | Prism | DONE | Deprecated import migration, inline style elimination, service layer completion |
+
+---
+
+## [DONE] v39.0 "Prism" — Migration & Cleanup
+
+### Scope
+
+Complete the services layer migration started in v23.0. Eliminate all deprecated
+`utils/` import shims and replace 177 inline `setStyleSheet` calls with QSS
+objectNames. Zero deprecation warnings at runtime.
+
+- Migrate 27 deprecated `utils.*` imports in production code to `services.*`
+- Migrate 13 deprecated `utils.*` imports in test files to `services.*`
+- Eliminate 177 inline `setStyleSheet` calls across 15+ UI files (use objectNames + QSS)
+- Add QSS rules in `modern.qss` + `light.qss` for all new objectNames
+- Remove deprecated shim modules once all consumers migrated
+- Zero DeprecationWarning output from test suite
+- Update ARCHITECTURE.md import examples to use `services.*` paths
+
+### Deliverables
+
+- [x] Production code: 27 deprecated imports → `services.*` (16 files)
+- [x] Test code: 13 deprecated imports → `services.*` (5 files)
+- [x] Top 5 UI files: wizard (17), monitor_tab (16), hardware_tab (16), community_tab (14), notification_panel (10) — setStyleSheet → objectNames
+- [x] Remaining 10 UI files: maintenance, automation, profiles, teleport, development, desktop, storage, security, network, diagnostics — setStyleSheet → objectNames
+- [x] QSS rules for all new objectNames in modern.qss + light.qss
+- [x] Remove deprecated utils/ shim modules (system, hardware, bluetooth, disk, temperature, processes, services)
+- [x] Zero DeprecationWarning in test output
+- [x] Update ARCHITECTURE.md import paths
+- [x] Tests for all migration changes
+- [x] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| CodeGen | Import migration (production + tests), shim removal |
+| Sculptor | setStyleSheet → objectNames conversion, QSS rules |
+| Guardian | Tests, deprecation warning verification |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v38.0 Clarity (clean baseline)
 
 ---
 

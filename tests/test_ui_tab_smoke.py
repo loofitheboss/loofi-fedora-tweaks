@@ -389,7 +389,7 @@ class TestNotificationCard(unittest.TestCase):
 class TestFirstRunWizard(unittest.TestCase):
     """Tests for FirstRunWizard dialog."""
 
-    @patch("utils.hardware_profiles.detect_hardware_profile", return_value="generic")
+    @patch("services.hardware.hardware_profiles.detect_hardware_profile", return_value="generic")
     def test_init(self, mock_detect):
         from ui.wizard import FirstRunWizard
         w = FirstRunWizard()

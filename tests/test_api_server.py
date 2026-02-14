@@ -195,7 +195,7 @@ class TestInputValidation:
         """Malformed JSON should return 422."""
         response = test_client.post(
             "/api/execute",
-            data="not-valid-json{{{",
+            content=b"not-valid-json{{{",
             headers={
                 "Authorization": f"Bearer {valid_token}",
                 "Content-Type": "application/json",

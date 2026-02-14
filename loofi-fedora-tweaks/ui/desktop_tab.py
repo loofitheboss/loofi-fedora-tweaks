@@ -90,7 +90,7 @@ class DesktopTab(BaseTab):
 
         # Header
         header = QLabel(self.tr("Window Management"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         wm_layout.addWidget(header)
 
         # Compositor detection
@@ -132,7 +132,7 @@ class DesktopTab(BaseTab):
         self.compositor = compositor
 
         comp_label = QLabel(self.tr("Detected: {}").format(compositor_name))
-        comp_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        comp_label.setObjectName("desktopCompLabel")
         layout.addWidget(comp_label)
 
         # Quick actions based on compositor
@@ -148,7 +148,7 @@ class DesktopTab(BaseTab):
             info = QLabel(self.tr("Install Hyprland, Sway, or KDE for tiling support."))
 
         info.setWordWrap(True)
-        info.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        info.setObjectName("desktopCompInfo")
         layout.addWidget(info)
 
         return group
@@ -240,7 +240,7 @@ class DesktopTab(BaseTab):
         self.template_preview = QTextEdit()
         self.template_preview.setReadOnly(True)
         self.template_preview.setMaximumHeight(100)
-        self.template_preview.setStyleSheet("font-family: monospace;")
+        self.template_preview.setObjectName("desktopTemplatePreview")
         layout.addWidget(self.template_preview)
 
         return group
@@ -482,12 +482,12 @@ class DesktopTab(BaseTab):
         layout.setSpacing(15)
 
         header = QLabel(self.tr("Display Configuration"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Session Info
         self.display_session_info = QLabel(self.tr("Detecting session..."))
-        self.display_session_info.setStyleSheet("color: #9da7bf;")
+        self.display_session_info.setObjectName("desktopSessionInfo")
         layout.addWidget(self.display_session_info)
 
         # Displays table

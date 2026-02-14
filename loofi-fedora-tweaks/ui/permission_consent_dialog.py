@@ -35,7 +35,7 @@ class PermissionConsentDialog(QDialog):
             )
         )
         header.setWordWrap(True)
-        header.setStyleSheet("font-size: 14px; font-weight: bold; margin-bottom: 10px;")
+        header.setObjectName("consentHeader")
         layout.addWidget(header)
 
         # Permission list

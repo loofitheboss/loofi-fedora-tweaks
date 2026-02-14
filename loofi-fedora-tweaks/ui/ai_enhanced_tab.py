@@ -121,7 +121,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("AI Lab - Enhanced"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff; padding: 10px;")
+        header.setObjectName("aiHeader")
         layout.addWidget(header)
 
         # Sub-tab widget
@@ -174,7 +174,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
                 rec_label = QLabel(
                     self.tr("Recommended model: {} ({})").format(rec["name"], rec["size"])
                 )
-                rec_label.setStyleSheet("color: #3dd68c; font-weight: bold;")
+                rec_label.setObjectName("aiRecLabel")
                 ram_layout.addWidget(rec_label)
 
         layout.addWidget(ram_group)
@@ -456,7 +456,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
         self.index_path_label = QLabel(
             self.tr("Index location: {}").format(ContextRAGManager.get_index_path())
         )
-        self.index_path_label.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        self.index_path_label.setObjectName("aiIndexPath")
         status_layout.addWidget(self.index_path_label)
 
         # Action buttons

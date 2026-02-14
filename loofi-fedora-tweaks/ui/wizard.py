@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
-from utils.hardware_profiles import detect_hardware_profile
+from services.hardware.hardware_profiles import detect_hardware_profile
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -228,7 +228,7 @@ class FirstRunWizard(QDialog):
         # Step indicator
         self._step_label = QLabel()
         self._step_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._step_label.setStyleSheet("color: #39c5cf; font-weight: bold;")
+        self._step_label.setObjectName("wizardStepLabel")
         root_layout.addWidget(self._step_label)
 
         # Stacked pages ------------------------------------------------
@@ -259,10 +259,8 @@ class FirstRunWizard(QDialog):
 
         self._btn_next = QPushButton(self.tr("Next \u2192"))
         self._btn_next.setFixedWidth(100)
-        self._btn_next.setStyleSheet(
-            "background-color: #39c5cf; color: #0b0e14; font-weight: bold; "
-            "border-radius: 6px; padding: 6px;"
-        )
+        self._btn_next.setObjectName("wizardBtnNext")
+        self._btn_next.setProperty("wizardMode", "next")
         self._btn_next.clicked.connect(self._go_next)
         nav_layout.addWidget(self._btn_next)
 
@@ -294,21 +292,17 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("wizardDesc")
         layout.addWidget(desc)
 
         # Detection card
         card = QFrame()
-        card.setStyleSheet(
-            "QFrame { background-color: #1c2030; border-radius: 10px; padding: 16px; }"
-        )
+        card.setObjectName("wizardDetectionCard")
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(10)
 
         self._lbl_detected_summary = QLabel()
-        self._lbl_detected_summary.setStyleSheet(
-            "font-size: 15px; font-weight: bold; color: #3dd68c;"
-        )
+        self._lbl_detected_summary.setObjectName("wizardDetectedSummary")
         card_layout.addWidget(self._lbl_detected_summary)
 
         self._lbl_hw_model = QLabel()
@@ -350,7 +344,7 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("wizardDesc")
         layout.addWidget(desc)
 
         # Scroll area for radio options (future-proof)
@@ -368,10 +362,7 @@ class FirstRunWizard(QDialog):
             radio = QRadioButton(
                 f"  {uc['emoji']}  {uc['label']}  \u2014  {uc['description']}"
             )
-            radio.setStyleSheet(
-                "QRadioButton { font-size: 13px; padding: 8px 4px; }"
-                "QRadioButton::indicator { width: 16px; height: 16px; }"
-            )
+            radio.setObjectName("wizardUseCaseRadio")
             if key == "daily":
                 radio.setChecked(True)
             self._uc_button_group.addButton(radio, idx)
@@ -404,19 +395,17 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("wizardDesc")
         layout.addWidget(desc)
 
         # Summary card
         card = QFrame()
-        card.setStyleSheet(
-            "QFrame { background-color: #1c2030; border-radius: 10px; padding: 16px; }"
-        )
+        card.setObjectName("wizardSummaryCard")
         card_layout = QVBoxLayout(card)
 
         self._lbl_summary = QLabel()
         self._lbl_summary.setWordWrap(True)
-        self._lbl_summary.setStyleSheet("font-size: 12px; line-height: 1.5;")
+        self._lbl_summary.setObjectName("wizardSummaryText")
         self._lbl_summary.setTextFormat(Qt.TextFormat.PlainText)
         card_layout.addWidget(self._lbl_summary)
 
@@ -443,16 +432,12 @@ class FirstRunWizard(QDialog):
 
         if index < 4:
             self._btn_next.setText(self.tr("Next \u2192"))
-            self._btn_next.setStyleSheet(
-                "background-color: #39c5cf; color: #0b0e14; font-weight: bold; "
-                "border-radius: 6px; padding: 6px;"
-            )
+            self._btn_next.setProperty("wizardMode", "next")
         else:
             self._btn_next.setText(self.tr("\u2705 Apply"))
-            self._btn_next.setStyleSheet(
-                "background-color: #3dd68c; color: #0b0e14; font-weight: bold; "
-                "border-radius: 6px; padding: 6px;"
-            )
+            self._btn_next.setProperty("wizardMode", "apply")
+        self._btn_next.style().unpolish(self._btn_next)
+        self._btn_next.style().polish(self._btn_next)
 
         # Populate contents when entering a step
         if index == 0:
@@ -594,7 +579,7 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("wizardDesc")
         layout.addWidget(desc)
 
         # Health results card
@@ -631,7 +616,7 @@ class FirstRunWizard(QDialog):
             )
         )
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf;")
+        desc.setObjectName("wizardDesc")
         layout.addWidget(desc)
 
         scroll = QScrollArea()
@@ -735,8 +720,8 @@ class FirstRunWizard(QDialog):
         for icon, text, level in checks:
             lbl = QLabel(f"  {icon}  {text}")
             lbl.setWordWrap(True)
-            color = {"ok": "#3dd68c", "warning": "#f5a623", "info": "#39c5cf", "unknown": "#9da7bf"}.get(level, "#9da7bf")
-            lbl.setStyleSheet(f"font-size: 13px; color: {color}; padding: 4px;")
+            _health_names = {"ok": "wizardHealthOk", "warning": "wizardHealthWarning", "info": "wizardHealthInfo", "unknown": "wizardHealthUnknown"}
+            lbl.setObjectName(_health_names.get(level, "wizardHealthUnknown"))
             self._health_layout.insertWidget(self._health_layout.count() - 1, lbl)
 
     def _populate_actions(self):
@@ -798,14 +783,14 @@ class FirstRunWizard(QDialog):
 
         if not recommendations:
             lbl = QLabel(self.tr("  ✅ Your system looks great! No actions needed."))
-            lbl.setStyleSheet("font-size: 13px; color: #3dd68c; padding: 8px;")
+            lbl.setObjectName("wizardNoActions")
             self._actions_layout.insertWidget(0, lbl)
             return
 
         for rec in recommendations:
-            risk_color = {"LOW": "#3dd68c", "MEDIUM": "#f5a623", "HIGH": "#e06c75"}.get(rec["risk"], "#9da7bf")
+            _action_names = {"LOW": "wizardActionLow", "MEDIUM": "wizardActionMedium", "HIGH": "wizardActionHigh"}
             cb = QCheckBox(f"  [{rec['risk']}] {rec['text']}")
             cb.setChecked(rec["checked"])
-            cb.setStyleSheet(f"font-size: 12px; color: {risk_color}; padding: 4px;")
+            cb.setObjectName(_action_names.get(rec["risk"], "wizardActionLow"))
             self._action_checkboxes.append(cb)
             self._actions_layout.insertWidget(self._actions_layout.count() - 1, cb)

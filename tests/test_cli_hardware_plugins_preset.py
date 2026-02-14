@@ -16,7 +16,7 @@ class TestHardwareCommand(unittest.TestCase):
     """Tests for cmd_hardware."""
 
     @patch('cli.main._print')
-    @patch('utils.hardware_profiles.detect_hardware_profile')
+    @patch('services.hardware.hardware_profiles.detect_hardware_profile')
     def test_cmd_hardware_text_output(self, mock_detect, mock_print):
         mock_detect.return_value = (
             'hp',
@@ -37,7 +37,7 @@ class TestHardwareCommand(unittest.TestCase):
         self.assertTrue(mock_print.called)
 
     @patch('cli.main._output_json')
-    @patch('utils.hardware_profiles.detect_hardware_profile')
+    @patch('services.hardware.hardware_profiles.detect_hardware_profile')
     def test_cmd_hardware_json_output(self, mock_detect, mock_output_json):
         mock_detect.return_value = ('generic', {'label': 'Generic'})
 

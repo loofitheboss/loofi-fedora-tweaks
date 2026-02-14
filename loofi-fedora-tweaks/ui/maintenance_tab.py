@@ -17,7 +17,7 @@ from PyQt6.QtGui import QColor
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from utils.command_runner import CommandRunner
-from utils.system import SystemManager
+from services.system import SystemManager
 from core.plugins.metadata import PluginMetadata
 
 import shutil
@@ -46,7 +46,7 @@ class _UpdatesSubTab(QWidget):
 
         # Header
         header = QLabel(self.tr("System Updates"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Update All Button (Prominent)
@@ -54,10 +54,7 @@ class _UpdatesSubTab(QWidget):
             self.tr("\U0001f504 Update All (DNF + Flatpak + Firmware)")
         )
         self.btn_update_all.setAccessibleName(self.tr("Update All (DNF + Flatpak + Firmware)"))
-        self.btn_update_all.setStyleSheet(
-            "font-size: 14px; padding: 10px; "
-            "background-color: #3daee9; color: white;"
-        )
+        self.btn_update_all.setObjectName("maintUpdateAllBtn")
         self.btn_update_all.clicked.connect(self.run_update_all)
         layout.addWidget(self.btn_update_all)
 
@@ -329,7 +326,7 @@ class _CleanupSubTab(QWidget):
 
         btn_autoremove = QPushButton(self.tr("Remove Unused Packages (Risky)"))
         btn_autoremove.setAccessibleName(self.tr("Remove Unused Packages"))
-        btn_autoremove.setStyleSheet("color: #e8556d;")
+        btn_autoremove.setObjectName("maintAutoremoveBtn")
         btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
 
@@ -469,36 +466,28 @@ class _OverlaysSubTab(QWidget):
 
         # Info Card
         info_frame = QFrame()
-        info_frame.setStyleSheet("""
-            QFrame {
-                background-color: #1c2030;
-                border-radius: 12px;
-                padding: 15px;
-            }
-        """)
+        info_frame.setObjectName("maintOverlayInfoFrame")
         info_layout = QVBoxLayout(info_frame)
 
         variant = SystemManager.get_variant_name()
         info_label = QLabel(
             self.tr("\U0001f4e6 System: Fedora {} (Immutable)").format(variant)
         )
-        info_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        info_label.setObjectName("maintOverlayInfoLabel")
         info_layout.addWidget(info_label)
 
         desc_label = QLabel(self.tr(
             "Layered packages are RPMs installed on top of the base OS image.\n"
             "Changes require a reboot to fully apply."
         ))
-        desc_label.setStyleSheet("color: #9da7bf;")
+        desc_label.setObjectName("maintOverlayDesc")
         info_layout.addWidget(desc_label)
 
         # Pending Reboot Warning
         self.reboot_warning = QLabel(
             self.tr("\u26a0\ufe0f Pending changes require reboot!")
         )
-        self.reboot_warning.setStyleSheet(
-            "color: #e8b84d; font-weight: bold;"
-        )
+        self.reboot_warning.setObjectName("maintRebootWarning")
         self.reboot_warning.setVisible(False)
         info_layout.addWidget(self.reboot_warning)
 
@@ -542,18 +531,7 @@ class _OverlaysSubTab(QWidget):
             self.tr("\U0001f501 Reboot to Apply Changes")
         )
         self.btn_reboot.setAccessibleName(self.tr("Reboot to Apply Changes"))
-        self.btn_reboot.setStyleSheet("""
-            QPushButton {
-                background-color: #e8556d;
-                color: #0b0e14;
-                font-weight: bold;
-                padding: 12px;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #eba0ac;
-            }
-        """)
+        self.btn_reboot.setObjectName("maintRebootBtn")
         self.btn_reboot.clicked.connect(self.reboot_system)
         self.btn_reboot.setVisible(False)
         layout.addWidget(self.btn_reboot)
@@ -678,7 +656,7 @@ class _SmartUpdatesSubTab(QWidget):
         self.setLayout(layout)
 
         header = QLabel(self.tr("Smart Updates"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Check Updates

@@ -28,8 +28,8 @@ from core.plugins.metadata import PluginMetadata
 
 from services.system.processes import ProcessManager
 from utils.commands import PrivilegedCommand
-from utils.system import SystemManager
-from utils.disk import DiskManager
+from services.system import SystemManager
+from services.hardware import DiskManager
 from utils.monitor import SystemMonitor
 from utils.history import HistoryManager
 from utils.health_score import HealthScoreManager

@@ -55,7 +55,7 @@ class LogsTab(BaseTab):
         self.setLayout(layout)
 
         header = QLabel(self.tr("Smart Log Viewer"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("logsHeader")
         layout.addWidget(header)
 
         # ==================== Error Summary ====================
@@ -68,17 +68,17 @@ class LogsTab(BaseTab):
         sg_layout.addWidget(self.lbl_total, 0, 1)
 
         self.lbl_critical = QLabel("—")
-        self.lbl_critical.setStyleSheet("color: #e8556d; font-weight: bold;")
+        self.lbl_critical.setObjectName("logsCritical")
         sg_layout.addWidget(QLabel(self.tr("Critical:")), 0, 2)
         sg_layout.addWidget(self.lbl_critical, 0, 3)
 
         self.lbl_warning = QLabel("—")
-        self.lbl_warning.setStyleSheet("color: #e89840;")
+        self.lbl_warning.setObjectName("logsWarning")
         sg_layout.addWidget(QLabel(self.tr("Warnings:")), 1, 0)
         sg_layout.addWidget(self.lbl_warning, 1, 1)
 
         self.lbl_errors = QLabel("—")
-        self.lbl_errors.setStyleSheet("color: #e8556d;")
+        self.lbl_errors.setObjectName("logsErrors")
         sg_layout.addWidget(QLabel(self.tr("Errors:")), 1, 2)
         sg_layout.addWidget(self.lbl_errors, 1, 3)
 

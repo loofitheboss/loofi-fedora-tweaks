@@ -367,7 +367,7 @@ class TestActionExecution(unittest.TestCase):
         self.assertFalse(r["success"])
         self.assertIn("not installed", r["message"])
 
-    @patch("utils.hardware.HardwareManager.set_governor",
+    @patch("services.hardware.HardwareManager.set_governor",
            return_value={"success": True, "message": "done"})
     def test_set_cpu_governor_via_hardware_manager(self, _):
         r = AutomationProfiles.execute_action("set_cpu_governor", {"governor": "performance"})
@@ -536,14 +536,14 @@ class TestTilingActions(unittest.TestCase):
 class TestCPUGovernorFallback(unittest.TestCase):
 
     @patch("subprocess.run")
-    @patch("utils.hardware.HardwareManager.set_governor", side_effect=ImportError("no module"))
+    @patch("services.hardware.HardwareManager.set_governor", side_effect=ImportError("no module"))
     def test_fallback_success(self, _, mock_run):
         mock_run.return_value = MagicMock(returncode=0)
         r = AutomationProfiles.execute_action("set_cpu_governor", {"governor": "performance"})
         self.assertTrue(r["success"])
 
     @patch("subprocess.run")
-    @patch("utils.hardware.HardwareManager.set_governor", side_effect=ImportError("no module"))
+    @patch("services.hardware.HardwareManager.set_governor", side_effect=ImportError("no module"))
     def test_fallback_failure(self, _, mock_run):
         mock_run.return_value = MagicMock(returncode=1)
         r = AutomationProfiles.execute_action("set_cpu_governor", {"governor": "performance"})

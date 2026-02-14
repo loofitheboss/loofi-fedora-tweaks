@@ -10,7 +10,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.bluetooth import (
+from services.hardware import (
     BluetoothManager, BluetoothDevice, BluetoothResult,
     BluetoothStatus, BluetoothDeviceType,
 )
@@ -19,7 +19,7 @@ from utils.bluetooth import (
 class TestBluetoothAdapterStatus(unittest.TestCase):
     """Tests for get_adapter_status()."""
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_adapter_powered_on(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0,
@@ -37,7 +37,7 @@ class TestBluetoothAdapterStatus(unittest.TestCase):
         self.assertEqual(status.adapter_name, "BlueZ")
         self.assertEqual(status.adapter_address, "00:11:22:33:44:55")
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_adapter_powered_off(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0,
@@ -46,21 +46,21 @@ class TestBluetoothAdapterStatus(unittest.TestCase):
         status = BluetoothManager.get_adapter_status()
         self.assertFalse(status.powered)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_adapter_not_found(self, mock_run):
         mock_run.return_value = MagicMock(returncode=1, stdout="")
         status = BluetoothManager.get_adapter_status()
         self.assertFalse(status.powered)
         self.assertEqual(status.adapter_name, "")
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_adapter_timeout(self, mock_run):
         import subprocess
         mock_run.side_effect = subprocess.TimeoutExpired("bluetoothctl", 10)
         status = BluetoothManager.get_adapter_status()
         self.assertFalse(status.powered)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_adapter_oserror(self, mock_run):
         mock_run.side_effect = OSError("bluetoothctl not found")
         status = BluetoothManager.get_adapter_status()
@@ -70,7 +70,7 @@ class TestBluetoothAdapterStatus(unittest.TestCase):
 class TestBluetoothListDevices(unittest.TestCase):
     """Tests for list_devices()."""
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_list_paired_devices(self, mock_run):
         # First call: list, second call: info per device
         def side_effect(cmd, **kwargs):
@@ -105,13 +105,13 @@ class TestBluetoothListDevices(unittest.TestCase):
         self.assertEqual(devices[0].device_type, BluetoothDeviceType.AUDIO)
         self.assertEqual(devices[1].device_type, BluetoothDeviceType.INPUT)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_list_empty(self, mock_run):
         mock_run.return_value = MagicMock(returncode=0, stdout="")
         devices = BluetoothManager.list_devices()
         self.assertEqual(devices, [])
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_list_failure(self, mock_run):
         mock_run.return_value = MagicMock(returncode=1, stdout="")
         devices = BluetoothManager.list_devices()
@@ -153,7 +153,7 @@ class TestBluetoothDeviceClassification(unittest.TestCase):
 class TestBluetoothActions(unittest.TestCase):
     """Tests for pair/unpair/connect/disconnect/trust/block/unblock."""
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_pair_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="Pairing successful", stderr=""
@@ -162,7 +162,7 @@ class TestBluetoothActions(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertIn("OK", result.message)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_pair_failure(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=1, stdout="", stderr="Failed to pair"
@@ -170,7 +170,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.pair("AA:BB:CC:DD:EE:FF")
         self.assertFalse(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_connect_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="Connection successful", stderr=""
@@ -178,7 +178,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.connect("AA:BB:CC:DD:EE:FF")
         self.assertTrue(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_disconnect_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="Successful", stderr=""
@@ -186,7 +186,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.disconnect("AA:BB:CC:DD:EE:FF")
         self.assertTrue(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_trust_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="trust successful", stderr=""
@@ -194,7 +194,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.trust("AA:BB:CC:DD:EE:FF")
         self.assertTrue(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_block_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="block successful", stderr=""
@@ -202,7 +202,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.block("AA:BB:CC:DD:EE:FF")
         self.assertTrue(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_unblock_success(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="unblock successful", stderr=""
@@ -210,7 +210,7 @@ class TestBluetoothActions(unittest.TestCase):
         result = BluetoothManager.unblock("AA:BB:CC:DD:EE:FF")
         self.assertTrue(result.success)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_action_timeout(self, mock_run):
         import subprocess
         mock_run.side_effect = subprocess.TimeoutExpired("bluetoothctl", 15)
@@ -218,7 +218,7 @@ class TestBluetoothActions(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertIn("Timed out", result.message)
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_action_oserror(self, mock_run):
         mock_run.side_effect = OSError("not found")
         result = BluetoothManager.connect("AA:BB:CC:DD:EE:FF")
@@ -229,7 +229,7 @@ class TestBluetoothActions(unittest.TestCase):
 class TestBluetoothPower(unittest.TestCase):
     """Tests for power_on/power_off."""
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_power_on(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="Changing power on succeeded", stderr=""
@@ -241,7 +241,7 @@ class TestBluetoothPower(unittest.TestCase):
             capture_output=True, text=True, timeout=15
         )
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_power_off(self, mock_run):
         mock_run.return_value = MagicMock(
             returncode=0, stdout="Changing power off succeeded", stderr=""
@@ -257,7 +257,7 @@ class TestBluetoothPower(unittest.TestCase):
 class TestBluetoothScan(unittest.TestCase):
     """Tests for scan()."""
 
-    @patch('utils.bluetooth.subprocess.run')
+    @patch('services.hardware.bluetooth.subprocess.run')
     def test_scan_returns_devices(self, mock_run):
         def side_effect(cmd, **kwargs):
             if "scan" in cmd:

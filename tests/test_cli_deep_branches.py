@@ -134,7 +134,7 @@ class TestCmdTweak(unittest.TestCase):
         self.assertEqual(r, 1)
 
     @patch('cli.main._output_json')
-    @patch('utils.system.SystemManager.is_atomic', return_value=False)
+    @patch('services.system.SystemManager.is_atomic', return_value=False)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
     def test_tweak_status_json(self, mock_prof, mock_atomic, mock_json):
         _set_json(True)
@@ -144,7 +144,7 @@ class TestCmdTweak(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.system.SystemManager.is_atomic', return_value=False)
+    @patch('services.system.SystemManager.is_atomic', return_value=False)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
     def test_tweak_status_text(self, mock_prof, mock_atomic, mock_print):
         _set_json(False)
@@ -204,10 +204,10 @@ class TestCmdNetwork(unittest.TestCase):
 class TestCmdInfo(unittest.TestCase):
 
     @patch('cli.main._output_json')
-    @patch('utils.system.SystemManager.has_pending_deployment', return_value=True)
+    @patch('services.system.SystemManager.has_pending_deployment', return_value=True)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
-    @patch('utils.system.SystemManager.get_package_manager', return_value='rpm-ostree')
-    @patch('utils.system.SystemManager.is_atomic', return_value=True)
+    @patch('services.system.SystemManager.get_package_manager', return_value='rpm-ostree')
+    @patch('services.system.SystemManager.is_atomic', return_value=True)
     def test_info_json_atomic(self, mock_at, mock_pm, mock_prof, mock_pending, mock_json):
         _set_json(True)
         r = cmd_info(_ns())
@@ -217,10 +217,10 @@ class TestCmdInfo(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.system.SystemManager.has_pending_deployment', return_value=True)
+    @patch('services.system.SystemManager.has_pending_deployment', return_value=True)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
-    @patch('utils.system.SystemManager.get_package_manager', return_value='rpm-ostree')
-    @patch('utils.system.SystemManager.is_atomic', return_value=True)
+    @patch('services.system.SystemManager.get_package_manager', return_value='rpm-ostree')
+    @patch('services.system.SystemManager.is_atomic', return_value=True)
     def test_info_text_atomic(self, mock_at, mock_pm, mock_prof, mock_pending, mock_print):
         _set_json(False)
         r = cmd_info(_ns())
@@ -250,7 +250,7 @@ class TestCmdHealth(unittest.TestCase):
 
     @patch('cli.main._output_json')
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
-    @patch('utils.disk.DiskManager.check_disk_health', return_value=('ok', 'healthy'))
+    @patch('services.hardware.DiskManager.check_disk_health', return_value=('ok', 'healthy'))
     @patch('utils.monitor.SystemMonitor.get_system_health')
     def test_health_json(self, mock_health, mock_disk, mock_prof, mock_json):
         _set_json(True)
@@ -260,10 +260,10 @@ class TestCmdHealth(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.system.SystemManager.get_variant_name', return_value='Workstation')
-    @patch('utils.system.SystemManager.is_atomic', return_value=False)
+    @patch('services.system.SystemManager.get_variant_name', return_value='Workstation')
+    @patch('services.system.SystemManager.is_atomic', return_value=False)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
-    @patch('utils.disk.DiskManager.check_disk_health', return_value=('warning', 'disk 80%'))
+    @patch('services.hardware.DiskManager.check_disk_health', return_value=('warning', 'disk 80%'))
     @patch('utils.monitor.SystemMonitor.get_system_health')
     def test_health_text_no_mem_no_cpu(self, mock_health, mock_disk, mock_prof,
                                          mock_atomic, mock_var, mock_print):
@@ -273,10 +273,10 @@ class TestCmdHealth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.system.SystemManager.get_variant_name', return_value='Workstation')
-    @patch('utils.system.SystemManager.is_atomic', return_value=False)
+    @patch('services.system.SystemManager.get_variant_name', return_value='Workstation')
+    @patch('services.system.SystemManager.is_atomic', return_value=False)
     @patch('utils.operations.TweakOps.get_power_profile', return_value='balanced')
-    @patch('utils.disk.DiskManager.check_disk_health', return_value=('critical', 'disk 95%'))
+    @patch('services.hardware.DiskManager.check_disk_health', return_value=('critical', 'disk 95%'))
     @patch('utils.monitor.SystemMonitor.get_system_health')
     def test_health_text_critical(self, mock_health, mock_disk, mock_prof,
                                     mock_atomic, mock_var, mock_print):
@@ -298,8 +298,8 @@ class TestCmdDisk(unittest.TestCase):
                                 free_human='60 GB', percent_used=40, mount_point=mp)
 
     @patch('cli.main._output_json')
-    @patch('utils.disk.DiskManager.get_disk_usage')
-    @patch('utils.disk.DiskManager.check_disk_health', return_value=('ok', 'healthy'))
+    @patch('services.hardware.DiskManager.get_disk_usage')
+    @patch('services.hardware.DiskManager.check_disk_health', return_value=('ok', 'healthy'))
     def test_disk_json(self, mock_dh, mock_usage, mock_json):
         _set_json(True)
         mock_usage.side_effect = [self._usage('/'), self._usage('/home')]
@@ -308,9 +308,9 @@ class TestCmdDisk(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.disk.DiskManager.find_large_directories')
-    @patch('utils.disk.DiskManager.check_disk_health', return_value=('ok', 'ok'))
-    @patch('utils.disk.DiskManager.get_disk_usage')
+    @patch('services.hardware.DiskManager.find_large_directories')
+    @patch('services.hardware.DiskManager.check_disk_health', return_value=('ok', 'ok'))
+    @patch('services.hardware.DiskManager.get_disk_usage')
     def test_disk_text_details(self, mock_usage, mock_dh, mock_large, mock_print):
         _set_json(False)
         mock_usage.side_effect = [self._usage('/'), self._usage('/')]  # same mount
@@ -319,7 +319,7 @@ class TestCmdDisk(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.disk.DiskManager.get_disk_usage', return_value=None)
+    @patch('services.hardware.DiskManager.get_disk_usage', return_value=None)
     def test_disk_text_no_usage(self, mock_usage, mock_print):
         _set_json(False)
         r = cmd_disk(_ns(details=False))
@@ -331,8 +331,8 @@ class TestCmdDisk(unittest.TestCase):
 class TestCmdProcesses(unittest.TestCase):
 
     @patch('cli.main._output_json')
-    @patch('utils.processes.ProcessManager.get_top_by_memory')
-    @patch('utils.processes.ProcessManager.get_process_count')
+    @patch('services.system.ProcessManager.get_top_by_memory')
+    @patch('services.system.ProcessManager.get_process_count')
     def test_processes_json_by_memory(self, mock_cnt, mock_top, mock_json):
         _set_json(True)
         mock_cnt.return_value = {'total': 100, 'running': 5, 'sleeping': 90, 'zombie': 0}
@@ -343,9 +343,9 @@ class TestCmdProcesses(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.processes.ProcessManager.bytes_to_human', return_value='1 KB')
-    @patch('utils.processes.ProcessManager.get_top_by_cpu')
-    @patch('utils.processes.ProcessManager.get_process_count')
+    @patch('services.system.ProcessManager.bytes_to_human', return_value='1 KB')
+    @patch('services.system.ProcessManager.get_top_by_cpu')
+    @patch('services.system.ProcessManager.get_process_count')
     def test_processes_text_by_cpu(self, mock_cnt, mock_top, mock_bth, mock_print):
         _set_json(False)
         mock_cnt.return_value = {'total': 10, 'running': 2, 'sleeping': 7, 'zombie': 1}
@@ -360,7 +360,7 @@ class TestCmdProcesses(unittest.TestCase):
 class TestCmdTemperature(unittest.TestCase):
 
     @patch('cli.main._output_json')
-    @patch('utils.temperature.TemperatureManager.get_all_sensors')
+    @patch('services.hardware.TemperatureManager.get_all_sensors')
     def test_temperature_json_with_sensors(self, mock_sens, mock_json):
         _set_json(True)
         mock_sens.return_value = [SimpleNamespace(label='CPU', current=55, high=80, critical=95)]
@@ -369,7 +369,7 @@ class TestCmdTemperature(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._print')
-    @patch('utils.temperature.TemperatureManager.get_all_sensors')
+    @patch('services.hardware.TemperatureManager.get_all_sensors')
     def test_temperature_text_empty(self, mock_sens, mock_print):
         _set_json(False)
         mock_sens.return_value = []
@@ -377,7 +377,7 @@ class TestCmdTemperature(unittest.TestCase):
         self.assertEqual(r, 1)
 
     @patch('cli.main._print')
-    @patch('utils.temperature.TemperatureManager.get_all_sensors')
+    @patch('services.hardware.TemperatureManager.get_all_sensors')
     def test_temperature_text_multiple(self, mock_sens, mock_print):
         _set_json(False)
         mock_sens.return_value = [
@@ -857,7 +857,7 @@ class TestCmdFirewall(unittest.TestCase):
 class TestCmdBluetooth(unittest.TestCase):
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.get_adapter_status')
+    @patch('services.hardware.BluetoothManager.get_adapter_status')
     def test_bt_status_no_adapter(self, mock_status, mock_print):
         _set_json(False)
         mock_status.return_value = SimpleNamespace(adapter_name='', powered=False,
@@ -866,7 +866,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 1)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.get_adapter_status')
+    @patch('services.hardware.BluetoothManager.get_adapter_status')
     def test_bt_status_ok(self, mock_status, mock_print):
         _set_json(False)
         mock_status.return_value = SimpleNamespace(adapter_name='hci0', powered=True,
@@ -875,7 +875,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.list_devices')
+    @patch('services.hardware.BluetoothManager.list_devices')
     def test_bt_devices_empty(self, mock_devs, mock_print):
         _set_json(False)
         mock_devs.return_value = []
@@ -883,7 +883,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.list_devices')
+    @patch('services.hardware.BluetoothManager.list_devices')
     def test_bt_devices_with_items(self, mock_devs, mock_print):
         _set_json(False)
         dev = SimpleNamespace(address='11:22:33', name='AirPods', paired=True,
@@ -894,7 +894,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.scan')
+    @patch('services.hardware.BluetoothManager.scan')
     def test_bt_scan(self, mock_scan, mock_print):
         _set_json(False)
         dev = SimpleNamespace(address='11:22:33', name='Speaker',
@@ -904,7 +904,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.power_on')
+    @patch('services.hardware.BluetoothManager.power_on')
     def test_bt_power_on(self, mock_power, mock_print):
         _set_json(False)
         mock_power.return_value = SimpleNamespace(success=True, message='ok')
@@ -912,7 +912,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.power_off')
+    @patch('services.hardware.BluetoothManager.power_off')
     def test_bt_power_off(self, mock_power, mock_print):
         _set_json(False)
         mock_power.return_value = SimpleNamespace(success=True, message='off')
@@ -920,7 +920,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.connect')
+    @patch('services.hardware.BluetoothManager.connect')
     def test_bt_connect(self, mock_conn, mock_print):
         _set_json(False)
         mock_conn.return_value = SimpleNamespace(success=True, message='connected')
@@ -934,7 +934,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 1)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.disconnect')
+    @patch('services.hardware.BluetoothManager.disconnect')
     def test_bt_disconnect(self, mock_disc, mock_print):
         _set_json(False)
         mock_disc.return_value = SimpleNamespace(success=True, message='disconnected')
@@ -942,7 +942,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.pair')
+    @patch('services.hardware.BluetoothManager.pair')
     def test_bt_pair(self, mock_pair, mock_print):
         _set_json(False)
         mock_pair.return_value = SimpleNamespace(success=True, message='paired')
@@ -950,7 +950,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._print')
-    @patch('utils.bluetooth.BluetoothManager.trust')
+    @patch('services.hardware.BluetoothManager.trust')
     def test_bt_trust(self, mock_trust, mock_print):
         _set_json(False)
         mock_trust.return_value = SimpleNamespace(success=True, message='trusted')
@@ -958,7 +958,7 @@ class TestCmdBluetooth(unittest.TestCase):
         self.assertEqual(r, 0)
 
     @patch('cli.main._output_json')
-    @patch('utils.bluetooth.BluetoothManager.get_adapter_status')
+    @patch('services.hardware.BluetoothManager.get_adapter_status')
     def test_bt_status_json(self, mock_status, mock_json):
         _set_json(True)
         mock_status.return_value = SimpleNamespace(adapter_name='hci0', powered=True,
@@ -968,7 +968,7 @@ class TestCmdBluetooth(unittest.TestCase):
         _set_json(False)
 
     @patch('cli.main._output_json')
-    @patch('utils.bluetooth.BluetoothManager.scan')
+    @patch('services.hardware.BluetoothManager.scan')
     @patch('cli.main._print')
     def test_bt_scan_json(self, mock_print, mock_scan, mock_json):
         _set_json(True)

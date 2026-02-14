@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.services import ServiceManager, UnitScope, UnitState, ServiceUnit, Result
+from services.system import ServiceManager, UnitScope, UnitState, ServiceUnit, Result
 
 
 # ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ class TestListUnits(unittest.TestCase):
         "tracker-miner.service    loaded inactive dead   Tracker Miner\n"
     )
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_list_units_parses_output(self, mock_run):
         """list_units parses systemctl output into ServiceUnit list."""
         mock_run.return_value = MagicMock(returncode=0, stdout=self.SAMPLE_OUTPUT)
@@ -67,7 +67,7 @@ class TestListUnits(unittest.TestCase):
         names = [u.name for u in units]
         self.assertIn("gamemoded", names)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_list_units_filter_active(self, mock_run):
         """list_units filters by active state."""
         mock_run.return_value = MagicMock(returncode=0, stdout=self.SAMPLE_OUTPUT)
@@ -77,7 +77,7 @@ class TestListUnits(unittest.TestCase):
         for unit in units:
             self.assertEqual(unit.state, UnitState.ACTIVE)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_list_units_filter_failed(self, mock_run):
         """list_units filters by failed state."""
         mock_run.return_value = MagicMock(returncode=0, stdout=self.SAMPLE_OUTPUT)
@@ -88,7 +88,7 @@ class TestListUnits(unittest.TestCase):
         self.assertEqual(units[0].name, "bluetooth")
         self.assertEqual(units[0].state, UnitState.FAILED)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_list_units_filter_gaming(self, mock_run):
         """list_units filters for gaming-related services."""
         mock_run.return_value = MagicMock(returncode=0, stdout=self.SAMPLE_OUTPUT)
@@ -97,7 +97,7 @@ class TestListUnits(unittest.TestCase):
 
         self.assertTrue(all(u.is_gaming for u in units))
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_list_units_nonzero_exit(self, mock_run):
         """list_units returns empty list on error."""
         mock_run.return_value = MagicMock(returncode=1, stdout="")
@@ -105,7 +105,7 @@ class TestListUnits(unittest.TestCase):
         units = ServiceManager.list_units()
         self.assertEqual(units, [])
 
-    @patch('utils.services.subprocess.run', side_effect=Exception("systemctl not found"))
+    @patch('services.system.services.subprocess.run', side_effect=Exception("systemctl not found"))
     def test_list_units_exception(self, mock_run):
         """list_units returns empty list on exception."""
         units = ServiceManager.list_units()
@@ -119,7 +119,7 @@ class TestListUnits(unittest.TestCase):
 class TestStartStopRestart(unittest.TestCase):
     """Tests for start_unit, stop_unit, restart_unit."""
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_start_unit_success(self, mock_run):
         """start_unit returns success on returncode 0."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -128,7 +128,7 @@ class TestStartStopRestart(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertIn("Started", result.message)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_stop_unit_success(self, mock_run):
         """stop_unit returns success on returncode 0."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -137,7 +137,7 @@ class TestStartStopRestart(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertIn("Stopped", result.message)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_restart_unit_success(self, mock_run):
         """restart_unit returns success on returncode 0."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -146,7 +146,7 @@ class TestStartStopRestart(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertIn("Restarted", result.message)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_start_unit_failure(self, mock_run):
         """start_unit returns failure on non-zero exit."""
         mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="unit not found")
@@ -154,7 +154,7 @@ class TestStartStopRestart(unittest.TestCase):
         result = ServiceManager.start_unit("nonexistent")
         self.assertFalse(result.success)
 
-    @patch('utils.services.subprocess.run', side_effect=Exception("timeout"))
+    @patch('services.system.services.subprocess.run', side_effect=Exception("timeout"))
     def test_start_unit_exception(self, mock_run):
         """start_unit handles exception gracefully."""
         result = ServiceManager.start_unit("test")
@@ -169,7 +169,7 @@ class TestStartStopRestart(unittest.TestCase):
 class TestMaskUnmask(unittest.TestCase):
     """Tests for mask_unit and unmask_unit."""
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_mask_unit_success(self, mock_run):
         """mask_unit returns success on returncode 0."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -178,7 +178,7 @@ class TestMaskUnmask(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertIn("Masked", result.message)
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_unmask_unit_success(self, mock_run):
         """unmask_unit returns success on returncode 0."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
@@ -195,7 +195,7 @@ class TestMaskUnmask(unittest.TestCase):
 class TestGetUnitStatus(unittest.TestCase):
     """Tests for get_unit_status."""
 
-    @patch('utils.services.subprocess.run')
+    @patch('services.system.services.subprocess.run')
     def test_get_unit_status_returns_output(self, mock_run):
         """get_unit_status returns systemctl status output."""
         expected = "gamemoded.service - GameMode daemon\n   Active: active (running)\n"
@@ -204,7 +204,7 @@ class TestGetUnitStatus(unittest.TestCase):
         status = ServiceManager.get_unit_status("gamemoded")
         self.assertIn("active", status)
 
-    @patch('utils.services.subprocess.run', side_effect=Exception("fail"))
+    @patch('services.system.services.subprocess.run', side_effect=Exception("fail"))
     def test_get_unit_status_handles_exception(self, mock_run):
         """get_unit_status returns empty string on exception."""
         status = ServiceManager.get_unit_status("bad")

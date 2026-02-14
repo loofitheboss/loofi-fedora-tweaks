@@ -59,7 +59,7 @@ class PerformanceTab(BaseTab):
         self.setLayout(layout)
 
         header = QLabel(self.tr("Performance Auto-Tuner"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("perfHeader")
         layout.addWidget(header)
 
         # ==================== Workload Detection ====================
@@ -68,7 +68,7 @@ class PerformanceTab(BaseTab):
         workload_group.setLayout(wl_layout)
 
         self.lbl_workload = QLabel("—")
-        self.lbl_workload.setStyleSheet("font-size: 16px; font-weight: bold;")
+        self.lbl_workload.setObjectName("perfWorkload")
         wl_layout.addWidget(QLabel(self.tr("Profile:")), 0, 0)
         wl_layout.addWidget(self.lbl_workload, 0, 1)
 
@@ -125,7 +125,7 @@ class PerformanceTab(BaseTab):
 
         self.lbl_rec_details = QLabel("")
         self.lbl_rec_details.setWordWrap(True)
-        self.lbl_rec_details.setStyleSheet("color: #9da7bf;")
+        self.lbl_rec_details.setObjectName("perfRecDetails")
         rec_layout.addWidget(self.lbl_rec_details)
 
         btn_apply = QPushButton(self.tr("⚡ Apply Recommendation"))

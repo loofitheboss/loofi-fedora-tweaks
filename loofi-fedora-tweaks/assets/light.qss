@@ -893,3 +893,995 @@ QPushButton#outputCancelBtn:hover {
     background-color: #fde0dc;
     color: #d20f39;
 }
+
+/* v39.0 Prism — wizard.py */
+
+#wizardStepLabel {
+    color: #179299;
+    font-weight: bold;
+}
+
+#wizardBtnNext[wizardMode="next"] {
+    background-color: #179299;
+    color: #eff1f5;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+#wizardBtnNext[wizardMode="apply"] {
+    background-color: #40a02b;
+    color: #eff1f5;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 6px;
+}
+
+#wizardDesc {
+    color: #6c6f85;
+}
+
+#wizardDetectionCard,
+#wizardSummaryCard {
+    background-color: #e6e9ef;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+#wizardDetectedSummary {
+    font-size: 15px;
+    font-weight: bold;
+    color: #40a02b;
+}
+
+#wizardUseCaseRadio {
+    font-size: 13px;
+    padding: 8px 4px;
+}
+
+#wizardUseCaseRadio::indicator {
+    width: 16px;
+    height: 16px;
+}
+
+#wizardSummaryText {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+#wizardHealthOk {
+    font-size: 13px;
+    color: #40a02b;
+    padding: 4px;
+}
+
+#wizardHealthWarning {
+    font-size: 13px;
+    color: #df8e1d;
+    padding: 4px;
+}
+
+#wizardHealthInfo {
+    font-size: 13px;
+    color: #179299;
+    padding: 4px;
+}
+
+#wizardHealthUnknown {
+    font-size: 13px;
+    color: #6c6f85;
+    padding: 4px;
+}
+
+#wizardNoActions {
+    font-size: 13px;
+    color: #40a02b;
+    padding: 8px;
+}
+
+#wizardActionLow {
+    font-size: 12px;
+    color: #40a02b;
+    padding: 4px;
+}
+
+#wizardActionMedium {
+    font-size: 12px;
+    color: #df8e1d;
+    padding: 4px;
+}
+
+#wizardActionHigh {
+    font-size: 12px;
+    color: #d20f39;
+    padding: 4px;
+}
+
+/* v39.0 Prism — monitor_tab.py */
+
+#monitorCard {
+    background-color: #ccd0da;
+    border-radius: 12px;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#monitorCard::title {
+    padding: 10px;
+}
+
+#monitorCpuLabel,
+#monitorMemLabel,
+#monitorNetLabel,
+#monitorDiskLabel {
+    color: #6c6f85;
+    font-size: 12px;
+}
+
+#monitorNetRecvDot {
+    color: #8839ef;
+    font-size: 10px;
+}
+
+#monitorNetSendDot {
+    color: #04a5e5;
+    font-size: 10px;
+}
+
+#monitorDiskReadDot {
+    color: #df8e1d;
+    font-size: 10px;
+}
+
+#monitorDiskWriteDot {
+    color: #fe640b;
+    font-size: 10px;
+}
+
+#monitorSummaryFrame {
+    background-color: #ccd0da;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#monitorSummaryLabel {
+    color: #6c6f85;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+#monitorSortCombo {
+    background-color: #ccd0da;
+    border: 1px solid #bcc0cc;
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: #4c4f69;
+    min-width: 100px;
+}
+
+#monitorSortCombo::drop-down {
+    border: none;
+}
+
+#monitorFilterToggle {
+    background-color: #ccd0da;
+    border: 1px solid #bcc0cc;
+    color: #4c4f69;
+    padding: 6px 14px;
+    border-radius: 6px;
+}
+
+#monitorFilterToggle:checked {
+    background-color: #179299;
+    color: #eff1f5;
+    border: 1px solid #179299;
+}
+
+#monitorFilterToggle:hover {
+    background-color: #bcc0cc;
+}
+
+#monitorFilterToggle:checked:hover {
+    background-color: #179299;
+}
+
+#monitorRefreshBtn {
+    background-color: #ccd0da;
+    border: 1px solid #bcc0cc;
+    color: #4c4f69;
+    padding: 6px 14px;
+    border-radius: 6px;
+}
+
+#monitorRefreshBtn:hover {
+    background-color: #bcc0cc;
+}
+
+#monitorProcessTree {
+    background-color: #ccd0da;
+    border: 1px solid #bcc0cc;
+    border-radius: 8px;
+    color: #4c4f69;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+#monitorProcessTree::item {
+    padding: 4px 2px;
+}
+
+#monitorProcessTree::item:selected {
+    background-color: #bcc0cc;
+}
+
+#monitorProcessTree::item:alternate {
+    background-color: #eff1f5;
+}
+
+#monitorProcessTree QHeaderView::section {
+    background-color: #eff1f5;
+    color: #6c6f85;
+    border: none;
+    border-bottom: 1px solid #bcc0cc;
+    padding: 6px 4px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#monitorContextMenu {
+    background-color: #ccd0da;
+    border: 1px solid #bcc0cc;
+    border-radius: 6px;
+    color: #4c4f69;
+    padding: 4px;
+}
+
+#monitorContextMenu::item {
+    padding: 6px 20px;
+    border-radius: 4px;
+}
+
+#monitorContextMenu::item:selected {
+    background-color: #bcc0cc;
+}
+
+#monitorContextMenu::separator {
+    height: 1px;
+    background-color: #bcc0cc;
+    margin: 4px 8px;
+}
+
+/* v39.0 Prism — hardware_tab.py */
+
+#hwCard {
+    background-color: #ccd0da;
+    border-radius: 12px;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#hwCard::title {
+    padding: 10px;
+}
+
+#hwCpuFreq,
+#hwPowerStatus,
+#hwGpuStatus,
+#hwFanStatus,
+#hwBtStatus,
+#hwBootInfo {
+    color: #6c6f85;
+}
+
+#hwCpuDesc,
+#hwAudioDesc,
+#hwBatteryDesc,
+#hwFingerprintDesc,
+#hwBtDevices,
+#hwBootDesc {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+#hwGpuWarning {
+    color: #df8e1d;
+    font-size: 11px;
+}
+
+#hwPowerSaver {
+    background-color: #40a02b20;
+    border: 1px solid #40a02b;
+    color: #40a02b;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwPowerSaver:hover {
+    background-color: #40a02b;
+    color: #eff1f5;
+}
+
+#hwPowerBalanced {
+    background-color: #17929920;
+    border: 1px solid #179299;
+    color: #179299;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwPowerBalanced:hover {
+    background-color: #179299;
+    color: #eff1f5;
+}
+
+#hwPowerPerformance {
+    background-color: #d20f3920;
+    border: 1px solid #d20f39;
+    color: #d20f39;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwPowerPerformance:hover {
+    background-color: #d20f39;
+    color: #eff1f5;
+}
+
+#hwGpuIntegrated {
+    background-color: #40a02b20;
+    border: 1px solid #40a02b;
+    color: #40a02b;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwGpuIntegrated:hover {
+    background-color: #40a02b;
+    color: #eff1f5;
+}
+
+#hwGpuHybrid {
+    background-color: #17929920;
+    border: 1px solid #179299;
+    color: #179299;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwGpuHybrid:hover {
+    background-color: #179299;
+    color: #eff1f5;
+}
+
+#hwGpuNvidia {
+    background-color: #d20f3920;
+    border: 1px solid #d20f39;
+    color: #d20f39;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+#hwGpuNvidia:hover {
+    background-color: #d20f39;
+    color: #eff1f5;
+}
+
+/* v39.0 Prism — community_tab.py */
+
+#communityStatusLabel {
+    color: #8c8fa1;
+}
+
+#communitySyncStatus {
+    color: #8c8fa1;
+}
+
+#communitySyncStatus[state="connected"] {
+    color: #40a02b;
+}
+
+#communitySyncStatus[state="partial"] {
+    color: #df8e1d;
+}
+
+#communitySyncStatus[state="error"] {
+    color: #d20f39;
+}
+
+#communityMarketplaceHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+
+#communityMarketplaceStatus {
+    color: #8c8fa1;
+}
+
+#communityDetailName {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#communityDetailAuthor {
+    color: #8c8fa1;
+}
+
+#communityDetailVerification {
+    color: #8c8fa1;
+}
+
+#communityDetailRating {
+    color: #8c8fa1;
+}
+
+#communityReviewsSummary {
+    color: #8c8fa1;
+}
+
+#communityReviewFeedback {
+    color: #8c8fa1;
+}
+
+#communityReviewFeedback[state="success"] {
+    color: #40a02b;
+}
+
+#communityReviewFeedback[state="error"] {
+    color: #d20f39;
+}
+
+#communityAnalyticsStatus {
+    color: #8c8fa1;
+}
+
+/* v39.0 Prism — notification_panel.py */
+
+#notificationPanel {
+    background-color: #eff1f5;
+    border: 1px solid #ccd0da;
+    border-radius: 10px;
+}
+
+#notifCard {
+    border: 1px solid #ccd0da;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 2px;
+}
+
+#notifDismissBtn {
+    border: none;
+    color: #8c8fa1;
+}
+
+#notifDismissBtn:hover {
+    color: #d20f39;
+}
+
+#notifMessage {
+    color: #6c6f85;
+}
+
+#notifTimestamp {
+    color: #9ca0b0;
+    font-size: 11px;
+}
+
+#notifTitle {
+    font-size: 16px;
+}
+
+#notifBadge {
+    background-color: #d20f39;
+    color: #eff1f5;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#notifMarkReadBtn {
+    border: none;
+    color: #179299;
+}
+
+#notifMarkReadBtn:hover {
+    color: #04a5e5;
+}
+
+#notifScrollArea {
+    border: none;
+    background: transparent;
+}
+
+#notifEmpty {
+    color: #9ca0b0;
+    padding: 40px;
+}
+
+/* ===== Maintenance Tab (T9) ===== */
+#maintUpdateAllBtn {
+    font-size: 14px;
+    padding: 10px;
+    background-color: #1e66f5;
+    color: #eff1f5;
+}
+
+#maintAutoremoveBtn {
+    color: #d20f39;
+}
+
+#maintOverlayInfoFrame {
+    background-color: #e6e9ef;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+#maintOverlayInfoLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#maintOverlayDesc {
+    color: #6c6f85;
+}
+
+#maintRebootWarning {
+    color: #df8e1d;
+    font-weight: bold;
+}
+
+#maintRebootBtn {
+    background-color: #d20f39;
+    color: #eff1f5;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+#maintRebootBtn:hover {
+    background-color: #e64553;
+}
+
+/* ===== Automation Tab (T9) ===== */
+#autoServiceStatus {
+    font-weight: bold;
+}
+
+#autoServiceStatus[serviceState="running"] {
+    color: #40a02b;
+}
+
+#autoServiceStatus[serviceState="enabled"] {
+    color: #df8e1d;
+}
+
+#autoServiceStatus[serviceState="disabled"] {
+    color: #d20f39;
+}
+
+#autoReplicatorInfo {
+    color: #6c6f85;
+    margin-bottom: 10px;
+}
+
+#autoAnsibleDesc,
+#autoKickstartDesc {
+    color: #6c6f85;
+}
+
+#autoAnsibleExportBtn,
+#autoKickstartExportBtn {
+    background-color: #40a02b;
+    color: #eff1f5;
+    font-weight: bold;
+}
+
+/* ===== Profiles Tab (T9) ===== */
+#profileDesc {
+    color: #6c6f85;
+    font-size: 12px;
+}
+
+#profileActiveLabel {
+    font-size: 13px;
+    padding: 8px;
+    background: #e6e9ef;
+    border-radius: 4px;
+    color: #4c4f69;
+}
+
+#profileCard {
+    background: #e6e9ef;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#profileCardTitle {
+    font-size: 14px;
+    font-weight: bold;
+    color: #4c4f69;
+}
+
+#profileCardDesc {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+#profileCardBadge {
+    color: #8839ef;
+    font-size: 10px;
+}
+
+/* ===== Teleport Tab (T9) ===== */
+#teleportDesc {
+    color: #6c6f85;
+    font-size: 12px;
+}
+
+#teleportCaptureBtn,
+#teleportApplyBtn {
+    font-weight: bold;
+    padding: 8px 16px;
+}
+
+#teleportCaptureSummary,
+#teleportRestorePreview {
+    color: #6c6f85;
+}
+
+/* ===== Development Tab (T9) ===== */
+#devContainerStatus {
+    color: #6c6f85;
+}
+
+#devContainerHelp {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+#devLangInfo,
+#devVscodeInfo {
+    color: #6c6f85;
+}
+
+/* ===== Desktop Tab (T9) ===== */
+#desktopCompLabel {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#desktopCompInfo {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+#desktopTemplatePreview {
+    font-family: monospace;
+}
+
+#desktopSessionInfo {
+    color: #6c6f85;
+}
+
+/* ===== Storage Tab (T9) ===== */
+#storageSmartHealth {
+    font-weight: bold;
+}
+
+#storageSmartHealth[smartState="passed"] {
+    color: #40a02b;
+}
+
+#storageSmartHealth[smartState="failed"] {
+    color: #d20f39;
+}
+
+#storageSmartRealloc[reallocState="warning"] {
+    color: #fe640b;
+    font-weight: bold;
+}
+
+#storageSmartRealloc[reallocState="ok"] {
+    color: inherit;
+    font-weight: normal;
+}
+
+/* ===== Security Tab (T9) ===== */
+#secScoreLabel {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#secScoreLabel[scoreLevel="good"] {
+    color: #40a02b;
+}
+
+#secScoreLabel[scoreLevel="ok"] {
+    color: #df8e1d;
+}
+
+#secScoreLabel[scoreLevel="warning"] {
+    color: #fe640b;
+}
+
+#secScoreLabel[scoreLevel="bad"] {
+    color: #d20f39;
+}
+
+#secRecLabel {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#secRecItem {
+    color: #fe640b;
+    font-size: 11px;
+}
+
+#secUsbInfo {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+/* ===== Network Tab (T9) ===== */
+#netCurrentDns,
+#netMacStatus,
+#netHostnameStatus {
+    font-weight: bold;
+}
+
+#netBwLabel {
+    font-size: 13px;
+}
+
+/* ===== Diagnostics Tab (T9) ===== */
+#diagJournalOutput {
+    font-family: monospace;
+}
+
+#diagPanicBtn {
+    background-color: #d20f39;
+    color: #eff1f5;
+    font-weight: bold;
+}
+
+#diagKernelParams {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+#diagSecureBootHelp {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+/* ===== T9b: setStyleSheet elimination ===== */
+
+/* -- Fingerprint Dialog -- */
+#fprintStatus {
+    font-size: 14px;
+    margin: 10px;
+}
+
+/* -- What's New Dialog -- */
+#whatsNewHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#whatsNewCloseBtn {
+    font-weight: bold;
+    padding: 8px 24px;
+}
+
+/* -- Gaming Tab -- */
+#gamingHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+
+/* -- Mesh Tab -- */
+#meshDeviceName {
+    font-weight: bold;
+}
+#meshPairingCode {
+    font-family: monospace;
+    font-size: 16px;
+}
+#meshDropZone {
+    border: 2px dashed #9ca0b0;
+    border-radius: 8px;
+    padding: 20px;
+    color: #7c7f93;
+}
+
+/* -- Permission Consent Dialog -- */
+#consentHeader {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* -- Settings Tab -- */
+#settingsHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#settingsDesc {
+    color: #6c6f85;
+    font-size: 12px;
+}
+
+/* -- AI Enhanced Tab -- */
+#aiHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+    padding: 10px;
+}
+#aiRecLabel {
+    color: #40a02b;
+    font-weight: bold;
+}
+#aiIndexPath {
+    color: #6c6f85;
+    font-size: 11px;
+}
+
+/* -- Software Tab -- */
+#swInstalledBtn {
+    background-color: #40a02b;
+    color: #eff1f5;
+}
+#swReposHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#swFlatpakHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+
+/* -- Health Timeline Tab -- */
+#healthTlHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#healthTlDesc {
+    color: #6c6f85;
+    font-size: 12px;
+}
+#healthTlSummary {
+    font-size: 12px;
+    padding: 8px;
+    background: #e6e9ef;
+    border-radius: 4px;
+    color: #4c4f69;
+}
+#healthTlAnomaly {
+    font-size: 12px;
+    padding: 8px;
+    background: #e6e9ef;
+    border-radius: 4px;
+    color: #4c4f69;
+}
+
+/* -- Logs Tab -- */
+#logsHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#logsCritical {
+    color: #d20f39;
+    font-weight: bold;
+}
+#logsWarning {
+    color: #df8e1d;
+}
+#logsErrors {
+    color: #d20f39;
+}
+
+/* -- Notification Toast -- */
+#toastIcon {
+    font-size: 18px;
+}
+#toastTitle {
+    font-weight: bold;
+    font-size: 13px;
+    color: #4c4f69;
+}
+#toastMessage {
+    font-size: 11px;
+    color: #6c6f85;
+}
+#toastCloseBtn {
+    border: none;
+    color: #9ca0b0;
+    font-size: 14px;
+}
+#toastCloseBtn:hover {
+    color: #d20f39;
+}
+
+/* -- Performance Tab -- */
+#perfHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#perfWorkload {
+    font-size: 16px;
+    font-weight: bold;
+}
+#perfRecDetails {
+    color: #6c6f85;
+}
+
+/* -- Snapshot Tab -- */
+#snapHeader {
+    font-size: 18px;
+    font-weight: bold;
+    color: #8839ef;
+}
+#snapBackendAvail {
+    color: #40a02b;
+}
+#snapBackendMissing {
+    color: #d20f39;
+}
+
+/* -- Virtualization Tab -- */
+#virtBanner {
+    font-size: 12px;
+    padding: 6px;
+    background: #e6e9ef;
+    border-radius: 4px;
+    color: #4c4f69;
+}
+
+/* -- Main Window -- */
+#mainWinSidebarSearch {
+    margin: 5px 10px;
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+#mainWinNotifBell {
+    border: none;
+    font-size: 20px;
+    padding: 5px;
+}
+#mainWinNotifBell:hover {
+    background-color: #ccd0da;
+    border-radius: 6px;
+}
+#mainWinNotifBadge {
+    background-color: #d20f39;
+    color: #eff1f5;
+    border-radius: 8px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* -- Quick Actions -- */
+#quickActList {
+    font-size: 13px;
+}
+#quickActList::item {
+    padding: 6px 10px;
+}
+#quickActStatus {
+    color: #9ca0b0;
+    font-size: 11px;
+}

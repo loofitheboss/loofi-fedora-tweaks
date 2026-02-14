@@ -19,7 +19,7 @@ import shutil
 
 from utils.command_runner import CommandRunner
 from utils.commands import PrivilegedCommand
-from utils.system import SystemManager
+from services.system import SystemManager
 
 
 class DependencyDoctor(QDialog):

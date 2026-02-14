@@ -1,0 +1,52 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git *": "allow",
+      "npm *": "allow",
+      "python -m pytest *": "allow",
+      "python -m flake8 *": "allow",
+      "python -m mypy *": "allow",
+      "PYTHONPATH=* python -m pytest *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "wc *": "allow",
+      "find *": "allow",
+      "diff *": "allow",
+      "flake8 *": "allow",
+      "rm *": "deny",
+      "rm -rf *": "deny",
+      "sudo *": "deny",
+      "pkexec *": "deny",
+      "curl * | bash": "deny",
+      "bash install.sh": "deny",
+      "dnf *": "deny",
+      "rpm-ostree *": "deny",
+      "systemctl *": "deny",
+      "chmod *": "deny",
+      "chown *": "deny"
+    },
+    "edit": {
+      "*": "ask",
+      "loofi-fedora-tweaks/utils/*.py": "allow",
+      "loofi-fedora-tweaks/ui/*.py": "allow",
+      "loofi-fedora-tweaks/cli/*.py": "allow",
+      "loofi-fedora-tweaks/core/**/*.py": "allow",
+      "loofi-fedora-tweaks/config/*.py": "allow",
+      "tests/*.py": "allow",
+      "tests/**/*.py": "allow",
+      ".github/agent-memory/**/*.md": "allow",
+      "version.py": "ask",
+      "loofi-fedora-tweaks.spec": "ask",
+      "pyproject.toml": "ask",
+      "install.sh": "deny",
+      "uninstall.sh": "deny",
+      ".env*": "deny"
+    }
+  }
+}

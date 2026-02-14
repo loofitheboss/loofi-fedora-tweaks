@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 from utils.monitor import SystemMonitor
-from utils.disk import DiskManager
+from services.hardware import DiskManager
 
 
 @dataclass

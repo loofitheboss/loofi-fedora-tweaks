@@ -25,9 +25,8 @@ from services.system.processes import (
     ProcessInfo,
 )
 
-# Backward compatibility shim
-# process.py is a deprecated shim, re-export from its location
-from services.system.process import CommandRunner
+# Backward compatibility: CommandRunner lives in utils.command_runner
+from utils.command_runner import CommandRunner
 
 __all__ = [
     # System

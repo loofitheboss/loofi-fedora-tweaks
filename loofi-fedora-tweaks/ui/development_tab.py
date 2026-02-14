@@ -130,11 +130,11 @@ class DevelopmentTab(BaseTab):
         # Header with status
         header_layout = QHBoxLayout()
         header = QLabel(self.tr("Container Management"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         header_layout.addWidget(header)
 
         self.container_status_label = QLabel()
-        self.container_status_label.setStyleSheet("color: #9da7bf;")
+        self.container_status_label.setObjectName("devContainerStatus")
         header_layout.addWidget(self.container_status_label)
         header_layout.addStretch()
         ct_layout.addLayout(header_layout)
@@ -262,7 +262,7 @@ class DevelopmentTab(BaseTab):
             "Containers share your home directory by default. "
             "Double-click a container to enter it."
         ))
-        help_label.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        help_label.setObjectName("devContainerHelp")
         help_label.setWordWrap(True)
         layout.addWidget(help_label)
 
@@ -470,7 +470,7 @@ class DevelopmentTab(BaseTab):
 
         # Header
         header = QLabel(self.tr("Developer Tools"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         dev_layout.addWidget(header)
 
         # Language Version Managers
@@ -493,7 +493,7 @@ class DevelopmentTab(BaseTab):
             "Install version managers to run multiple language versions without affecting system packages."
         ))
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #9da7bf;")
+        info_label.setObjectName("devLangInfo")
         layout.addWidget(info_label)
 
         # PyEnv
@@ -552,7 +552,7 @@ class DevelopmentTab(BaseTab):
             "Install recommended extensions for different development profiles."
         ))
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #9da7bf;")
+        info_label.setObjectName("devVscodeInfo")
         layout.addWidget(info_label)
 
         # Profile selector

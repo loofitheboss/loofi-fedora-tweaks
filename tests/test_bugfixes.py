@@ -14,8 +14,8 @@ import shutil
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from utils.presets import PresetManager
-from utils.processes import ProcessManager
-from utils.disk import DiskManager
+from services.system import ProcessManager
+from services.hardware import DiskManager
 
 
 class TestPresetPathTraversal(unittest.TestCase):

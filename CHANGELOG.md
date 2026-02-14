@@ -4,6 +4,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [39.0.0] - 2025-07-23 "Prism"
+
+### Changed
+
+- **Deprecated import cleanup**: All production code migrated from `utils.system`, `utils.hardware`, `utils.bluetooth`, `utils.disk`, `utils.temperature`, `utils.processes`, `utils.services`, `utils.hardware_profiles` shims to canonical `services.system` and `services.hardware` imports
+- **Test @patch targets**: All 127+ `@patch('utils.*')` decorators in test files updated to target `services.*` module paths
+- **setStyleSheet elimination**: 175+ inline `setStyleSheet(...)` calls replaced with `setObjectName(...)` + QSS rules across 31 UI files
+- **Dynamic styling**: Conditional styles now use Qt property selectors (`setProperty` + `unpolish`/`polish`) instead of runtime `setStyleSheet` calls
+- **Version tests**: v38-specific version assertions updated to be forward-compatible
+
+### Removed
+
+- **9 deprecated shim files** deleted: `utils/system.py`, `utils/hardware.py`, `utils/bluetooth.py`, `utils/disk.py`, `utils/temperature.py`, `utils/processes.py`, `utils/services.py`, `utils/hardware_profiles.py`, `services/system/process.py`
+
+### Added
+
+- **~600 new QSS rules** in `modern.qss` (dark theme) for migrated objectNames
+- **~600 new QSS rules** in `light.qss` (Catppuccin Latte) for migrated objectNames
+- **test_v39_prism.py**: 18 tests verifying shim removal, import migration, setStyleSheet elimination, QSS migration
+
+### Fixed
+
+- **services/system/__init__.py**: CommandRunner import bypasses deprecated `services.system.process` shim — no more cascade DeprecationWarning
+- **pyproject.toml**: Version synced to 39.0.0
+- **httpx deprecation**: Fixed `data=` → `content=` in test_api_server.py
+
 ## [38.0.0] - 2025-07-22 "Clarity"
 
 ### Changed

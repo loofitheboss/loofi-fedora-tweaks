@@ -372,7 +372,7 @@ class TestAgentArbitrator:
 
     def test_cpu_request_blocked_on_thermal(self):
         from utils.arbitrator import Arbitrator, AgentRequest, Priority
-        from utils.temperature import TemperatureSensor
+        from services.hardware import TemperatureSensor
 
         hot_cpu = [
             TemperatureSensor(
@@ -396,7 +396,7 @@ class TestAgentArbitrator:
 
     def test_cpu_request_allows_critical_on_thermal(self):
         from utils.arbitrator import Arbitrator, AgentRequest, Priority
-        from utils.temperature import TemperatureSensor
+        from services.hardware import TemperatureSensor
 
         hot_cpu = [
             TemperatureSensor(

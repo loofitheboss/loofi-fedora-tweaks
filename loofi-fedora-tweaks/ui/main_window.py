@@ -30,7 +30,7 @@ from utils.focus_mode import FocusMode
 from utils.history import HistoryManager
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
-from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
+from services.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
 from version import __version__
 
 from core.plugins import PluginInterface, PluginRegistry
@@ -126,9 +126,7 @@ class MainWindow(QMainWindow):
         # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
         search_height = int(self._line_height * 2 + 28)
         self.sidebar_search.setFixedHeight(search_height)
-        self.sidebar_search.setStyleSheet(
-            "QLineEdit { margin: 5px 10px; border-radius: 8px; padding: 4px 10px; }"
-        )
+        self.sidebar_search.setObjectName("mainWinSidebarSearch")
         self.sidebar_search.textChanged.connect(self._filter_sidebar)
         sidebar_layout.addWidget(self.sidebar_search)
 
@@ -745,18 +743,12 @@ class MainWindow(QMainWindow):
         # Bell button
         self.notif_bell = QToolButton()
         self.notif_bell.setText("\U0001f514")  # Bell emoji
-        self.notif_bell.setStyleSheet(
-            "QToolButton { border: none; font-size: 20px; padding: 5px; }"
-            "QToolButton:hover { background-color: #1c2030; border-radius: 6px; }"
-        )
+        self.notif_bell.setObjectName("mainWinNotifBell")
         self.notif_bell.clicked.connect(self._toggle_notification_panel)
 
         # Unread count badge (overlays bell button)
         self._notif_badge = QLabel("0")
-        self._notif_badge.setStyleSheet(
-            "background-color: #e8556d; color: #0b0e14; border-radius: 8px; "
-            "padding: 1px 6px; font-size: 10px; font-weight: bold;"
-        )
+        self._notif_badge.setObjectName("mainWinNotifBadge")
         self._notif_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._notif_badge.setFixedHeight(16)
         self._notif_badge.setVisible(False)
@@ -853,7 +845,7 @@ class MainWindow(QMainWindow):
 
         try:
             # Storage: check disk space
-            from utils.disk import DiskManager
+            from services.hardware import DiskManager
             usage = DiskManager.get_disk_usage("/")
             if usage and hasattr(usage, 'percent_used'):
                 if usage.percent_used >= 90:

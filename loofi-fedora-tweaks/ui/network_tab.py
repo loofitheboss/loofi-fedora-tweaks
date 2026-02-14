@@ -58,7 +58,7 @@ class NetworkTab(BaseTab):
         self.setLayout(layout)
 
         header = QLabel(self.tr("Network"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Sub-tab widget
@@ -187,7 +187,7 @@ class NetworkTab(BaseTab):
 
         # Current DNS display
         self.lbl_current_dns = QLabel(self.tr("Current DNS: detecting..."))
-        self.lbl_current_dns.setStyleSheet("font-weight: bold;")
+        self.lbl_current_dns.setObjectName("netCurrentDns")
         dns_layout.addWidget(self.lbl_current_dns)
 
         self.dns_combo = QComboBox()
@@ -239,7 +239,7 @@ class NetworkTab(BaseTab):
         mac_layout.addWidget(mac_desc)
 
         self.lbl_mac_status = QLabel(self.tr("MAC Randomization: detecting..."))
-        self.lbl_mac_status.setStyleSheet("font-weight: bold;")
+        self.lbl_mac_status.setObjectName("netMacStatus")
         mac_layout.addWidget(self.lbl_mac_status)
 
         mac_btn_row = QHBoxLayout()
@@ -268,7 +268,7 @@ class NetworkTab(BaseTab):
         hostname_layout.addWidget(hostname_desc)
 
         self.lbl_hostname_status = QLabel(self.tr("Hostname broadcast: detecting..."))
-        self.lbl_hostname_status.setStyleSheet("font-weight: bold;")
+        self.lbl_hostname_status.setObjectName("netHostnameStatus")
         hostname_layout.addWidget(self.lbl_hostname_status)
 
         hostname_btn_row = QHBoxLayout()
@@ -311,7 +311,7 @@ class NetworkTab(BaseTab):
         self.lbl_recv_rate = QLabel(self.tr("Download Rate: —"))
         for lbl in (self.lbl_total_sent, self.lbl_total_recv,
                     self.lbl_send_rate, self.lbl_recv_rate):
-            lbl.setStyleSheet("font-size: 13px;")
+            lbl.setObjectName("netBwLabel")
             bw_layout.addWidget(lbl)
         container.addWidget(bw_group)
 

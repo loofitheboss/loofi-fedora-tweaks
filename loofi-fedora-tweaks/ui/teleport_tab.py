@@ -63,9 +63,7 @@ class TeleportTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("State Teleport"))
-        header.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #a277ff;"
-        )
+        header.setObjectName("header")
         layout.addWidget(header)
 
         description = QLabel(self.tr(
@@ -74,7 +72,7 @@ class TeleportTab(QWidget, PluginInterface):
             "terminal state, and environment."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        description.setObjectName("teleportDesc")
         layout.addWidget(description)
 
         # Capture section
@@ -136,9 +134,7 @@ class TeleportTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
         capture_btn = QPushButton(self.tr("Capture State"))
         capture_btn.setAccessibleName(self.tr("Capture State"))
-        capture_btn.setStyleSheet(
-            "font-weight: bold; padding: 8px 16px;"
-        )
+        capture_btn.setObjectName("teleportCaptureBtn")
         capture_btn.clicked.connect(self._capture_state)
         btn_layout.addWidget(capture_btn)
         btn_layout.addStretch()
@@ -147,7 +143,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Capture summary label
         self.capture_summary = QLabel(self.tr("No state captured yet."))
         self.capture_summary.setWordWrap(True)
-        self.capture_summary.setStyleSheet("color: #9da7bf;")
+        self.capture_summary.setObjectName("teleportCaptureSummary")
         layout.addWidget(self.capture_summary)
 
         return group
@@ -222,7 +218,7 @@ class TeleportTab(QWidget, PluginInterface):
             self.tr("No incoming teleport. Import a package file to begin.")
         )
         self.restore_preview.setWordWrap(True)
-        self.restore_preview.setStyleSheet("color: #9da7bf;")
+        self.restore_preview.setObjectName("teleportRestorePreview")
         layout.addWidget(self.restore_preview)
 
         # Apply button
@@ -230,9 +226,7 @@ class TeleportTab(QWidget, PluginInterface):
         self.apply_btn = QPushButton(self.tr("Apply Teleport"))
         self.apply_btn.setAccessibleName(self.tr("Apply Teleport"))
         self.apply_btn.setEnabled(False)
-        self.apply_btn.setStyleSheet(
-            "font-weight: bold; padding: 8px 16px;"
-        )
+        self.apply_btn.setObjectName("teleportApplyBtn")
         self.apply_btn.clicked.connect(self._apply_teleport)
         apply_layout.addWidget(self.apply_btn)
         apply_layout.addStretch()

@@ -65,7 +65,7 @@ class NotificationToast(QWidget):
         # Accent bar is painted in paintEvent
 
         self._icon_label = QLabel("🔔")
-        self._icon_label.setStyleSheet("font-size: 18px;")
+        self._icon_label.setObjectName("toastIcon")
         self._icon_label.setFixedWidth(28)
         layout.addWidget(self._icon_label)
 
@@ -75,13 +75,11 @@ class NotificationToast(QWidget):
         text_col.setSpacing(2)
 
         self._title_label = QLabel("")
-        self._title_label.setStyleSheet(
-            "font-weight: bold; font-size: 13px; color: #e6edf3;"
-        )
+        self._title_label.setObjectName("toastTitle")
         text_col.addWidget(self._title_label)
 
         self._message_label = QLabel("")
-        self._message_label.setStyleSheet("font-size: 11px; color: #9da7bf;")
+        self._message_label.setObjectName("toastMessage")
         self._message_label.setWordWrap(True)
         text_col.addWidget(self._message_label)
 
@@ -90,10 +88,7 @@ class NotificationToast(QWidget):
         # Close button
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(24, 24)
-        close_btn.setStyleSheet(
-            "QPushButton { border: none; color: #5c6578; font-size: 14px; }"
-            "QPushButton:hover { color: #e8556d; }"
-        )
+        close_btn.setObjectName("toastCloseBtn")
         close_btn.clicked.connect(self._slide_out)
         layout.addWidget(close_btn, 0, Qt.AlignmentFlag.AlignTop)
 

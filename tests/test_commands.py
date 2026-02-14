@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(
 class TestPrivilegedCommandBuilders(unittest.TestCase):
     """Test command tuple builder methods."""
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
     def test_dnf_install(self, mock_pm):
         from utils.commands import PrivilegedCommand
         binary, args, desc = PrivilegedCommand.dnf("install", "vim")
@@ -29,7 +29,7 @@ class TestPrivilegedCommandBuilders(unittest.TestCase):
         self.assertIn("-y", args)
         self.assertIn("vim", args)
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="rpm-ostree")
+    @patch("services.system.SystemManager.get_package_manager", return_value="rpm-ostree")
     def test_dnf_atomic_install(self, mock_pm):
         from utils.commands import PrivilegedCommand
         binary, args, desc = PrivilegedCommand.dnf("install", "vim")
@@ -37,7 +37,7 @@ class TestPrivilegedCommandBuilders(unittest.TestCase):
         self.assertIn("rpm-ostree", args)
         self.assertIn("install", args)
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
     def test_dnf_clean(self, mock_pm):
         from utils.commands import PrivilegedCommand
         binary, args, desc = PrivilegedCommand.dnf("clean")
@@ -106,7 +106,7 @@ class TestPrivilegedCommandBuilders(unittest.TestCase):
 class TestParameterValidation(unittest.TestCase):
     """Test @validated_action decorator on PrivilegedCommand methods."""
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("utils.audit.AuditLogger.log_validation_failure")
     def test_dnf_rejects_invalid_action(self, mock_log_fail, mock_pm):
         from utils.commands import PrivilegedCommand
@@ -115,7 +115,7 @@ class TestParameterValidation(unittest.TestCase):
             PrivilegedCommand.dnf("INVALID_ACTION", "vim")
         self.assertIn("action", str(ctx.exception).lower())
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("utils.audit.AuditLogger.log_validation_failure")
     def test_dnf_rejects_empty_action(self, mock_log_fail, mock_pm):
         from utils.commands import PrivilegedCommand
@@ -165,7 +165,7 @@ class TestParameterValidation(unittest.TestCase):
         self.assertIn(
             "service", call_kwargs[1]["param"] if call_kwargs[1] else call_kwargs[0][1])
 
-    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
     def test_valid_dnf_action_passes(self, mock_pm):
         from utils.commands import PrivilegedCommand
         binary, args, desc = PrivilegedCommand.dnf("install", "vim")

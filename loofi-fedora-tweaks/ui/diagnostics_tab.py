@@ -17,7 +17,7 @@ from PyQt6.QtCore import Qt
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
-from utils.services import ServiceManager, UnitScope, UnitState
+from services.system import ServiceManager, UnitScope, UnitState
 from utils.boot_analyzer import BootAnalyzer
 from utils.journal import JournalManager
 from core.plugins.metadata import PluginMetadata
@@ -54,10 +54,7 @@ class _WatchtowerSubTab(QWidget):
         header = QLabel(
             self.tr("\U0001f52d Watchtower - System Diagnostics")
         )
-        header.setStyleSheet(
-            "font-size: 18px; font-weight: bold; "
-            "color: #a277ff; padding: 10px;"
-        )
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Internal sub-tabs for different diagnostic areas
@@ -222,7 +219,7 @@ class _WatchtowerSubTab(QWidget):
 
         self.journal_output = QTextEdit()
         self.journal_output.setReadOnly(True)
-        self.journal_output.setStyleSheet("font-family: monospace;")
+        self.journal_output.setObjectName("diagJournalOutput")
         journal_layout.addWidget(self.journal_output)
 
         layout.addWidget(journal_group)
@@ -239,9 +236,7 @@ class _WatchtowerSubTab(QWidget):
 
         panic_btn = QPushButton(self.tr("\U0001f198 Export Panic Log"))
         panic_btn.setAccessibleName(self.tr("Export Panic Log"))
-        panic_btn.setStyleSheet(
-            "background-color: #dc3545; color: white; font-weight: bold;"
-        )
+        panic_btn.setObjectName("diagPanicBtn")
         panic_btn.clicked.connect(self._export_panic_log)
         btn_layout.addWidget(panic_btn)
 
@@ -536,9 +531,7 @@ class _BootSubTab(QWidget):
         current_layout.addWidget(QLabel(self.tr("Current cmdline:")))
         self.current_params_label = QLabel()
         self.current_params_label.setWordWrap(True)
-        self.current_params_label.setStyleSheet(
-            "color: #9da7bf; font-size: 11px;"
-        )
+        self.current_params_label.setObjectName("diagKernelParams")
         current_layout.addWidget(self.current_params_label, 1)
         layout.addLayout(current_layout)
 
@@ -703,7 +696,7 @@ class _BootSubTab(QWidget):
             "modules (NVIDIA, VirtualBox) when Secure Boot is enabled."
         ))
         help_label.setWordWrap(True)
-        help_label.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        help_label.setObjectName("diagSecureBootHelp")
         layout.addWidget(help_label)
 
         return group

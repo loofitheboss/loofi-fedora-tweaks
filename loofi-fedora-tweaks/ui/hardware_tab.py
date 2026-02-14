@@ -12,9 +12,9 @@ from PyQt6.QtWidgets import (
     QComboBox, QGroupBox, QSlider, QMessageBox, QGridLayout, QTextEdit
 )
 from PyQt6.QtCore import Qt, QTimer
-from utils.hardware import HardwareManager
+from services.hardware import HardwareManager
 from utils.command_runner import CommandRunner
-from utils.bluetooth import BluetoothManager
+from services.hardware import BluetoothManager
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 from ui.tooltips import HW_CPU_GOVERNOR, HW_FAN_MODE
@@ -152,18 +152,7 @@ class HardwareTab(QWidget, PluginInterface):
     def create_card(self, title: str, icon: str) -> QGroupBox:
         """Create a styled card group box."""
         card = QGroupBox(f"{icon} {title}")
-        card.setStyleSheet("""
-            QGroupBox {
-                background-color: #1c2030;
-                border-radius: 12px;
-                padding: 20px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QGroupBox::title {
-                padding: 10px;
-            }
-        """)
+        card.setObjectName("hwCard")
         return card
 
     # ==================== CPU GOVERNOR ====================
@@ -175,7 +164,7 @@ class HardwareTab(QWidget, PluginInterface):
         # Current frequency display
         freq = HardwareManager.get_cpu_frequency()
         self.lbl_cpu_freq = QLabel(self.tr("Current: {} MHz / {} MHz").format(freq['current'], freq['max']))
-        self.lbl_cpu_freq.setStyleSheet("color: #9da7bf;")
+        self.lbl_cpu_freq.setObjectName("hwCpuFreq")
         layout.addWidget(self.lbl_cpu_freq)
 
         # Governor dropdown
@@ -199,7 +188,7 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Description
         desc = QLabel(self.tr("Controls CPU frequency scaling policy"))
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("hwCpuDesc")
         layout.addWidget(desc)
 
         return card
@@ -230,33 +219,21 @@ class HardwareTab(QWidget, PluginInterface):
         # Current profile
         current = HardwareManager.get_power_profile()
         self.lbl_power_profile = QLabel(self.tr("Current: {}").format(current.title()))
-        self.lbl_power_profile.setStyleSheet("color: #9da7bf;")
+        self.lbl_power_profile.setObjectName("hwPowerStatus")
         layout.addWidget(self.lbl_power_profile)
 
         # Profile buttons
         btn_layout = QHBoxLayout()
 
         profiles = [
-            ("🔋 Saver", "power-saver", "#3dd68c"),
-            ("⚖️ Balanced", "balanced", "#39c5cf"),
-            ("⚡ Performance", "performance", "#e8556d")
+            ("🔋 Saver", "power-saver", "hwPowerSaver"),
+            ("⚖️ Balanced", "balanced", "hwPowerBalanced"),
+            ("⚡ Performance", "performance", "hwPowerPerformance")
         ]
 
-        for label, profile, color in profiles:
+        for label, profile, obj_name in profiles:
             btn = QPushButton(label)
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {color}20;
-                    border: 1px solid {color};
-                    color: {color};
-                    padding: 8px 12px;
-                    border-radius: 6px;
-                }}
-                QPushButton:hover {{
-                    background-color: {color};
-                    color: #0b0e14;
-                }}
-            """)
+            btn.setObjectName(obj_name)
             btn.clicked.connect(lambda checked, p=profile: self.set_power_profile(p))
             btn.setAccessibleName(self.tr("{} profile").format(profile))
             btn_layout.addWidget(btn)
@@ -294,33 +271,21 @@ class HardwareTab(QWidget, PluginInterface):
         # Current mode
         current = HardwareManager.get_gpu_mode()
         self.lbl_gpu_mode = QLabel(self.tr("Current: {}").format(current.title()))
-        self.lbl_gpu_mode.setStyleSheet("color: #9da7bf;")
+        self.lbl_gpu_mode.setObjectName("hwGpuStatus")
         layout.addWidget(self.lbl_gpu_mode)
 
         # Mode buttons
         btn_layout = QHBoxLayout()
 
         modes = [
-            ("☀️ Integrated", "integrated", "#3dd68c"),
-            ("🔀 Hybrid", "hybrid", "#39c5cf"),
-            ("🚀 NVIDIA", "nvidia", "#e8556d")
+            ("☀️ Integrated", "integrated", "hwGpuIntegrated"),
+            ("🔀 Hybrid", "hybrid", "hwGpuHybrid"),
+            ("🚀 NVIDIA", "nvidia", "hwGpuNvidia")
         ]
 
-        for label, mode, color in modes:
+        for label, mode, obj_name in modes:
             btn = QPushButton(label)
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {color}20;
-                    border: 1px solid {color};
-                    color: {color};
-                    padding: 8px 12px;
-                    border-radius: 6px;
-                }}
-                QPushButton:hover {{
-                    background-color: {color};
-                    color: #0b0e14;
-                }}
-            """)
+            btn.setObjectName(obj_name)
             btn.clicked.connect(lambda checked, m=mode: self.set_gpu_mode(m))
             btn.setAccessibleName(self.tr("{} GPU mode").format(mode))
             btn_layout.addWidget(btn)
@@ -329,7 +294,7 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Warning
         warn = QLabel(self.tr("⚠️ Requires logout/reboot"))
-        warn.setStyleSheet("color: #e8b84d; font-size: 11px;")
+        warn.setObjectName("hwGpuWarning")
         layout.addWidget(warn)
 
         return card
@@ -375,7 +340,7 @@ class HardwareTab(QWidget, PluginInterface):
         # Current status
         status = HardwareManager.get_fan_status()
         self.lbl_fan_status = QLabel(self.tr("Speed: {}% | Temp: {}°C").format(int(status['speed']), int(status['temperature'])))
-        self.lbl_fan_status.setStyleSheet("color: #9da7bf;")
+        self.lbl_fan_status.setObjectName("hwFanStatus")
         layout.addWidget(self.lbl_fan_status)
 
         # Fan speed slider
@@ -439,7 +404,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Restart Pipewire audio services if sound is not working"))
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("hwAudioDesc")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -464,7 +429,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Limit battery charge to extend battery lifespan"))
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("hwBatteryDesc")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -509,7 +474,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Enroll your fingerprint for authentication"))
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("hwFingerprintDesc")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -535,12 +500,12 @@ class HardwareTab(QWidget, PluginInterface):
 
         # Adapter status
         self.lbl_bt_status = QLabel(self.tr("Bluetooth: detecting..."))
-        self.lbl_bt_status.setStyleSheet("color: #9da7bf;")
+        self.lbl_bt_status.setObjectName("hwBtStatus")
         layout.addWidget(self.lbl_bt_status)
 
         # Device list (compact)
         self.lbl_bt_devices = QLabel(self.tr("Paired devices: —"))
-        self.lbl_bt_devices.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        self.lbl_bt_devices.setObjectName("hwBtDevices")
         self.lbl_bt_devices.setWordWrap(True)
         layout.addWidget(self.lbl_bt_devices)
 
@@ -626,13 +591,13 @@ class HardwareTab(QWidget, PluginInterface):
         layout = QVBoxLayout(card)
 
         desc = QLabel(self.tr("Manage GRUB2 bootloader, kernels, and boot parameters."))
-        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setObjectName("hwBootDesc")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
         # Current kernel info
         self.lbl_boot_info = QLabel(self.tr("Current kernel: loading..."))
-        self.lbl_boot_info.setStyleSheet("color: #9da7bf;")
+        self.lbl_boot_info.setObjectName("hwBootInfo")
         layout.addWidget(self.lbl_boot_info)
 
         btn_layout = QHBoxLayout()

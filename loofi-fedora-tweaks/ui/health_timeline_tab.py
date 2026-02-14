@@ -60,9 +60,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("Health Timeline"))
-        header.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #a277ff;"
-        )
+        header.setObjectName("healthTlHeader")
         layout.addWidget(header)
 
         description = QLabel(self.tr(
@@ -71,7 +69,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
             "export data for analysis."
         ))
         description.setWordWrap(True)
-        description.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        description.setObjectName("healthTlDesc")
         layout.addWidget(description)
 
         # Summary section
@@ -79,10 +77,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         summary_layout = QVBoxLayout(summary_group)
         self.summary_label = QLabel(self.tr("Loading..."))
         self.summary_label.setWordWrap(True)
-        self.summary_label.setStyleSheet(
-            "font-size: 12px; padding: 8px; background: #0b0e14; "
-            "border-radius: 4px; color: #e6edf3;"
-        )
+        self.summary_label.setObjectName("healthTlSummary")
         summary_layout.addWidget(self.summary_label)
         layout.addWidget(summary_group)
 
@@ -162,10 +157,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         anomaly_layout = QVBoxLayout(anomaly_group)
         self.anomaly_label = QLabel(self.tr("No anomalies detected."))
         self.anomaly_label.setWordWrap(True)
-        self.anomaly_label.setStyleSheet(
-            "font-size: 12px; padding: 8px; background: #0b0e14; "
-            "border-radius: 4px; color: #e6edf3;"
-        )
+        self.anomaly_label.setObjectName("healthTlAnomaly")
         anomaly_layout.addWidget(self.anomaly_label)
 
         detect_btn = QPushButton(self.tr("Detect Anomalies"))

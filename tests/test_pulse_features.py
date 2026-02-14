@@ -14,8 +14,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-t
 from utils.performance import (
     PerformanceCollector, CpuSample, MemorySample, DiskIOSample, NetworkSample,
 )
-from utils.processes import ProcessManager, ProcessInfo
-from utils.temperature import TemperatureManager, TemperatureSensor
+from services.system import ProcessManager, ProcessInfo
+from services.hardware import TemperatureManager, TemperatureSensor
 from utils.network_monitor import NetworkMonitor, InterfaceStats, ConnectionInfo
 
 
@@ -133,7 +133,7 @@ class TestProcessManager(unittest.TestCase):
         ProcessManager._prev_snapshot = {}
         ProcessManager._prev_snapshot_time = 0.0
 
-    @patch('utils.processes.time.monotonic', return_value=1000.0)
+    @patch('services.system.processes.time.monotonic', return_value=1000.0)
     @patch('os.listdir', return_value=["1", "42", "self", "cpuinfo"])
     @patch('os.sysconf', return_value=4096)
     @patch('os.cpu_count', return_value=4)
@@ -191,7 +191,7 @@ class TestProcessManager(unittest.TestCase):
         self.assertIn("Signal 15", msg)
         self.assertIn("1234", msg)
 
-    @patch('utils.processes.subprocess.run')
+    @patch('services.system.processes.subprocess.run')
     @patch('os.kill', side_effect=PermissionError("Operation not permitted"))
     def test_kill_process_permission_error(self, mock_kill, mock_run):
         """Mock os.kill raising PermissionError, verify pkexec fallback."""
@@ -204,7 +204,7 @@ class TestProcessManager(unittest.TestCase):
             capture_output=True, text=True, timeout=30,
         )
 
-    @patch('utils.processes.subprocess.run')
+    @patch('services.system.processes.subprocess.run')
     def test_renice_process(self, mock_run):
         """Mock subprocess.run for renice command."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -367,7 +367,7 @@ class TestTemperatureMonitor(unittest.TestCase):
         self.assertEqual(level, "critical")
         self.assertIn("critical", msg.lower())
 
-    @patch('utils.temperature.glob.glob',
+    @patch('services.hardware.temperature.glob.glob',
            side_effect=PermissionError("Permission denied"))
     def test_handles_permission_error(self, mock_glob):
         """Verify graceful handling when hwmon cannot be read."""

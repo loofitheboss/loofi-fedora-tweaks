@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from utils.agents import AgentRegistry
 from utils.monitor import SystemMonitor
-from utils.system import SystemManager
+from services.system import SystemManager
 from version import __version__, __version_codename__
 
 router = APIRouter()

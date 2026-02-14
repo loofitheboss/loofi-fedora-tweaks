@@ -24,9 +24,7 @@ class NotificationCard(QFrame):
         super().__init__(parent)
         self.notification = notification
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setStyleSheet(
-            "QFrame { border: 1px solid #2d3348; border-radius: 8px; padding: 8px; margin: 2px; }"
-        )
+        self.setObjectName("notifCard")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 6, 8, 6)
@@ -38,8 +36,7 @@ class NotificationCard(QFrame):
 
         dismiss_btn = QPushButton("x")
         dismiss_btn.setFixedSize(20, 20)
-        dismiss_btn.setStyleSheet(
-            "QPushButton { border: none; color: #9da7bf; } QPushButton:hover { color: #e8556d; }")
+        dismiss_btn.setObjectName("notifDismissBtn")
         if on_dismiss:
             dismiss_btn.clicked.connect(lambda: on_dismiss(notification.id))
         header.addWidget(dismiss_btn)
@@ -48,7 +45,7 @@ class NotificationCard(QFrame):
         # Message
         msg = QLabel(notification.message)
         msg.setWordWrap(True)
-        msg.setStyleSheet("color: #9da7bf;")
+        msg.setObjectName("notifMessage")
         layout.addWidget(msg)
 
         # Timestamp
@@ -63,7 +60,7 @@ class NotificationCard(QFrame):
             time_str = f"{elapsed // 86400}d ago"
 
         ts = QLabel(time_str)
-        ts.setStyleSheet("color: #5c6578; font-size: 11px;")
+        ts.setObjectName("notifTimestamp")
         layout.addWidget(ts)
 
 
@@ -80,14 +77,6 @@ class NotificationPanel(QWidget):
         super().__init__(parent)
         self.setFixedWidth(self.PANEL_WIDTH)
         self.setObjectName("notificationPanel")
-        self.setStyleSheet(
-            "#notificationPanel { "
-            "  background-color: #141722; "
-            "  border: 1px solid #2d3348; "
-            "  border-radius: 10px; "
-            "  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); "
-            "}"
-        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -95,20 +84,16 @@ class NotificationPanel(QWidget):
         # Header
         header = QHBoxLayout()
         title = QLabel(self.tr("<b>Notifications</b>"))
-        title.setStyleSheet("font-size: 16px;")
+        title.setObjectName("notifTitle")
         header.addWidget(title)
 
         self.badge = QLabel("0")
-        self.badge.setStyleSheet(
-            "background-color: #e8556d; color: #0b0e14; border-radius: 10px; "
-            "padding: 2px 8px; font-size: 12px; font-weight: bold;"
-        )
+        self.badge.setObjectName("notifBadge")
         header.addWidget(self.badge)
         header.addStretch()
 
         mark_read_btn = QPushButton(self.tr("Mark all read"))
-        mark_read_btn.setStyleSheet(
-            "QPushButton { border: none; color: #39c5cf; } QPushButton:hover { color: #4dd9e3; }")
+        mark_read_btn.setObjectName("notifMarkReadBtn")
         mark_read_btn.clicked.connect(self._mark_all_read)
         header.addWidget(mark_read_btn)
 
@@ -119,8 +104,7 @@ class NotificationPanel(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll.setStyleSheet(
-            "QScrollArea { border: none; background: transparent; }")
+        scroll.setObjectName("notifScrollArea")
 
         self.cards_widget = QWidget()
         self.cards_layout = QVBoxLayout(self.cards_widget)
@@ -151,7 +135,7 @@ class NotificationPanel(QWidget):
         if not notifications:
             empty = QLabel(self.tr("No notifications"))
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            empty.setStyleSheet("color: #5c6578; padding: 40px;")
+            empty.setObjectName("notifEmpty")
             self.cards_layout.addWidget(empty)
         else:
             for notif in notifications:

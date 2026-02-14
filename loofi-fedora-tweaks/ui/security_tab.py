@@ -86,8 +86,7 @@ class SecurityTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("🛡️ Security Center"))
-        # Keep header color theme-driven to avoid hardcoded red accents.
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("header")
         layout.addWidget(header)
 
         # Security Score
@@ -140,16 +139,19 @@ class SecurityTab(QWidget, PluginInterface):
 
         # Color based on score
         if score >= 90:
-            color = "#2ecc71"  # Green
+            score_level = "good"
         elif score >= 70:
-            color = "#f39c12"  # Orange
+            score_level = "ok"
         elif score >= 50:
-            color = "#e67e22"  # Dark orange
+            score_level = "warning"
         else:
-            color = "#e74c3c"  # Red
+            score_level = "bad"
 
         score_label = QLabel(f"{score}/100 - {rating}")
-        score_label.setStyleSheet(f"font-size: 24px; font-weight: bold; color: {color};")
+        score_label.setObjectName("secScoreLabel")
+        score_label.setProperty("scoreLevel", score_level)
+        score_label.style().unpolish(score_label)
+        score_label.style().polish(score_label)
         layout.addWidget(score_label)
 
         # Stats
@@ -165,12 +167,12 @@ class SecurityTab(QWidget, PluginInterface):
         # Recommendations
         if score_data["recommendations"]:
             rec_label = QLabel(self.tr("Recommendations:"))
-            rec_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+            rec_label.setObjectName("secRecLabel")
             layout.addWidget(rec_label)
 
             for rec in score_data["recommendations"][:3]:  # Limit to 3
                 rec_item = QLabel(f"  ⚠️ {rec}")
-                rec_item.setStyleSheet("color: #e89840; font-size: 11px;")
+                rec_item.setObjectName("secRecItem")
                 rec_item.setWordWrap(True)
                 layout.addWidget(rec_item)
 
@@ -243,7 +245,7 @@ class SecurityTab(QWidget, PluginInterface):
                 "USB Guard blocks unauthorized USB devices to prevent BadUSB attacks."
             ))
             info.setWordWrap(True)
-            info.setStyleSheet("color: #9da7bf; font-size: 11px;")
+            info.setObjectName("secUsbInfo")
             layout.addWidget(info)
         else:
             # Device list

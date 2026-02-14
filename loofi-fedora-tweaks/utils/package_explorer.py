@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from utils.system import SystemManager
+from services.system import SystemManager
 from utils.commands import PrivilegedCommand
 
 logger = logging.getLogger(__name__)

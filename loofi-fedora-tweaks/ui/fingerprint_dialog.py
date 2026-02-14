@@ -17,7 +17,7 @@ class FingerprintDialog(QDialog):
         # Instructions
         self.lbl_status = QLabel("Ready to enroll.\nClick 'Start Enrollment' to begin.")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_status.setStyleSheet("font-size: 14px; margin: 10px;")
+        self.lbl_status.setObjectName("fprintStatus")
         layout.addWidget(self.lbl_status)
 
         # Progress

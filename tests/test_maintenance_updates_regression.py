@@ -48,8 +48,8 @@ def _install_maintenance_import_stubs():
     command_runner_module = types.ModuleType("utils.command_runner")
     command_runner_module.CommandRunner = _Dummy
 
-    system_module = types.ModuleType("utils.system")
-    system_module.SystemManager = type(
+    services_system_module = types.ModuleType("services.system")
+    services_system_module.SystemManager = type(
         "SystemManager",
         (),
         {
@@ -75,7 +75,7 @@ def _install_maintenance_import_stubs():
     sys.modules["ui.base_tab"] = base_tab_module
     sys.modules["ui.tab_utils"] = tab_utils_module
     sys.modules["utils.command_runner"] = command_runner_module
-    sys.modules["utils.system"] = system_module
+    sys.modules["services.system"] = services_system_module
     sys.modules["core.plugins.metadata"] = metadata_module
 
 
@@ -90,7 +90,7 @@ class TestMaintenanceUpdatesRegression(unittest.TestCase):
             "ui.base_tab",
             "ui.tab_utils",
             "utils.command_runner",
-            "utils.system",
+            "services.system",
             "core.plugins.metadata",
         ):
             cls._module_backup[module_name] = sys.modules.get(module_name)

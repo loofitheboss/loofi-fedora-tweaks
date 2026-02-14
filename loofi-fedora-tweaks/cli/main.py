@@ -12,8 +12,8 @@ import subprocess
 import sys
 from typing import List, Optional
 
-from utils.bluetooth import BluetoothManager
-from utils.disk import DiskManager
+from services.hardware import BluetoothManager
+from services.hardware import DiskManager
 from utils.firewall_manager import FirewallManager
 from utils.focus_mode import FocusMode
 from utils.health_timeline import HealthTimeline
@@ -27,12 +27,12 @@ from utils.plugin_installer import PluginInstaller
 from utils.plugin_marketplace import PluginMarketplace
 from utils.ports import PortAuditor
 from utils.presets import PresetManager
-from utils.processes import ProcessManager
+from services.system import ProcessManager
 from utils.profiles import ProfileManager
 from utils.service_explorer import ServiceExplorer, ServiceScope
 from utils.storage import StorageManager
-from utils.system import SystemManager
-from utils.temperature import TemperatureManager
+from services.system import SystemManager
+from services.hardware import TemperatureManager
 from utils.update_checker import UpdateChecker
 from version import __version__, __version_codename__
 
@@ -556,7 +556,7 @@ def cmd_doctor(args):
 
 def cmd_hardware(args):
     """Show detected hardware profile."""
-    from utils.hardware_profiles import detect_hardware_profile
+    from services.hardware.hardware_profiles import detect_hardware_profile
 
     key, profile = detect_hardware_profile()
 

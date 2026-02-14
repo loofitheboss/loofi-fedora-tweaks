@@ -475,7 +475,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Status label
         self.lbl_community_status = QLabel(self.tr("Click 'Refresh' to load community presets."))
-        self.lbl_community_status.setStyleSheet("color: #9da7bf;")
+        self.lbl_community_status.setObjectName("communityStatusLabel")
         layout.addWidget(self.lbl_community_status)
 
         # Buttons
@@ -597,6 +597,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Token status
         self.lbl_sync_status = QLabel()
+        self.lbl_sync_status.setObjectName("communitySyncStatus")
         self.update_sync_status()
         cloud_layout.addWidget(self.lbl_sync_status)
 
@@ -648,17 +649,23 @@ class CommunityTab(QWidget, PluginInterface):
             self.lbl_sync_status.setText(
                 self.tr("Connected | Gist ID: {}...").format(gist_id[:8])
             )
-            self.lbl_sync_status.setStyleSheet("color: #3dd68c;")
+            self.lbl_sync_status.setProperty("state", "connected")
+            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+            self.lbl_sync_status.style().polish(self.lbl_sync_status)
         elif token:
             self.lbl_sync_status.setText(
                 self.tr("Token set, but no Gist yet. Push to create one.")
             )
-            self.lbl_sync_status.setStyleSheet("color: #e8b84d;")
+            self.lbl_sync_status.setProperty("state", "partial")
+            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+            self.lbl_sync_status.style().polish(self.lbl_sync_status)
         else:
             self.lbl_sync_status.setText(
                 self.tr("Not configured. Add your GitHub Personal Access Token.")
             )
-            self.lbl_sync_status.setStyleSheet("color: #e8556d;")
+            self.lbl_sync_status.setProperty("state", "error")
+            self.lbl_sync_status.style().unpolish(self.lbl_sync_status)
+            self.lbl_sync_status.style().polish(self.lbl_sync_status)
 
     def save_token(self):
         """Save GitHub Personal Access Token."""
@@ -775,7 +782,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("Community Preset Marketplace"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("communityMarketplaceHeader")
         layout.addWidget(header)
 
         # Search and Filter
@@ -818,7 +825,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.marketplace_plugin_list = self.marketplace_preset_list
 
         self.marketplace_status_label = QLabel(self.tr("Loading..."))
-        self.marketplace_status_label.setStyleSheet("color: #9da7bf;")
+        self.marketplace_status_label.setObjectName("communityMarketplaceStatus")
         list_layout.addWidget(self.marketplace_status_label)
 
         layout.addWidget(list_group)
@@ -828,11 +835,11 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout = QVBoxLayout(details_group)
 
         self.detail_name = QLabel("")
-        self.detail_name.setStyleSheet("font-size: 16px; font-weight: bold;")
+        self.detail_name.setObjectName("communityDetailName")
         details_layout.addWidget(self.detail_name)
 
         self.detail_author = QLabel("")
-        self.detail_author.setStyleSheet("color: #9da7bf;")
+        self.detail_author.setObjectName("communityDetailAuthor")
         details_layout.addWidget(self.detail_author)
 
         self.detail_desc = QLabel("")
@@ -843,11 +850,11 @@ class CommunityTab(QWidget, PluginInterface):
         details_layout.addWidget(self.detail_stats)
 
         self.detail_verification = QLabel("")
-        self.detail_verification.setStyleSheet("color: #9da7bf;")
+        self.detail_verification.setObjectName("communityDetailVerification")
         details_layout.addWidget(self.detail_verification)
 
         self.detail_rating_summary = QLabel("")
-        self.detail_rating_summary.setStyleSheet("color: #9da7bf;")
+        self.detail_rating_summary.setObjectName("communityDetailRating")
         details_layout.addWidget(self.detail_rating_summary)
 
         # Action buttons
@@ -877,7 +884,7 @@ class CommunityTab(QWidget, PluginInterface):
         reviews_layout = QVBoxLayout(reviews_group)
 
         self.reviews_summary_label = QLabel(self.tr("Select a preset to view ratings and reviews."))
-        self.reviews_summary_label.setStyleSheet("color: #9da7bf;")
+        self.reviews_summary_label.setObjectName("communityReviewsSummary")
         reviews_layout.addWidget(self.reviews_summary_label)
 
         self.reviews_text = QTextEdit()
@@ -916,7 +923,7 @@ class CommunityTab(QWidget, PluginInterface):
         review_actions_layout.addWidget(self.submit_review_btn)
 
         self.review_feedback_label = QLabel("")
-        self.review_feedback_label.setStyleSheet("color: #9da7bf;")
+        self.review_feedback_label.setObjectName("communityReviewFeedback")
         review_actions_layout.addWidget(self.review_feedback_label)
         review_actions_layout.addStretch()
         reviews_layout.addLayout(review_actions_layout)
@@ -935,7 +942,7 @@ class CommunityTab(QWidget, PluginInterface):
         analytics_layout.addWidget(self.analytics_opt_in_checkbox)
 
         self.analytics_status_label = QLabel("")
-        self.analytics_status_label.setStyleSheet("color: #9da7bf;")
+        self.analytics_status_label.setObjectName("communityAnalyticsStatus")
         analytics_layout.addWidget(self.analytics_status_label)
         self._update_analytics_status_label(self.plugin_analytics.is_enabled())
 
@@ -1077,8 +1084,10 @@ class CommunityTab(QWidget, PluginInterface):
 
     def _set_review_feedback(self, message: str, success: bool):
         """Show inline review form feedback with simple success/error coloring."""
-        color = "#3dd68c" if success else "#e8556d"
-        self.review_feedback_label.setStyleSheet(f"color: {color};")
+        state = "success" if success else "error"
+        self.review_feedback_label.setProperty("state", state)
+        self.review_feedback_label.style().unpolish(self.review_feedback_label)
+        self.review_feedback_label.style().polish(self.review_feedback_label)
         self.review_feedback_label.setText(message)
 
     def _update_analytics_status_label(self, enabled: bool):

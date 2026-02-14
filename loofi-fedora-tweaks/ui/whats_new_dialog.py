@@ -63,7 +63,7 @@ class WhatsNewDialog(QDialog):
         header = QLabel(self.tr("What's New in v{version} \"{codename}\"").format(
             version=__version__, codename=__version_codename__
         ))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("whatsNewHeader")
         layout.addWidget(header)
 
         # Release notes
@@ -98,7 +98,7 @@ class WhatsNewDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         close_btn = QPushButton(self.tr("Got it!"))
-        close_btn.setStyleSheet("font-weight: bold; padding: 8px 24px;")
+        close_btn.setObjectName("whatsNewCloseBtn")
         close_btn.clicked.connect(self._on_close)
         btn_layout.addWidget(close_btn)
         layout.addLayout(btn_layout)

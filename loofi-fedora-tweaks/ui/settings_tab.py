@@ -73,9 +73,7 @@ class SettingsTab(QWidget, PluginInterface):
 
         # Header
         header = QLabel(self.tr("Settings"))
-        header.setStyleSheet(
-            "font-size: 18px; font-weight: bold; color: #a277ff;"
-        )
+        header.setObjectName("settingsHeader")
         layout.addWidget(header)
 
         desc = QLabel(self.tr(
@@ -83,7 +81,7 @@ class SettingsTab(QWidget, PluginInterface):
             "Changes are saved automatically."
         ))
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #9da7bf; font-size: 12px;")
+        desc.setObjectName("settingsDesc")
         layout.addWidget(desc)
 
         # Internal sub-tabs

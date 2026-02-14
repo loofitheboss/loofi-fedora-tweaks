@@ -11,7 +11,7 @@ from typing import Iterable
 
 from utils.log import get_logger
 from utils.pulse import SystemPulse, PowerState
-from utils.temperature import TemperatureManager
+from services.hardware import TemperatureManager
 
 
 logger = get_logger(__name__)

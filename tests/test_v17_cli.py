@@ -8,7 +8,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.bluetooth import (
+from services.hardware import (
     BluetoothManager, BluetoothDevice, BluetoothResult,
     BluetoothStatus, BluetoothDeviceType,
 )

@@ -47,7 +47,7 @@ class SnapshotTab(BaseTab):
         self.setLayout(layout)
 
         header = QLabel(self.tr("System Snapshots"))
-        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        header.setObjectName("snapHeader")
         layout.addWidget(header)
 
         # ==================== Backend Status ====================
@@ -133,10 +133,12 @@ class SnapshotTab(BaseTab):
                 b = backend_map.get(name)
                 if b and b.available:
                     label.setText(f"✅ {b.version or 'installed'}")
-                    label.setStyleSheet("color: #3dd68c;")
+                    label.setObjectName("snapBackendAvail")
                 else:
                     label.setText("❌ Not found")
-                    label.setStyleSheet("color: #e8556d;")
+                    label.setObjectName("snapBackendMissing")
+                label.style().unpolish(label)
+                label.style().polish(label)
         except Exception as exc:
             self.append_output(f"Backend check failed: {exc}\n")
 

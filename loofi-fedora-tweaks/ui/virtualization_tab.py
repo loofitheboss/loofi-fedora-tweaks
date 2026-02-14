@@ -64,10 +64,7 @@ class VirtualizationTab(QWidget, PluginInterface):
 
         # ---- Top banner: virt status summary ----
         self.banner_label = QLabel(self.tr("Loading virtualization status..."))
-        self.banner_label.setStyleSheet(
-            "font-size: 12px; padding: 6px; background: #0b0e14; "
-            "border-radius: 4px; color: #e6edf3;"
-        )
+        self.banner_label.setObjectName("virtBanner")
         self.banner_label.setWordWrap(True)
         main_layout.addWidget(self.banner_label)
 

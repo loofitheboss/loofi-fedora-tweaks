@@ -440,7 +440,7 @@ class AutomationProfiles:
         """Set CPU governor for all cores."""
         governor = params.get("governor", "schedutil")
         try:
-            from utils.hardware import HardwareManager
+            from services.hardware import HardwareManager
             success = HardwareManager.set_governor(governor)
             return {"success": success, "message": f"CPU governor set to '{governor}'" if success else "Failed to set governor"}
         except ImportError:
