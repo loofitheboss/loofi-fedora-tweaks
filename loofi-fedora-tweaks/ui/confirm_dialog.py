@@ -26,6 +26,9 @@ from PyQt6.QtWidgets import (
 )
 
 from utils.settings import SettingsManager
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class ConfirmActionDialog(QDialog):
@@ -132,7 +135,7 @@ class ConfirmActionDialog(QDialog):
                 mgr.set("confirm_dangerous_actions", False)
                 mgr.save()
             except Exception:
-                pass
+                logger.debug("Failed to save confirmation preference", exc_info=True)
 
         # Record snapshot request
         if self.snapshot_cb and self.snapshot_cb.isChecked():
@@ -167,7 +170,7 @@ class ConfirmActionDialog(QDialog):
                 if not mgr.get("confirm_dangerous_actions"):
                     return True
             except Exception:
-                pass
+                logger.debug("Failed to read confirmation preference", exc_info=True)
 
         dialog = ConfirmActionDialog(
             parent=parent,

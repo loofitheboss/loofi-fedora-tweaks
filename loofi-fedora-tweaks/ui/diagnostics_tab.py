@@ -90,6 +90,7 @@ class _WatchtowerSubTab(QWidget):
         filter_layout.addWidget(QLabel(self.tr("Filter:")))
 
         self.service_filter = QComboBox()
+        self.service_filter.setAccessibleName(self.tr("Service filter"))
         self.service_filter.addItem(
             self.tr("\U0001f3ae Gaming Services"), "gaming"
         )
@@ -110,6 +111,7 @@ class _WatchtowerSubTab(QWidget):
         filter_layout.addStretch()
 
         refresh_btn = QPushButton(self.tr("\U0001f504 Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh services"))
         refresh_btn.clicked.connect(self._refresh_services)
         filter_layout.addWidget(refresh_btn)
 
@@ -186,6 +188,7 @@ class _WatchtowerSubTab(QWidget):
 
         # Refresh button
         refresh_btn = QPushButton(self.tr("\U0001f504 Analyze Boot"))
+        refresh_btn.setAccessibleName(self.tr("Analyze Boot"))
         refresh_btn.clicked.connect(self._refresh_boot_analysis)
         layout.addWidget(refresh_btn)
 
@@ -228,12 +231,14 @@ class _WatchtowerSubTab(QWidget):
         btn_layout = QHBoxLayout()
 
         refresh_btn = QPushButton(self.tr("\U0001f504 Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh journal"))
         refresh_btn.clicked.connect(self._refresh_journal)
         btn_layout.addWidget(refresh_btn)
 
         btn_layout.addStretch()
 
         panic_btn = QPushButton(self.tr("\U0001f198 Export Panic Log"))
+        panic_btn.setAccessibleName(self.tr("Export Panic Log"))
         panic_btn.setStyleSheet(
             "background-color: #dc3545; color: white; font-weight: bold;"
         )
@@ -241,6 +246,7 @@ class _WatchtowerSubTab(QWidget):
         btn_layout.addWidget(panic_btn)
 
         bundle_btn = QPushButton(self.tr("\U0001f4e6 Export Support Bundle"))
+        bundle_btn.setAccessibleName(self.tr("Export Support Bundle"))
         bundle_btn.clicked.connect(self._export_support_bundle)
         btn_layout.addWidget(bundle_btn)
 
@@ -556,6 +562,7 @@ class _BootSubTab(QWidget):
 
         for param, desc in common_params:
             cb = QCheckBox(desc)
+            cb.setAccessibleName(desc)
             cb.setProperty("param", param)
             cb.stateChanged.connect(
                 lambda state, p=param: self.on_param_toggled(p, state)
@@ -569,14 +576,17 @@ class _BootSubTab(QWidget):
         custom_layout = QHBoxLayout()
         custom_layout.addWidget(QLabel(self.tr("Custom:")))
         self.custom_param_input = QLineEdit()
+        self.custom_param_input.setAccessibleName(self.tr("Custom kernel parameter"))
         self.custom_param_input.setPlaceholderText("e.g., mem=4G")
         custom_layout.addWidget(self.custom_param_input)
 
         add_btn = QPushButton(self.tr("Add"))
+        add_btn.setAccessibleName(self.tr("Add custom parameter"))
         add_btn.clicked.connect(self.add_custom_param)
         custom_layout.addWidget(add_btn)
 
         remove_btn = QPushButton(self.tr("Remove"))
+        remove_btn.setAccessibleName(self.tr("Remove custom parameter"))
         remove_btn.clicked.connect(self.remove_custom_param)
         custom_layout.addWidget(remove_btn)
 
@@ -585,10 +595,12 @@ class _BootSubTab(QWidget):
         # Backup/Restore
         backup_layout = QHBoxLayout()
         backup_btn = QPushButton(self.tr("\U0001f4e6 Backup GRUB"))
+        backup_btn.setAccessibleName(self.tr("Backup GRUB"))
         backup_btn.clicked.connect(self.backup_grub)
         backup_layout.addWidget(backup_btn)
 
         restore_btn = QPushButton(self.tr("\u267b\ufe0f Restore Backup"))
+        restore_btn.setAccessibleName(self.tr("Restore Backup"))
         restore_btn.clicked.connect(self.restore_grub)
         backup_layout.addWidget(restore_btn)
 
@@ -616,6 +628,7 @@ class _BootSubTab(QWidget):
         size_layout.addWidget(QLabel(self.tr("Size (% of RAM):")))
 
         self.zram_slider = QSlider(Qt.Orientation.Horizontal)
+        self.zram_slider.setAccessibleName(self.tr("ZRAM size percent of RAM"))
         self.zram_slider.setMinimum(25)
         self.zram_slider.setMaximum(150)
         self.zram_slider.setValue(100)
@@ -635,6 +648,7 @@ class _BootSubTab(QWidget):
         algo_layout.addWidget(QLabel(self.tr("Compression:")))
 
         self.zram_algo_combo = QComboBox()
+        self.zram_algo_combo.setAccessibleName(self.tr("ZRAM compression algorithm"))
         for algo, desc in ZramManager.ALGORITHMS.items():
             self.zram_algo_combo.addItem(f"{algo} - {desc}", algo)
         algo_layout.addWidget(self.zram_algo_combo, 1)
@@ -644,6 +658,7 @@ class _BootSubTab(QWidget):
         # Apply button
         btn_layout = QHBoxLayout()
         apply_btn = QPushButton(self.tr("\u2705 Apply ZRAM Settings"))
+        apply_btn.setAccessibleName(self.tr("Apply ZRAM Settings"))
         apply_btn.clicked.connect(self.apply_zram)
         btn_layout.addWidget(apply_btn)
         btn_layout.addStretch()
@@ -670,10 +685,12 @@ class _BootSubTab(QWidget):
         btn_layout = QHBoxLayout()
 
         generate_btn = QPushButton(self.tr("\U0001f511 Generate MOK Key"))
+        generate_btn.setAccessibleName(self.tr("Generate MOK Key"))
         generate_btn.clicked.connect(self.generate_mok_key)
         btn_layout.addWidget(generate_btn)
 
         enroll_btn = QPushButton(self.tr("\U0001f4dd Enroll Key"))
+        enroll_btn.setAccessibleName(self.tr("Enroll Key"))
         enroll_btn.clicked.connect(self.enroll_mok_key)
         btn_layout.addWidget(enroll_btn)
 

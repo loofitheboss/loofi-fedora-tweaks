@@ -71,10 +71,12 @@ class StorageTab(BaseTab):
 
         disk_btn_layout = QHBoxLayout()
         btn_smart = QPushButton(self.tr("🔍 SMART Health"))
+        btn_smart.setAccessibleName(self.tr("Check SMART health"))
         btn_smart.clicked.connect(self._check_smart)
         disk_btn_layout.addWidget(btn_smart)
 
         btn_refresh_disks = QPushButton(self.tr("🔄 Refresh"))
+        btn_refresh_disks.setAccessibleName(self.tr("Refresh disks"))
         btn_refresh_disks.clicked.connect(self._refresh_all)
         disk_btn_layout.addWidget(btn_refresh_disks)
         dl_layout.addLayout(disk_btn_layout)
@@ -108,10 +110,12 @@ class StorageTab(BaseTab):
         action_group.setLayout(al_layout)
 
         btn_trim = QPushButton(self.tr("✂️ Trim SSDs"))
+        btn_trim.setAccessibleName(self.tr("Trim SSDs"))
         btn_trim.clicked.connect(self._trim_ssd)
         al_layout.addWidget(btn_trim)
 
         btn_fsck = QPushButton(self.tr("🔧 Check Filesystem"))
+        btn_fsck.setAccessibleName(self.tr("Check filesystem"))
         btn_fsck.clicked.connect(self._check_filesystem)
         al_layout.addWidget(btn_fsck)
 

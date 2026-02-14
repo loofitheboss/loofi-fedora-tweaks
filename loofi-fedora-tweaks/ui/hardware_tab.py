@@ -17,6 +17,10 @@ from utils.command_runner import CommandRunner
 from utils.bluetooth import BluetoothManager
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from ui.tooltips import HW_CPU_GOVERNOR, HW_FAN_MODE
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class HardwareTab(QWidget, PluginInterface):
@@ -175,6 +179,8 @@ class HardwareTab(QWidget, PluginInterface):
         h_layout.addWidget(QLabel(self.tr("Governor:")))
 
         self.combo_governor = QComboBox()
+        self.combo_governor.setAccessibleName(self.tr("CPU governor"))
+        self.combo_governor.setToolTip(HW_CPU_GOVERNOR)
         governors = HardwareManager.get_available_governors()
         self.combo_governor.addItems(governors)
 
@@ -248,6 +254,7 @@ class HardwareTab(QWidget, PluginInterface):
                 }}
             """)
             btn.clicked.connect(lambda checked, p=profile: self.set_power_profile(p))
+            btn.setAccessibleName(self.tr("{} profile").format(profile))
             btn_layout.addWidget(btn)
 
         layout.addLayout(btn_layout)
@@ -275,6 +282,7 @@ class HardwareTab(QWidget, PluginInterface):
         if not tools:
             layout.addWidget(QLabel(self.tr("❌ No GPU switching tool found")))
             install_btn = QPushButton(self.tr("📦 Install envycontrol"))
+            install_btn.setAccessibleName(self.tr("Install envycontrol"))
             install_btn.clicked.connect(self.install_envycontrol)
             layout.addWidget(install_btn)
             return card
@@ -310,6 +318,7 @@ class HardwareTab(QWidget, PluginInterface):
                 }}
             """)
             btn.clicked.connect(lambda checked, m=mode: self.set_gpu_mode(m))
+            btn.setAccessibleName(self.tr("{} GPU mode").format(mode))
             btn_layout.addWidget(btn)
 
         layout.addLayout(btn_layout)
@@ -354,6 +363,7 @@ class HardwareTab(QWidget, PluginInterface):
         if not HardwareManager.is_nbfc_available():
             layout.addWidget(QLabel(self.tr("❌ nbfc-linux not installed")))
             install_btn = QPushButton(self.tr("📦 Learn how to install"))
+            install_btn.setAccessibleName(self.tr("Install NBFC"))
             install_btn.clicked.connect(self.show_nbfc_help)
             layout.addWidget(install_btn)
             return card
@@ -369,6 +379,8 @@ class HardwareTab(QWidget, PluginInterface):
         slider_layout.addWidget(QLabel(self.tr("Manual:")))
 
         self.slider_fan = QSlider(Qt.Orientation.Horizontal)
+        self.slider_fan.setAccessibleName(self.tr("Fan speed"))
+        self.slider_fan.setToolTip(HW_FAN_MODE)
         self.slider_fan.setRange(0, 100)
         self.slider_fan.setValue(50)
         self.slider_fan.setTickPosition(QSlider.TickPosition.TicksBelow)
@@ -385,10 +397,12 @@ class HardwareTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         btn_apply = QPushButton(self.tr("✅ Apply"))
+        btn_apply.setAccessibleName(self.tr("Apply fan speed"))
         btn_apply.clicked.connect(lambda: self.set_fan_speed(self.slider_fan.value()))
         btn_layout.addWidget(btn_apply)
 
         btn_auto = QPushButton(self.tr("🔄 Auto"))
+        btn_auto.setAccessibleName(self.tr("Auto fan mode"))
         btn_auto.clicked.connect(lambda: self.set_fan_speed(-1))
         btn_layout.addWidget(btn_auto)
 
@@ -426,6 +440,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout.addWidget(desc)
 
         btn_restart_audio = QPushButton(self.tr("Restart Audio Services (Pipewire)"))
+        btn_restart_audio.setAccessibleName(self.tr("Restart audio"))
         btn_restart_audio.clicked.connect(
             lambda: self._run_hw_command(
                 "systemctl",
@@ -452,10 +467,12 @@ class HardwareTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         btn_limit_80 = QPushButton(self.tr("Limit to 80%"))
+        btn_limit_80.setAccessibleName(self.tr("Limit charge 80%"))
         btn_limit_80.clicked.connect(lambda: self._set_battery_limit(80))
         btn_layout.addWidget(btn_limit_80)
 
         btn_limit_100 = QPushButton(self.tr("Limit to 100% (Full)"))
+        btn_limit_100.setAccessibleName(self.tr("Limit charge 100%"))
         btn_limit_100.clicked.connect(lambda: self._set_battery_limit(100))
         btn_layout.addWidget(btn_limit_100)
 
@@ -493,6 +510,7 @@ class HardwareTab(QWidget, PluginInterface):
         layout.addWidget(desc)
 
         btn_enroll_finger = QPushButton(self.tr("Enroll Fingerprint (GUI)"))
+        btn_enroll_finger.setAccessibleName(self.tr("Enroll fingerprint"))
         btn_enroll_finger.clicked.connect(self._enroll_fingerprint)
         layout.addWidget(btn_enroll_finger)
 
@@ -526,14 +544,17 @@ class HardwareTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         btn_power_on = QPushButton(self.tr("Power On"))
+        btn_power_on.setAccessibleName(self.tr("Bluetooth on"))
         btn_power_on.clicked.connect(self._bt_power_on)
         btn_layout.addWidget(btn_power_on)
 
         btn_power_off = QPushButton(self.tr("Power Off"))
+        btn_power_off.setAccessibleName(self.tr("Bluetooth off"))
         btn_power_off.clicked.connect(self._bt_power_off)
         btn_layout.addWidget(btn_power_off)
 
         btn_scan = QPushButton(self.tr("Scan"))
+        btn_scan.setAccessibleName(self.tr("Scan Bluetooth"))
         btn_scan.clicked.connect(self._bt_scan)
         btn_layout.addWidget(btn_scan)
 
@@ -607,7 +628,7 @@ class HardwareTab(QWidget, PluginInterface):
                 status = HardwareManager.get_fan_status()
                 self.lbl_fan_status.setText(self.tr("Speed: {}% | Temp: {}°C").format(int(status['speed']), int(status['temperature'])))
         except Exception:
-            pass
+            logger.debug("Failed to refresh hardware status", exc_info=True)
 
     def show_toast(self, message: str):
         """Show a quick toast notification (status bar style)."""

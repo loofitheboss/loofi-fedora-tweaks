@@ -117,6 +117,7 @@ class SecurityTab(QWidget, PluginInterface):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setMaximumHeight(100)
+        self.log_text.setAccessibleName(self.tr("Activity log"))
         log_layout.addWidget(self.log_text)
         layout.addWidget(log_group)
 
@@ -175,6 +176,7 @@ class SecurityTab(QWidget, PluginInterface):
 
         # Refresh button
         refresh_btn = QPushButton(self.tr("🔄 Refresh Score"))
+        refresh_btn.setAccessibleName(self.tr("Refresh Score"))
         refresh_btn.clicked.connect(self._refresh_score)
         layout.addWidget(refresh_btn)
 
@@ -204,10 +206,12 @@ class SecurityTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         refresh_btn = QPushButton(self.tr("🔄 Scan Ports"))
+        refresh_btn.setAccessibleName(self.tr("Scan Ports"))
         refresh_btn.clicked.connect(self._refresh_ports)
         btn_layout.addWidget(refresh_btn)
 
         block_btn = QPushButton(self.tr("🚫 Block Selected"))
+        block_btn.setAccessibleName(self.tr("Block Selected port"))
         block_btn.clicked.connect(self._block_port)
         btn_layout.addWidget(block_btn)
 
@@ -231,6 +235,7 @@ class SecurityTab(QWidget, PluginInterface):
 
         if not installed:
             install_btn = QPushButton(self.tr("📥 Install USB Guard"))
+            install_btn.setAccessibleName(self.tr("Install USB Guard"))
             install_btn.clicked.connect(self._install_usbguard)
             layout.addWidget(install_btn)
 
@@ -253,18 +258,22 @@ class SecurityTab(QWidget, PluginInterface):
 
             if not running:
                 start_btn = QPushButton(self.tr("▶️ Start Service"))
+                start_btn.setAccessibleName(self.tr("Start Service"))
                 start_btn.clicked.connect(self._start_usbguard)
                 btn_layout.addWidget(start_btn)
 
             refresh_btn = QPushButton(self.tr("🔄 Refresh"))
+            refresh_btn.setAccessibleName(self.tr("Refresh USB devices"))
             refresh_btn.clicked.connect(self._refresh_usb_devices)
             btn_layout.addWidget(refresh_btn)
 
             allow_btn = QPushButton(self.tr("✅ Allow Selected"))
+            allow_btn.setAccessibleName(self.tr("Allow Selected"))
             allow_btn.clicked.connect(self._allow_usb)
             btn_layout.addWidget(allow_btn)
 
             block_btn = QPushButton(self.tr("🚫 Block Selected"))
+            block_btn.setAccessibleName(self.tr("Block Selected USB device"))
             block_btn.clicked.connect(self._block_usb)
             btn_layout.addWidget(block_btn)
 
@@ -292,6 +301,7 @@ class SecurityTab(QWidget, PluginInterface):
 
         if not firejail_ok:
             install_btn = QPushButton(self.tr("📥 Install Firejail"))
+            install_btn.setAccessibleName(self.tr("Install Firejail"))
             install_btn.clicked.connect(self._install_firejail)
             layout.addWidget(install_btn)
         else:
@@ -302,6 +312,7 @@ class SecurityTab(QWidget, PluginInterface):
 
             for app, desc in list(SandboxManager.FIREJAIL_PROFILES.items())[:4]:
                 btn = QPushButton(app.capitalize())
+                btn.setAccessibleName(self.tr("Launch {} sandboxed").format(app.capitalize()))
                 btn.setToolTip(f"Launch {app} in sandbox")
                 btn.clicked.connect(lambda checked, a=app: self._launch_sandboxed(a))
                 profiles_layout.addWidget(btn)
@@ -313,10 +324,12 @@ class SecurityTab(QWidget, PluginInterface):
             options_layout = QHBoxLayout()
 
             self.no_network_check = QCheckBox(self.tr("No Network"))
+            self.no_network_check.setAccessibleName(self.tr("No Network"))
             self.no_network_check.setToolTip("Disable network access")
             options_layout.addWidget(self.no_network_check)
 
             self.private_home_check = QCheckBox(self.tr("Private Home"))
+            self.private_home_check.setAccessibleName(self.tr("Private Home"))
             self.private_home_check.setToolTip("Use empty home directory")
             options_layout.addWidget(self.private_home_check)
 
@@ -327,12 +340,14 @@ class SecurityTab(QWidget, PluginInterface):
             custom_layout = QHBoxLayout()
 
             self.sandbox_cmd = QComboBox()
+            self.sandbox_cmd.setAccessibleName(self.tr("Sandbox command"))
             self.sandbox_cmd.setEditable(True)
             self.sandbox_cmd.addItems(["firefox", "chromium", "vlc", "gimp"])
             self.sandbox_cmd.setMinimumWidth(200)
             custom_layout.addWidget(self.sandbox_cmd)
 
             run_btn = QPushButton(self.tr("🚀 Run Sandboxed"))
+            run_btn.setAccessibleName(self.tr("Run Sandboxed"))
             run_btn.clicked.connect(self._run_custom_sandbox)
             custom_layout.addWidget(run_btn)
 
@@ -483,6 +498,7 @@ class SecurityTab(QWidget, PluginInterface):
         fw_layout = QHBoxLayout(group)
 
         btn_fw_status = QPushButton(self.tr("Check Status"))
+        btn_fw_status.setAccessibleName(self.tr("Check Firewall Status"))
         btn_fw_status.clicked.connect(
             lambda: self._run_privacy_command(
                 "systemctl", ["status", "firewalld"],
@@ -492,6 +508,7 @@ class SecurityTab(QWidget, PluginInterface):
         fw_layout.addWidget(btn_fw_status)
 
         btn_fw_enable = QPushButton(self.tr("Enable Firewall"))
+        btn_fw_enable.setAccessibleName(self.tr("Enable Firewall"))
         btn_fw_enable.clicked.connect(
             lambda: self._run_privacy_command(
                 "pkexec", ["systemctl", "enable", "--now", "firewalld"],
@@ -501,6 +518,7 @@ class SecurityTab(QWidget, PluginInterface):
         fw_layout.addWidget(btn_fw_enable)
 
         btn_fw_disable = QPushButton(self.tr("Disable Firewall"))
+        btn_fw_disable.setAccessibleName(self.tr("Disable Firewall"))
         btn_fw_disable.clicked.connect(
             lambda: self._run_privacy_command(
                 "pkexec", ["systemctl", "disable", "--now", "firewalld"],
@@ -519,6 +537,7 @@ class SecurityTab(QWidget, PluginInterface):
         tele_layout = QVBoxLayout(group)
 
         btn_remove_tele = QPushButton(self.tr("Remove Fedora Telemetry Packages"))
+        btn_remove_tele.setAccessibleName(self.tr("Remove Fedora Telemetry Packages"))
         tele_cmd = "dnf remove -y abrt* gnome-abrt* || true"
         btn_remove_tele.clicked.connect(
             lambda: self._run_privacy_command(
@@ -538,6 +557,7 @@ class SecurityTab(QWidget, PluginInterface):
         sec_layout = QVBoxLayout(group)
 
         btn_check_updates = QPushButton(self.tr("Check for Security Updates"))
+        btn_check_updates.setAccessibleName(self.tr("Check for Security Updates"))
         btn_check_updates.clicked.connect(
             lambda: self._run_privacy_command(
                 "dnf", ["check-update", "--security"],

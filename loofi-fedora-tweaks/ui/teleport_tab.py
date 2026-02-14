@@ -90,6 +90,7 @@ class TeleportTab(QWidget, PluginInterface):
         log_group = QGroupBox(self.tr("Output Log"))
         log_layout = QVBoxLayout(log_group)
         self.output_text = QTextEdit()
+        self.output_text.setAccessibleName(self.tr("Output Log"))
         self.output_text.setReadOnly(True)
         self.output_text.setMaximumHeight(120)
         log_layout.addWidget(self.output_text)
@@ -114,6 +115,7 @@ class TeleportTab(QWidget, PluginInterface):
         path_layout.addWidget(QLabel(self.tr("Workspace Path:")))
 
         self.workspace_path_edit = QLineEdit()
+        self.workspace_path_edit.setAccessibleName(self.tr("Workspace Path"))
         self.workspace_path_edit.setPlaceholderText(
             self.tr("Auto-detect from current directory")
         )
@@ -124,6 +126,7 @@ class TeleportTab(QWidget, PluginInterface):
         path_layout.addWidget(self.workspace_path_edit)
 
         browse_btn = QPushButton(self.tr("Browse..."))
+        browse_btn.setAccessibleName(self.tr("Browse workspace"))
         browse_btn.clicked.connect(self._browse_workspace)
         path_layout.addWidget(browse_btn)
 
@@ -132,6 +135,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Capture button
         btn_layout = QHBoxLayout()
         capture_btn = QPushButton(self.tr("Capture State"))
+        capture_btn.setAccessibleName(self.tr("Capture State"))
         capture_btn.setStyleSheet(
             "font-weight: bold; padding: 8px 16px;"
         )
@@ -157,6 +161,7 @@ class TeleportTab(QWidget, PluginInterface):
 
         # Table of saved packages
         self.packages_table = QTableWidget(0, 4)
+        self.packages_table.setAccessibleName(self.tr("Saved States"))
         self.packages_table.setHorizontalHeaderLabels([
             self.tr("Package ID"),
             self.tr("Source Device"),
@@ -177,14 +182,17 @@ class TeleportTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         refresh_btn = QPushButton(self.tr("Refresh List"))
+        refresh_btn.setAccessibleName(self.tr("Refresh List"))
         refresh_btn.clicked.connect(self._refresh_packages)
         btn_layout.addWidget(refresh_btn)
 
         export_btn = QPushButton(self.tr("Export to File"))
+        export_btn.setAccessibleName(self.tr("Export to File"))
         export_btn.clicked.connect(self._export_package)
         btn_layout.addWidget(export_btn)
 
         send_btn = QPushButton(self.tr("Send to Device"))
+        send_btn.setAccessibleName(self.tr("Send to Device"))
         send_btn.clicked.connect(self._send_to_device)
         btn_layout.addWidget(send_btn)
 
@@ -203,6 +211,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Import button
         import_layout = QHBoxLayout()
         import_btn = QPushButton(self.tr("Import from File"))
+        import_btn.setAccessibleName(self.tr("Import from File"))
         import_btn.clicked.connect(self._import_package)
         import_layout.addWidget(import_btn)
         import_layout.addStretch()
@@ -219,6 +228,7 @@ class TeleportTab(QWidget, PluginInterface):
         # Apply button
         apply_layout = QHBoxLayout()
         self.apply_btn = QPushButton(self.tr("Apply Teleport"))
+        self.apply_btn.setAccessibleName(self.tr("Apply Teleport"))
         self.apply_btn.setEnabled(False)
         self.apply_btn.setStyleSheet(
             "font-weight: bold; padding: 8px 16px;"

@@ -22,6 +22,9 @@ from utils.favorites import FavoritesManager
 from version import __version__
 import os
 import logging
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 # Custom data roles for sidebar items
 _ROLE_DESC = Qt.ItemDataRole.UserRole + 1   # Tab description string
@@ -314,7 +317,7 @@ class MainWindow(QMainWindow):
             self.pulse.moveToThread(self.pulse_thread)
             self.pulse_thread.start()
         except Exception:
-            pass
+            logger.debug("Failed to start pulse listener", exc_info=True)
 
     def _build_favorites_section(self):
         """Build a ⭐ Favorites category at the top of the sidebar with pinned tabs."""
@@ -526,7 +529,7 @@ class MainWindow(QMainWindow):
             palette = CommandPalette(self.switch_to_tab, self)
             palette.exec()
         except ImportError:
-            pass
+            logger.debug("Command palette module not available", exc_info=True)
 
     def _filter_sidebar(self, text: str):
         """Filter sidebar items by name, description, badge, and category."""
@@ -731,7 +734,7 @@ class MainWindow(QMainWindow):
             # Refresh badge since a new notification likely exists
             self._refresh_notif_badge()
         except Exception:
-            pass
+            logger.debug("Failed to show toast notification", exc_info=True)
 
     def _refresh_status_indicators(self):
         """Update sidebar status indicators from live system data (v29.0)."""
@@ -801,7 +804,7 @@ class MainWindow(QMainWindow):
             bar = QuickActionsBar(self)
             bar.exec()
         except ImportError:
-            pass
+            logger.debug("Quick actions module not available", exc_info=True)
 
     def _check_first_run(self):
         """Show first-run wizard if this is the first launch."""
@@ -814,7 +817,7 @@ class MainWindow(QMainWindow):
                 wizard = FirstRunWizard(self)
                 wizard.exec()
             except ImportError:
-                pass
+                logger.debug("First-run wizard module not available", exc_info=True)
 
     def setup_tray(self):
         from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
@@ -892,7 +895,7 @@ class MainWindow(QMainWindow):
                     try:
                         page.cleanup()
                     except Exception:
-                        pass
+                        logger.debug("Failed to cleanup page on close", exc_info=True)
             event.accept()
 
     def check_dependencies(self):
@@ -932,7 +935,7 @@ class MainWindow(QMainWindow):
             if isinstance(app, QApplication):
                 app.setStyleSheet(stylesheet)
         except OSError:
-            pass
+            logger.debug("Failed to load theme stylesheet", exc_info=True)
 
     @staticmethod
     def detect_system_theme() -> str:
@@ -942,18 +945,8 @@ class MainWindow(QMainWindow):
 
         Returns ``"dark"`` when detection fails.
         """
-        import subprocess
-        try:
-            result = subprocess.run(
-                ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
-                capture_output=True, text=True, timeout=3,
-            )
-            value = result.stdout.strip().strip("'\"")
-            if "light" in value:
-                return "light"
-        except (OSError, subprocess.TimeoutExpired):
-            pass
-        return "dark"
+        from utils.desktop_utils import DesktopUtils
+        return DesktopUtils.detect_color_scheme()
 
     def _get_frameless_mode_flag(self) -> bool:
         """

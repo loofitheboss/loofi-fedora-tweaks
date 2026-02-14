@@ -158,11 +158,13 @@ class DesktopTab(BaseTab):
         preset_layout = QHBoxLayout()
 
         self.preset_combo = QComboBox()
+        self.preset_combo.setAccessibleName(self.tr("Keybinding preset"))
         self.preset_combo.addItem("Vim Style (H/J/K/L)", "vim")
         self.preset_combo.addItem("Arrow Keys", "arrows")
         preset_layout.addWidget(self.preset_combo)
 
         apply_btn = QPushButton(self.tr("Apply Preset"))
+        apply_btn.setAccessibleName(self.tr("Apply Preset"))
         apply_btn.clicked.connect(self._apply_keybinding_preset)
         preset_layout.addWidget(apply_btn)
 
@@ -174,14 +176,17 @@ class DesktopTab(BaseTab):
             kde_layout = QHBoxLayout()
 
             enable_tiling_btn = QPushButton(self.tr("Enable Quick Tiling"))
+            enable_tiling_btn.setAccessibleName(self.tr("Enable Quick Tiling"))
             enable_tiling_btn.clicked.connect(self._enable_kde_tiling)
             kde_layout.addWidget(enable_tiling_btn)
 
             install_script_btn = QPushButton(self.tr("Install Tiling Script"))
+            install_script_btn.setAccessibleName(self.tr("Install Tiling Script"))
             install_script_btn.clicked.connect(self._install_kwin_script)
             kde_layout.addWidget(install_script_btn)
 
             reconfigure_btn = QPushButton(self.tr("Reload KWin"))
+            reconfigure_btn.setAccessibleName(self.tr("Reload KWin"))
             reconfigure_btn.clicked.connect(self._reconfigure_kwin)
             kde_layout.addWidget(reconfigure_btn)
 
@@ -191,6 +196,7 @@ class DesktopTab(BaseTab):
         # Hyprland/Sway reload
         elif self.compositor in ["hyprland", "sway"]:
             reload_btn = QPushButton(self.tr("Reload Config"))
+            reload_btn.setAccessibleName(self.tr("Reload Config"))
             reload_btn.clicked.connect(self._reload_wm_config)
             layout.addWidget(reload_btn)
 
@@ -206,15 +212,18 @@ class DesktopTab(BaseTab):
         template_layout = QHBoxLayout()
 
         self.template_combo = QComboBox()
+        self.template_combo.setAccessibleName(self.tr("Workspace template"))
         for key, template in TilingManager.WORKSPACE_TEMPLATES.items():
             self.template_combo.addItem(str(template["name"]), key)
         template_layout.addWidget(self.template_combo)
 
         preview_btn = QPushButton(self.tr("Preview"))
+        preview_btn.setAccessibleName(self.tr("Preview"))
         preview_btn.clicked.connect(self._preview_template)
         template_layout.addWidget(preview_btn)
 
         apply_btn = QPushButton(self.tr("Generate Config"))
+        apply_btn.setAccessibleName(self.tr("Generate Config"))
         apply_btn.clicked.connect(self._generate_template_config)
         template_layout.addWidget(apply_btn)
 
@@ -244,10 +253,12 @@ class DesktopTab(BaseTab):
         path_layout.addWidget(QLabel(self.tr("Repo Path:")))
 
         self.dotfile_path = QLineEdit()
+        self.dotfile_path.setAccessibleName(self.tr("Dotfile repository path"))
         self.dotfile_path.setText(str(Path.home() / "dotfiles"))
         path_layout.addWidget(self.dotfile_path)
 
         create_btn = QPushButton(self.tr("Create Repo"))
+        create_btn.setAccessibleName(self.tr("Create Repo"))
         create_btn.clicked.connect(self._create_dotfile_repo)
         path_layout.addWidget(create_btn)
 
@@ -259,6 +270,7 @@ class DesktopTab(BaseTab):
         for name in ["hyprland", "sway", "kitty", "fish", "nvim"]:
             if name in DotfileManager.DOTFILES:
                 btn = QPushButton(self.tr("Sync {}").format(name))
+                btn.setAccessibleName(self.tr("Sync {}").format(name))
                 btn.clicked.connect(lambda checked, n=name: self._sync_dotfile(n))
                 btn.setMaximumWidth(100)
                 sync_layout.addWidget(btn)
@@ -364,6 +376,7 @@ class DesktopTab(BaseTab):
         theme_layout.addWidget(QLabel(self.tr("Select a theme to apply:")))
 
         self.theme_combo = QComboBox()
+        self.theme_combo.setAccessibleName(self.tr("KDE global theme"))
         self.themes = {
             self.tr("Breeze Dark"): "org.kde.breezedark.desktop",
             self.tr("Breeze Light"): "org.kde.breeze.desktop",
@@ -374,6 +387,7 @@ class DesktopTab(BaseTab):
         theme_layout.addWidget(self.theme_combo)
 
         btn_apply_theme = QPushButton(self.tr("Apply Theme"))
+        btn_apply_theme.setAccessibleName(self.tr("Apply Theme"))
         btn_apply_theme.clicked.connect(self._apply_theme)
         theme_layout.addWidget(btn_apply_theme)
 
@@ -385,6 +399,7 @@ class DesktopTab(BaseTab):
         icon_group.setLayout(icon_layout)
 
         btn_papirus = QPushButton(self.tr("Install Papirus Icons"))
+        btn_papirus.setAccessibleName(self.tr("Install Papirus Icons"))
         btn_papirus.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["dnf", "install", "-y", "papirus-icon-theme"],
@@ -394,6 +409,7 @@ class DesktopTab(BaseTab):
         icon_layout.addWidget(btn_papirus)
 
         btn_tela = QPushButton(self.tr("Install Tela Icons"))
+        btn_tela.setAccessibleName(self.tr("Install Tela Icons"))
         btn_tela.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["dnf", "install", "-y", "tela-icon-theme"],
@@ -410,6 +426,7 @@ class DesktopTab(BaseTab):
         fonts_group.setLayout(fonts_layout)
 
         btn_firacode = QPushButton(self.tr("FiraCode Nerd Font"))
+        btn_firacode.setAccessibleName(self.tr("FiraCode Nerd Font"))
         btn_firacode.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["dnf", "install", "-y", "fira-code-fonts"],
@@ -419,6 +436,7 @@ class DesktopTab(BaseTab):
         fonts_layout.addWidget(btn_firacode)
 
         btn_jetbrains = QPushButton(self.tr("JetBrains Mono"))
+        btn_jetbrains.setAccessibleName(self.tr("JetBrains Mono"))
         btn_jetbrains.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["dnf", "install", "-y", "jetbrains-mono-fonts"],

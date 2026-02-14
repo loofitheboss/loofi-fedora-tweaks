@@ -10,6 +10,7 @@ Usage:
 """
 
 import logging
+import logging.handlers
 import os
 import sys
 from pathlib import Path
@@ -43,10 +44,15 @@ def _setup_root_logger():
     console.setFormatter(logging.Formatter(_LOG_FORMAT, _LOG_DATE_FORMAT))
     root.addHandler(console)
 
-    # File handler (DEBUG and above)
+    # File handler (DEBUG and above) — rotate at 5 MB, keep 3 backups
     try:
         log_file = _get_log_dir() / "app.log"
-        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_file,
+            maxBytes=5 * 1024 * 1024,
+            backupCount=3,
+            encoding="utf-8",
+        )
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter(_LOG_FORMAT, _LOG_DATE_FORMAT))
         root.addHandler(file_handler)

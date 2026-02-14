@@ -60,6 +60,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         self.output_area.setReadOnly(True)
         self.output_area.setMaximumHeight(200)
         self.output_area.setObjectName("outputArea")
+        self.output_area.setAccessibleName(self.tr("Command output"))
 
         # Command runner
         self.runner = CommandRunner()

@@ -107,6 +107,7 @@ class SettingsTab(QWidget, PluginInterface):
 
         # Theme selector
         self.theme_combo = QComboBox()
+        self.theme_combo.setAccessibleName(self.tr("Theme selector"))
         self.theme_combo.addItems(["dark", "light"])
         self.theme_combo.setCurrentText(self._mgr.get("theme"))
         self.theme_combo.currentTextChanged.connect(self._on_theme_changed)
@@ -114,12 +115,14 @@ class SettingsTab(QWidget, PluginInterface):
 
         # Follow system theme
         self.follow_system_cb = QCheckBox(self.tr("Follow system theme"))
+        self.follow_system_cb.setAccessibleName(self.tr("Follow system theme"))
         self.follow_system_cb.setChecked(self._mgr.get("follow_system_theme"))
         self.follow_system_cb.toggled.connect(self._on_follow_system_toggled)
         form.addRow("", self.follow_system_cb)
 
         # v29.0: Reset appearance to defaults
         reset_appearance_btn = QPushButton(self.tr("↩ Reset Appearance"))
+        reset_appearance_btn.setAccessibleName(self.tr("Reset Appearance"))
         reset_appearance_btn.setToolTip(self.tr("Reset theme settings to defaults"))
         reset_appearance_btn.clicked.connect(self._reset_appearance)
         form.addRow("", reset_appearance_btn)
@@ -134,6 +137,7 @@ class SettingsTab(QWidget, PluginInterface):
         form.setSpacing(12)
 
         self.start_minimized_cb = QCheckBox(self.tr("Start minimized to tray"))
+        self.start_minimized_cb.setAccessibleName(self.tr("Start minimized to tray"))
         self.start_minimized_cb.setChecked(self._mgr.get("start_minimized"))
         self.start_minimized_cb.toggled.connect(
             lambda v: self._toggle_setting("start_minimized", v)
@@ -141,6 +145,7 @@ class SettingsTab(QWidget, PluginInterface):
         form.addRow("", self.start_minimized_cb)
 
         self.notifications_cb = QCheckBox(self.tr("Show desktop notifications"))
+        self.notifications_cb.setAccessibleName(self.tr("Show desktop notifications"))
         self.notifications_cb.setChecked(self._mgr.get("show_notifications"))
         self.notifications_cb.toggled.connect(
             lambda v: self._toggle_setting("show_notifications", v)
@@ -148,6 +153,7 @@ class SettingsTab(QWidget, PluginInterface):
         form.addRow("", self.notifications_cb)
 
         self.confirm_cb = QCheckBox(self.tr("Confirm dangerous actions"))
+        self.confirm_cb.setAccessibleName(self.tr("Confirm dangerous actions"))
         self.confirm_cb.setChecked(self._mgr.get("confirm_dangerous_actions"))
         self.confirm_cb.toggled.connect(
             lambda v: self._toggle_setting("confirm_dangerous_actions", v)
@@ -155,6 +161,7 @@ class SettingsTab(QWidget, PluginInterface):
         form.addRow("", self.confirm_cb)
 
         self.restore_tab_cb = QCheckBox(self.tr("Restore last active tab on start"))
+        self.restore_tab_cb.setAccessibleName(self.tr("Restore last active tab on start"))
         self.restore_tab_cb.setChecked(self._mgr.get("restore_last_tab"))
         self.restore_tab_cb.toggled.connect(
             lambda v: self._toggle_setting("restore_last_tab", v)
@@ -163,6 +170,7 @@ class SettingsTab(QWidget, PluginInterface):
 
         # v29.0: Reset behavior to defaults
         reset_behavior_btn = QPushButton(self.tr("↩ Reset Behavior"))
+        reset_behavior_btn.setAccessibleName(self.tr("Reset Behavior"))
         reset_behavior_btn.setToolTip(self.tr("Reset behavior settings to defaults"))
         reset_behavior_btn.clicked.connect(self._reset_behavior)
         form.addRow("", reset_behavior_btn)
@@ -180,6 +188,7 @@ class SettingsTab(QWidget, PluginInterface):
         log_group = QGroupBox(self.tr("Logging"))
         log_form = QFormLayout(log_group)
         self.log_combo = QComboBox()
+        self.log_combo.setAccessibleName(self.tr("Log level selector"))
         self.log_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
         self.log_combo.setCurrentText(self._mgr.get("log_level"))
         self.log_combo.currentTextChanged.connect(self._on_log_level_changed)
@@ -188,6 +197,7 @@ class SettingsTab(QWidget, PluginInterface):
 
         # Update checking
         self.updates_cb = QCheckBox(self.tr("Check for updates on start"))
+        self.updates_cb.setAccessibleName(self.tr("Check for updates on start"))
         self.updates_cb.setChecked(self._mgr.get("check_updates_on_start"))
         self.updates_cb.toggled.connect(
             lambda v: self._toggle_setting("check_updates_on_start", v)
@@ -198,6 +208,7 @@ class SettingsTab(QWidget, PluginInterface):
         reset_group = QGroupBox(self.tr("Reset"))
         reset_layout = QVBoxLayout(reset_group)
         reset_btn = QPushButton(self.tr("Reset All Settings to Defaults"))
+        reset_btn.setAccessibleName(self.tr("Reset All Settings to Defaults"))
         reset_btn.setObjectName("dangerAction")
         reset_btn.clicked.connect(self._on_reset)
         reset_layout.addWidget(reset_btn)

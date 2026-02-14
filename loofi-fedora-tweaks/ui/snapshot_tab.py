@@ -69,14 +69,17 @@ class SnapshotTab(BaseTab):
         action_layout = QHBoxLayout()
 
         btn_create = QPushButton(self.tr("📸 Create Snapshot"))
+        btn_create.setAccessibleName(self.tr("Create Snapshot"))
         btn_create.clicked.connect(self._create_snapshot)
         action_layout.addWidget(btn_create)
 
         btn_delete = QPushButton(self.tr("🗑️ Delete Selected"))
+        btn_delete.setAccessibleName(self.tr("Delete Selected"))
         btn_delete.clicked.connect(self._delete_snapshot)
         action_layout.addWidget(btn_delete)
 
         btn_refresh = QPushButton(self.tr("🔄 Refresh"))
+        btn_refresh.setAccessibleName(self.tr("Refresh"))
         btn_refresh.clicked.connect(self._refresh_all)
         action_layout.addWidget(btn_refresh)
 
@@ -88,6 +91,7 @@ class SnapshotTab(BaseTab):
         snap_group.setLayout(sl_layout)
 
         self.snap_table = QTableWidget()
+        self.snap_table.setAccessibleName(self.tr("Snapshot Timeline"))
         self.snap_table.setColumnCount(5)
         self.snap_table.setHorizontalHeaderLabels([
             self.tr("ID"), self.tr("Label"), self.tr("Backend"),

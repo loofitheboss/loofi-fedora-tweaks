@@ -29,6 +29,9 @@ from utils.processes import ProcessManager
 from ui.tab_utils import configure_top_tabs
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -643,6 +646,7 @@ class _ProcessesSubTab(QWidget):
         # Sort controls
         controls_layout.addWidget(QLabel(self.tr("Sort by:")))
         self.sort_combo = QComboBox()
+        self.sort_combo.setAccessibleName(self.tr("Process sort order"))
         self.sort_combo.addItem(self.tr("CPU"), "cpu")
         self.sort_combo.addItem(self.tr("Memory"), "memory")
         self.sort_combo.addItem(self.tr("Name"), "name")
@@ -668,6 +672,7 @@ class _ProcessesSubTab(QWidget):
 
         # Show All / My Processes toggle
         self.btn_toggle_filter = QPushButton(self.tr("My Processes"))
+        self.btn_toggle_filter.setAccessibleName(self.tr("My Processes"))
         self.btn_toggle_filter.setCheckable(True)
         self.btn_toggle_filter.setChecked(False)
         self.btn_toggle_filter.setStyleSheet(f"""
@@ -695,6 +700,7 @@ class _ProcessesSubTab(QWidget):
 
         # Refresh button
         btn_refresh = QPushButton(self.tr("Refresh"))
+        btn_refresh.setAccessibleName(self.tr("Refresh"))
         btn_refresh.setStyleSheet(f"""
             QPushButton {{
                 background-color: {self.COLOR_SURFACE0};
@@ -838,7 +844,7 @@ class _ProcessesSubTab(QWidget):
             try:
                 selected_pid = int(current_item.text(0))
             except (ValueError, TypeError):
-                pass
+                logger.debug("Failed to parse selected process PID", exc_info=True)
 
         # Populate tree
         self.process_tree.clear()

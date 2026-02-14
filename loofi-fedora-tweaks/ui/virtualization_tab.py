@@ -60,6 +60,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
         self.output_text.setMaximumHeight(120)
+        self.output_text.setAccessibleName(self.tr("Virtualization output log"))
 
         # ---- Top banner: virt status summary ----
         self.banner_label = QLabel(self.tr("Loading virtualization status..."))
@@ -110,10 +111,12 @@ class VirtualizationTab(QWidget, PluginInterface):
         # Toolbar
         toolbar = QHBoxLayout()
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh VM list"))
         refresh_btn.clicked.connect(self._refresh_vm_list)
         toolbar.addWidget(refresh_btn)
 
         quick_create_btn = QPushButton(self.tr("Quick Create"))
+        quick_create_btn.setAccessibleName(self.tr("Quick Create VM"))
         quick_create_btn.clicked.connect(self._show_quick_create_dialog)
         toolbar.addWidget(quick_create_btn)
 
@@ -144,18 +147,22 @@ class VirtualizationTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         start_btn = QPushButton(self.tr("Start"))
+        start_btn.setAccessibleName(self.tr("Start VM"))
         start_btn.clicked.connect(self._start_selected_vm)
         btn_layout.addWidget(start_btn)
 
         stop_btn = QPushButton(self.tr("Stop"))
+        stop_btn.setAccessibleName(self.tr("Stop VM"))
         stop_btn.clicked.connect(self._stop_selected_vm)
         btn_layout.addWidget(stop_btn)
 
         force_stop_btn = QPushButton(self.tr("Force Stop"))
+        force_stop_btn.setAccessibleName(self.tr("Force Stop VM"))
         force_stop_btn.clicked.connect(self._force_stop_selected_vm)
         btn_layout.addWidget(force_stop_btn)
 
         delete_btn = QPushButton(self.tr("Delete"))
+        delete_btn.setAccessibleName(self.tr("Delete VM"))
         delete_btn.clicked.connect(self._delete_selected_vm)
         btn_layout.addWidget(delete_btn)
 
@@ -249,31 +256,38 @@ class VirtualizationTab(QWidget, PluginInterface):
         form = QFormLayout(dialog)
 
         name_edit = QLineEdit()
+        name_edit.setAccessibleName(self.tr("VM name"))
         name_edit.setPlaceholderText("my-vm")
         form.addRow(self.tr("VM Name:"), name_edit)
 
         flavor_combo = QComboBox()
+        flavor_combo.setAccessibleName(self.tr("VM flavour"))
         for key, flavor in VM_FLAVORS.items():
             flavor_combo.addItem(flavor["label"], key)
         form.addRow(self.tr("Flavour:"), flavor_combo)
 
         ram_spin = QSpinBox()
+        ram_spin.setAccessibleName(self.tr("RAM"))
         ram_spin.setRange(512, 65536)
         ram_spin.setSingleStep(512)
         ram_spin.setSuffix(" MB")
         form.addRow(self.tr("RAM:"), ram_spin)
 
         vcpu_spin = QSpinBox()
+        vcpu_spin.setAccessibleName(self.tr("Virtual CPUs"))
         vcpu_spin.setRange(1, 32)
         form.addRow(self.tr("vCPUs:"), vcpu_spin)
 
         disk_spin = QSpinBox()
+        disk_spin.setAccessibleName(self.tr("Disk size"))
         disk_spin.setRange(5, 500)
         disk_spin.setSuffix(" GB")
         form.addRow(self.tr("Disk:"), disk_spin)
 
         iso_edit = QLineEdit()
+        iso_edit.setAccessibleName(self.tr("ISO file path"))
         iso_browse = QPushButton(self.tr("Browse..."))
+        iso_browse.setAccessibleName(self.tr("Browse ISO"))
         iso_layout = QHBoxLayout()
         iso_layout.addWidget(iso_edit)
         iso_layout.addWidget(iso_browse)
@@ -301,7 +315,9 @@ class VirtualizationTab(QWidget, PluginInterface):
 
         btn_layout = QHBoxLayout()
         create_btn = QPushButton(self.tr("Create"))
+        create_btn.setAccessibleName(self.tr("Create VM"))
         cancel_btn = QPushButton(self.tr("Cancel"))
+        cancel_btn.setAccessibleName(self.tr("Cancel"))
         btn_layout.addStretch()
         btn_layout.addWidget(create_btn)
         btn_layout.addWidget(cancel_btn)
@@ -364,6 +380,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         layout.addWidget(checklist_group)
 
         check_btn = QPushButton(self.tr("Check Prerequisites"))
+        check_btn.setAccessibleName(self.tr("Check Prerequisites"))
         check_btn.clicked.connect(self._check_vfio_prerequisites)
         layout.addWidget(check_btn)
 
@@ -374,6 +391,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         gpu_layout.addWidget(self.gpu_list)
 
         detect_btn = QPushButton(self.tr("Detect GPUs"))
+        detect_btn.setAccessibleName(self.tr("Detect GPUs"))
         detect_btn.clicked.connect(self._detect_gpus)
         gpu_layout.addWidget(detect_btn)
         layout.addWidget(gpu_group)
@@ -389,6 +407,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         plan_layout.addWidget(self.plan_tree)
 
         gen_plan_btn = QPushButton(self.tr("Generate Plan for Selected GPU"))
+        gen_plan_btn.setAccessibleName(self.tr("Generate Plan for Selected GPU"))
         gen_plan_btn.clicked.connect(self._generate_vfio_plan)
         plan_layout.addWidget(gen_plan_btn)
         layout.addWidget(plan_group)
@@ -461,6 +480,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         self._refresh_base_status()
 
         create_base_btn = QPushButton(self.tr("Create Base Image..."))
+        create_base_btn.setAccessibleName(self.tr("Create Base Image"))
         create_base_btn.clicked.connect(self._create_base_image)
         base_layout.addWidget(create_base_btn)
         layout.addWidget(base_group)
@@ -474,10 +494,12 @@ class VirtualizationTab(QWidget, PluginInterface):
 
         disp_toolbar = QHBoxLayout()
         launch_btn = QPushButton(self.tr("Launch Disposable"))
+        launch_btn.setAccessibleName(self.tr("Launch Disposable VM"))
         launch_btn.clicked.connect(self._launch_disposable)
         disp_toolbar.addWidget(launch_btn)
 
         refresh_disp_btn = QPushButton(self.tr("Refresh"))
+        refresh_disp_btn.setAccessibleName(self.tr("Refresh disposable VMs"))
         refresh_disp_btn.clicked.connect(self._refresh_disposable_list)
         disp_toolbar.addWidget(refresh_disp_btn)
 

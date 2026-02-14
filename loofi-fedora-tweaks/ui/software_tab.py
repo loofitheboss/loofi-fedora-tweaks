@@ -13,12 +13,10 @@ from PyQt6.QtWidgets import (
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from utils.software_utils import SoftwareUtils
 from utils.command_runner import CommandRunner
 from utils.batch_ops import BatchOpsManager
 from core.plugins.metadata import PluginMetadata
-
-import shlex
-import subprocess
 
 
 # ---------------------------------------------------------------------------
@@ -46,6 +44,7 @@ class _ApplicationsSubTab(QWidget):
         header_layout.addWidget(QLabel(self.tr("Essential Applications")))
         header_layout.addStretch()
         btn_refresh = QPushButton(self.tr("Refresh Status"))
+        btn_refresh.setAccessibleName(self.tr("Refresh app status"))
         btn_refresh.clicked.connect(self.refresh_list)
         header_layout.addWidget(btn_refresh)
         layout.addLayout(header_layout)
@@ -151,6 +150,7 @@ class _ApplicationsSubTab(QWidget):
         lbl_desc = QLabel(app_desc)
 
         btn_install = QPushButton(self.tr("Install"))
+        btn_install.setAccessibleName(self.tr("Install {}").format(app_name))
 
         # Check if installed
         chk_cmd = app_data.get("check_cmd")
@@ -178,14 +178,7 @@ class _ApplicationsSubTab(QWidget):
 
     def check_installed(self, cmd):
         """Run a check command silently to determine installation status."""
-        try:
-            subprocess.run(
-                shlex.split(cmd), check=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            )
-            return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return False
+        return SoftwareUtils.is_check_command_satisfied(cmd)
 
     def install_app(self, app_data):
         self.output_area.clear()
@@ -295,12 +288,14 @@ class _RepositoriesSubTab(QWidget):
         self.btn_enable_fusion = QPushButton(
             self.tr("Enable RPM Fusion (Free & Non-Free)")
         )
+        self.btn_enable_fusion.setAccessibleName(self.tr("Enable RPM Fusion"))
         self.btn_enable_fusion.clicked.connect(self.enable_rpm_fusion)
         fusion_layout.addWidget(self.btn_enable_fusion)
 
         self.btn_install_codecs = QPushButton(
             self.tr("Install Multimedia Codecs (ffmpeg, gstreamer, etc.)")
         )
+        self.btn_install_codecs.setAccessibleName(self.tr("Install codecs"))
         self.btn_install_codecs.clicked.connect(self.install_multimedia_codecs)
         fusion_layout.addWidget(self.btn_install_codecs)
 
@@ -314,6 +309,7 @@ class _RepositoriesSubTab(QWidget):
         self.btn_enable_flathub = QPushButton(
             self.tr("Enable Flathub Remote")
         )
+        self.btn_enable_flathub.setAccessibleName(self.tr("Enable Flathub"))
         self.btn_enable_flathub.clicked.connect(self.enable_flathub)
         flathub_layout.addWidget(self.btn_enable_flathub)
 
@@ -329,6 +325,7 @@ class _RepositoriesSubTab(QWidget):
         self.btn_copr_loofi = QPushButton(
             self.tr("Enable Loofi Fedora Tweaks COPR")
         )
+        self.btn_copr_loofi.setAccessibleName(self.tr("Enable Loofi COPR"))
         self.btn_copr_loofi.clicked.connect(
             lambda: self.run_command(
                 "pkexec",
