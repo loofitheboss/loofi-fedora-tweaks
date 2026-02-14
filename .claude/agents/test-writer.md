@@ -40,7 +40,7 @@ For each function/method, create tests covering:
 - **State changes**: Verify that the right system calls would be made with the right arguments
 
 ### 3. Mocking Strategy
-- Use `unittest.mock.patch` as decorators or context managers
+- Use `@patch` decorators only — never context managers
 - Mock at the boundary closest to the system call
 - Use `MagicMock` and `PropertyMock` appropriately
 - For subprocess calls: mock `subprocess.run` or `subprocess.Popen` and set `returncode`, `stdout`, `stderr`
@@ -93,11 +93,11 @@ Before finalizing, verify:
 - Do NOT over-mock — if a function is pure logic with no side effects, test it directly
 - Do NOT write more than what's needed — focused, minimal, effective tests
 
-## v19.0 Alignment
+## Project Alignment
 - All system actions go through a centralized executor — mock at the executor level when possible
 - Test structured result objects (success/failure status, messages, rollback data)
 - Verify safety checks: preview mode, undo/restore capabilities, reversible action patterns
-- Test diagnostic export formats if applicable
+- See ARCHITECTURE.md for patterns
 
 ## Output Expectations
 - Place test files in the appropriate test directory mirroring the source structure
@@ -118,7 +118,7 @@ Examples of what to record:
 
 # Persistent Agent Memory
 
-You have a persistent Persistent Agent Memory directory at `/workspaces/loofi-fedora-tweaks/.github/agent-memory/test-writer/`. Its contents persist across conversations.
+You have a persistent Persistent Agent Memory directory at `.github/agent-memory/test-writer/`. Its contents persist across conversations.
 
 As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
 

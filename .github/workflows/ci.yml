@@ -28,6 +28,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
+  COVERAGE_THRESHOLD: "74"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/ci.yml
@@ -97,7 +98,7 @@ jobs:
             --timeout=60 \
             --cov=loofi-fedora-tweaks \
             --cov-report=term-missing \
-            --cov-fail-under=74 \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }} \
             --junitxml=test-results.xml
       - name: Upload test results
         if: always()
@@ -131,7 +132,6 @@ jobs:
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install bandit
       - run: bandit -r loofi-fedora-tweaks/ -ll -ii --skip B103,B104,B108,B310,B404,B603,B602 -f json -o bandit-report.json
-        continue-on-error: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,5 +1,24 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "loofi-workflow": {
+      "type": "local",
+      "command": ["python3", "scripts/mcp_workflow_server.py"],
+      "enabled": true,
+      "timeout": 10000
+    },
+    "loofi-agent-sync": {
+      "type": "local",
+      "command": ["python3", "scripts/mcp_agent_sync_server.py"],
+      "enabled": true,
+      "timeout": 10000
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    }
+  },
   "permission": {
     "bash": {
       "*": "ask",
@@ -8,7 +27,16 @@
       "python -m pytest *": "allow",
       "python -m flake8 *": "allow",
       "python -m mypy *": "allow",
+      "python3 -m pytest *": "allow",
+      "python3 -m flake8 *": "allow",
+      "python3 -m mypy *": "allow",
       "PYTHONPATH=* python -m pytest *": "allow",
+      "PYTHONPATH=* python3 -m pytest *": "allow",
+      "just *": "allow",
+      "just": "allow",
+      "python3 scripts/project_stats.py *": "allow",
+      "python3 scripts/sync_ai_adapters.py *": "allow",
+      "python3 scripts/bump_version.py --dry-run *": "allow",
       "grep *": "allow",
       "rg *": "allow",
       "ls *": "allow",
@@ -48,5 +76,6 @@
       "uninstall.sh": "deny",
       ".env*": "deny"
     }
-  }
+  },
+  "instructions": ["AGENTS.md"]
 }

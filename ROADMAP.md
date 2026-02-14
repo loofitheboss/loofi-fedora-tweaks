@@ -27,11 +27,82 @@
 | v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
 | v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
 | v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
-| v38.0 | Clarity | ACTIVE | UX polish, theme correctness, stability improvements |
+| v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
+| v39.0 | Prism | DONE | Deprecated import migration, inline style elimination |
+| v40.0 | Foundation | DONE | Correctness & safety hardening, zero shell injection |
 
 ---
 
-## [ACTIVE] v38.0 "Clarity" — UX Polish & Theme Correctness
+## [DONE] v40.0 "Foundation" — Correctness & Safety Hardening
+
+### Scope
+
+Pure hardening release. Every subprocess call gets an explicit timeout,
+every logger call uses `%s` formatting, every `pkexec sh -c` invocation
+refactored to atomic commands, all hardcoded `dnf` references route
+through `PrivilegedCommand.dnf()` or `SystemManager.get_package_manager()`.
+
+### Deliverables
+
+- [x] Zero `pkexec sh -c` patterns (10 calls refactored to atomic commands)
+- [x] Zero hardcoded `dnf` (13 references replaced with SystemManager)
+- [x] Zero f-string logger calls (21 calls converted to `%s`)
+- [x] Zero bare exception handlers (141 blocks now log exceptions)
+- [x] Subprocess timeout enforcement on all remaining calls
+- [x] AdvancedOps return types (4 methods → OperationResult dataclass)
+- [x] Stale import migrations (utils.system → services.system)
+- [x] Release notes + version bump
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Builder | Shell injection elimination, dnf replacement, timeout enforcement |
+| CodeGen | Logger formatting, exception handling |
+| Guardian | Stale import fixes, migration tests |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v39.0 Prism (clean import baseline)
+
+---
+
+## [DONE] v39.0 "Prism" — Import Migration & Style Elimination
+
+### Scope
+
+Complete the services layer migration from v23.0. Remove all deprecated
+`utils/` import shims, replace 175+ inline `setStyleSheet` calls with
+QSS objectNames, and enforce zero DeprecationWarnings.
+
+### Deliverables
+
+- [x] Zero deprecated imports (27 production + 13 test files migrated)
+- [x] Zero inline styles (175+ setStyleSheet → setObjectName + QSS rules)
+- [x] Zero DeprecationWarnings (strict enforcement)
+- [x] 9 shim modules removed
+- [x] ~600 new QSS rules in both modern.qss and light.qss
+- [x] Migration verification tests (test_v39_prism.py)
+- [x] Release notes + version bump
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Builder | Import migration, shim removal |
+| CodeGen | Style-to-QSS conversion |
+| Sculptor | QSS rules authoring |
+| Guardian | Migration tests, DeprecationWarning enforcement |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v38.0 Clarity (theme correctness baseline)
+
+---
+
+## [DONE] v38.0 "Clarity" — UX Polish & Theme Correctness
 
 ### Scope
 
@@ -61,8 +132,8 @@ hardening. No new major features — refine what exists.
 - [x] BaseTab: table objectName, optional color params, Copy/Save/Cancel toolbar
 - [x] Undo button in status bar + toast notification system
 - [x] Clickable breadcrumb category (QPushButton with hover underline)
-- [ ] Tests for all changes
-- [ ] CHANGELOG + README + release notes
+- [x] Tests for all changes
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 

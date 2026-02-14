@@ -82,7 +82,7 @@ def execute_command(cmd: List[str], check: bool = True) -> CommandResult:
     """Centralized command executor with structured results."""
     logger.debug("Executing: %s", " ".join(cmd))
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=check)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=check, timeout=30)
         return CommandResult.ok(stdout=result.stdout, stderr=result.stderr)
     except subprocess.CalledProcessError as e:
         return CommandResult.fail(message=str(e), stderr=e.stderr)
@@ -99,9 +99,9 @@ Follow this exact workflow for every task:
 
 ## Testing Standards
 
-- Place tests alongside or in a `tests/` directory mirroring `utils/` structure
-- Use `pytest` style
-- Mock all system calls using `unittest.mock.patch`
+- Use `unittest.TestCase` classes
+- Use `@patch` decorators (never context managers)
+- Mock all system calls using `@patch`
 - Test both success and failure paths
 - Test dataclass validation and edge cases
 - No root privileges required for any test
@@ -113,12 +113,12 @@ def test_tweak_result_undo_support():
     assert result.success is True
 ```
 
-## v19.0 Alignment
+## Project Alignment
 
-All implementations must align with the v19.0 roadmap priorities:
-- **Preview Changes**: Operations should be inspectable before execution
-- **Undo/Restore**: Always capture previous state
-- **Diagnostics Export**: Structured results enable diagnostics collection
+All implementations must align with the project's architectural principles (see ARCHITECTURE.md):
+- **PrivilegedCommand pattern**: All pkexec operations through PrivilegedCommand builder
+- **Undo/Restore**: Always capture previous state via HistoryManager
+- **Operations tuple**: Return `Tuple[str, List[str], str]` from utils methods
 - **Centralized Executor**: All system actions through one path
 
 ## Boundaries
@@ -152,7 +152,7 @@ Examples of what to record:
 
 # Persistent Agent Memory
 
-You have a persistent Persistent Agent Memory directory at `/workspaces/loofi-fedora-tweaks/.github/agent-memory/backend-builder/`. Its contents persist across conversations.
+You have a persistent Persistent Agent Memory directory at `.github/agent-memory/backend-builder/`. Its contents persist across conversations.
 
 As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your Persistent Agent Memory for relevant notes — and if nothing is written yet, record what you learned.
 

@@ -22,6 +22,8 @@ venv/
 !.vscode/tasks.json
 !.vscode/mcp.json
 !.vscode/mcp.env.example
+# NEVER commit mcp.env — contains secrets (PAT tokens)
+.vscode/mcp.env
 *.swp
 *.swo
 *~

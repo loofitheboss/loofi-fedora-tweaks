@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 38.0.0 "Clarity" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 40.0.0 "Foundation" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -11,7 +11,7 @@
 loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── main.py                   # Entry point — GUI (default), CLI (--cli), Daemon (--daemon)
 ├── version.py                # __version__, __version_codename__, __app_name__
-├── ui/                       # PyQt6 widgets — 26 tabs
+├── ui/                       # PyQt6 widgets — 28 feature tabs + base class
 │   ├── base_tab.py           # BaseTab ABC — shared CommandRunner wiring, output area
 │   ├── *_tab.py              # Feature tabs (inherit BaseTab for command tabs)
 │   ├── main_window.py        # MainWindow with sidebar + lazy-loaded tab stack
@@ -20,7 +20,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── doctor.py             # DependencyDoctor startup check
 │   ├── command_palette.py    # Ctrl+K command palette
 │   └── confirm_dialog.py     # ConfirmActionDialog for dangerous ops
-├── utils/                    # Business logic — 100+ modules
+├── utils/                    # Business logic — 105 modules
 │   ├── commands.py           # PrivilegedCommand builder (pkexec, never sudo)
 │   ├── command_runner.py     # CommandRunner (QProcess async wrapper)
 │   ├── system.py             # SystemManager (is_atomic, get_package_manager)
@@ -45,7 +45,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── plugins/                  # Third-party plugin directory
 └── resources/                # Static resources
 
-tests/                        # 158 test files, 3953+ tests (76.8% coverage)
+tests/                        # 174 test files, 4349 tests (74% coverage)
 scripts/                      # Build, workflow, CI scripts
 config/                       # Global config templates
 docs/                         # User guide, release notes, checklists
@@ -59,7 +59,7 @@ completions/                  # Shell completions (bash, zsh)
 
 | Mode | Flag | Module | Purpose |
 | ------ | ------ | -------- | --------- |
-| **GUI** | (default) | `main.py` → `MainWindow` | PyQt6 desktop app with 26 lazy-loaded tabs |
+| **GUI** | (default) | `main.py` → `MainWindow` | PyQt6 desktop app with 28 lazy-loaded tabs |
 | **CLI** | `--cli` | `cli/main.py` | Subcommands with `--json` output |
 | **Daemon** | `--daemon` | `utils/daemon.py` | Background scheduler |
 
@@ -74,7 +74,7 @@ completions/                  # Shell completions (bash, zsh)
 
 **Key rule**: `utils/operations.py` is the shared API. GUI and CLI are consumers only.
 
-## Tab Layout (26 Tabs)
+## Tab Layout (28 Feature Tabs)
 
 | # | Tab | File | Consolidates |
 | --- | ----- | ------ | ------------- |
@@ -102,8 +102,10 @@ completions/                  # Shell completions (bash, zsh)
 | 22 | Storage | `storage_tab.py` | Disks + Mounts + SMART |
 | 23 | Health Timeline | `health_timeline_tab.py` | System health over time |
 | 24 | Profiles | `profiles_tab.py` | User profiles management |
-| 25 | Agents | `agents_tab.py` | AI agent management |
-| 26 | Settings | `settings_tab.py` | App settings |
+| 25 | Extensions | `extensions_tab.py` | GNOME/KDE extensions browser |
+| 26 | Backup | `backup_tab.py` | Backup wizard + Timeshift/Snapper |
+| 27 | Agents | `agents_tab.py` | AI agent management |
+| 28 | Settings | `settings_tab.py` | App settings |
 
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
@@ -207,7 +209,7 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 - **Both paths**: Test success AND failure
 - **No root**: Tests run in CI without privileges
 - **Path setup**: `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))`
-- **Coverage**: 76.8% current, 80% target (v33)
+- **Coverage**: 74% current, 80% target
 
 ## Adding a Feature
 
@@ -220,10 +222,11 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 
 ## Version Management
 
-Two files MUST stay in sync:
+Three files MUST stay in sync (use `scripts/bump_version.py` for cascade):
 
 - `loofi-fedora-tweaks/version.py` — `__version__`, `__version_codename__`
 - `loofi-fedora-tweaks.spec` — `Version:`
+- `pyproject.toml` — `version`
 
 ## Build & Run
 
