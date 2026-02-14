@@ -8,9 +8,9 @@ Provides:
 - GPU acceleration configuration
 """
 
-import subprocess
-import shutil
 import os
+import shutil
+import subprocess
 from dataclasses import dataclass
 from typing import Optional
 
@@ -140,7 +140,7 @@ class OllamaManager:
 
         try:
             # Try to start background process
-            subprocess.Popen(
+            subprocess.Popen(  # noqa: timeout — fire-and-forget background daemon
                 ["ollama", "serve"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -240,7 +240,7 @@ class OllamaManager:
                     if callback:
                         callback(line.strip())
 
-            process.wait()
+            process.wait(timeout=600)
 
             if process.returncode == 0:
                 return Result(True, f"Model '{model_name}' downloaded successfully")

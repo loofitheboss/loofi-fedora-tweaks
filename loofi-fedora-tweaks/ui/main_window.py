@@ -3,26 +3,39 @@ Main Window - v25.0 "Plugin Architecture"
 26-tab layout sourced from PluginRegistry with sidebar navigation, breadcrumb, and status bar.
 """
 
-from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
-    QStackedWidget, QLabel, QFrame, QTreeWidgetItemIterator, QScrollArea, QPushButton
-)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QShortcut, QKeySequence, QFontMetrics
-
-from ui.lazy_widget import LazyWidget
-from utils.pulse import SystemPulse, PulseThread
-from utils.focus_mode import FocusMode
-from utils.config_manager import ConfigManager
-from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
-from core.plugins import PluginRegistry, PluginInterface
-from core.plugins.metadata import PluginMetadata, CompatStatus
-from core.plugins.registry import CATEGORY_ICONS
-from utils.favorites import FavoritesManager
-from version import __version__
-import os
 import logging
+import os
+
+from core.plugins.metadata import CompatStatus, PluginMetadata
+from core.plugins.registry import CATEGORY_ICONS
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFontMetrics, QKeySequence, QShortcut
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QScrollArea,
+    QStackedWidget,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QTreeWidgetItemIterator,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.config_manager import ConfigManager
+from utils.favorites import FavoritesManager
+from utils.focus_mode import FocusMode
 from utils.log import get_logger
+from utils.pulse import PulseThread, SystemPulse
+from utils.system import (
+    SystemManager,  # noqa: F401  (Backward-compatible symbol for legacy tests)
+)
+from version import __version__
+
+from core.plugins import PluginInterface, PluginRegistry
+from ui.lazy_widget import LazyWidget
 
 logger = get_logger(__name__)
 
@@ -109,7 +122,8 @@ class MainWindow(QMainWindow):
         self.sidebar_search.setPlaceholderText(self.tr("Search tabs..."))
         self.sidebar_search.setClearButtonEnabled(True)
         self.sidebar_search.setAccessibleName(self.tr("Search tabs"))
-        self.sidebar_search.setAccessibleDescription(self.tr("Filter sidebar tabs by name or description"))
+        self.sidebar_search.setAccessibleDescription(
+            self.tr("Filter sidebar tabs by name or description"))
         # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
         search_height = int(self._line_height * 2 + 28)
         self.sidebar_search.setFixedHeight(search_height)
@@ -144,8 +158,10 @@ class MainWindow(QMainWindow):
         self.sidebar.setAnimated(True)
         self.sidebar.currentItemChanged.connect(self.change_page)
         # v31.0: Context menu for favorites
-        self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
+        self.sidebar.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self.sidebar.customContextMenuRequested.connect(
+            self._sidebar_context_menu)
         sidebar_layout.addWidget(self.sidebar)
 
         # Sidebar footer
@@ -272,8 +288,8 @@ class MainWindow(QMainWindow):
 
     def _build_sidebar_from_registry(self, context: dict) -> None:
         """Source all tabs from PluginRegistry. Replaces 26 hardcoded add_page() calls."""
-        from core.plugins.loader import PluginLoader
         from core.plugins.compat import CompatibilityDetector
+        from core.plugins.loader import PluginLoader
 
         detector = CompatibilityDetector()
         loader = PluginLoader(detector=detector)
@@ -417,7 +433,8 @@ class MainWindow(QMainWindow):
         if not category_item:
             category_item = QTreeWidgetItem(self.sidebar)
             category_item.setText(0, cat_label)
-            category_item.setData(0, _ROLE_DESC, category)  # Store raw category name
+            # Store raw category name
+            category_item.setData(0, _ROLE_DESC, category)
             category_item.setExpanded(True)
 
         # Badge suffix
@@ -440,7 +457,8 @@ class MainWindow(QMainWindow):
                 icon=icon,
                 badge=badge,
             )
-            page_widget = self._wrap_page_widget(DisabledPluginPage(placeholder_meta, disabled_reason))
+            page_widget = self._wrap_page_widget(
+                DisabledPluginPage(placeholder_meta, disabled_reason))
             item.setDisabled(True)
             tooltip = disabled_reason if disabled_reason else f"{name} is not available on this system."
             item.setToolTip(0, tooltip)
@@ -467,7 +485,8 @@ class MainWindow(QMainWindow):
         scroll.setObjectName("pageScroll")
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setWidget(widget)
         return scroll
@@ -586,7 +605,8 @@ class MainWindow(QMainWindow):
         # Ctrl+1 through Ctrl+9 - switch to category 1-9
         for i in range(1, 10):
             shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
-            shortcut.activated.connect(lambda idx=i - 1: self._select_category(idx))
+            shortcut.activated.connect(
+                lambda idx=i - 1: self._select_category(idx))
 
         # Ctrl+Tab - next tab
         next_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
@@ -635,7 +655,8 @@ class MainWindow(QMainWindow):
             self.sidebar.setCurrentItem(prev_item)
         else:
             # Wrap around to bottom
-            last_top = self.sidebar.topLevelItem(self.sidebar.topLevelItemCount() - 1)
+            last_top = self.sidebar.topLevelItem(
+                self.sidebar.topLevelItemCount() - 1)
             # Find last visible item
             while last_top.childCount() > 0 and last_top.isExpanded():
                 last_top = last_top.child(last_top.childCount() - 1)
@@ -670,20 +691,21 @@ class MainWindow(QMainWindow):
         )
         self.notif_bell.clicked.connect(self._toggle_notification_panel)
 
-        # Unread count badge
+        # Unread count badge (overlays bell button)
         self._notif_badge = QLabel("0")
         self._notif_badge.setStyleSheet(
             "background-color: #e8556d; color: #0b0e14; border-radius: 8px; "
             "padding: 1px 6px; font-size: 10px; font-weight: bold;"
         )
         self._notif_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._notif_badge.setFixedHeight(16)
         self._notif_badge.setVisible(False)
 
-        # Add bell + badge to breadcrumb bar
+        # Add bell first, then badge — badge appears as overlay to the right
         bc_layout = self._breadcrumb_frame.layout()
         if bc_layout:
-            bc_layout.addWidget(self._notif_badge)
             bc_layout.addWidget(self.notif_bell)
+            bc_layout.addWidget(self._notif_badge)
 
         # Timer to refresh unread count (every 5s)
         from PyQt6.QtCore import QTimer
@@ -702,19 +724,31 @@ class MainWindow(QMainWindow):
             self.notif_panel.hide()
         else:
             self.notif_panel.refresh()
-            # Position below breadcrumb and above status bar
-            x = self.width() - self.notif_panel.width() - 10
+
+            # v35.0 Fortress: Improved edge-clipping prevention
+            panel = self.notif_panel
+            panel_w = panel.PANEL_WIDTH
+            margin = panel.EDGE_MARGIN
             breadcrumb_bottom = self._breadcrumb_frame.geometry().bottom()
-            y = breadcrumb_bottom + 6
-
             status_height = self._status_frame.height() if hasattr(self, "_status_frame") else 0
-            max_y = self.height() - status_height - self.notif_panel.height() - 6
-            y = max(y, 6)
-            y = min(y, max_y)
+            window_w = self.width()
+            window_h = self.height()
 
-            self.notif_panel.move(x, y)
-            self.notif_panel.show()
-            self.notif_panel.raise_()
+            # X: right-aligned, clamped to window edges
+            x = max(margin, window_w - panel_w - margin)
+
+            # Y: below breadcrumb bar
+            y = breadcrumb_bottom + margin
+
+            # Available height: from y to bottom minus status bar and margin
+            available_h = window_h - y - status_height - margin
+            capped_h = max(panel.MIN_HEIGHT, min(
+                panel.sizeHint().height(), available_h, panel.MAX_HEIGHT))
+
+            panel.setFixedHeight(capped_h)
+            panel.move(x, y)
+            panel.show()
+            panel.raise_()
         self._refresh_notif_badge()
 
     def _refresh_notif_badge(self):
@@ -750,7 +784,8 @@ class MainWindow(QMainWindow):
             from utils.update_checker import UpdateChecker
             update_info = UpdateChecker.check()
             if update_info and update_info.is_newer:
-                self._set_tab_status("Maintenance", "warning", "Updates available")
+                self._set_tab_status(
+                    "Maintenance", "warning", "Updates available")
             else:
                 self._set_tab_status("Maintenance", "ok", "Up to date")
         except Exception:
@@ -762,9 +797,11 @@ class MainWindow(QMainWindow):
             usage = DiskManager.get_disk_usage("/")
             if usage and hasattr(usage, 'percent_used'):
                 if usage.percent_used >= 90:
-                    self._set_tab_status("Storage", "error", f"Disk {usage.percent_used:.0f}% full")
+                    self._set_tab_status(
+                        "Storage", "error", f"Disk {usage.percent_used:.0f}% full")
                 elif usage.percent_used >= 75:
-                    self._set_tab_status("Storage", "warning", f"Disk {usage.percent_used:.0f}% used")
+                    self._set_tab_status(
+                        "Storage", "warning", f"Disk {usage.percent_used:.0f}% used")
                 else:
                     self._set_tab_status("Storage", "ok", "Healthy")
         except Exception:
@@ -792,7 +829,8 @@ class MainWindow(QMainWindow):
                 item.setData(0, _ROLE_STATUS, status)
                 if tooltip:
                     existing = item.data(0, _ROLE_DESC) or ""
-                    item.setToolTip(0, f"{existing}\n[{tooltip}]" if existing else tooltip)
+                    item.setToolTip(
+                        0, f"{existing}\n[{tooltip}]" if existing else tooltip)
                 break
             iterator += 1
 
@@ -804,7 +842,11 @@ class MainWindow(QMainWindow):
     def _show_quick_actions(self):
         """Show the Quick Actions bar."""
         try:
-            from ui.quick_actions import QuickActionsBar, QuickActionRegistry, register_default_actions
+            from ui.quick_actions import (
+                QuickActionRegistry,
+                QuickActionsBar,
+                register_default_actions,
+            )
             registry = QuickActionRegistry.instance()
             if not registry.get_all():
                 register_default_actions(registry)
@@ -824,19 +866,22 @@ class MainWindow(QMainWindow):
                 wizard = FirstRunWizard(self)
                 wizard.exec()
             except ImportError:
-                logger.debug("First-run wizard module not available", exc_info=True)
+                logger.debug(
+                    "First-run wizard module not available", exc_info=True)
 
     def setup_tray(self):
-        from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
-        from PyQt6.QtGui import QIcon, QAction
+        from PyQt6.QtGui import QAction, QIcon
+        from PyQt6.QtWidgets import QMenu, QSystemTrayIcon
 
         if QSystemTrayIcon.isSystemTrayAvailable():
             self.tray_icon = QSystemTrayIcon(self)
-            icon_path = os.path.join(os.path.dirname(__file__), "..", "assets", "loofi-fedora-tweaks.png")
+            icon_path = os.path.join(os.path.dirname(
+                __file__), "..", "assets", "loofi-fedora-tweaks.png")
             if os.path.exists(icon_path):
                 self.tray_icon.setIcon(QIcon(icon_path))
             else:
-                self.tray_icon.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
+                self.tray_icon.setIcon(self.style().standardIcon(
+                    self.style().StandardPixmap.SP_ComputerIcon))
 
             tray_menu = QMenu()
             show_action = QAction(self.tr("Show"), self)
@@ -902,7 +947,8 @@ class MainWindow(QMainWindow):
                     try:
                         page.cleanup()
                     except Exception:
-                        logger.debug("Failed to cleanup page on close", exc_info=True)
+                        logger.debug(
+                            "Failed to cleanup page on close", exc_info=True)
             event.accept()
 
     def check_dependencies(self):

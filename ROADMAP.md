@@ -24,6 +24,151 @@
 | v32.0 | Abyss | DONE | Full visual redesign, activity-based categories, Abyss theme |
 | v33.0 | Bastion | DONE | Testing & type safety debt, CI pipeline hardening |
 | v34.0 | Citadel | DONE | Light theme fix, stability hardening, accessibility polish |
+| v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
+| v36.0 | Horizon | ACTIVE | UX safety, performance optimization, navigation polish |
+| v37.0 | Pinnacle | NEXT | Smart features, ecosystem expansion, user-requested enhancements |
+
+---
+
+## [DONE] v35.0 "Fortress" — Security & Privilege Hardening
+
+### Scope
+
+Complete hardening guide Phase 1–2 to unblock future feature development.
+263 subprocess calls across 56 files need timeout enforcement.
+Structured audit logging, parameter validation, and Polkit separation.
+
+- Add `timeout` parameter to all 263 subprocess calls across 56 utils/cli files
+- Implement structured audit logging for all privileged actions
+- Add parameter schema validation to PrivilegedCommand
+- Split monolithic Polkit policy into per-capability policies
+- Add dry-run mode for system mutations
+- Create SECURITY.md with vulnerability disclosure process
+- Deprecate `install.sh` curl-pipe-bash (move to "Advanced" section)
+- Add CLI `run_operation()` timeout enforcement
+- Fix notification panel UI bug (panel shows on init, badge ordering)
+
+### Deliverables
+
+- [x] Subprocess timeout enforcement: all 56 files (263 calls) have `timeout` parameter
+- [x] Audit logger module: `utils/audit.py` with structured JSON logging
+- [x] All privileged actions logged (timestamp, action, params, exit code, stderr hash)
+- [x] PrivilegedCommand parameter validation (schema-based, reject unknown params)
+- [x] Polkit policy split: 10+ granular policies (firewall, network, storage, service, kernel, etc.)
+- [x] Dry-run mode: `--dry-run` flag on CLI, preview mode on GUI confirm dialogs
+- [x] SECURITY.md with disclosure process and supported versions
+- [x] `install.sh` deprecated with warning banner, README updated to recommend RPM/Copr
+- [x] CLI `run_operation()` with configurable timeout (default 300s)
+- [x] Notification panel: starts hidden, proper positioning, bell+badge ordering
+- [x] Tests for all changes (audit, validation, timeouts)
+- [x] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Builder | Subprocess timeouts (56 files), audit logger, parameter validation |
+| CodeGen | Polkit split, dry-run mode, CLI timeout |
+| Guardian | Tests, SECURITY.md, install.sh deprecation |
+| Sculptor | Notification panel UI fix |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v34.0 Citadel (clean stability baseline)
+
+---
+
+## [ACTIVE] v36.0 "Horizon" — UX Safety & Performance
+
+### Scope
+
+Hardening guide Phase 3–4 (API security, UX stabilization) plus performance optimization
+and navigation/UI polish based on user feedback.
+
+- Safe Mode: read-only diagnostics on first launch, explicit toggle for mutations
+- Risk classification per tweak (Low/Medium/High) with revert instructions
+- Rollback/undo support: config backup + snapshot integration
+- API security: rate limiting, `--unsafe-expose` flag, read-only endpoint separation
+- Performance: startup profiling, lazy import optimization, memory reduction
+- Navigation polish: sidebar rendering, category smoothness, breadcrumb improvements
+- UI polish: consistent spacing, widget alignment, responsive layouts
+
+### Deliverables
+
+- [ ] Safe Mode toggle (read-only by default on first launch)
+- [ ] Risk classification system: `utils/risk.py` with Low/Medium/High per action
+- [ ] Revert instructions shown for Medium/High risk operations
+- [ ] Config backup before destructive operations (automatic)
+- [ ] API rate limiting on auth endpoints
+- [ ] `--unsafe-expose` flag required for non-localhost binding
+- [ ] Read-only vs privileged API endpoint separation
+- [ ] Startup time profiling and optimization (target: <2s cold start)
+- [ ] Lazy import audit: defer heavy imports (PyQt6 submodules, optional utils)
+- [ ] Sidebar navigation polish (smooth scrolling, hover states, collapse animation)
+- [ ] Breadcrumb bar layout improvements
+- [ ] Coverage ≥ 80% (complete v33 deliverable)
+- [ ] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Builder | Safe mode, risk classification, config backup, API security |
+| CodeGen | Performance optimization, lazy imports |
+| Sculptor | Navigation polish, sidebar, breadcrumb improvements |
+| Guardian | Tests, coverage push to 80% |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v35.0 Fortress (hardening gate cleared)
+
+---
+
+## [NEXT] v37.0 "Pinnacle" — Smart Features & Ecosystem
+
+### Scope
+
+With hardening complete and UX polished, expand with user-requested features
+focused on practical Fedora system management.
+
+- Smart Update Manager: dependency conflict preview, update scheduling, rollback on failure
+- GNOME/KDE Extension Manager: browse, install, enable/disable extensions from app
+- Flatpak Manager improvements: size visualization, permission viewer, cleanup suggestions
+- Boot Customization: GRUB theme, timeout, default kernel selection
+- Wayland-aware tweaks: display config, scaling, fractional scaling
+- System Backup Wizard: guided backup with Timeshift/Snapper integration
+- Plugin ecosystem: community plugin showcase, plugin quality ratings
+- Onboarding improvements: interactive first-run wizard, guided system check
+
+### Deliverables
+
+- [ ] Smart Update Manager tab section (conflict preview, scheduling, rollback)
+- [ ] Extension manager: GNOME Shell extensions + KDE widgets browser
+- [ ] Flatpak Manager: size treemap, permission audit, orphan cleanup
+- [ ] Boot config: GRUB theme selector, timeout slider, default kernel picker
+- [ ] Wayland display config: scaling, fractional scaling, multi-monitor layout
+- [ ] System Backup Wizard: step-by-step guided backup setup
+- [ ] Plugin showcase: curated community plugins in marketplace tab
+- [ ] First-run wizard v2: interactive system health check + recommended actions
+- [ ] Tests for all new features
+- [ ] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Arkitekt | Feature architecture design |
+| Builder | Update manager, extension manager, Flatpak manager, boot config backends |
+| Sculptor | UI tabs, wizard v2, plugin showcase |
+| CodeGen | Wayland tweaks, backup wizard |
+| Guardian | Tests for all features |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v36.0 Horizon (UX safety and performance baseline)
 
 ---
 

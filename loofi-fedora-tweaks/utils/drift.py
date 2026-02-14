@@ -252,7 +252,8 @@ class DriftDetector:
             # Try rpm-ostree first
             result = subprocess.run(
                 ["rpm-ostree", "status", "--json"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
             if result.returncode == 0:
                 import json
@@ -264,7 +265,8 @@ class DriftDetector:
             # Fallback: get manually installed packages
             result = subprocess.run(
                 ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
             if result.returncode == 0:
                 return result.stdout.strip().split("\n")[:100]  # Limit
@@ -278,7 +280,8 @@ class DriftDetector:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "list-unit-files", "--state=enabled", "--no-legend"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=60,
             )
             if result.returncode == 0:
                 services = []
@@ -312,7 +315,8 @@ class DriftDetector:
             try:
                 result = subprocess.run(
                     ["sysctl", "-n", key],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False,
+                    timeout=15,
                 )
                 if result.returncode == 0:
                     values.append(f"{key}={result.stdout.strip()}")

@@ -17,7 +17,6 @@ from typing import Optional
 
 from utils.containers import Result
 
-
 SERVICE_TYPE = "_loofi._tcp.local."
 SERVICE_PORT = 53317  # Same as LocalSend for compatibility
 BROADCAST_INTERVAL = 30  # seconds
@@ -36,7 +35,8 @@ class PeerDevice:
     platform: str          # "linux", "android", etc.
     version: str           # Loofi version
     last_seen: float       # timestamp
-    capabilities: list = field(default_factory=list)  # ["clipboard", "filedrop", "teleport"]
+    # ["clipboard", "filedrop", "teleport"]
+    capabilities: list = field(default_factory=list)
 
 
 class MeshDiscovery:
@@ -185,7 +185,8 @@ class MeshDiscovery:
                 platform=txt_fields.get("platform", "unknown"),
                 version=txt_fields.get("version", ""),
                 last_seen=now,
-                capabilities=txt_fields.get("capabilities", "").split(",") if txt_fields.get("capabilities") else [],
+                capabilities=txt_fields.get("capabilities", "").split(
+                    ",") if txt_fields.get("capabilities") else [],
             )
             peers.append(peer)
 
@@ -218,7 +219,7 @@ class MeshDiscovery:
         ] + txt_args
 
         try:
-            cls._publish_process = subprocess.Popen(
+            cls._publish_process = subprocess.Popen(  # noqa: timeout — long-running daemon
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

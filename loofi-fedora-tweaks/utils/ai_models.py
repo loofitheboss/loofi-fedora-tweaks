@@ -9,8 +9,8 @@ Provides:
 - Installed model listing and RAM estimation
 """
 
-import subprocess
 import shutil
+import subprocess
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -201,7 +201,7 @@ class AIModelManager:
                     if callback:
                         callback(stripped)
 
-            process.wait()
+            process.wait(timeout=600)
 
             if process.returncode == 0:
                 return Result(
@@ -210,7 +210,8 @@ class AIModelManager:
                     {"model_id": model_id},
                 )
             else:
-                tail = " ".join(output_lines[-3:]) if output_lines else "Unknown error"
+                tail = " ".join(
+                    output_lines[-3:]) if output_lines else "Unknown error"
                 return Result(False, f"Download failed: {tail}")
 
         except FileNotFoundError:

@@ -83,7 +83,8 @@ class ConfigManager:
         try:
             result = subprocess.run(
                 ["dnf", "repolist", "--enabled", "-q"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
             for line in result.stdout.strip().split("\n")[1:]:  # Skip header
                 if line.strip():
@@ -101,7 +102,8 @@ class ConfigManager:
         try:
             result = subprocess.run(
                 ["flatpak", "list", "--app", "--columns=application"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
             apps = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
         except (subprocess.SubprocessError, OSError) as e:

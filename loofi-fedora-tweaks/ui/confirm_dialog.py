@@ -21,12 +21,17 @@ Usage::
 """
 
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QCheckBox, QFrame,
+    QCheckBox,
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
 )
-
-from utils.settings import SettingsManager
 from utils.log import get_logger
+from utils.settings import SettingsManager
 
 logger = get_logger(__name__)
 
@@ -41,12 +46,14 @@ class ConfirmActionDialog(QDialog):
         description: str = "",
         undo_hint: str = "",
         offer_snapshot: bool = False,
+        command_preview: str = "",
     ):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Confirm Action"))
         self.setMinimumWidth(440)
         self.setMaximumWidth(600)
         self._snapshot_requested = False
+        self._command_preview = command_preview
 
         layout = QVBoxLayout(self)
         layout.setSpacing(16)
@@ -106,12 +113,38 @@ class ConfirmActionDialog(QDialog):
             layout.addWidget(self.snapshot_cb)
 
         # Don't ask again checkbox
-        self.dont_ask_cb = QCheckBox(self.tr("Don't ask for confirmation again"))
+        self.dont_ask_cb = QCheckBox(
+            self.tr("Don't ask for confirmation again"))
         self.dont_ask_cb.setStyleSheet("font-size: 11px; color: #5c6578;")
         layout.addWidget(self.dont_ask_cb)
 
+        # Command preview area (hidden by default, v35.0)
+        self._preview_area = None
+        if command_preview:
+            self._preview_area = QTextEdit()
+            self._preview_area.setReadOnly(True)
+            self._preview_area.setPlainText(command_preview)
+            self._preview_area.setStyleSheet(
+                "QTextEdit { background-color: #0b0e14; color: #c8d0e0; "
+                "border: 1px solid #2d3348; border-radius: 6px; "
+                "font-family: monospace; font-size: 12px; padding: 8px; }"
+            )
+            self._preview_area.setMaximumHeight(100)
+            self._preview_area.setVisible(False)
+            layout.addWidget(self._preview_area)
+
         # Buttons
         btn_row = QHBoxLayout()
+
+        # Preview button (v35.0 Fortress)
+        if command_preview:
+            preview_btn = QPushButton(self.tr("🔍 Preview"))
+            preview_btn.setMinimumWidth(90)
+            preview_btn.setToolTip(
+                self.tr("Show the exact command that will run"))
+            preview_btn.clicked.connect(self._toggle_preview)
+            btn_row.addWidget(preview_btn)
+
         btn_row.addStretch()
 
         cancel_btn = QPushButton(self.tr("Cancel"))
@@ -135,13 +168,21 @@ class ConfirmActionDialog(QDialog):
                 mgr.set("confirm_dangerous_actions", False)
                 mgr.save()
             except Exception:
-                logger.debug("Failed to save confirmation preference", exc_info=True)
+                logger.debug(
+                    "Failed to save confirmation preference", exc_info=True)
 
         # Record snapshot request
         if self.snapshot_cb and self.snapshot_cb.isChecked():
             self._snapshot_requested = True
 
         self.accept()
+
+    def _toggle_preview(self):
+        """Toggle the command preview area visibility."""
+        if self._preview_area:
+            visible = self._preview_area.isVisible()
+            self._preview_area.setVisible(not visible)
+            self.adjustSize()
 
     @property
     def snapshot_requested(self) -> bool:
@@ -156,6 +197,7 @@ class ConfirmActionDialog(QDialog):
         undo_hint: str = "",
         offer_snapshot: bool = False,
         force: bool = False,
+        command_preview: str = "",
     ) -> bool:
         """
         Convenience method to show a confirmation dialog.
@@ -163,6 +205,7 @@ class ConfirmActionDialog(QDialog):
         Returns True if the user confirmed, False if cancelled.
         If ``confirm_dangerous_actions`` is disabled in settings and
         ``force`` is False, returns True immediately (user opted out).
+        ``command_preview`` (v35.0): optional command string to show via Preview button.
         """
         if not force:
             try:
@@ -170,7 +213,8 @@ class ConfirmActionDialog(QDialog):
                 if not mgr.get("confirm_dangerous_actions"):
                     return True
             except Exception:
-                logger.debug("Failed to read confirmation preference", exc_info=True)
+                logger.debug(
+                    "Failed to read confirmation preference", exc_info=True)
 
         dialog = ConfirmActionDialog(
             parent=parent,
@@ -178,5 +222,6 @@ class ConfirmActionDialog(QDialog):
             description=description,
             undo_hint=undo_hint,
             offer_snapshot=offer_snapshot,
+            command_preview=command_preview,
         )
         return dialog.exec() == QDialog.DialogCode.Accepted

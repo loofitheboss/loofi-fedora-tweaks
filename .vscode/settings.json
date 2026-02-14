@@ -1,4 +1,6 @@
 {
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.shellIntegration.decorationsEnabled": "both",
     "chatgpt.openOnStartup": true,
     "claudeCode.allowDangerouslySkipPermissions": true,
     "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,

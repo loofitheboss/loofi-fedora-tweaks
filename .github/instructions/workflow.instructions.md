@@ -23,6 +23,15 @@ Every task entry must include: `ID:`, `Files:`, `Dep:`, `Agent:`, `Description:`
 - Do NOT close a task without passing its `Tests:` field
 - Do NOT release without `CHANGELOG`, `README`, and release notes
 
+### Stabilization Gate (MANDATORY)
+See `.github/instructions/system_hardening_and_stabilization_guide.md` for full details.
+- **No new major features** until Phase 1–2 stabilization is complete
+- All privileged actions must use named actions with parameter schema validation
+- All subprocess calls must have `timeout` enforcement
+- All privileged actions must be audit-logged (timestamp, action, params, exit code)
+- Never expand root-level capability without: validation, audit log, rollback strategy
+- If unsure, default to restrictive behavior
+
 ### Current State
 - **Done**: v33.0.0 "Bastion"
 - **Active/Next**: v33.0 (Testing & CI Hardening)
@@ -58,6 +67,8 @@ cmd = [binary] + args  # ALWAYS unpack — never pass tuple to subprocess
 - Use `SystemManager.get_package_manager()` — never hardcode `dnf`
 - Use `pkexec` only — never `sudo`
 - `dnf()` adds `-y` internally — don't duplicate
+- All subprocess calls MUST include `timeout` parameter
+- Privileged actions must be audit-logged (see hardening guide Phase 2)
 
 ### B. Async UI Operations
 ```python

@@ -9,10 +9,11 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 
 - `ARCHITECTURE.md` — Canonical architecture, layer rules, tab layout, patterns
 - `ROADMAP.md` — Version scope, status, deliverables
+- `.github/instructions/system_hardening_and_stabilization_guide.md` — **MANDATORY** stabilization rules (security, privileges, packaging)
 - `.github/agents/` — 8 VS Code agents (canonical definitions)
 - `.github/claude-agents/` — 7 Claude agents (adapters, synced via sync_ai_adapters.py)
 - `AGENTS.md` — Quick reference for agent system
-- `.github/instructions/` — AI instructions (primary, workflow, test, copilot)
+- `.github/instructions/` — AI instructions (primary, workflow, test, copilot, hardening)
 
 ## TOKEN DISCIPLINE (CRITICAL)
 
@@ -42,6 +43,15 @@ Canonical definitions live in `.github/agents/*.agent.md`. Claude-specific adapt
 2. For complex features: delegate to project-coordinator agent
 3. For simple tasks: act directly
 4. Always follow existing patterns in codebase
+
+## STABILIZATION DIRECTIVE (PRIORITY)
+See `.github/instructions/system_hardening_and_stabilization_guide.md` for full details.
+- **No new major features** until Phase 1–2 stabilization is complete
+- Refactor before expanding. Safety over velocity.
+- Never expand root-level capability without: validation, audit log, rollback strategy
+- All privileged actions must use named actions with parameter schema validation
+- All subprocess calls must have timeout enforcement
+- If unsure, default to restrictive behavior
 
 ## RELEASE RULES
 

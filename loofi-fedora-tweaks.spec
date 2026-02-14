@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        34.0.0
+Version:        36.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -57,6 +57,12 @@ chmod +x "%{buildroot}/usr/bin/%{name}"
 
 install -m 644 %{name}.desktop "%{buildroot}/usr/share/applications/"
 install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.firewall.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.network.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.storage.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.service-manage.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.kernel.policy "%{buildroot}/usr/share/polkit-1/actions/"
+install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.security.policy "%{buildroot}/usr/share/polkit-1/actions/"
 install -m 644 loofi-fedora-tweaks/config/loofi-fedora-tweaks.service "%{buildroot}/usr/lib/systemd/user/"
 install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/usr/share/icons/hicolor/128x128/apps/"
 
@@ -66,6 +72,12 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 %attr(755,root,root) /usr/bin/%{name}
 /usr/share/applications/%{name}.desktop
 /usr/share/polkit-1/actions/org.loofi.fedora-tweaks.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.firewall.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.network.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.storage.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.service-manage.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.kernel.policy
+/usr/share/polkit-1/actions/org.loofi.fedora-tweaks.security.policy
 /usr/lib/systemd/user/loofi-fedora-tweaks.service
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 

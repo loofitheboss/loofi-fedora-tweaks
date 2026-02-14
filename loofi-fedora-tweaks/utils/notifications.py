@@ -57,7 +57,7 @@ class NotificationManager:
                 body
             ]
 
-            subprocess.run(cmd, check=False, capture_output=True)
+            subprocess.run(cmd, check=False, capture_output=True, timeout=60)
             return True
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to send notification: %s", e)

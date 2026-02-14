@@ -45,7 +45,8 @@ class Daemon:
             # Check using upower
             result = subprocess.run(
                 ["upower", "-i", "/org/freedesktop/UPower/devices/line_power_AC0"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=60,
             )
 
             if "online: yes" in result.stdout.lower():

@@ -96,3 +96,32 @@ class ConfigError(LoofiError):
             hint="Delete the configuration file and restart to regenerate defaults.",
             recoverable=True,
         )
+
+
+class CommandTimeoutError(LoofiError):
+    """A system command exceeded its time limit."""
+
+    def __init__(self, cmd="", timeout=0):
+        msg = f"Command timed out after {timeout}s: {cmd}" if cmd else "Command timed out."
+        super().__init__(
+            msg,
+            code="COMMAND_TIMEOUT",
+            hint="The operation took too long. Try again or increase the timeout.",
+            recoverable=True,
+        )
+        self.timeout = timeout
+
+
+class ValidationError(LoofiError):
+    """Parameter validation failed for a privileged action."""
+
+    def __init__(self, param="", detail=""):
+        msg = f"Invalid parameter: {param}" if param else "Parameter validation failed."
+        if detail:
+            msg += f" ({detail})"
+        super().__init__(
+            msg,
+            code="VALIDATION_ERROR",
+            hint="Check the parameter values and try again.",
+            recoverable=True,
+        )

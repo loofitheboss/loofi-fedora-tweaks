@@ -29,6 +29,7 @@ class GamingUtils:
             result = subprocess.run(
                 ["systemctl", "--user", "is-active", "gamemoded"],
                 capture_output=True, text=True,
+                timeout=60,
             )
             if "active" in result.stdout:
                 return "active"
@@ -36,6 +37,7 @@ class GamingUtils:
             res_rpm = subprocess.run(
                 ["rpm", "-q", "gamemode"],
                 capture_output=True,
+                timeout=600,
             )
             if res_rpm.returncode == 0:
                 return "installed"

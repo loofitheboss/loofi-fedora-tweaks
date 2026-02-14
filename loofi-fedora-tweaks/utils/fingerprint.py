@@ -1,9 +1,11 @@
 import subprocess
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 
 class FingerprintWorker(QThread):
-    progress_update = pyqtSignal(str)  # "Center your finger", "Enrollment scan 1 of 5", etc.
+    # "Center your finger", "Enrollment scan 1 of 5", etc.
+    progress_update = pyqtSignal(str)
     enroll_success = pyqtSignal()
     enroll_fail = pyqtSignal(str)  # Error message
 
@@ -24,7 +26,7 @@ class FingerprintWorker(QThread):
         cmd = ["fprintd-enroll", "-f", self.finger]
 
         try:
-            process = subprocess.Popen(
+            process = subprocess.Popen(  # noqa: timeout — interactive enrollment with progress
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

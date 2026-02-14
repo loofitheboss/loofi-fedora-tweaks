@@ -57,7 +57,7 @@ class HistoryManager:
         try:
             # Determine if we need pkexec (simple heuristic or explicitness in command)
             # ideally, the command stored should be complete.
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, timeout=60)
             self._save_history(history)
             return Result(True, f"Undid: {last_action['description']}")
         except subprocess.CalledProcessError as e:

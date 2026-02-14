@@ -246,13 +246,15 @@ class TaskScheduler:
             # Clean DNF cache
             subprocess.run(
                 ["pkexec", "dnf", "clean", "all"],
-                capture_output=True, check=False
+                capture_output=True, check=False,
+                timeout=600,
             )
 
             # Remove orphaned packages (non-interactive)
             subprocess.run(
                 ["dnf", "autoremove", "-y", "--assumeno"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
 
             from utils.notifications import NotificationManager
@@ -269,7 +271,8 @@ class TaskScheduler:
         try:
             result = subprocess.run(
                 ["dnf", "check-update", "-q"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=600,
             )
 
             # dnf check-update returns 100 if updates available
@@ -338,7 +341,8 @@ class TaskScheduler:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "is-enabled", "loofi-fedora-tweaks"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=60,
             )
             return result.stdout.strip() == "enabled"
         except (subprocess.SubprocessError, OSError) as e:
@@ -351,7 +355,8 @@ class TaskScheduler:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "is-active", "loofi-fedora-tweaks"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=60,
             )
             return result.stdout.strip() == "active"
         except (subprocess.SubprocessError, OSError) as e:
@@ -364,7 +369,8 @@ class TaskScheduler:
         try:
             subprocess.run(
                 ["systemctl", "--user", "enable", "--now", "loofi-fedora-tweaks"],
-                check=True
+                check=True,
+                timeout=60,
             )
             return True
         except (subprocess.SubprocessError, OSError) as e:
@@ -377,7 +383,8 @@ class TaskScheduler:
         try:
             subprocess.run(
                 ["systemctl", "--user", "disable", "--now", "loofi-fedora-tweaks"],
-                check=True
+                check=True,
+                timeout=60,
             )
             return True
         except (subprocess.SubprocessError, OSError) as e:

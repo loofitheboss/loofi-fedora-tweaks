@@ -75,7 +75,8 @@ class ZramManager:
         try:
             result = subprocess.run(
                 ["zramctl", "--noheadings", "--raw"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=15,
             )
             enabled = bool(result.stdout.strip())
         except Exception:
@@ -170,7 +171,7 @@ compression-algorithm = {algorithm}
 
             # Copy with elevated privileges
             cmd = ["pkexec", "cp", temp_path, config_path]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
 
             # Clean up temp file
             os.unlink(temp_path)
@@ -194,7 +195,7 @@ compression-algorithm = {algorithm}
             config_path = "/etc/systemd/zram-generator.conf"
             if os.path.exists(config_path):
                 cmd = ["pkexec", "rm", config_path]
-                result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+                result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
                 if result.returncode == 0:
                     return ZramResult(True, "ZRAM disabled. Reboot to apply.")
                 else:
@@ -214,7 +215,8 @@ compression-algorithm = {algorithm}
         try:
             result = subprocess.run(
                 ["zramctl", "--noheadings", "--bytes", "-o", "DATA,DISKSIZE"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=15,
             )
             if result.returncode == 0 and result.stdout.strip():
                 line = result.stdout.strip().split("\n")[0]

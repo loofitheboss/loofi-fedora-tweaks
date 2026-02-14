@@ -4,6 +4,52 @@
 
 All notable changes to this project will be documented in this file.
 
+## [36.0.0] - Unreleased "Horizon"
+
+### Security
+
+### Added
+
+### Changed
+
+### Test Suite
+
+---
+
+## [35.0.0] - 2025-07-19 "Fortress"
+
+### Security
+
+- **Subprocess timeout enforcement**: All `subprocess.run()` and `subprocess.check_output()` calls across 56+ files now include mandatory `timeout` parameters. Category-specific defaults: Package=600s, Network=30s, SysInfo=15s, Service=60s, File=120s, Container/VM=300s, Default=60s.
+- **Structured audit logging**: New `AuditLogger` singleton (`utils/audit.py`) logs all privileged actions to `~/.config/loofi-fedora-tweaks/audit.jsonl` in JSON Lines format with automatic rotation (10 MB, 5 backups), sensitive parameter redaction, and stderr SHA-256 hashing.
+- **Parameter schema validation**: `@validated_action` decorator on `PrivilegedCommand` builder methods enforces type checking, required parameters, path traversal detection, and choices validation. Failures are audit-logged and raise `ValidationError`.
+- **Granular Polkit policies**: Split monolithic policy into 7 purpose-scoped files (package, firewall, network, storage, service, kernel, security). `POLKIT_MAP` and `get_polkit_action_id()` added to `utils/commands.py`.
+- **SECURITY.md**: Added vulnerability disclosure policy, supported versions (v34+), 90-day response timeline.
+
+### Added
+
+- **`utils/audit.py`**: `AuditLogger` singleton — `log()`, `log_validation_failure()`, `get_recent()`, `_sanitize_params()`, `_hash_stderr()`, `reset()`.
+- **`PrivilegedCommand.execute_and_log()`**: Combined command execution + audit logging with timeout and dry-run support.
+- **CLI `audit-log` command**: `--cli audit-log --count 20` to view recent audit entries (supports `--json`).
+- **CLI `--dry-run` flag**: Shows what commands would execute without running them, audit-logged with `dry_run=True`.
+- **CLI `--timeout` flag**: Global operation timeout (default 300s).
+- **GUI command preview**: `ConfirmActionDialog` now supports collapsible command preview area with "🔍 Preview" toggle.
+- **`CommandTimeoutError`**: New error class in `utils/errors.py` for timeout handling.
+- **`ValidationError`**: New error class in `utils/errors.py` for parameter validation failures.
+- **6 new Polkit policy files**: firewall, network, storage, service-manage, kernel, security.
+
+### Changed
+
+- **`install.sh` deprecated**: Added deprecation banner; requires `--i-know-what-i-am-doing` flag to proceed.
+- **Notification panel**: Added class constants (MIN_HEIGHT, MAX_HEIGHT, PANEL_WIDTH), edge-clipping prevention, drop shadow styling.
+- **RPM spec**: Updated to install and package all 7 Polkit policy files.
+
+### Test Suite
+
+- **54 new tests** in 3 files: `test_timeout_enforcement.py` (4), `test_audit.py` (17), `test_commands.py` (33).
+
+---
+
 ## [34.0.0] - 2025-07-18 "Citadel"
 
 ### Fixed

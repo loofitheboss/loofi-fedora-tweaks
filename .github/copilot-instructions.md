@@ -102,6 +102,19 @@ Always use `SystemManager.get_package_manager()` from `utils/system.py` — neve
 ### Privilege Escalation
 Use `pkexec` (Polkit) for root operations — **never `sudo`**. Policy at `config/org.loofi.fedora-tweaks.policy`. Prefer `PrivilegedCommand` builder over raw command arrays.
 
+### Subprocess Timeouts (MANDATORY)
+All `subprocess.run()` and `subprocess.check_output()` calls MUST include a `timeout` parameter. No exceptions.
+
+### Audit Logging (MANDATORY)
+All privileged actions must be logged with: timestamp, action name, sanitized parameters, exit code, stderr hash.
+
+### Stabilization Directive
+See `.github/instructions/system_hardening_and_stabilization_guide.md` for full hardening rules.
+- **No new major features** until Phase 1–2 stabilization is complete
+- Refactor before expanding. Safety over velocity.
+- Never expand root-level capability without: validation, audit log, rollback strategy
+- If unsure, default to restrictive behavior
+
 ### CommandRunner (Async GUI Commands)
 `utils/command_runner.py` wraps `QProcess` for non-blocking command execution in UI tabs. Signals: `output_received`, `finished`, `error_occurred`, `progress_update`. Auto-detects Flatpak sandbox (`/.flatpak-info`) and wraps commands with `flatpak-spawn --host`. Usage pattern in tabs:
 ```python

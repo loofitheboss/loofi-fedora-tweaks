@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v34.0.0 "Citadel"
+# Loofi Fedora Tweaks v35.0.0 "Fortress"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v34.0.0">
-    <img src="https://img.shields.io/badge/Release-v34.0.0-blue?style=for-the-badge&logo=github" alt="Release v34.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v35.0.0">
+    <img src="https://img.shields.io/badge/Release-v35.0.0-blue?style=for-the-badge&logo=github" alt="Release v35.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -32,6 +32,21 @@ It is designed to be practical for both casual users and advanced users:
 - Optional headless web API mode.
 - Privileged actions routed through `pkexec` prompts.
 - Automatic detection of Traditional Fedora (`dnf`) and Atomic Fedora (`rpm-ostree`).
+
+---
+
+## What Is New in v35.0.0?
+
+`v35.0.0 "Fortress"` is a security hardening release — subprocess timeout enforcement, structured audit logging, and privilege management:
+
+- **Subprocess timeout enforcement** — All subprocess calls across 56+ files now have mandatory timeouts with category-specific defaults.
+- **Structured audit logging** — JSONL audit trail for all privileged actions with auto-rotation, sensitive param redaction, and stderr hashing.
+- **Granular Polkit policies** — Split into 7 purpose-scoped policy files (package, firewall, network, storage, service, kernel, security).
+- **Parameter validation** — `@validated_action` decorator enforces type checking, path traversal detection, and choices validation.
+- **CLI dry-run & timeout** — `--dry-run` flag previews commands without executing, `--timeout` sets global operation timeout.
+- **54 new tests** — Full coverage for timeout enforcement, audit system, and command validation.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v35.0.0.md`](docs/releases/RELEASE-NOTES-v35.0.0.md)
 
 ---
 

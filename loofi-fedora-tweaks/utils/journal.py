@@ -144,7 +144,7 @@ class JournalManager:
 
         # Kernel version
         try:
-            result = subprocess.run(["uname", "-r"], capture_output=True, text=True)
+            result = subprocess.run(["uname", "-r"], capture_output=True, text=True, timeout=15)
             if result.returncode == 0:
                 info_lines.append(f"KERNEL={result.stdout.strip()}")
         except (subprocess.SubprocessError, OSError) as e:

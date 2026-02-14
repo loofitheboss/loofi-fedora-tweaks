@@ -321,7 +321,8 @@ class UpdateChecker:
 
             command = ["gpg", "--verify", signature_path, file_path]
             try:
-                result = subprocess.run(
+                result = subprocess.run(,
+                timeout=60,
                     command, capture_output=True, text=True, check=False)
             except OSError as exc:
                 return VerifyResult(ok=False, method=method, error=f"Signature verification failed: {exc}")

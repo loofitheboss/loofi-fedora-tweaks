@@ -51,7 +51,8 @@ class SecureBootManager:
         try:
             result = subprocess.run(
                 ["mokutil", "--sb-state"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=15,
             )
             secure_boot_enabled = "SecureBoot enabled" in result.stdout
             status_msg = result.stdout.strip()
@@ -65,7 +66,8 @@ class SecureBootManager:
         try:
             result = subprocess.run(
                 ["mokutil", "--list-enrolled"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=15,
             )
             mok_enrolled = result.returncode == 0 and bool(result.stdout.strip())
         except Exception:
@@ -76,7 +78,8 @@ class SecureBootManager:
         try:
             result = subprocess.run(
                 ["mokutil", "--list-new"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=15,
             )
             pending_mok = result.returncode == 0 and bool(result.stdout.strip())
         except Exception:
@@ -121,7 +124,7 @@ class SecureBootManager:
                 "-subj", "/CN=Loofi Fedora Tweaks MOK/"
             ]
 
-            result = subprocess.run(cmd_priv, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd_priv, capture_output=True, text=True, check=False, timeout=60)
 
             if result.returncode != 0:
                 return SecureBootResult(False, f"Key generation failed: {result.stderr}")
@@ -166,7 +169,8 @@ class SecureBootManager:
             result = subprocess.run(
                 cmd,
                 input=f"{password}\n{password}\n",
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False,
+                timeout=60,
             )
 
             if result.returncode == 0:
@@ -234,7 +238,7 @@ class SecureBootManager:
                 module_path
             ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
 
             if result.returncode == 0:
                 return SecureBootResult(

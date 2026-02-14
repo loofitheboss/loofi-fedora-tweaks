@@ -27,6 +27,11 @@ scripts/              # build_rpm.sh, workflow-runner.sh
 4. **Always mock system calls in tests** — use `@patch` decorators
 5. **Always unpack PrivilegedCommand tuples** before `subprocess.run()`
 6. **Version sync**: `version.py` and `.spec` must match
+7. **Subprocess timeouts**: All subprocess calls MUST include `timeout` parameter
+8. **Audit logging**: Privileged actions must be logged (timestamp, action, params, exit code)
+9. **Stabilization gate**: No new major features until Phase 1–2 hardening is complete
+
+> **MANDATORY**: See `.github/instructions/system_hardening_and_stabilization_guide.md` for full stabilization rules.
 
 ## Key Patterns
 

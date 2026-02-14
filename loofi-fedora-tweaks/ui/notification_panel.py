@@ -3,12 +3,18 @@ Notification Panel - Slide-out notification display.
 Part of v13.5 UX Polish.
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QScrollArea, QFrame
-)
-from PyQt6.QtCore import Qt
 import time
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class NotificationCard(QFrame):
@@ -32,7 +38,8 @@ class NotificationCard(QFrame):
 
         dismiss_btn = QPushButton("x")
         dismiss_btn.setFixedSize(20, 20)
-        dismiss_btn.setStyleSheet("QPushButton { border: none; color: #9da7bf; } QPushButton:hover { color: #e8556d; }")
+        dismiss_btn.setStyleSheet(
+            "QPushButton { border: none; color: #9da7bf; } QPushButton:hover { color: #e8556d; }")
         if on_dismiss:
             dismiss_btn.clicked.connect(lambda: on_dismiss(notification.id))
         header.addWidget(dismiss_btn)
@@ -63,10 +70,24 @@ class NotificationCard(QFrame):
 class NotificationPanel(QWidget):
     """Slide-out notification panel."""
 
+    # v35.0 Fortress: Dynamic height cap, edge-clipping prevention
+    MIN_HEIGHT = 150
+    MAX_HEIGHT = 500
+    PANEL_WIDTH = 350
+    EDGE_MARGIN = 8
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(350)
+        self.setFixedWidth(self.PANEL_WIDTH)
         self.setObjectName("notificationPanel")
+        self.setStyleSheet(
+            "#notificationPanel { "
+            "  background-color: #141722; "
+            "  border: 1px solid #2d3348; "
+            "  border-radius: 10px; "
+            "  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); "
+            "}"
+        )
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -86,7 +107,8 @@ class NotificationPanel(QWidget):
         header.addStretch()
 
         mark_read_btn = QPushButton(self.tr("Mark all read"))
-        mark_read_btn.setStyleSheet("QPushButton { border: none; color: #39c5cf; } QPushButton:hover { color: #4dd9e3; }")
+        mark_read_btn.setStyleSheet(
+            "QPushButton { border: none; color: #39c5cf; } QPushButton:hover { color: #4dd9e3; }")
         mark_read_btn.clicked.connect(self._mark_all_read)
         header.addWidget(mark_read_btn)
 
@@ -95,7 +117,10 @@ class NotificationPanel(QWidget):
         # Scroll area for cards
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setStyleSheet(
+            "QScrollArea { border: none; background: transparent; }")
 
         self.cards_widget = QWidget()
         self.cards_layout = QVBoxLayout(self.cards_widget)
@@ -104,6 +129,8 @@ class NotificationPanel(QWidget):
 
         layout.addWidget(scroll)
 
+        # Start hidden — MainWindow._toggle_notification_panel() controls visibility
+        self.hide()
         self.refresh()
 
     def refresh(self):

@@ -38,11 +38,11 @@ class SafetyManager:
                 # Here we assume the user might need to enter password if not running as root.
                 # However, for a CLI non-interactive snapshot:
                 cmd = ["pkexec", "timeshift", "--create", "--comments", comment, "--tags", "D"]
-                subprocess.run(cmd, check=True)
+                subprocess.run(cmd, check=True, timeout=600)
                 return True
             elif tool == "snapper":
                 cmd = ["pkexec", "snapper", "create", "--description", comment]
-                subprocess.run(cmd, check=True)
+                subprocess.run(cmd, check=True, timeout=600)
                 return True
         except subprocess.CalledProcessError:
             return False

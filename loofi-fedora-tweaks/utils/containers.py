@@ -5,12 +5,12 @@ Part of v7.1 "Developer" update.
 
 from __future__ import annotations
 
-import subprocess
-import shutil
 import re
+import shutil
+import subprocess
 from dataclasses import dataclass
-from typing import Optional
 from enum import Enum
+from typing import Optional
 
 
 class ContainerStatus(Enum):
@@ -159,7 +159,8 @@ class ContainerManager:
             cmd.append("--no-entry")
 
         if additional_packages:
-            cmd.extend(["--additional-packages", " ".join(additional_packages)])
+            cmd.extend(["--additional-packages",
+                       " ".join(additional_packages)])
 
         try:
             result = subprocess.run(
@@ -199,7 +200,7 @@ class ContainerManager:
 
         try:
             # Return the process so the caller can manage it
-            return subprocess.Popen(
+            return subprocess.Popen(  # noqa: timeout — interactive session, caller manages
                 ["distrobox", "enter", name],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -321,7 +322,8 @@ class ContainerManager:
 
         try:
             result = subprocess.run(
-                ["distrobox", "enter", container_name, "--", "distrobox-export", "--app", app_name],
+                ["distrobox", "enter", container_name, "--",
+                    "distrobox-export", "--app", app_name],
                 capture_output=True,
                 text=True,
                 timeout=60

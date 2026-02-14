@@ -34,6 +34,7 @@ class SoftwareUtils:
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                timeout=60,
             )
             return True
         except (subprocess.CalledProcessError, FileNotFoundError, ValueError):

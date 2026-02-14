@@ -137,7 +137,7 @@ class KernelManager:
         cmd = ["pkexec", "grubby", "--update-kernel=ALL", f"--args={param}"]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
             if result.returncode == 0:
                 return KernelResult(
                     success=True,
@@ -177,7 +177,7 @@ class KernelManager:
         cmd = ["pkexec", "grubby", "--update-kernel=ALL", f"--remove-args={param}"]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
             if result.returncode == 0:
                 return KernelResult(
                     success=True,
@@ -225,12 +225,12 @@ class KernelManager:
         try:
             # Use pkexec to copy back
             cmd = ["pkexec", "cp", backup_path, cls.GRUB_DEFAULT]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
 
             if result.returncode == 0:
                 # Rebuild grub config
                 rebuild_cmd = ["pkexec", "grub2-mkconfig", "-o", "/boot/grub2/grub.cfg"]
-                subprocess.run(rebuild_cmd, capture_output=True, check=False)
+                subprocess.run(rebuild_cmd, capture_output=True, check=False, timeout=120)
 
                 return KernelResult(
                     success=True,

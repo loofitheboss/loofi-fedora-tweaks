@@ -92,14 +92,14 @@ class PresetManager:
         if not shutil.which("gsettings"):
             return None
         try:
-            return subprocess.check_output(["gsettings", "get", schema, key], text=True).strip().strip("'")
+            return subprocess.check_output(["gsettings", "get", schema, key], text=True, timeout=15).strip().strip("'")
         except subprocess.CalledProcessError:
             return None
 
     def _set_gsettings(self, schema, key, value):
         if value and shutil.which("gsettings"):
             try:
-                subprocess.run(["gsettings", "set", schema, key, value], check=False)
+                subprocess.run(["gsettings", "set", schema, key, value], check=False, timeout=15)
             except Exception:
                 pass
 
@@ -115,6 +115,6 @@ class PresetManager:
         if not shutil.which("powerprofilesctl"):
             return "balanced"
         try:
-            return subprocess.check_output(["powerprofilesctl", "get"], text=True).strip()
+            return subprocess.check_output(["powerprofilesctl", "get"], text=True, timeout=60).strip()
         except subprocess.CalledProcessError:
             return "balanced"

@@ -19,10 +19,11 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 ## KEY FILES (READ ONCE, REFERENCE BY NAME)
 - `ARCHITECTURE.md` — Canonical architecture, layer rules, tab layout, patterns
 - `ROADMAP.md` — Version scope, status, deliverables
+- `.github/instructions/system_hardening_and_stabilization_guide.md` — **MANDATORY** stabilization rules (security, privileges, packaging)
 - `.github/agents/` — 8 VS Code agents (canonical definitions)
 - `.github/claude-agents/` — 7 Claude agents (adapters, synced via sync_ai_adapters.py)
 - `AGENTS.md` — Quick reference for agent system
-- `.github/instructions/` — AI instructions (primary, workflow, test, copilot)
+- `.github/instructions/` — AI instructions (primary, workflow, test, copilot, hardening)
 
 ## TOKEN DISCIPLINE (CRITICAL)
 - Read context files once, reference by name after
@@ -56,6 +57,15 @@ All agent definitions: `.github/claude-agents/*.md`
 - Clear separation of UI, logic, and system interaction (see ARCHITECTURE.md § Layer Rules)
 - Minimal dependencies
 
+## STABILIZATION DIRECTIVE (PRIORITY)
+See `.github/instructions/system_hardening_and_stabilization_guide.md` for full details.
+- **No new major features** until Phase 1–2 stabilization is complete
+- Refactor before expanding. Safety over velocity.
+- Never expand root-level capability without: validation, audit log, rollback strategy
+- All privileged actions must use named actions with parameter schema validation
+- All subprocess calls must have timeout enforcement
+- If unsure, default to restrictive behavior
+
 ## CRITICAL PATTERNS (NEVER VIOLATE)
 See `ARCHITECTURE.md` § Critical Patterns for full details. Summary:
 1. **PrivilegedCommand**: Returns `Tuple[str, List[str], str]` — ALWAYS unpack before subprocess.run()
@@ -63,6 +73,8 @@ See `ARCHITECTURE.md` § Critical Patterns for full details. Summary:
 3. **Package Manager**: Use `SystemManager.get_package_manager()` — NEVER hardcode `dnf`
 4. **Privilege Escalation**: Use `pkexec` only, NEVER `sudo`
 5. **Atomic Fedora**: Always branch on `SystemManager.is_atomic()` for dnf vs rpm-ostree
+6. **Subprocess Timeouts**: All subprocess calls MUST include `timeout` parameter
+7. **Audit Logging**: Privileged actions must be logged with timestamp, action, params, exit code
 
 ## TESTING RULES
 - Update or add tests when behavior changes

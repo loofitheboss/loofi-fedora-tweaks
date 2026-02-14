@@ -44,6 +44,12 @@ sys.path.insert(0, str(os.path.dirname(
 # Global flag for JSON output
 _json_output = False
 
+# Global operation timeout (default 300s, configurable via --timeout)
+_operation_timeout = 300
+
+# Global dry-run flag (v35.0 Fortress)
+_dry_run = False
+
 
 def _print(text):
     """Print text (suppressed in JSON mode)."""
@@ -56,15 +62,44 @@ def _output_json(data):
     print(json_module.dumps(data, indent=2, default=str))
 
 
-def run_operation(op_result):
-    """Execute an operation tuple (cmd, args, description)."""
+def run_operation(op_result, timeout=None):
+    """Execute an operation tuple (cmd, args, description).
+
+    Args:
+        op_result: Tuple of (cmd, args, description) from utils operations.
+        timeout: Override timeout in seconds. Defaults to global _operation_timeout (300s).
+    """
     cmd, args, desc = op_result
+    full_cmd = [cmd] + args
+
+    # Dry-run mode: show command without executing, audit-log it
+    if _dry_run:
+        _print(f"🔍 [DRY-RUN] Would execute: {' '.join(full_cmd)}")
+        _print(f"   Description: {desc}")
+        try:
+            from utils.audit import AuditLogger
+            AuditLogger().log(
+                action=f"cli.{cmd}",
+                params={"cmd": full_cmd, "description": desc},
+                exit_code=None,
+                dry_run=True,
+            )
+        except Exception:
+            pass
+        if _json_output:
+            _output_json(
+                {"dry_run": True, "command": full_cmd, "description": desc})
+        return True
+
     _print(f"🔄 {desc}")
+
+    op_timeout = timeout if timeout is not None else _operation_timeout
 
     try:
         result = subprocess.run(
             [cmd] + args,
-            capture_output=True, text=True, check=False
+            capture_output=True, text=True, check=False,
+            timeout=op_timeout,
         )
         if result.returncode == 0:
             _print("✅ Success")
@@ -75,6 +110,9 @@ def run_operation(op_result):
             if result.stderr.strip():
                 _print(result.stderr)
         return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        _print(f"❌ Timed out after {op_timeout}s")
+        return False
     except Exception as e:
         _print(f"❌ Error: {e}")
         return False
@@ -2474,6 +2512,41 @@ def cmd_storage(args):
     return 1
 
 
+def cmd_audit_log(args):
+    """Show recent audit log entries."""
+    from utils.audit import AuditLogger
+
+    audit = AuditLogger()
+    count = getattr(args, "count", 20)
+    entries = audit.get_recent(count)
+
+    if _json_output:
+        _output_json({"entries": entries, "count": len(
+            entries), "log_path": str(audit.log_path)})
+        return 0
+
+    if not entries:
+        _print("No audit log entries found.")
+        _print(f"Log path: {audit.log_path}")
+        return 0
+
+    _print(f"📋 Recent Audit Log ({len(entries)} entries)")
+    _print(f"   Log: {audit.log_path}")
+    _print("─" * 72)
+
+    for entry in entries:
+        ts = entry.get("ts", "?")[:19].replace("T", " ")
+        action = entry.get("action", "?")
+        exit_code = entry.get("exit_code")
+        dry_run = entry.get("dry_run", False)
+
+        status = "DRY" if dry_run else (
+            "✅" if exit_code == 0 else f"❌ ({exit_code})")
+        _print(f"  {ts}  {action:30s}  {status}")
+
+    return 0
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -2486,6 +2559,10 @@ def main(argv: Optional[List[str]] = None):
                         version=f"{__version__} \"{__version_codename__}\"")
     parser.add_argument("--json", action="store_true",
                         help="Output in JSON format (for scripting)")
+    parser.add_argument("--timeout", type=int, default=300,
+                        help="Operation timeout in seconds (default: 300)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Show commands without executing them (v35.0)")
 
     subparsers = parser.add_subparsers(
         dest="command", help="Available commands")
@@ -2834,10 +2911,22 @@ def main(argv: Optional[List[str]] = None):
     agent_parser.add_argument(
         "--min-severity", help="Minimum severity to notify: info/low/medium/high/critical")
 
+    # v35.0 Fortress - Audit log viewer
+    audit_parser = subparsers.add_parser(
+        "audit-log", help="View recent audit log entries")
+    audit_parser.add_argument(
+        "--count", type=int, default=20, help="Number of entries to show (default: 20)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
     _json_output = getattr(args, "json", False)
+
+    # Set operation timeout from --timeout flag
+    _operation_timeout = getattr(args, "timeout", 300)
+
+    # Set dry-run mode from --dry-run flag
+    _dry_run = getattr(args, "dry_run", False)
 
     if args.command is None:
         parser.print_help()
@@ -2886,6 +2975,8 @@ def main(argv: Optional[List[str]] = None):
         # v18.0 Sentinel
         "agent": cmd_agent,
         "self-update": cmd_self_update,
+        # v35.0 Fortress
+        "audit-log": cmd_audit_log,
     }
 
     handler = commands.get(args.command)
