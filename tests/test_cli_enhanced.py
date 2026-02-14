@@ -113,6 +113,7 @@ class TestCLIRunOperation(unittest.TestCase):
         mock_run.assert_called_once_with(
             ["pkexec", "dnf", "clean", "all"],
             capture_output=True, text=True, check=False,
+            timeout=300,
         )
 
     @patch('subprocess.run')

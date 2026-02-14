@@ -162,7 +162,7 @@ class TestUndoLastAction(unittest.TestCase):
 
         self.assertTrue(result.success)
         self.assertIn("Undid", result.message)
-        mock_run.assert_called_once_with(["echo", "undo"], check=True)
+        mock_run.assert_called_once_with(["echo", "undo"], check=True, timeout=60)
 
     @patch('utils.history.os.makedirs')
     def test_undo_last_action_no_history(self, mock_makedirs):

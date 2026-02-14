@@ -54,7 +54,7 @@ class TestHistory(unittest.TestCase):
         with patch('subprocess.run') as mock_run:
             result = self.history_mgr.undo_last_action()
             self.assertTrue(result.success)
-            mock_run.assert_called_with(["echo", "undo"], check=True)
+            mock_run.assert_called_with(["echo", "undo"], check=True, timeout=60)
             
         self.assertIsNone(self.history_mgr.get_last_action())
 
