@@ -164,10 +164,12 @@ class BackupTab(BaseTab):
             self.tr("Description"),
             self.tr("Tool"),
         ])
-        self.snap_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.snap_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        self.snap_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.snap_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        h_header = self.snap_table.horizontalHeader()
+        assert h_header is not None
+        h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        h_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         self.snap_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         BaseTab.configure_table(self.snap_table)
         layout.addWidget(self.snap_table)

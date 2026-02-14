@@ -153,7 +153,9 @@ jobs:
         if: always()
         with:
           name: flatpak-artifacts
-          path: dist/flatpak
+          path: |
+            dist/flatpak/*.flatpak
+            dist/flatpak/repo
 
   package_sdist:
     runs-on: ubuntu-latest
