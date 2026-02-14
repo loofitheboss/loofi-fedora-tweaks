@@ -10,11 +10,21 @@
 			".github/agents": true,
 			".github/instructions": true
 		},
-		"chatgpt.openOnStartup": true,
+		"chatgpt.openOnStartup": false,
 		"chat.agentSkillsLocations": {
 			".codex/skills": true,
 			"~/.codex/skills": true
 		},
+
+		// === Performance: minimize CPU/RAM ===
+		// Pylance / Python analysis — all heavy features off
+		"python.analysis.indexing": false,
+		"python.analysis.autoImportCompletions": false,
+		"python.analysis.typeCheckingMode": "off",
+		"python.analysis.diagnosticMode": "openFilesOnly",
+		"python.analysis.enablePytestSupport": false,
+		"python.analysis.autoSearchPaths": false,
+		"python.analysis.diagnosticSeverityOverrides": {},
 		"python.analysis.exclude": [
 			"**/.git/**",
 			"**/.mypy_cache/**",
@@ -23,11 +33,15 @@
 			"**/.flatpak-builder/**",
 			"**/rpmbuild/**",
 			"**/dist/**",
+			"**/build/**",
 			"**/docs/**",
 			"**/examples/**",
 			"**/node_modules/**",
-			"**/__pycache__/**"
+			"**/__pycache__/**",
+			"**/loofi_fedora_tweaks.egg-info/**",
+			"**/.workflow/**"
 		],
+
 		"files.watcherExclude": {
 			"**/.git/**": true,
 			"**/.mypy_cache/**": true,
@@ -36,19 +50,57 @@
 			"**/.flatpak-builder/**": true,
 			"**/rpmbuild/**": true,
 			"**/dist/**": true,
-			"**/node_modules/**": true
+			"**/build/**": true,
+			"**/node_modules/**": true,
+			"**/__pycache__/**": true,
+			"**/loofi_fedora_tweaks.egg-info/**": true,
+			"**/.workflow/**": true
 		},
-		"python.analysis.typeCheckingMode": "basic",
-		"python.analysis.autoImportCompletions": true,
-		"python.analysis.indexing": true,
-		"editor.formatOnSave": true,
-		"editor.codeActionsOnSave": {
-			"source.organizeImports": "explicit"
+
+		"search.exclude": {
+			"**/.git/**": true,
+			"**/__pycache__/**": true,
+			"**/.mypy_cache/**": true,
+			"**/.pytest_cache/**": true,
+			"**/rpmbuild/**": true,
+			"**/dist/**": true,
+			"**/build/**": true,
+			"**/node_modules/**": true,
+			"**/loofi_fedora_tweaks.egg-info/**": true
 		},
-		"python.linting.enabled": true,
-		"python.linting.ruffEnabled": true,
+
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/.mypy_cache": true,
+			"**/.pytest_cache": true,
+			"**/.ruff_cache": true,
+			"**/loofi_fedora_tweaks.egg-info": true
+		},
+
+		// === Editor: disable on-save overhead ===
+		"editor.formatOnSave": false,
+		"editor.codeActionsOnSave": {},
+		"editor.minimap.enabled": false,
+		"editor.bracketPairColorization.enabled": false,
+		"editor.guides.bracketPairs": false,
+		"editor.occurrencesHighlight": "off",
+		"editor.renderWhitespace": "none",
+		"editor.hover.delay": 500,
+
+		// === Git: reduce background work ===
+		"git.decorations.enabled": false,
+		"git.blame.editorDecoration.enabled": false,
+
+		// === Extensions: reduce background load ===
+		"gitlens.codeLens.enabled": false,
+		"gitlens.currentLine.enabled": false,
+		"gitlens.hovers.currentLine.over": "line",
+		"gitlens.statusBar.enabled": false,
+
+		// === Testing (keep lightweight) ===
 		"python.testing.pytestEnabled": true,
 		"python.testing.unittestEnabled": false,
-		"python.testing.nosetestsEnabled": false
+		"python.testing.nosetestsEnabled": false,
+		"python.testing.autoTestDiscoverOnSaveEnabled": false
 	}
 }
