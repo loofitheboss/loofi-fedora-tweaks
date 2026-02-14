@@ -184,7 +184,7 @@ class AuditLogger:
 
     def _sanitize_params(self, params: dict) -> dict:
         """Redact sensitive parameter values."""
-        sanitized = {}
+        sanitized: dict[str, object] = {}
         for key, value in params.items():
             if any(s in key.lower() for s in self.SENSITIVE_KEYS):
                 sanitized[key] = "***REDACTED***"

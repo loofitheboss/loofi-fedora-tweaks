@@ -286,7 +286,8 @@ class AutoTuner:
         Return a PrivilegedCommand tuple that sets vm.swappiness via sysctl.
         """
         value = max(0, min(200, value))
-        return PrivilegedCommand.sysctl("vm.swappiness", str(value))
+        result: Tuple[str, List[str], str] = PrivilegedCommand.sysctl("vm.swappiness", str(value))
+        return result
 
     @staticmethod
     def apply_io_scheduler(scheduler: str, device: str = "") -> Tuple[str, List[str], str]:
