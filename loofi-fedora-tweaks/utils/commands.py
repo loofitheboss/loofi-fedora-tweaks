@@ -10,7 +10,6 @@ v35.0.0: Auto-audit logging via execute_and_log(), POLKIT_MAP.
 """
 
 import functools
-import os
 import re
 import subprocess
 from typing import Any, Callable, Dict, List, Optional, Tuple

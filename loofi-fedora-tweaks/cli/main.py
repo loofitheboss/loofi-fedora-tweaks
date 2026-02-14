@@ -2923,10 +2923,10 @@ def main(argv: Optional[List[str]] = None):
     _json_output = getattr(args, "json", False)
 
     # Set operation timeout from --timeout flag
-    _operation_timeout = getattr(args, "timeout", 300)
+    _operation_timeout = getattr(args, "timeout", 300)  # noqa: F841
 
     # Set dry-run mode from --dry-run flag
-    _dry_run = getattr(args, "dry_run", False)
+    _dry_run = getattr(args, "dry_run", False)  # noqa: F841
 
     if args.command is None:
         parser.print_help()

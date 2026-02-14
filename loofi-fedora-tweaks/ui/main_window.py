@@ -29,9 +29,7 @@ from utils.favorites import FavoritesManager
 from utils.focus_mode import FocusMode
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
-from utils.system import (
-    SystemManager,  # noqa: F401  (Backward-compatible symbol for legacy tests)
-)
+from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
 from version import __version__
 
 from core.plugins import PluginInterface, PluginRegistry
