@@ -1,9 +1,24 @@
 # Release Notes — Latest
 
-> **Current release:** v34.0.0 "Citadel"
+> **Current release:** v38.0.0 "Clarity"
 >
 > For versioned release notes see the individual files in this directory:
 > `RELEASE-NOTES-vX.Y.Z.md`
+
+## v38.0.0 "Clarity"
+
+UX polish release — Doctor tab rewrite, theme correctness (14 inline styles replaced with objectNames),
+Quick Actions wired, undo button, toast notifications, output toolbar, risk badges.
+40 new tests (4349 total).
+
+See [RELEASE-NOTES-v38.0.0.md](RELEASE-NOTES-v38.0.0.md) for full details.
+
+## v37.0.0 "Pinnacle"
+
+Feature expansion — smart updates, extension manager, Flatpak audit, boot config,
+display settings, backup wizard, risk registry. 76 new tests.
+
+See [RELEASE-NOTES-v37.0.0.md](RELEASE-NOTES-v37.0.0.md) for full details.
 
 ## v34.0.0 "Citadel"
 
@@ -40,7 +55,10 @@ See [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) for full details.
 
 | Version | Codename | Notes |
 | --------- | ---------- | ------- |
-| v31.0.0 | — | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
+| v37.0.0 | Pinnacle | [RELEASE-NOTES-v37.0.0.md](RELEASE-NOTES-v37.0.0.md) |
+| v35.0.0 | Fortress | [RELEASE-NOTES-v35.0.0.md](RELEASE-NOTES-v35.0.0.md) |
+| v34.0.0 | Citadel | [RELEASE-NOTES-v34.0.0.md](RELEASE-NOTES-v34.0.0.md) |
+| v33.0.0 | Bastion | [RELEASE-NOTES-v33.0.0.md](RELEASE-NOTES-v33.0.0.md) |
 | v30.0.0 | — | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
 | v29.0.0 | — | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |
 | v28.0.0 | — | [RELEASE-NOTES-v28.0.0.md](RELEASE-NOTES-v28.0.0.md) |

@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
 from utils.config_manager import ConfigManager
 from utils.favorites import FavoritesManager
 from utils.focus_mode import FocusMode
+from utils.history import HistoryManager
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
 from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
@@ -186,8 +187,11 @@ class MainWindow(QMainWindow):
         self._breadcrumb_frame.setFixedHeight(breadcrumb_height)
         bc_layout = QHBoxLayout(self._breadcrumb_frame)
         bc_layout.setContentsMargins(16, 0, 16, 0)
-        self._bc_category = QLabel("")
+        self._bc_category = QPushButton("")
         self._bc_category.setObjectName("bcCategory")
+        self._bc_category.setFlat(True)
+        self._bc_category.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._bc_category.clicked.connect(self._on_breadcrumb_category_click)
         self._bc_sep = QLabel("  ›  ")
         self._bc_sep.setObjectName("bcSep")
         self._bc_page = QLabel("")
@@ -217,6 +221,15 @@ class MainWindow(QMainWindow):
         self._status_label = QLabel("")
         self._status_label.setObjectName("statusText")
         sb_layout.addWidget(self._status_label)
+
+        # Undo button (v38.0)
+        self._undo_btn = QPushButton(self.tr("↩ Undo"))
+        self._undo_btn.setObjectName("undoButton")
+        self._undo_btn.setVisible(False)
+        self._undo_btn.setToolTip(self.tr("Undo last action"))
+        self._undo_btn.clicked.connect(self._on_undo_clicked)
+        sb_layout.addWidget(self._undo_btn)
+
         sb_layout.addStretch()
         shortcuts_hint = QLabel(
             self.tr("Ctrl+K Search  |  Ctrl+Shift+K Actions  |  F1 Help")
@@ -517,10 +530,59 @@ class MainWindow(QMainWindow):
         self._bc_category.setText(category)
         self._bc_page.setText(page_name)
         self._bc_desc.setText(desc)
+        # Store parent item ref for breadcrumb click (v38.0)
+        self._bc_parent_item = parent
+
+    def _on_breadcrumb_category_click(self):
+        """Navigate to the first page of the current breadcrumb category."""
+        parent = getattr(self, "_bc_parent_item", None)
+        if parent and parent.childCount() > 0:
+            parent.setExpanded(True)
+            self.sidebar.setCurrentItem(parent.child(0))
 
     def set_status(self, text: str):
         """Set status bar message (can be called from any tab)."""
         self._status_label.setText(text)
+
+    def show_undo_button(self, description: str = ""):
+        """Show the undo button in the status bar after an undoable action."""
+        if description:
+            self._status_label.setText(self.tr("✓ ") + description)
+        self._undo_btn.setVisible(True)
+
+    def _on_undo_clicked(self):
+        """Execute undo via HistoryManager and update status."""
+        try:
+            hm = HistoryManager()
+            result = hm.undo_last_action()
+            if result.success:
+                self.show_status_toast(result.message)
+            else:
+                self.show_status_toast(result.message, error=True)
+        except Exception as e:
+            logger.debug("Undo failed: %s", e)
+            self.show_status_toast(self.tr("Undo failed"), error=True)
+        self._undo_btn.setVisible(False)
+
+    def show_status_toast(self, message: str, error: bool = False, duration: int = 3000):
+        """Show a temporary status-bar toast notification (v38.0)."""
+        self._status_label.setText(message)
+        if error:
+            self._status_label.setProperty("toast", "error")
+        else:
+            self._status_label.setProperty("toast", "success")
+        self._status_label.style().unpolish(self._status_label)
+        self._status_label.style().polish(self._status_label)
+
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(duration, self._clear_toast)
+
+    def _clear_toast(self):
+        """Clear toast styling from the status bar."""
+        self._status_label.setText("")
+        self._status_label.setProperty("toast", "")
+        self._status_label.style().unpolish(self._status_label)
+        self._status_label.style().polish(self._status_label)
 
     def switch_to_tab(self, name):
         """Helper for Dashboard and Command Palette to switch tabs."""
@@ -847,7 +909,7 @@ class MainWindow(QMainWindow):
             )
             registry = QuickActionRegistry.instance()
             if not registry.get_all():
-                register_default_actions(registry)
+                register_default_actions(registry, main_window=self)
             bar = QuickActionsBar(self)
             bar.exec()
         except ImportError:

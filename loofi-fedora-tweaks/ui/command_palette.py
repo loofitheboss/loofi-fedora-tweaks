@@ -193,14 +193,7 @@ class CommandPalette(QDialog):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
 
-        # Dark overlay style
-        self.setStyleSheet("""
-            QDialog {
-                background-color: #0b0e14;
-                border: 1px solid #2d3348;
-                border-radius: 12px;
-            }
-        """)
+        self.setObjectName("commandPalette")
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
@@ -214,50 +207,18 @@ class CommandPalette(QDialog):
         input_font = QFont()
         input_font.setPointSize(14)
         self._search_input.setFont(input_font)
-        self._search_input.setStyleSheet("""
-            QLineEdit {
-                background-color: #1c2030;
-                color: #e6edf3;
-                border: 1px solid #5c6578;
-                border-radius: 8px;
-                padding: 10px 14px;
-                selection-background-color: #39c5cf;
-            }
-            QLineEdit:focus {
-                border: 1px solid #39c5cf;
-            }
-        """)
+        self._search_input.setObjectName("paletteSearch")
         self._search_input.textChanged.connect(self._on_text_changed)
         layout.addWidget(self._search_input)
 
         # Results count hint
         self._lbl_hint = QLabel()
-        self._lbl_hint.setStyleSheet("color: #6c7086; font-size: 11px; padding-left: 4px;")
+        self._lbl_hint.setObjectName("paletteHint")
         layout.addWidget(self._lbl_hint)
 
         # Results list
         self._results_list = QListWidget()
-        self._results_list.setStyleSheet("""
-            QListWidget {
-                background-color: #0b0e14;
-                color: #e6edf3;
-                border: none;
-                outline: none;
-                font-size: 13px;
-            }
-            QListWidget::item {
-                padding: 8px 12px;
-                border-radius: 6px;
-                margin: 1px 0px;
-            }
-            QListWidget::item:selected {
-                background-color: #1c2030;
-                color: #39c5cf;
-            }
-            QListWidget::item:hover {
-                background-color: #2a2b3d;
-            }
-        """)
+        self._results_list.setObjectName("paletteResults")
         self._results_list.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self._results_list.itemActivated.connect(self._activate_item)
         self._results_list.itemClicked.connect(self._activate_item)
@@ -268,7 +229,7 @@ class CommandPalette(QDialog):
             self.tr("\u2191\u2193 Navigate    \u23ce Enter    Esc Close")
         )
         footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer.setStyleSheet("color: #5c6578; font-size: 10px; padding-top: 2px;")
+        footer.setObjectName("paletteFooter")
         layout.addWidget(footer)
 
         # Center on parent
@@ -302,6 +263,10 @@ class CommandPalette(QDialog):
 
         for entry in filtered:
             display_text = f"{entry['category']}  \u203a  {entry['name']}"
+            # Show keyword hints as description (v38.0)
+            keywords = entry.get("keywords", [])
+            if keywords:
+                display_text += f"\n  {', '.join(keywords[:4])}"
             item = QListWidgetItem(display_text)
             item.setData(Qt.ItemDataRole.UserRole, entry)
             self._results_list.addItem(item)

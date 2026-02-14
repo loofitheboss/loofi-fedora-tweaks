@@ -5,13 +5,13 @@
 
 ## Current Release
 
-- **v37.0.0 "Pinnacle"**
-- Full notes: `docs/releases/RELEASE-NOTES-v37.0.0.md`
+- **v38.0.0 "Clarity"**
+- Full notes: `docs/releases/RELEASE-NOTES-v38.0.0.md`
 
 ## Previous Release
 
-- **v36.0.0 "Horizon"**
-- Full notes: `docs/releases/RELEASE-NOTES-v36.0.0.md`
+- **v37.0.0 "Pinnacle"**
+- Full notes: `docs/releases/RELEASE-NOTES-v37.0.0.md`
 
 ## Why this file exists
 

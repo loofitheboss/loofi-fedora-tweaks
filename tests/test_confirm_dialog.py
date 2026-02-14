@@ -151,6 +151,7 @@ class TestOnConfirm(unittest.TestCase):
         dialog = MagicMock(spec=ConfirmActionDialog)
         dialog.dont_ask_cb = MagicMock()
         dialog.dont_ask_cb.isChecked.return_value = True
+        dialog._action_key = ""  # No per-action key — triggers global disable
         dialog.snapshot_cb = None
         dialog._snapshot_requested = False
         dialog.accept = MagicMock()

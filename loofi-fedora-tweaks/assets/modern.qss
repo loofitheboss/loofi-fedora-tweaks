@@ -1,6 +1,6 @@
 /* ================================================
    Loofi Abyss — Dark Theme
-   Loofi Fedora Tweaks v31.0
+   Loofi Fedora Tweaks v38.0
    Deep-ocean-inspired custom palette
    ================================================ */
 
@@ -466,10 +466,19 @@ QFrame#breadcrumbBar QLabel {
     background-color: transparent;
 }
 
-QLabel#bcCategory {
+QPushButton#bcCategory {
     color: #5c6578;
     font-size: 9.75pt;
     font-weight: 500;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    text-align: left;
+}
+
+QPushButton#bcCategory:hover {
+    color: #39c5cf;
+    text-decoration: underline;
 }
 
 QLabel#bcSep {
@@ -646,4 +655,292 @@ QPushButton#sidebarToggle {
 QPushButton#sidebarToggle:hover {
     background-color: #1c2030;
     color: #39c5cf;
+}
+
+/* ===== Dashboard — Section Titles ===== */
+QLabel#sectionTitle {
+    color: #9da7bf;
+    font-size: 11pt;
+    font-weight: 600;
+}
+
+/* ===== Dashboard — Health Score ===== */
+QLabel#healthTitle {
+    color: #e6edf3;
+    font-size: 13pt;
+    font-weight: bold;
+}
+
+QLabel#healthRecs {
+    color: #9da7bf;
+    font-size: 9pt;
+}
+
+/* ===== Dashboard — Metric Labels ===== */
+QLabel#metricLabel {
+    color: #e6edf3;
+    font-size: 18pt;
+    font-weight: bold;
+}
+
+QLabel#metricDetail {
+    color: #9da7bf;
+    font-size: 9pt;
+}
+
+/* ===== Dashboard — Storage ===== */
+QLabel#storageLabel {
+    color: #9da7bf;
+    font-size: 9pt;
+}
+
+QProgressBar#storageBar {
+    background-color: #1c2030;
+    border: none;
+    border-radius: 4px;
+    max-height: 8px;
+}
+
+QProgressBar#storageBar::chunk {
+    border-radius: 4px;
+    background-color: #39c5cf;
+}
+
+QProgressBar#storageBar[level="critical"]::chunk {
+    background-color: #f85149;
+}
+
+QProgressBar#storageBar[level="warning"]::chunk {
+    background-color: #d29922;
+}
+
+QProgressBar#storageBar[level="ok"]::chunk {
+    background-color: #39c5cf;
+}
+
+/* ===== Dashboard — Process Labels ===== */
+QLabel#processLabel {
+    color: #9da7bf;
+    font-size: 9pt;
+}
+
+/* ===== Dashboard — History Labels ===== */
+QLabel#historyLabel {
+    color: #9da7bf;
+    font-size: 9pt;
+}
+
+/* ===== Doctor Dialog ===== */
+QLabel#doctorHeader {
+    color: #e6edf3;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+QPushButton#doctorFixButton {
+    background-color: #39c5cf;
+    color: #0b0e14;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+}
+
+QPushButton#doctorFixButton:hover {
+    background-color: #4dd8e2;
+}
+
+/* ===== Confirm Dialog ===== */
+QLabel#confirmIcon {
+    font-size: 28px;
+}
+
+QLabel#confirmAction {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e6edf3;
+}
+
+QFrame#confirmSeparator {
+    color: #2d3348;
+}
+
+QLabel#confirmDescription {
+    color: #9da7bf;
+    font-size: 13px;
+}
+
+QFrame#confirmUndoFrame {
+    background-color: #0b0e14;
+    border: 1px solid #2d3348;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+QLabel#confirmUndoText {
+    color: #39c5cf;
+    font-size: 12px;
+}
+
+QCheckBox#confirmSnapshot {
+    font-size: 12px;
+    padding: 4px 0;
+}
+
+QCheckBox#confirmDontAsk {
+    font-size: 11px;
+    color: #5c6578;
+}
+
+QTextEdit#confirmPreview {
+    background-color: #0b0e14;
+    color: #c8d0e0;
+    border: 1px solid #2d3348;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 8px;
+}
+
+/* Risk Level Badges */
+QLabel#riskBadge {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+QLabel#riskBadge[level="low"] {
+    background-color: #1a4731;
+    color: #56d364;
+}
+
+QLabel#riskBadge[level="medium"] {
+    background-color: #3d2e00;
+    color: #d29922;
+}
+
+QLabel#riskBadge[level="high"] {
+    background-color: #4a1a1a;
+    color: #f85149;
+}
+
+/* ===== Command Palette ===== */
+QDialog#commandPalette {
+    background-color: #0b0e14;
+    border: 1px solid #2d3348;
+    border-radius: 12px;
+}
+
+QLineEdit#paletteSearch {
+    background-color: #1c2030;
+    color: #e6edf3;
+    border: 1px solid #5c6578;
+    border-radius: 8px;
+    padding: 10px 14px;
+    selection-background-color: #39c5cf;
+}
+
+QLineEdit#paletteSearch:focus {
+    border: 1px solid #39c5cf;
+}
+
+QLabel#paletteHint {
+    color: #6c7086;
+    font-size: 11px;
+    padding-left: 4px;
+}
+
+QListWidget#paletteResults {
+    background-color: #0b0e14;
+    color: #e6edf3;
+    border: none;
+    outline: none;
+    font-size: 13px;
+}
+
+QListWidget#paletteResults::item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 1px 0px;
+}
+
+QListWidget#paletteResults::item:selected {
+    background-color: #1c2030;
+    color: #39c5cf;
+}
+
+QListWidget#paletteResults::item:hover {
+    background-color: #2a2b3d;
+}
+
+QLabel#paletteFooter {
+    color: #5c6578;
+    font-size: 10px;
+    padding-top: 2px;
+}
+
+/* ===== BaseTab Table ===== */
+QTableWidget#baseTable {
+    background-color: #0b0e14;
+    alternate-background-color: #252540;
+    color: #e4e8f4;
+    gridline-color: #2d3348;
+    selection-background-color: #5c6578;
+    selection-color: #ffffff;
+}
+
+QTableWidget#baseTable QHeaderView::section {
+    background-color: #1c2030;
+    color: #9da7bf;
+    border: none;
+    padding: 6px 8px;
+    font-weight: 600;
+}
+
+/* ===== Undo Button ===== */
+QPushButton#undoButton {
+    background-color: #39c5cf;
+    color: #0b0e14;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 10pt;
+    font-weight: 600;
+}
+
+QPushButton#undoButton:hover {
+    background-color: #4dd8e2;
+}
+
+/* ===== Toast Notifications ===== */
+QLabel#statusText[toast="success"] {
+    color: #56d364;
+}
+
+QLabel#statusText[toast="error"] {
+    color: #f85149;
+}
+
+/* ===== Output Toolbar ===== */
+QPushButton#outputCopyBtn,
+QPushButton#outputSaveBtn,
+QPushButton#outputCancelBtn {
+    background-color: #1c2030;
+    color: #9da7bf;
+    border: 1px solid #2d3348;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 9pt;
+}
+
+QPushButton#outputCopyBtn:hover,
+QPushButton#outputSaveBtn:hover {
+    background-color: #2d3348;
+    color: #e6edf3;
+}
+
+QPushButton#outputCancelBtn:hover {
+    background-color: #4a1a1a;
+    color: #f85149;
 }

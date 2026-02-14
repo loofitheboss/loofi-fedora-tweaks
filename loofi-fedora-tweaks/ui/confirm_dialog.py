@@ -37,7 +37,12 @@ logger = get_logger(__name__)
 
 
 class ConfirmActionDialog(QDialog):
-    """Rich confirmation dialog with action details and snapshot option."""
+    """Rich confirmation dialog with action details, risk level, and snapshot option."""
+
+    # Risk level constants
+    RISK_LOW = "low"
+    RISK_MEDIUM = "medium"
+    RISK_HIGH = "high"
 
     def __init__(
         self,
@@ -47,6 +52,8 @@ class ConfirmActionDialog(QDialog):
         undo_hint: str = "",
         offer_snapshot: bool = False,
         command_preview: str = "",
+        risk_level: str = "",
+        action_key: str = "",
     ):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Confirm Action"))
@@ -54,51 +61,62 @@ class ConfirmActionDialog(QDialog):
         self.setMaximumWidth(600)
         self._snapshot_requested = False
         self._command_preview = command_preview
+        self._action_key = action_key  # For per-action "don't ask again"
 
         layout = QVBoxLayout(self)
         layout.setSpacing(16)
         layout.setContentsMargins(24, 20, 24, 20)
 
-        # Warning icon + action header
+        # Warning icon + action header + risk badge
         header_row = QHBoxLayout()
         icon_label = QLabel("⚠️")
-        icon_label.setStyleSheet("font-size: 28px;")
+        icon_label.setObjectName("confirmIcon")
         header_row.addWidget(icon_label)
 
         action_label = QLabel(action or self.tr("Are you sure?"))
-        action_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        action_label.setObjectName("confirmAction")
         action_label.setWordWrap(True)
         header_row.addWidget(action_label, 1)
+
+        # Risk level badge (v38.0)
+        if risk_level:
+            badge_text = {
+                self.RISK_LOW: self.tr("LOW"),
+                self.RISK_MEDIUM: self.tr("MEDIUM"),
+                self.RISK_HIGH: self.tr("HIGH"),
+            }.get(risk_level, risk_level.upper())
+            risk_badge = QLabel(badge_text)
+            risk_badge.setObjectName("riskBadge")
+            risk_badge.setProperty("level", risk_level)
+            header_row.addWidget(risk_badge)
+
         layout.addLayout(header_row)
 
         # Separator
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet("color: #2d3348;")
+        sep.setObjectName("confirmSeparator")
         layout.addWidget(sep)
 
         # Description
         if description:
             desc_label = QLabel(description)
             desc_label.setWordWrap(True)
-            desc_label.setStyleSheet("color: #9da7bf; font-size: 13px;")
+            desc_label.setObjectName("confirmDescription")
             layout.addWidget(desc_label)
 
         # Undo hint
         if undo_hint:
             undo_frame = QFrame()
-            undo_frame.setStyleSheet(
-                "QFrame { background-color: #0b0e14; border: 1px solid #2d3348; "
-                "border-radius: 8px; padding: 10px; }"
-            )
+            undo_frame.setObjectName("confirmUndoFrame")
             undo_layout = QHBoxLayout(undo_frame)
             undo_layout.setContentsMargins(10, 8, 10, 8)
             undo_icon = QLabel("💡")
-            undo_icon.setStyleSheet("font-size: 16px;")
+            undo_icon.setObjectName("confirmIcon")
             undo_layout.addWidget(undo_icon)
             undo_text = QLabel(undo_hint)
             undo_text.setWordWrap(True)
-            undo_text.setStyleSheet("color: #39c5cf; font-size: 12px;")
+            undo_text.setObjectName("confirmUndoText")
             undo_layout.addWidget(undo_text, 1)
             layout.addWidget(undo_frame)
 
@@ -109,13 +127,13 @@ class ConfirmActionDialog(QDialog):
                 self.tr("Create system snapshot before proceeding")
             )
             self.snapshot_cb.setChecked(True)
-            self.snapshot_cb.setStyleSheet("font-size: 12px; padding: 4px 0;")
+            self.snapshot_cb.setObjectName("confirmSnapshot")
             layout.addWidget(self.snapshot_cb)
 
         # Don't ask again checkbox
         self.dont_ask_cb = QCheckBox(
             self.tr("Don't ask for confirmation again"))
-        self.dont_ask_cb.setStyleSheet("font-size: 11px; color: #5c6578;")
+        self.dont_ask_cb.setObjectName("confirmDontAsk")
         layout.addWidget(self.dont_ask_cb)
 
         # Command preview area (hidden by default, v35.0)
@@ -124,11 +142,7 @@ class ConfirmActionDialog(QDialog):
             self._preview_area = QTextEdit()
             self._preview_area.setReadOnly(True)
             self._preview_area.setPlainText(command_preview)
-            self._preview_area.setStyleSheet(
-                "QTextEdit { background-color: #0b0e14; color: #c8d0e0; "
-                "border: 1px solid #2d3348; border-radius: 6px; "
-                "font-family: monospace; font-size: 12px; padding: 8px; }"
-            )
+            self._preview_area.setObjectName("confirmPreview")
             self._preview_area.setMaximumHeight(100)
             self._preview_area.setVisible(False)
             layout.addWidget(self._preview_area)
@@ -161,11 +175,18 @@ class ConfirmActionDialog(QDialog):
 
     def _on_confirm(self):
         """Handle confirm button click."""
-        # Save "don't ask" preference
+        # Save "don't ask" preference (per-action if action_key provided, global otherwise)
         if self.dont_ask_cb.isChecked():
             try:
                 mgr = SettingsManager.instance()
-                mgr.set("confirm_dangerous_actions", False)
+                if self._action_key:
+                    # Per-action suppression (v38.0)
+                    suppressed = mgr.get("suppressed_confirmations") or []
+                    if self._action_key not in suppressed:
+                        suppressed.append(self._action_key)
+                    mgr.set("suppressed_confirmations", suppressed)
+                else:
+                    mgr.set("confirm_dangerous_actions", False)
                 mgr.save()
             except Exception:
                 logger.debug(
@@ -198,6 +219,8 @@ class ConfirmActionDialog(QDialog):
         offer_snapshot: bool = False,
         force: bool = False,
         command_preview: str = "",
+        risk_level: str = "",
+        action_key: str = "",
     ) -> bool:
         """
         Convenience method to show a confirmation dialog.
@@ -206,10 +229,17 @@ class ConfirmActionDialog(QDialog):
         If ``confirm_dangerous_actions`` is disabled in settings and
         ``force`` is False, returns True immediately (user opted out).
         ``command_preview`` (v35.0): optional command string to show via Preview button.
+        ``risk_level`` (v38.0): "low", "medium", or "high" to show risk badge.
+        ``action_key`` (v38.0): unique key for per-action "don't ask again".
         """
         if not force:
             try:
                 mgr = SettingsManager.instance()
+                # Check per-action suppression first (v38.0)
+                if action_key:
+                    suppressed = mgr.get("suppressed_confirmations") or []
+                    if action_key in suppressed:
+                        return True
                 if not mgr.get("confirm_dangerous_actions"):
                     return True
             except Exception:
@@ -223,5 +253,7 @@ class ConfirmActionDialog(QDialog):
             undo_hint=undo_hint,
             offer_snapshot=offer_snapshot,
             command_preview=command_preview,
+            risk_level=risk_level,
+            action_key=action_key,
         )
         return dialog.exec() == QDialog.DialogCode.Accepted

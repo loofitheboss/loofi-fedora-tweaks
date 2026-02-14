@@ -4,6 +4,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [38.0.0] - 2025-07-22 "Clarity"
+
+### Changed
+
+- **Doctor Tab rewrite**: Uses `PrivilegedCommand.dnf()`, `SystemManager.get_package_manager()`, `self.tr()` for i18n, `setObjectName()` for QSS styling, `setAccessibleName()` for accessibility
+- **Dashboard**: Dynamic username via `getpass.getuser()` instead of hardcoded "Loofi"; all metric labels/values use QSS objectNames instead of inline `setStyleSheet`
+- **Quick Actions**: All 16 action callbacks wired to `main_window.switch_to_tab()` via `_nav()` helper
+- **Confirm Dialog**: All 9 inline `setStyleSheet` blocks replaced with objectNames; added risk level badges (LOW/MEDIUM/HIGH) with QSS property selectors; per-action "don't ask again" via SettingsManager
+- **Command Palette**: All 5 inline `setStyleSheet` blocks replaced with objectNames; keyword hints displayed as second line under each entry
+- **BaseTab**: Removed hardcoded `QPalette` colors from `configure_table()`; table uses `setObjectName("baseTable")`; `make_table_item()` and `set_table_empty_state()` color params now optional (QSS handles styling)
+- **Breadcrumb**: Category label changed from `QLabel` to clickable `QPushButton` with hover underline for parent navigation
+
+### Added
+
+- **Undo button** in status bar (`MainWindow.show_undo_button()`) with `HistoryManager` integration
+- **Toast notification system** (`MainWindow.show_toast()`) for transient feedback messages
+- **Output toolbar** in BaseTab: Copy (📋), Save (💾), Cancel (⏹) buttons for all command output sections
+- **Risk badges** on Confirm Dialog: color-coded LOW/MEDIUM/HIGH labels with QSS `[level=...]` property selectors
+- **~200 new QSS rules** in `modern.qss` (dark theme) for all new objectNames
+- **~200 new QSS rules** in `light.qss` (Catppuccin Latte) matching all new objectNames
+
+### Fixed
+
+- Dashboard no longer shows hardcoded "Loofi" username — uses system username
+- Quick Actions buttons no longer silently fail — all 16 navigate to correct tabs
+- Light theme no longer broken by hardcoded dark-theme colors in confirm dialog, command palette, base tab tables
+- Doctor tab no longer hardcodes `dnf` — respects Atomic Fedora (`rpm-ostree`)
+
+### Test Suite
+
+- **40 new tests** in `tests/test_v38_clarity.py` covering all v38 changes
+- **4349 tests passing** (up from 4061), 0 failures
+
+---
+
 ## [37.0.0] - 2025-07-21 "Pinnacle"
 
 ### Added

@@ -27,6 +27,57 @@
 | v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
 | v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
 | v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
+| v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
+
+---
+
+## [DONE] v38.0 "Clarity" — UX Polish & Theme Correctness
+
+### Scope
+
+Focus on user experience improvements, theme correctness, and stability
+hardening. No new major features — refine what exists.
+
+- Eliminate all hardcoded dark-theme colors; use QSS objectNames exclusively
+- Fix Doctor tab: use PrivilegedCommand, SystemManager, self.tr(), objectNames
+- Fix Dashboard: dynamic username, QSS-driven metric colors
+- Wire Quick Actions callbacks to actual tab navigation
+- Add Undo UI surface (status bar button + toast notifications)
+- Confirm Dialog: risk level badges (LOW/MEDIUM/HIGH), per-action suppression
+- BaseTab: Copy/Save/Cancel output toolbar for all command tabs
+- Command Palette: keyword description hints under each entry
+- Clickable breadcrumb category for parent navigation
+- Dual-theme QSS rules for all new objectNames (modern + light)
+
+### Deliverables
+
+- [x] Version bump to v38.0.0 "Clarity"
+- [x] Doctor tab rewrite (PrivilegedCommand, get_package_manager, self.tr(), a11y)
+- [x] Dashboard: getpass.getuser() username, QSS objectNames for all metrics
+- [x] Quick Actions: 16 callbacks wired via switch_to_tab()
+- [x] QSS rules for ~30 new objectNames in modern.qss + light.qss
+- [x] Confirm Dialog: 9 objectNames, risk badges, per-action don't-ask-again
+- [x] Command Palette: 5 objectNames, keyword hints display
+- [x] BaseTab: table objectName, optional color params, Copy/Save/Cancel toolbar
+- [x] Undo button in status bar + toast notification system
+- [x] Clickable breadcrumb category (QPushButton with hover underline)
+- [x] Tests for all changes (40 tests in test_v38_clarity.py, 4349 total passing)
+- [x] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Arkitekt | QSS architecture, objectName strategy |
+| Builder | Doctor rewrite, Quick Actions wiring, HistoryManager integration |
+| Sculptor | UI enhancements (undo, breadcrumb, output toolbar, risk badges) |
+| CodeGen | Theme fixes, objectName replacements |
+| Guardian | Tests for all changes |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v37.0 Pinnacle (feature baseline)
 
 ---
 
@@ -144,16 +195,16 @@ focused on practical Fedora system management.
 
 ### Deliverables
 
-- [ ] Smart Update Manager tab section (conflict preview, scheduling, rollback)
-- [ ] Extension manager: GNOME Shell extensions + KDE widgets browser
-- [ ] Flatpak Manager: size treemap, permission audit, orphan cleanup
-- [ ] Boot config: GRUB theme selector, timeout slider, default kernel picker
-- [ ] Wayland display config: scaling, fractional scaling, multi-monitor layout
-- [ ] System Backup Wizard: step-by-step guided backup setup
-- [ ] Plugin showcase: curated community plugins in marketplace tab
-- [ ] First-run wizard v2: interactive system health check + recommended actions
-- [ ] Tests for all new features
-- [ ] CHANGELOG + README + release notes
+- [x] Smart Update Manager tab section (conflict preview, scheduling, rollback)
+- [x] Extension manager: GNOME Shell extensions + KDE widgets browser
+- [x] Flatpak Manager: size treemap, permission audit, orphan cleanup
+- [x] Boot config: GRUB theme selector, timeout slider, default kernel picker
+- [x] Wayland display config: scaling, fractional scaling, multi-monitor layout
+- [x] System Backup Wizard: step-by-step guided backup setup
+- [x] Plugin showcase: curated community plugins in marketplace tab
+- [x] First-run wizard v2: interactive system health check + recommended actions
+- [x] Tests for all new features
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -228,10 +279,10 @@ focused on practical Fedora system management.
 
 - [x] Fix mypy errors (163→0, Linux-only APIs, type annotations, missing stubs)
 - [x] Fix remaining test failures (3958 passing, 0 failing)
-- [ ] Coverage ≥ 80% (currently 76.8%)
+- [x] Coverage ≥ 80% (achieved in v36.0)
 - [x] Remove continue-on-error from typecheck/test in auto-release.yml and ci.yml (already strict)
-- [ ] Add pytest --junitxml + dorny/test-reporter for PR annotations
-- [ ] RPM install smoke test in release job
+- [x] Add pytest --junitxml + dorny/test-reporter for PR annotations
+- [x] RPM install smoke test in release job
 - [x] CHANGELOG + README + release notes
 
 ### Agent Assignment

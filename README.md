@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v37.0.0 "Pinnacle"
+# Loofi Fedora Tweaks v38.0.0 "Clarity"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v37.0.0">
-    <img src="https://img.shields.io/badge/Release-v37.0.0-blue?style=for-the-badge&logo=github" alt="Release v37.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v38.0.0">
+    <img src="https://img.shields.io/badge/Release-v38.0.0-blue?style=for-the-badge&logo=github" alt="Release v38.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,20 +35,28 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v38.0.0?
+
+`v38.0.0 "Clarity"` is a UX polish release — theme correctness, Doctor tab rewrite, Quick Actions wiring, and new undo/toast/toolbar UI:
+
+- **Doctor Tab rewrite** — Uses `PrivilegedCommand`, `SystemManager`, `self.tr()`, objectNames, accessibility names.
+- **Dashboard username** — Dynamic username via `getpass.getuser()` instead of hardcoded "Loofi".
+- **Quick Actions wired** — All 16 action callbacks navigate to correct tabs via `switch_to_tab()`.
+- **Theme correctness** — 14 inline `setStyleSheet` blocks replaced with objectNames across confirm dialog, command palette, and base tab.
+- **Undo button** — Status bar undo with `HistoryManager` integration.
+- **Toast notifications** — Transient success/error feedback in status bar.
+- **Output toolbar** — Copy/Save/Cancel buttons on all command output sections.
+- **Risk badges** — Color-coded LOW/MEDIUM/HIGH labels on confirm dialog.
+- **~200 new QSS rules** — Both `modern.qss` and `light.qss` updated for all new objectNames.
+- **40 new tests** — 4349 tests passing, 0 failures.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v38.0.0.md`](docs/releases/RELEASE-NOTES-v38.0.0.md)
+
+---
+
 ## What Is New in v37.0.0?
 
-`v37.0.0 "Pinnacle"` is a feature expansion release — smart updates, desktop extension management, Flatpak audit, boot configuration, display settings, and backup wizard:
-
-- **Smart Update Manager** — Check updates, preview conflicts, schedule automatic updates, rollback transactions.
-- **Extension Manager** — Install/enable/disable/remove GNOME & KDE extensions from GUI or CLI.
-- **Flatpak Manager** — Audit app sizes, detect orphan runtimes, bulk cleanup, permissions inspection.
-- **Boot Configuration** — View/edit GRUB settings, list kernels, set timeout — all through pkexec.
-- **Display Settings** — Wayland session info, display list, fractional scaling toggle.
-- **Backup Wizard** — Auto-detect Timeshift/Snapper/restic, create/restore/delete snapshots.
-- **Risk Registry** — Centralized risk assessment for all privileged actions with revert instructions.
-- **First-Run Wizard v2** — 5-step wizard with system health check and recommended actions.
-- **6 new CLI commands** — `updates`, `extension`, `flatpak-manage`, `boot`, `display`, `backup`.
-- **76 new tests** — Full coverage for all new backends, UI tabs, and CLI handlers.
+`v37.0.0 "Pinnacle"` is a feature expansion release — smart updates, desktop extension management, Flatpak audit, boot configuration, display settings, and backup wizard.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v37.0.0.md`](docs/releases/RELEASE-NOTES-v37.0.0.md)
 
@@ -264,7 +272,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 3953+ passing
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 4349+ passing
 ```
 
 Lint:

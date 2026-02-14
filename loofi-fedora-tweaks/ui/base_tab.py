@@ -17,9 +17,10 @@ import logging
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QGroupBox, QLabel, QTextEdit, QTableWidget, QTableWidgetItem
+    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QTextEdit,
+    QTableWidget, QTableWidgetItem, QPushButton, QFileDialog
 )
-from PyQt6.QtGui import QColor, QPalette
+from PyQt6.QtGui import QColor
 from utils.command_runner import CommandRunner
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
@@ -111,9 +112,64 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         return group
 
     def add_output_section(self, layout):
-        """Add the standard output area to a layout."""
-        layout.addWidget(QLabel(self.tr("Output Log:")))
+        """Add the standard output area with Copy/Save/Cancel toolbar to a layout."""
+        header_row = QHBoxLayout()
+        header_row.addWidget(QLabel(self.tr("Output Log:")))
+        header_row.addStretch()
+
+        # Copy button (v38.0)
+        copy_btn = QPushButton(self.tr("📋 Copy"))
+        copy_btn.setObjectName("outputCopyBtn")
+        copy_btn.setToolTip(self.tr("Copy output to clipboard"))
+        copy_btn.clicked.connect(self._copy_output)
+        header_row.addWidget(copy_btn)
+
+        # Save button (v38.0)
+        save_btn = QPushButton(self.tr("💾 Save"))
+        save_btn.setObjectName("outputSaveBtn")
+        save_btn.setToolTip(self.tr("Save output to file"))
+        save_btn.clicked.connect(self._save_output)
+        header_row.addWidget(save_btn)
+
+        # Cancel button (v38.0)
+        cancel_btn = QPushButton(self.tr("⏹ Cancel"))
+        cancel_btn.setObjectName("outputCancelBtn")
+        cancel_btn.setToolTip(self.tr("Cancel running command"))
+        cancel_btn.clicked.connect(self._cancel_command)
+        header_row.addWidget(cancel_btn)
+
+        layout.addLayout(header_row)
         layout.addWidget(self.output_area)
+
+    def _copy_output(self):
+        """Copy the output area text to clipboard."""
+        text = self.output_area.toPlainText()
+        if text:
+            from PyQt6.QtWidgets import QApplication
+            clipboard = QApplication.clipboard()
+            if clipboard:
+                clipboard.setText(text)
+
+    def _save_output(self):
+        """Save the output area text to a file."""
+        text = self.output_area.toPlainText()
+        if not text:
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, self.tr("Save Output"), "output.txt",
+            self.tr("Text Files (*.txt);;All Files (*)")
+        )
+        if path:
+            try:
+                with open(path, "w") as f:
+                    f.write(text)
+            except OSError as e:
+                logger.debug("Failed to save output: %s", e)
+
+    def _cancel_command(self):
+        """Cancel the currently running command."""
+        if self.runner:
+            self.runner.cancel()
 
     # ---------------------------------------------------------------- PluginInterface
 
@@ -143,7 +199,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         - Alternating row colors for scanability
         - Proper row height for readability
         - Clean appearance (no row numbers)
-        - Explicit text color via palette for data rows
+        - Theme-aware colors via QSS objectName
 
         Usage::
 
@@ -154,26 +210,18 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         table.verticalHeader().setVisible(False)
         table.verticalHeader().setDefaultSectionSize(36)
         table.setShowGrid(True)
-
-        # Force text color via palette — QSS alone doesn't always apply to items
-        pal = table.palette()
-        pal.setColor(QPalette.ColorRole.Text, QColor("#e4e8f4"))
-        pal.setColor(QPalette.ColorRole.WindowText, QColor("#e4e8f4"))
-        pal.setColor(QPalette.ColorRole.Base, QColor("#0b0e14"))
-        pal.setColor(QPalette.ColorRole.AlternateBase, QColor("#252540"))
-        pal.setColor(QPalette.ColorRole.Highlight, QColor("#5c6578"))
-        pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
-        table.setPalette(pal)
+        table.setObjectName("baseTable")
 
     @staticmethod
-    def make_table_item(text, color: str = "#e4e8f4") -> QTableWidgetItem:
-        """Create a table item with explicit foreground color for readability."""
+    def make_table_item(text, color: str = "") -> QTableWidgetItem:
+        """Create a table item. Color is applied via QSS by default."""
         item = QTableWidgetItem(str(text))
-        item.setForeground(QColor(color))
+        if color:
+            item.setForeground(QColor(color))
         return item
 
     @staticmethod
-    def set_table_empty_state(table: QTableWidget, message: str, color: str = "#9da7bf") -> None:
+    def set_table_empty_state(table: QTableWidget, message: str, color: str = "") -> None:
         """Render a single full-width empty-state row in a table."""
         table.clearSpans()
         table.setRowCount(1)

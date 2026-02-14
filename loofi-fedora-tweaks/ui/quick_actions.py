@@ -263,15 +263,25 @@ class QuickActionsBar(QDialog):
 # Default actions
 # -----------------------------------------------------------------------
 
-def register_default_actions(registry: QuickActionRegistry) -> None:
-    """Register the built-in set of quick actions."""
+def register_default_actions(registry: QuickActionRegistry, main_window=None) -> None:
+    """Register the built-in set of quick actions.
+
+    When *main_window* is provided, callbacks navigate to the relevant tab.
+    Otherwise, callbacks are no-ops (for test/headless use).
+    """
+
+    def _nav(tab_name: str) -> Callable:
+        """Return a callback that switches to *tab_name* via MainWindow."""
+        if main_window is not None and hasattr(main_window, "switch_to_tab"):
+            return lambda: main_window.switch_to_tab(tab_name)
+        return lambda: tab_name
 
     defaults: List[QuickAction] = [
         # -- Maintenance --
         QuickAction(
             name="Update System",
             category="Maintenance",
-            callback=lambda: "update_system",
+            callback=_nav("Updates"),
             description="Run a full system update via the package manager",
             icon="\U0001f504",  # 🔄
             keywords=["dnf", "upgrade", "packages", "rpm-ostree"],
@@ -279,7 +289,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Clean DNF Cache",
             category="Maintenance",
-            callback=lambda: "clean_dnf_cache",
+            callback=_nav("Cleanup"),
             description="Clear the DNF package cache to free disk space",
             icon="\U0001f9f9",  # 🧹
             keywords=["cache", "cleanup", "disk", "space"],
@@ -287,7 +297,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Trim SSD",
             category="Maintenance",
-            callback=lambda: "trim_ssd",
+            callback=_nav("Cleanup"),
             description="Run fstrim to optimize SSD performance",
             icon="\U0001f4be",  # 💾
             keywords=["fstrim", "ssd", "discard", "optimize"],
@@ -295,7 +305,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Vacuum Journals",
             category="Maintenance",
-            callback=lambda: "vacuum_journals",
+            callback=_nav("Cleanup"),
             description="Vacuum systemd journal logs to reclaim space",
             icon="\U0001f4dc",  # 📜
             keywords=["journal", "vacuum", "log", "journalctl", "systemd"],
@@ -304,7 +314,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Run Security Scan",
             category="Security",
-            callback=lambda: "run_security_scan",
+            callback=_nav("Security"),
             description="Perform a security audit of the system",
             icon="\U0001f6e1\ufe0f",  # 🛡️
             keywords=["audit", "hardening", "scan", "security"],
@@ -312,7 +322,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Check Open Ports",
             category="Security",
-            callback=lambda: "check_open_ports",
+            callback=_nav("Security"),
             description="List all open network ports on this machine",
             icon="\U0001f50d",  # 🔍
             keywords=["port", "scan", "network", "firewall", "ss"],
@@ -320,7 +330,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Toggle Firewall",
             category="Security",
-            callback=lambda: "toggle_firewall",
+            callback=_nav("Security"),
             description="Enable or disable the system firewall (firewalld)",
             icon="\U0001f525",  # 🔥
             keywords=["firewall", "firewalld", "enable", "disable"],
@@ -329,7 +339,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Auto-Tune Performance",
             category="Hardware",
-            callback=lambda: "auto_tune_performance",
+            callback=_nav("Hardware"),
             description="Apply optimized hardware-specific performance settings",
             icon="\u26a1",  # ⚡
             keywords=["tune", "performance", "cpu", "governor", "turbo"],
@@ -337,7 +347,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Show CPU Governor",
             category="Hardware",
-            callback=lambda: "show_cpu_governor",
+            callback=_nav("Hardware"),
             description="Display the current CPU frequency scaling governor",
             icon="\U0001f9e0",  # 🧠
             keywords=["cpu", "governor", "frequency", "scaling"],
@@ -345,7 +355,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Show Battery Status",
             category="Hardware",
-            callback=lambda: "show_battery_status",
+            callback=_nav("HP Tweaks"),
             description="Show battery charge level and health information",
             icon="\U0001f50b",  # 🔋
             keywords=["battery", "charge", "health", "power"],
@@ -354,7 +364,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Show DNS Config",
             category="Network",
-            callback=lambda: "show_dns_config",
+            callback=_nav("Network"),
             description="Display the currently configured DNS resolvers",
             icon="\U0001f310",  # 🌐
             keywords=["dns", "nameserver", "resolver", "resolv.conf"],
@@ -362,7 +372,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Flush DNS Cache",
             category="Network",
-            callback=lambda: "flush_dns_cache",
+            callback=_nav("Network"),
             description="Flush the local DNS resolver cache",
             icon="\U0001f4a8",  # 💨
             keywords=["dns", "flush", "cache", "resolved"],
@@ -371,7 +381,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="View System Info",
             category="System",
-            callback=lambda: "view_system_info",
+            callback=_nav("System Info"),
             description="Show detailed hardware and OS information",
             icon="\U0001f4cb",  # 📋
             keywords=["info", "hardware", "os", "kernel", "specs"],
@@ -379,7 +389,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Show Disk Usage",
             category="System",
-            callback=lambda: "show_disk_usage",
+            callback=_nav("Storage"),
             description="Display disk usage summary for all mounted volumes",
             icon="\U0001f4c0",  # 💿
             keywords=["disk", "usage", "df", "storage", "mount"],
@@ -387,7 +397,7 @@ def register_default_actions(registry: QuickActionRegistry) -> None:
         QuickAction(
             name="Create Snapshot",
             category="System",
-            callback=lambda: "create_snapshot",
+            callback=_nav("Snapshots"),
             description="Create a system snapshot via Timeshift or Snapper",
             icon="\U0001f4f8",  # 📸
             keywords=["snapshot", "timeshift", "snapper", "backup", "btrfs"],
