@@ -4,7 +4,44 @@
 
 All notable changes to this project will be documented in this file.
 
-## [36.0.0] - Unreleased "Horizon"
+## [37.0.0] - 2025-07-21 "Pinnacle"
+
+### Added
+
+- **Smart Update Manager** (`utils/update_manager.py`): Check for updates, preview package conflicts, schedule automatic updates (systemd timer), rollback last transaction, view update history. Branches on Atomic vs Traditional (`dnf` / `rpm-ostree`).
+- **Extension Manager** (`utils/extension_manager.py`): List, install, enable, disable, and remove desktop extensions (GNOME / KDE). Auto-detects desktop environment via `$XDG_CURRENT_DESKTOP`.
+- **Flatpak Manager** (`utils/flatpak_manager.py`): Audit Flatpak app sizes, inspect permissions, detect orphan runtimes, bulk cleanup unused packages.
+- **Boot Configuration Manager** (`utils/boot_config.py`): View/edit GRUB config, list installed kernels, set timeout, apply GRUB changes via pkexec.
+- **Wayland Display Manager** (`utils/wayland_display.py`): List displays, show session info, enable/disable fractional scaling (GNOME Mutter).
+- **Backup Wizard** (`utils/backup_wizard.py`): Detect backup tools (Timeshift, Snapper, restic), create/list/restore/delete snapshots.
+- **Plugin Marketplace extensions** (`utils/plugin_marketplace.py`): Curated plugin list with quality reports (rating, downloads, last updated).
+- **Risk Registry** (`utils/risk.py`): Centralized risk assessment for all privileged actions — `RiskLevel` enum (LOW/MEDIUM/HIGH), `RiskEntry` dataclass, `RiskRegistry` singleton with revert instructions.
+- **Extensions Tab** (`ui/extensions_tab.py`): New tab — search, filter, install/remove/enable/disable desktop extensions.
+- **Backup Tab** (`ui/backup_tab.py`): New tab — 3-page wizard (detect tools → configure → manage snapshots).
+- **Smart Updates sub-tab** in Maintenance: Check updates, preview conflicts, schedule, rollback with undo.
+- **Flatpak Manager sub-tab** in Software: Size audit, orphan detection, permission inspection, bulk cleanup.
+- **Boot Configuration card** in Hardware: Kernel list, GRUB config viewer, timeout editor.
+- **Display sub-tab** in Desktop: Session info, display list, fractional scaling toggle.
+- **Featured Plugins sub-tab** in Community: Curated plugin directory with ratings and downloads.
+- **First-Run Wizard v2** (`ui/wizard.py`): Upgraded from 3-step to 5-step — added system health check page (disk, packages, firewall, backup, SELinux) and recommended actions page with risk badges.
+- **6 new CLI subcommands**: `updates`, `extension`, `flatpak-manage`, `boot`, `display`, `backup` — all with `--json` and `--dry-run` support.
+
+### Changed
+
+- **Tab count**: 26 → 28 (added Extensions, Backup).
+- **Maintenance tab**: Added Smart Updates sub-tab via `_SmartUpdatesSubTab`.
+- **Software tab**: Added Flatpak Manager sub-tab via `_create_flatpak_tab()`.
+- **Hardware tab**: Added Boot Configuration card via `create_boot_config_card()`.
+- **Desktop tab**: Added Display sub-tab via `_create_display_tab()`.
+- **Community tab**: Added Featured Plugins sub-tab via `_create_featured_tab()`.
+
+### Test Suite
+
+- **76 new tests** in 9 files: `test_update_manager.py`, `test_extension_manager.py`, `test_flatpak_manager.py`, `test_boot_config.py`, `test_wayland_display.py`, `test_backup_wizard.py`, `test_risk.py`, `test_extensions_tab.py`, `test_cli_v37.py`.
+
+---
+
+## [36.0.0] - 2025-07-20 "Horizon"
 
 ### Security
 

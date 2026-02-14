@@ -2547,6 +2547,286 @@ def cmd_audit_log(args):
     return 0
 
 
+# ==================== v37.0 Pinnacle ====================
+
+
+def cmd_updates(args):
+    """Handle smart updates subcommand."""
+    from utils.update_manager import UpdateManager
+
+    if args.action == "check":
+        updates = UpdateManager.check_updates()
+        if _json_output:
+            _output_json([{"name": u.name, "old": u.old_version,
+                           "new": u.new_version, "source": u.source} for u in updates])
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Available Updates")
+            _print("═══════════════════════════════════════════")
+            if not updates:
+                _print("  System is up to date.")
+            for u in updates:
+                _print(f"  {u.name}: {u.old_version} → {u.new_version} ({u.source})")
+        return 0
+
+    elif args.action == "conflicts":
+        conflicts = UpdateManager.preview_conflicts()
+        if _json_output:
+            _output_json([{"package": c.package, "type": c.conflict_type,
+                           "desc": c.description} for c in conflicts])
+        else:
+            if not conflicts:
+                _print("  No conflicts detected.")
+            for c in conflicts:
+                _print(f"  ⚠ {c.package}: {c.conflict_type} — {c.description}")
+        return 0
+
+    elif args.action == "schedule":
+        time_str = getattr(args, "time", "02:00") or "02:00"
+        scheduled = UpdateManager.schedule_update(time_str)
+        cmds = UpdateManager.get_schedule_commands(scheduled)
+        for binary, cmd_args, desc in cmds:
+            run_operation((binary, cmd_args, desc))
+        return 0
+
+    elif args.action == "rollback":
+        return 0 if run_operation(UpdateManager.rollback_last()) else 1
+
+    elif args.action == "history":
+        history = UpdateManager.get_update_history()
+        if _json_output:
+            _output_json([{"date": h.date, "name": h.name,
+                           "version": h.new_version, "source": h.source} for h in history])
+        else:
+            for h in history:
+                _print(f"  {h.date}: {h.name} → {h.new_version} ({h.source})")
+        return 0
+
+    return 1
+
+
+def cmd_extension(args):
+    """Handle extension management subcommand."""
+    from utils.extension_manager import ExtensionManager
+
+    if args.action == "list":
+        extensions = ExtensionManager.list_installed()
+        if _json_output:
+            _output_json([{"uuid": e.uuid, "name": e.name, "enabled": e.enabled,
+                           "desktop": e.desktop} for e in extensions])
+        else:
+            for e in extensions:
+                status = "✅" if e.enabled else "❌"
+                _print(f"  {status} {e.name or e.uuid} ({e.desktop})")
+        return 0
+
+    elif args.action == "install":
+        if not args.uuid:
+            _print("❌ Extension UUID required")
+            return 1
+        return 0 if run_operation(ExtensionManager.install(args.uuid)) else 1
+
+    elif args.action == "remove":
+        if not args.uuid:
+            _print("❌ Extension UUID required")
+            return 1
+        return 0 if run_operation(ExtensionManager.remove(args.uuid)) else 1
+
+    elif args.action == "enable":
+        if not args.uuid:
+            _print("❌ Extension UUID required")
+            return 1
+        return 0 if run_operation(ExtensionManager.enable(args.uuid)) else 1
+
+    elif args.action == "disable":
+        if not args.uuid:
+            _print("❌ Extension UUID required")
+            return 1
+        return 0 if run_operation(ExtensionManager.disable(args.uuid)) else 1
+
+    return 1
+
+
+def cmd_flatpak_manage(args):
+    """Handle Flatpak management subcommand."""
+    from utils.flatpak_manager import FlatpakManager
+
+    if args.action == "sizes":
+        sizes = FlatpakManager.get_flatpak_sizes()
+        if _json_output:
+            _output_json([{"app_id": s.app_id, "size": s.size_str} for s in sizes])
+        else:
+            _print("═══════════════════════════════════════════")
+            _print("   Flatpak Sizes")
+            _print("═══════════════════════════════════════════")
+            for s in sizes:
+                _print(f"  {s.app_id}: {s.size_str}")
+            _print(f"\n  Total: {FlatpakManager.get_total_size()}")
+        return 0
+
+    elif args.action == "permissions":
+        all_perms = FlatpakManager.get_all_permissions()
+        if _json_output:
+            _output_json([{"app_id": a.app_id,
+                           "permissions": [{"type": p.permission_type, "value": p.value}
+                                           for p in a.permissions]}
+                          for a in all_perms])
+        else:
+            for a in all_perms:
+                _print(f"  {a.app_id}: {len(a.permissions)} permissions")
+        return 0
+
+    elif args.action == "orphans":
+        orphans = FlatpakManager.find_orphan_runtimes()
+        if _json_output:
+            _output_json({"orphans": orphans})
+        else:
+            if not orphans:
+                _print("  No orphan runtimes found.")
+            for o in orphans:
+                _print(f"  🗑 {o}")
+        return 0
+
+    elif args.action == "cleanup":
+        return 0 if run_operation(FlatpakManager.cleanup_unused()) else 1
+
+    return 1
+
+
+def cmd_boot(args):
+    """Handle boot configuration subcommand."""
+    from utils.boot_config import BootConfigManager
+
+    if args.action == "config":
+        config = BootConfigManager.get_grub_config()
+        if _json_output:
+            _output_json({"default": config.default_entry, "timeout": config.timeout,
+                          "theme": config.theme, "cmdline": config.cmdline_linux})
+        else:
+            _print(f"  Default: {config.default_entry}")
+            _print(f"  Timeout: {config.timeout}s")
+            _print(f"  Theme: {config.theme or 'none'}")
+            _print(f"  Cmdline: {config.cmdline_linux}")
+        return 0
+
+    elif args.action == "kernels":
+        kernels = BootConfigManager.list_kernels()
+        if _json_output:
+            _output_json([{"title": k.title, "version": k.version,
+                           "default": k.is_default} for k in kernels])
+        else:
+            for k in kernels:
+                marker = "→ " if k.is_default else "  "
+                _print(f"  {marker}{k.title} ({k.version})")
+        return 0
+
+    elif args.action == "timeout":
+        seconds = getattr(args, "seconds", None)
+        if seconds is None:
+            _print("❌ --seconds required")
+            return 1
+        return 0 if run_operation(BootConfigManager.set_timeout(seconds)) else 1
+
+    elif args.action == "apply":
+        return 0 if run_operation(BootConfigManager.apply_grub_changes()) else 1
+
+    return 1
+
+
+def cmd_display(args):
+    """Handle display configuration subcommand."""
+    from utils.wayland_display import WaylandDisplayManager
+
+    if args.action == "list":
+        displays = WaylandDisplayManager.get_displays()
+        if _json_output:
+            _output_json([{"name": d.name, "resolution": d.resolution,
+                           "scale": d.scale, "refresh": d.refresh_rate,
+                           "primary": d.primary} for d in displays])
+        else:
+            for d in displays:
+                primary = " ★" if d.primary else ""
+                _print(f"  {d.name}: {d.resolution} @{d.scale}x {d.refresh_rate}Hz{primary}")
+        return 0
+
+    elif args.action == "session":
+        info = WaylandDisplayManager.get_session_info()
+        if _json_output:
+            _output_json(info)
+        else:
+            for k, v in info.items():
+                _print(f"  {k}: {v}")
+        return 0
+
+    elif args.action == "fractional-on":
+        return 0 if run_operation(WaylandDisplayManager.enable_fractional_scaling()) else 1
+
+    elif args.action == "fractional-off":
+        return 0 if run_operation(WaylandDisplayManager.disable_fractional_scaling()) else 1
+
+    return 1
+
+
+def cmd_backup(args):
+    """Handle backup subcommand."""
+    from utils.backup_wizard import BackupWizard
+
+    if args.action == "detect":
+        tool = BackupWizard.detect_backup_tool()
+        available = BackupWizard.get_available_tools()
+        if _json_output:
+            _output_json({"active": tool, "available": available})
+        else:
+            _print(f"  Active tool: {tool}")
+            _print(f"  Available: {', '.join(available)}")
+        return 0
+
+    elif args.action == "create":
+        desc = getattr(args, "description", None) or "CLI backup"
+        tool = getattr(args, "tool", None)
+        return 0 if run_operation(BackupWizard.create_snapshot(tool=tool, description=desc)) else 1
+
+    elif args.action == "list":
+        tool = getattr(args, "tool", None)
+        snapshots = BackupWizard.list_snapshots(tool=tool)
+        if _json_output:
+            _output_json([{"id": s.id, "date": s.date, "description": s.description,
+                           "tool": s.tool} for s in snapshots])
+        else:
+            if not snapshots:
+                _print("  No snapshots found.")
+            for s in snapshots:
+                _print(f"  [{s.tool}] {s.id}: {s.description} ({s.date})")
+        return 0
+
+    elif args.action == "restore":
+        snap_id = getattr(args, "snapshot_id", None)
+        if not snap_id:
+            _print("❌ Snapshot ID required")
+            return 1
+        tool = getattr(args, "tool", None)
+        return 0 if run_operation(BackupWizard.restore_snapshot(snap_id, tool=tool)) else 1
+
+    elif args.action == "delete":
+        snap_id = getattr(args, "snapshot_id", None)
+        if not snap_id:
+            _print("❌ Snapshot ID required")
+            return 1
+        tool = getattr(args, "tool", None)
+        return 0 if run_operation(BackupWizard.delete_snapshot(snap_id, tool=tool)) else 1
+
+    elif args.action == "status":
+        status = BackupWizard.get_backup_status()
+        if _json_output:
+            _output_json(status)
+        else:
+            for k, v in status.items():
+                _print(f"  {k}: {v}")
+        return 0
+
+    return 1
+
+
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
     global _json_output
@@ -2917,6 +3197,60 @@ def main(argv: Optional[List[str]] = None):
     audit_parser.add_argument(
         "--count", type=int, default=20, help="Number of entries to show (default: 20)")
 
+    # v37.0 Pinnacle - Smart Updates
+    updates_parser = subparsers.add_parser(
+        "updates", help="Smart update management")
+    updates_parser.add_argument(
+        "action", choices=["check", "conflicts", "schedule", "rollback", "history"],
+        help="Update action to perform")
+    updates_parser.add_argument(
+        "--time", default="02:00", help="Schedule time (HH:MM, default: 02:00)")
+
+    # v37.0 Pinnacle - Extensions
+    ext_parser = subparsers.add_parser(
+        "extension", help="Desktop extension management")
+    ext_parser.add_argument(
+        "action", choices=["list", "install", "remove", "enable", "disable"],
+        help="Extension action")
+    ext_parser.add_argument(
+        "--uuid", help="Extension UUID for install/remove/enable/disable")
+
+    # v37.0 Pinnacle - Flatpak Manager
+    flatpak_parser = subparsers.add_parser(
+        "flatpak-manage", help="Flatpak management tools")
+    flatpak_parser.add_argument(
+        "action", choices=["sizes", "permissions", "orphans", "cleanup"],
+        help="Flatpak action")
+
+    # v37.0 Pinnacle - Boot Configuration
+    boot_parser = subparsers.add_parser(
+        "boot", help="Boot configuration management")
+    boot_parser.add_argument(
+        "action", choices=["config", "kernels", "timeout", "apply"],
+        help="Boot action")
+    boot_parser.add_argument(
+        "--seconds", type=int, help="Timeout in seconds (for timeout action)")
+
+    # v37.0 Pinnacle - Display
+    display_parser = subparsers.add_parser(
+        "display", help="Display and Wayland configuration")
+    display_parser.add_argument(
+        "action", choices=["list", "session", "fractional-on", "fractional-off"],
+        help="Display action")
+
+    # v37.0 Pinnacle - Backup
+    backup_parser = subparsers.add_parser(
+        "backup", help="Snapshot backup management")
+    backup_parser.add_argument(
+        "action", choices=["detect", "create", "list", "restore", "delete", "status"],
+        help="Backup action")
+    backup_parser.add_argument(
+        "--tool", help="Backup tool (timeshift/snapper)")
+    backup_parser.add_argument(
+        "--description", help="Snapshot description (for create)")
+    backup_parser.add_argument(
+        "--snapshot-id", help="Snapshot ID (for restore/delete)")
+
     args = parser.parse_args(argv)
 
     # Set JSON mode
@@ -2977,6 +3311,13 @@ def main(argv: Optional[List[str]] = None):
         "self-update": cmd_self_update,
         # v35.0 Fortress
         "audit-log": cmd_audit_log,
+        # v37.0 Pinnacle
+        "updates": cmd_updates,
+        "extension": cmd_extension,
+        "flatpak-manage": cmd_flatpak_manage,
+        "boot": cmd_boot,
+        "display": cmd_display,
+        "backup": cmd_backup,
     }
 
     handler = commands.get(args.command)

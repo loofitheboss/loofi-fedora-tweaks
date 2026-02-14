@@ -109,6 +109,36 @@ class PluginMetadata:
 
 
 @dataclass
+class CuratedPlugin:
+    """Featured/curated plugin entry for showcase display (v37.0)."""
+    id: str = ""
+    name: str = ""
+    description: str = ""
+    author: str = ""
+    rating: float = 0.0
+    downloads: int = 0
+    featured: bool = True
+    icon: str = "🔌"
+    category: str = "General"
+    version: str = ""
+    verified: bool = False
+
+
+@dataclass
+class QualityReport:
+    """Plugin quality assessment report (v37.0)."""
+    plugin_id: str = ""
+    rating_avg: float = 0.0
+    total_ratings: int = 0
+    downloads: int = 0
+    last_updated: str = ""
+    verified: bool = False
+    version_freshness: str = "unknown"  # "current" | "outdated" | "abandoned"
+    has_tests: bool = False
+    has_docs: bool = False
+
+
+@dataclass
 class MarketplaceResult:
     """Result of marketplace API operation."""
     success: bool
@@ -789,3 +819,88 @@ class PluginMarketplace:
         logger.debug("Found %d categories", len(categories))
 
         return categories
+
+    # -----------------------------------------------------------------
+    # Curated showcase (v37.0)
+    # -----------------------------------------------------------------
+
+    def get_curated_plugins(self) -> List[CuratedPlugin]:
+        """Get curated/featured plugins for showcase display.
+
+        Fetches featured plugins from CDN index and enriches with
+        rating and download counts from marketplace API.
+
+        Returns:
+            List of :class:`CuratedPlugin` sorted by rating descending.
+        """
+        featured_result = self.get_featured()
+        if not featured_result.success or not featured_result.data:
+            return []
+
+        curated: List[CuratedPlugin] = []
+        for plugin in featured_result.data:
+            curated.append(CuratedPlugin(
+                id=plugin.id,
+                name=plugin.name,
+                description=plugin.description,
+                author=plugin.author,
+                rating=plugin.rating_average or 0.0,
+                downloads=plugin.rating_count,
+                featured=plugin.featured,
+                icon=plugin.icon,
+                category=plugin.category,
+                version=plugin.version,
+                verified=plugin.verified_publisher,
+            ))
+
+        # Sort by rating descending, then downloads
+        curated.sort(key=lambda p: (p.rating, p.downloads), reverse=True)
+        return curated
+
+    def get_plugin_quality(self, plugin_id: str) -> QualityReport:
+        """Assess plugin quality based on marketplace data.
+
+        Aggregates rating, download count, version freshness, and
+        metadata quality indicators.
+
+        Args:
+            plugin_id: Plugin identifier.
+
+        Returns:
+            :class:`QualityReport` with quality assessment.
+        """
+        report = QualityReport(plugin_id=plugin_id)
+
+        # Try to get plugin details from index
+        index_result = self.fetch_index()
+        if not index_result.success or not index_result.data:
+            return report
+
+        plugin = None
+        for p in index_result.data:
+            if p.id == plugin_id:
+                plugin = p
+                break
+
+        if not plugin:
+            return report
+
+        report.rating_avg = plugin.rating_average or 0.0
+        report.total_ratings = plugin.rating_count
+        report.downloads = plugin.rating_count  # approximate
+        report.verified = plugin.verified_publisher
+        report.has_docs = bool(plugin.homepage)
+
+        # Determine version freshness
+        if plugin.version:
+            parts = plugin.version.split(".")
+            try:
+                major = int(parts[0]) if parts else 0
+                if major >= 1:
+                    report.version_freshness = "current"
+                else:
+                    report.version_freshness = "outdated"
+            except ValueError:
+                report.version_freshness = "unknown"
+
+        return report

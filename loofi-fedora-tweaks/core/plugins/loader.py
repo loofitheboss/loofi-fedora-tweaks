@@ -46,6 +46,8 @@ _BUILTIN_PLUGINS: list[tuple[str, str]] = [
     ("ui.teleport_tab", "TeleportTab"),
     ("ui.diagnostics_tab", "DiagnosticsTab"),
     ("ui.community_tab", "CommunityTab"),
+    ("ui.extensions_tab", "ExtensionsTab"),
+    ("ui.backup_tab", "BackupTab"),
     ("ui.settings_tab", "SettingsTab"),
 ]
 

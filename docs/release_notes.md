@@ -5,13 +5,13 @@
 
 ## Current Release
 
-- **v34.0.0 "Citadel"**
-- Full notes: `docs/releases/RELEASE-NOTES-v34.0.0.md`
+- **v37.0.0 "Pinnacle"**
+- Full notes: `docs/releases/RELEASE-NOTES-v37.0.0.md`
 
 ## Previous Release
 
-- **v33.0.0 "Bastion"**
-- Full notes: `docs/releases/RELEASE-NOTES-v33.0.0.md`
+- **v36.0.0 "Horizon"**
+- Full notes: `docs/releases/RELEASE-NOTES-v36.0.0.md`
 
 ## Why this file exists
 

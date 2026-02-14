@@ -9,10 +9,11 @@ Sub-tabs:
 
 from pathlib import Path
 
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
     QPushButton, QComboBox, QTextEdit, QScrollArea,
-    QFrame, QLineEdit, QTabWidget
+    QFrame, QLineEdit, QTabWidget, QListWidget,
 )
 
 from ui.base_tab import BaseTab
@@ -63,6 +64,11 @@ class DesktopTab(BaseTab):
         # Sub-tab 2: Theming (from ThemingTab)
         self.sub_tabs.addTab(
             self._create_theming_tab(), self.tr("Theming")
+        )
+
+        # Sub-tab 3: Display Configuration (v37.0 Pinnacle)
+        self.sub_tabs.addTab(
+            self._create_display_tab(), self.tr("Display")
         )
 
         # Shared output area at bottom
@@ -460,3 +466,125 @@ class DesktopTab(BaseTab):
             "lookandfeeltool", ["-a", theme_id],
             self.tr("Applying {} theme...").format(theme_name)
         )
+
+    # ================================================================
+    # DISPLAY CONFIGURATION SUB-TAB (v37.0 Pinnacle)
+    # ================================================================
+
+    def _create_display_tab(self) -> QWidget:
+        """Create the display/monitor configuration sub-tab."""
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setSpacing(15)
+
+        header = QLabel(self.tr("Display Configuration"))
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        layout.addWidget(header)
+
+        # Session Info
+        self.display_session_info = QLabel(self.tr("Detecting session..."))
+        self.display_session_info.setStyleSheet("color: #9da7bf;")
+        layout.addWidget(self.display_session_info)
+
+        # Displays table
+        group = QGroupBox(self.tr("Connected Displays"))
+        group_layout = QVBoxLayout(group)
+
+        self.display_list = QListWidget()
+        self.display_list.setMinimumHeight(100)
+        group_layout.addWidget(self.display_list)
+
+        btn_row = QHBoxLayout()
+        btn_detect = QPushButton(self.tr("Detect Displays"))
+        btn_detect.setAccessibleName(self.tr("Detect displays"))
+        btn_detect.clicked.connect(self._detect_displays)
+        btn_row.addWidget(btn_detect)
+        btn_row.addStretch()
+        group_layout.addLayout(btn_row)
+
+        layout.addWidget(group)
+
+        # Scaling
+        scale_group = QGroupBox(self.tr("Scaling"))
+        scale_layout = QVBoxLayout(scale_group)
+
+        frac_row = QHBoxLayout()
+        btn_frac_enable = QPushButton(self.tr("Enable Fractional Scaling"))
+        btn_frac_enable.setAccessibleName(self.tr("Enable fractional scaling"))
+        btn_frac_enable.clicked.connect(self._enable_fractional)
+        frac_row.addWidget(btn_frac_enable)
+
+        btn_frac_disable = QPushButton(self.tr("Disable Fractional Scaling"))
+        btn_frac_disable.setAccessibleName(self.tr("Disable fractional scaling"))
+        btn_frac_disable.clicked.connect(self._disable_fractional)
+        frac_row.addWidget(btn_frac_disable)
+        frac_row.addStretch()
+        scale_layout.addLayout(frac_row)
+
+        layout.addWidget(scale_group)
+
+        layout.addStretch()
+        scroll.setWidget(container)
+
+        # Auto-detect on creation
+        QTimer.singleShot(500, self._detect_displays)
+        QTimer.singleShot(600, self._load_session_info)
+
+        return scroll
+
+    def _detect_displays(self):
+        """Detect connected displays."""
+        try:
+            from utils.wayland_display import WaylandDisplayManager
+            displays = WaylandDisplayManager.get_displays()
+            self.display_list.clear()
+            for d in displays:
+                primary = " ★" if d.primary else ""
+                scale_str = f" @{d.scale}x" if d.scale != 1.0 else ""
+                text = f"{d.name}: {d.resolution}{scale_str} @ {d.refresh_rate}Hz{primary}"
+                if d.make or d.model:
+                    text += f" ({d.make} {d.model})".strip()
+                self.display_list.addItem(text)
+            if not displays:
+                self.display_list.addItem(self.tr("No displays detected"))
+            self.append_output(self.tr("Detected {} displays.\n").format(len(displays)))
+        except Exception as e:
+            self.display_list.clear()
+            self.display_list.addItem(f"Error: {e}")
+
+    def _load_session_info(self):
+        """Load session type info."""
+        try:
+            from utils.wayland_display import WaylandDisplayManager
+            info = WaylandDisplayManager.get_session_info()
+            self.display_session_info.setText(
+                self.tr("Session: {} | DE: {} | Compositor: {}").format(
+                    info.get("session_type", "?"),
+                    info.get("desktop", "?"),
+                    info.get("compositor", "?"),
+                )
+            )
+        except Exception:
+            self.display_session_info.setText(self.tr("Session info unavailable"))
+
+    def _enable_fractional(self):
+        """Enable fractional scaling."""
+        try:
+            from utils.wayland_display import WaylandDisplayManager
+            binary, args, desc = WaylandDisplayManager.enable_fractional_scaling()
+            self.run_command(binary, args, desc)
+        except Exception as e:
+            self.append_output(f"[ERROR] {e}\n")
+
+    def _disable_fractional(self):
+        """Disable fractional scaling."""
+        try:
+            from utils.wayland_display import WaylandDisplayManager
+            binary, args, desc = WaylandDisplayManager.disable_fractional_scaling()
+            self.run_command(binary, args, desc)
+        except Exception as e:
+            self.append_output(f"[ERROR] {e}\n")

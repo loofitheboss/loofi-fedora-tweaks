@@ -25,8 +25,8 @@
 | v33.0 | Bastion | DONE | Testing & type safety debt, CI pipeline hardening |
 | v34.0 | Citadel | DONE | Light theme fix, stability hardening, accessibility polish |
 | v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
-| v36.0 | Horizon | ACTIVE | UX safety, performance optimization, navigation polish |
-| v37.0 | Pinnacle | NEXT | Smart features, ecosystem expansion, user-requested enhancements |
+| v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
+| v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
 
 ---
 
@@ -79,7 +79,7 @@ Structured audit logging, parameter validation, and Polkit separation.
 
 ---
 
-## [ACTIVE] v36.0 "Horizon" — UX Safety & Performance
+## [DONE] v36.0 "Horizon" — UX Safety & Performance
 
 ### Scope
 
@@ -96,19 +96,19 @@ and navigation/UI polish based on user feedback.
 
 ### Deliverables
 
-- [ ] Safe Mode toggle (read-only by default on first launch)
-- [ ] Risk classification system: `utils/risk.py` with Low/Medium/High per action
-- [ ] Revert instructions shown for Medium/High risk operations
-- [ ] Config backup before destructive operations (automatic)
-- [ ] API rate limiting on auth endpoints
-- [ ] `--unsafe-expose` flag required for non-localhost binding
-- [ ] Read-only vs privileged API endpoint separation
-- [ ] Startup time profiling and optimization (target: <2s cold start)
-- [ ] Lazy import audit: defer heavy imports (PyQt6 submodules, optional utils)
-- [ ] Sidebar navigation polish (smooth scrolling, hover states, collapse animation)
-- [ ] Breadcrumb bar layout improvements
-- [ ] Coverage ≥ 80% (complete v33 deliverable)
-- [ ] CHANGELOG + README + release notes
+- [x] Safe Mode toggle (read-only by default on first launch)
+- [x] Risk classification system: `utils/risk.py` with Low/Medium/High per action
+- [x] Revert instructions shown for Medium/High risk operations
+- [x] Config backup before destructive operations (automatic)
+- [x] API rate limiting on auth endpoints
+- [x] `--unsafe-expose` flag required for non-localhost binding
+- [x] Read-only vs privileged API endpoint separation
+- [x] Startup time profiling and optimization (target: <2s cold start)
+- [x] Lazy import audit: defer heavy imports (PyQt6 submodules, optional utils)
+- [x] Sidebar navigation polish (smooth scrolling, hover states, collapse animation)
+- [x] Breadcrumb bar layout improvements
+- [x] Coverage ≥ 80% (complete v33 deliverable)
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -126,7 +126,7 @@ and navigation/UI polish based on user feedback.
 
 ---
 
-## [NEXT] v37.0 "Pinnacle" — Smart Features & Ecosystem
+## [DONE] v37.0 "Pinnacle" — Smart Features & Ecosystem
 
 ### Scope
 

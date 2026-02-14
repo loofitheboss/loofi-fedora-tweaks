@@ -15,7 +15,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QStackedWidget, QWidget, QRadioButton, QButtonGroup,
-    QFrame, QScrollArea,
+    QFrame, QScrollArea, QCheckBox,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -183,12 +183,15 @@ def _build_summary(hw_profile_key: str, hw_profile: dict, use_case: str) -> str:
 # =======================================================================
 
 class FirstRunWizard(QDialog):
-    """Three-step first-run wizard: Detect -> Choose -> Apply."""
+    """Five-step first-run wizard v2: Detect -> Choose -> Health -> Actions -> Apply."""
+
+    # Sentinel for v2 completion
+    _V2_SENTINEL = _CONFIG_DIR / "wizard_v2.json"
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(self.tr("Loofi Fedora Tweaks - Setup Wizard"))
-        self.setFixedSize(620, 520)
+        self.setFixedSize(620, 560)
         self.setWindowFlags(
             self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint
         )
@@ -234,6 +237,8 @@ class FirstRunWizard(QDialog):
 
         self._stack.addWidget(self._build_step1())
         self._stack.addWidget(self._build_step2())
+        self._stack.addWidget(self._build_step4_health())
+        self._stack.addWidget(self._build_step5_actions())
         self._stack.addWidget(self._build_step3())
 
         # Navigation buttons -------------------------------------------
@@ -422,19 +427,21 @@ class FirstRunWizard(QDialog):
 
     def _set_step(self, index: int):
         """Switch visible step and update buttons."""
-        index = max(0, min(index, 2))
+        index = max(0, min(index, 4))
         self._stack.setCurrentIndex(index)
 
         step_names = [
-            self.tr("Step 1 of 3: Detection"),
-            self.tr("Step 2 of 3: Use Case"),
-            self.tr("Step 3 of 3: Apply"),
+            self.tr("Step 1 of 5: Detection"),
+            self.tr("Step 2 of 5: Use Case"),
+            self.tr("Step 3 of 5: Health Check"),
+            self.tr("Step 4 of 5: Recommendations"),
+            self.tr("Step 5 of 5: Apply"),
         ]
         self._step_label.setText(step_names[index])
 
         self._btn_back.setVisible(index > 0)
 
-        if index < 2:
+        if index < 4:
             self._btn_next.setText(self.tr("Next \u2192"))
             self._btn_next.setStyleSheet(
                 "background-color: #39c5cf; color: #0b0e14; font-weight: bold; "
@@ -451,13 +458,17 @@ class FirstRunWizard(QDialog):
         if index == 0:
             self._populate_step1()
         elif index == 2:
+            self._populate_health()
+        elif index == 3:
+            self._populate_actions()
+        elif index == 4:
             self._populate_step3()
 
     def _go_next(self):
         current = self._stack.currentIndex()
         if current == 1:
             self._capture_use_case()
-        if current < 2:
+        if current < 4:
             self._set_step(current + 1)
         else:
             self._apply()
@@ -474,7 +485,7 @@ class FirstRunWizard(QDialog):
         self.accept()
 
     def _apply(self):
-        """Save profile and mark complete."""
+        """Save profile, v2 data, and mark complete."""
         self._capture_use_case()
 
         profile_data = {
@@ -487,9 +498,24 @@ class FirstRunWizard(QDialog):
             "use_case": self._selected_use_case,
         }
 
+        # Collect v2 action selections
+        v2_data = {
+            "health_checks": getattr(self, "_health_results", {}),
+            "selected_actions": [],
+        }
+        for cb in getattr(self, "_action_checkboxes", []):
+            if cb.isChecked():
+                v2_data["selected_actions"].append(cb.text())
+
         _save_profile(profile_data)
         _mark_first_run_complete()
-        logger.info("First-run wizard completed. Profile: %s", profile_data)
+
+        # Save v2 completion data
+        _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        with open(self._V2_SENTINEL, "w", encoding="utf-8") as fh:
+            json.dump(v2_data, fh, indent=2)
+
+        logger.info("First-run wizard v2 completed. Profile: %s", profile_data)
         self.accept()
 
     # -- Data helpers ---------------------------------------------------
@@ -544,3 +570,242 @@ class FirstRunWizard(QDialog):
             self._hw_key, self._hw_profile, self._selected_use_case
         )
         self._lbl_summary.setText(summary)
+
+    # -- v2 Health Check & Actions pages --------------------------------
+
+    def _build_step4_health(self) -> QWidget:
+        """Step 3 (v2) - System Health Check."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(14)
+
+        header = QLabel(self.tr("\U0001fa7a Step 3: System Health Check"))
+        hfont = QFont()
+        hfont.setPointSize(13)
+        hfont.setBold(True)
+        header.setFont(hfont)
+        layout.addWidget(header)
+
+        desc = QLabel(
+            self.tr(
+                "Quick diagnostics to identify potential issues. "
+                "Problems will be flagged for your attention."
+            )
+        )
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #9da7bf;")
+        layout.addWidget(desc)
+
+        # Health results card
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_content = QWidget()
+        self._health_layout = QVBoxLayout(scroll_content)
+        self._health_layout.setSpacing(6)
+        self._health_layout.addStretch()
+        scroll.setWidget(scroll_content)
+        layout.addWidget(scroll, 1)
+
+        return page
+
+    def _build_step5_actions(self) -> QWidget:
+        """Step 4 (v2) - Recommended Actions."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(14)
+
+        header = QLabel(self.tr("\U0001f4cb Step 4: Recommended Actions"))
+        hfont = QFont()
+        hfont.setPointSize(13)
+        hfont.setBold(True)
+        header.setFont(hfont)
+        layout.addWidget(header)
+
+        desc = QLabel(
+            self.tr(
+                "Based on your system health check, here are recommended actions. "
+                "Check the ones you'd like to apply."
+            )
+        )
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #9da7bf;")
+        layout.addWidget(desc)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_content = QWidget()
+        self._actions_layout = QVBoxLayout(scroll_content)
+        self._actions_layout.setSpacing(6)
+        self._actions_layout.addStretch()
+        scroll.setWidget(scroll_content)
+        layout.addWidget(scroll, 1)
+
+        return page
+
+    def _populate_health(self):
+        """Run health checks and display results."""
+        import shutil
+        import subprocess
+
+        # Clear previous results
+        while self._health_layout.count() > 1:
+            item = self._health_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        self._health_results = {}
+        checks = []
+
+        # 1. Disk space
+        try:
+            stat = os.statvfs("/")
+            free_gb = (stat.f_bavail * stat.f_frsize) / (1024 ** 3)
+            total_gb = (stat.f_blocks * stat.f_frsize) / (1024 ** 3)
+            pct_used = ((total_gb - free_gb) / total_gb * 100) if total_gb else 0
+            if free_gb < 5:
+                checks.append(("⚠️", f"Low disk space: {free_gb:.1f} GB free ({pct_used:.0f}% used)", "warning"))
+            else:
+                checks.append(("✅", f"Disk space OK: {free_gb:.1f} GB free ({pct_used:.0f}% used)", "ok"))
+            self._health_results["disk_free_gb"] = round(free_gb, 1)
+        except OSError:
+            checks.append(("❓", "Could not check disk space", "unknown"))
+
+        # 2. Package manager state
+        if shutil.which("dnf"):
+            try:
+                result = subprocess.run(
+                    ["dnf", "check", "--duplicates"],
+                    capture_output=True, text=True, timeout=10
+                )
+                if result.returncode == 0:
+                    checks.append(("✅", "Package state healthy (no duplicates)", "ok"))
+                else:
+                    checks.append(("⚠️", "Package issues detected (duplicates found)", "warning"))
+                self._health_results["pkg_healthy"] = result.returncode == 0
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                checks.append(("❓", "Could not check package state", "unknown"))
+        else:
+            checks.append(("ℹ️", "DNF not found (atomic system?)", "info"))
+
+        # 3. Firewall status
+        if shutil.which("firewall-cmd"):
+            try:
+                result = subprocess.run(
+                    ["firewall-cmd", "--state"],
+                    capture_output=True, text=True, timeout=5
+                )
+                if "running" in result.stdout.lower():
+                    checks.append(("✅", "Firewall is running", "ok"))
+                else:
+                    checks.append(("⚠️", "Firewall is NOT running", "warning"))
+                self._health_results["firewall_running"] = "running" in result.stdout.lower()
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                checks.append(("❓", "Could not check firewall status", "unknown"))
+        else:
+            checks.append(("❓", "firewall-cmd not found", "unknown"))
+
+        # 4. Backup tool availability
+        if shutil.which("timeshift") or shutil.which("snapper"):
+            tool = "timeshift" if shutil.which("timeshift") else "snapper"
+            checks.append(("✅", f"Backup tool available: {tool}", "ok"))
+            self._health_results["backup_tool"] = tool
+        else:
+            checks.append(("⚠️", "No backup tool installed (timeshift/snapper)", "warning"))
+            self._health_results["backup_tool"] = None
+
+        # 5. SELinux status
+        try:
+            result = subprocess.run(
+                ["getenforce"], capture_output=True, text=True, timeout=5
+            )
+            mode = result.stdout.strip()
+            if mode == "Enforcing":
+                checks.append(("✅", f"SELinux: {mode}", "ok"))
+            else:
+                checks.append(("ℹ️", f"SELinux: {mode}", "info"))
+            self._health_results["selinux"] = mode
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            checks.append(("❓", "Could not check SELinux", "unknown"))
+
+        # Display results
+        for icon, text, level in checks:
+            lbl = QLabel(f"  {icon}  {text}")
+            lbl.setWordWrap(True)
+            color = {"ok": "#3dd68c", "warning": "#f5a623", "info": "#39c5cf", "unknown": "#9da7bf"}.get(level, "#9da7bf")
+            lbl.setStyleSheet(f"font-size: 13px; color: {color}; padding: 4px;")
+            self._health_layout.insertWidget(self._health_layout.count() - 1, lbl)
+
+    def _populate_actions(self):
+        """Build recommendation checkboxes based on health results."""
+        # Clear previous
+        while self._actions_layout.count() > 1:
+            item = self._actions_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        self._action_checkboxes = []
+        results = getattr(self, "_health_results", {})
+
+        recommendations = []
+
+        # Based on health check results
+        if results.get("disk_free_gb", 999) < 10:
+            recommendations.append({
+                "text": "Run disk cleanup (remove old kernels, clear caches)",
+                "risk": "LOW",
+                "checked": True,
+            })
+
+        if results.get("pkg_healthy") is False:
+            recommendations.append({
+                "text": "Fix package duplicates (dnf check --duplicates)",
+                "risk": "MEDIUM",
+                "checked": True,
+            })
+
+        if results.get("firewall_running") is False:
+            recommendations.append({
+                "text": "Enable firewall (firewalld)",
+                "risk": "LOW",
+                "checked": True,
+            })
+
+        if results.get("backup_tool") is None:
+            recommendations.append({
+                "text": "Install backup tool (timeshift recommended)",
+                "risk": "LOW",
+                "checked": True,
+            })
+
+        selinux = results.get("selinux", "")
+        if selinux and selinux != "Enforcing":
+            recommendations.append({
+                "text": f"SELinux is {selinux} — consider enabling Enforcing mode",
+                "risk": "MEDIUM",
+                "checked": False,
+            })
+
+        # Always suggest these
+        recommendations.append({
+            "text": "Configure automatic system snapshots before updates",
+            "risk": "LOW",
+            "checked": True,
+        })
+
+        if not recommendations:
+            lbl = QLabel(self.tr("  ✅ Your system looks great! No actions needed."))
+            lbl.setStyleSheet("font-size: 13px; color: #3dd68c; padding: 8px;")
+            self._actions_layout.insertWidget(0, lbl)
+            return
+
+        for rec in recommendations:
+            risk_color = {"LOW": "#3dd68c", "MEDIUM": "#f5a623", "HIGH": "#e06c75"}.get(rec["risk"], "#9da7bf")
+            cb = QCheckBox(f"  [{rec['risk']}] {rec['text']}")
+            cb.setChecked(rec["checked"])
+            cb.setStyleSheet(f"font-size: 12px; color: {risk_color}; padding: 4px;")
+            self._action_checkboxes.append(cb)
+            self._actions_layout.insertWidget(self._actions_layout.count() - 1, cb)

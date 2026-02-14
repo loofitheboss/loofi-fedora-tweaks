@@ -2,7 +2,7 @@
 
 Tests the round-trip: PluginLoader.load_builtins() → PluginRegistry.
 
-All 26 built-in UI tab imports are mocked so this test runs headless
+All 28 built-in UI tab imports are mocked so this test runs headless
 without PyQt6, Qt application, or any GUI.  Each stub plugin uses the
 same category/order values as defined in loader._BUILTIN_PLUGINS so that
 category structure tests remain realistic.
@@ -57,9 +57,11 @@ _PLUGIN_INFO: dict[str, tuple[str, str, int]] = {
     "ui.diagnostics_tab":     ("diagnostics",     "System",        50),
     "ui.community_tab":       ("community",       "Community",     10),
     "ui.settings_tab":        ("settings",        "Settings",      10),
+    "ui.extensions_tab":      ("extensions",      "Personalize",   15),
+    "ui.backup_tab":          ("backup",          "Maintain",      15),
 }
 
-assert len(_PLUGIN_INFO) == 26, "Plugin count must match _BUILTIN_PLUGINS"
+assert len(_PLUGIN_INFO) == 28, "Plugin count must match _BUILTIN_PLUGINS"
 
 
 def _make_stub_plugin(module_path: str, class_name: str):
@@ -113,7 +115,7 @@ def _build_fake_import_function():
 # ---------------------------------------------------------------------------
 
 class TestPluginIntegrationLoadBuiltins:
-    """Full pipeline: load all 26 builtins into the registry via mocked imports."""
+    """Full pipeline: load all 28 builtins into the registry via mocked imports."""
 
     def setup_method(self):
         PluginRegistry.reset()
@@ -121,25 +123,25 @@ class TestPluginIntegrationLoadBuiltins:
     def teardown_method(self):
         PluginRegistry.reset()
 
-    def test_load_builtins_loads_all_26_plugins(self):
-        """load_builtins() returns exactly 26 plugin IDs under mocked imports."""
+    def test_load_builtins_loads_all_28_plugins(self):
+        """load_builtins() returns exactly 28 plugin IDs under mocked imports."""
         registry = PluginRegistry.instance()
         loader = PluginLoader(registry=registry)
 
         with patch("importlib.import_module", side_effect=_build_fake_import_function()):
             loaded = loader.load_builtins()
 
-        assert len(loaded) == 26
+        assert len(loaded) == 28
 
-    def test_registry_contains_all_26_plugins(self):
-        """After load_builtins(), PluginRegistry holds 26 entries."""
+    def test_registry_contains_all_28_plugins(self):
+        """After load_builtins(), PluginRegistry holds 28 entries."""
         registry = PluginRegistry.instance()
         loader = PluginLoader(registry=registry)
 
         with patch("importlib.import_module", side_effect=_build_fake_import_function()):
             loader.load_builtins()
 
-        assert len(registry) == 26
+        assert len(registry) == 28
 
     def test_all_loaded_ids_are_unique(self):
         """Every loaded plugin ID is distinct."""
@@ -181,7 +183,7 @@ class TestPluginIntegrationCategoryStructure:
     EXPECTED_CATEGORIES = {
         "Overview", "AI", "System", "Hardware", "Software",
         "Developer", "Network", "Security", "Desktop", "Entertainment",
-        "Community", "Settings",
+        "Community", "Settings", "Personalize", "Maintain",
     }
 
     def setup_method(self):
@@ -254,7 +256,7 @@ class TestPluginIntegrationPartialFailure:
         PluginRegistry.reset()
 
     def test_partial_failure_loads_remaining_plugins(self, caplog):
-        """If 3 builtins fail, the remaining 23 are still loaded."""
+        """If 3 builtins fail, the remaining 25 are still loaded."""
         fake_import = _build_fake_import_function()
         failing = {"ui.gaming_tab", "ui.teleport_tab", "ui.mesh_tab"}
 
@@ -270,8 +272,8 @@ class TestPluginIntegrationPartialFailure:
              caplog.at_level(logging.WARNING):
             loaded = loader.load_builtins()
 
-        assert len(loaded) == 23
-        assert len(registry) == 23
+        assert len(loaded) == 25
+        assert len(registry) == 25
 
     def test_failed_plugin_ids_not_in_loaded_list(self, caplog):
         """Plugin IDs that fail to import must not appear in the returned list."""
@@ -330,7 +332,7 @@ class TestPluginIntegrationRegistryIsolation:
         with patch("importlib.import_module", side_effect=_build_fake_import_function()):
             loader.load_builtins()
 
-        assert len(registry) == 26
+        assert len(registry) == 28
 
         # Reset and reload
         PluginRegistry.reset()
@@ -341,8 +343,8 @@ class TestPluginIntegrationRegistryIsolation:
         with patch("importlib.import_module", side_effect=_build_fake_import_function()):
             loaded2 = loader2.load_builtins()
 
-        assert len(loaded2) == 26
-        assert len(registry2) == 26
+        assert len(loaded2) == 28
+        assert len(registry2) == 28
 
     def test_second_load_without_reset_raises_on_duplicate(self):
         """Attempting to load builtins twice into the same registry raises ValueError."""

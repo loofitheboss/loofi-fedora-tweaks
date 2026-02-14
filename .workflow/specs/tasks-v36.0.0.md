@@ -4,7 +4,7 @@
 
 ### Phase 1: UX Safety (Safe Mode + Risk Classification)
 
-- [ ] T1: Implement SafeModeManager
+- [x] T1: Implement SafeModeManager
   - ID: T1
   - Files: `utils/safe_mode.py`
   - Dep: none
@@ -14,7 +14,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_safe_mode.py`
 
-- [ ] T2: Implement RiskRegistry and RiskLevel
+- [x] T2: Implement RiskRegistry and RiskLevel
   - ID: T2
   - Files: `utils/risk.py`
   - Dep: none
@@ -24,7 +24,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_risk.py`
 
-- [ ] T3: Implement ConfigBackupManager
+- [x] T3: Implement ConfigBackupManager
   - ID: T3
   - Files: `utils/config_backup.py`
   - Dep: none
@@ -34,7 +34,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_config_backup.py`
 
-- [ ] T4: Wire safe mode into BaseTab
+- [x] T4: Wire safe mode into BaseTab
   - ID: T4
   - Files: `ui/base_tab.py`
   - Dep: T1
@@ -44,7 +44,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_base_tab.py`
 
-- [ ] T5: Wire risk + backup into ConfirmActionDialog
+- [x] T5: Wire risk + backup into ConfirmActionDialog
   - ID: T5
   - Files: `ui/confirm_dialog.py`
   - Dep: T2, T3
@@ -54,7 +54,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_confirm_dialog.py`
 
-- [ ] T6: Add safe mode CLI flags
+- [x] T6: Add safe mode CLI flags
   - ID: T6
   - Files: `cli/main.py`
   - Dep: T1
@@ -66,7 +66,7 @@
 
 ### Phase 2: API Security
 
-- [ ] T7: Add rate limiting to auth endpoints
+- [x] T7: Add rate limiting to auth endpoints
   - ID: T7
   - Files: `api/__init__.py`
   - Dep: none
@@ -76,7 +76,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_api_server.py`
 
-- [ ] T8: Add --unsafe-expose flag
+- [x] T8: Add --unsafe-expose flag
   - ID: T8
   - Files: `api/__init__.py`, `cli/main.py`
   - Dep: none
@@ -86,7 +86,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_api_server.py`
 
-- [ ] T9: Separate read-only vs privileged API endpoints
+- [x] T9: Separate read-only vs privileged API endpoints
   - ID: T9
   - Files: `api/routes/system.py`, `api/routes/profiles.py`, `api/routes/executor.py`
   - Dep: T7
@@ -98,7 +98,7 @@
 
 ### Phase 3: Performance Optimization
 
-- [ ] T10: Create startup profiler script
+- [x] T10: Create startup profiler script
   - ID: T10
   - Files: `scripts/profile_startup.py`
   - Dep: none
@@ -108,7 +108,7 @@
   - Docs: CHANGELOG
   - Tests: Manual verification
 
-- [ ] T11: Lazy import audit and optimization
+- [x] T11: Lazy import audit and optimization
   - ID: T11
   - Files: `utils/lazy_imports.py`, `loofi-fedora-tweaks/main.py`
   - Dep: T10
@@ -118,7 +118,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_lazy_imports.py`
 
-- [ ] T12: QSS stylesheet caching
+- [x] T12: QSS stylesheet caching
   - ID: T12
   - Files: `ui/main_window.py`
   - Dep: none
@@ -130,7 +130,7 @@
 
 ### Phase 4: Navigation & UI Polish
 
-- [ ] T13: Sidebar smooth scrolling
+- [x] T13: Sidebar smooth scrolling
   - ID: T13
   - Files: `ui/main_window.py`
   - Dep: none
@@ -140,7 +140,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_main_window.py`
 
-- [ ] T14: Sidebar hover states and collapse animation
+- [x] T14: Sidebar hover states and collapse animation
   - ID: T14
   - Files: `ui/main_window.py`, `assets/modern.qss`
   - Dep: T13
@@ -150,7 +150,7 @@
   - Docs: CHANGELOG
   - Tests: Visual verification
 
-- [ ] T15: Breadcrumb bar improvements
+- [x] T15: Breadcrumb bar improvements
   - ID: T15
   - Files: `ui/main_window.py`
   - Dep: none
@@ -160,7 +160,7 @@
   - Docs: CHANGELOG
   - Tests: `tests/test_main_window.py`
 
-- [ ] T16: Tab layout spacing audit
+- [x] T16: Tab layout spacing audit
   - ID: T16
   - Files: Multiple `ui/*_tab.py` files
   - Dep: none
@@ -172,7 +172,7 @@
 
 ### Phase 5: Testing & Coverage
 
-- [ ] T17: Tests for safe mode, risk, config backup
+- [x] T17: Tests for safe mode, risk, config backup
   - ID: T17
   - Files: `tests/test_safe_mode.py`, `tests/test_risk.py`, `tests/test_config_backup.py`
   - Dep: T1, T2, T3
@@ -182,7 +182,7 @@
   - Docs: none
   - Tests: Self
 
-- [ ] T18: Tests for API security changes
+- [x] T18: Tests for API security changes
   - ID: T18
   - Files: `tests/test_api_server.py`
   - Dep: T7, T8, T9
@@ -192,7 +192,7 @@
   - Docs: none
   - Tests: Self
 
-- [ ] T19: Tests for lazy imports and performance
+- [x] T19: Tests for lazy imports and performance
   - ID: T19
   - Files: `tests/test_lazy_imports.py`
   - Dep: T11
@@ -202,7 +202,7 @@
   - Docs: none
   - Tests: Self
 
-- [ ] T20: Coverage push toward 80%
+- [x] T20: Coverage push toward 80%
   - ID: T20
   - Files: Multiple test files
   - Dep: T17, T18, T19
@@ -214,7 +214,7 @@
 
 ### Phase 6: Release
 
-- [ ] T21: CHANGELOG + README + release notes
+- [x] T21: CHANGELOG + README + release notes
   - ID: T21
   - Files: `CHANGELOG.md`, `README.md`, `docs/release_notes.md`
   - Dep: T1-T20

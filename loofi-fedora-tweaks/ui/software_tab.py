@@ -8,7 +8,7 @@ original AppsTab and ReposTab.
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
-    QGroupBox, QScrollArea, QFrame, QTabWidget, QCheckBox
+    QGroupBox, QScrollArea, QFrame, QTabWidget, QCheckBox, QListWidget,
 )
 
 from ui.base_tab import BaseTab
@@ -443,5 +443,127 @@ class SoftwareTab(BaseTab):
         configure_top_tabs(self.tabs)
         self.tabs.addTab(_ApplicationsSubTab(), self.tr("Applications"))
         self.tabs.addTab(_RepositoriesSubTab(), self.tr("Repositories"))
+        self.tabs.addTab(self._create_flatpak_tab(), self.tr("Flatpak Manager"))
 
         layout.addWidget(self.tabs)
+
+    def _create_flatpak_tab(self):
+        """Create the Flatpak Manager sub-tab (v37.0 Pinnacle)."""
+
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(15)
+
+        header = QLabel(self.tr("Flatpak Manager"))
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        layout.addWidget(header)
+
+        # Size overview
+        size_group = QGroupBox(self.tr("Flatpak Storage"))
+        size_layout = QVBoxLayout(size_group)
+
+        self._flatpak_size_label = QLabel(self.tr("Total size: calculating..."))
+        size_layout.addWidget(self._flatpak_size_label)
+
+        btn_row = QHBoxLayout()
+        btn_sizes = QPushButton(self.tr("Show Sizes"))
+        btn_sizes.setAccessibleName(self.tr("Show Flatpak sizes"))
+        btn_sizes.clicked.connect(self._show_flatpak_sizes)
+        btn_row.addWidget(btn_sizes)
+
+        btn_orphans = QPushButton(self.tr("Find Orphan Runtimes"))
+        btn_orphans.setAccessibleName(self.tr("Find orphan runtimes"))
+        btn_orphans.clicked.connect(self._find_orphans)
+        btn_row.addWidget(btn_orphans)
+
+        btn_cleanup = QPushButton(self.tr("Cleanup Unused"))
+        btn_cleanup.setAccessibleName(self.tr("Cleanup unused Flatpaks"))
+        btn_cleanup.clicked.connect(self._cleanup_flatpaks)
+        btn_row.addWidget(btn_cleanup)
+        btn_row.addStretch()
+        size_layout.addLayout(btn_row)
+
+        layout.addWidget(size_group)
+
+        # Permissions
+        perm_group = QGroupBox(self.tr("Permissions Audit"))
+        perm_layout = QVBoxLayout(perm_group)
+
+        btn_perms = QPushButton(self.tr("Show App Permissions"))
+        btn_perms.setAccessibleName(self.tr("Show Flatpak permissions"))
+        btn_perms.clicked.connect(self._show_permissions)
+        perm_layout.addWidget(btn_perms)
+
+        self._flatpak_perms_list = QListWidget()
+        self._flatpak_perms_list.setMinimumHeight(120)
+        perm_layout.addWidget(self._flatpak_perms_list)
+
+        layout.addWidget(perm_group)
+
+        # Output
+        self._flatpak_output = QTextEdit()
+        self._flatpak_output.setReadOnly(True)
+        self._flatpak_output.setMaximumHeight(120)
+        layout.addWidget(self._flatpak_output)
+
+        self._flatpak_runner = CommandRunner()
+        self._flatpak_runner.output_received.connect(
+            lambda t: self._flatpak_output.insertPlainText(t)
+        )
+        self._flatpak_runner.finished.connect(
+            lambda ec: self._flatpak_output.insertPlainText(
+                self.tr("\nDone (exit {})\n").format(ec)
+            )
+        )
+
+        layout.addStretch()
+        return widget
+
+    def _show_flatpak_sizes(self):
+        try:
+            from utils.flatpak_manager import FlatpakManager
+            sizes = FlatpakManager.get_flatpak_sizes()
+            total = FlatpakManager.get_total_size()
+            self._flatpak_size_label.setText(
+                self.tr("Total size: {}").format(total)
+            )
+            lines = [f"{s.app_id}: {s.size_str}" for s in sizes]
+            self._flatpak_output.setPlainText("\n".join(lines) or "No Flatpaks found.")
+        except Exception as e:
+            self._flatpak_output.setPlainText(f"[ERROR] {e}")
+
+    def _find_orphans(self):
+        try:
+            from utils.flatpak_manager import FlatpakManager
+            orphans = FlatpakManager.find_orphan_runtimes()
+            lines = [f"🗑 {o}" for o in orphans]
+            self._flatpak_output.setPlainText(
+                "\n".join(lines) if lines else "No orphan runtimes found."
+            )
+        except Exception as e:
+            self._flatpak_output.setPlainText(f"[ERROR] {e}")
+
+    def _cleanup_flatpaks(self):
+        try:
+            from utils.flatpak_manager import FlatpakManager
+            binary, args, desc = FlatpakManager.cleanup_unused()
+            self._flatpak_output.clear()
+            self._flatpak_output.setPlainText(f"{desc}\n")
+            self._flatpak_runner.run_command(binary, args)
+        except Exception as e:
+            self._flatpak_output.setPlainText(f"[ERROR] {e}")
+
+    def _show_permissions(self):
+        try:
+            from utils.flatpak_manager import FlatpakManager
+            self._flatpak_perms_list.clear()
+            all_perms = FlatpakManager.get_all_permissions()
+            for app in all_perms:
+                self._flatpak_perms_list.addItem(
+                    f"{app.app_id}: {len(app.permissions)} permissions"
+                )
+            if not all_perms:
+                self._flatpak_perms_list.addItem("No Flatpak apps found.")
+        except Exception as e:
+            self._flatpak_output.setPlainText(f"[ERROR] {e}")

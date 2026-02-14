@@ -134,6 +134,10 @@ class HardwareTab(QWidget, PluginInterface):
         bluetooth_card = self.create_bluetooth_card()
         grid.addWidget(bluetooth_card, 3, 1)
 
+        # Boot Configuration Card (v37.0 Pinnacle)
+        boot_card = self.create_boot_config_card()
+        grid.addWidget(boot_card, 4, 0, 1, 2)
+
         layout.addLayout(grid)
 
         # Output area for hardware commands (from Tweaks tab)
@@ -613,6 +617,123 @@ class HardwareTab(QWidget, PluginInterface):
         self._run_hw_command("bluetoothctl", ["--timeout", "10", "scan", "on"],
                              self.tr("Scanning for Bluetooth devices..."))
         QTimer.singleShot(12000, self._bt_refresh_status)
+
+    # ==================== BOOT CONFIGURATION (v37.0 Pinnacle) ====================
+
+    def create_boot_config_card(self) -> QGroupBox:
+        """Create boot configuration management card."""
+        card = self.create_card(self.tr("Boot Configuration"), "🥾")
+        layout = QVBoxLayout(card)
+
+        desc = QLabel(self.tr("Manage GRUB2 bootloader, kernels, and boot parameters."))
+        desc.setStyleSheet("color: #9da7bf; font-size: 11px;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        # Current kernel info
+        self.lbl_boot_info = QLabel(self.tr("Current kernel: loading..."))
+        self.lbl_boot_info.setStyleSheet("color: #9da7bf;")
+        layout.addWidget(self.lbl_boot_info)
+
+        btn_layout = QHBoxLayout()
+
+        btn_list_kernels = QPushButton(self.tr("List Kernels"))
+        btn_list_kernels.setAccessibleName(self.tr("List boot kernels"))
+        btn_list_kernels.clicked.connect(self._list_boot_kernels)
+        btn_layout.addWidget(btn_list_kernels)
+
+        btn_grub_config = QPushButton(self.tr("Show GRUB Config"))
+        btn_grub_config.setAccessibleName(self.tr("Show GRUB config"))
+        btn_grub_config.clicked.connect(self._show_grub_config)
+        btn_layout.addWidget(btn_grub_config)
+
+        btn_apply_grub = QPushButton(self.tr("Rebuild GRUB"))
+        btn_apply_grub.setAccessibleName(self.tr("Rebuild GRUB config"))
+        btn_apply_grub.clicked.connect(self._apply_grub)
+        btn_layout.addWidget(btn_apply_grub)
+
+        layout.addLayout(btn_layout)
+
+        # Boot timeout slider
+        timeout_layout = QHBoxLayout()
+        timeout_layout.addWidget(QLabel(self.tr("GRUB Timeout:")))
+        from PyQt6.QtWidgets import QSpinBox
+        self.boot_timeout_spin = QSpinBox()
+        self.boot_timeout_spin.setAccessibleName(self.tr("GRUB timeout seconds"))
+        self.boot_timeout_spin.setRange(0, 30)
+        self.boot_timeout_spin.setValue(5)
+        self.boot_timeout_spin.setSuffix("s")
+        timeout_layout.addWidget(self.boot_timeout_spin)
+
+        btn_set_timeout = QPushButton(self.tr("Set Timeout"))
+        btn_set_timeout.setAccessibleName(self.tr("Set GRUB timeout"))
+        btn_set_timeout.clicked.connect(self._set_boot_timeout)
+        timeout_layout.addWidget(btn_set_timeout)
+        timeout_layout.addStretch()
+        layout.addLayout(timeout_layout)
+
+        # Load initial info
+        QTimer.singleShot(1000, self._load_boot_info)
+
+        return card
+
+    def _load_boot_info(self):
+        """Load current kernel info."""
+        try:
+            from utils.boot_config import BootConfigManager
+            cmdline = BootConfigManager.get_current_cmdline()
+            kernel_line = cmdline.split('\n')[0] if cmdline else 'unknown'
+            self.lbl_boot_info.setText(
+                self.tr("Current: {}").format(kernel_line[:80])
+            )
+        except Exception:
+            self.lbl_boot_info.setText(self.tr("Current kernel: detection failed"))
+
+    def _list_boot_kernels(self):
+        try:
+            from utils.boot_config import BootConfigManager
+            kernels = BootConfigManager.list_kernels()
+            lines = [f"{'→ ' if k.is_default else '  '}{k.title} ({k.version})" for k in kernels]
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText("\n".join(lines) or "No kernels found.")
+        except Exception as e:
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText(f"[ERROR] {e}")
+
+    def _show_grub_config(self):
+        try:
+            from utils.boot_config import BootConfigManager
+            config = BootConfigManager.get_grub_config()
+            lines = [
+                f"Default: {config.default_entry}",
+                f"Timeout: {config.timeout}s",
+                f"Theme: {config.theme or 'none'}",
+                f"Cmdline: {config.cmdline_linux}",
+            ]
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText("\n".join(lines))
+        except Exception as e:
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText(f"[ERROR] {e}")
+
+    def _set_boot_timeout(self):
+        try:
+            from utils.boot_config import BootConfigManager
+            seconds = self.boot_timeout_spin.value()
+            binary, args, desc = BootConfigManager.set_timeout(seconds)
+            self._run_hw_command(binary, args, desc)
+        except Exception as e:
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText(f"[ERROR] {e}")
+
+    def _apply_grub(self):
+        try:
+            from utils.boot_config import BootConfigManager
+            binary, args, desc = BootConfigManager.apply_grub_changes()
+            self._run_hw_command(binary, args, desc)
+        except Exception as e:
+            if hasattr(self, 'hw_output_area'):
+                self.hw_output_area.setPlainText(f"[ERROR] {e}")
 
     # ==================== UTILITIES ====================
 

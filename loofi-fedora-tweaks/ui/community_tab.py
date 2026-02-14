@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QTabWidget, QFileDialog, QLineEdit, QListWidgetItem, QComboBox,
     QTextEdit, QCheckBox
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
 
 from utils.presets import PresetManager
 from utils.config_manager import ConfigManager
@@ -119,6 +119,11 @@ class CommunityTab(QWidget, PluginInterface):
         # Sub-tab 3: Plugins
         self.sub_tabs.addTab(
             self._create_plugins_tab(), self.tr("Plugins")
+        )
+
+        # Sub-tab 4: Featured Plugins (v37.0 Pinnacle)
+        self.sub_tabs.addTab(
+            self._create_featured_tab(), self.tr("Featured")
         )
 
     # ================================================================
@@ -268,6 +273,95 @@ class CommunityTab(QWidget, PluginInterface):
         loader = PluginLoader()
         loader.set_enabled(name, enabled)
         self.refresh_plugins()
+
+    # ================================================================
+    # FEATURED PLUGINS SUB-TAB (v37.0 Pinnacle)
+    # ================================================================
+
+    def _create_featured_tab(self) -> QWidget:
+        """Create the featured/curated plugins showcase tab."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
+
+        header = QLabel(self.tr("Featured Plugins"))
+        header.setObjectName("header")
+        layout.addWidget(header)
+
+        desc = QLabel(self.tr("Curated, high-quality plugins from the community."))
+        layout.addWidget(desc)
+
+        btn_row = QHBoxLayout()
+        btn_refresh = QPushButton(self.tr("Refresh Featured"))
+        btn_refresh.setAccessibleName(self.tr("Refresh Featured"))
+        btn_refresh.clicked.connect(self._load_featured_plugins)
+        btn_row.addWidget(btn_refresh)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)
+
+        self.featured_list = QListWidget()
+        self.featured_list.setMinimumHeight(200)
+        self.featured_list.currentItemChanged.connect(self._on_featured_selected)
+        layout.addWidget(self.featured_list)
+
+        self.featured_details = QTextEdit()
+        self.featured_details.setReadOnly(True)
+        self.featured_details.setMaximumHeight(120)
+        layout.addWidget(self.featured_details)
+
+        # Load on creation
+        QTimer.singleShot(500, self._load_featured_plugins)
+
+        return widget
+
+    def _load_featured_plugins(self):
+        """Load curated plugins from marketplace."""
+        try:
+            from utils.plugin_marketplace import PluginMarketplace
+            curated = PluginMarketplace.get_curated_plugins()
+            self.featured_list.clear()
+            for p in curated:
+                badge = "⭐ " if p.featured else ""
+                verified = " ✓" if p.verified else ""
+                item = QListWidgetItem(
+                    f"{badge}{p.name} v{p.version} by {p.author}{verified}  "
+                    f"(★ {p.rating:.1f}, {p.downloads} downloads)"
+                )
+                item.setData(Qt.ItemDataRole.UserRole, p)
+                self.featured_list.addItem(item)
+            if not curated:
+                self.featured_list.addItem(
+                    QListWidgetItem(self.tr("No featured plugins available."))
+                )
+        except Exception as e:
+            self.featured_list.clear()
+            self.featured_list.addItem(
+                QListWidgetItem(f"Error: {e}")
+            )
+
+    def _on_featured_selected(self, current, previous):
+        """Show details for selected featured plugin."""
+        if not current:
+            self.featured_details.clear()
+            return
+        plugin = current.data(Qt.ItemDataRole.UserRole)
+        if not plugin:
+            self.featured_details.clear()
+            return
+        lines = [
+            f"Name: {plugin.name}",
+            f"Author: {plugin.author}",
+            f"Version: {plugin.version}",
+            f"Category: {plugin.category}",
+            f"Rating: {plugin.rating:.1f}/5.0",
+            f"Downloads: {plugin.downloads}",
+            f"Verified: {'Yes' if plugin.verified else 'No'}",
+            f"Featured: {'Yes' if plugin.featured else 'No'}",
+            "",
+            f"{plugin.description}",
+        ]
+        self.featured_details.setText("\n".join(lines))
 
     # -- Local Presets --
 

@@ -660,6 +660,154 @@ class _OverlaysSubTab(QWidget):
 
 
 # ---------------------------------------------------------------------------
+# Sub-tab: Smart Updates (v37.0 Pinnacle)
+# ---------------------------------------------------------------------------
+
+
+class _SmartUpdatesSubTab(QWidget):
+    """Sub-tab for advanced update management.
+
+    Uses UpdateManager to check updates, preview conflicts,
+    schedule updates, and rollback.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self._loaded = False
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        header = QLabel(self.tr("Smart Updates"))
+        header.setStyleSheet("font-size: 18px; font-weight: bold; color: #a277ff;")
+        layout.addWidget(header)
+
+        # Check Updates
+        check_group = QGroupBox(self.tr("Available Updates"))
+        check_layout = QVBoxLayout(check_group)
+
+        btn_row = QHBoxLayout()
+        self.btn_check = QPushButton(self.tr("Check for Updates"))
+        self.btn_check.setAccessibleName(self.tr("Check for Updates"))
+        self.btn_check.clicked.connect(self._check_updates)
+        btn_row.addWidget(self.btn_check)
+
+        self.btn_conflicts = QPushButton(self.tr("Preview Conflicts"))
+        self.btn_conflicts.setAccessibleName(self.tr("Preview Conflicts"))
+        self.btn_conflicts.clicked.connect(self._preview_conflicts)
+        btn_row.addWidget(self.btn_conflicts)
+        btn_row.addStretch()
+        check_layout.addLayout(btn_row)
+
+        self.updates_list = QListWidget()
+        self.updates_list.setMinimumHeight(120)
+        check_layout.addWidget(self.updates_list)
+        layout.addWidget(check_group)
+
+        # Schedule & Rollback
+        actions_group = QGroupBox(self.tr("Actions"))
+        actions_layout = QVBoxLayout(actions_group)
+
+        schedule_row = QHBoxLayout()
+        self.btn_schedule = QPushButton(self.tr("Schedule Update (02:00)"))
+        self.btn_schedule.setAccessibleName(self.tr("Schedule Update"))
+        self.btn_schedule.clicked.connect(self._schedule_update)
+        schedule_row.addWidget(self.btn_schedule)
+
+        self.btn_rollback = QPushButton(self.tr("Rollback Last Update"))
+        self.btn_rollback.setAccessibleName(self.tr("Rollback Last Update"))
+        self.btn_rollback.setObjectName("dangerAction")
+        self.btn_rollback.clicked.connect(self._rollback_last)
+        schedule_row.addWidget(self.btn_rollback)
+        schedule_row.addStretch()
+        actions_layout.addLayout(schedule_row)
+        layout.addWidget(actions_group)
+
+        # Output
+        self.output_area = QTextEdit()
+        self.output_area.setReadOnly(True)
+        self.output_area.setMaximumHeight(150)
+        self.output_area.setAccessibleName(self.tr("Smart updates output"))
+        layout.addWidget(self.output_area)
+
+        self.runner = CommandRunner()
+        self.runner.output_received.connect(self._append_output)
+        self.runner.finished.connect(
+            lambda ec: self._append_output(
+                self.tr("\nCommand finished with exit code: {}\n").format(ec)
+            )
+        )
+
+        layout.addStretch()
+
+    def _append_output(self, text):
+        self.output_area.moveCursor(
+            self.output_area.textCursor().MoveOperation.End
+        )
+        self.output_area.insertPlainText(text)
+        self.output_area.moveCursor(
+            self.output_area.textCursor().MoveOperation.End
+        )
+
+    def _check_updates(self):
+        """Check for available updates."""
+        try:
+            from utils.update_manager import UpdateManager
+            updates = UpdateManager.check_updates()
+            self.updates_list.clear()
+            for u in updates:
+                item = QListWidgetItem(
+                    f"{u.name}  {u.old_version} → {u.new_version}  ({u.source})"
+                )
+                self.updates_list.addItem(item)
+            if not updates:
+                self.updates_list.addItem(
+                    QListWidgetItem(self.tr("System is up to date."))
+                )
+            self._append_output(
+                self.tr("Found {} available updates.\n").format(len(updates))
+            )
+        except Exception as e:
+            self._append_output(f"[ERROR] {e}\n")
+
+    def _preview_conflicts(self):
+        try:
+            from utils.update_manager import UpdateManager
+            conflicts = UpdateManager.preview_conflicts()
+            self.updates_list.clear()
+            for c in conflicts:
+                item = QListWidgetItem(
+                    f"⚠ {c.package}: {c.conflict_type} — {c.description}"
+                )
+                self.updates_list.addItem(item)
+            if not conflicts:
+                self.updates_list.addItem(
+                    QListWidgetItem(self.tr("No conflicts detected."))
+                )
+        except Exception as e:
+            self._append_output(f"[ERROR] {e}\n")
+
+    def _schedule_update(self):
+        try:
+            from utils.update_manager import UpdateManager
+            scheduled = UpdateManager.schedule_update("02:00")
+            cmds = UpdateManager.get_schedule_commands(scheduled)
+            for binary, args, desc in cmds:
+                self._append_output(f"{desc}\n")
+                self.runner.run_command(binary, args)
+        except Exception as e:
+            self._append_output(f"[ERROR] {e}\n")
+
+    def _rollback_last(self):
+        try:
+            from utils.update_manager import UpdateManager
+            binary, args, desc = UpdateManager.rollback_last()
+            self._append_output(f"{desc}\n")
+            self.runner.run_command(binary, args)
+        except Exception as e:
+            self._append_output(f"[ERROR] {e}\n")
+
+
+# ---------------------------------------------------------------------------
 # Main consolidated tab
 # ---------------------------------------------------------------------------
 
@@ -695,6 +843,7 @@ class MaintenanceTab(BaseTab):
         configure_top_tabs(self.tabs)
         self.tabs.addTab(_UpdatesSubTab(), self.tr("Updates"))
         self.tabs.addTab(_CleanupSubTab(), self.tr("Cleanup"))
+        self.tabs.addTab(_SmartUpdatesSubTab(), self.tr("Smart Updates"))
 
         if SystemManager.is_atomic():
             self.tabs.addTab(_OverlaysSubTab(), self.tr("Overlays"))
