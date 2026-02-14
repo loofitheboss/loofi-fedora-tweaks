@@ -11,7 +11,6 @@ Sub-tabs:
 
 import logging
 import os
-import subprocess
 
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
@@ -23,8 +22,10 @@ from PyQt6.QtWidgets import (
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from ui.tooltips import DIAG_NETWORK
 from utils.history import HistoryManager
 from utils.network_monitor import NetworkMonitor
+from utils.network_utils import NetworkUtils
 from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
@@ -104,6 +105,7 @@ class NetworkTab(BaseTab):
 
         btn_row = QHBoxLayout()
         btn_refresh_iface = QPushButton(self.tr("Refresh"))
+        btn_refresh_iface.setAccessibleName(self.tr("Refresh interfaces"))
         btn_refresh_iface.clicked.connect(self._load_interfaces)
         btn_row.addWidget(btn_refresh_iface)
         btn_row.addStretch()
@@ -126,14 +128,17 @@ class NetworkTab(BaseTab):
 
         wifi_btn_row = QHBoxLayout()
         btn_scan_wifi = QPushButton(self.tr("Scan Wi-Fi"))
+        btn_scan_wifi.setAccessibleName(self.tr("Scan Wi-Fi"))
         btn_scan_wifi.clicked.connect(self._scan_wifi)
         wifi_btn_row.addWidget(btn_scan_wifi)
 
         btn_connect_wifi = QPushButton(self.tr("Connect"))
+        btn_connect_wifi.setAccessibleName(self.tr("Connect Wi-Fi"))
         btn_connect_wifi.clicked.connect(self._connect_wifi)
         wifi_btn_row.addWidget(btn_connect_wifi)
 
         btn_disconnect_wifi = QPushButton(self.tr("Disconnect"))
+        btn_disconnect_wifi.setAccessibleName(self.tr("Disconnect Wi-Fi"))
         btn_disconnect_wifi.clicked.connect(self._disconnect_wifi)
         wifi_btn_row.addWidget(btn_disconnect_wifi)
         wifi_btn_row.addStretch()
@@ -156,6 +161,7 @@ class NetworkTab(BaseTab):
 
         vpn_btn_row = QHBoxLayout()
         btn_refresh_vpn = QPushButton(self.tr("Refresh VPN"))
+        btn_refresh_vpn.setAccessibleName(self.tr("Refresh VPN"))
         btn_refresh_vpn.clicked.connect(self._load_vpn)
         vpn_btn_row.addWidget(btn_refresh_vpn)
         vpn_btn_row.addStretch()
@@ -185,6 +191,7 @@ class NetworkTab(BaseTab):
         dns_layout.addWidget(self.lbl_current_dns)
 
         self.dns_combo = QComboBox()
+        self.dns_combo.setAccessibleName(self.tr("DNS provider"))
         self.dns_combo.addItem(self.tr("Cloudflare (1.1.1.1)"), "1.1.1.1 1.0.0.1")
         self.dns_combo.addItem(self.tr("Google (8.8.8.8)"), "8.8.8.8 8.8.4.4")
         self.dns_combo.addItem(self.tr("Quad9 (9.9.9.9)"), "9.9.9.9 149.112.112.112")
@@ -194,6 +201,7 @@ class NetworkTab(BaseTab):
         dns_layout.addWidget(self.dns_combo)
 
         btn_apply_dns = QPushButton(self.tr("Apply DNS"))
+        btn_apply_dns.setAccessibleName(self.tr("Apply DNS"))
         btn_apply_dns.clicked.connect(self.apply_dns)
         dns_layout.addWidget(btn_apply_dns)
 
@@ -206,6 +214,8 @@ class NetworkTab(BaseTab):
         test_layout.addWidget(self.lbl_dns_test)
 
         btn_test_dns = QPushButton(self.tr("Test DNS Resolution"))
+        btn_test_dns.setAccessibleName(self.tr("Test DNS"))
+        btn_test_dns.setToolTip(DIAG_NETWORK)
         btn_test_dns.clicked.connect(self._test_dns)
         test_layout.addWidget(btn_test_dns)
         container.addWidget(test_group)
@@ -234,10 +244,12 @@ class NetworkTab(BaseTab):
 
         mac_btn_row = QHBoxLayout()
         btn_enable_mac = QPushButton(self.tr("Enable"))
+        btn_enable_mac.setAccessibleName(self.tr("Enable MAC randomization"))
         btn_enable_mac.clicked.connect(lambda: self.toggle_mac_randomization(True))
         mac_btn_row.addWidget(btn_enable_mac)
 
         btn_disable_mac = QPushButton(self.tr("Disable"))
+        btn_disable_mac.setAccessibleName(self.tr("Disable MAC randomization"))
         btn_disable_mac.clicked.connect(lambda: self.toggle_mac_randomization(False))
         mac_btn_row.addWidget(btn_disable_mac)
         mac_btn_row.addStretch()
@@ -261,10 +273,12 @@ class NetworkTab(BaseTab):
 
         hostname_btn_row = QHBoxLayout()
         btn_hide_hostname = QPushButton(self.tr("Hide Hostname"))
+        btn_hide_hostname.setAccessibleName(self.tr("Hide hostname"))
         btn_hide_hostname.clicked.connect(lambda: self._toggle_hostname_privacy(True))
         hostname_btn_row.addWidget(btn_hide_hostname)
 
         btn_show_hostname = QPushButton(self.tr("Show Hostname"))
+        btn_show_hostname.setAccessibleName(self.tr("Show hostname"))
         btn_show_hostname.clicked.connect(lambda: self._toggle_hostname_privacy(False))
         hostname_btn_row.addWidget(btn_show_hostname)
         hostname_btn_row.addStretch()
@@ -275,6 +289,7 @@ class NetworkTab(BaseTab):
         undo_group = QGroupBox(self.tr("History"))
         undo_layout = QVBoxLayout(undo_group)
         btn_undo = QPushButton(self.tr("↩ Undo Last Action"))
+        btn_undo.setAccessibleName(self.tr("Undo last action"))
         btn_undo.clicked.connect(self.undo_last)
         undo_layout.addWidget(btn_undo)
         container.addWidget(undo_group)
@@ -333,6 +348,7 @@ class NetworkTab(BaseTab):
 
         conn_btn_row = QHBoxLayout()
         btn_refresh_conn = QPushButton(self.tr("Refresh"))
+        btn_refresh_conn.setAccessibleName(self.tr("Refresh connections"))
         btn_refresh_conn.clicked.connect(self._refresh_monitoring)
         conn_btn_row.addWidget(btn_refresh_conn)
         conn_btn_row.addStretch()
@@ -425,36 +441,18 @@ class NetworkTab(BaseTab):
 
     def _scan_wifi(self):
         """Scan for available WiFi networks via nmcli."""
-        try:
-            result = subprocess.run(
-                ["nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY,ACTIVE", "device", "wifi", "list", "--rescan", "yes"],
-                capture_output=True, text=True, timeout=15
-            )
-            lines = [line for line in result.stdout.strip().splitlines() if line.strip()]
-            rows: list[tuple[str, str, str, str]] = []
-            for line in lines:
-                parts = line.split(":")
-                if len(parts) >= 4:
-                    ssid = parts[0] or "(Hidden)"
-                    signal = f"{parts[1]}%"
-                    security = parts[2] or "Open"
-                    active = "Connected" if parts[3] == "yes" else ""
-                    rows.append((ssid, signal, security, active))
-
-            self.wifi_table.clearSpans()
-            if not rows:
-                self._set_empty_table_state(self.wifi_table, self.tr("No Wi-Fi networks found"))
-            else:
-                self.wifi_table.setRowCount(len(rows))
-                for i, row in enumerate(rows):
-                    self.wifi_table.setItem(i, 0, self._make_table_item(row[0]))
-                    self.wifi_table.setItem(i, 1, self._make_table_item(row[1]))
-                    self.wifi_table.setItem(i, 2, self._make_table_item(row[2]))
-                    self.wifi_table.setItem(i, 3, self._make_table_item(row[3]))
-            self.append_output(self.tr("WiFi scan complete. {} networks found.\n").format(len(lines)))
-        except Exception as e:
-            self._set_empty_table_state(self.wifi_table, self.tr("Wi-Fi scan failed"))
-            self.append_output(self.tr("WiFi scan failed: {}\n").format(e))
+        rows = NetworkUtils.scan_wifi()
+        self.wifi_table.clearSpans()
+        if not rows:
+            self._set_empty_table_state(self.wifi_table, self.tr("No Wi-Fi networks found"))
+        else:
+            self.wifi_table.setRowCount(len(rows))
+            for i, row in enumerate(rows):
+                self.wifi_table.setItem(i, 0, self._make_table_item(row[0]))
+                self.wifi_table.setItem(i, 1, self._make_table_item(row[1]))
+                self.wifi_table.setItem(i, 2, self._make_table_item(row[2]))
+                self.wifi_table.setItem(i, 3, self._make_table_item(row[3]))
+        self.append_output(self.tr("WiFi scan complete. {} networks found.\n").format(len(rows)))
 
     def _connect_wifi(self):
         """Connect to selected WiFi network."""
@@ -476,28 +474,15 @@ class NetworkTab(BaseTab):
 
     def _load_vpn(self):
         """Load VPN connections from NetworkManager."""
-        try:
-            result = subprocess.run(
-                ["nmcli", "-t", "-f", "NAME,TYPE,ACTIVE", "connection", "show"],
-                capture_output=True, text=True, timeout=5
-            )
-            vpn_lines = [line for line in result.stdout.strip().splitlines()
-                         if "vpn" in line.lower() or "wireguard" in line.lower()
-                         or "openvpn" in line.lower()]
-            self.vpn_table.clearSpans()
-            self.vpn_table.setRowCount(len(vpn_lines))
-            for i, line in enumerate(vpn_lines):
-                parts = line.split(":")
-                if len(parts) >= 3:
-                    self.vpn_table.setItem(i, 0, self._make_table_item(parts[0]))
-                    self.vpn_table.setItem(i, 1, self._make_table_item(parts[1]))
-                    status = "🟢 Active" if parts[2] == "yes" else "Inactive"
-                    self.vpn_table.setItem(i, 2, self._make_table_item(status))
-            if not vpn_lines:
-                self._set_empty_table_state(self.vpn_table, self.tr("No VPN connections configured"))
-        except Exception as e:
-            logger.debug("Failed to load VPN: %s", e)
-            self._set_empty_table_state(self.vpn_table, self.tr("Failed to load VPN connections"))
+        vpn_rows = NetworkUtils.load_vpn_connections()
+        self.vpn_table.clearSpans()
+        self.vpn_table.setRowCount(len(vpn_rows))
+        for i, (name, conn_type, status) in enumerate(vpn_rows):
+            self.vpn_table.setItem(i, 0, self._make_table_item(name))
+            self.vpn_table.setItem(i, 1, self._make_table_item(conn_type))
+            self.vpn_table.setItem(i, 2, self._make_table_item(status))
+        if not vpn_rows:
+            self._set_empty_table_state(self.vpn_table, self.tr("No VPN connections configured"))
 
     # ------------------------------------------------------------------ #
     #  DNS sub-tab
@@ -505,39 +490,17 @@ class NetworkTab(BaseTab):
 
     def _detect_current_dns(self):
         """Detect and display the current DNS servers."""
-        try:
-            result = subprocess.run(
-                ["nmcli", "-t", "-f", "IP4.DNS", "device", "show"],
-                capture_output=True, text=True, timeout=5
+        dns_str = NetworkUtils.detect_current_dns()
+        if dns_str:
+            self.lbl_current_dns.setText(
+                self.tr("Current DNS: {}").format(dns_str)
             )
-            dns_servers = set()
-            for line in result.stdout.splitlines():
-                if ":" in line:
-                    val = line.split(":", 1)[1].strip()
-                    if val:
-                        dns_servers.add(val)
-            if dns_servers:
-                self.lbl_current_dns.setText(
-                    self.tr("Current DNS: {}").format(", ".join(sorted(dns_servers)))
-                )
-            else:
-                self.lbl_current_dns.setText(self.tr("Current DNS: (DHCP default)"))
-        except Exception:
-            self.lbl_current_dns.setText(self.tr("Current DNS: unknown"))
+        else:
+            self.lbl_current_dns.setText(self.tr("Current DNS: (DHCP default)"))
 
     def get_active_connection(self):
         """Return the connection name of the active WiFi or Ethernet connection."""
-        try:
-            res = subprocess.run(
-                ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"],
-                capture_output=True, text=True, timeout=5
-            )
-            for line in res.stdout.splitlines():
-                if "wifi" in line or "ethernet" in line:
-                    return line.split(":")[0]
-        except (subprocess.SubprocessError, OSError) as e:
-            logger.debug("Failed to get active connection: %s", e)
-        return None
+        return NetworkUtils.get_active_connection()
 
     def apply_dns(self):
         """Apply selected DNS provider to active connection."""
@@ -564,11 +527,7 @@ class NetworkTab(BaseTab):
             ], self.tr("Applying DNS: {}").format(dns_servers))
 
         # Reapply connection in background
-        try:
-            subprocess.run(["nmcli", "con", "up", conn_name],
-                           capture_output=True, timeout=10)
-        except Exception:
-            pass
+        NetworkUtils.reactivate_connection(conn_name)
 
         QTimer.singleShot(1000, self._detect_current_dns)
         QMessageBox.information(self, self.tr("Success"),
@@ -642,17 +601,12 @@ class NetworkTab(BaseTab):
         if not conn:
             self.lbl_hostname_status.setText(self.tr("Hostname broadcast: no active connection"))
             return
-        try:
-            result = subprocess.run(
-                ["nmcli", "-t", "-f", "ipv4.dhcp-send-hostname", "connection", "show", conn],
-                capture_output=True, text=True, timeout=5
-            )
-            val = result.stdout.strip().split(":")[-1].strip() if result.stdout.strip() else ""
-            if val == "no":
-                self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ✅ Hidden"))
-            else:
-                self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ⚠️ Visible"))
-        except Exception:
+        result = NetworkUtils.check_hostname_privacy(conn)
+        if result is True:
+            self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ✅ Hidden"))
+        elif result is False:
+            self.lbl_hostname_status.setText(self.tr("Hostname broadcast: ⚠️ Visible"))
+        else:
             self.lbl_hostname_status.setText(self.tr("Hostname broadcast: unknown"))
 
     def _toggle_hostname_privacy(self, hide):

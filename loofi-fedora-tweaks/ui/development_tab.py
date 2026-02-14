@@ -22,7 +22,6 @@ from utils.containers import ContainerManager, ContainerStatus
 from utils.devtools import DevToolsManager
 from utils.vscode import VSCodeManager
 from utils.command_runner import CommandRunner
-import subprocess
 import shutil
 from core.plugins.metadata import PluginMetadata
 
@@ -170,6 +169,7 @@ class DevelopmentTab(BaseTab):
 
         btn_layout = QHBoxLayout()
         install_btn = QPushButton(self.tr("Install Distrobox"))
+        install_btn.setAccessibleName(self.tr("Install Distrobox"))
         install_btn.clicked.connect(self._install_distrobox)
         btn_layout.addWidget(install_btn)
         btn_layout.addStretch()
@@ -186,6 +186,7 @@ class DevelopmentTab(BaseTab):
         toolbar = QHBoxLayout()
 
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh"))
         refresh_btn.clicked.connect(self.refresh_containers)
         toolbar.addWidget(refresh_btn)
 
@@ -204,14 +205,17 @@ class DevelopmentTab(BaseTab):
         btn_layout = QHBoxLayout()
 
         enter_btn = QPushButton(self.tr("Enter Container"))
+        enter_btn.setAccessibleName(self.tr("Enter Container"))
         enter_btn.clicked.connect(self._enter_container)
         btn_layout.addWidget(enter_btn)
 
         stop_btn = QPushButton(self.tr("Stop"))
+        stop_btn.setAccessibleName(self.tr("Stop"))
         stop_btn.clicked.connect(self._stop_container)
         btn_layout.addWidget(stop_btn)
 
         delete_btn = QPushButton(self.tr("Delete"))
+        delete_btn.setAccessibleName(self.tr("Delete"))
         delete_btn.clicked.connect(self._delete_container)
         btn_layout.addWidget(delete_btn)
 
@@ -230,6 +234,7 @@ class DevelopmentTab(BaseTab):
         # Name input
         form_layout.addWidget(QLabel(self.tr("Name:")))
         self.name_input = QLineEdit()
+        self.name_input.setAccessibleName(self.tr("Container name"))
         self.name_input.setPlaceholderText("my-container")
         self.name_input.setMaximumWidth(200)
         form_layout.addWidget(self.name_input)
@@ -237,6 +242,7 @@ class DevelopmentTab(BaseTab):
         # Image selector
         form_layout.addWidget(QLabel(self.tr("Image:")))
         self.image_combo = QComboBox()
+        self.image_combo.setAccessibleName(self.tr("Container image"))
         for name in ContainerManager.get_available_images().keys():
             self.image_combo.addItem(name.capitalize(), name)
         self.image_combo.setCurrentIndex(0)
@@ -244,6 +250,7 @@ class DevelopmentTab(BaseTab):
 
         # Create button
         create_btn = QPushButton(self.tr("Create"))
+        create_btn.setAccessibleName(self.tr("Create"))
         create_btn.clicked.connect(self._create_container)
         form_layout.addWidget(create_btn)
 
@@ -344,6 +351,7 @@ class DevelopmentTab(BaseTab):
 
     def _open_terminal(self, container_name: str):
         """Open a terminal inside the container."""
+        from PyQt6.QtCore import QProcess
         cmd = ContainerManager.get_enter_command(container_name)
 
         # Try different terminal emulators
@@ -357,7 +365,7 @@ class DevelopmentTab(BaseTab):
         for term_name, term_cmd in terminals:
             if shutil.which(term_name):
                 try:
-                    subprocess.Popen(term_cmd, start_new_session=True)
+                    QProcess.startDetached(term_cmd[0], term_cmd[1:])
                     self.append_output(
                         self.tr("Opened terminal in container '{}'.\n").format(container_name)
                     )
@@ -495,6 +503,7 @@ class DevelopmentTab(BaseTab):
         pyenv_layout.addStretch()
 
         self.pyenv_btn = QPushButton(self.tr("Install PyEnv + Python 3.12"))
+        self.pyenv_btn.setAccessibleName(self.tr("Install PyEnv + Python 3.12"))
         self.pyenv_btn.clicked.connect(lambda: self._install_tool("pyenv"))
         pyenv_layout.addWidget(self.pyenv_btn)
         layout.addLayout(pyenv_layout)
@@ -506,6 +515,7 @@ class DevelopmentTab(BaseTab):
         nvm_layout.addStretch()
 
         self.nvm_btn = QPushButton(self.tr("Install NVM + Node LTS"))
+        self.nvm_btn.setAccessibleName(self.tr("Install NVM + Node LTS"))
         self.nvm_btn.clicked.connect(lambda: self._install_tool("nvm"))
         nvm_layout.addWidget(self.nvm_btn)
         layout.addLayout(nvm_layout)
@@ -517,6 +527,7 @@ class DevelopmentTab(BaseTab):
         rust_layout.addStretch()
 
         self.rust_btn = QPushButton(self.tr("Install Rustup"))
+        self.rust_btn.setAccessibleName(self.tr("Install Rustup"))
         self.rust_btn.clicked.connect(lambda: self._install_tool("rustup"))
         rust_layout.addWidget(self.rust_btn)
         layout.addLayout(rust_layout)
@@ -549,6 +560,7 @@ class DevelopmentTab(BaseTab):
         profile_layout.addWidget(QLabel(self.tr("Profile:")))
 
         self.profile_combo = QComboBox()
+        self.profile_combo.setAccessibleName(self.tr("VS Code extension profile"))
         for profile in VSCodeManager.get_available_profiles():
             self.profile_combo.addItem(
                 f"{profile['name']} ({profile['extension_count']} extensions)",
@@ -557,10 +569,12 @@ class DevelopmentTab(BaseTab):
         profile_layout.addWidget(self.profile_combo, 1)
 
         install_btn = QPushButton(self.tr("Install Extensions"))
+        install_btn.setAccessibleName(self.tr("Install Extensions"))
         install_btn.clicked.connect(self._install_vscode_profile)
         profile_layout.addWidget(install_btn)
 
         settings_btn = QPushButton(self.tr("Apply Settings"))
+        settings_btn.setAccessibleName(self.tr("Apply Settings"))
         settings_btn.clicked.connect(self._apply_vscode_settings)
         profile_layout.addWidget(settings_btn)
 

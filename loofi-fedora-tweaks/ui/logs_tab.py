@@ -17,6 +17,9 @@ from PyQt6.QtGui import QColor
 from ui.base_tab import BaseTab
 from utils.smart_logs import SmartLogViewer
 from core.plugins.metadata import PluginMetadata
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class LogsTab(BaseTab):
@@ -80,6 +83,7 @@ class LogsTab(BaseTab):
         sg_layout.addWidget(self.lbl_errors, 1, 3)
 
         btn_refresh_summary = QPushButton(self.tr("🔄 Refresh Summary"))
+        btn_refresh_summary.setAccessibleName(self.tr("Refresh Summary"))
         btn_refresh_summary.clicked.connect(self._load_summary)
         sg_layout.addWidget(btn_refresh_summary, 2, 0, 1, 4)
 
@@ -91,6 +95,7 @@ class LogsTab(BaseTab):
         pattern_group.setLayout(pg_layout)
 
         self.pattern_table = QTableWidget()
+        self.pattern_table.setAccessibleName(self.tr("Detected Patterns"))
         self.pattern_table.setColumnCount(2)
         self.pattern_table.setHorizontalHeaderLabels([
             self.tr("Pattern"), self.tr("Count")
@@ -112,17 +117,20 @@ class LogsTab(BaseTab):
 
         live_controls = QHBoxLayout()
         self.btn_live_toggle = QPushButton(self.tr("▶ Start Live"))
+        self.btn_live_toggle.setAccessibleName(self.tr("Start Live"))
         self.btn_live_toggle.clicked.connect(self._toggle_live)
         live_controls.addWidget(self.btn_live_toggle)
 
         live_controls.addWidget(QLabel(self.tr("Every (sec):")))
         self.live_interval_spin = QSpinBox()
+        self.live_interval_spin.setAccessibleName(self.tr("Live interval seconds"))
         self.live_interval_spin.setRange(1, 30)
         self.live_interval_spin.setValue(2)
         live_controls.addWidget(self.live_interval_spin)
 
         live_controls.addWidget(QLabel(self.tr("Buffer rows:")))
         self.live_buffer_spin = QSpinBox()
+        self.live_buffer_spin.setAccessibleName(self.tr("Buffer rows"))
         self.live_buffer_spin.setRange(50, 2000)
         self.live_buffer_spin.setValue(300)
         live_controls.addWidget(self.live_buffer_spin)
@@ -130,6 +138,7 @@ class LogsTab(BaseTab):
         lg_layout.addLayout(live_controls)
 
         self.live_text = QTextEdit()
+        self.live_text.setAccessibleName(self.tr("Live log output"))
         self.live_text.setReadOnly(True)
         self.live_text.setMaximumHeight(180)
         lg_layout.addWidget(self.live_text)
@@ -145,6 +154,7 @@ class LogsTab(BaseTab):
 
         filter_layout.addWidget(QLabel(self.tr("Unit:")))
         self.unit_combo = QComboBox()
+        self.unit_combo.setAccessibleName(self.tr("Unit filter"))
         self.unit_combo.setEditable(True)
         self.unit_combo.setMinimumWidth(180)
         self.unit_combo.addItem(self.tr("(all)"))
@@ -152,6 +162,7 @@ class LogsTab(BaseTab):
 
         filter_layout.addWidget(QLabel(self.tr("Priority:")))
         self.priority_combo = QComboBox()
+        self.priority_combo.setAccessibleName(self.tr("Priority filter"))
         self.priority_combo.addItems([
             "0 (emerg)", "1 (alert)", "2 (crit)", "3 (err)",
             "4 (warn)", "5 (notice)", "6 (info)", "7 (debug)"
@@ -161,6 +172,7 @@ class LogsTab(BaseTab):
 
         filter_layout.addWidget(QLabel(self.tr("Lines:")))
         self.lines_spin = QSpinBox()
+        self.lines_spin.setAccessibleName(self.tr("Lines to fetch"))
         self.lines_spin.setRange(10, 1000)
         self.lines_spin.setValue(100)
         filter_layout.addWidget(self.lines_spin)
@@ -171,10 +183,12 @@ class LogsTab(BaseTab):
         btn_layout = QHBoxLayout()
 
         btn_fetch = QPushButton(self.tr("📋 Fetch Logs"))
+        btn_fetch.setAccessibleName(self.tr("Fetch Logs"))
         btn_fetch.clicked.connect(self._fetch_logs)
         btn_layout.addWidget(btn_fetch)
 
         btn_export = QPushButton(self.tr("💾 Export Logs"))
+        btn_export.setAccessibleName(self.tr("Export Logs"))
         btn_export.clicked.connect(self._export_logs)
         btn_layout.addWidget(btn_export)
 
@@ -182,6 +196,7 @@ class LogsTab(BaseTab):
 
         # Log table
         self.log_table = QTableWidget()
+        self.log_table.setAccessibleName(self.tr("Log entries"))
         self.log_table.setColumnCount(4)
         self.log_table.setHorizontalHeaderLabels([
             self.tr("Time"), self.tr("Unit"), self.tr("Priority"), self.tr("Message")
@@ -234,7 +249,7 @@ class LogsTab(BaseTab):
                 for unit in units[:50]:
                     self.unit_combo.addItem(unit)
             except Exception:
-                pass
+                logger.debug("Failed to load systemd unit list", exc_info=True)
             # Restore selection
             idx = self.unit_combo.findText(current_text)
             if idx >= 0:

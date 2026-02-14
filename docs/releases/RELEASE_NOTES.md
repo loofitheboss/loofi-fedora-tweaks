@@ -1,9 +1,16 @@
 # Release Notes — Latest
 
-> **Current release:** v33.0.0 "Bastion"
+> **Current release:** v34.0.0 "Citadel"
 >
 > For versioned release notes see the individual files in this directory:
 > `RELEASE-NOTES-vX.Y.Z.md`
+
+## v34.0.0 "Citadel"
+
+Polish-only release — light theme fix, stability hardening, accessibility annotations.
+Zero subprocess in UI, 21 silent exceptions fixed, 85 new tests (4061 total).
+
+See [v34.0.0.md](v34.0.0.md) for full details.
 
 ## v33.0.0 "Bastion"
 

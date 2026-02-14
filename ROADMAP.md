@@ -23,6 +23,48 @@
 | v31.0 | Smart UX | DONE | Health score, i18n, batch ops, export report, plugin template |
 | v32.0 | Abyss | DONE | Full visual redesign, activity-based categories, Abyss theme |
 | v33.0 | Bastion | DONE | Testing & type safety debt, CI pipeline hardening |
+| v34.0 | Citadel | DONE | Light theme fix, stability hardening, accessibility polish |
+
+---
+
+## [DONE] v34.0 "Citadel" — Stability, Theme & Accessibility Polish
+
+### Scope
+
+- Fix broken light theme (24 missing QSS selectors, 4 dead selectors)
+- Harden CommandRunner (timeout, kill escalation, stderr separation, crash detection)
+- Extract all subprocess.run calls from UI code into utils/
+- Replace all silent `except Exception: pass` with logged exceptions
+- Add log rotation and proper daemon logging
+- Add accessibility annotations to all 20 unannotated tabs
+- Wire unused tooltips.py constants into UI code
+- Push test coverage toward 80%
+
+### Deliverables
+
+- [x] Light theme parity with dark theme (all QSS selectors ported)
+- [x] CommandRunner: timeout, kill escalation, stderr signal, crash detection
+- [x] Zero subprocess.run calls in ui/ files
+- [x] Zero silent exception swallows in ui/ files
+- [x] Log rotation (5 MB, 3 backups)
+- [x] Daemon uses proper logging (17 print→logger conversions)
+- [x] Accessibility annotations on all 27 tabs (314 calls)
+- [x] tooltips.py constants wired into UI
+- [x] Tests for all changes (85 new tests)
+- [x] CHANGELOG + README + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| CodeGen | Light theme QSS, CommandRunner hardening |
+| Builder | Extract subprocess from UI to utils/ |
+| Guardian | Silent exception fixes, accessibility, tests |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v33.0 Bastion (clean type-safe baseline)
 
 ---
 

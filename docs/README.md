@@ -36,6 +36,6 @@ These legacy files are kept for compatibility and historical context.
 
 ## Documentation Maintenance Notes
 
-- User-facing guides are aligned to `v33.0.0 "Bastion"`.
+- User-facing guides are aligned to `v34.0.0 "Citadel"`.
 - Screenshot paths are standardized to `docs/images/user-guide/*.png`.
 - When replacing screenshots, keep filenames stable or update all guide references.

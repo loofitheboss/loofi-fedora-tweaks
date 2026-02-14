@@ -4,6 +4,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [34.0.0] - 2025-07-18 "Citadel"
+
+### Fixed
+
+- **Light theme completely rewritten**: Removed 4 dead `QListWidget` selectors; added 24+ new selectors covering `QTreeWidget#sidebar`, `QPushButton:disabled`, focus rings, combobox dropdowns, scrollbar hover states, table/tree items, and objectName-targeted labels. Uses Catppuccin Latte palette throughout.
+- **21 silent exception swallows replaced**: All `except Exception: pass` blocks across 9 UI files now log via `logger.debug(..., exc_info=True)` for proper traceability.
+- **Zero subprocess calls in UI layer**: Extracted all `subprocess.run`/`getoutput`/`Popen` calls from 7 UI files — Dashboard, Network, Software, Gaming, MainWindow, SystemInfo, and Development tabs no longer import `subprocess`. Delegated to `utils/network_utils.py`, `utils/software_utils.py`, `utils/gaming_utils.py`, `utils/desktop_utils.py`, and `utils/system_info_utils.py`. Development tab uses `QProcess.startDetached()` for terminal launching.
+
+### Changed
+
+- **CommandRunner hardened** (`utils/command_runner.py`):
+  - Added `stderr_received` signal (stderr also still forwarded to `output_received`)
+  - Added configurable timeout (default 5 min) with `QTimer`
+  - Added `stop()` with terminate → 5s grace → kill escalation
+  - Added `is_running()` check and crash detection via `QProcess.ExitStatus.CrashExit`
+  - Flatpak sandbox detection now cached at class level
+  - Byte decoding uses `errors='replace'` to prevent crashes on invalid output
+- **Log rotation enabled** (`utils/log.py`): Replaced `FileHandler` with `RotatingFileHandler` (5 MB max, 3 backups) to prevent unbounded log growth.
+- **Daemon logging** (`utils/daemon.py`): All 17 `print()` calls replaced with structured `logger.info/warning/error()` calls.
+
+### Added
+
+- **5 new utility modules**: `utils/network_utils.py` (6 nmcli helpers), `utils/software_utils.py` (check command), `utils/gaming_utils.py` (GameMode detection), `utils/desktop_utils.py` (color scheme detection), `utils/system_info_utils.py` (8 system query helpers — hostname, kernel, release, CPU, RAM, disk, uptime, battery).
+- **Accessibility annotations on all 27 tabs**: 314 `setAccessibleName()` calls across every tab file — all interactive widgets (buttons, checkboxes, combos, inputs, spinboxes) now have screen reader labels.
+- **Tooltip wiring**: Connected 3 tooltip constants from `ui/tooltips.py` to Hardware and Network tabs.
+- **85 new tests**: Full coverage for all 5 new utility modules (`test_network_utils.py`, `test_software_utils.py`, `test_gaming_utils.py`, `test_desktop_utils.py`, `test_system_info_utils.py`).
+
+### Test Suite
+
+- **4061 tests passing** (up from 3958), 0 failures.
+
+---
+
 ## [33.0.0] - 2025-07-17 "Bastion"
 
 ### Fixed

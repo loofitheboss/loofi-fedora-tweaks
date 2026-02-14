@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        33.0.0
+Version:        34.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -70,6 +70,17 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Fri Jul 18 2025 Loofi <loofi@example.com> - 34.0.0-1
+- v34.0.0 "Citadel" — Polish & Stability
+- Light theme completely rewritten (Catppuccin Latte, 24+ new selectors)
+- CommandRunner hardened (timeout, kill escalation, crash detection)
+- 12 subprocess.run calls extracted from UI to utils layer
+- 21 silent exception swallows replaced with logger.debug()
+- Log rotation enabled (5 MB, 3 backups)
+- Daemon print statements replaced with structured logging
+- 43 accessibility annotations added across 7 tabs
+- 67 new tests (4025 total, 0 failures)
+
 * Fri Feb 13 2026 Loofi <loofi@example.com> - 30.0.0-1
 - v30.0.0 Distribution & Reliability
 - Added packaging scripts: build_flatpak.sh, build_appimage.sh, build_sdist.sh

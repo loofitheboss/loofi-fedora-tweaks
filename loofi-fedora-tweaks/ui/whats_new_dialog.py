@@ -7,6 +7,9 @@ from PyQt6.QtWidgets import (
 )
 
 from version import __version__, __version_codename__
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 # Release notes for each version
@@ -128,4 +131,4 @@ class WhatsNewDialog(QDialog):
             mgr.set("last_seen_version", __version__)
             mgr.save()
         except Exception:
-            pass
+            logger.debug("Failed to save last seen version", exc_info=True)

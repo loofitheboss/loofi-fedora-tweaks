@@ -16,6 +16,9 @@ from ui.base_tab import BaseTab
 from utils.auto_tuner import AutoTuner, WorkloadProfile, TuningRecommendation, TuningHistoryEntry
 import time
 from core.plugins.metadata import PluginMetadata
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class PerformanceTab(BaseTab):
@@ -82,6 +85,7 @@ class PerformanceTab(BaseTab):
         wl_layout.addWidget(self.lbl_iowait, 3, 1)
 
         btn_refresh = QPushButton(self.tr("🔄 Re-detect Workload"))
+        btn_refresh.setAccessibleName(self.tr("Re-detect workload"))
         btn_refresh.clicked.connect(self._detect_workload)
         wl_layout.addWidget(btn_refresh, 4, 0, 1, 2)
 
@@ -125,6 +129,7 @@ class PerformanceTab(BaseTab):
         rec_layout.addWidget(self.lbl_rec_details)
 
         btn_apply = QPushButton(self.tr("⚡ Apply Recommendation"))
+        btn_apply.setAccessibleName(self.tr("Apply recommendation"))
         btn_apply.clicked.connect(self._apply_recommendation)
         rec_layout.addWidget(btn_apply)
 
@@ -217,7 +222,7 @@ class PerformanceTab(BaseTab):
         try:
             AutoTuner.save_tuning_entry(entry)
         except Exception:
-            pass
+            logger.debug("Failed to save tuning history entry", exc_info=True)
 
     def _refresh_history(self):
         """Update the history table."""

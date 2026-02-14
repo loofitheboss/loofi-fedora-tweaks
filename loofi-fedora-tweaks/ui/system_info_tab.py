@@ -3,12 +3,15 @@ from PyQt6.QtWidgets import (
     QPushButton, QComboBox, QFileDialog
 )
 from PyQt6.QtCore import QTimer
-import subprocess
 import os
 
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 from utils.report_exporter import ReportExporter
+from utils.log import get_logger
+from utils import system_info_utils
+
+logger = get_logger(__name__)
 
 
 class SystemInfoTab(QWidget, PluginInterface):
@@ -83,31 +86,22 @@ class SystemInfoTab(QWidget, PluginInterface):
 
     def refresh_info(self):
         try:
-            self.labels["hostname"].setText(subprocess.getoutput("hostname"))
-            self.labels["kernel"].setText(subprocess.getoutput("uname -r"))
-            self.labels["fedora"].setText(subprocess.getoutput("cat /etc/fedora-release"))
-
-            cpu_info = subprocess.getoutput("lscpu | grep 'Model name' | cut -d: -f2").strip()
-            self.labels["cpu"].setText(cpu_info if cpu_info else "Unknown")
-
-            mem = subprocess.getoutput("free -h | awk '/^Mem:/ {print $2 \" total, \" $3 \" used\"}'")
-            self.labels["ram"].setText(mem)
-
-            disk = subprocess.getoutput("df -h / | awk 'NR==2 {print $3 \"/\" $2 \" (\" $5 \" used)\"}'")
-            self.labels["disk"].setText(disk)
-
-            uptime = subprocess.getoutput("uptime -p")
-            self.labels["uptime"].setText(uptime)
+            self.labels["hostname"].setText(system_info_utils.get_hostname())
+            self.labels["kernel"].setText(system_info_utils.get_kernel_version())
+            self.labels["fedora"].setText(system_info_utils.get_fedora_release())
+            self.labels["cpu"].setText(system_info_utils.get_cpu_model())
+            self.labels["ram"].setText(system_info_utils.get_ram_usage())
+            self.labels["disk"].setText(system_info_utils.get_disk_usage())
+            self.labels["uptime"].setText(system_info_utils.get_uptime())
 
             # Battery
-            if os.path.exists("/sys/class/power_supply/BAT0/capacity"):
-                capacity = subprocess.getoutput("cat /sys/class/power_supply/BAT0/capacity")
-                status = subprocess.getoutput("cat /sys/class/power_supply/BAT0/status")
-                self.labels["battery"].setText(f"{capacity}% ({status})")
+            battery = system_info_utils.get_battery_status()
+            if battery is not None:
+                self.labels["battery"].setText(battery)
             else:
                 self.labels["battery"].setText(self.tr("No battery detected"))
         except Exception:
-            pass
+            logger.debug("Failed to refresh system info", exc_info=True)
 
     def _export_report(self):
         """Export system report as Markdown or HTML."""
@@ -125,4 +119,4 @@ class SystemInfoTab(QWidget, PluginInterface):
             try:
                 ReportExporter.save_report(path, fmt)
             except Exception:
-                pass
+                logger.debug("Failed to export system report", exc_info=True)

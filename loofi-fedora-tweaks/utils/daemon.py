@@ -9,8 +9,11 @@ import subprocess
 from pathlib import Path
 
 from utils.config_manager import ConfigManager
+from utils.log import get_logger
 from utils.plugin_base import PluginLoader
 from utils.plugin_installer import PluginInstaller
+
+logger = get_logger(__name__)
 
 
 class Daemon:
@@ -27,7 +30,7 @@ class Daemon:
     @classmethod
     def signal_handler(cls, signum, frame):
         """Handle shutdown signals."""
-        print(f"[Daemon] Received signal {signum}, shutting down...")
+        logger.info("Received signal %s, shutting down...", signum)
         cls._running = False
 
     @classmethod
@@ -77,13 +80,13 @@ class Daemon:
             return
 
         if current_state != cls._last_power_state:
-            print(f"[Daemon] Power state changed: {cls._last_power_state} -> {current_state}")
+            logger.info("Power state changed: %s -> %s", cls._last_power_state, current_state)
 
             on_battery = current_state == "battery"
             tasks = TaskScheduler.get_power_trigger_tasks(on_battery)
 
             for task in tasks:
-                print(f"[Daemon] Running power-triggered task: {task.name}")
+                logger.info("Running power-triggered task: %s", task.name)
                 TaskScheduler.execute_task(task)
 
             cls._last_power_state = current_state
@@ -93,10 +96,10 @@ class Daemon:
         """Run all on_boot tasks."""
         from utils.scheduler import TaskScheduler
 
-        print("[Daemon] Running boot tasks...")
+        logger.info("Running boot tasks...")
 
         for task in TaskScheduler.get_boot_tasks():
-            print(f"[Daemon] Running boot task: {task.name}")
+            logger.info("Running boot task: %s", task.name)
             TaskScheduler.execute_task(task)
 
     @classmethod
@@ -107,12 +110,12 @@ class Daemon:
         due_tasks = TaskScheduler.get_due_tasks()
 
         if due_tasks:
-            print(f"[Daemon] Found {len(due_tasks)} due tasks")
+            logger.info("Found %d due tasks", len(due_tasks))
 
             for task in due_tasks:
-                print(f"[Daemon] Running scheduled task: {task.name}")
+                logger.info("Running scheduled task: %s", task.name)
                 success, message = TaskScheduler.execute_task(task)
-                print(f"[Daemon] Task '{task.name}': {'Success' if success else 'Failed'} - {message}")
+                logger.info("Task '%s': %s - %s", task.name, 'Success' if success else 'Failed', message)
 
     @classmethod
     def check_plugin_updates(cls):
@@ -122,7 +125,7 @@ class Daemon:
         if not config.get("plugin_auto_update", True):
             return
 
-        print("[Daemon] Checking for plugin updates...")
+        logger.info("Checking for plugin updates...")
 
         try:
             loader = PluginLoader()
@@ -134,29 +137,29 @@ class Daemon:
                     continue  # Skip disabled plugins
 
                 plugin_name = plugin["name"]
-                print(f"[Daemon] Checking updates for plugin: {plugin_name}")
+                logger.debug("Checking updates for plugin: %s", plugin_name)
 
                 result = installer.check_update(plugin_name)
 
                 if result.success and result.data and result.data.get("update_available"):
                     new_version = result.data.get("new_version")
-                    print(f"[Daemon] Update available for {plugin_name}: {new_version}")
+                    logger.info("Update available for %s: %s", plugin_name, new_version)
 
                     # Auto-update the plugin
                     update_result = installer.update(plugin_name)
 
                     if update_result.success:
-                        print(f"[Daemon] Successfully updated {plugin_name} to {new_version}")
+                        logger.info("Successfully updated %s to %s", plugin_name, new_version)
                     else:
-                        print(f"[Daemon] Failed to update {plugin_name}: {update_result.error}")
+                        logger.warning("Failed to update %s: %s", plugin_name, update_result.error)
 
         except Exception as e:
-            print(f"[Daemon] Error checking plugin updates: {e}")
+            logger.error("Error checking plugin updates: %s", e, exc_info=True)
 
     @classmethod
     def run(cls):
         """Main daemon loop."""
-        print("[Daemon] Loofi Fedora Tweaks daemon starting...")
+        logger.info("Loofi Fedora Tweaks daemon starting...")
 
         # Set up signal handlers
         signal.signal(signal.SIGTERM, cls.signal_handler)
@@ -192,10 +195,10 @@ class Daemon:
                 time.sleep(10)
 
             except Exception as e:
-                print(f"[Daemon] Error in main loop: {e}")
+                logger.error("Error in main loop: %s", e, exc_info=True)
                 time.sleep(60)  # Back off on error
 
-        print("[Daemon] Daemon stopped.")
+        logger.info("Daemon stopped.")
 
 
 def main():

@@ -4,8 +4,6 @@ Normalized to BaseTab in v17.0 "Atlas".
 Uses PrivilegedCommand for package installation.
 """
 
-import subprocess
-
 from PyQt6.QtWidgets import (
     QGroupBox, QLabel, QMessageBox, QPushButton,
     QVBoxLayout, QWidget,
@@ -13,6 +11,7 @@ from PyQt6.QtWidgets import (
 
 from ui.base_tab import BaseTab
 from utils.commands import PrivilegedCommand
+from utils.gaming_utils import GamingUtils
 from utils.log import get_logger
 from core.plugins.metadata import PluginMetadata
 
@@ -54,6 +53,7 @@ class GamingTab(BaseTab):
 
         # Feral Gamemode
         self.btn_gamemode = QPushButton(self.tr("Install Feral GameMode"))
+        self.btn_gamemode.setAccessibleName(self.tr("Install GameMode"))
         self.btn_gamemode.clicked.connect(self.install_gamemode)
         perf_layout.addWidget(self.btn_gamemode)
 
@@ -62,6 +62,7 @@ class GamingTab(BaseTab):
 
         # MangoHud
         btn_mangohud = QPushButton(self.tr("Install MangoHud & Goverlay"))
+        btn_mangohud.setAccessibleName(self.tr("Install MangoHud"))
         btn_mangohud.clicked.connect(self.install_mangohud)
         perf_layout.addWidget(btn_mangohud)
 
@@ -74,11 +75,13 @@ class GamingTab(BaseTab):
 
         # ProtonUp-Qt
         btn_protonup = QPushButton(self.tr("Install ProtonUp-Qt (Flatpak)"))
+        btn_protonup.setAccessibleName(self.tr("Install ProtonUp-Qt"))
         btn_protonup.clicked.connect(self.install_protonup)
         steam_layout.addWidget(btn_protonup)
 
         # Steam Devices
         btn_steam_devices = QPushButton(self.tr("Install Steam Devices (Controller Support)"))
+        btn_steam_devices.setAccessibleName(self.tr("Install Steam Devices"))
         btn_steam_devices.clicked.connect(self.install_steam_devices)
         steam_layout.addWidget(btn_steam_devices)
 
@@ -98,29 +101,22 @@ class GamingTab(BaseTab):
                                 self.tr("GameMode installation started."))
 
     def check_gamemode_status(self):
-        try:
-            result = subprocess.run(
-                ["systemctl", "--user", "is-active", "gamemoded"],
-                capture_output=True, text=True
-            )
-            if "active" in result.stdout:
-                self.lbl_gamemode_status.setText(
-                    self.tr("GameMode Status: ✅ Active (Service Running)"))
-                self.btn_gamemode.setEnabled(False)
-                self.btn_gamemode.setText(self.tr("GameMode Installed"))
-            else:
-                res_rpm = subprocess.run(
-                    ["rpm", "-q", "gamemode"], capture_output=True)
-                if res_rpm.returncode == 0:
-                    self.lbl_gamemode_status.setText(
-                        self.tr("GameMode Status: ⚠️ Installed but Inactive"))
-                    self.btn_gamemode.setText(self.tr("Reinstall GameMode"))
-                else:
-                    self.lbl_gamemode_status.setText(
-                        self.tr("GameMode Status: ❌ Not Installed"))
-        except Exception as e:
+        status = GamingUtils.get_gamemode_status()
+        if status == "active":
             self.lbl_gamemode_status.setText(
-                self.tr("Status check failed: {}").format(e))
+                self.tr("GameMode Status: ✅ Active (Service Running)"))
+            self.btn_gamemode.setEnabled(False)
+            self.btn_gamemode.setText(self.tr("GameMode Installed"))
+        elif status == "installed":
+            self.lbl_gamemode_status.setText(
+                self.tr("GameMode Status: ⚠️ Installed but Inactive"))
+            self.btn_gamemode.setText(self.tr("Reinstall GameMode"))
+        elif status == "missing":
+            self.lbl_gamemode_status.setText(
+                self.tr("GameMode Status: ❌ Not Installed"))
+        else:
+            self.lbl_gamemode_status.setText(
+                self.tr("Status check failed"))
 
     def install_mangohud(self):
         binary, args, desc = PrivilegedCommand.dnf("install", "mangohud", "goverlay")

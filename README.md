@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v33.0.0 "Bastion"
+# Loofi Fedora Tweaks v34.0.0 "Citadel"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v33.0.0">
-    <img src="https://img.shields.io/badge/Release-v33.0.0-blue?style=for-the-badge&logo=github" alt="Release v33.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v34.0.0">
+    <img src="https://img.shields.io/badge/Release-v34.0.0-blue?style=for-the-badge&logo=github" alt="Release v34.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -35,20 +35,22 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v33.0.0?
+## What Is New in v34.0.0?
 
-`v33.0.0 "Bastion"` is a testing and CI hardening release — zero type errors, all tests passing, strict CI gates:
+`v34.0.0 "Citadel"` is a polish-only release — light theme fix, stability hardening, and accessibility:
 
-- **Zero mypy errors** — Fixed 163 type errors across 40+ source files. Added `from __future__ import annotations`, proper type annotations, `cast()` calls for Qt types.
-- **3953+ tests passing** — Resolved all pre-existing test failures. Fixed SecurityTab static method calls, pulse.py upower parsing, and test isolation issues.
-- **Strict CI gates** — All CI gates enforced with no `continue-on-error` — typecheck, test, lint, docs all blocking.
-- **Type-safety baseline** — Clean mypy baseline established for future development.
+- **Light theme rewritten** — Removed 4 dead selectors, added 24+ new selectors, full Catppuccin Latte palette.
+- **CommandRunner hardened** — Configurable timeout, terminate→kill escalation, stderr signal, crash detection.
+- **Zero subprocess in UI** — Extracted all subprocess calls from 7 UI files into 5 new utils modules.
+- **21 silent exceptions fixed** — All `except: pass` blocks now log with `exc_info=True`.
+- **Accessibility** — 314 `setAccessibleName()` calls across all 27 tabs.
+- **4061 tests passing** — 85 new tests for the 5 new utility modules.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v33.0.0.md`](docs/releases/RELEASE-NOTES-v33.0.0.md)
+Full notes: [`docs/releases/v34.0.0.md`](docs/releases/v34.0.0.md)
 
 ---
 
-## What Is New in v32.0.0?
+## What Is New in v33.0.0?
 
 Full notes: [`docs/releases/RELEASE-NOTES-v32.0.0.md`](docs/releases/RELEASE-NOTES-v32.0.0.md)
 

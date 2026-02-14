@@ -189,6 +189,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
 
         btn_layout = QHBoxLayout()
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh models"))
         refresh_btn.clicked.connect(self._refresh_models)
         btn_layout.addWidget(refresh_btn)
         btn_layout.addStretch()
@@ -212,6 +213,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
             row.addWidget(label, stretch=1)
 
             dl_btn = QPushButton(self.tr("Download"))
+            dl_btn.setAccessibleName(self.tr("Download {}").format(info["name"]))
             dl_btn.setProperty("model_id", model_id)
             dl_btn.clicked.connect(lambda checked, mid=model_id: self._download_model(mid))
             row.addWidget(dl_btn)
@@ -325,6 +327,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
         model_row = QHBoxLayout()
         model_row.addWidget(QLabel(self.tr("Whisper Model:")))
         self.whisper_model_combo = QComboBox()
+        self.whisper_model_combo.setAccessibleName(self.tr("Whisper model selector"))
         for model_name, info in WHISPER_MODELS.items():
             self.whisper_model_combo.addItem(
                 self.tr("{} ({} MB RAM)").format(info["name"], info["ram_required"]),
@@ -338,6 +341,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
         dur_row = QHBoxLayout()
         dur_row.addWidget(QLabel(self.tr("Duration (seconds):")))
         self.duration_spin = QSpinBox()
+        self.duration_spin.setAccessibleName(self.tr("Recording duration in seconds"))
         self.duration_spin.setMinimum(1)
         self.duration_spin.setMaximum(30)
         self.duration_spin.setValue(5)
@@ -348,10 +352,12 @@ class AIEnhancedTab(QWidget, PluginInterface):
         # Buttons
         btn_row = QHBoxLayout()
         self.record_btn = QPushButton(self.tr("Record"))
+        self.record_btn.setAccessibleName(self.tr("Record audio"))
         self.record_btn.clicked.connect(self._record_audio)
         btn_row.addWidget(self.record_btn)
 
         self.transcribe_btn = QPushButton(self.tr("Transcribe Last Recording"))
+        self.transcribe_btn.setAccessibleName(self.tr("Transcribe Last Recording"))
         self.transcribe_btn.clicked.connect(self._transcribe_last)
         self.transcribe_btn.setEnabled(False)
         btn_row.addWidget(self.transcribe_btn)
@@ -457,14 +463,17 @@ class AIEnhancedTab(QWidget, PluginInterface):
         idx_btn_row = QHBoxLayout()
 
         self.build_index_btn = QPushButton(self.tr("Build Index"))
+        self.build_index_btn.setAccessibleName(self.tr("Build Index"))
         self.build_index_btn.clicked.connect(self._build_index)
         idx_btn_row.addWidget(self.build_index_btn)
 
         self.clear_index_btn = QPushButton(self.tr("Clear Index"))
+        self.clear_index_btn.setAccessibleName(self.tr("Clear Index"))
         self.clear_index_btn.clicked.connect(self._clear_index)
         idx_btn_row.addWidget(self.clear_index_btn)
 
         self.refresh_stats_btn = QPushButton(self.tr("Refresh Stats"))
+        self.refresh_stats_btn.setAccessibleName(self.tr("Refresh Stats"))
         self.refresh_stats_btn.clicked.connect(self._refresh_index_stats)
         idx_btn_row.addWidget(self.refresh_stats_btn)
 
@@ -479,11 +488,13 @@ class AIEnhancedTab(QWidget, PluginInterface):
 
         query_row = QHBoxLayout()
         self.search_input = QLineEdit()
+        self.search_input.setAccessibleName(self.tr("Knowledge base search query"))
         self.search_input.setPlaceholderText(self.tr("Enter search query..."))
         self.search_input.returnPressed.connect(self._search_index)
         query_row.addWidget(self.search_input)
 
         search_btn = QPushButton(self.tr("Search"))
+        search_btn.setAccessibleName(self.tr("Search knowledge base"))
         search_btn.clicked.connect(self._search_index)
         query_row.addWidget(search_btn)
 
@@ -507,6 +518,7 @@ class AIEnhancedTab(QWidget, PluginInterface):
         files_layout.addWidget(self.files_list)
 
         scan_btn = QPushButton(self.tr("Scan Files"))
+        scan_btn.setAccessibleName(self.tr("Scan Files"))
         scan_btn.clicked.connect(self._scan_files)
         files_layout.addWidget(scan_btn)
 

@@ -91,18 +91,22 @@ class HealthTimelineTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout(actions_group)
 
         snapshot_btn = QPushButton(self.tr("Record Snapshot"))
+        snapshot_btn.setAccessibleName(self.tr("Record Snapshot"))
         snapshot_btn.clicked.connect(self._record_snapshot)
         btn_layout.addWidget(snapshot_btn)
 
         export_btn = QPushButton(self.tr("Export Data"))
+        export_btn.setAccessibleName(self.tr("Export Data"))
         export_btn.clicked.connect(self._export_data)
         btn_layout.addWidget(export_btn)
 
         prune_btn = QPushButton(self.tr("Prune Old Data"))
+        prune_btn.setAccessibleName(self.tr("Prune Old Data"))
         prune_btn.clicked.connect(self._prune_data)
         btn_layout.addWidget(prune_btn)
 
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh"))
         refresh_btn.clicked.connect(self._refresh_data)
         btn_layout.addWidget(refresh_btn)
 
@@ -115,6 +119,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
 
         view_layout.addWidget(QLabel(self.tr("Metric Type:")))
         self.metric_combo = QComboBox()
+        self.metric_combo.setAccessibleName(self.tr("Metric Type"))
         self.metric_combo.addItems([
             "cpu_temp", "ram_usage", "disk_usage", "load_avg"
         ])
@@ -123,6 +128,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
 
         view_layout.addWidget(QLabel(self.tr("Hours:")))
         self.hours_spin = QSpinBox()
+        self.hours_spin.setAccessibleName(self.tr("Hours"))
         self.hours_spin.setRange(1, 168)
         self.hours_spin.setValue(24)
         self.hours_spin.valueChanged.connect(self._refresh_table)
@@ -135,6 +141,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         table_group = QGroupBox(self.tr("Recent Metrics"))
         table_layout = QVBoxLayout(table_group)
         self.metrics_table = QTableWidget()
+        self.metrics_table.setAccessibleName(self.tr("Recent Metrics"))
         self.metrics_table.setColumnCount(4)
         self.metrics_table.setHorizontalHeaderLabels([
             self.tr("Timestamp"),
@@ -162,6 +169,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         anomaly_layout.addWidget(self.anomaly_label)
 
         detect_btn = QPushButton(self.tr("Detect Anomalies"))
+        detect_btn.setAccessibleName(self.tr("Detect Anomalies"))
         detect_btn.clicked.connect(self._detect_anomalies)
         anomaly_layout.addWidget(detect_btn)
         layout.addWidget(anomaly_group)
@@ -170,6 +178,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         log_group = QGroupBox(self.tr("Output Log"))
         log_layout = QVBoxLayout(log_group)
         self.output_text = QTextEdit()
+        self.output_text.setAccessibleName(self.tr("Output Log"))
         self.output_text.setReadOnly(True)
         self.output_text.setMaximumHeight(120)
         log_layout.addWidget(self.output_text)

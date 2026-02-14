@@ -104,10 +104,12 @@ class AgentsTab(BaseTab):
         sched_layout.addStretch()
 
         self.btn_start_scheduler = QPushButton(self.tr("Start Scheduler"))
+        self.btn_start_scheduler.setAccessibleName(self.tr("Start Scheduler"))
         self.btn_start_scheduler.clicked.connect(self._start_scheduler)
         sched_layout.addWidget(self.btn_start_scheduler)
 
         self.btn_stop_scheduler = QPushButton(self.tr("Stop Scheduler"))
+        self.btn_stop_scheduler.setAccessibleName(self.tr("Stop Scheduler"))
         self.btn_stop_scheduler.clicked.connect(self._stop_scheduler)
         self.btn_stop_scheduler.setEnabled(False)
         sched_layout.addWidget(self.btn_stop_scheduler)
@@ -178,6 +180,7 @@ class AgentsTab(BaseTab):
         # Action buttons
         btn_layout = QHBoxLayout()
         btn_refresh = QPushButton(self.tr("Refresh"))
+        btn_refresh.setAccessibleName(self.tr("Refresh agents"))
         btn_refresh.clicked.connect(self._refresh_agents_table)
         btn_layout.addWidget(btn_refresh)
         btn_layout.addStretch()
@@ -201,6 +204,7 @@ class AgentsTab(BaseTab):
         )))
 
         self.goal_input = QLineEdit()
+        self.goal_input.setAccessibleName(self.tr("Agent goal input"))
         self.goal_input.setPlaceholderText(self.tr(
             "e.g., 'Keep my system healthy' or 'Watch for security threats'"
         ))
@@ -217,11 +221,13 @@ class AgentsTab(BaseTab):
         ]
         for label, goal in templates:
             btn = QPushButton(label)
+            btn.setAccessibleName(self.tr(goal))
             btn.clicked.connect(lambda checked, g=goal: self.goal_input.setText(g))
             template_layout.addWidget(btn)
         goal_layout.addLayout(template_layout)
 
         btn_plan = QPushButton(self.tr("🤖 Generate Agent Plan"))
+        btn_plan.setAccessibleName(self.tr("Generate Agent Plan"))
         btn_plan.clicked.connect(self._generate_plan)
         goal_layout.addWidget(btn_plan)
 
@@ -241,11 +247,13 @@ class AgentsTab(BaseTab):
 
         opts_layout.addWidget(QLabel(self.tr("Dry Run (safe mode):")), 0, 0)
         self.chk_dry_run = QCheckBox()
+        self.chk_dry_run.setAccessibleName(self.tr("Dry Run (safe mode)"))
         self.chk_dry_run.setChecked(True)
         opts_layout.addWidget(self.chk_dry_run, 0, 1)
 
         opts_layout.addWidget(QLabel(self.tr("Max actions per hour:")), 1, 0)
         self.spn_max_actions = QSpinBox()
+        self.spn_max_actions.setAccessibleName(self.tr("Max actions per hour"))
         self.spn_max_actions.setRange(1, 100)
         self.spn_max_actions.setValue(10)
         opts_layout.addWidget(self.spn_max_actions, 1, 1)
@@ -253,6 +261,7 @@ class AgentsTab(BaseTab):
         plan_layout.addLayout(opts_layout)
 
         btn_create = QPushButton(self.tr("✅ Create Agent"))
+        btn_create.setAccessibleName(self.tr("Create Agent"))
         btn_create.clicked.connect(self._create_agent_from_plan)
         plan_layout.addWidget(btn_create)
 
@@ -281,6 +290,7 @@ class AgentsTab(BaseTab):
 
         btn_layout = QHBoxLayout()
         btn_refresh = QPushButton(self.tr("Refresh"))
+        btn_refresh.setAccessibleName(self.tr("Refresh activity"))
         btn_refresh.clicked.connect(self._refresh_activity_table)
         btn_layout.addWidget(btn_refresh)
         btn_layout.addStretch()
@@ -389,18 +399,23 @@ class AgentsTab(BaseTab):
             actions_layout.setContentsMargins(2, 2, 2, 2)
 
             btn_toggle = QPushButton(self.tr("Disable") if agent.enabled else self.tr("Enable"))
+            btn_toggle.setAccessibleName(
+                self.tr("Disable agent") if agent.enabled else self.tr("Enable agent")
+            )
             btn_toggle.clicked.connect(
                 lambda checked, aid=agent.agent_id, en=agent.enabled: self._toggle_agent(aid, en)
             )
             actions_layout.addWidget(btn_toggle)
 
             btn_run = QPushButton(self.tr("Run"))
+            btn_run.setAccessibleName(self.tr("Run agent"))
             btn_run.clicked.connect(
                 lambda checked, aid=agent.agent_id: self._run_agent_now(aid)
             )
             actions_layout.addWidget(btn_run)
 
             btn_notify = QPushButton(self.tr("🔕") if notif_enabled else self.tr("🔔"))
+            btn_notify.setAccessibleName(self.tr("Toggle notifications"))
             btn_notify.setToolTip(self.tr("Toggle notifications"))
             btn_notify.clicked.connect(
                 lambda checked, aid=agent.agent_id, ne=notif_enabled: self._toggle_notifications(aid, ne)

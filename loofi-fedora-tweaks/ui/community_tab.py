@@ -183,14 +183,17 @@ class CommunityTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh plugins"))
         refresh_btn.clicked.connect(self.refresh_plugins)
         btn_layout.addWidget(refresh_btn)
 
         self.enable_btn = QPushButton(self.tr("Enable"))
+        self.enable_btn.setAccessibleName(self.tr("Enable plugin"))
         self.enable_btn.clicked.connect(lambda: self._set_selected_plugin(True))
         btn_layout.addWidget(self.enable_btn)
 
         self.disable_btn = QPushButton(self.tr("Disable"))
+        self.disable_btn.setAccessibleName(self.tr("Disable plugin"))
         self.disable_btn.clicked.connect(lambda: self._set_selected_plugin(False))
         btn_layout.addWidget(self.disable_btn)
 
@@ -283,12 +286,15 @@ class CommunityTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         self.btn_load = QPushButton(self.tr("Load Selected"))
+        self.btn_load.setAccessibleName(self.tr("Load Selected"))
         self.btn_load.clicked.connect(self.load_preset)
 
         self.btn_save = QPushButton(self.tr("Save Current State"))
+        self.btn_save.setAccessibleName(self.tr("Save Current State"))
         self.btn_save.clicked.connect(self.save_preset)
 
         self.btn_delete = QPushButton(self.tr("Delete Selected"))
+        self.btn_delete.setAccessibleName(self.tr("Delete Selected"))
         self.btn_delete.clicked.connect(self.delete_preset)
 
         btn_layout.addWidget(self.btn_load)
@@ -382,9 +388,11 @@ class CommunityTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         btn_refresh = QPushButton(self.tr("Refresh"))
+        btn_refresh.setAccessibleName(self.tr("Refresh community presets"))
         btn_refresh.clicked.connect(self.refresh_community_presets)
 
         btn_download = QPushButton(self.tr("Download Selected"))
+        btn_download.setAccessibleName(self.tr("Download Selected"))
         btn_download.clicked.connect(self.download_community_preset)
 
         btn_layout.addWidget(btn_refresh)
@@ -473,10 +481,12 @@ class CommunityTab(QWidget, PluginInterface):
         btn_row = QHBoxLayout()
 
         btn_export = QPushButton(self.tr("Export to File"))
+        btn_export.setAccessibleName(self.tr("Export to File"))
         btn_export.clicked.connect(self.export_config)
         btn_row.addWidget(btn_export)
 
         btn_import = QPushButton(self.tr("Import from File"))
+        btn_import.setAccessibleName(self.tr("Import from File"))
         btn_import.clicked.connect(self.import_config)
         btn_row.addWidget(btn_import)
 
@@ -501,6 +511,7 @@ class CommunityTab(QWidget, PluginInterface):
         token_row.addWidget(QLabel(self.tr("GitHub Token:")))
 
         self.txt_token = QLineEdit()
+        self.txt_token.setAccessibleName(self.tr("GitHub token"))
         self.txt_token.setPlaceholderText("ghp_xxxxxxxxxxxx...")
         self.txt_token.setEchoMode(QLineEdit.EchoMode.Password)
         token = CloudSyncManager.get_gist_token()
@@ -509,6 +520,7 @@ class CommunityTab(QWidget, PluginInterface):
         token_row.addWidget(self.txt_token)
 
         btn_save_token = QPushButton(self.tr("Save"))
+        btn_save_token.setAccessibleName(self.tr("Save token"))
         btn_save_token.clicked.connect(self.save_token)
         token_row.addWidget(btn_save_token)
 
@@ -518,10 +530,12 @@ class CommunityTab(QWidget, PluginInterface):
         sync_row = QHBoxLayout()
 
         btn_push = QPushButton(self.tr("Push to Gist"))
+        btn_push.setAccessibleName(self.tr("Push to Gist"))
         btn_push.clicked.connect(self.push_to_gist)
         sync_row.addWidget(btn_push)
 
         btn_pull = QPushButton(self.tr("Pull from Gist"))
+        btn_pull.setAccessibleName(self.tr("Pull from Gist"))
         btn_pull.clicked.connect(self.pull_from_gist)
         sync_row.addWidget(btn_pull)
 
@@ -674,11 +688,13 @@ class CommunityTab(QWidget, PluginInterface):
         search_layout = QHBoxLayout()
 
         self.search_input = QLineEdit()
+        self.search_input.setAccessibleName(self.tr("Search presets"))
         self.search_input.setPlaceholderText(self.tr("Search presets..."))
         self.search_input.returnPressed.connect(self.search_presets)
         search_layout.addWidget(self.search_input)
 
         self.category_combo = QComboBox()
+        self.category_combo.setAccessibleName(self.tr("Preset category"))
         self.category_combo.addItem(self.tr("All Categories"), "")
         for cat in self.marketplace.get_categories():
             self.category_combo.addItem(cat.capitalize(), cat)
@@ -686,10 +702,12 @@ class CommunityTab(QWidget, PluginInterface):
         search_layout.addWidget(self.category_combo)
 
         search_btn = QPushButton(self.tr("Search"))
+        search_btn.setAccessibleName(self.tr("Search marketplace"))
         search_btn.clicked.connect(self.search_presets)
         search_layout.addWidget(search_btn)
 
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh marketplace"))
         refresh_btn.clicked.connect(lambda: self.refresh_marketplace(force=True))
         search_layout.addWidget(refresh_btn)
 
@@ -742,6 +760,7 @@ class CommunityTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         self.download_btn = QPushButton(self.tr("Download"))
+        self.download_btn.setAccessibleName(self.tr("Download preset"))
         self.download_btn.clicked.connect(self.download_marketplace_preset)
         self.download_btn.setEnabled(False)
         btn_layout.addWidget(self.download_btn)
@@ -749,6 +768,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.install_plugin_btn = self.download_btn
 
         self.apply_btn = QPushButton(self.tr("Download & Apply"))
+        self.apply_btn.setAccessibleName(self.tr("Download and Apply preset"))
         self.apply_btn.clicked.connect(self.download_and_apply)
         self.apply_btn.setEnabled(False)
         btn_layout.addWidget(self.apply_btn)
@@ -773,16 +793,19 @@ class CommunityTab(QWidget, PluginInterface):
 
         review_form_row_1 = QHBoxLayout()
         self.review_reviewer_input = QLineEdit()
+        self.review_reviewer_input.setAccessibleName(self.tr("Reviewer name"))
         self.review_reviewer_input.setPlaceholderText(self.tr("Reviewer name"))
         review_form_row_1.addWidget(self.review_reviewer_input)
 
         self.review_rating_combo = QComboBox()
+        self.review_rating_combo.setAccessibleName(self.tr("Review rating"))
         for rating in range(5, 0, -1):
             self.review_rating_combo.addItem(self.tr("{} star(s)").format(rating), rating)
         review_form_row_1.addWidget(self.review_rating_combo)
         reviews_layout.addLayout(review_form_row_1)
 
         self.review_title_input = QLineEdit()
+        self.review_title_input.setAccessibleName(self.tr("Review title"))
         self.review_title_input.setPlaceholderText(self.tr("Review title (optional)"))
         reviews_layout.addWidget(self.review_title_input)
 
@@ -793,6 +816,7 @@ class CommunityTab(QWidget, PluginInterface):
 
         review_actions_layout = QHBoxLayout()
         self.submit_review_btn = QPushButton(self.tr("Submit Review"))
+        self.submit_review_btn.setAccessibleName(self.tr("Submit Review"))
         self.submit_review_btn.setEnabled(False)
         self.submit_review_btn.clicked.connect(self.submit_marketplace_review)
         review_actions_layout.addWidget(self.submit_review_btn)
@@ -811,6 +835,7 @@ class CommunityTab(QWidget, PluginInterface):
         self.analytics_opt_in_checkbox = QCheckBox(
             self.tr("Share anonymous plugin marketplace usage analytics")
         )
+        self.analytics_opt_in_checkbox.setAccessibleName(self.tr("Share anonymous plugin marketplace usage analytics"))
         self.analytics_opt_in_checkbox.setChecked(self.plugin_analytics.is_enabled())
         self.analytics_opt_in_checkbox.stateChanged.connect(self._on_analytics_opt_in_changed)
         analytics_layout.addWidget(self.analytics_opt_in_checkbox)
@@ -832,10 +857,12 @@ class CommunityTab(QWidget, PluginInterface):
         drift_btn_layout = QHBoxLayout()
 
         check_drift_btn = QPushButton(self.tr("Check Drift"))
+        check_drift_btn.setAccessibleName(self.tr("Check Drift"))
         check_drift_btn.clicked.connect(self.check_drift)
         drift_btn_layout.addWidget(check_drift_btn)
 
         clear_baseline_btn = QPushButton(self.tr("Clear Baseline"))
+        clear_baseline_btn.setAccessibleName(self.tr("Clear Baseline"))
         clear_baseline_btn.clicked.connect(self.clear_baseline)
         drift_btn_layout.addWidget(clear_baseline_btn)
 

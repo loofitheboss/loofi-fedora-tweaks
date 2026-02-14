@@ -113,14 +113,17 @@ class MeshTab(QWidget, PluginInterface):
         # Buttons
         btn_layout = QHBoxLayout()
         self.btn_scan = QPushButton(self.tr("Scan Network"))
+        self.btn_scan.setAccessibleName(self.tr("Scan Network"))
         self.btn_scan.clicked.connect(self.on_scan_peers)
         btn_layout.addWidget(self.btn_scan)
 
         self.btn_register = QPushButton(self.tr("Announce This Device"))
+        self.btn_register.setAccessibleName(self.tr("Announce This Device"))
         self.btn_register.clicked.connect(self.on_register_service)
         btn_layout.addWidget(self.btn_register)
 
         self.btn_unregister = QPushButton(self.tr("Stop Announcing"))
+        self.btn_unregister.setAccessibleName(self.tr("Stop Announcing"))
         self.btn_unregister.clicked.connect(self.on_unregister_service)
         btn_layout.addWidget(self.btn_unregister)
 
@@ -150,6 +153,7 @@ class MeshTab(QWidget, PluginInterface):
         clip_layout.addWidget(self.clipboard_preview)
 
         btn_refresh_clip = QPushButton(self.tr("Refresh Clipboard"))
+        btn_refresh_clip.setAccessibleName(self.tr("Refresh Clipboard"))
         btn_refresh_clip.clicked.connect(self.on_refresh_clipboard)
         clip_layout.addWidget(btn_refresh_clip)
 
@@ -161,9 +165,11 @@ class MeshTab(QWidget, PluginInterface):
 
         row = QHBoxLayout()
         self.device_combo = QComboBox()
+        self.device_combo.setAccessibleName(self.tr("Target device"))
         row.addWidget(self.device_combo)
 
         btn_sync = QPushButton(self.tr("Send Clipboard"))
+        btn_sync.setAccessibleName(self.tr("Send Clipboard"))
         btn_sync.clicked.connect(self.on_send_clipboard)
         row.addWidget(btn_sync)
         row.addStretch()
@@ -181,6 +187,7 @@ class MeshTab(QWidget, PluginInterface):
         pair_row.addWidget(self.lbl_pairing_code)
 
         btn_generate = QPushButton(self.tr("Generate Code"))
+        btn_generate.setAccessibleName(self.tr("Generate Code"))
         btn_generate.clicked.connect(self.on_generate_pairing_code)
         pair_row.addWidget(btn_generate)
         pair_row.addStretch()
@@ -218,6 +225,7 @@ class MeshTab(QWidget, PluginInterface):
 
         file_btn_row = QHBoxLayout()
         self.btn_choose_file = QPushButton(self.tr("Choose File"))
+        self.btn_choose_file.setAccessibleName(self.tr("Choose File"))
         self.btn_choose_file.clicked.connect(self.on_choose_file)
         file_btn_row.addWidget(self.btn_choose_file)
 
@@ -251,10 +259,12 @@ class MeshTab(QWidget, PluginInterface):
 
         inc_btn_row = QHBoxLayout()
         btn_accept = QPushButton(self.tr("Accept"))
+        btn_accept.setAccessibleName(self.tr("Accept transfer"))
         btn_accept.clicked.connect(self.on_accept_transfer)
         inc_btn_row.addWidget(btn_accept)
 
         btn_reject = QPushButton(self.tr("Reject"))
+        btn_reject.setAccessibleName(self.tr("Reject transfer"))
         btn_reject.clicked.connect(self.on_reject_transfer)
         inc_btn_row.addWidget(btn_reject)
 

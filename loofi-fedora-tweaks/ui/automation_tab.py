@@ -37,11 +37,13 @@ class AddTaskDialog(QDialog):
 
         # Task name
         self.txt_name = QLineEdit()
+        self.txt_name.setAccessibleName(self.tr("Task name"))
         self.txt_name.setPlaceholderText(self.tr("e.g., Daily Cleanup"))
         layout.addRow(self.tr("Task Name:"), self.txt_name)
 
         # Action
         self.cmb_action = QComboBox()
+        self.cmb_action.setAccessibleName(self.tr("Task action"))
         self.cmb_action.addItem(self.tr("System Cleanup"), TaskAction.CLEANUP.value)
         self.cmb_action.addItem(self.tr("Check for Updates"), TaskAction.UPDATE_CHECK.value)
         self.cmb_action.addItem(self.tr("Sync Config to Cloud"), TaskAction.SYNC_CONFIG.value)
@@ -51,6 +53,7 @@ class AddTaskDialog(QDialog):
 
         # Preset selector (for apply_preset action)
         self.cmb_preset = QComboBox()
+        self.cmb_preset.setAccessibleName(self.tr("Preset selection"))
         self.load_presets()
         self.cmb_preset.setVisible(False)
         self.lbl_preset = QLabel(self.tr("Preset:"))
@@ -59,6 +62,7 @@ class AddTaskDialog(QDialog):
 
         # Schedule
         self.cmb_schedule = QComboBox()
+        self.cmb_schedule.setAccessibleName(self.tr("Task schedule"))
         self.cmb_schedule.addItem(self.tr("Hourly"), TaskSchedule.HOURLY.value)
         self.cmb_schedule.addItem(self.tr("Daily"), TaskSchedule.DAILY.value)
         self.cmb_schedule.addItem(self.tr("Weekly"), TaskSchedule.WEEKLY.value)
@@ -72,9 +76,11 @@ class AddTaskDialog(QDialog):
         btn_layout = QHBoxLayout()
 
         btn_cancel = QPushButton(self.tr("Cancel"))
+        btn_cancel.setAccessibleName(self.tr("Cancel"))
         btn_cancel.clicked.connect(self.reject)
 
         btn_add = QPushButton(self.tr("Add Task"))
+        btn_add.setAccessibleName(self.tr("Add Task"))
         btn_add.clicked.connect(self.accept)
         btn_add.setDefault(True)
 
@@ -200,6 +206,7 @@ class AutomationTab(BaseTab):
         layout.addStretch()
 
         self.btn_service_toggle = QPushButton()
+        self.btn_service_toggle.setAccessibleName(self.tr("Toggle background service"))
         self.btn_service_toggle.clicked.connect(self.toggle_service)
         layout.addWidget(self.btn_service_toggle)
 
@@ -219,18 +226,22 @@ class AutomationTab(BaseTab):
         btn_layout = QHBoxLayout()
 
         btn_add = QPushButton(self.tr("Add Task"))
+        btn_add.setAccessibleName(self.tr("Add Task"))
         btn_add.clicked.connect(self.add_task)
         btn_layout.addWidget(btn_add)
 
         btn_toggle = QPushButton(self.tr("Toggle Selected"))
+        btn_toggle.setAccessibleName(self.tr("Toggle Selected"))
         btn_toggle.clicked.connect(self.toggle_task)
         btn_layout.addWidget(btn_toggle)
 
         btn_run = QPushButton(self.tr("Run Now"))
+        btn_run.setAccessibleName(self.tr("Run Now"))
         btn_run.clicked.connect(self.run_task_now)
         btn_layout.addWidget(btn_run)
 
         btn_delete = QPushButton(self.tr("Delete"))
+        btn_delete.setAccessibleName(self.tr("Delete"))
         btn_delete.clicked.connect(self.delete_task)
         btn_layout.addWidget(btn_delete)
 
@@ -483,14 +494,17 @@ class AutomationTab(BaseTab):
         opts_layout = QHBoxLayout()
 
         self.ansible_packages = QCheckBox(self.tr("DNF Packages"))
+        self.ansible_packages.setAccessibleName(self.tr("DNF Packages"))
         self.ansible_packages.setChecked(True)
         opts_layout.addWidget(self.ansible_packages)
 
         self.ansible_flatpaks = QCheckBox(self.tr("Flatpak Apps"))
+        self.ansible_flatpaks.setAccessibleName(self.tr("Flatpak Apps"))
         self.ansible_flatpaks.setChecked(True)
         opts_layout.addWidget(self.ansible_flatpaks)
 
         self.ansible_settings = QCheckBox(self.tr("GNOME Settings"))
+        self.ansible_settings.setAccessibleName(self.tr("GNOME Settings"))
         self.ansible_settings.setChecked(True)
         opts_layout.addWidget(self.ansible_settings)
 
@@ -501,10 +515,12 @@ class AutomationTab(BaseTab):
         btn_layout = QHBoxLayout()
 
         preview_btn = QPushButton(self.tr("Preview"))
+        preview_btn.setAccessibleName(self.tr("Preview Ansible playbook"))
         preview_btn.clicked.connect(self._preview_ansible)
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
+        export_btn.setAccessibleName(self.tr("Export Ansible playbook"))
         export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
         export_btn.clicked.connect(self._export_ansible)
         btn_layout.addWidget(export_btn)
@@ -531,10 +547,12 @@ class AutomationTab(BaseTab):
         opts_layout = QHBoxLayout()
 
         self.ks_packages = QCheckBox(self.tr("DNF Packages"))
+        self.ks_packages.setAccessibleName(self.tr("DNF Packages"))
         self.ks_packages.setChecked(True)
         opts_layout.addWidget(self.ks_packages)
 
         self.ks_flatpaks = QCheckBox(self.tr("Flatpak Apps"))
+        self.ks_flatpaks.setAccessibleName(self.tr("Flatpak Apps"))
         self.ks_flatpaks.setChecked(True)
         opts_layout.addWidget(self.ks_flatpaks)
 
@@ -545,10 +563,12 @@ class AutomationTab(BaseTab):
         btn_layout = QHBoxLayout()
 
         preview_btn = QPushButton(self.tr("Preview"))
+        preview_btn.setAccessibleName(self.tr("Preview Kickstart file"))
         preview_btn.clicked.connect(self._preview_kickstart)
         btn_layout.addWidget(preview_btn)
 
         export_btn = QPushButton(self.tr("Export"))
+        export_btn.setAccessibleName(self.tr("Export Kickstart file"))
         export_btn.setStyleSheet("background-color: #3dd68c; color: #0b0e14; font-weight: bold;")
         export_btn.clicked.connect(self._export_kickstart)
         btn_layout.addWidget(export_btn)

@@ -89,22 +89,27 @@ class ProfilesTab(QWidget, PluginInterface):
         # Action buttons
         btn_layout = QHBoxLayout()
         refresh_btn = QPushButton(self.tr("Refresh"))
+        refresh_btn.setAccessibleName(self.tr("Refresh profiles"))
         refresh_btn.clicked.connect(self._refresh_profiles)
         btn_layout.addWidget(refresh_btn)
 
         create_btn = QPushButton(self.tr("Create Custom Profile"))
+        create_btn.setAccessibleName(self.tr("Create Custom Profile"))
         create_btn.clicked.connect(self._show_create_dialog)
         btn_layout.addWidget(create_btn)
 
         capture_btn = QPushButton(self.tr("Capture Current State"))
+        capture_btn.setAccessibleName(self.tr("Capture Current State"))
         capture_btn.clicked.connect(self._capture_current)
         btn_layout.addWidget(capture_btn)
 
         export_all_btn = QPushButton(self.tr("Export All"))
+        export_all_btn.setAccessibleName(self.tr("Export All profiles"))
         export_all_btn.clicked.connect(self._export_all_profiles)
         btn_layout.addWidget(export_all_btn)
 
         import_all_btn = QPushButton(self.tr("Import Bundle"))
+        import_all_btn.setAccessibleName(self.tr("Import Bundle"))
         import_all_btn.clicked.connect(self._import_bundle)
         btn_layout.addWidget(import_all_btn)
 
@@ -117,6 +122,7 @@ class ProfilesTab(QWidget, PluginInterface):
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
         self.output_text.setMaximumHeight(120)
+        self.output_text.setAccessibleName(self.tr("Profile output log"))
         log_layout.addWidget(self.output_text)
         layout.addWidget(log_group)
 
@@ -193,18 +199,21 @@ class ProfilesTab(QWidget, PluginInterface):
         btn_layout = QHBoxLayout()
 
         apply_btn = QPushButton(self.tr("Apply"))
+        apply_btn.setAccessibleName(self.tr("Apply profile"))
         profile_key = profile.get("key", "")
         apply_btn.clicked.connect(lambda checked, k=profile_key: self._apply_profile(k))
         btn_layout.addWidget(apply_btn)
 
         if not profile.get("builtin"):
             delete_btn = QPushButton(self.tr("Delete"))
+            delete_btn.setAccessibleName(self.tr("Delete profile"))
             delete_btn.clicked.connect(
                 lambda checked, k=profile_key: self._delete_profile(k)
             )
             btn_layout.addWidget(delete_btn)
 
         export_btn = QPushButton(self.tr("Export"))
+        export_btn.setAccessibleName(self.tr("Export profile"))
         export_btn.clicked.connect(
             lambda checked, k=profile_key: self._export_profile(k)
         )
@@ -312,28 +321,35 @@ class ProfilesTab(QWidget, PluginInterface):
         form = QFormLayout(dialog)
 
         name_edit = QLineEdit()
+        name_edit.setAccessibleName(self.tr("Profile name"))
         name_edit.setPlaceholderText(self.tr("My Custom Profile"))
         form.addRow(self.tr("Name:"), name_edit)
 
         desc_edit = QLineEdit()
+        desc_edit.setAccessibleName(self.tr("Profile description"))
         desc_edit.setPlaceholderText(self.tr("Description of this profile"))
         form.addRow(self.tr("Description:"), desc_edit)
 
         governor_combo = QComboBox()
+        governor_combo.setAccessibleName(self.tr("CPU governor"))
         governor_combo.addItems(["performance", "powersave", "schedutil", "ondemand", "conservative"])
         form.addRow(self.tr("CPU Governor:"), governor_combo)
 
         compositor_combo = QComboBox()
+        compositor_combo.setAccessibleName(self.tr("Compositor mode"))
         compositor_combo.addItems(["enabled", "disabled", "reduced"])
         form.addRow(self.tr("Compositor:"), compositor_combo)
 
         notif_combo = QComboBox()
+        notif_combo.setAccessibleName(self.tr("Notification mode"))
         notif_combo.addItems(["all", "critical", "dnd"])
         form.addRow(self.tr("Notifications:"), notif_combo)
 
         btn_layout = QHBoxLayout()
         save_btn = QPushButton(self.tr("Save"))
+        save_btn.setAccessibleName(self.tr("Save"))
         cancel_btn = QPushButton(self.tr("Cancel"))
+        cancel_btn.setAccessibleName(self.tr("Cancel"))
         btn_layout.addStretch()
         btn_layout.addWidget(save_btn)
         btn_layout.addWidget(cancel_btn)
@@ -390,11 +406,14 @@ class ProfilesTab(QWidget, PluginInterface):
         layout.addWidget(label)
 
         name_edit = QLineEdit()
+        name_edit.setAccessibleName(self.tr("Profile name"))
         layout.addWidget(name_edit)
 
         btn_layout = QHBoxLayout()
         ok_btn = QPushButton(self.tr("OK"))
+        ok_btn.setAccessibleName(self.tr("OK"))
         cancel_btn = QPushButton(self.tr("Cancel"))
+        cancel_btn.setAccessibleName(self.tr("Cancel"))
         btn_layout.addStretch()
         btn_layout.addWidget(ok_btn)
         btn_layout.addWidget(cancel_btn)

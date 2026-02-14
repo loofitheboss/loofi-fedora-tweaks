@@ -53,6 +53,7 @@ class _UpdatesSubTab(QWidget):
         self.btn_update_all = QPushButton(
             self.tr("\U0001f504 Update All (DNF + Flatpak + Firmware)")
         )
+        self.btn_update_all.setAccessibleName(self.tr("Update All (DNF + Flatpak + Firmware)"))
         self.btn_update_all.setStyleSheet(
             "font-size: 14px; padding: 10px; "
             "background-color: #3daee9; color: white;"
@@ -67,14 +68,17 @@ class _UpdatesSubTab(QWidget):
             self.btn_dnf = QPushButton(self.tr("Update System (rpm-ostree)"))
         else:
             self.btn_dnf = QPushButton(self.tr("Update System (DNF)"))
+        self.btn_dnf.setAccessibleName(self.tr("Update System"))
         self.btn_dnf.clicked.connect(self.run_dnf_update)
         btn_layout.addWidget(self.btn_dnf)
 
         self.btn_flatpak = QPushButton(self.tr("Update Flatpaks"))
+        self.btn_flatpak.setAccessibleName(self.tr("Update Flatpaks"))
         self.btn_flatpak.clicked.connect(self.run_flatpak_update)
         btn_layout.addWidget(self.btn_flatpak)
 
         self.btn_fw = QPushButton(self.tr("Update Firmware"))
+        self.btn_fw.setAccessibleName(self.tr("Update Firmware"))
         self.btn_fw.clicked.connect(self.run_fw_update)
         btn_layout.addWidget(self.btn_fw)
 
@@ -86,6 +90,7 @@ class _UpdatesSubTab(QWidget):
         kernel_group.setLayout(kernel_layout)
 
         btn_list_kernels = QPushButton(self.tr("List Installed Kernels"))
+        btn_list_kernels.setAccessibleName(self.tr("List Installed Kernels"))
         btn_list_kernels.clicked.connect(
             lambda: self.run_single_command(
                 "rpm", ["-qa", "kernel"],
@@ -95,6 +100,7 @@ class _UpdatesSubTab(QWidget):
         kernel_layout.addWidget(btn_list_kernels)
 
         btn_remove_old = QPushButton(self.tr("Remove Old Kernels"))
+        btn_remove_old.setAccessibleName(self.tr("Remove Old Kernels"))
         btn_remove_old.clicked.connect(
             lambda: self.run_single_command(
                 "pkexec", ["dnf", "remove", "--oldinstallonly", "-y"],
@@ -115,6 +121,7 @@ class _UpdatesSubTab(QWidget):
         # Output Area
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
+        self.output_area.setAccessibleName(self.tr("Update output"))
         layout.addWidget(self.output_area)
 
         # Command runner
@@ -299,6 +306,7 @@ class _CleanupSubTab(QWidget):
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
         self.output_area.setMaximumHeight(200)
+        self.output_area.setAccessibleName(self.tr("Cleanup output"))
 
         self.runner = CommandRunner()
         self.runner.output_received.connect(self.append_output)
@@ -310,6 +318,7 @@ class _CleanupSubTab(QWidget):
         cleanup_group.setLayout(cleanup_layout)
 
         btn_dnf_clean = QPushButton(self.tr("Clean DNF Cache"))
+        btn_dnf_clean.setAccessibleName(self.tr("Clean DNF Cache"))
         btn_dnf_clean.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["dnf", "clean", "all"],
@@ -319,11 +328,13 @@ class _CleanupSubTab(QWidget):
         cleanup_layout.addWidget(btn_dnf_clean)
 
         btn_autoremove = QPushButton(self.tr("Remove Unused Packages (Risky)"))
+        btn_autoremove.setAccessibleName(self.tr("Remove Unused Packages"))
         btn_autoremove.setStyleSheet("color: #e8556d;")
         btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
 
         btn_journal = QPushButton(self.tr("Vacuum Journal (2 weeks)"))
+        btn_journal.setAccessibleName(self.tr("Vacuum Journal"))
         btn_journal.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["journalctl", "--vacuum-time=2weeks"],
@@ -340,6 +351,7 @@ class _CleanupSubTab(QWidget):
         maint_group.setLayout(maint_layout)
 
         btn_trim = QPushButton(self.tr("SSD Trim (fstrim)"))
+        btn_trim.setAccessibleName(self.tr("SSD Trim"))
         btn_trim.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["fstrim", "-av"],
@@ -349,6 +361,7 @@ class _CleanupSubTab(QWidget):
         maint_layout.addWidget(btn_trim)
 
         btn_rpmdb = QPushButton(self.tr("Rebuild RPM Database"))
+        btn_rpmdb.setAccessibleName(self.tr("Rebuild RPM Database"))
         btn_rpmdb.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["rpm", "--rebuilddb"],
@@ -360,6 +373,7 @@ class _CleanupSubTab(QWidget):
         # Timeshift Check
         ts_layout = QHBoxLayout()
         btn_check_ts = QPushButton(self.tr("Check for Timeshift Snapshots"))
+        btn_check_ts.setAccessibleName(self.tr("Check for Timeshift Snapshots"))
         btn_check_ts.clicked.connect(self.check_timeshift)
         ts_layout.addWidget(btn_check_ts)
         maint_layout.addLayout(ts_layout)
@@ -502,10 +516,12 @@ class _OverlaysSubTab(QWidget):
         btn_layout = QHBoxLayout()
 
         self.btn_refresh = QPushButton(self.tr("\U0001f504 Refresh"))
+        self.btn_refresh.setAccessibleName(self.tr("Refresh"))
         self.btn_refresh.clicked.connect(self.refresh_list)
         btn_layout.addWidget(self.btn_refresh)
 
         self.btn_remove = QPushButton(self.tr("\u2796 Remove Selected"))
+        self.btn_remove.setAccessibleName(self.tr("Remove Selected"))
         self.btn_remove.setObjectName("dangerAction")
         self.btn_remove.clicked.connect(self.remove_selected)
         btn_layout.addWidget(self.btn_remove)
@@ -513,6 +529,7 @@ class _OverlaysSubTab(QWidget):
         btn_layout.addStretch()
 
         self.btn_reset = QPushButton(self.tr("\U0001f5d1\ufe0f Reset to Base Image"))
+        self.btn_reset.setAccessibleName(self.tr("Reset to Base Image"))
         self.btn_reset.setObjectName("dangerAction")
         self.btn_reset.clicked.connect(self.reset_to_base)
         btn_layout.addWidget(self.btn_reset)
@@ -524,6 +541,7 @@ class _OverlaysSubTab(QWidget):
         self.btn_reboot = QPushButton(
             self.tr("\U0001f501 Reboot to Apply Changes")
         )
+        self.btn_reboot.setAccessibleName(self.tr("Reboot to Apply Changes"))
         self.btn_reboot.setStyleSheet("""
             QPushButton {
                 background-color: #e8556d;

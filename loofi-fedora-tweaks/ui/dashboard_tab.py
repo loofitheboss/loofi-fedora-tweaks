@@ -25,14 +25,17 @@ from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
-import subprocess
-
+from services.system.processes import ProcessManager
+from utils.commands import PrivilegedCommand
 from utils.system import SystemManager
 from utils.disk import DiskManager
 from utils.monitor import SystemMonitor
 from utils.history import HistoryManager
 from utils.health_score import HealthScoreManager
 from utils.quick_actions_config import QuickActionsConfig
+from utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -432,26 +435,18 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _refresh_processes(self):
         try:
-            result = subprocess.run(
-                ["ps", "-eo", "pid,pcpu,pmem,comm", "--sort=-pcpu", "--no-headers"],
-                capture_output=True, text=True, timeout=5
-            )
-            lines = result.stdout.strip().splitlines()[:5]
+            top = ProcessManager.get_top_by_cpu(5)
             for i, lbl in enumerate(self.process_labels):
-                if i < len(lines):
-                    parts = lines[i].split()
-                    if len(parts) >= 4:
-                        pid, cpu, mem = parts[0], parts[1], parts[2]
-                        name = " ".join(parts[3:])[:30]
-                        lbl.setText(
-                            f"  {name:<30}  CPU {cpu:>5}%  MEM {mem:>5}%  PID {pid}"
-                        )
-                    else:
-                        lbl.setText(lines[i].strip())
+                if i < len(top):
+                    p = top[i]
+                    name = p.name[:30]
+                    lbl.setText(
+                        f"  {name:<30}  CPU {p.cpu_percent:>5.1f}%  MEM {p.memory_percent:>5.1f}%  PID {p.pid}"
+                    )
                 else:
                     lbl.setText("—")
         except Exception:
-            pass
+            logger.debug("Failed to refresh process list", exc_info=True)
 
     # ==================================================================
     # Recent Actions
@@ -485,7 +480,7 @@ class DashboardTab(QWidget, PluginInterface):
                 else:
                     lbl.setText("—")
         except Exception:
-            pass
+            logger.debug("Failed to refresh action history", exc_info=True)
 
     # ==================================================================
     # Quick Actions (v31.0: configurable)
@@ -579,7 +574,7 @@ class DashboardTab(QWidget, PluginInterface):
             self._prev_rx = rx
             self._prev_tx = tx
         except Exception:
-            pass
+            logger.debug("Failed to refresh network stats", exc_info=True)
 
     @staticmethod
     def _get_network_bytes():
@@ -598,7 +593,7 @@ class DashboardTab(QWidget, PluginInterface):
                         rx_total += int(parts[0])
                         tx_total += int(parts[8])
         except OSError:
-            pass
+            logger.debug("Failed to read network device stats", exc_info=True)
         return rx_total, tx_total
 
     @staticmethod
@@ -655,13 +650,15 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _reboot(self):
         from PyQt6.QtWidgets import QMessageBox
+        from PyQt6.QtCore import QProcess
         reply = QMessageBox.question(
             self, self.tr("Reboot Now?"),
             self.tr("Reboot now to apply pending changes?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            subprocess.run(["systemctl", "reboot"])
+            binary, args, _ = PrivilegedCommand.systemctl("reboot")
+            QProcess.startDetached(binary, args)
 
     @staticmethod
     def _card() -> QFrame:
@@ -673,6 +670,7 @@ class DashboardTab(QWidget, PluginInterface):
     def _action_btn(text: str, icon: str, color: str, callback) -> QPushButton:
         btn = QPushButton(f"{icon}  {text}")
         btn.setObjectName("quickActionButton")
+        btn.setAccessibleName(text)
         btn.setProperty("accentColor", color)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.clicked.connect(callback)
@@ -692,5 +690,5 @@ class DashboardTab(QWidget, PluginInterface):
                         if mp not in mounts and not mp.startswith("/snap"):
                             mounts.append(mp)
         except OSError:
-            pass
+            logger.debug("Failed to read mount points", exc_info=True)
         return mounts[:6]
