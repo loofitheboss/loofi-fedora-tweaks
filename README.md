@@ -46,7 +46,7 @@ It is designed to be practical for both casual users and advanced users:
 - **Accessibility** — 314 `setAccessibleName()` calls across all 27 tabs.
 - **4061 tests passing** — 85 new tests for the 5 new utility modules.
 
-Full notes: [`docs/releases/v34.0.0.md`](docs/releases/v34.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v34.0.0.md`](docs/releases/RELEASE-NOTES-v34.0.0.md)
 
 ---
 

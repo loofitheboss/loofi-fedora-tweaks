@@ -10,7 +10,7 @@
 Polish-only release — light theme fix, stability hardening, accessibility annotations.
 Zero subprocess in UI, 21 silent exceptions fixed, 85 new tests (4061 total).
 
-See [v34.0.0.md](v34.0.0.md) for full details.
+See [RELEASE-NOTES-v34.0.0.md](RELEASE-NOTES-v34.0.0.md) for full details.
 
 ## v33.0.0 "Bastion"
 

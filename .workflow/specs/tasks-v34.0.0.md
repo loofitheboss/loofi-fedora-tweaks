@@ -134,7 +134,7 @@
 
 - [x] T13: Update CHANGELOG, README, release notes
   - ID: T13
-  - Files: `CHANGELOG.md`, `README.md`, `docs/releases/v34.0.0.md`
+  - Files: `CHANGELOG.md`, `README.md`, `docs/releases/RELEASE-NOTES-v34.0.0.md`
   - Dep: T1-T12
   - Agent: Planner
   - Description: Document all v34.0.0 changes

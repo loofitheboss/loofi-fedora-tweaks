@@ -6,7 +6,7 @@
 ## Current Release
 
 - **v34.0.0 "Citadel"**
-- Full notes: `docs/releases/v34.0.0.md`
+- Full notes: `docs/releases/RELEASE-NOTES-v34.0.0.md`
 
 ## Previous Release
 
