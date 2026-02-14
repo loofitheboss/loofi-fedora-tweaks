@@ -11,15 +11,21 @@ for i18n readiness.
 """
 
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QLabel, QPushButton, QListWidget,
-    QListWidgetItem, QHBoxLayout, QMessageBox,
+    QDialog,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QHBoxLayout,
+    QMessageBox,
 )
 from PyQt6.QtGui import QIcon, QColor
 import shutil
 
 from utils.command_runner import CommandRunner
 from utils.commands import PrivilegedCommand
-from utils.system import SystemManager
+from services.system import SystemManager
 
 
 class DependencyDoctor(QDialog):
@@ -36,9 +42,9 @@ class DependencyDoctor(QDialog):
         header.setObjectName("doctorHeader")
         layout.addWidget(header)
 
-        desc = QLabel(self.tr(
-            "The following tools are recommended for full functionality."
-        ))
+        desc = QLabel(
+            self.tr("The following tools are recommended for full functionality.")
+        )
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
@@ -53,9 +59,7 @@ class DependencyDoctor(QDialog):
             "timeshift": self.tr("System backup/snapshot tool"),
             "flatpak": self.tr("Application sandboxing"),
             "git": self.tr("Version control (for updates)"),
-            SystemManager.get_package_manager(): self.tr(
-                "Package manager (Critical)"
-            ),
+            SystemManager.get_package_manager(): self.tr("Package manager (Critical)"),
             "pkexec": self.tr("Authorization agent (Critical)"),
         }
 
@@ -106,9 +110,7 @@ class DependencyDoctor(QDialog):
         if self.missing_tools:
             self.btn_fix.setEnabled(True)
             self.btn_fix.setText(
-                self.tr("Install {n} Missing Tools").format(
-                    n=len(self.missing_tools)
-                )
+                self.tr("Install {n} Missing Tools").format(n=len(self.missing_tools))
             )
         else:
             self.btn_fix.setEnabled(False)
@@ -119,9 +121,7 @@ class DependencyDoctor(QDialog):
             return
 
         # Use PrivilegedCommand for proper package manager detection
-        binary, args, desc = PrivilegedCommand.dnf(
-            "install", *self.missing_tools
-        )
+        binary, args, desc = PrivilegedCommand.dnf("install", *self.missing_tools)
         cmd = args  # CommandRunner takes binary + args separately
 
         # Disable UI

@@ -30,7 +30,7 @@ from utils.focus_mode import FocusMode
 from utils.history import HistoryManager
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
-from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
+from services.system import SystemManager  # noqa: F401  (re-exported for legacy callers)
 from version import __version__
 
 from core.plugins import PluginInterface, PluginRegistry
@@ -877,7 +877,7 @@ class MainWindow(QMainWindow):
 
         try:
             # Storage: check disk space
-            from utils.disk import DiskManager
+            from services.hardware.disk import DiskManager
 
             usage = DiskManager.get_disk_usage("/")
             if usage and hasattr(usage, "percent_used"):
