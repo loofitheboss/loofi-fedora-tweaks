@@ -8,16 +8,22 @@ Handles installation of version managers:
 - Rustup for Rust
 """
 
+import logging
 import subprocess
 import shutil
 from dataclasses import dataclass
-from typing import Any, Optional
 from pathlib import Path
+from typing import Any, Optional
+
+from utils.commands import PrivilegedCommand
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Result:
     """Operation result with message."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -93,11 +99,12 @@ export NVM_DIR="$HOME/.nvm"
                         [info["check_cmd"], "--version"],
                         capture_output=True,
                         text=True,
-                        timeout=5
+                        timeout=5,
                     )
                     version = result.stdout.strip().split("\n")[0]
                     return True, version
-                except Exception:
+                except Exception as e:
+                    logger.debug("Failed to get version for %s: %s", tool, e)
                     return True, "installed"
 
         # Check by directory (for NVM)
@@ -134,23 +141,28 @@ export NVM_DIR="$HOME/.nvm"
             return Result(True, "PyEnv is already installed.")
 
         # Check for required build dependencies
-        required_deps = ["gcc", "make", "zlib-devel", "bzip2-devel",
-                         "readline-devel", "sqlite-devel", "openssl-devel",
-                         "libffi-devel", "xz-devel"]
+        required_deps = [
+            "gcc",
+            "make",
+            "zlib-devel",
+            "bzip2-devel",
+            "readline-devel",
+            "sqlite-devel",
+            "openssl-devel",
+            "libffi-devel",
+            "xz-devel",
+        ]
 
         try:
             # Install build dependencies first
-            subprocess.run(
-                ["pkexec", "dnf", "install", "-y"] + required_deps,
-                check=True,
-                timeout=300
-            )
+            binary, args, desc = PrivilegedCommand.dnf("install", *required_deps)
+            subprocess.run([binary] + args, check=True, timeout=300)
 
             # Install pyenv via official script
             subprocess.run(
                 ["bash", "-c", "curl -fsSL https://pyenv.run | bash"],
                 check=True,
-                timeout=300
+                timeout=300,
             )
 
             # Add to shell config
@@ -161,7 +173,7 @@ export NVM_DIR="$HOME/.nvm"
                 f"PyEnv installed successfully!\n"
                 f"Restart your terminal, then run:\n"
                 f"  pyenv install {python_version}\n"
-                f"  pyenv global {python_version}"
+                f"  pyenv global {python_version}",
             )
 
         except subprocess.CalledProcessError as e:
@@ -187,18 +199,22 @@ export NVM_DIR="$HOME/.nvm"
         try:
             # Install NVM via official script
             subprocess.run(
-                ["bash", "-c",
-                 "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"],
+                [
+                    "bash",
+                    "-c",
+                    "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash",
+                ],
                 check=True,
-                timeout=120
+                timeout=120,
             )
 
             return Result(
                 True,
                 f"NVM installed successfully!\n"
                 f"Restart your terminal, then run:\n"
-                f"  nvm install --{node_version}\n" if node_version in ["lts", "latest"]
-                else f"  nvm install {node_version}\n"
+                f"  nvm install --{node_version}\n"
+                if node_version in ["lts", "latest"]
+                else f"  nvm install {node_version}\n",
             )
 
         except subprocess.CalledProcessError as e:
@@ -221,9 +237,13 @@ export NVM_DIR="$HOME/.nvm"
         try:
             # Install rustup non-interactively
             subprocess.run(
-                ["bash", "-c", "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"],
+                [
+                    "bash",
+                    "-c",
+                    "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
+                ],
                 check=True,
-                timeout=300
+                timeout=300,
             )
 
             # Add to shell config
@@ -232,7 +252,7 @@ export NVM_DIR="$HOME/.nvm"
             return Result(
                 True,
                 "Rustup installed successfully!\n"
-                "Restart your terminal to use `rustc`, `cargo`, and `rustup`."
+                "Restart your terminal to use `rustc`, `cargo`, and `rustup`.",
             )
 
         except subprocess.CalledProcessError as e:
@@ -269,11 +289,13 @@ export NVM_DIR="$HOME/.nvm"
         tools = []
         for key, info in cls.INSTALLERS.items():
             installed, version = cls.get_tool_status(key)
-            tools.append({
-                "key": key,
-                "name": info["name"],
-                "description": info["description"],
-                "installed": installed,
-                "version": version,
-            })
+            tools.append(
+                {
+                    "key": key,
+                    "name": info["name"],
+                    "description": info["description"],
+                    "installed": installed,
+                    "version": version,
+                }
+            )
         return tools

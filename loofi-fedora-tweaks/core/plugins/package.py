@@ -83,10 +83,10 @@ logger = get_logger(__name__)
 
 # Valid permission types
 VALID_PERMISSIONS = {
-    "network",        # Internet access
-    "filesystem",     # Read/write user files
-    "sudo",           # Privileged operations (pkexec)
-    "clipboard",      # System clipboard access
+    "network",  # Internet access
+    "filesystem",  # Read/write user files
+    "sudo",  # Privileged operations (pkexec)
+    "clipboard",  # System clipboard access
     "notifications",  # Desktop notifications
 }
 
@@ -292,7 +292,7 @@ class PluginPackage:
 
         if not path.name.endswith(".loofi-plugin"):
             logger.warning(
-                f"Archive '{path.name}' doesn't have .loofi-plugin extension"
+                "Archive '%s' doesn't have .loofi-plugin extension", path.name
             )
 
         files: dict[str, bytes] = {}
@@ -410,7 +410,7 @@ class PluginPackage:
                     # Add to archive
                     tar.addfile(info, io.BytesIO(content))
 
-            logger.info(f"Saved plugin package to {path}")
+            logger.info("Saved plugin package to %s", path)
         except (tarfile.TarError, OSError) as e:
             raise OSError(f"Failed to save package: {e}") from e
 
@@ -427,14 +427,16 @@ class PluginPackage:
 
         for filename, expected_hash in self.checksums.items():
             if filename not in self.files:
-                logger.error(f"File {filename} in checksums but not in archive")
+                logger.error("File %s in checksums but not in archive", filename)
                 return False
 
             actual_hash = hashlib.sha256(self.files[filename]).hexdigest()
             if actual_hash != expected_hash:
                 logger.error(
-                    f"Checksum mismatch for {filename}: "
-                    f"expected {expected_hash}, got {actual_hash}"
+                    "Checksum mismatch for %s: expected %s, got %s",
+                    filename,
+                    expected_hash,
+                    actual_hash,
                 )
                 return False
 

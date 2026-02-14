@@ -3,10 +3,13 @@ Report Exporter — v31.0 Smart UX
 Exports system information as Markdown or HTML report.
 """
 
+import logging
 import os
 import subprocess
 from datetime import datetime
 from typing import Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class ReportExporter:
@@ -23,60 +26,82 @@ class ReportExporter:
         info = {}
         try:
             info["hostname"] = subprocess.getoutput("hostname").strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get hostname: %s", e)
             info["hostname"] = "Unknown"
 
         try:
             info["kernel"] = subprocess.getoutput("uname -r").strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get kernel version: %s", e)
             info["kernel"] = "Unknown"
 
         try:
-            info["fedora_version"] = subprocess.getoutput("cat /etc/fedora-release").strip()
-        except Exception:
+            info["fedora_version"] = subprocess.getoutput(
+                "cat /etc/fedora-release"
+            ).strip()
+        except Exception as e:
+            logger.debug("Failed to get Fedora version: %s", e)
             info["fedora_version"] = "Unknown"
 
         try:
-            cpu = subprocess.getoutput("lscpu | grep 'Model name' | cut -d: -f2").strip()
+            cpu = subprocess.getoutput(
+                "lscpu | grep 'Model name' | cut -d: -f2"
+            ).strip()
             info["cpu"] = cpu if cpu else "Unknown"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get CPU model: %s", e)
             info["cpu"] = "Unknown"
 
         try:
-            mem = subprocess.getoutput("free -h | awk '/^Mem:/ {print $2 \" total, \" $3 \" used\"}'").strip()
+            mem = subprocess.getoutput(
+                'free -h | awk \'/^Mem:/ {print $2 " total, " $3 " used"}\''
+            ).strip()
             info["ram"] = mem
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get RAM usage: %s", e)
             info["ram"] = "Unknown"
 
         try:
-            disk = subprocess.getoutput("df -h / | awk 'NR==2 {print $3 \"/\" $2 \" (\" $5 \" used)\"}'").strip()
+            disk = subprocess.getoutput(
+                'df -h / | awk \'NR==2 {print $3 "/" $2 " (" $5 " used)"}\''
+            ).strip()
             info["disk_root"] = disk
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get disk usage: %s", e)
             info["disk_root"] = "Unknown"
 
         try:
             info["uptime"] = subprocess.getoutput("uptime -p").strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get uptime: %s", e)
             info["uptime"] = "Unknown"
 
         try:
             if os.path.exists("/sys/class/power_supply/BAT0/capacity"):
-                capacity = subprocess.getoutput("cat /sys/class/power_supply/BAT0/capacity").strip()
-                status = subprocess.getoutput("cat /sys/class/power_supply/BAT0/status").strip()
+                capacity = subprocess.getoutput(
+                    "cat /sys/class/power_supply/BAT0/capacity"
+                ).strip()
+                status = subprocess.getoutput(
+                    "cat /sys/class/power_supply/BAT0/status"
+                ).strip()
                 info["battery"] = f"{capacity}% ({status})"
             else:
                 info["battery"] = "No battery detected"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get battery status: %s", e)
             info["battery"] = "Unknown"
 
         try:
             info["architecture"] = subprocess.getoutput("uname -m").strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get architecture: %s", e)
             info["architecture"] = "Unknown"
 
         try:
             info["desktop"] = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get desktop environment: %s", e)
             info["desktop"] = "Unknown"
 
         info["report_date"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

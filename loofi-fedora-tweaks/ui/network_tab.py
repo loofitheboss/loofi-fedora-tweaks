@@ -15,9 +15,18 @@ import os
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
-    QComboBox, QGroupBox, QHBoxLayout, QHeaderView, QLabel,
-    QMessageBox, QPushButton, QTabWidget, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget,
+    QComboBox,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from ui.base_tab import BaseTab
@@ -32,7 +41,6 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkTab(BaseTab):
-
     _METADATA = PluginMetadata(
         id="network",
         name="Network",
@@ -48,6 +56,7 @@ class NetworkTab(BaseTab):
 
     def create_widget(self) -> QWidget:
         return self
+
     """Network management with Connections, DNS, Privacy, and Monitoring sub-tabs."""
 
     def __init__(self):
@@ -93,11 +102,18 @@ class NetworkTab(BaseTab):
         iface_layout = QVBoxLayout(iface_group)
 
         self.iface_table = QTableWidget(0, 5)
-        self.iface_table.setHorizontalHeaderLabels([
-            self.tr("Interface"), self.tr("Type"), self.tr("Status"),
-            self.tr("IP Address"), self.tr("MAC"),
-        ])
-        self.iface_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.iface_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Interface"),
+                self.tr("Type"),
+                self.tr("Status"),
+                self.tr("IP Address"),
+                self.tr("MAC"),
+            ]
+        )
+        self.iface_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
         self.iface_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.iface_table)
         self.set_table_empty_state(self.iface_table, self.tr("Loading interfaces..."))
@@ -117,13 +133,22 @@ class NetworkTab(BaseTab):
         wifi_layout = QVBoxLayout(wifi_group)
 
         self.wifi_table = QTableWidget(0, 4)
-        self.wifi_table.setHorizontalHeaderLabels([
-            self.tr("SSID"), self.tr("Signal"), self.tr("Security"), self.tr("Status"),
-        ])
-        self.wifi_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.wifi_table.setHorizontalHeaderLabels(
+            [
+                self.tr("SSID"),
+                self.tr("Signal"),
+                self.tr("Security"),
+                self.tr("Status"),
+            ]
+        )
+        self.wifi_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
         self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.wifi_table)
-        self.set_table_empty_state(self.wifi_table, self.tr("Click 'Scan Wi-Fi' to list networks"))
+        self.set_table_empty_state(
+            self.wifi_table, self.tr("Click 'Scan Wi-Fi' to list networks")
+        )
         wifi_layout.addWidget(self.wifi_table)
 
         wifi_btn_row = QHBoxLayout()
@@ -150,13 +175,21 @@ class NetworkTab(BaseTab):
         vpn_layout = QVBoxLayout(vpn_group)
 
         self.vpn_table = QTableWidget(0, 3)
-        self.vpn_table.setHorizontalHeaderLabels([
-            self.tr("Name"), self.tr("Type"), self.tr("Status"),
-        ])
-        self.vpn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.vpn_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Name"),
+                self.tr("Type"),
+                self.tr("Status"),
+            ]
+        )
+        self.vpn_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
         self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.vpn_table)
-        self.set_table_empty_state(self.vpn_table, self.tr("Loading VPN connections..."))
+        self.set_table_empty_state(
+            self.vpn_table, self.tr("Loading VPN connections...")
+        )
         vpn_layout.addWidget(self.vpn_table)
 
         vpn_btn_row = QHBoxLayout()
@@ -178,10 +211,12 @@ class NetworkTab(BaseTab):
         dns_group = QGroupBox(self.tr("DNS Switcher"))
         dns_layout = QVBoxLayout(dns_group)
 
-        dns_desc = QLabel(self.tr(
-            "Change DNS for the current active connection. "
-            "Applies instantly via NetworkManager."
-        ))
+        dns_desc = QLabel(
+            self.tr(
+                "Change DNS for the current active connection. "
+                "Applies instantly via NetworkManager."
+            )
+        )
         dns_desc.setWordWrap(True)
         dns_layout.addWidget(dns_desc)
 
@@ -195,8 +230,12 @@ class NetworkTab(BaseTab):
         self.dns_combo.addItem(self.tr("Cloudflare (1.1.1.1)"), "1.1.1.1 1.0.0.1")
         self.dns_combo.addItem(self.tr("Google (8.8.8.8)"), "8.8.8.8 8.8.4.4")
         self.dns_combo.addItem(self.tr("Quad9 (9.9.9.9)"), "9.9.9.9 149.112.112.112")
-        self.dns_combo.addItem(self.tr("AdGuard (94.140.14.14)"), "94.140.14.14 94.140.15.15")
-        self.dns_combo.addItem(self.tr("OpenDNS (208.67.222.222)"), "208.67.222.222 208.67.220.220")
+        self.dns_combo.addItem(
+            self.tr("AdGuard (94.140.14.14)"), "94.140.14.14 94.140.15.15"
+        )
+        self.dns_combo.addItem(
+            self.tr("OpenDNS (208.67.222.222)"), "208.67.222.222 208.67.220.220"
+        )
         self.dns_combo.addItem(self.tr("System Default (DHCP)"), "auto")
         dns_layout.addWidget(self.dns_combo)
 
@@ -231,10 +270,12 @@ class NetworkTab(BaseTab):
         mac_group = QGroupBox(self.tr("MAC Randomization"))
         mac_layout = QVBoxLayout(mac_group)
 
-        mac_desc = QLabel(self.tr(
-            "Randomize your MAC address on WiFi and Ethernet connections "
-            "to prevent network tracking. Requires NetworkManager restart."
-        ))
+        mac_desc = QLabel(
+            self.tr(
+                "Randomize your MAC address on WiFi and Ethernet connections "
+                "to prevent network tracking. Requires NetworkManager restart."
+            )
+        )
         mac_desc.setWordWrap(True)
         mac_layout.addWidget(mac_desc)
 
@@ -260,10 +301,12 @@ class NetworkTab(BaseTab):
         hostname_group = QGroupBox(self.tr("Hostname Privacy"))
         hostname_layout = QVBoxLayout(hostname_group)
 
-        hostname_desc = QLabel(self.tr(
-            "Prevent your hostname from being broadcast on the network via DHCP. "
-            "Sets send-hostname=false for active connections."
-        ))
+        hostname_desc = QLabel(
+            self.tr(
+                "Prevent your hostname from being broadcast on the network via DHCP. "
+                "Sets send-hostname=false for active connections."
+            )
+        )
         hostname_desc.setWordWrap(True)
         hostname_layout.addWidget(hostname_desc)
 
@@ -309,8 +352,12 @@ class NetworkTab(BaseTab):
         self.lbl_total_recv = QLabel(self.tr("Total Received: —"))
         self.lbl_send_rate = QLabel(self.tr("Upload Rate: —"))
         self.lbl_recv_rate = QLabel(self.tr("Download Rate: —"))
-        for lbl in (self.lbl_total_sent, self.lbl_total_recv,
-                    self.lbl_send_rate, self.lbl_recv_rate):
+        for lbl in (
+            self.lbl_total_sent,
+            self.lbl_total_recv,
+            self.lbl_send_rate,
+            self.lbl_recv_rate,
+        ):
             lbl.setObjectName("netBwLabel")
             bw_layout.addWidget(lbl)
         container.addWidget(bw_group)
@@ -320,14 +367,24 @@ class NetworkTab(BaseTab):
         traffic_layout = QVBoxLayout(traffic_group)
 
         self.traffic_table = QTableWidget(0, 6)
-        self.traffic_table.setHorizontalHeaderLabels([
-            self.tr("Interface"), self.tr("Type"), self.tr("Sent"),
-            self.tr("Received"), self.tr("↑ Rate"), self.tr("↓ Rate"),
-        ])
-        self.traffic_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.traffic_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Interface"),
+                self.tr("Type"),
+                self.tr("Sent"),
+                self.tr("Received"),
+                self.tr("↑ Rate"),
+                self.tr("↓ Rate"),
+            ]
+        )
+        self.traffic_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
         self.traffic_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.traffic_table)
-        self.set_table_empty_state(self.traffic_table, self.tr("Switch to Monitoring to load traffic"))
+        self.set_table_empty_state(
+            self.traffic_table, self.tr("Switch to Monitoring to load traffic")
+        )
         traffic_layout.addWidget(self.traffic_table)
         container.addWidget(traffic_group)
 
@@ -336,14 +393,24 @@ class NetworkTab(BaseTab):
         conn_layout = QVBoxLayout(conn_group)
 
         self.conn_table = QTableWidget(0, 6)
-        self.conn_table.setHorizontalHeaderLabels([
-            self.tr("Protocol"), self.tr("Local"), self.tr("Remote"),
-            self.tr("State"), self.tr("PID"), self.tr("Process"),
-        ])
-        self.conn_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.conn_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Protocol"),
+                self.tr("Local"),
+                self.tr("Remote"),
+                self.tr("State"),
+                self.tr("PID"),
+                self.tr("Process"),
+            ]
+        )
+        self.conn_table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
         self.conn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.conn_table)
-        self.set_table_empty_state(self.conn_table, self.tr("Switch to Monitoring to load connections"))
+        self.set_table_empty_state(
+            self.conn_table, self.tr("Switch to Monitoring to load connections")
+        )
         conn_layout.addWidget(self.conn_table)
 
         conn_btn_row = QHBoxLayout()
@@ -366,6 +433,7 @@ class NetworkTab(BaseTab):
     def _make_container(layout):
         """Wrap a QVBoxLayout into a plain QWidget for use as a tab page."""
         from PyQt6.QtWidgets import QWidget, QScrollArea
+
         inner = QWidget()
         inner.setLayout(layout)
         scroll = QScrollArea()
@@ -414,21 +482,29 @@ class NetworkTab(BaseTab):
             interfaces = NetworkMonitor.get_all_interfaces()
             self.iface_table.clearSpans()
             if not interfaces:
-                self._set_empty_table_state(self.iface_table, self.tr("No active interfaces detected"))
+                self._set_empty_table_state(
+                    self.iface_table, self.tr("No active interfaces detected")
+                )
                 return
 
             self.iface_table.setRowCount(len(interfaces))
             for i, iface in enumerate(interfaces):
                 self.iface_table.setItem(i, 0, self._make_table_item(iface.name))
-                self.iface_table.setItem(i, 1, self._make_table_item(iface.type.capitalize()))
+                self.iface_table.setItem(
+                    i, 1, self._make_table_item(iface.type.capitalize())
+                )
                 status = "🟢 Up" if iface.is_up else "🔴 Down"
                 self.iface_table.setItem(i, 2, self._make_table_item(status))
-                self.iface_table.setItem(i, 3, self._make_table_item(iface.ip_address or "—"))
+                self.iface_table.setItem(
+                    i, 3, self._make_table_item(iface.ip_address or "—")
+                )
                 mac = self._get_mac_address(iface.name)
                 self.iface_table.setItem(i, 4, self._make_table_item(mac))
         except Exception as e:
             logger.error("Failed to load interfaces: %s", e)
-            self._set_empty_table_state(self.iface_table, self.tr("Failed to load interfaces"))
+            self._set_empty_table_state(
+                self.iface_table, self.tr("Failed to load interfaces")
+            )
 
     @staticmethod
     def _get_mac_address(iface_name):
@@ -436,7 +512,8 @@ class NetworkTab(BaseTab):
         try:
             with open(f"/sys/class/net/{iface_name}/address", "r") as f:
                 return f.read().strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read MAC address for %s: %s", iface_name, e)
             return "—"
 
     def _scan_wifi(self):
@@ -444,7 +521,9 @@ class NetworkTab(BaseTab):
         rows = NetworkUtils.scan_wifi()
         self.wifi_table.clearSpans()
         if not rows:
-            self._set_empty_table_state(self.wifi_table, self.tr("No Wi-Fi networks found"))
+            self._set_empty_table_state(
+                self.wifi_table, self.tr("No Wi-Fi networks found")
+            )
         else:
             self.wifi_table.setRowCount(len(rows))
             for i, row in enumerate(rows):
@@ -452,25 +531,37 @@ class NetworkTab(BaseTab):
                 self.wifi_table.setItem(i, 1, self._make_table_item(row[1]))
                 self.wifi_table.setItem(i, 2, self._make_table_item(row[2]))
                 self.wifi_table.setItem(i, 3, self._make_table_item(row[3]))
-        self.append_output(self.tr("WiFi scan complete. {} networks found.\n").format(len(rows)))
+        self.append_output(
+            self.tr("WiFi scan complete. {} networks found.\n").format(len(rows))
+        )
 
     def _connect_wifi(self):
         """Connect to selected WiFi network."""
         row = self.wifi_table.currentRow()
         if row < 0:
-            QMessageBox.warning(self, self.tr("Error"), self.tr("Select a WiFi network first."))
+            QMessageBox.warning(
+                self, self.tr("Error"), self.tr("Select a WiFi network first.")
+            )
             return
         ssid = self.wifi_table.item(row, 0).text()
         if ssid == "(Hidden)":
-            QMessageBox.warning(self, self.tr("Error"), self.tr("Cannot connect to a hidden network from here."))
+            QMessageBox.warning(
+                self,
+                self.tr("Error"),
+                self.tr("Cannot connect to a hidden network from here."),
+            )
             return
-        self.run_command("nmcli", ["device", "wifi", "connect", ssid],
-                         self.tr("Connecting to {}...").format(ssid))
+        self.run_command(
+            "nmcli",
+            ["device", "wifi", "connect", ssid],
+            self.tr("Connecting to {}...").format(ssid),
+        )
 
     def _disconnect_wifi(self):
         """Disconnect WiFi."""
-        self.run_command("nmcli", ["device", "disconnect", "wlan0"],
-                         self.tr("Disconnecting WiFi..."))
+        self.run_command(
+            "nmcli", ["device", "disconnect", "wlan0"], self.tr("Disconnecting WiFi...")
+        )
 
     def _load_vpn(self):
         """Load VPN connections from NetworkManager."""
@@ -482,7 +573,9 @@ class NetworkTab(BaseTab):
             self.vpn_table.setItem(i, 1, self._make_table_item(conn_type))
             self.vpn_table.setItem(i, 2, self._make_table_item(status))
         if not vpn_rows:
-            self._set_empty_table_state(self.vpn_table, self.tr("No VPN connections configured"))
+            self._set_empty_table_state(
+                self.vpn_table, self.tr("No VPN connections configured")
+            )
 
     # ------------------------------------------------------------------ #
     #  DNS sub-tab
@@ -492,9 +585,7 @@ class NetworkTab(BaseTab):
         """Detect and display the current DNS servers."""
         dns_str = NetworkUtils.detect_current_dns()
         if dns_str:
-            self.lbl_current_dns.setText(
-                self.tr("Current DNS: {}").format(dns_str)
-            )
+            self.lbl_current_dns.setText(self.tr("Current DNS: {}").format(dns_str))
         else:
             self.lbl_current_dns.setText(self.tr("Current DNS: (DHCP default)"))
 
@@ -508,44 +599,71 @@ class NetworkTab(BaseTab):
         conn_name = self.get_active_connection()
 
         if not conn_name:
-            QMessageBox.warning(self, self.tr("Error"),
-                                self.tr("No active Wi-Fi or Ethernet connection found."))
+            QMessageBox.warning(
+                self,
+                self.tr("Error"),
+                self.tr("No active Wi-Fi or Ethernet connection found."),
+            )
             return
 
         if dns_servers == "auto":
-            self.run_command("nmcli", [
-                "con", "mod", conn_name,
-                "ipv4.ignore-auto-dns", "no",
-                "ipv6.ignore-auto-dns", "no",
-                "ipv4.dns", "",
-            ], self.tr("Resetting DNS to DHCP default..."))
+            self.run_command(
+                "nmcli",
+                [
+                    "con",
+                    "mod",
+                    conn_name,
+                    "ipv4.ignore-auto-dns",
+                    "no",
+                    "ipv6.ignore-auto-dns",
+                    "no",
+                    "ipv4.dns",
+                    "",
+                ],
+                self.tr("Resetting DNS to DHCP default..."),
+            )
         else:
-            self.run_command("nmcli", [
-                "con", "mod", conn_name,
-                "ipv4.dns", dns_servers,
-                "ipv4.ignore-auto-dns", "yes",
-            ], self.tr("Applying DNS: {}").format(dns_servers))
+            self.run_command(
+                "nmcli",
+                [
+                    "con",
+                    "mod",
+                    conn_name,
+                    "ipv4.dns",
+                    dns_servers,
+                    "ipv4.ignore-auto-dns",
+                    "yes",
+                ],
+                self.tr("Applying DNS: {}").format(dns_servers),
+            )
 
         # Reapply connection in background
         NetworkUtils.reactivate_connection(conn_name)
 
         QTimer.singleShot(1000, self._detect_current_dns)
-        QMessageBox.information(self, self.tr("Success"),
-                                self.tr("DNS settings applied to '{}'.").format(conn_name))
+        QMessageBox.information(
+            self,
+            self.tr("Success"),
+            self.tr("DNS settings applied to '{}'.").format(conn_name),
+        )
 
     def _test_dns(self):
         """Test DNS resolution speed."""
-        self.run_command("bash", [
-            "-c",
-            "echo 'Testing DNS resolution...' && "
-            "for domain in google.com github.com fedoraproject.org; do "
-            "    start=$(date +%s%N); "
-            "    nslookup $domain >/dev/null 2>&1; "
-            "    end=$(date +%s%N); "
-            "    ms=$(( (end - start) / 1000000 )); "
-            "    echo \"  $domain: ${ms}ms\"; "
-            "done"
-        ], self.tr("Testing DNS resolution speed..."))
+        self.run_command(
+            "bash",
+            [
+                "-c",
+                "echo 'Testing DNS resolution...' && "
+                "for domain in google.com github.com fedoraproject.org; do "
+                "    start=$(date +%s%N); "
+                "    nslookup $domain >/dev/null 2>&1; "
+                "    end=$(date +%s%N); "
+                "    ms=$(( (end - start) / 1000000 )); "
+                '    echo "  $domain: ${ms}ms"; '
+                "done",
+            ],
+            self.tr("Testing DNS resolution speed..."),
+        )
 
     # ------------------------------------------------------------------ #
     #  Privacy sub-tab
@@ -579,19 +697,31 @@ class NetworkTab(BaseTab):
                 self.append_output(self.tr("Failed to write temp file: {}\n").format(e))
                 return
 
-            self.run_command("pkexec", ["mv", tmp_file, config_file],
-                             self.tr("Enabling MAC randomization..."))
+            self.run_command(
+                "pkexec",
+                ["mv", tmp_file, config_file],
+                self.tr("Enabling MAC randomization..."),
+            )
             self.history.log_change(
                 self.tr("Enabled MAC Randomization"),
-                ["pkexec", "rm", "-f", config_file]
+                ["pkexec", "rm", "-f", config_file],
             )
-            QMessageBox.information(self, self.tr("Enabled"),
-                                    self.tr("MAC Randomization enabled. Restart NetworkManager to apply."))
+            QMessageBox.information(
+                self,
+                self.tr("Enabled"),
+                self.tr("MAC Randomization enabled. Restart NetworkManager to apply."),
+            )
         else:
-            self.run_command("pkexec", ["rm", "-f", config_file],
-                             self.tr("Disabling MAC randomization..."))
-            QMessageBox.information(self, self.tr("Disabled"),
-                                    self.tr("MAC Randomization disabled. Restart NetworkManager to apply."))
+            self.run_command(
+                "pkexec",
+                ["rm", "-f", config_file],
+                self.tr("Disabling MAC randomization..."),
+            )
+            QMessageBox.information(
+                self,
+                self.tr("Disabled"),
+                self.tr("MAC Randomization disabled. Restart NetworkManager to apply."),
+            )
 
         QTimer.singleShot(500, self.check_mac_status)
 
@@ -599,7 +729,9 @@ class NetworkTab(BaseTab):
         """Check if hostname is hidden from DHCP broadcasts."""
         conn = self.get_active_connection()
         if not conn:
-            self.lbl_hostname_status.setText(self.tr("Hostname broadcast: no active connection"))
+            self.lbl_hostname_status.setText(
+                self.tr("Hostname broadcast: no active connection")
+            )
             return
         result = NetworkUtils.check_hostname_privacy(conn)
         if result is True:
@@ -613,28 +745,50 @@ class NetworkTab(BaseTab):
         """Hide or show hostname in DHCP requests."""
         conn = self.get_active_connection()
         if not conn:
-            QMessageBox.warning(self, self.tr("Error"),
-                                self.tr("No active connection found."))
+            QMessageBox.warning(
+                self, self.tr("Error"), self.tr("No active connection found.")
+            )
             return
 
         value = "no" if hide else "yes"
-        self.run_command("nmcli", [
-            "connection", "modify", conn,
-            "ipv4.dhcp-send-hostname", value,
-        ], self.tr("Setting hostname visibility to {}...").format(
-            "hidden" if hide else "visible"
-        ))
+        self.run_command(
+            "nmcli",
+            [
+                "connection",
+                "modify",
+                conn,
+                "ipv4.dhcp-send-hostname",
+                value,
+            ],
+            self.tr("Setting hostname visibility to {}...").format(
+                "hidden" if hide else "visible"
+            ),
+        )
 
-        action = self.tr("Hidden hostname from DHCP") if hide else self.tr("Restored hostname to DHCP")
+        action = (
+            self.tr("Hidden hostname from DHCP")
+            if hide
+            else self.tr("Restored hostname to DHCP")
+        )
         undo_value = "yes" if hide else "no"
-        self.history.log_change(action, [
-            "nmcli", "connection", "modify", conn,
-            "ipv4.dhcp-send-hostname", undo_value,
-        ])
+        self.history.log_change(
+            action,
+            [
+                "nmcli",
+                "connection",
+                "modify",
+                conn,
+                "ipv4.dhcp-send-hostname",
+                undo_value,
+            ],
+        )
 
         QTimer.singleShot(500, self._check_hostname_privacy)
-        QMessageBox.information(self, self.tr("Done"),
-                                self.tr("Hostname privacy updated. Reconnect to apply."))
+        QMessageBox.information(
+            self,
+            self.tr("Done"),
+            self.tr("Hostname privacy updated. Reconnect to apply."),
+        )
 
     def undo_last(self):
         """Undo the last network privacy action."""
@@ -656,16 +810,24 @@ class NetworkTab(BaseTab):
             # Bandwidth summary
             summary = NetworkMonitor.get_bandwidth_summary()
             self.lbl_total_sent.setText(
-                self.tr("Total Sent: {}").format(NetworkMonitor.bytes_to_human(summary["total_sent"]))
+                self.tr("Total Sent: {}").format(
+                    NetworkMonitor.bytes_to_human(summary["total_sent"])
+                )
             )
             self.lbl_total_recv.setText(
-                self.tr("Total Received: {}").format(NetworkMonitor.bytes_to_human(summary["total_recv"]))
+                self.tr("Total Received: {}").format(
+                    NetworkMonitor.bytes_to_human(summary["total_recv"])
+                )
             )
             self.lbl_send_rate.setText(
-                self.tr("Upload Rate: {}/s").format(NetworkMonitor.bytes_to_human(summary["total_send_rate"]))
+                self.tr("Upload Rate: {}/s").format(
+                    NetworkMonitor.bytes_to_human(summary["total_send_rate"])
+                )
             )
             self.lbl_recv_rate.setText(
-                self.tr("Download Rate: {}/s").format(NetworkMonitor.bytes_to_human(summary["total_recv_rate"]))
+                self.tr("Download Rate: {}/s").format(
+                    NetworkMonitor.bytes_to_human(summary["total_recv_rate"])
+                )
             )
 
             # Per-interface traffic
@@ -673,41 +835,60 @@ class NetworkTab(BaseTab):
             non_lo = [i for i in interfaces if i.type != "loopback"]
             self.traffic_table.clearSpans()
             if not non_lo:
-                self._set_empty_table_state(self.traffic_table, self.tr("No network traffic data available"))
+                self._set_empty_table_state(
+                    self.traffic_table, self.tr("No network traffic data available")
+                )
             else:
                 self.traffic_table.setRowCount(len(non_lo))
                 for i, iface in enumerate(non_lo):
                     self.traffic_table.setItem(i, 0, self._make_table_item(iface.name))
-                    self.traffic_table.setItem(i, 1, self._make_table_item(iface.type.capitalize()))
-                    self.traffic_table.setItem(i, 2, self._make_table_item(iface.bytes_sent_human))
-                    self.traffic_table.setItem(i, 3, self._make_table_item(iface.bytes_recv_human))
-                    self.traffic_table.setItem(i, 4, self._make_table_item(iface.send_rate_human))
-                    self.traffic_table.setItem(i, 5, self._make_table_item(iface.recv_rate_human))
+                    self.traffic_table.setItem(
+                        i, 1, self._make_table_item(iface.type.capitalize())
+                    )
+                    self.traffic_table.setItem(
+                        i, 2, self._make_table_item(iface.bytes_sent_human)
+                    )
+                    self.traffic_table.setItem(
+                        i, 3, self._make_table_item(iface.bytes_recv_human)
+                    )
+                    self.traffic_table.setItem(
+                        i, 4, self._make_table_item(iface.send_rate_human)
+                    )
+                    self.traffic_table.setItem(
+                        i, 5, self._make_table_item(iface.recv_rate_human)
+                    )
 
             # Active connections
             connections = NetworkMonitor.get_active_connections()
             # Show only ESTABLISHED and LISTEN, limit to 100
-            filtered = [c for c in connections
-                        if c.state in ("ESTABLISHED", "LISTEN")][:100]
+            filtered = [c for c in connections if c.state in ("ESTABLISHED", "LISTEN")][
+                :100
+            ]
             self.conn_table.clearSpans()
             if not filtered:
-                self._set_empty_table_state(self.conn_table, self.tr("No active connections"))
+                self._set_empty_table_state(
+                    self.conn_table, self.tr("No active connections")
+                )
             else:
                 self.conn_table.setRowCount(len(filtered))
                 for i, conn in enumerate(filtered):
                     self.conn_table.setItem(i, 0, self._make_table_item(conn.protocol))
-                    self.conn_table.setItem(i, 1, self._make_table_item(
-                        f"{conn.local_addr}:{conn.local_port}"
-                    ))
-                    self.conn_table.setItem(i, 2, self._make_table_item(
-                        f"{conn.remote_addr}:{conn.remote_port}"
-                    ))
+                    self.conn_table.setItem(
+                        i,
+                        1,
+                        self._make_table_item(f"{conn.local_addr}:{conn.local_port}"),
+                    )
+                    self.conn_table.setItem(
+                        i,
+                        2,
+                        self._make_table_item(f"{conn.remote_addr}:{conn.remote_port}"),
+                    )
                     self.conn_table.setItem(i, 3, self._make_table_item(conn.state))
-                    self.conn_table.setItem(i, 4, self._make_table_item(
-                        str(conn.pid) if conn.pid else "—"
-                    ))
-                    self.conn_table.setItem(i, 5, self._make_table_item(
-                        conn.process_name or "—"
-                    ))
+                    self.conn_table.setItem(
+                        i, 4, self._make_table_item(str(conn.pid) if conn.pid else "—")
+                    )
+                    self.conn_table.setItem(
+                        i, 5, self._make_table_item(conn.process_name or "—")
+                    )
         except Exception as e:
             logger.error("Monitoring refresh failed: %s", e)

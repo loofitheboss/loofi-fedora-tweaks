@@ -50,7 +50,7 @@ class PluginAdapter(PluginInterface):
         """
         self._wrapped = wrapped_plugin
         self._metadata_cache: PluginMetadata | None = None
-        logger.debug(f"PluginAdapter wrapping {wrapped_plugin.info.name}")
+        logger.debug("PluginAdapter wrapping %s", wrapped_plugin.info.name)
 
     def metadata(self) -> PluginMetadata:
         """
@@ -114,10 +114,12 @@ class PluginAdapter(PluginInterface):
                     f"Plugin {self._wrapped.info.name} create_widget() must "
                     f"return QWidget, got {type(widget).__name__}"
                 )
-            logger.debug(f"Created widget for {self._wrapped.info.name}")
+            logger.debug("Created widget for %s", self._wrapped.info.name)
             return widget
         except Exception as e:
-            logger.error(f"Failed to create widget for {self._wrapped.info.name}: {e}")
+            logger.error(
+                "Failed to create widget for %s: %s", self._wrapped.info.name, e
+            )
             raise RuntimeError(
                 f"Plugin {self._wrapped.info.name} failed to create widget: {e}"
             ) from e
@@ -135,7 +137,7 @@ class PluginAdapter(PluginInterface):
                 self._wrapped.on_load()
             except Exception as e:
                 logger.warning(
-                    f"Plugin {self._wrapped.info.name} on_load() failed: {e}"
+                    "Plugin %s on_load() failed: %s", self._wrapped.info.name, e
                 )
 
     def on_deactivate(self) -> None:
@@ -171,11 +173,12 @@ class PluginAdapter(PluginInterface):
             min_version = manifest.min_app_version
             if min_version:
                 from version import __version__ as APP_VERSION
+
                 if not self._version_compat(APP_VERSION, min_version):
                     return CompatStatus(
                         compatible=False,
                         reason=f"Requires app version >= {min_version} "
-                               f"(current: {APP_VERSION})"
+                        f"(current: {APP_VERSION})",
                     )
 
         # Check permissions (warn but don't block)
@@ -183,13 +186,9 @@ class PluginAdapter(PluginInterface):
         if manifest and hasattr(manifest, "permissions"):
             perms = manifest.permissions
             if "sudo" in perms:
-                warnings.append(
-                    "Plugin requests 'sudo' permission — use with caution"
-                )
+                warnings.append("Plugin requests 'sudo' permission — use with caution")
             if "network" in perms:
-                warnings.append(
-                    "Plugin requires network access"
-                )
+                warnings.append("Plugin requires network access")
 
         return CompatStatus(compatible=True, warnings=warnings)
 
@@ -206,8 +205,9 @@ class PluginAdapter(PluginInterface):
         """
         self._context = context
         logger.debug(
-            f"Injected context for {self._wrapped.info.name}: "
-            f"{', '.join(context.keys())}"
+            "Injected context for %s: %s",
+            self._wrapped.info.name,
+            ", ".join(context.keys()),
         )
 
     @staticmethod
@@ -259,7 +259,9 @@ class PluginAdapter(PluginInterface):
         except (ValueError, AttributeError):
             # Unparseable versions — assume compatible
             logger.warning(
-                f"Could not parse versions: {current} vs {minimum}, assuming compatible"
+                "Could not parse versions: %s vs %s, assuming compatible",
+                current,
+                minimum,
             )
             return True
 

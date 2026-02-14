@@ -8,6 +8,7 @@ Provides configuration helpers for:
 - Workspace templates
 """
 
+import logging
 import subprocess
 import shutil
 import os
@@ -15,10 +16,13 @@ from dataclasses import dataclass
 from typing import Any, Optional
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -36,20 +40,20 @@ class TilingManager:
             "name": "Dwindle (Fibonacci)",
             "desc": "New windows take half of remaining space",
             "hyprland": "dwindle",
-            "sway": "splitv"
+            "sway": "splitv",
         },
         "master": {
             "name": "Master-Stack",
             "desc": "One large master, others stacked",
             "hyprland": "master",
-            "sway": "splith"
+            "sway": "splith",
         },
         "columns": {
             "name": "Columns",
             "desc": "Equal width columns",
             "hyprland": "dwindle",
-            "sway": "splitv"
-        }
+            "sway": "splitv",
+        },
     }
 
     # Workspace templates
@@ -61,7 +65,7 @@ class TilingManager:
                 2: {"name": "Browser", "apps": ["firefox"]},
                 3: {"name": "Docs", "apps": ["evince", "obsidian"]},
                 4: {"name": "Terminal", "apps": ["terminal"]},
-            }
+            },
         },
         "creative": {
             "name": "Creative",
@@ -70,7 +74,7 @@ class TilingManager:
                 2: {"name": "Reference", "apps": ["firefox"]},
                 3: {"name": "Files", "apps": ["nautilus"]},
                 4: {"name": "Music", "apps": ["spotify"]},
-            }
+            },
         },
         "gaming": {
             "name": "Gaming",
@@ -79,8 +83,8 @@ class TilingManager:
                 2: {"name": "Chat", "apps": ["discord"]},
                 3: {"name": "Browser", "apps": ["firefox"]},
                 4: {"name": "System", "apps": ["terminal"]},
-            }
-        }
+            },
+        },
     }
 
     @classmethod
@@ -135,12 +139,14 @@ class TilingManager:
                     if line.startswith("bind = "):
                         parts = line.replace("bind = ", "").split(",")
                         if len(parts) >= 4:
-                            bindings.append({
-                                "mods": parts[0].strip(),
-                                "key": parts[1].strip(),
-                                "action": parts[2].strip(),
-                                "args": ",".join(parts[3:]).strip()
-                            })
+                            bindings.append(
+                                {
+                                    "mods": parts[0].strip(),
+                                    "key": parts[1].strip(),
+                                    "action": parts[2].strip(),
+                                    "args": ",".join(parts[3:]).strip(),
+                                }
+                            )
             elif cls.is_sway():
                 # Parse Sway bindsym
                 for line in content.split("\n"):
@@ -148,23 +154,14 @@ class TilingManager:
                     if line.startswith("bindsym "):
                         parts = line.replace("bindsym ", "").split(" ", 1)
                         if len(parts) == 2:
-                            bindings.append({
-                                "key": parts[0],
-                                "action": parts[1]
-                            })
-        except Exception:
-            pass
+                            bindings.append({"key": parts[0], "action": parts[1]})
+        except Exception as e:
+            logger.debug("Failed to parse keybindings from config: %s", e)
 
         return bindings
 
     @classmethod
-    def add_keybinding(
-        cls,
-        mods: str,
-        key: str,
-        action: str,
-        args: str = ""
-    ) -> Result:
+    def add_keybinding(cls, mods: str, key: str, action: str, args: str = "") -> Result:
         """Add a keybinding to compositor config."""
         config_path = cls.get_config_path()
 
@@ -185,7 +182,7 @@ class TilingManager:
             return Result(
                 True,
                 "Keybinding added. Reload config to apply.",
-                {"backup": str(backup_path)}
+                {"backup": str(backup_path)},
             )
         except Exception as e:
             return Result(False, f"Error: {e}")
@@ -196,17 +193,11 @@ class TilingManager:
         try:
             if cls.is_hyprland():
                 result = subprocess.run(
-                    ["hyprctl", "reload"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    ["hyprctl", "reload"], capture_output=True, text=True, timeout=10
                 )
             elif cls.is_sway():
                 result = subprocess.run(
-                    ["swaymsg", "reload"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    ["swaymsg", "reload"], capture_output=True, text=True, timeout=10
                 )
             else:
                 return Result(False, "Unknown compositor")
@@ -247,16 +238,10 @@ class TilingManager:
             for ws_num, ws_config in template["workspaces"].items():  # type: ignore[union-attr]
                 config_lines.append(f"# Workspace {ws_num}: {ws_config['name']}")
                 for app in ws_config["apps"]:
-                    config_lines.append(
-                        f"assign [app_id=\"{app}\"] workspace {ws_num}"
-                    )
+                    config_lines.append(f'assign [app_id="{app}"] workspace {ws_num}')
             config_lines.append("")
 
-        return Result(
-            True,
-            "Template generated",
-            {"config": "\n".join(config_lines)}
-        )
+        return Result(True, "Template generated", {"config": "\n".join(config_lines)})
 
     @classmethod
     def move_window_to_workspace(cls, workspace: int) -> Result:
@@ -267,14 +252,14 @@ class TilingManager:
                     ["hyprctl", "dispatch", "movetoworkspacesilent", str(workspace)],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
                 )
             elif cls.is_sway():
                 result = subprocess.run(
                     ["swaymsg", "move", "container", "to", "workspace", str(workspace)],
                     capture_output=True,
                     text=True,
-                    timeout=5
+                    timeout=5,
                 )
             else:
                 return Result(False, "Unknown compositor")
@@ -365,16 +350,11 @@ Generated by Loofi Fedora Tweaks.
 
             # Initialize git
             subprocess.run(
-                ["git", "init"],
-                cwd=repo_path,
-                capture_output=True,
-                timeout=10
+                ["git", "init"], cwd=repo_path, capture_output=True, timeout=10
             )
 
             return Result(
-                True,
-                f"Dotfiles repo created at {repo_path}",
-                {"path": str(repo_path)}
+                True, f"Dotfiles repo created at {repo_path}", {"path": str(repo_path)}
             )
         except Exception as e:
             return Result(False, f"Error: {e}")

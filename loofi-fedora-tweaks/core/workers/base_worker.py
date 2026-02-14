@@ -60,6 +60,7 @@ logger = logging.getLogger(__name__)
 # Resolve metaclass conflict between QThread and ABC
 class _BaseWorkerMeta(wrappertype, ABCMeta):
     """Metaclass combining QThread's metaclass and ABC's metaclass."""
+
     pass
 
 
@@ -84,8 +85,8 @@ class BaseWorker(QThread, metaclass=_BaseWorkerMeta):
     # Standard signal protocol
     started = pyqtSignal()
     progress = pyqtSignal(str, int)  # message, percentage (0-100)
-    finished = pyqtSignal(object)     # result data (Any type)
-    error = pyqtSignal(str)           # error message
+    finished = pyqtSignal(object)  # result data (Any type)
+    error = pyqtSignal(str)  # error message
 
     def __init__(self, parent: Optional[Any] = None):
         """
@@ -108,21 +109,21 @@ class BaseWorker(QThread, metaclass=_BaseWorkerMeta):
         self._result = None
 
         try:
-            logger.debug(f"{self.__class__.__name__} started")
+            logger.debug("%s started", self.__class__.__name__)
             self.started.emit()
 
             # Call subclass implementation
             self._result = self.do_work()
 
             if not self._should_stop:
-                logger.debug(f"{self.__class__.__name__} completed successfully")
+                logger.debug("%s completed successfully", self.__class__.__name__)
                 self.finished.emit(self._result)
             else:
-                logger.debug(f"{self.__class__.__name__} cancelled")
+                logger.debug("%s cancelled", self.__class__.__name__)
                 self.error.emit("Operation cancelled by user")
 
         except Exception as e:
-            logger.error(f"{self.__class__.__name__} error: {e}", exc_info=True)
+            logger.error("%s error: %s", self.__class__.__name__, e, exc_info=True)
             self.error.emit(f"{type(e).__name__}: {e}")
 
     @abstractmethod
@@ -149,7 +150,7 @@ class BaseWorker(QThread, metaclass=_BaseWorkerMeta):
         Sets the internal cancellation flag. Subclasses should check
         `is_cancelled()` periodically and return early if True.
         """
-        logger.debug(f"Cancellation requested for {self.__class__.__name__}")
+        logger.debug("Cancellation requested for %s", self.__class__.__name__)
         self._should_stop = True
 
     def is_cancelled(self) -> bool:

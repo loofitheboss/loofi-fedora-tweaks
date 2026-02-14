@@ -45,7 +45,9 @@ class Daemon:
             # Check using upower
             result = subprocess.run(
                 ["upower", "-i", "/org/freedesktop/UPower/devices/line_power_AC0"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=60,
             )
 
@@ -66,7 +68,8 @@ class Daemon:
                         return "ac" if f.read().strip() == "1" else "battery"
 
             return "ac"  # Default to AC if unknown
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to detect power state: %s", e)
             return "ac"
 
     @classmethod
@@ -81,7 +84,9 @@ class Daemon:
             return
 
         if current_state != cls._last_power_state:
-            logger.info("Power state changed: %s -> %s", cls._last_power_state, current_state)
+            logger.info(
+                "Power state changed: %s -> %s", cls._last_power_state, current_state
+            )
 
             on_battery = current_state == "battery"
             tasks = TaskScheduler.get_power_trigger_tasks(on_battery)
@@ -116,7 +121,12 @@ class Daemon:
             for task in due_tasks:
                 logger.info("Running scheduled task: %s", task.name)
                 success, message = TaskScheduler.execute_task(task)
-                logger.info("Task '%s': %s - %s", task.name, 'Success' if success else 'Failed', message)
+                logger.info(
+                    "Task '%s': %s - %s",
+                    task.name,
+                    "Success" if success else "Failed",
+                    message,
+                )
 
     @classmethod
     def check_plugin_updates(cls):
@@ -142,7 +152,11 @@ class Daemon:
 
                 result = installer.check_update(plugin_name)
 
-                if result.success and result.data and result.data.get("update_available"):
+                if (
+                    result.success
+                    and result.data
+                    and result.data.get("update_available")
+                ):
                     new_version = result.data.get("new_version")
                     logger.info("Update available for %s: %s", plugin_name, new_version)
 
@@ -150,9 +164,13 @@ class Daemon:
                     update_result = installer.update(plugin_name)
 
                     if update_result.success:
-                        logger.info("Successfully updated %s to %s", plugin_name, new_version)
+                        logger.info(
+                            "Successfully updated %s to %s", plugin_name, new_version
+                        )
                     else:
-                        logger.warning("Failed to update %s: %s", plugin_name, update_result.error)
+                        logger.warning(
+                            "Failed to update %s: %s", plugin_name, update_result.error
+                        )
 
         except Exception as e:
             logger.error("Error checking plugin updates: %s", e, exc_info=True)

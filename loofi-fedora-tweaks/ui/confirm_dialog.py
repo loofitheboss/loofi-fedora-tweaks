@@ -131,8 +131,7 @@ class ConfirmActionDialog(QDialog):
             layout.addWidget(self.snapshot_cb)
 
         # Don't ask again checkbox
-        self.dont_ask_cb = QCheckBox(
-            self.tr("Don't ask for confirmation again"))
+        self.dont_ask_cb = QCheckBox(self.tr("Don't ask for confirmation again"))
         self.dont_ask_cb.setObjectName("confirmDontAsk")
         layout.addWidget(self.dont_ask_cb)
 
@@ -154,8 +153,7 @@ class ConfirmActionDialog(QDialog):
         if command_preview:
             preview_btn = QPushButton(self.tr("🔍 Preview"))
             preview_btn.setMinimumWidth(90)
-            preview_btn.setToolTip(
-                self.tr("Show the exact command that will run"))
+            preview_btn.setToolTip(self.tr("Show the exact command that will run"))
             preview_btn.clicked.connect(self._toggle_preview)
             btn_row.addWidget(preview_btn)
 
@@ -188,9 +186,8 @@ class ConfirmActionDialog(QDialog):
                 else:
                     mgr.set("confirm_dangerous_actions", False)
                 mgr.save()
-            except Exception:
-                logger.debug(
-                    "Failed to save confirmation preference", exc_info=True)
+            except Exception as e:
+                logger.debug("Failed to save confirmation preference: %s", e)
 
         # Record snapshot request
         if self.snapshot_cb and self.snapshot_cb.isChecked():
@@ -242,9 +239,8 @@ class ConfirmActionDialog(QDialog):
                         return True
                 if not mgr.get("confirm_dangerous_actions"):
                     return True
-            except Exception:
-                logger.debug(
-                    "Failed to read confirmation preference", exc_info=True)
+            except Exception as e:
+                logger.debug("Failed to read confirmation preference: %s", e)
 
         dialog = ConfirmActionDialog(
             parent=parent,

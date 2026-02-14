@@ -3,16 +3,21 @@ Health Score Manager — v31.0 Smart UX
 Aggregates system metrics into a single 0–100 health score.
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import List
 
+from services.system import SystemManager
 from utils.monitor import SystemMonitor
 from services.hardware import DiskManager
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class HealthScore:
     """Aggregated system health score."""
+
     score: int
     grade: str
     components: dict
@@ -75,7 +80,7 @@ class HealthScoreManager:
             usage = DiskManager.get_disk_usage("/")
             if usage is None:
                 return 50, "Disk info unavailable"
-            pct = usage.percent_used if hasattr(usage, 'percent_used') else 0
+            pct = usage.percent_used if hasattr(usage, "percent_used") else 0
             score = max(0, 100 - pct)
             recommendation = None
             if pct >= 90:
@@ -83,7 +88,8 @@ class HealthScoreManager:
             elif pct >= 75:
                 recommendation = "Disk usage above 75% — consider freeing space"
             return score, recommendation
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to score disk usage: %s", e)
             return 50, None
 
     @staticmethod
@@ -108,7 +114,8 @@ class HealthScoreManager:
                 score = 60
                 recommendation = "System hasn't been rebooted in over 30 days"
             return score, recommendation
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to score uptime: %s", e)
             return 50, None
 
     @staticmethod
@@ -116,29 +123,66 @@ class HealthScoreManager:
         """Score based on pending updates count."""
         try:
             import subprocess
-            result = subprocess.run(
-                ["dnf", "check-update", "--quiet"],
-                capture_output=True, text=True, timeout=30
-            )
-            # dnf check-update returns exit code 100 if updates are available
-            if result.returncode == 0:
-                return 100, None  # No updates pending
-            elif result.returncode == 100:
-                lines = [line for line in result.stdout.strip().splitlines() if line.strip() and not line.startswith("Last")]
-                count = len(lines)
-                if count > 50:
-                    score = 40
-                    recommendation = f"{count} updates pending — run system update"
-                elif count > 10:
-                    score = 70
-                    recommendation = f"{count} updates available"
+
+            if SystemManager.is_atomic():
+                result = subprocess.run(
+                    ["rpm-ostree", "upgrade", "--check"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                if result.returncode == 0 and "AvailableUpdate" in result.stdout:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().splitlines()
+                        if line.strip()
+                    ]
+                    count = len(lines)
+                    if count > 50:
+                        score = 40
+                        recommendation = f"{count} updates pending — run system update"
+                    elif count > 10:
+                        score = 70
+                        recommendation = f"{count} updates available"
+                    else:
+                        score = 85
+                        recommendation = f"{count} minor updates available"
+                    return score, recommendation
+                elif result.returncode == 0:
+                    return 100, None  # No updates pending
                 else:
-                    score = 85
-                    recommendation = f"{count} minor updates available"
-                return score, recommendation
+                    return 50, None
             else:
-                return 50, None
-        except Exception:
+                result = subprocess.run(
+                    ["dnf", "check-update", "--quiet"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                # dnf check-update returns exit code 100 if updates are available
+                if result.returncode == 0:
+                    return 100, None  # No updates pending
+                elif result.returncode == 100:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().splitlines()
+                        if line.strip() and not line.startswith("Last")
+                    ]
+                    count = len(lines)
+                    if count > 50:
+                        score = 40
+                        recommendation = f"{count} updates pending — run system update"
+                    elif count > 10:
+                        score = 70
+                        recommendation = f"{count} updates available"
+                    else:
+                        score = 85
+                        recommendation = f"{count} minor updates available"
+                    return score, recommendation
+                else:
+                    return 50, None
+        except Exception as e:
+            logger.debug("Failed to check for updates: %s", e)
             return 75, None  # Can't check — assume moderate
 
     @classmethod

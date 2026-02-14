@@ -3,6 +3,7 @@ Kernel Manager - Kernel parameter and boot configuration management.
 Provides safe interface for modifying kernel boot parameters via grubby.
 """
 
+import logging
 import os
 import subprocess
 import shutil
@@ -11,10 +12,13 @@ from dataclasses import dataclass
 from typing import List, Optional
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class KernelResult:
     """Result of a kernel operation."""
+
     success: bool
     message: str
     output: str = ""
@@ -69,7 +73,8 @@ class KernelManager:
                 cmdline = f.read().strip()
             # Split but preserve quoted strings
             return cmdline.split()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read /proc/cmdline: %s", e)
             return []
 
     @classmethod
@@ -87,8 +92,8 @@ class KernelManager:
                         # Extract value between quotes
                         value = line.split("=", 1)[1].strip().strip('"')
                         return value.split() if value else []
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read default GRUB parameters: %s", e)
         return []
 
     @classmethod
@@ -107,9 +112,7 @@ class KernelManager:
             shutil.copy2(cls.GRUB_DEFAULT, backup_path)
 
             return KernelResult(
-                success=True,
-                message="Backup created",
-                backup_path=str(backup_path)
+                success=True, message="Backup created", backup_path=str(backup_path)
             )
         except Exception as e:
             return KernelResult(False, f"Backup failed: {str(e)}")
@@ -137,19 +140,21 @@ class KernelManager:
         cmd = ["pkexec", "grubby", "--update-kernel=ALL", f"--args={param}"]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=60
+            )
             if result.returncode == 0:
                 return KernelResult(
                     success=True,
                     message=f"Added parameter: {param}\nReboot required to apply.",
                     output=result.stdout,
-                    backup_path=backup_result.backup_path
+                    backup_path=backup_result.backup_path,
                 )
             else:
                 return KernelResult(
                     success=False,
                     message=f"Failed to add parameter: {result.stderr}",
-                    output=result.stderr
+                    output=result.stderr,
                 )
         except Exception as e:
             return KernelResult(False, f"Error: {str(e)}")
@@ -177,19 +182,21 @@ class KernelManager:
         cmd = ["pkexec", "grubby", "--update-kernel=ALL", f"--remove-args={param}"]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=60
+            )
             if result.returncode == 0:
                 return KernelResult(
                     success=True,
                     message=f"Removed parameter: {param}\nReboot required to apply.",
                     output=result.stdout,
-                    backup_path=backup_result.backup_path
+                    backup_path=backup_result.backup_path,
                 )
             else:
                 return KernelResult(
                     success=False,
                     message=f"Failed to remove parameter: {result.stderr}",
-                    output=result.stderr
+                    output=result.stderr,
                 )
         except Exception as e:
             return KernelResult(False, f"Error: {str(e)}")
@@ -225,17 +232,21 @@ class KernelManager:
         try:
             # Use pkexec to copy back
             cmd = ["pkexec", "cp", backup_path, cls.GRUB_DEFAULT]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=600
+            )
 
             if result.returncode == 0:
                 # Rebuild grub config
                 rebuild_cmd = ["pkexec", "grub2-mkconfig", "-o", "/boot/grub2/grub.cfg"]
-                subprocess.run(rebuild_cmd, capture_output=True, check=False, timeout=120)
+                subprocess.run(
+                    rebuild_cmd, capture_output=True, check=False, timeout=120
+                )
 
                 return KernelResult(
                     success=True,
                     message="Backup restored. Reboot required to apply.",
-                    output=result.stdout
+                    output=result.stdout,
                 )
             else:
                 return KernelResult(False, f"Restore failed: {result.stderr}")

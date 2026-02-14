@@ -7,13 +7,26 @@ Sub-tabs:
 - Theming: KDE global themes, icon themes, fonts
 """
 
+import logging
 from pathlib import Path
 
 from PyQt6.QtCore import QTimer
+
+logger = logging.getLogger(__name__)
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QComboBox, QTextEdit, QScrollArea,
-    QFrame, QLineEdit, QTabWidget, QListWidget,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QComboBox,
+    QTextEdit,
+    QScrollArea,
+    QFrame,
+    QLineEdit,
+    QTabWidget,
+    QListWidget,
 )
 
 from ui.base_tab import BaseTab
@@ -57,19 +70,13 @@ class DesktopTab(BaseTab):
         layout.addWidget(self.sub_tabs)
 
         # Sub-tab 1: Window Manager (from DirectorTab)
-        self.sub_tabs.addTab(
-            self._create_wm_tab(), self.tr("Window Manager")
-        )
+        self.sub_tabs.addTab(self._create_wm_tab(), self.tr("Window Manager"))
 
         # Sub-tab 2: Theming (from ThemingTab)
-        self.sub_tabs.addTab(
-            self._create_theming_tab(), self.tr("Theming")
-        )
+        self.sub_tabs.addTab(self._create_theming_tab(), self.tr("Theming"))
 
         # Sub-tab 3: Display Configuration (v37.0 Pinnacle)
-        self.sub_tabs.addTab(
-            self._create_display_tab(), self.tr("Display")
-        )
+        self.sub_tabs.addTab(self._create_display_tab(), self.tr("Display"))
 
         # Shared output area at bottom
         self.add_output_section(layout)
@@ -137,10 +144,12 @@ class DesktopTab(BaseTab):
 
         # Quick actions based on compositor
         if compositor == "kde":
-            info = QLabel(self.tr(
-                "KWin provides native quick-tiling with keyboard shortcuts. "
-                "Use Meta+Arrow keys or configure custom bindings below."
-            ))
+            info = QLabel(
+                self.tr(
+                    "KWin provides native quick-tiling with keyboard shortcuts. "
+                    "Use Meta+Arrow keys or configure custom bindings below."
+                )
+            )
         elif compositor in ["hyprland", "sway"]:
             config_path = str(TilingManager.get_config_path())
             info = QLabel(self.tr("Config: {}").format(config_path))
@@ -213,7 +222,9 @@ class DesktopTab(BaseTab):
         group = QGroupBox(self.tr("Workspace Templates"))
         layout = QVBoxLayout(group)
 
-        layout.addWidget(QLabel(self.tr("Apply a workspace template to organize apps:")))
+        layout.addWidget(
+            QLabel(self.tr("Apply a workspace template to organize apps:"))
+        )
 
         template_layout = QHBoxLayout()
 
@@ -250,9 +261,13 @@ class DesktopTab(BaseTab):
         group = QGroupBox(self.tr("Dotfile Sync"))
         layout = QVBoxLayout(group)
 
-        layout.addWidget(QLabel(self.tr(
-            "Sync your config files to a git repository for backup and sharing."
-        )))
+        layout.addWidget(
+            QLabel(
+                self.tr(
+                    "Sync your config files to a git repository for backup and sharing."
+                )
+            )
+        )
 
         # Repository path
         path_layout = QHBoxLayout()
@@ -329,12 +344,16 @@ class DesktopTab(BaseTab):
         template_key = self.template_combo.currentData()
         template = TilingManager.WORKSPACE_TEMPLATES.get(template_key, {})
 
-        preview_lines = [self.tr("Template: {}").format(template.get('name', template_key))]
+        preview_lines = [
+            self.tr("Template: {}").format(template.get("name", template_key))
+        ]
 
         for ws_num, ws_config in template.get("workspaces", {}).items():
             apps = ", ".join(ws_config.get("apps", []))
             preview_lines.append(
-                self.tr("  Workspace {} ({}): {}").format(ws_num, ws_config['name'], apps)
+                self.tr("  Workspace {} ({}): {}").format(
+                    ws_num, ws_config["name"], apps
+                )
             )
 
         self.template_preview.setText("\n".join(preview_lines))
@@ -347,7 +366,9 @@ class DesktopTab(BaseTab):
         if result.success:
             self.template_preview.setText(result.data.get("config", ""))
             self.append_output(
-                self.tr("Config generated for {}. Copy to your config file.\n").format(template_key)
+                self.tr("Config generated for {}. Copy to your config file.\n").format(
+                    template_key
+                )
             )
         else:
             self.append_output(result.message + "\n")
@@ -386,7 +407,7 @@ class DesktopTab(BaseTab):
         self.themes = {
             self.tr("Breeze Dark"): "org.kde.breezedark.desktop",
             self.tr("Breeze Light"): "org.kde.breeze.desktop",
-            self.tr("Oxygen"): "org.kde.oxygen"
+            self.tr("Oxygen"): "org.kde.oxygen",
         }
         for name in self.themes.keys():
             self.theme_combo.addItem(name)
@@ -408,8 +429,9 @@ class DesktopTab(BaseTab):
         btn_papirus.setAccessibleName(self.tr("Install Papirus Icons"))
         btn_papirus.clicked.connect(
             lambda: self.run_command(
-                "pkexec", ["dnf", "install", "-y", "papirus-icon-theme"],
-                self.tr("Installing Papirus Icons...")
+                "pkexec",
+                ["dnf", "install", "-y", "papirus-icon-theme"],
+                self.tr("Installing Papirus Icons..."),
             )
         )
         icon_layout.addWidget(btn_papirus)
@@ -418,8 +440,9 @@ class DesktopTab(BaseTab):
         btn_tela.setAccessibleName(self.tr("Install Tela Icons"))
         btn_tela.clicked.connect(
             lambda: self.run_command(
-                "pkexec", ["dnf", "install", "-y", "tela-icon-theme"],
-                self.tr("Installing Tela Icons...")
+                "pkexec",
+                ["dnf", "install", "-y", "tela-icon-theme"],
+                self.tr("Installing Tela Icons..."),
             )
         )
         icon_layout.addWidget(btn_tela)
@@ -435,8 +458,9 @@ class DesktopTab(BaseTab):
         btn_firacode.setAccessibleName(self.tr("FiraCode Nerd Font"))
         btn_firacode.clicked.connect(
             lambda: self.run_command(
-                "pkexec", ["dnf", "install", "-y", "fira-code-fonts"],
-                self.tr("Installing FiraCode...")
+                "pkexec",
+                ["dnf", "install", "-y", "fira-code-fonts"],
+                self.tr("Installing FiraCode..."),
             )
         )
         fonts_layout.addWidget(btn_firacode)
@@ -445,8 +469,9 @@ class DesktopTab(BaseTab):
         btn_jetbrains.setAccessibleName(self.tr("JetBrains Mono"))
         btn_jetbrains.clicked.connect(
             lambda: self.run_command(
-                "pkexec", ["dnf", "install", "-y", "jetbrains-mono-fonts"],
-                self.tr("Installing JetBrains Mono...")
+                "pkexec",
+                ["dnf", "install", "-y", "jetbrains-mono-fonts"],
+                self.tr("Installing JetBrains Mono..."),
             )
         )
         fonts_layout.addWidget(btn_jetbrains)
@@ -463,8 +488,9 @@ class DesktopTab(BaseTab):
         theme_name = self.theme_combo.currentText()
         theme_id = self.themes.get(theme_name, "org.kde.breeze.desktop")
         self.run_command(
-            "lookandfeeltool", ["-a", theme_id],
-            self.tr("Applying {} theme...").format(theme_name)
+            "lookandfeeltool",
+            ["-a", theme_id],
+            self.tr("Applying {} theme...").format(theme_name),
         )
 
     # ================================================================
@@ -540,12 +566,15 @@ class DesktopTab(BaseTab):
         """Detect connected displays."""
         try:
             from utils.wayland_display import WaylandDisplayManager
+
             displays = WaylandDisplayManager.get_displays()
             self.display_list.clear()
             for d in displays:
                 primary = " ★" if d.primary else ""
                 scale_str = f" @{d.scale}x" if d.scale != 1.0 else ""
-                text = f"{d.name}: {d.resolution}{scale_str} @ {d.refresh_rate}Hz{primary}"
+                text = (
+                    f"{d.name}: {d.resolution}{scale_str} @ {d.refresh_rate}Hz{primary}"
+                )
                 if d.make or d.model:
                     text += f" ({d.make} {d.model})".strip()
                 self.display_list.addItem(text)
@@ -560,6 +589,7 @@ class DesktopTab(BaseTab):
         """Load session type info."""
         try:
             from utils.wayland_display import WaylandDisplayManager
+
             info = WaylandDisplayManager.get_session_info()
             self.display_session_info.setText(
                 self.tr("Session: {} | DE: {} | Compositor: {}").format(
@@ -568,13 +598,15 @@ class DesktopTab(BaseTab):
                     info.get("compositor", "?"),
                 )
             )
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to load session info: %s", e)
             self.display_session_info.setText(self.tr("Session info unavailable"))
 
     def _enable_fractional(self):
         """Enable fractional scaling."""
         try:
             from utils.wayland_display import WaylandDisplayManager
+
             binary, args, desc = WaylandDisplayManager.enable_fractional_scaling()
             self.run_command(binary, args, desc)
         except Exception as e:
@@ -584,6 +616,7 @@ class DesktopTab(BaseTab):
         """Disable fractional scaling."""
         try:
             from utils.wayland_display import WaylandDisplayManager
+
             binary, args, desc = WaylandDisplayManager.disable_fractional_scaling()
             self.run_command(binary, args, desc)
         except Exception as e:

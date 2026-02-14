@@ -5,8 +5,11 @@ Extracted from ui/gaming_tab.py in v34.0 to enforce
 the 'no subprocess in UI' architectural rule.
 """
 
+import logging
 import subprocess
 from typing import Literal
+
+logger = logging.getLogger(__name__)
 
 
 class GamingUtils:
@@ -28,7 +31,8 @@ class GamingUtils:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "is-active", "gamemoded"],
-                capture_output=True, text=True,
+                capture_output=True,
+                text=True,
                 timeout=60,
             )
             if "active" in result.stdout:
@@ -43,5 +47,6 @@ class GamingUtils:
                 return "installed"
 
             return "missing"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check GameMode status: %s", e)
             return "error"

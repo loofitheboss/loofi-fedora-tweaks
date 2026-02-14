@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-t
 class TestDoctorPrivilegedCommand(unittest.TestCase):
     """Verify doctor uses PrivilegedCommand.dnf() and get_package_manager()."""
 
-    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("shutil.which", return_value=None)
     @patch("utils.command_runner.CommandRunner.run_command")
     def test_fix_uses_privileged_command(self, mock_run, mock_which, mock_pm):
@@ -40,7 +40,7 @@ class TestDoctorPrivilegedCommand(unittest.TestCase):
         self.assertEqual(binary, "pkexec")
         d.close()
 
-    @patch("services.system.SystemManager.get_package_manager", return_value="rpm-ostree")
+    @patch("utils.system.SystemManager.get_package_manager", return_value="rpm-ostree")
     @patch("shutil.which", return_value=None)
     def test_tools_dict_uses_system_pm(self, mock_which, mock_pm):
         """Tools dict includes the detected package manager, not hardcoded dnf."""
@@ -49,7 +49,7 @@ class TestDoctorPrivilegedCommand(unittest.TestCase):
         self.assertIn("rpm-ostree", d.tools)
         d.close()
 
-    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("shutil.which", return_value="/usr/bin/fake")
     def test_header_has_object_name(self, mock_which, mock_pm):
         """Doctor header label uses objectName for QSS styling."""
@@ -65,7 +65,7 @@ class TestDoctorPrivilegedCommand(unittest.TestCase):
         self.assertTrue(found, "doctorHeader objectName not found")
         d.close()
 
-    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("shutil.which", return_value="/usr/bin/fake")
     def test_fix_button_has_object_name(self, mock_which, mock_pm):
         """Fix button uses objectName for QSS styling."""
@@ -74,7 +74,7 @@ class TestDoctorPrivilegedCommand(unittest.TestCase):
         self.assertEqual(d.btn_fix.objectName(), "doctorFixButton")
         d.close()
 
-    @patch("services.system.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.system.SystemManager.get_package_manager", return_value="dnf")
     @patch("shutil.which", return_value="/usr/bin/fake")
     def test_tool_list_has_accessible_name(self, mock_which, mock_pm):
         """Tool list has accessibleName for a11y."""
@@ -619,23 +619,22 @@ class TestQSSObjectNames(unittest.TestCase):
 # Version Alignment
 # ---------------------------------------------------------------------------
 class TestVersionAlignment(unittest.TestCase):
-    """Verify version files are at least v38.0.0."""
+    """Verify version files are in sync at v38.0.0."""
 
     def test_version_py(self):
-        """version.py has __version__ >= '38.0.0'."""
-        from version import __version__
-        major = int(__version__.split('.')[0])
-        self.assertGreaterEqual(major, 38)
+        """version.py has __version__ = '38.0.0'."""
+        from version import __version__, __version_codename__
+        self.assertEqual(__version__, "38.0.0")
+        self.assertEqual(__version_codename__, "Clarity")
 
     def test_pyproject_version(self):
-        """pyproject.toml version matches version.py."""
-        from version import __version__
+        """pyproject.toml has version = '38.0.0'."""
         pyproject_path = os.path.join(
             os.path.dirname(__file__), "..", "pyproject.toml"
         )
         with open(pyproject_path, "r") as f:
             content = f.read()
-        self.assertIn(f'version = "{__version__}"', content)
+        self.assertIn('version = "38.0.0"', content)
 
 
 if __name__ == "__main__":

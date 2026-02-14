@@ -7,6 +7,7 @@ and active connections from /proc/net/tcp{,6} and /proc/net/udp{,6}.
 No external dependencies (no psutil).
 """
 
+import logging
 import os
 import socket
 import struct
@@ -15,20 +16,23 @@ import time
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class InterfaceStats:
     """Traffic statistics for a single network interface."""
-    name: str           # e.g., "wlp2s0", "enp3s0"
-    type: str           # "wifi", "ethernet", "loopback", "vpn", "other"
+
+    name: str  # e.g., "wlp2s0", "enp3s0"
+    type: str  # "wifi", "ethernet", "loopback", "vpn", "other"
     is_up: bool
     ip_address: str
     bytes_sent: int
     bytes_recv: int
     packets_sent: int
     packets_recv: int
-    send_rate: float    # bytes/sec (0 on first call)
-    recv_rate: float    # bytes/sec (0 on first call)
+    send_rate: float  # bytes/sec (0 on first call)
+    recv_rate: float  # bytes/sec (0 on first call)
 
     @property
     def bytes_sent_human(self) -> str:
@@ -50,12 +54,13 @@ class InterfaceStats:
 @dataclass
 class ConnectionInfo:
     """A single active network connection."""
-    protocol: str       # "tcp", "udp", "tcp6", "udp6"
+
+    protocol: str  # "tcp", "udp", "tcp6", "udp6"
     local_addr: str
     local_port: int
     remote_addr: str
     remote_port: int
-    state: str          # "ESTABLISHED", "LISTEN", etc.
+    state: str  # "ESTABLISHED", "LISTEN", etc.
     pid: int
     process_name: str
 
@@ -131,18 +136,20 @@ class NetworkMonitor:
             is_up = cls._is_interface_up(name)
             ip_address = cls.get_interface_ip(name) if is_up else ""
 
-            results.append(InterfaceStats(
-                name=name,
-                type=iface_type,
-                is_up=is_up,
-                ip_address=ip_address,
-                bytes_sent=bytes_sent,
-                bytes_recv=bytes_recv,
-                packets_sent=packets_sent,
-                packets_recv=packets_recv,
-                send_rate=round(send_rate, 2),
-                recv_rate=round(recv_rate, 2),
-            ))
+            results.append(
+                InterfaceStats(
+                    name=name,
+                    type=iface_type,
+                    is_up=is_up,
+                    ip_address=ip_address,
+                    bytes_sent=bytes_sent,
+                    bytes_recv=bytes_recv,
+                    packets_sent=packets_sent,
+                    packets_recv=packets_recv,
+                    send_rate=round(send_rate, 2),
+                    recv_rate=round(recv_rate, 2),
+                )
+            )
 
         return results
 
@@ -185,16 +192,20 @@ class NetworkMonitor:
                 if proto.startswith("udp"):
                     state_str = cls._TCP_STATES.get(state_str, "")
 
-                connections.append(ConnectionInfo(
-                    protocol=proto,
-                    local_addr=entry["local_addr"],
-                    local_port=entry["local_port"],
-                    remote_addr=entry["remote_addr"],
-                    remote_port=entry["remote_port"],
-                    state=cls._TCP_STATES.get(state_str, state_str) if proto.startswith("tcp") else state_str,
-                    pid=pid,
-                    process_name=process_name,
-                ))
+                connections.append(
+                    ConnectionInfo(
+                        protocol=proto,
+                        local_addr=entry["local_addr"],
+                        local_port=entry["local_port"],
+                        remote_addr=entry["remote_addr"],
+                        remote_port=entry["remote_port"],
+                        state=cls._TCP_STATES.get(state_str, state_str)
+                        if proto.startswith("tcp")
+                        else state_str,
+                        pid=pid,
+                        process_name=process_name,
+                    )
+                )
 
         return connections
 
@@ -256,8 +267,8 @@ class NetworkMonitor:
                     # e.g. "inet 192.168.1.42/24 brd 192.168.1.255 scope global ..."
                     addr_cidr = line.split()[1]
                     return addr_cidr.split("/")[0]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to get interface IP for %s: %s", name, e)
         return ""
 
     @staticmethod
@@ -306,8 +317,8 @@ class NetworkMonitor:
                     "bytes_sent": int(fields[8]),
                     "packets_sent": int(fields[9]),
                 }
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read /proc/net/dev: %s", e)
         return stats
 
     @staticmethod
@@ -340,8 +351,8 @@ class NetworkMonitor:
                 return "ethernet"
             if dev_type == 65534:  # ARPHRD_NONE -- tunnels, VPNs
                 return "vpn"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to classify interface %s: %s", name, e)
 
         return "other"
 
@@ -352,7 +363,8 @@ class NetworkMonitor:
             with open(f"/sys/class/net/{name}/operstate", "r") as f:
                 state = f.read().strip().lower()
             return state == "up"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check interface state for %s: %s", name, e)
             return False
 
     # ------------------------------------------------------------------ #
@@ -389,18 +401,20 @@ class NetworkMonitor:
                     state = parts[3]
                     inode = parts[9]
 
-                    entries.append({
-                        "local_addr": local_addr,
-                        "local_port": local_port,
-                        "remote_addr": remote_addr,
-                        "remote_port": remote_port,
-                        "state": state,
-                        "inode": inode,
-                    })
+                    entries.append(
+                        {
+                            "local_addr": local_addr,
+                            "local_port": local_port,
+                            "remote_addr": remote_addr,
+                            "remote_port": remote_port,
+                            "state": state,
+                            "inode": inode,
+                        }
+                    )
                 except (ValueError, IndexError):
                     continue
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to parse %s: %s", path, e)
         return entries
 
     @staticmethod
@@ -424,7 +438,7 @@ class NetworkMonitor:
             # host byte order (little-endian on x86).
             if len(host_hex) != 32:
                 return (host_hex, port)
-            words = [host_hex[i:i + 8] for i in range(0, 32, 8)]
+            words = [host_hex[i : i + 8] for i in range(0, 32, 8)]
             byte_groups = []
             for word in words:
                 # Convert each 4-byte word from little-endian
@@ -437,14 +451,16 @@ class NetworkMonitor:
             else:
                 try:
                     addr = socket.inet_ntop(socket.AF_INET6, raw)
-                except Exception:
+                except Exception as e:
+                    logger.debug("Failed to decode IPv6 address: %s", e)
                     addr = host_hex
         else:
             # IPv4: 8 hex chars, little-endian 32-bit
             try:
                 packed = struct.pack("<I", int(host_hex, 16))
                 addr = socket.inet_ntoa(packed)
-            except Exception:
+            except Exception as e:
+                logger.debug("Failed to decode IPv4 address: %s", e)
                 addr = host_hex
 
         return (addr, port)
@@ -462,11 +478,9 @@ class NetworkMonitor:
         """
         inode_map: Dict[str, Tuple[int, str]] = {}
         try:
-            pids = [
-                entry for entry in os.listdir("/proc")
-                if entry.isdigit()
-            ]
-        except Exception:
+            pids = [entry for entry in os.listdir("/proc") if entry.isdigit()]
+        except Exception as e:
+            logger.debug("Failed to list /proc entries: %s", e)
             return inode_map
 
         for pid_str in pids:
@@ -506,5 +520,6 @@ class NetworkMonitor:
         try:
             with open(f"/proc/{pid}/comm", "r") as f:
                 return f.read().strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read process name for pid %s: %s", pid, e)
             return ""

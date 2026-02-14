@@ -8,16 +8,22 @@ Provides:
 - GPU acceleration configuration
 """
 
+import logging
 import os
 import shutil
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
 
+from services.system import SystemManager
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -34,33 +40,33 @@ class OllamaManager:
         "llama3.2": {
             "name": "Llama 3.2 (3B)",
             "size": "2.0 GB",
-            "desc": "Meta's latest, fast and capable"
+            "desc": "Meta's latest, fast and capable",
         },
         "mistral": {
             "name": "Mistral 7B",
             "size": "4.1 GB",
-            "desc": "Excellent general-purpose model"
+            "desc": "Excellent general-purpose model",
         },
         "codellama": {
             "name": "Code Llama (7B)",
             "size": "3.8 GB",
-            "desc": "Specialized for code generation"
+            "desc": "Specialized for code generation",
         },
         "phi3": {
             "name": "Phi-3 Mini",
             "size": "2.3 GB",
-            "desc": "Microsoft's efficient small model"
+            "desc": "Microsoft's efficient small model",
         },
         "gemma2:2b": {
             "name": "Gemma 2 (2B)",
             "size": "1.6 GB",
-            "desc": "Google's lightweight model"
+            "desc": "Google's lightweight model",
         },
         "qwen2.5:3b": {
             "name": "Qwen 2.5 (3B)",
             "size": "1.9 GB",
-            "desc": "Alibaba's multilingual model"
-        }
+            "desc": "Alibaba's multilingual model",
+        },
     }
 
     @classmethod
@@ -76,7 +82,7 @@ class OllamaManager:
                 ["systemctl", "--user", "is-active", "ollama"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 return True
@@ -86,20 +92,19 @@ class OllamaManager:
                 ["systemctl", "is-active", "ollama"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             return result.returncode == 0
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check Ollama service status via systemctl: %s", e)
             # Check if process is running
             try:
                 result = subprocess.run(
-                    ["pgrep", "-x", "ollama"],
-                    capture_output=True,
-                    text=True,
-                    timeout=5
+                    ["pgrep", "-x", "ollama"], capture_output=True, text=True, timeout=5
                 )
                 return result.returncode == 0
-            except Exception:
+            except Exception as e:
+                logger.debug("Failed to check Ollama process via pgrep: %s", e)
                 return False
 
     @classmethod
@@ -117,7 +122,7 @@ class OllamaManager:
                 ["bash", "-c", "curl -fsSL https://ollama.com/install.sh | sh"],
                 capture_output=True,
                 text=True,
-                timeout=300  # 5 minutes
+                timeout=300,  # 5 minutes
             )
 
             if result.returncode == 0:
@@ -144,7 +149,7 @@ class OllamaManager:
                 ["ollama", "serve"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                start_new_session=True
+                start_new_session=True,
             )
             return Result(True, "Ollama service started")
         except Exception as e:
@@ -163,7 +168,9 @@ class OllamaManager:
             # Try systemctl first (if running as a service)
             result = subprocess.run(
                 ["systemctl", "--user", "stop", "ollama"],
-                capture_output=True, text=True, timeout=10
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             if result.returncode == 0:
                 return Result(True, "Ollama service stopped")
@@ -171,7 +178,9 @@ class OllamaManager:
             # Fallback: kill the process
             result = subprocess.run(
                 ["pkill", "-f", "ollama serve"],
-                capture_output=True, text=True, timeout=10
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             if result.returncode == 0:
                 return Result(True, "Ollama process stopped")
@@ -188,10 +197,7 @@ class OllamaManager:
 
         try:
             result = subprocess.run(
-                ["ollama", "list"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["ollama", "list"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode != 0:
@@ -204,13 +210,16 @@ class OllamaManager:
                 if line.strip():
                     parts = line.split()
                     if len(parts) >= 2:
-                        models.append({
-                            "name": parts[0],
-                            "size": parts[1] if len(parts) > 1 else "unknown"
-                        })
+                        models.append(
+                            {
+                                "name": parts[0],
+                                "size": parts[1] if len(parts) > 1 else "unknown",
+                            }
+                        )
 
             return models
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list Ollama models: %s", e)
             return []
 
     @classmethod
@@ -230,7 +239,7 @@ class OllamaManager:
                 ["ollama", "pull", model_name],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True
+                text=True,
             )
 
             output = []
@@ -258,10 +267,7 @@ class OllamaManager:
 
         try:
             result = subprocess.run(
-                ["ollama", "rm", model_name],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["ollama", "rm", model_name], capture_output=True, text=True, timeout=30
             )
 
             if result.returncode == 0:
@@ -292,14 +298,12 @@ class OllamaManager:
                 ["ollama", "run", model, prompt],
                 capture_output=True,
                 text=True,
-                timeout=timeout
+                timeout=timeout,
             )
 
             if result.returncode == 0:
                 return Result(
-                    True,
-                    "Response generated",
-                    {"response": result.stdout.strip()}
+                    True, "Response generated", {"response": result.stdout.strip()}
                 )
             else:
                 return Result(False, f"Generation failed: {result.stderr}")
@@ -318,8 +322,7 @@ class LlamaCppManager:
     @classmethod
     def is_installed(cls) -> bool:
         """Check if llama.cpp main binary is available."""
-        return shutil.which("llama-cli") is not None or \
-            shutil.which("main") is not None
+        return shutil.which("llama-cli") is not None or shutil.which("main") is not None
 
     @classmethod
     def install(cls) -> Result:
@@ -328,25 +331,45 @@ class LlamaCppManager:
         if cls.is_installed():
             return Result(True, "llama.cpp is already installed")
 
-        # Try DNF first (if packaged)
+        # Try package manager (if packaged)
         try:
-            result = subprocess.run(
-                ["dnf", "list", "llama-cpp"],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            pm = SystemManager.get_package_manager()
+            if pm == "rpm-ostree":
+                # On Atomic, check if package is available via rpm-ostree
+                result = subprocess.run(
+                    ["rpm", "-q", "llama-cpp"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if result.returncode == 0:
+                    return Result(
+                        False,
+                        "llama.cpp package found. Install with: pkexec rpm-ostree install llama-cpp",
+                    )
+            else:
+                result = subprocess.run(
+                    ["dnf", "list", "llama-cpp"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if result.returncode == 0:
+                    return Result(
+                        False,
+                        "llama.cpp package found. Install with: pkexec dnf install llama-cpp",
+                    )
             if result.returncode == 0:
                 return Result(
                     False,
-                    "llama.cpp package found. Install with: sudo dnf install llama-cpp"
+                    "llama.cpp package found. Install with: pkexec dnf install llama-cpp",
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to check llama.cpp package availability: %s", e)
 
         return Result(
             False,
-            "llama.cpp requires manual installation. See: https://github.com/ggerganov/llama.cpp"
+            "llama.cpp requires manual installation. See: https://github.com/ggerganov/llama.cpp",
         )
 
 
@@ -366,11 +389,7 @@ class AIConfigManager:
             return Result(False, "NVIDIA GPU not detected")
 
         # Check if CUDA toolkit is installed
-        cuda_paths = [
-            "/usr/local/cuda",
-            "/usr/lib64/cuda",
-            "/opt/cuda"
-        ]
+        cuda_paths = ["/usr/local/cuda", "/usr/lib64/cuda", "/opt/cuda"]
 
         cuda_found = any(os.path.exists(p) for p in cuda_paths)
 
@@ -380,8 +399,8 @@ class AIConfigManager:
         return Result(
             False,
             "CUDA toolkit not found. Install with:\n"
-            "sudo dnf install cuda-toolkit\n"
-            "Or enable RPM Fusion and install: sudo dnf install nvidia-driver-cuda"
+            "pkexec dnf install cuda-toolkit\n"
+            "Or enable RPM Fusion and install: pkexec dnf install nvidia-driver-cuda",
         )
 
     @classmethod
@@ -393,20 +412,17 @@ class AIConfigManager:
             # Check if AMD GPU exists
             try:
                 result = subprocess.run(
-                    ["lspci"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
+                    ["lspci"], capture_output=True, text=True, timeout=10
                 )
                 if "AMD" not in result.stdout or "VGA" not in result.stdout:
                     return Result(False, "AMD GPU not detected")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to detect AMD GPU via lspci: %s", e)
 
             return Result(
                 False,
                 "ROCm not installed. Install with:\n"
-                "sudo dnf install rocm-hip rocm-runtime rocm-smi"
+                "pkexec dnf install rocm-hip rocm-runtime rocm-smi",
             )
 
         return Result(True, "ROCm is configured and ready")
@@ -420,11 +436,14 @@ class AIConfigManager:
         if shutil.which("nvidia-smi"):
             try:
                 out = subprocess.run(
-                    ["nvidia-smi", "--query-gpu=memory.total,memory.used,memory.free",
-                     "--format=csv,noheader,nounits"],
+                    [
+                        "nvidia-smi",
+                        "--query-gpu=memory.total,memory.used,memory.free",
+                        "--format=csv,noheader,nounits",
+                    ],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
                 )
                 if out.returncode == 0:
                     parts = out.stdout.strip().split(",")
@@ -432,7 +451,7 @@ class AIConfigManager:
                         result["total_mb"] = int(parts[0].strip())
                         result["used_mb"] = int(parts[1].strip())
                         result["free_mb"] = int(parts[2].strip())
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to query NVIDIA GPU memory: %s", e)
 
         return result

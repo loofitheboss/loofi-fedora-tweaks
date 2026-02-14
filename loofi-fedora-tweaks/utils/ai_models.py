@@ -9,15 +9,19 @@ Provides:
 - Installed model listing and RAM estimation
 """
 
+import logging
 import shutil
 import subprocess
 from dataclasses import dataclass
 from typing import Any, Optional
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -122,16 +126,18 @@ class AIModelManager:
         """
         models = []
         for model_id, info in RECOMMENDED_MODELS.items():
-            models.append({
-                "id": model_id,
-                "name": info["name"],
-                "size": info["size"],
-                "size_mb": info["size_mb"],
-                "quantization": info["quantization"],
-                "ram_required": info["ram_required"],
-                "parameters": info["parameters"],
-                "description": info["description"],
-            })
+            models.append(
+                {
+                    "id": model_id,
+                    "name": info["name"],
+                    "size": info["size"],
+                    "size_mb": info["size_mb"],
+                    "quantization": info["quantization"],
+                    "ram_required": info["ram_required"],
+                    "parameters": info["parameters"],
+                    "description": info["description"],
+                }
+            )
         return models
 
     @staticmethod
@@ -210,8 +216,7 @@ class AIModelManager:
                     {"model_id": model_id},
                 )
             else:
-                tail = " ".join(
-                    output_lines[-3:]) if output_lines else "Unknown error"
+                tail = " ".join(output_lines[-3:]) if output_lines else "Unknown error"
                 return Result(False, f"Download failed: {tail}")
 
         except FileNotFoundError:
@@ -249,16 +254,19 @@ class AIModelManager:
                     continue
                 parts = line.split()
                 if len(parts) >= 2:
-                    models.append({
-                        "name": parts[0],
-                        "size": parts[1] if len(parts) > 1 else "unknown",
-                    })
+                    models.append(
+                        {
+                            "name": parts[0],
+                            "size": parts[1] if len(parts) > 1 else "unknown",
+                        }
+                    )
 
             return models
 
         except subprocess.TimeoutExpired:
             return []
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list installed Ollama models: %s", e)
             return []
 
     @staticmethod

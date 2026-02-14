@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        39.0.0
+Version:        40.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -82,6 +82,17 @@ install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/
 /usr/share/icons/hicolor/128x128/apps/loofi-fedora-tweaks.png
 
 %changelog
+* Sat Feb 14 2026 Loofi <loofi@example.com> - 40.0.0-1
+- v40.0.0 "Foundation" — Correctness & Safety
+- All subprocess calls have explicit timeout= parameters
+- All 21 f-string logger calls converted to %s formatting
+- All 13 hardcoded dnf commands replaced with PrivilegedCommand/SystemManager
+- All 10 pkexec sh -c calls refactored to atomic commands (no shell=True)
+- All 141 silent except Exception: blocks now capture and log errors
+- All sudo references replaced with pkexec
+- package_manager.py unified through PrivilegedCommand.dnf()
+- Fedora Atomic (rpm-ostree) compatibility across all package operations
+
 * Fri Jul 18 2025 Loofi <loofi@example.com> - 34.0.0-1
 - v34.0.0 "Citadel" — Polish & Stability
 - Light theme completely rewritten (Catppuccin Latte, 24+ new selectors)

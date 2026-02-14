@@ -6,6 +6,7 @@ Discovers other Loofi instances on the local network using Avahi/mDNS,
 registers this device as a service, and provides peer connectivity checks.
 """
 
+import logging
 import os
 import shutil
 import socket
@@ -16,6 +17,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from utils.containers import Result
+
+logger = logging.getLogger(__name__)
 
 SERVICE_TYPE = "_loofi._tcp.local."
 SERVICE_PORT = 53317  # Same as LocalSend for compatibility
@@ -28,13 +31,14 @@ DEVICE_ID_FILE = os.path.join(CONFIG_DIR, "device_id")
 @dataclass
 class PeerDevice:
     """Represents a discovered peer on the local network."""
-    name: str              # hostname or user-set name
-    address: str           # IP address
-    port: int              # service port
-    device_id: str         # unique device identifier
-    platform: str          # "linux", "android", etc.
-    version: str           # Loofi version
-    last_seen: float       # timestamp
+
+    name: str  # hostname or user-set name
+    address: str  # IP address
+    port: int  # service port
+    device_id: str  # unique device identifier
+    platform: str  # "linux", "android", etc.
+    version: str  # Loofi version
+    last_seen: float  # timestamp
     # ["clipboard", "filedrop", "teleport"]
     capabilities: list = field(default_factory=list)
 
@@ -149,7 +153,8 @@ class MeshDiscovery:
             )
         except subprocess.TimeoutExpired:
             return []
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to run avahi-browse for peer discovery: %s", e)
             return []
 
         if result.returncode != 0:
@@ -185,8 +190,9 @@ class MeshDiscovery:
                 platform=txt_fields.get("platform", "unknown"),
                 version=txt_fields.get("version", ""),
                 last_seen=now,
-                capabilities=txt_fields.get("capabilities", "").split(
-                    ",") if txt_fields.get("capabilities") else [],
+                capabilities=txt_fields.get("capabilities", "").split(",")
+                if txt_fields.get("capabilities")
+                else [],
             )
             peers.append(peer)
 

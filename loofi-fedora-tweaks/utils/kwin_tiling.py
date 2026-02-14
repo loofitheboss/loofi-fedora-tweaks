@@ -8,6 +8,7 @@ Provides:
 - Window rules management
 """
 
+import logging
 import subprocess
 import shutil
 import os
@@ -16,10 +17,13 @@ from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -94,11 +98,19 @@ class KWinManager:
         try:
             # Enable quick tiling in kwinrc
             result = subprocess.run(
-                [kwrite, "--file", "kwinrc", "--group", "Windows",
-                 "--key", "ElectricBorders", "1"],
+                [
+                    kwrite,
+                    "--file",
+                    "kwinrc",
+                    "--group",
+                    "Windows",
+                    "--key",
+                    "ElectricBorders",
+                    "1",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode != 0:
@@ -128,12 +140,19 @@ class KWinManager:
 
         try:
             result = subprocess.run(
-                [kwrite, "--file", "kglobalshortcutsrc",
-                 "--group", "kwin",
-                 "--key", action_name, shortcut],
+                [
+                    kwrite,
+                    "--file",
+                    "kglobalshortcutsrc",
+                    "--group",
+                    "kwin",
+                    "--key",
+                    action_name,
+                    shortcut,
+                ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode != 0:
@@ -190,7 +209,7 @@ class KWinManager:
         return Result(
             True,
             f"Applied '{preset}' preset. Restart KWin to apply.",
-            {"bindings": bindings}
+            {"bindings": bindings},
         )
 
     @classmethod
@@ -202,7 +221,7 @@ class KWinManager:
                 ["qdbus", "org.kde.KWin", "/KWin", "reconfigure"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -210,11 +229,16 @@ class KWinManager:
 
             # Try dbus-send as fallback
             result = subprocess.run(
-                ["dbus-send", "--type=signal", "--dest=org.kde.KWin",
-                 "/KWin", "org.kde.KWin.reloadConfig"],
+                [
+                    "dbus-send",
+                    "--type=signal",
+                    "--dest=org.kde.KWin",
+                    "/KWin",
+                    "org.kde.KWin.reloadConfig",
+                ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -230,7 +254,7 @@ class KWinManager:
         window_class: str,
         workspace: Optional[int] = None,
         maximized: bool = False,
-        position: Optional[str] = None
+        position: Optional[str] = None,
     ) -> Result:
         """
         Add a KWin window rule.
@@ -250,11 +274,18 @@ class KWinManager:
 
             if kread:
                 result = subprocess.run(
-                    [kread, "--file", "kwinrulesrc", "--group", "General",
-                     "--key", "count"],
+                    [
+                        kread,
+                        "--file",
+                        "kwinrulesrc",
+                        "--group",
+                        "General",
+                        "--key",
+                        "count",
+                    ],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     count = int(result.stdout.strip())
@@ -268,39 +299,103 @@ class KWinManager:
 
             # Set rule properties
             commands = [
-                [kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                 "--key", "Description", f"Loofi Rule: {window_class}"],
-                [kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                 "--key", "wmclass", window_class],
-                [kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                 "--key", "wmclassmatch", "1"],  # Exact match
+                [
+                    kwrite,
+                    "--file",
+                    "kwinrulesrc",
+                    "--group",
+                    f"{new_rule_num}",
+                    "--key",
+                    "Description",
+                    f"Loofi Rule: {window_class}",
+                ],
+                [
+                    kwrite,
+                    "--file",
+                    "kwinrulesrc",
+                    "--group",
+                    f"{new_rule_num}",
+                    "--key",
+                    "wmclass",
+                    window_class,
+                ],
+                [
+                    kwrite,
+                    "--file",
+                    "kwinrulesrc",
+                    "--group",
+                    f"{new_rule_num}",
+                    "--key",
+                    "wmclassmatch",
+                    "1",
+                ],  # Exact match
             ]
 
             if workspace:
-                commands.append([
-                    kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                    "--key", "desktops", str(workspace)
-                ])
-                commands.append([
-                    kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                    "--key", "desktopsrule", "2"  # Force
-                ])
+                commands.append(
+                    [
+                        kwrite,
+                        "--file",
+                        "kwinrulesrc",
+                        "--group",
+                        f"{new_rule_num}",
+                        "--key",
+                        "desktops",
+                        str(workspace),
+                    ]
+                )
+                commands.append(
+                    [
+                        kwrite,
+                        "--file",
+                        "kwinrulesrc",
+                        "--group",
+                        f"{new_rule_num}",
+                        "--key",
+                        "desktopsrule",
+                        "2",  # Force
+                    ]
+                )
 
             if maximized:
-                commands.append([
-                    kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                    "--key", "maximizehoriz", "true"
-                ])
-                commands.append([
-                    kwrite, "--file", "kwinrulesrc", "--group", f"{new_rule_num}",
-                    "--key", "maximizevert", "true"
-                ])
+                commands.append(
+                    [
+                        kwrite,
+                        "--file",
+                        "kwinrulesrc",
+                        "--group",
+                        f"{new_rule_num}",
+                        "--key",
+                        "maximizehoriz",
+                        "true",
+                    ]
+                )
+                commands.append(
+                    [
+                        kwrite,
+                        "--file",
+                        "kwinrulesrc",
+                        "--group",
+                        f"{new_rule_num}",
+                        "--key",
+                        "maximizevert",
+                        "true",
+                    ]
+                )
 
             # Update count
-            commands.append([
-                kwrite, "--file", "kwinrulesrc", "--group", "General",
-                "--key", "count", str(new_rule_num)
-            ])
+            commands.append(
+                [
+                    kwrite,
+                    "--file",
+                    "kwinrulesrc",
+                    "--group",
+                    "General",
+                    "--key",
+                    "count",
+                    str(new_rule_num),
+                ]
+            )
 
             for cmd in commands:
                 subprocess.run(cmd, capture_output=True, timeout=10)
@@ -308,7 +403,7 @@ class KWinManager:
             return Result(
                 True,
                 f"Window rule added for {window_class}",
-                {"rule_number": new_rule_num}
+                {"rule_number": new_rule_num},
             )
         except Exception as e:
             return Result(False, f"Error: {e}")
@@ -323,7 +418,7 @@ class KWinManager:
                 ["qdbus", "org.kde.KWin", "/KWin", "queryWindowInfo"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode != 0:
@@ -335,7 +430,8 @@ class KWinManager:
                     windows.append({"info": line.strip()})
 
             return windows
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to query KWin window list: %s", e)
             return windows
 
     @classmethod
@@ -396,22 +492,27 @@ console.log("Loofi Tiling Script loaded");
 
         # Create metadata.json
         metadata = scripts_dir / "metadata.json"
-        metadata.write_text(json.dumps({
-            "KPlugin": {
-                "Name": "Loofi Tiling",
-                "Description": "Basic tiling script from Loofi Fedora Tweaks",
-                "Icon": "preferences-system-windows-effect-fadedesktop",
-                "Authors": [{"Name": "Loofi Fedora Tweaks"}],
-                "Id": "loofi-tiling",
-                "Version": "1.0",
-                "License": "GPL-3.0"
-            },
-            "X-Plasma-API": "javascript",
-            "X-Plasma-MainScript": "main.js"
-        }, indent=2))
+        metadata.write_text(
+            json.dumps(
+                {
+                    "KPlugin": {
+                        "Name": "Loofi Tiling",
+                        "Description": "Basic tiling script from Loofi Fedora Tweaks",
+                        "Icon": "preferences-system-windows-effect-fadedesktop",
+                        "Authors": [{"Name": "Loofi Fedora Tweaks"}],
+                        "Id": "loofi-tiling",
+                        "Version": "1.0",
+                        "License": "GPL-3.0",
+                    },
+                    "X-Plasma-API": "javascript",
+                    "X-Plasma-MainScript": "main.js",
+                },
+                indent=2,
+            )
+        )
 
         return Result(
             True,
             f"Tiling script installed to {scripts_dir}. Enable in System Settings → Window Management → KWin Scripts.",
-            {"path": str(scripts_dir)}
+            {"path": str(scripts_dir)},
         )

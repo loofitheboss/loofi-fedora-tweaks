@@ -1,6 +1,13 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QGridLayout,
-    QPushButton, QComboBox, QFileDialog
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QGroupBox,
+    QGridLayout,
+    QPushButton,
+    QComboBox,
+    QFileDialog,
 )
 from PyQt6.QtCore import QTimer
 import os
@@ -15,7 +22,6 @@ logger = get_logger(__name__)
 
 
 class SystemInfoTab(QWidget, PluginInterface):
-
     _METADATA = PluginMetadata(
         id="system_info",
         name="System Info",
@@ -51,7 +57,7 @@ class SystemInfoTab(QWidget, PluginInterface):
             (self.tr("RAM"), "ram"),
             (self.tr("Disk Usage (/)"), "disk"),
             (self.tr("Uptime"), "uptime"),
-            (self.tr("Battery"), "battery")
+            (self.tr("Battery"), "battery"),
         ]
 
         for i, (label, key) in enumerate(fields):
@@ -100,8 +106,8 @@ class SystemInfoTab(QWidget, PluginInterface):
                 self.labels["battery"].setText(battery)
             else:
                 self.labels["battery"].setText(self.tr("No battery detected"))
-        except Exception:
-            logger.debug("Failed to refresh system info", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to refresh system info: %s", e)
 
     def _export_report(self):
         """Export system report as Markdown or HTML."""
@@ -118,5 +124,5 @@ class SystemInfoTab(QWidget, PluginInterface):
         if path:
             try:
                 ReportExporter.save_report(path, fmt)
-            except Exception:
-                logger.debug("Failed to export system report", exc_info=True)
+            except Exception as e:
+                logger.debug("Failed to export system report: %s", e)

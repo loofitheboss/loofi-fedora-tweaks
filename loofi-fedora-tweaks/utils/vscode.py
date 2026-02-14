@@ -7,16 +7,20 @@ Python, C++, and other development profiles.
 """
 
 import json
+import logging
 import subprocess
 import shutil
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result with message."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -44,7 +48,7 @@ class VSCodeManager:
                 "ms-python.black-formatter",
                 "ms-toolsai.jupyter",
                 "charliermarsh.ruff",
-            ]
+            ],
         },
         "cpp": {
             "name": "C/C++ Development",
@@ -55,7 +59,7 @@ class VSCodeManager:
                 "ms-vscode.cmake-tools",
                 "twxs.cmake",
                 "xaver.clang-format",
-            ]
+            ],
         },
         "rust": {
             "name": "Rust Development",
@@ -64,7 +68,7 @@ class VSCodeManager:
                 "rust-lang.rust-analyzer",
                 "tamasfe.even-better-toml",
                 "vadimcn.vscode-lldb",
-            ]
+            ],
         },
         "web": {
             "name": "Web Development",
@@ -75,7 +79,7 @@ class VSCodeManager:
                 "bradlc.vscode-tailwindcss",
                 "formulahendry.auto-rename-tag",
                 "ecmel.vscode-html-css",
-            ]
+            ],
         },
         "containers": {
             "name": "Container Development",
@@ -84,7 +88,7 @@ class VSCodeManager:
                 "ms-azuretools.vscode-docker",
                 "ms-vscode-remote.remote-containers",
                 "exiasr.hadolint",
-            ]
+            ],
         },
     }
 
@@ -109,14 +113,12 @@ class VSCodeManager:
             for app in flatpak_apps:
                 try:
                     result = subprocess.run(
-                        ["flatpak", "info", app],
-                        capture_output=True,
-                        timeout=5
+                        ["flatpak", "info", app], capture_output=True, timeout=5
                     )
                     if result.returncode == 0:
                         return f"flatpak run {app}"
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Flatpak VS Code detection failed: %s", e)
 
         return None
 
@@ -143,20 +145,25 @@ class VSCodeManager:
                     cmd.split() + ["--list-extensions"],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=30,
                 )
             else:
                 result = subprocess.run(
                     [cmd, "--list-extensions"],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=30,
                 )
 
             if result.returncode == 0:
-                return [ext.strip().lower() for ext in result.stdout.strip().split("\n") if ext.strip()]
+                return [
+                    ext.strip().lower()
+                    for ext in result.stdout.strip().split("\n")
+                    if ext.strip()
+                ]
             return []
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list installed extensions: %s", e)
             return []
 
     @classmethod
@@ -180,14 +187,14 @@ class VSCodeManager:
                     cmd.split() + ["--install-extension", extension_id, "--force"],
                     capture_output=True,
                     text=True,
-                    timeout=120
+                    timeout=120,
                 )
             else:
                 result = subprocess.run(
                     [cmd, "--install-extension", extension_id, "--force"],
                     capture_output=True,
                     text=True,
-                    timeout=120
+                    timeout=120,
                 )
 
             if result.returncode == 0:
@@ -236,7 +243,7 @@ class VSCodeManager:
             fail_count == 0,
             f"{profile_name}: {success_count}/{len(extensions)} extensions installed"
             + (f" ({fail_count} failed)" if fail_count else ""),
-            {"installed": success_count, "failed": fail_count}
+            {"installed": success_count, "failed": fail_count},
         )
 
     @classmethod
@@ -254,7 +261,14 @@ class VSCodeManager:
             home / ".config" / "Code" / "User" / "settings.json",  # Standard
             home / ".config" / "Code - OSS" / "User" / "settings.json",  # OSS
             home / ".config" / "VSCodium" / "User" / "settings.json",  # VSCodium
-            home / ".var" / "app" / "com.visualstudio.code" / "config" / "Code" / "User" / "settings.json",  # Flatpak
+            home
+            / ".var"
+            / "app"
+            / "com.visualstudio.code"
+            / "config"
+            / "Code"
+            / "User"
+            / "settings.json",  # Flatpak
         ]
 
         for path in paths:
@@ -304,8 +318,8 @@ class VSCodeManager:
                 "python.formatting.provider": "none",
                 "[python]": {
                     "editor.formatOnSave": True,
-                    "editor.defaultFormatter": "ms-python.black-formatter"
-                }
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                },
             },
             "cpp": {
                 "C_Cpp.default.cppStandard": "c++20",
@@ -316,18 +330,18 @@ class VSCodeManager:
                 "rust-analyzer.checkOnSave.command": "clippy",
                 "[rust]": {
                     "editor.formatOnSave": True,
-                    "editor.defaultFormatter": "rust-lang.rust-analyzer"
-                }
+                    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+                },
             },
             "web": {
                 "[javascript]": {
                     "editor.formatOnSave": True,
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
                 },
                 "[typescript]": {
                     "editor.formatOnSave": True,
-                    "editor.defaultFormatter": "esbenp.prettier-vscode"
-                }
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                },
             },
         }
 
@@ -349,7 +363,9 @@ class VSCodeManager:
             # Deep merge new settings
             new_settings = profile_settings[profile]
             for key, value in new_settings.items():
-                if isinstance(value, dict) and isinstance(current_settings.get(key), dict):
+                if isinstance(value, dict) and isinstance(
+                    current_settings.get(key), dict
+                ):
                     current_settings[key].update(value)
                 else:
                     current_settings[key] = value
@@ -358,7 +374,9 @@ class VSCodeManager:
             with open(settings_path, "w") as f:
                 json.dump(current_settings, f, indent=4)
 
-            return Result(True, f"Settings for {profile} profile injected successfully.")
+            return Result(
+                True, f"Settings for {profile} profile injected successfully."
+            )
 
         except json.JSONDecodeError:
             return Result(False, "Could not parse existing settings.json")
@@ -378,7 +396,7 @@ class VSCodeManager:
                 "key": key,
                 "name": info["name"],
                 "description": info["description"],
-                "extension_count": len(info["extensions"])
+                "extension_count": len(info["extensions"]),
             }
             for key, info in cls.EXTENSION_PROFILES.items()
         ]

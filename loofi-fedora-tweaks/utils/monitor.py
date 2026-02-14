@@ -3,15 +3,19 @@ System Monitor - Resource monitoring utilities.
 Provides memory usage, CPU load, and uptime information.
 """
 
+import logging
 import os
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class MemoryInfo:
     """System memory information."""
+
     total_bytes: int
     available_bytes: int
     used_bytes: int
@@ -33,6 +37,7 @@ class MemoryInfo:
 @dataclass
 class CpuInfo:
     """CPU load information."""
+
     load_1min: float
     load_5min: float
     load_15min: float
@@ -49,6 +54,7 @@ class CpuInfo:
 @dataclass
 class SystemHealth:
     """Aggregated system health status."""
+
     memory: Optional[MemoryInfo]
     cpu: Optional[CpuInfo]
     uptime: str
@@ -119,7 +125,8 @@ class SystemMonitor:
                 used_bytes=used,
                 percent_used=round(percent, 1),
             )
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read memory info from /proc/meminfo: %s", e)
             return None
 
     @staticmethod
@@ -139,7 +146,8 @@ class SystemMonitor:
                 load_15min=round(load_15, 2),
                 core_count=core_count,
             )
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get CPU load averages: %s", e)
             return None
 
     @staticmethod
@@ -167,7 +175,8 @@ class SystemMonitor:
                 parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
 
             return ", ".join(parts)
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read uptime from /proc/uptime: %s", e)
             return "unknown"
 
     @staticmethod
@@ -176,10 +185,12 @@ class SystemMonitor:
         try:
             with open("/etc/hostname", "r") as f:
                 return f.read().strip()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to read hostname from /etc/hostname: %s", e)
             try:
                 return subprocess.getoutput("hostname").strip()
-            except Exception:
+            except Exception as e:
+                logger.debug("Failed to get hostname via hostname command: %s", e)
                 return "unknown"
 
     @classmethod

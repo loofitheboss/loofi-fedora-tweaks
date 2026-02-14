@@ -7,10 +7,19 @@ and log export. Uses SmartLogViewer from utils/smart_logs.py.
 """
 
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QTableWidget, QHeaderView,
-    QComboBox, QSpinBox, QFileDialog, QGridLayout, QTextEdit,
-    QWidget
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QGroupBox,
+    QTableWidget,
+    QHeaderView,
+    QComboBox,
+    QSpinBox,
+    QFileDialog,
+    QGridLayout,
+    QTextEdit,
+    QWidget,
 )
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
@@ -97,9 +106,9 @@ class LogsTab(BaseTab):
         self.pattern_table = QTableWidget()
         self.pattern_table.setAccessibleName(self.tr("Detected Patterns"))
         self.pattern_table.setColumnCount(2)
-        self.pattern_table.setHorizontalHeaderLabels([
-            self.tr("Pattern"), self.tr("Count")
-        ])
+        self.pattern_table.setHorizontalHeaderLabels(
+            [self.tr("Pattern"), self.tr("Count")]
+        )
         self.pattern_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
@@ -163,10 +172,18 @@ class LogsTab(BaseTab):
         filter_layout.addWidget(QLabel(self.tr("Priority:")))
         self.priority_combo = QComboBox()
         self.priority_combo.setAccessibleName(self.tr("Priority filter"))
-        self.priority_combo.addItems([
-            "0 (emerg)", "1 (alert)", "2 (crit)", "3 (err)",
-            "4 (warn)", "5 (notice)", "6 (info)", "7 (debug)"
-        ])
+        self.priority_combo.addItems(
+            [
+                "0 (emerg)",
+                "1 (alert)",
+                "2 (crit)",
+                "3 (err)",
+                "4 (warn)",
+                "5 (notice)",
+                "6 (info)",
+                "7 (debug)",
+            ]
+        )
         self.priority_combo.setCurrentIndex(4)  # Default: warning and above
         filter_layout.addWidget(self.priority_combo)
 
@@ -198,9 +215,9 @@ class LogsTab(BaseTab):
         self.log_table = QTableWidget()
         self.log_table.setAccessibleName(self.tr("Log entries"))
         self.log_table.setColumnCount(4)
-        self.log_table.setHorizontalHeaderLabels([
-            self.tr("Time"), self.tr("Unit"), self.tr("Priority"), self.tr("Message")
-        ])
+        self.log_table.setHorizontalHeaderLabels(
+            [self.tr("Time"), self.tr("Unit"), self.tr("Priority"), self.tr("Message")]
+        )
         hdr = self.log_table.horizontalHeader()
         hdr.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
         hdr.setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
@@ -232,12 +249,16 @@ class LogsTab(BaseTab):
             self.pattern_table.clearSpans()
             self.pattern_table.setRowCount(0)
             if not summary.detected_patterns:
-                self.set_table_empty_state(self.pattern_table, self.tr("No known log patterns detected"))
+                self.set_table_empty_state(
+                    self.pattern_table, self.tr("No known log patterns detected")
+                )
             else:
                 for pattern_name, count in summary.detected_patterns:
                     row = self.pattern_table.rowCount()
                     self.pattern_table.insertRow(row)
-                    self.pattern_table.setItem(row, 0, self.make_table_item(pattern_name))
+                    self.pattern_table.setItem(
+                        row, 0, self.make_table_item(pattern_name)
+                    )
                     self.pattern_table.setItem(row, 1, self.make_table_item(str(count)))
 
             # Populate unit combo from top units
@@ -248,15 +269,19 @@ class LogsTab(BaseTab):
                 units = SmartLogViewer.get_unit_list()
                 for unit in units[:50]:
                     self.unit_combo.addItem(unit)
-            except Exception:
-                logger.debug("Failed to load systemd unit list", exc_info=True)
+            except Exception as e:
+                logger.debug("Failed to load systemd unit list: %s", e)
             # Restore selection
             idx = self.unit_combo.findText(current_text)
             if idx >= 0:
                 self.unit_combo.setCurrentIndex(idx)
 
         except Exception as exc:
-            self.set_table_empty_state(self.pattern_table, self.tr("Failed to load log summary"), color="#e8556d")
+            self.set_table_empty_state(
+                self.pattern_table,
+                self.tr("Failed to load log summary"),
+                color="#e8556d",
+            )
             self.append_output(f"Error loading summary: {exc}\n")
 
     def _fetch_logs(self):
@@ -270,16 +295,15 @@ class LogsTab(BaseTab):
             lines = self.lines_spin.value()
 
             entries = SmartLogViewer.get_logs(
-                unit=unit,
-                priority=priority,
-                lines=lines,
-                since="24h ago"
+                unit=unit, priority=priority, lines=lines, since="24h ago"
             )
 
             self.log_table.clearSpans()
             self.log_table.setRowCount(0)
             if not entries:
-                self.set_table_empty_state(self.log_table, self.tr("No log entries for current filters"))
+                self.set_table_empty_state(
+                    self.log_table, self.tr("No log entries for current filters")
+                )
             for entry in entries:
                 row = self.log_table.rowCount()
                 self.log_table.insertRow(row)
@@ -304,15 +328,18 @@ class LogsTab(BaseTab):
 
             self.append_output(f"Fetched {len(entries)} log entries\n")
         except Exception as exc:
-            self.set_table_empty_state(self.log_table, self.tr("Failed to fetch logs"), color="#e8556d")
+            self.set_table_empty_state(
+                self.log_table, self.tr("Failed to fetch logs"), color="#e8556d"
+            )
             self.append_output(f"Error fetching logs: {exc}\n")
 
     def _export_logs(self):
         """Export current logs to a file."""
         path, _ = QFileDialog.getSaveFileName(
-            self, self.tr("Export Logs"),
+            self,
+            self.tr("Export Logs"),
             "loofi-logs.txt",
-            self.tr("Text Files (*.txt);;JSON Files (*.json)")
+            self.tr("Text Files (*.txt);;JSON Files (*.json)"),
         )
         if not path:
             return

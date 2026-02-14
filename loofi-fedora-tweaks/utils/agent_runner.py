@@ -16,6 +16,7 @@ import threading
 import time
 from typing import Any, Callable, Dict, List, Optional
 
+from services.system import SystemManager
 from utils.agents import (
     ActionSeverity,
     AgentAction,
@@ -106,9 +107,7 @@ class AgentExecutor:
                     action.operation, agent.settings
                 )
             elif action.command:
-                result = AgentExecutor._execute_command(
-                    action.command, action.args
-                )
+                result = AgentExecutor._execute_command(action.command, action.args)
             else:
                 result = AgentResult(
                     success=False,
@@ -142,9 +141,7 @@ class AgentExecutor:
         )
 
     @staticmethod
-    def _execute_operation(
-        operation: str, settings: Dict[str, Any]
-    ) -> AgentResult:
+    def _execute_operation(operation: str, settings: Dict[str, Any]) -> AgentResult:
         """
         Execute a named operation.
 
@@ -421,28 +418,57 @@ class AgentExecutor:
 
     @staticmethod
     def _op_check_dnf_updates(settings: Dict[str, Any]) -> AgentResult:
-        """Check for available DNF updates."""
+        """Check for available package updates."""
         try:
-            result = subprocess.run(
-                ["dnf", "check-update", "--quiet"],
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-            # Exit code 100 = updates available, 0 = no updates
-            if result.returncode == 100:
-                lines = [line for line in result.stdout.strip().split("\n") if line.strip() and not line.startswith("Last")]
-                count = len(lines)
+            if SystemManager.is_atomic():
+                result = subprocess.run(
+                    ["rpm-ostree", "upgrade", "--check"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+                if result.returncode == 0 and "AvailableUpdate" in result.stdout:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().split("\n")
+                        if line.strip()
+                    ]
+                    count = len(lines)
+                    return AgentResult(
+                        success=True,
+                        message=f"{count} rpm-ostree update(s) available",
+                        data={"dnf_updates": count, "alert": count > 0},
+                    )
                 return AgentResult(
                     success=True,
-                    message=f"{count} DNF update(s) available",
-                    data={"dnf_updates": count, "alert": count > 0},
+                    message="System is up to date (rpm-ostree)",
+                    data={"dnf_updates": 0, "alert": False},
                 )
-            return AgentResult(
-                success=True,
-                message="System is up to date (DNF)",
-                data={"dnf_updates": 0, "alert": False},
-            )
+            else:
+                result = subprocess.run(
+                    ["dnf", "check-update", "--quiet"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+                # Exit code 100 = updates available, 0 = no updates
+                if result.returncode == 100:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().split("\n")
+                        if line.strip() and not line.startswith("Last")
+                    ]
+                    count = len(lines)
+                    return AgentResult(
+                        success=True,
+                        message=f"{count} DNF update(s) available",
+                        data={"dnf_updates": count, "alert": count > 0},
+                    )
+                return AgentResult(
+                    success=True,
+                    message="System is up to date (DNF)",
+                    data={"dnf_updates": 0, "alert": False},
+                )
         except (OSError, subprocess.SubprocessError) as exc:
             return AgentResult(success=False, message=f"DNF check failed: {exc}")
 
@@ -457,7 +483,9 @@ class AgentExecutor:
                 timeout=30,
             )
             if result.returncode == 0:
-                lines = [line for line in result.stdout.strip().split("\n") if line.strip()]
+                lines = [
+                    line for line in result.stdout.strip().split("\n") if line.strip()
+                ]
                 count = len(lines)
                 return AgentResult(
                     success=True,
@@ -490,7 +518,11 @@ class AgentExecutor:
                 text=True,
                 timeout=10,
             )
-            size = result.stdout.strip().split("\t")[0] if result.returncode == 0 else "unknown"
+            size = (
+                result.stdout.strip().split("\t")[0]
+                if result.returncode == 0
+                else "unknown"
+            )
             return AgentResult(
                 success=True,
                 message=f"DNF cache size: {size} (use Maintenance tab to clean)",
@@ -588,7 +620,9 @@ class AgentExecutor:
                 },
             )
         except OSError as exc:
-            return AgentResult(success=False, message=f"Workload detection failed: {exc}")
+            return AgentResult(
+                success=False, message=f"Workload detection failed: {exc}"
+            )
 
     @staticmethod
     def _op_apply_tuning(settings: Dict[str, Any]) -> AgentResult:
@@ -703,9 +737,7 @@ class AgentScheduler:
 
             # Log alerts
             if result.data and result.data.get("alert"):
-                logger.warning(
-                    "Agent %s alert: %s", agent.name, result.message
-                )
+                logger.warning("Agent %s alert: %s", agent.name, result.message)
 
         state.status = AgentStatus.IDLE
 
@@ -742,6 +774,7 @@ class AgentScheduler:
         """Send notifications for an agent result if configured."""
         try:
             from utils.agent_notifications import AgentNotifier, AgentNotificationConfig
+
             if not hasattr(self, "_notifier"):
                 self._notifier = AgentNotifier()
             notif_config = AgentNotificationConfig.from_dict(agent.notification_config)

@@ -6,16 +6,20 @@ Reads process information directly from /proc without psutil dependency.
 Provides CPU/memory usage tracking, process listing, and signal management.
 """
 
+import logging
 import os
 import subprocess
 import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ProcessInfo:
     """Information about a single running process."""
+
     pid: int
     name: str
     user: str
@@ -37,7 +41,9 @@ class ProcessManager:
     """
 
     # Class-level storage for CPU calculation snapshots
-    _prev_snapshot: Dict[int, Tuple[float, float]] = {}  # pid -> (total_time, timestamp)
+    _prev_snapshot: Dict[
+        int, Tuple[float, float]
+    ] = {}  # pid -> (total_time, timestamp)
     _prev_snapshot_time: float = 0.0
 
     @staticmethod
@@ -57,8 +63,8 @@ class ProcessManager:
                     if line.startswith("MemTotal:"):
                         parts = line.split()
                         return int(parts[1]) * 1024  # kB to bytes
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read total memory from /proc/meminfo: %s", e)
         return 1  # Avoid division by zero
 
     @staticmethod
@@ -71,8 +77,8 @@ class ProcessManager:
                     parts = line.strip().split(":")
                     if len(parts) >= 3:
                         uid_map[int(parts[2])] = parts[0]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read uid-user map from /etc/passwd: %s", e)
         return uid_map
 
     @staticmethod
@@ -96,7 +102,7 @@ class ProcessManager:
             end = content.rindex(")")
             name = content[start:end]
             # Fields after the closing parenthesis
-            fields = content[end + 2:].split()
+            fields = content[end + 2 :].split()
         except (ValueError, IndexError):
             return None
 
@@ -106,12 +112,12 @@ class ProcessManager:
         try:
             return {
                 "name": name,
-                "state": fields[0],           # field 3
-                "utime": int(fields[11]),      # field 14: user mode jiffies
-                "stime": int(fields[12]),      # field 15: kernel mode jiffies
-                "nice": int(fields[16]),       # field 19: nice value
+                "state": fields[0],  # field 3
+                "utime": int(fields[11]),  # field 14: user mode jiffies
+                "stime": int(fields[12]),  # field 15: kernel mode jiffies
+                "nice": int(fields[16]),  # field 19: nice value
                 "num_threads": int(fields[17]),  # field 20
-                "rss": int(fields[21]),        # field 24: resident set size in pages
+                "rss": int(fields[21]),  # field 24: resident set size in pages
             }
         except (ValueError, IndexError):
             return None
@@ -125,7 +131,13 @@ class ProcessManager:
                     if line.startswith("Uid:"):
                         # Format: Uid: real effective saved filesystem
                         return int(line.split()[1])
-        except (FileNotFoundError, PermissionError, ProcessLookupError, ValueError, IndexError):
+        except (
+            FileNotFoundError,
+            PermissionError,
+            ProcessLookupError,
+            ValueError,
+            IndexError,
+        ):
             pass
         return None
 
@@ -137,7 +149,9 @@ class ProcessManager:
                 raw = f.read()
             if raw:
                 # Arguments are separated by null bytes
-                return raw.replace(b"\x00", b" ").decode("utf-8", errors="replace").strip()
+                return (
+                    raw.replace(b"\x00", b" ").decode("utf-8", errors="replace").strip()
+                )
         except (FileNotFoundError, PermissionError, ProcessLookupError):
             pass
         return ""
@@ -161,7 +175,11 @@ class ProcessManager:
         num_cpus = os.cpu_count() or 1
 
         current_time = time.monotonic()
-        elapsed = current_time - cls._prev_snapshot_time if cls._prev_snapshot_time > 0 else 0.0
+        elapsed = (
+            current_time - cls._prev_snapshot_time
+            if cls._prev_snapshot_time > 0
+            else 0.0
+        )
 
         new_snapshot: Dict[int, Tuple[float, float]] = {}
         processes: List[ProcessInfo] = []
@@ -192,7 +210,9 @@ class ProcessManager:
 
             # Memory
             memory_bytes = stat["rss"] * page_size
-            memory_percent = (memory_bytes / total_memory) * 100.0 if total_memory > 0 else 0.0
+            memory_percent = (
+                (memory_bytes / total_memory) * 100.0 if total_memory > 0 else 0.0
+            )
 
             # User from UID
             uid = cls._read_proc_status_uid(pid)
@@ -203,17 +223,19 @@ class ProcessManager:
             if not command:
                 command = f"[{stat['name']}]"
 
-            processes.append(ProcessInfo(
-                pid=pid,
-                name=stat["name"],
-                user=user,
-                cpu_percent=round(cpu_percent, 1),
-                memory_percent=round(memory_percent, 1),
-                memory_bytes=memory_bytes,
-                state=stat["state"],
-                command=command,
-                nice=stat["nice"],
-            ))
+            processes.append(
+                ProcessInfo(
+                    pid=pid,
+                    name=stat["name"],
+                    user=user,
+                    cpu_percent=round(cpu_percent, 1),
+                    memory_percent=round(memory_percent, 1),
+                    memory_bytes=memory_bytes,
+                    state=stat["state"],
+                    command=command,
+                    nice=stat["nice"],
+                )
+            )
 
         # Store snapshot for next call
         cls._prev_snapshot = new_snapshot
@@ -291,7 +313,10 @@ class ProcessManager:
             except subprocess.TimeoutExpired:
                 return False, f"Timed out sending signal to process {pid}"
             except FileNotFoundError:
-                return False, "pkexec not found - cannot send signal to privileged process"
+                return (
+                    False,
+                    "pkexec not found - cannot send signal to privileged process",
+                )
             except Exception as e:
                 return False, f"Failed to signal process {pid}: {e}"
         except ProcessLookupError:
@@ -375,8 +400,13 @@ class ProcessManager:
                     counts["sleeping"] += 1
                 elif state == "Z":
                     counts["zombie"] += 1
-            except (FileNotFoundError, PermissionError, ProcessLookupError,
-                    ValueError, IndexError):
+            except (
+                FileNotFoundError,
+                PermissionError,
+                ProcessLookupError,
+                ValueError,
+                IndexError,
+            ):
                 continue
 
         return counts

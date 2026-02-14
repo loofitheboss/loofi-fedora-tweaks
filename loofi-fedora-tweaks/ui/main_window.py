@@ -30,7 +30,7 @@ from utils.focus_mode import FocusMode
 from utils.history import HistoryManager
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
-from services.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
+from utils.system import SystemManager  # noqa: F401  (Backward-compatible symbol for legacy tests)
 from version import __version__
 
 from core.plugins import PluginInterface, PluginRegistry
@@ -128,7 +128,9 @@ class MainWindow(QMainWindow):
         # HiDPI: 2*line_height + padding (4+10)*2 = approx 36px at 1x DPI
         search_height = int(self._line_height * 2 + 28)
         self.sidebar_search.setFixedHeight(search_height)
-        self.sidebar_search.setObjectName("mainWinSidebarSearch")
+        self.sidebar_search.setStyleSheet(
+            "QLineEdit { margin: 5px 10px; border-radius: 8px; padding: 4px 10px; }"
+        )
         self.sidebar_search.textChanged.connect(self._filter_sidebar)
         sidebar_layout.addWidget(self.sidebar_search)
 
@@ -342,8 +344,8 @@ class MainWindow(QMainWindow):
             self.pulse_thread = PulseThread(self.pulse)
             self.pulse.moveToThread(self.pulse_thread)
             self.pulse_thread.start()
-        except Exception:
-            logger.debug("Failed to start pulse listener", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to start pulse listener: %s", e)
 
     def _build_favorites_section(self):
         """Build a ⭐ Favorites category at the top of the sidebar with pinned tabs."""
@@ -581,9 +583,8 @@ class MainWindow(QMainWindow):
             self._status_label.setProperty("toast", "error")
         else:
             self._status_label.setProperty("toast", "success")
-        if self._status_label.style() is not None:
-            self._status_label.style().unpolish(self._status_label)
-            self._status_label.style().polish(self._status_label)
+        self._status_label.style().unpolish(self._status_label)
+        self._status_label.style().polish(self._status_label)
 
         from PyQt6.QtCore import QTimer
 
@@ -593,9 +594,8 @@ class MainWindow(QMainWindow):
         """Clear toast styling from the status bar."""
         self._status_label.setText("")
         self._status_label.setProperty("toast", "")
-        if self._status_label.style() is not None:
-            self._status_label.style().unpolish(self._status_label)
-            self._status_label.style().polish(self._status_label)
+        self._status_label.style().unpolish(self._status_label)
+        self._status_label.style().polish(self._status_label)
 
     def switch_to_tab(self, name):
         """Helper for Dashboard and Command Palette to switch tabs."""
@@ -759,12 +759,18 @@ class MainWindow(QMainWindow):
         # Bell button
         self.notif_bell = QToolButton()
         self.notif_bell.setText("\U0001f514")  # Bell emoji
-        self.notif_bell.setObjectName("mainWinNotifBell")
+        self.notif_bell.setStyleSheet(
+            "QToolButton { border: none; font-size: 20px; padding: 5px; }"
+            "QToolButton:hover { background-color: #1c2030; border-radius: 6px; }"
+        )
         self.notif_bell.clicked.connect(self._toggle_notification_panel)
 
         # Unread count badge (overlays bell button)
         self._notif_badge = QLabel("0")
-        self._notif_badge.setObjectName("mainWinNotifBadge")
+        self._notif_badge.setStyleSheet(
+            "background-color: #e8556d; color: #0b0e14; border-radius: 8px; "
+            "padding: 1px 6px; font-size: 10px; font-weight: bold;"
+        )
         self._notif_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._notif_badge.setFixedHeight(16)
         self._notif_badge.setVisible(False)
@@ -837,7 +843,8 @@ class MainWindow(QMainWindow):
                 self._notif_badge.setVisible(True)
             else:
                 self._notif_badge.setVisible(False)
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to refresh notification badge: %s", e)
             self._notif_badge.setVisible(False)
 
     def show_toast(self, title: str, message: str, category: str = "general"):
@@ -850,8 +857,8 @@ class MainWindow(QMainWindow):
             self._toast_widget.show_toast(title, message, category)
             # Refresh badge since a new notification likely exists
             self._refresh_notif_badge()
-        except Exception:
-            logger.debug("Failed to show toast notification", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to show toast notification: %s", e)
 
     def _refresh_status_indicators(self):
         """Update sidebar status indicators from live system data (v29.0)."""
@@ -864,12 +871,13 @@ class MainWindow(QMainWindow):
                 self._set_tab_status("Maintenance", "warning", "Updates available")
             else:
                 self._set_tab_status("Maintenance", "ok", "Up to date")
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check for updates: %s", e)
             self._set_tab_status("Maintenance", "", "")
 
         try:
             # Storage: check disk space
-            from services.hardware import DiskManager
+            from utils.disk import DiskManager
 
             usage = DiskManager.get_disk_usage("/")
             if usage and hasattr(usage, "percent_used"):
@@ -883,7 +891,8 @@ class MainWindow(QMainWindow):
                     )
                 else:
                     self._set_tab_status("Storage", "ok", "Healthy")
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check disk space: %s", e)
             self._set_tab_status("Storage", "", "")
 
     def _set_tab_status(self, tab_name: str, status: str, tooltip: str = ""):
@@ -1032,8 +1041,8 @@ class MainWindow(QMainWindow):
                 if hasattr(page, "cleanup"):
                     try:
                         page.cleanup()
-                    except Exception:
-                        logger.debug("Failed to cleanup page on close", exc_info=True)
+                    except Exception as e:
+                        logger.debug("Failed to cleanup page on close: %s", e)
             event.accept()
 
     def check_dependencies(self):

@@ -3,8 +3,12 @@ Battery Manager - Battery charge limit control via systemd service.
 Part of hardware services layer (v23.0 Architecture Hardening).
 """
 
+import logging
 import os
+import subprocess
 from typing import Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 class BatteryManager:
@@ -15,6 +19,11 @@ class BatteryManager:
     def set_limit(self, limit: int) -> Tuple[Optional[str], Optional[list]]:
         """
         Sets the battery charge limit (80 or 100) using a persistent Systemd service.
+
+        Returns:
+            Tuple of (cmd, args) for the caller, or (None, None) on error.
+            The command is now a multi-step operation run internally;
+            returns ("echo", ["Battery limit set"]) on success.
         """
         # 1. Save config for the UI to read back
         try:
@@ -22,10 +31,9 @@ class BatteryManager:
             with open(self.CONFIG_PATH, "w") as f:
                 f.write(str(limit))
         except Exception as e:
-            print(f"Failed to save battery config: {e}")
+            logger.debug("Failed to save battery config: %s", e)
 
         # 2. Create the Systemd Service content
-        # We use a oneshot service that simple echoes the value at boot.
         service_content = f"""[Unit]
 Description=Restore HP Battery Charge Limit ({limit}%)
 After=multi-user.target
@@ -45,17 +53,64 @@ WantedBy=multi-user.target
             with open(tmp_service, "w") as f:
                 f.write(service_content)
 
-            # 4. Construct the command to move it and enable it
-            # We chain commands: mv temp -> /etc/... && daemon-reload && enable --now
-            # Note: We also apply it immediately via the shell command in the chain for instant feedback
+            # 4. Move service file to systemd directory
+            result = subprocess.run(
+                ["pkexec", "mv", tmp_service, self.SERVICE_PATH],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                logger.debug("Failed to move service file: %s", result.stderr)
+                return None, None
 
-            cmd = f"mv {tmp_service} {self.SERVICE_PATH} && " \
-                f"systemctl daemon-reload && " \
-                f"systemctl enable --now loofi-battery.service && " \
-                f"to_apply={limit}; echo $to_apply > /sys/class/power_supply/BAT0/charge_control_end_threshold"
+            # 5. Reload systemd daemon
+            result = subprocess.run(
+                ["pkexec", "systemctl", "daemon-reload"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                logger.debug("daemon-reload failed: %s", result.stderr)
+                return None, None
 
-            return "pkexec", ["sh", "-c", cmd]
+            # 6. Enable and start the service
+            result = subprocess.run(
+                ["pkexec", "systemctl", "enable", "--now", "loofi-battery.service"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                logger.debug("Service enable failed: %s", result.stderr)
+                return None, None
+
+            # 7. Apply immediately by writing to sysfs
+            result = subprocess.run(
+                [
+                    "pkexec",
+                    "tee",
+                    "/sys/class/power_supply/BAT0/charge_control_end_threshold",
+                ],
+                input=str(limit),
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                logger.debug("sysfs write failed: %s", result.stderr)
+                # Service is installed but immediate apply failed
+                return "echo", [
+                    f"Battery limit service installed, reboot to apply {limit}%"
+                ]
+
+            return "echo", [f"Battery limit set to {limit}%"]
 
         except Exception as e:
-            print(f"Error preparing battery service: {e}")
+            logger.debug("Error preparing battery service: %s", e)
             return None, None

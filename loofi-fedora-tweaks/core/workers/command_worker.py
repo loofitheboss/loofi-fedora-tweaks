@@ -56,7 +56,7 @@ class CommandWorker(BaseWorker):
         command: str,
         args: Optional[List[str]] = None,
         description: str = "",
-        parent: Optional[Any] = None
+        parent: Optional[Any] = None,
     ):
         """
         Initialize command worker.
@@ -88,7 +88,9 @@ class CommandWorker(BaseWorker):
         Returns:
             ActionResult: Structured result with exit code and output
         """
-        logger.debug(f"CommandWorker executing: {self.command} {' '.join(self.args)}")
+        logger.debug(
+            "CommandWorker executing: %s %s", self.command, " ".join(self.args)
+        )
 
         # Initialize runner and connect signals
         self._runner = CommandRunner()
@@ -117,14 +119,15 @@ class CommandWorker(BaseWorker):
 
         result = ActionResult(
             success=success,
-            message=self.description or f"Command {'succeeded' if success else 'failed'}",
+            message=self.description
+            or f"Command {'succeeded' if success else 'failed'}",
             exit_code=self._exit_code,
             stdout=stdout_text,
             stderr="",  # CommandRunner merges stderr into output
-            action_id=f"{self.command}_{self.args[0] if self.args else 'no_args'}"
+            action_id=f"{self.command}_{self.args[0] if self.args else 'no_args'}",
         )
 
-        logger.debug(f"CommandWorker completed with exit code {self._exit_code}")
+        logger.debug("CommandWorker completed with exit code %s", self._exit_code)
         return result
 
     def _on_output(self, text: str) -> None:
@@ -171,7 +174,7 @@ class CommandWorker(BaseWorker):
         Args:
             error_msg: Error message
         """
-        logger.warning(f"CommandWorker error: {error_msg}")
+        logger.warning("CommandWorker error: %s", error_msg)
         # Don't emit error signal here - let do_work() return ActionResult
         # with success=False and the error will propagate via BaseWorker.error
 

@@ -17,8 +17,15 @@ import getpass
 from collections import deque
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGridLayout, QFrame, QProgressBar, QScrollArea
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QGridLayout,
+    QFrame,
+    QProgressBar,
+    QScrollArea,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
@@ -28,8 +35,8 @@ from core.plugins.metadata import PluginMetadata
 
 from services.system.processes import ProcessManager
 from utils.commands import PrivilegedCommand
-from services.system import SystemManager
-from services.hardware import DiskManager
+from utils.system import SystemManager
+from utils.disk import DiskManager
 from utils.monitor import SystemMonitor
 from utils.history import HistoryManager
 from utils.health_score import HealthScoreManager
@@ -42,6 +49,7 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Sparkline widget (compact, self-contained)
 # ---------------------------------------------------------------------------
+
 
 class SparkLine(QWidget):
     """Tiny area-chart widget for embedding in dashboard cards."""
@@ -121,6 +129,7 @@ class SparkLine(QWidget):
 # Health Score Widget (v31.0 Smart UX)
 # ---------------------------------------------------------------------------
 
+
 class HealthScoreWidget(QWidget):
     """Circular gauge showing aggregate system health score."""
 
@@ -153,7 +162,9 @@ class HealthScoreWidget(QWidget):
         bg_pen.setWidth(8)
         bg_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(bg_pen)
-        painter.drawArc(cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, -270 * 16)
+        painter.drawArc(
+            cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, -270 * 16
+        )
 
         # Score arc
         if self._score > 0:
@@ -162,22 +173,29 @@ class HealthScoreWidget(QWidget):
             score_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             painter.setPen(score_pen)
             span = int(-270 * 16 * self._score / 100)
-            painter.drawArc(cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, span)
+            painter.drawArc(
+                cx - radius, cy - radius, radius * 2, radius * 2, 225 * 16, span
+            )
 
         # Score text — use palette foreground
         painter.setPen(self.palette().color(self.foregroundRole()))
         from PyQt6.QtGui import QFont
+
         font = QFont()
         font.setPixelSize(22)
         font.setBold(True)
         painter.setFont(font)
-        painter.drawText(cx - 20, cy - 8, 40, 30, Qt.AlignmentFlag.AlignCenter, str(self._score))
+        painter.drawText(
+            cx - 20, cy - 8, 40, 30, Qt.AlignmentFlag.AlignCenter, str(self._score)
+        )
 
         # Grade text
         font.setPixelSize(14)
         painter.setFont(font)
         painter.setPen(self._color)
-        painter.drawText(cx - 20, cy + 18, 40, 20, Qt.AlignmentFlag.AlignCenter, self._grade)
+        painter.drawText(
+            cx - 20, cy + 18, 40, 20, Qt.AlignmentFlag.AlignCenter, self._grade
+        )
 
         # Label — use palette mid color
         font.setPixelSize(11)
@@ -192,6 +210,7 @@ class HealthScoreWidget(QWidget):
 # ---------------------------------------------------------------------------
 # Dashboard Tab v3
 # ---------------------------------------------------------------------------
+
 
 class DashboardTab(QWidget, PluginInterface):
     """Overhauled dashboard with live graphs and richer information."""
@@ -274,7 +293,8 @@ class DashboardTab(QWidget, PluginInterface):
 
         try:
             username = getpass.getuser().capitalize()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get username: %s", e)
             username = "User"
         header = QLabel(self.tr("Welcome back, {name}! 👋").format(name=username))
         header.setObjectName("header")
@@ -402,9 +422,9 @@ class DashboardTab(QWidget, PluginInterface):
             usage = DiskManager.get_disk_usage(mp)
             if not usage:
                 continue
-            percent = usage.percent_used if hasattr(usage, 'percent_used') else 0
-            free = usage.free_human if hasattr(usage, 'free_human') else "?"
-            total = usage.total_human if hasattr(usage, 'total_human') else "?"
+            percent = usage.percent_used if hasattr(usage, "percent_used") else 0
+            free = usage.free_human if hasattr(usage, "free_human") else "?"
+            total = usage.total_human if hasattr(usage, "total_human") else "?"
 
             lbl = QLabel(f"{mp}  —  {free} free / {total}")
             lbl.setObjectName("storageLabel")
@@ -454,8 +474,8 @@ class DashboardTab(QWidget, PluginInterface):
                     )
                 else:
                     lbl.setText("—")
-        except Exception:
-            logger.debug("Failed to refresh process list", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to refresh process list: %s", e)
 
     # ==================================================================
     # Recent Actions
@@ -488,8 +508,8 @@ class DashboardTab(QWidget, PluginInterface):
                     lbl.setText(f"  {ts}  —  {action}")
                 else:
                     lbl.setText("—")
-        except Exception:
-            logger.debug("Failed to refresh action history", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to refresh action history: %s", e)
 
     # ==================================================================
     # Quick Actions (v31.0: configurable)
@@ -572,8 +592,8 @@ class DashboardTab(QWidget, PluginInterface):
                 )
             self._prev_rx = rx
             self._prev_tx = tx
-        except Exception:
-            logger.debug("Failed to refresh network stats", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to refresh network stats: %s", e)
 
     @staticmethod
     def _get_network_bytes():
@@ -599,11 +619,11 @@ class DashboardTab(QWidget, PluginInterface):
     def _human_speed(bps: float) -> str:
         if bps < 1024:
             return f"{bps:.0f} B/s"
-        elif bps < 1024 ** 2:
+        elif bps < 1024**2:
             return f"{bps / 1024:.1f} KB/s"
-        elif bps < 1024 ** 3:
-            return f"{bps / (1024 ** 2):.1f} MB/s"
-        return f"{bps / (1024 ** 3):.2f} GB/s"
+        elif bps < 1024**3:
+            return f"{bps / (1024**2):.1f} MB/s"
+        return f"{bps / (1024**3):.2f} GB/s"
 
     # ==================================================================
     # Quick Action callbacks
@@ -611,7 +631,11 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _go_to_tab(self, tab_name: str):
         """Navigate to a named tab via MainWindow."""
-        if tab_name and self.main_window is not None and hasattr(self.main_window, "switch_to_tab"):
+        if (
+            tab_name
+            and self.main_window is not None
+            and hasattr(self.main_window, "switch_to_tab")
+        ):
             self.main_window.switch_to_tab(tab_name)
 
     def _go_maintenance(self):
@@ -634,13 +658,16 @@ class DashboardTab(QWidget, PluginInterface):
         """Refresh the health score gauge."""
         try:
             hs = HealthScoreManager.calculate()
-            self._health_gauge.set_score(hs.score, hs.grade, hs.color, hs.recommendations)
+            self._health_gauge.set_score(
+                hs.score, hs.grade, hs.color, hs.recommendations
+            )
             if hs.recommendations:
                 recs_text = "\n".join(f"• {r}" for r in hs.recommendations[:3])
             else:
                 recs_text = "✅ System is healthy — no issues detected"
             self._health_recs.setText(recs_text)
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to calculate health score: %s", e)
             self._health_recs.setText("Could not calculate health score")
 
     # ==================================================================
@@ -650,8 +677,10 @@ class DashboardTab(QWidget, PluginInterface):
     def _reboot(self):
         from PyQt6.QtWidgets import QMessageBox
         from PyQt6.QtCore import QProcess
+
         reply = QMessageBox.question(
-            self, self.tr("Reboot Now?"),
+            self,
+            self.tr("Reboot Now?"),
             self.tr("Reboot now to apply pending changes?"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )

@@ -3,15 +3,19 @@ Disk Manager - Disk space monitoring and analysis utilities.
 Provides disk usage stats, low space warnings, and large directory detection.
 """
 
+import logging
 import shutil
 import subprocess
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class DiskUsage:
     """Represents disk usage for a mount point."""
+
     mount_point: str
     total_bytes: int
     used_bytes: int
@@ -35,6 +39,7 @@ class DiskUsage:
 @dataclass
 class LargeDirectory:
     """Represents a directory with its size."""
+
     path: str
     size_bytes: int
 
@@ -81,7 +86,8 @@ class DiskManager:
                 free_bytes=usage.free,
                 percent_used=round(percent, 1),
             )
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get disk usage for path %s: %s", path, e)
             return None
 
     @staticmethod
@@ -135,8 +141,8 @@ class DiskManager:
                         )
                     except (ValueError, IndexError):
                         continue
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to get all mount points: %s", e)
 
         return results
 
@@ -205,7 +211,9 @@ class DiskManager:
                         size = int(parts[0])
                         dir_path = parts[1]
                         if dir_path != path:  # Skip the root itself
-                            results.append(LargeDirectory(path=dir_path, size_bytes=size))
+                            results.append(
+                                LargeDirectory(path=dir_path, size_bytes=size)
+                            )
                     except ValueError:
                         continue
 

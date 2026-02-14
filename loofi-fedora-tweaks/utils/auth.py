@@ -1,5 +1,6 @@
 """Authentication utilities for Loofi Web API."""
 
+import logging
 import secrets
 from pathlib import Path
 from typing import Optional
@@ -10,6 +11,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 
 from utils.config_manager import ConfigManager
+
+logger = logging.getLogger(__name__)
 
 
 class AuthManager:
@@ -46,8 +49,8 @@ class AuthManager:
         ConfigManager.save_config(config)
         try:
             cls._auth_path().write_text("1")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to write auth marker file: %s", e)
 
     @classmethod
     def _hash_key(cls, api_key: str) -> str:
@@ -69,9 +72,16 @@ class AuthManager:
         """Issue a JWT for a valid API key."""
         data = cls._load_auth_data()
         stored_hash = data.get("api_key_hash")
-        if not stored_hash or not bcrypt.checkpw(api_key.encode("utf-8"), stored_hash.encode("utf-8")):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
-        payload = {"sub": "loofi-api", "exp": int(__import__("time").time()) + cls._TOKEN_LIFETIME_SECONDS}
+        if not stored_hash or not bcrypt.checkpw(
+            api_key.encode("utf-8"), stored_hash.encode("utf-8")
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key"
+            )
+        payload = {
+            "sub": "loofi-api",
+            "exp": int(__import__("time").time()) + cls._TOKEN_LIFETIME_SECONDS,
+        }
         return str(jwt.encode(payload, data["jwt_secret"], algorithm=cls._ALGORITHM))
 
     @classmethod
@@ -79,8 +89,11 @@ class AuthManager:
         data = cls._load_auth_data()
         try:
             jwt.decode(token, data["jwt_secret"], algorithms=[cls._ALGORITHM])
-        except Exception:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        except Exception as e:
+            logger.debug("JWT token verification failed: %s", e)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
 
     @classmethod
     def verify_bearer_token(
@@ -88,6 +101,8 @@ class AuthManager:
         credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     ) -> str:
         if not credentials or credentials.scheme.lower() != "bearer":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token"
+            )
         cls.verify_token(credentials.credentials)
         return str(credentials.credentials)

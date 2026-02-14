@@ -25,11 +25,18 @@ _log = logging.getLogger("loofi.main")
 def _notify_error(title: str, message: str):
     """Send a desktop notification when the GUI can't start."""
     import subprocess as _sp
+
     try:
         _sp.Popen(
-            ["notify-send", "--app-name=Loofi Fedora Tweaks",
-             "--icon=dialog-error", title, message],
-            stdout=_sp.DEVNULL, stderr=_sp.DEVNULL,
+            [
+                "notify-send",
+                "--app-name=Loofi Fedora Tweaks",
+                "--icon=dialog-error",
+                title,
+                message,
+            ],
+            stdout=_sp.DEVNULL,
+            stderr=_sp.DEVNULL,
         )
     except FileNotFoundError:
         pass  # notify-send not installed, nothing we can do
@@ -39,6 +46,7 @@ def _check_pyqt6():
     """Pre-flight check for PyQt6 availability with a helpful message."""
     try:
         from PyQt6.QtWidgets import QApplication  # noqa: F401
+
         return True
     except ImportError as exc:
         msg = str(exc)
@@ -48,10 +56,7 @@ def _check_pyqt6():
                 "Fix:  sudo dnf install mesa-libGL mesa-libEGL"
             )
         elif "No module named" in msg:
-            hint = (
-                "PyQt6 is not installed.\n"
-                "Fix:  sudo dnf install python3-pyqt6"
-            )
+            hint = "PyQt6 is not installed.\nFix:  sudo dnf install python3-pyqt6"
         else:
             hint = f"PyQt6 import failed: {msg}"
 
@@ -65,27 +70,25 @@ def main():
     """Main entry point with argument parsing."""
     parser = argparse.ArgumentParser(
         prog="loofi-fedora-tweaks",
-        description="System tweaks and maintenance for Fedora"
+        description="System tweaks and maintenance for Fedora",
     )
     parser.add_argument(
-        "--daemon", "-d",
+        "--daemon",
+        "-d",
         action="store_true",
-        help="Run as background daemon for scheduled tasks"
+        help="Run as background daemon for scheduled tasks",
     )
     parser.add_argument(
-        "--cli", "-c",
+        "--cli",
+        "-c",
         action="store_true",
-        help="Run in command-line mode (pass remaining args to CLI)"
+        help="Run in command-line mode (pass remaining args to CLI)",
     )
     parser.add_argument(
-        "--web",
-        action="store_true",
-        help="Run headless Loofi Web API server"
+        "--web", action="store_true", help="Run headless Loofi Web API server"
     )
     parser.add_argument(
-        "--version", "-v",
-        action="version",
-        version=f"%(prog)s {__version__}"
+        "--version", "-v", action="version", version=f"%(prog)s {__version__}"
     )
 
     args, remaining = parser.parse_known_args()
@@ -93,9 +96,11 @@ def main():
     if args.daemon:
         # Run in daemon mode
         from utils.daemon import Daemon
+
         Daemon.run()
     elif args.web:
         from utils.api_server import APIServer
+
         server = APIServer()
         server.start()
         _log.info("Loofi Web API started on %s:%s", server.host, server.port)
@@ -107,6 +112,7 @@ def main():
     elif args.cli:
         # Run CLI mode
         from cli.main import main as cli_main
+
         sys.exit(cli_main(remaining))
     else:
         # Run GUI
@@ -129,6 +135,7 @@ def main():
 
             # Install centralized error handler (v29.0)
             from utils.error_handler import install_error_handler
+
             install_error_handler()
 
             # Load translations based on system locale
@@ -136,7 +143,8 @@ def main():
             translator = QTranslator()
             translations_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "resources", "translations",
+                "resources",
+                "translations",
             )
 
             if translator.load(f"loofi_{locale}", translations_path):
@@ -147,7 +155,8 @@ def main():
             # Load QSS Stylesheet
             style_file = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "assets", "modern.qss",
+                "assets",
+                "modern.qss",
             )
             if os.path.exists(style_file):
                 with open(style_file, "r") as f:
@@ -169,8 +178,8 @@ def main():
                         f"The application failed to start:\n\n{exc}\n\n"
                         f"Check the log at:\n{LOG_FILE}",
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                _log.debug("Failed to show Qt error dialog: %s", e)
             _notify_error("Loofi — Startup Crash", str(exc))
             print(f"FATAL: {exc}", file=sys.stderr)
             print(f"Log file: {LOG_FILE}", file=sys.stderr)

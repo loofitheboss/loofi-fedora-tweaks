@@ -9,11 +9,29 @@ Three sub-tabs wrapped in a QTabWidget:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTabWidget, QTableWidget,
-    QHeaderView, QComboBox, QLineEdit, QTextEdit, QScrollArea,
-    QFrame, QMessageBox, QFileDialog, QTreeWidget, QTreeWidgetItem,
-    QListWidget, QListWidgetItem, QDialog, QFormLayout, QSpinBox,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QTableWidget,
+    QHeaderView,
+    QComboBox,
+    QLineEdit,
+    QTextEdit,
+    QScrollArea,
+    QFrame,
+    QMessageBox,
+    QFileDialog,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QListWidget,
+    QListWidgetItem,
+    QDialog,
+    QFormLayout,
+    QSpinBox,
 )
 from PyQt6.QtCore import Qt
 
@@ -21,10 +39,14 @@ from utils.virtualization import VirtualizationManager
 from utils.vm_manager import VMManager, VM_FLAVORS
 from utils.vfio import VFIOAssistant
 from utils.disposable_vm import DisposableVMManager
+import logging
+
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+
+logger = logging.getLogger(__name__)
 
 
 class VirtualizationTab(QWidget, PluginInterface):
@@ -94,7 +116,8 @@ class VirtualizationTab(QWidget, PluginInterface):
         try:
             summary = VirtualizationManager.get_summary()
             self.banner_label.setText(summary)
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to refresh virtualization status banner: %s", e)
             self.banner_label.setText(self.tr("Could not query virtualization status."))
 
     # ==================================================================
@@ -122,21 +145,19 @@ class VirtualizationTab(QWidget, PluginInterface):
 
         # VM table
         self.vm_table = QTableWidget(0, 4)
-        self.vm_table.setHorizontalHeaderLabels([
-            self.tr("Name"), self.tr("State"),
-            self.tr("RAM (MB)"), self.tr("vCPUs"),
-        ])
+        self.vm_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Name"),
+                self.tr("State"),
+                self.tr("RAM (MB)"),
+                self.tr("vCPUs"),
+            ]
+        )
         header = self.vm_table.horizontalHeader()
         if header is not None:
-            header.setSectionResizeMode(
-                QHeaderView.ResizeMode.Stretch
-            )
-        self.vm_table.setSelectionBehavior(
-            QTableWidget.SelectionBehavior.SelectRows
-        )
-        self.vm_table.setEditTriggers(
-            QTableWidget.EditTrigger.NoEditTriggers
-        )
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.vm_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.vm_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.vm_table)
         layout.addWidget(self.vm_table)
 
@@ -178,7 +199,9 @@ class VirtualizationTab(QWidget, PluginInterface):
         self.vm_table.setRowCount(0)
         vms = VMManager.list_vms()
         if not vms:
-            self.set_table_empty_state(self.vm_table, self.tr("No virtual machines found"))
+            self.set_table_empty_state(
+                self.vm_table, self.tr("No virtual machines found")
+            )
             self.log(self.tr("VM list refreshed (0 VMs)."))
             return
         for vm in vms:
@@ -325,15 +348,21 @@ class VirtualizationTab(QWidget, PluginInterface):
         def do_create():
             vm_name = name_edit.text().strip()
             if not vm_name:
-                QMessageBox.warning(dialog, self.tr("Error"), self.tr("Please enter a VM name."))
+                QMessageBox.warning(
+                    dialog, self.tr("Error"), self.tr("Please enter a VM name.")
+                )
                 return
             iso_path = iso_edit.text().strip()
             if not iso_path:
-                QMessageBox.warning(dialog, self.tr("Error"), self.tr("Please select an ISO file."))
+                QMessageBox.warning(
+                    dialog, self.tr("Error"), self.tr("Please select an ISO file.")
+                )
                 return
             flavor_key = flavor_combo.currentData()
             result = VMManager.create_vm(
-                vm_name, flavor_key, iso_path,
+                vm_name,
+                flavor_key,
+                iso_path,
                 ram_mb=ram_spin.value(),
                 vcpus=vcpu_spin.value(),
                 disk_gb=disk_spin.value(),
@@ -397,9 +426,13 @@ class VirtualizationTab(QWidget, PluginInterface):
         plan_group = QGroupBox(self.tr("Setup Plan"))
         plan_layout = QVBoxLayout(plan_group)
         self.plan_tree = QTreeWidget()
-        self.plan_tree.setHeaderLabels([
-            self.tr("Step"), self.tr("Description"), self.tr("Reversible"),
-        ])
+        self.plan_tree.setHeaderLabels(
+            [
+                self.tr("Step"),
+                self.tr("Description"),
+                self.tr("Reversible"),
+            ]
+        )
         self.plan_tree.setColumnCount(3)
         plan_layout.addWidget(self.plan_tree)
 
@@ -439,7 +472,9 @@ class VirtualizationTab(QWidget, PluginInterface):
             item = QListWidgetItem(desc)
             item.setData(Qt.ItemDataRole.UserRole, gpu)
             self.gpu_list.addItem(item)
-        self.log(self.tr("{} GPU candidate(s) detected.").format(len(self._gpu_candidates)))
+        self.log(
+            self.tr("{} GPU candidate(s) detected.").format(len(self._gpu_candidates))
+        )
 
     def _generate_vfio_plan(self):
         current = self.gpu_list.currentItem()
@@ -452,11 +487,13 @@ class VirtualizationTab(QWidget, PluginInterface):
         steps = VFIOAssistant.get_step_by_step_plan(gpu)
         self.plan_tree.clear()
         for step in steps:
-            item = QTreeWidgetItem([
-                str(step["step_number"]),
-                step["description"],
-                self.tr("Yes") if step["reversible"] else self.tr("No"),
-            ])
+            item = QTreeWidgetItem(
+                [
+                    str(step["step_number"]),
+                    step["description"],
+                    self.tr("Yes") if step["reversible"] else self.tr("No"),
+                ]
+            )
             self.plan_tree.addTopLevelItem(item)
         self.log(self.tr("VFIO setup plan generated ({} steps).").format(len(steps)))
 
@@ -512,9 +549,7 @@ class VirtualizationTab(QWidget, PluginInterface):
     def _refresh_base_status(self):
         if DisposableVMManager.is_base_image_available():
             path = DisposableVMManager.get_base_image_path()
-            self.base_status_label.setText(
-                self.tr("Base image ready: {}").format(path)
-            )
+            self.base_status_label.setText(self.tr("Base image ready: {}").format(path))
         else:
             self.base_status_label.setText(
                 self.tr("No base image found. Create one to use disposable VMs.")
@@ -522,7 +557,9 @@ class VirtualizationTab(QWidget, PluginInterface):
 
     def _create_base_image(self):
         iso_path, _ = QFileDialog.getOpenFileName(
-            self, self.tr("Select ISO for Base Image"), "",
+            self,
+            self.tr("Select ISO for Base Image"),
+            "",
             self.tr("ISO Images (*.iso)"),
         )
         if not iso_path:

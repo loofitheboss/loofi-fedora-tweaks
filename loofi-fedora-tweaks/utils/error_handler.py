@@ -33,7 +33,9 @@ def _format_user_message(exc: Exception) -> str:
         if exc.code:
             parts.append(f"\n\nError code: {exc.code}")
         if exc.recoverable:
-            parts.append("\n\nThis error is recoverable — you can continue using the app.")
+            parts.append(
+                "\n\nThis error is recoverable — you can continue using the app."
+            )
         return "".join(parts)
     return str(exc)
 
@@ -42,14 +44,20 @@ def _show_error_dialog(exc: Exception) -> None:
     """Show a Qt error dialog for the exception, if QApplication exists."""
     try:
         from PyQt6.QtWidgets import QApplication, QMessageBox
+
         app = QApplication.instance()
         if not app:
             return
 
         from utils.errors import LoofiError
+
         if isinstance(exc, LoofiError):
             title = f"Loofi — {exc.code}"
-            icon = QMessageBox.Icon.Warning if exc.recoverable else QMessageBox.Icon.Critical
+            icon = (
+                QMessageBox.Icon.Warning
+                if exc.recoverable
+                else QMessageBox.Icon.Critical
+            )
         else:
             title = "Loofi — Unexpected Error"
             icon = QMessageBox.Icon.Critical
@@ -60,9 +68,9 @@ def _show_error_dialog(exc: Exception) -> None:
         msg.setText(_format_user_message(exc))
         msg.setDetailedText(traceback.format_exc())
         msg.exec()
-    except Exception:
+    except Exception as e:
         # If we can't show a dialog, just log it
-        pass
+        logger.debug("Failed to show error dialog: %s", e)
 
 
 def _log_error(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) -> None:
@@ -72,7 +80,9 @@ def _log_error(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) 
     if isinstance(exc_value, LoofiError):
         logger.error(
             "LoofiError [%s]: %s (recoverable=%s)",
-            exc_value.code, exc_value, exc_value.recoverable,
+            exc_value.code,
+            exc_value,
+            exc_value.recoverable,
             exc_info=(exc_type, exc_value, exc_tb),
         )
     else:
@@ -85,6 +95,7 @@ def _log_error(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) 
     # Also log to NotificationCenter for in-app visibility
     try:
         from utils.notification_center import NotificationCenter
+
         nc = NotificationCenter()
         if isinstance(exc_value, LoofiError):
             nc.add(
@@ -98,11 +109,13 @@ def _log_error(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) 
                 message=str(exc_value)[:200],
                 category="system",
             )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Failed to send notification for error: %s", e)
 
 
-def _loofi_excepthook(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) -> None:
+def _loofi_excepthook(
+    exc_type: Type[BaseException], exc_value: BaseException, exc_tb
+) -> None:
     """
     Global exception handler for unhandled exceptions.
 

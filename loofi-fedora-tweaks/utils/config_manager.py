@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from services.system import SystemManager
 from utils.containers import Result
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,9 @@ class ConfigManager:
         return {
             "cpu_governor": HardwareManager.get_current_governor(),
             "power_profile": HardwareManager.get_power_profile(),
-            "gpu_mode": HardwareManager.get_gpu_mode() if HardwareManager.is_hybrid_gpu() else None,
+            "gpu_mode": HardwareManager.get_gpu_mode()
+            if HardwareManager.is_hybrid_gpu()
+            else None,
         }
 
     @classmethod
@@ -81,15 +84,29 @@ class ConfigManager:
         repos: dict[str, list[str]] = {"enabled": [], "disabled": []}
 
         try:
-            result = subprocess.run(
-                ["dnf", "repolist", "--enabled", "-q"],
-                capture_output=True, text=True, check=False,
-                timeout=600,
-            )
-            for line in result.stdout.strip().split("\n")[1:]:  # Skip header
-                if line.strip():
-                    repo_id = line.split()[0]
-                    repos["enabled"].append(repo_id)
+            if SystemManager.is_atomic():
+                # On Atomic, dnf may not be available; use rpm-ostree for repo info
+                result = subprocess.run(
+                    ["rpm-ostree", "status", "--json"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=600,
+                )
+                # rpm-ostree status doesn't directly list repos, fall back gracefully
+                return repos
+            else:
+                result = subprocess.run(
+                    ["dnf", "repolist", "--enabled", "-q"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=600,
+                )
+                for line in result.stdout.strip().split("\n")[1:]:  # Skip header
+                    if line.strip():
+                        repo_id = line.split()[0]
+                        repos["enabled"].append(repo_id)
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list repos: %s", e)
 
@@ -102,10 +119,16 @@ class ConfigManager:
         try:
             result = subprocess.run(
                 ["flatpak", "list", "--app", "--columns=application"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=600,
             )
-            apps = [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
+            apps = [
+                line.strip()
+                for line in result.stdout.strip().split("\n")
+                if line.strip()
+            ]
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list flatpak apps: %s", e)
         return apps
@@ -128,7 +151,7 @@ class ConfigManager:
                 "hardware": cls.gather_hardware_settings(),
                 "repos": cls.gather_repo_settings(),
                 "flatpak_apps": cls.gather_flatpak_apps(),
-            }
+            },
         }
 
         # Include local presets if any
@@ -214,6 +237,7 @@ class ConfigManager:
         if hardware.get("cpu_governor"):
             try:
                 from services.hardware import HardwareManager
+
                 if HardwareManager.set_governor(hardware["cpu_governor"]):
                     applied.append("CPU Governor")
                 else:
@@ -225,6 +249,7 @@ class ConfigManager:
         if hardware.get("power_profile"):
             try:
                 from services.hardware import HardwareManager
+
                 if HardwareManager.set_power_profile(hardware["power_profile"]):
                     applied.append("Power Profile")
                 else:
@@ -238,18 +263,30 @@ class ConfigManager:
         for preset in presets:
             if "name" in preset:
                 try:
-                    preset_path = cls.PRESETS_DIR / f"{preset['name'].lower().replace(' ', '_')}.json"
+                    preset_path = (
+                        cls.PRESETS_DIR
+                        / f"{preset['name'].lower().replace(' ', '_')}.json"
+                    )
                     with open(preset_path, "w") as f:
                         json.dump(preset, f, indent=2)
                     applied.append(f"Preset: {preset['name']}")
                 except (OSError, json.JSONDecodeError) as e:
-                    logger.debug("Failed to import preset %s: %s", preset.get('name', 'unknown'), e)
+                    logger.debug(
+                        "Failed to import preset %s: %s",
+                        preset.get("name", "unknown"),
+                        e,
+                    )
                     errors.append(f"Preset: {preset.get('name', 'unknown')}")
 
         if errors:
-            return Result(True, f"Imported: {', '.join(applied)}. Errors: {', '.join(errors)}")
+            return Result(
+                True, f"Imported: {', '.join(applied)}. Errors: {', '.join(errors)}"
+            )
         else:
-            return Result(True, f"Successfully imported: {', '.join(applied) if applied else 'No settings changed'}")
+            return Result(
+                True,
+                f"Successfully imported: {', '.join(applied) if applied else 'No settings changed'}",
+            )
 
     @classmethod
     def save_config(cls, config: dict) -> bool:

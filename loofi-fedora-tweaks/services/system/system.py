@@ -8,6 +8,10 @@ import subprocess
 import shutil
 from typing import Any
 
+from utils.log import get_logger
+
+logger = get_logger(__name__)
+
 
 class SystemManager:
     """Manages system detection and provides system-level information."""
@@ -47,8 +51,8 @@ class SystemManager:
                     if line.startswith("VARIANT="):
                         variant = line.split("=")[1].strip().strip('"')
                         return variant
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read variant from /etc/os-release: %s", e)
 
         return "Atomic"  # Generic fallback
 
@@ -76,17 +80,20 @@ class SystemManager:
         try:
             result = subprocess.run(
                 ["rpm-ostree", "status", "--json"],
-                capture_output=True, text=True, check=False
+                capture_output=True,
+                text=True,
+                check=False,
             )
             if result.returncode == 0:
                 import json
+
                 data = json.loads(result.stdout)
                 deployments = data.get("deployments", [])
                 # If there's more than one deployment and first isn't booted, reboot pending
                 if len(deployments) > 1:
                     return not deployments[0].get("booted", False)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to check pending deployment: %s", e)
 
         return False
 
@@ -104,21 +111,25 @@ class SystemManager:
         try:
             result = subprocess.run(
                 ["rpm-ostree", "status", "--json"],
-                capture_output=True, text=True, check=False
+                capture_output=True,
+                text=True,
+                check=False,
             )
             if result.returncode == 0:
                 import json
+
                 data = json.loads(result.stdout)
                 deployments = data.get("deployments", [])
                 if deployments:
                     # Get the booted deployment
                     for dep in deployments:
                         if dep.get("booted", False):
-                            pkgs: list[Any] = dep.get("requested-local-packages", []) + \
-                                dep.get("requested-packages", [])
+                            pkgs: list[Any] = dep.get(
+                                "requested-local-packages", []
+                            ) + dep.get("requested-packages", [])
                             return pkgs
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to get layered packages: %s", e)
 
         return []
 
@@ -132,9 +143,9 @@ class SystemManager:
         """Check if Flathub remote is configured."""
         try:
             result = subprocess.run(
-                ["flatpak", "remotes"],
-                capture_output=True, text=True, check=False
+                ["flatpak", "remotes"], capture_output=True, text=True, check=False
             )
             return "flathub" in result.stdout.lower()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check Flathub remote: %s", e)
             return False

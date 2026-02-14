@@ -5,6 +5,7 @@ Part of v7.1 "Developer" update.
 
 from __future__ import annotations
 
+import logging
 import re
 import shutil
 import subprocess
@@ -12,9 +13,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+logger = logging.getLogger(__name__)
+
 
 class ContainerStatus(Enum):
     """Container runtime status."""
+
     RUNNING = "running"
     STOPPED = "stopped"
     CREATED = "created"
@@ -24,6 +28,7 @@ class ContainerStatus(Enum):
 @dataclass
 class Container:
     """Represents a Distrobox container."""
+
     name: str
     status: ContainerStatus
     image: str
@@ -33,6 +38,7 @@ class Container:
 @dataclass
 class Result:
     """Operation result with message."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -77,7 +83,7 @@ class ContainerManager:
                 ["distrobox", "list", "--no-color"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode != 0:
@@ -109,18 +115,18 @@ class ContainerManager:
                     else:
                         status = ContainerStatus.UNKNOWN
 
-                    containers.append(Container(
-                        name=name,
-                        status=status,
-                        image=image,
-                        id=container_id
-                    ))
+                    containers.append(
+                        Container(
+                            name=name, status=status, image=image, id=container_id
+                        )
+                    )
 
             return containers
 
         except subprocess.TimeoutExpired:
             return []
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list distrobox containers: %s", e)
             return []
 
     @classmethod
@@ -129,7 +135,7 @@ class ContainerManager:
         name: str,
         image: str = "fedora",
         home_sharing: bool = True,
-        additional_packages: Optional[list[str]] = None
+        additional_packages: Optional[list[str]] = None,
     ) -> Result:
         """
         Create a new Distrobox container.
@@ -144,11 +150,17 @@ class ContainerManager:
             Result object with success status and message.
         """
         if not cls.is_available():
-            return Result(False, "Distrobox is not installed. Install with: sudo dnf install distrobox")
+            return Result(
+                False,
+                "Distrobox is not installed. Install with: sudo dnf install distrobox",
+            )
 
         # Validate name
-        if not re.match(r'^[a-zA-Z0-9_-]+$', name):
-            return Result(False, "Invalid container name. Use only letters, numbers, dashes, and underscores.")
+        if not re.match(r"^[a-zA-Z0-9_-]+$", name):
+            return Result(
+                False,
+                "Invalid container name. Use only letters, numbers, dashes, and underscores.",
+            )
 
         # Resolve image URL
         image_url = cls.AVAILABLE_IMAGES.get(image.lower(), image)
@@ -159,19 +171,20 @@ class ContainerManager:
             cmd.append("--no-entry")
 
         if additional_packages:
-            cmd.extend(["--additional-packages",
-                       " ".join(additional_packages)])
+            cmd.extend(["--additional-packages", " ".join(additional_packages)])
 
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=300  # Container creation can take time
+                timeout=300,  # Container creation can take time
             )
 
             if result.returncode == 0:
-                return Result(True, f"Container '{name}' created successfully.", {"name": name})
+                return Result(
+                    True, f"Container '{name}' created successfully.", {"name": name}
+                )
             else:
                 error = result.stderr.strip() or result.stdout.strip()
                 return Result(False, f"Failed to create container: {error}")
@@ -204,9 +217,10 @@ class ContainerManager:
                 ["distrobox", "enter", name],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to enter container: %s", e)
             return None
 
     @classmethod
@@ -244,12 +258,7 @@ class ContainerManager:
             cmd.append("--force")
 
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
             if result.returncode == 0:
                 return Result(True, f"Container '{name}' deleted.")
@@ -278,10 +287,7 @@ class ContainerManager:
 
         try:
             result = subprocess.run(
-                ["distrobox", "stop", name],
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["distrobox", "stop", name], capture_output=True, text=True, timeout=30
             )
 
             if result.returncode == 0:
@@ -322,15 +328,24 @@ class ContainerManager:
 
         try:
             result = subprocess.run(
-                ["distrobox", "enter", container_name, "--",
-                    "distrobox-export", "--app", app_name],
+                [
+                    "distrobox",
+                    "enter",
+                    container_name,
+                    "--",
+                    "distrobox-export",
+                    "--app",
+                    app_name,
+                ],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
 
             if result.returncode == 0:
-                return Result(True, f"Application '{app_name}' exported from '{container_name}'.")
+                return Result(
+                    True, f"Application '{app_name}' exported from '{container_name}'."
+                )
             else:
                 error = result.stderr.strip() or result.stdout.strip()
                 return Result(False, f"Failed to export app: {error}")

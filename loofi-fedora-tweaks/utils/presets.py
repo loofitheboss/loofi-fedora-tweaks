@@ -1,7 +1,10 @@
+import logging
 import os
 import json
 import subprocess
 import shutil
+
+logger = logging.getLogger(__name__)
 
 
 class PresetManager:
@@ -32,16 +35,22 @@ class PresetManager:
         data = {
             "name": name,
             "theme": self._get_gsettings("org.gnome.desktop.interface", "gtk-theme"),
-            "icon_theme": self._get_gsettings("org.gnome.desktop.interface", "icon-theme"),
-            "cursor_theme": self._get_gsettings("org.gnome.desktop.interface", "cursor-theme"),
-            "color_scheme": self._get_gsettings("org.gnome.desktop.interface", "color-scheme"),
+            "icon_theme": self._get_gsettings(
+                "org.gnome.desktop.interface", "icon-theme"
+            ),
+            "cursor_theme": self._get_gsettings(
+                "org.gnome.desktop.interface", "cursor-theme"
+            ),
+            "color_scheme": self._get_gsettings(
+                "org.gnome.desktop.interface", "color-scheme"
+            ),
             "battery_limit": self._get_battery_limit(),
-            "power_profile": self._get_power_profile()
+            "power_profile": self._get_power_profile(),
         }
 
         safe_name = self._sanitize_name(name)
         path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(data, f, indent=4)
         return True
 
@@ -52,14 +61,22 @@ class PresetManager:
         if not os.path.exists(path):
             return False
 
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
 
         # Apply GSettings
-        self._set_gsettings("org.gnome.desktop.interface", "gtk-theme", data.get("theme"))
-        self._set_gsettings("org.gnome.desktop.interface", "icon-theme", data.get("icon_theme"))
-        self._set_gsettings("org.gnome.desktop.interface", "cursor-theme", data.get("cursor_theme"))
-        self._set_gsettings("org.gnome.desktop.interface", "color-scheme", data.get("color_scheme"))
+        self._set_gsettings(
+            "org.gnome.desktop.interface", "gtk-theme", data.get("theme")
+        )
+        self._set_gsettings(
+            "org.gnome.desktop.interface", "icon-theme", data.get("icon_theme")
+        )
+        self._set_gsettings(
+            "org.gnome.desktop.interface", "cursor-theme", data.get("cursor_theme")
+        )
+        self._set_gsettings(
+            "org.gnome.desktop.interface", "color-scheme", data.get("color_scheme")
+        )
 
         # Apply Battery Limit (Requires PKEXEC if changed)
         # We can implement a signal or callback, or just run valid commands here if possible.
@@ -81,10 +98,11 @@ class PresetManager:
         safe_name = self._sanitize_name(name)
         path = os.path.join(self.PRESETS_DIR, f"{safe_name}.json")
         try:
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 json.dump({"name": name, **data}, f, indent=4)
             return True
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to save preset data: %s", e)
             return False
 
     # --- Helpers ---
@@ -92,16 +110,24 @@ class PresetManager:
         if not shutil.which("gsettings"):
             return None
         try:
-            return subprocess.check_output(["gsettings", "get", schema, key], text=True, timeout=15).strip().strip("'")
+            return (
+                subprocess.check_output(
+                    ["gsettings", "get", schema, key], text=True, timeout=15
+                )
+                .strip()
+                .strip("'")
+            )
         except subprocess.CalledProcessError:
             return None
 
     def _set_gsettings(self, schema, key, value):
         if value and shutil.which("gsettings"):
             try:
-                subprocess.run(["gsettings", "set", schema, key, value], check=False, timeout=15)
-            except Exception:
-                pass
+                subprocess.run(
+                    ["gsettings", "set", schema, key, value], check=False, timeout=15
+                )
+            except Exception as e:
+                logger.debug("Failed to set gsettings %s %s: %s", schema, key, e)
 
     def _get_battery_limit(self):
         # Read from config file primarily
@@ -115,6 +141,8 @@ class PresetManager:
         if not shutil.which("powerprofilesctl"):
             return "balanced"
         try:
-            return subprocess.check_output(["powerprofilesctl", "get"], text=True, timeout=60).strip()
+            return subprocess.check_output(
+                ["powerprofilesctl", "get"], text=True, timeout=60
+            ).strip()
         except subprocess.CalledProcessError:
             return "balanced"

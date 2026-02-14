@@ -3,19 +3,24 @@ Operations Layer - Business logic extracted from UI tabs.
 Provides reusable operations for both GUI and CLI.
 """
 
+import logging
 import subprocess
 import os
 import getpass
 from dataclasses import dataclass
 from typing import List, Tuple
 
+logger = logging.getLogger(__name__)
+
 from core.executor.action_result import ActionResult
 from services.system import SystemManager
+from utils.commands import PrivilegedCommand
 
 
 @dataclass
 class OperationResult:
     """Result of an operation."""
+
     success: bool
     message: str
     output: str = ""
@@ -30,7 +35,11 @@ class CleanupOps:
         """Clean DNF package cache."""
         pm = SystemManager.get_package_manager()
         if pm == "rpm-ostree":
-            return ("pkexec", ["rpm-ostree", "cleanup", "--base"], "Cleaning rpm-ostree base...")
+            return (
+                "pkexec",
+                ["rpm-ostree", "cleanup", "--base"],
+                "Cleaning rpm-ostree base...",
+            )
         return ("pkexec", ["dnf", "clean", "all"], "Cleaning DNF cache...")
 
     @staticmethod
@@ -38,13 +47,21 @@ class CleanupOps:
         """Remove unused packages."""
         pm = SystemManager.get_package_manager()
         if pm == "rpm-ostree":
-            return ("pkexec", ["rpm-ostree", "cleanup", "-m"], "Cleaning rpm-ostree metadata...")
+            return (
+                "pkexec",
+                ["rpm-ostree", "cleanup", "-m"],
+                "Cleaning rpm-ostree metadata...",
+            )
         return ("pkexec", ["dnf", "autoremove", "-y"], "Removing unused packages...")
 
     @staticmethod
     def vacuum_journal(days: int = 14) -> Tuple[str, List[str], str]:
         """Vacuum system journal."""
-        return ("pkexec", ["journalctl", f"--vacuum-time={days}d"], f"Vacuuming journal ({days} days)...")
+        return (
+            "pkexec",
+            ["journalctl", f"--vacuum-time={days}d"],
+            f"Vacuuming journal ({days} days)...",
+        )
 
     @staticmethod
     def trim_ssd() -> Tuple[str, List[str], str]:
@@ -73,7 +90,11 @@ class TweakOps:
         valid = ["performance", "balanced", "power-saver"]
         if profile not in valid:
             profile = "balanced"
-        return ("powerprofilesctl", ["set", profile], f"Setting power profile to {profile}...")
+        return (
+            "powerprofilesctl",
+            ["set", profile],
+            f"Setting power profile to {profile}...",
+        )
 
     @staticmethod
     def get_power_profile() -> str:
@@ -81,17 +102,24 @@ class TweakOps:
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "get"],
-                capture_output=True, text=True, check=False
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10,
             )
             return result.stdout.strip() if result.returncode == 0 else "unknown"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get power profile: %s", e)
             return "unknown"
 
     @staticmethod
     def restart_audio() -> Tuple[str, List[str], str]:
         """Restart Pipewire audio services."""
-        return ("systemctl", ["--user", "restart", "pipewire", "pipewire-pulse", "wireplumber"],
-                "Restarting audio services...")
+        return (
+            "systemctl",
+            ["--user", "restart", "pipewire", "pipewire-pulse", "wireplumber"],
+            "Restarting audio services...",
+        )
 
     @staticmethod
     def set_battery_limit(limit: int) -> OperationResult:
@@ -100,13 +128,21 @@ class TweakOps:
             return OperationResult(False, "Invalid limit (50-100)")
 
         if not os.path.exists(TweakOps.BATTERY_SYSFS):
-            return OperationResult(False, "Battery limit not supported on this hardware")
+            return OperationResult(
+                False, "Battery limit not supported on this hardware"
+            )
 
         try:
-            cmd = f"echo {limit} > {TweakOps.BATTERY_SYSFS}"
+            binary, args, desc = PrivilegedCommand.write_file(
+                TweakOps.BATTERY_SYSFS, str(limit)
+            )
             result = subprocess.run(
-                ["pkexec", "sh", "-c", cmd],
-                capture_output=True, text=True, check=False
+                [binary] + args,
+                input=str(limit),
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
             )
             if result.returncode == 0:
                 return OperationResult(True, f"Battery limit set to {limit}%")
@@ -116,50 +152,172 @@ class TweakOps:
 
     @staticmethod
     def install_nbfc() -> Tuple[str, List[str], str]:
-        """Install NBFC fan control."""
-        return ("pkexec", ["sh", "-c", "dnf install -y nbfc-linux && systemctl enable --now nbfc_service"],
-                "Installing nbfc-linux...")
+        """Install NBFC fan control.
+
+        Note: systemctl enable must be run separately after install.
+        """
+        return PrivilegedCommand.dnf("install", "nbfc-linux")
 
     @staticmethod
     def set_fan_profile(profile: str) -> Tuple[str, List[str], str]:
         """Set NBFC fan profile."""
-        return ("nbfc", ["config", "-a", profile.lower()], f"Setting fan profile to {profile}...")
+        return (
+            "nbfc",
+            ["config", "-a", profile.lower()],
+            f"Setting fan profile to {profile}...",
+        )
 
 
 class AdvancedOps:
     """Advanced system optimization operations."""
 
     @staticmethod
-    def apply_dnf_tweaks() -> Tuple[str, List[str], str]:
-        """Optimize DNF configuration."""
-        cmd = ("grep -q 'max_parallel_downloads' /etc/dnf/dnf.conf || "
-               "echo 'max_parallel_downloads=10' >> /etc/dnf/dnf.conf; "
-               "grep -q 'fastestmirror' /etc/dnf/dnf.conf || "
-               "echo 'fastestmirror=True' >> /etc/dnf/dnf.conf")
-        return ("pkexec", ["sh", "-c", cmd], "Applying DNF optimizations...")
+    def apply_dnf_tweaks() -> OperationResult:
+        """Optimize DNF configuration.
+
+        Appends max_parallel_downloads and fastestmirror to dnf.conf
+        if not already present.
+        """
+        conf_path = "/etc/dnf/dnf.conf"
+        tweaks = {
+            "max_parallel_downloads": "max_parallel_downloads=10",
+            "fastestmirror": "fastestmirror=True",
+        }
+
+        try:
+            # Read current config
+            try:
+                with open(conf_path, "r") as f:
+                    content = f.read()
+            except (OSError, PermissionError):
+                content = ""
+
+            lines_to_add = []
+            for key, line in tweaks.items():
+                if key not in content:
+                    lines_to_add.append(line)
+
+            if not lines_to_add:
+                return OperationResult(True, "DNF already optimized")
+
+            append_content = "\n".join(lines_to_add) + "\n"
+            result = subprocess.run(
+                ["pkexec", "tee", "-a", conf_path],
+                input=append_content,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return OperationResult(True, "DNF optimizations applied")
+            return OperationResult(False, f"Failed: {result.stderr}")
+        except Exception as e:
+            return OperationResult(False, str(e))
 
     @staticmethod
-    def enable_tcp_bbr() -> Tuple[str, List[str], str]:
+    def enable_tcp_bbr() -> OperationResult:
         """Enable TCP BBR congestion control."""
-        cmd = ("echo 'net.core.default_qdisc=fq' > /etc/sysctl.d/99-bbr.conf && "
-               "echo 'net.ipv4.tcp_congestion_control=bbr' >> /etc/sysctl.d/99-bbr.conf && "
-               "sysctl --system")
-        return ("pkexec", ["sh", "-c", cmd], "Enabling TCP BBR...")
+        conf_path = "/etc/sysctl.d/99-bbr.conf"
+        content = "net.core.default_qdisc=fq\nnet.ipv4.tcp_congestion_control=bbr\n"
+
+        try:
+            # Write sysctl config
+            result = subprocess.run(
+                ["pkexec", "tee", conf_path],
+                input=content,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                return OperationResult(
+                    False, f"Failed to write config: {result.stderr}"
+                )
+
+            # Reload sysctl
+            result = subprocess.run(
+                ["pkexec", "sysctl", "--system"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return OperationResult(True, "TCP BBR enabled")
+            return OperationResult(False, f"sysctl reload failed: {result.stderr}")
+        except Exception as e:
+            return OperationResult(False, str(e))
 
     @staticmethod
-    def install_gamemode() -> Tuple[str, List[str], str]:
+    def install_gamemode() -> OperationResult:
         """Install and configure GameMode."""
         user = getpass.getuser()
-        cmd = f"dnf install -y gamemode && usermod -aG gamemode {user}"
-        return ("pkexec", ["sh", "-c", cmd], f"Installing GameMode for {user}...")
+
+        try:
+            # Install gamemode
+            binary, args, desc = PrivilegedCommand.dnf("install", "gamemode")
+            result = subprocess.run(
+                [binary] + args,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=300,
+            )
+            if result.returncode != 0:
+                return OperationResult(False, f"Install failed: {result.stderr}")
+
+            # Add user to gamemode group
+            result = subprocess.run(
+                ["pkexec", "usermod", "-aG", "gamemode", user],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return OperationResult(True, f"GameMode installed for {user}")
+            return OperationResult(False, f"usermod failed: {result.stderr}")
+        except Exception as e:
+            return OperationResult(False, str(e))
 
     @staticmethod
-    def set_swappiness(value: int = 10) -> Tuple[str, List[str], str]:
+    def set_swappiness(value: int = 10) -> OperationResult:
         """Set system swappiness value."""
         if not 0 <= value <= 100:
             value = 10
-        cmd = f"echo 'vm.swappiness={value}' > /etc/sysctl.d/99-swappiness.conf && sysctl --system"
-        return ("pkexec", ["sh", "-c", cmd], f"Setting swappiness to {value}...")
+        conf_path = "/etc/sysctl.d/99-swappiness.conf"
+        content = f"vm.swappiness={value}\n"
+
+        try:
+            # Write sysctl config
+            result = subprocess.run(
+                ["pkexec", "tee", conf_path],
+                input=content,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                return OperationResult(
+                    False, f"Failed to write config: {result.stderr}"
+                )
+
+            # Reload sysctl
+            result = subprocess.run(
+                ["pkexec", "sysctl", "--system"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return OperationResult(True, f"Swappiness set to {value}")
+            return OperationResult(False, f"sysctl reload failed: {result.stderr}")
+        except Exception as e:
+            return OperationResult(False, str(e))
 
 
 class NetworkOps:
@@ -184,7 +342,10 @@ class NetworkOps:
             # Get active connection
             result = subprocess.run(
                 ["nmcli", "-t", "-", "NAME", "connection", "show", "--active"],
-                capture_output=True, text=True, check=False
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=15,
             )
             if result.returncode != 0:
                 return OperationResult(False, "No active connection found")
@@ -196,19 +357,34 @@ class NetworkOps:
             conn = connections[0]
 
             # Set DNS
-            dns_cmd = ["nmcli", "connection", "modify", conn,
-                       "ipv4.dns", f"{primary} {secondary}",
-                       "ipv4.ignore-auto-dns", "yes"]
+            dns_cmd = [
+                "nmcli",
+                "connection",
+                "modify",
+                conn,
+                "ipv4.dns",
+                f"{primary} {secondary}",
+                "ipv4.ignore-auto-dns",
+                "yes",
+            ]
 
-            result = subprocess.run(dns_cmd, capture_output=True, text=True, check=False)
+            result = subprocess.run(
+                dns_cmd, capture_output=True, text=True, check=False, timeout=15
+            )
             if result.returncode != 0:
                 return OperationResult(False, f"Failed: {result.stderr}")
 
             # Restart connection
-            subprocess.run(["nmcli", "connection", "up", conn],
-                           capture_output=True, check=False)
+            subprocess.run(
+                ["nmcli", "connection", "up", conn],
+                capture_output=True,
+                check=False,
+                timeout=30,
+            )
 
-            return OperationResult(True, f"DNS set to {provider} ({primary}, {secondary})")
+            return OperationResult(
+                True, f"DNS set to {provider} ({primary}, {secondary})"
+            )
 
         except Exception as e:
             return OperationResult(False, str(e))
@@ -227,6 +403,7 @@ def execute_operation(
     GUI paths continue using CommandRunner + QProcess.
     """
     from core.executor.action_executor import ActionExecutor
+
     command, args, _status = op_tuple
     pkexec = command == "pkexec"
     if pkexec:

@@ -7,21 +7,37 @@ original AppsTab and ReposTab.
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
-    QGroupBox, QScrollArea, QFrame, QTabWidget, QCheckBox, QListWidget,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QGroupBox,
+    QScrollArea,
+    QFrame,
+    QTabWidget,
+    QCheckBox,
+    QListWidget,
 )
+
+import logging
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from utils.commands import PrivilegedCommand
 from utils.software_utils import SoftwareUtils
 from utils.command_runner import CommandRunner
 from utils.batch_ops import BatchOpsManager
 from core.plugins.metadata import PluginMetadata
 
+logger = logging.getLogger(__name__)
+
 
 # ---------------------------------------------------------------------------
 # Sub-tab: Applications
 # ---------------------------------------------------------------------------
+
 
 class _ApplicationsSubTab(QWidget):
     """Sub-tab containing all application management functionality.
@@ -180,19 +196,13 @@ class _ApplicationsSubTab(QWidget):
 
     def install_app(self, app_data):
         self.output_area.clear()
-        self.append_output(
-            self.tr("Installing {}...\n").format(app_data["name"])
-        )
+        self.append_output(self.tr("Installing {}...\n").format(app_data["name"]))
         self.runner.run_command(app_data["cmd"], app_data["args"])
 
     def append_output(self, text):
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
         self.output_area.insertPlainText(text)
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
 
     def command_finished(self, exit_code):
         self.append_output(
@@ -244,9 +254,7 @@ class _ApplicationsSubTab(QWidget):
         if not packages:
             return
         self.output_area.clear()
-        self.append_output(
-            self.tr("Batch removing: {}\n").format(", ".join(packages))
-        )
+        self.append_output(self.tr("Batch removing: {}\n").format(", ".join(packages)))
         binary, args, desc = BatchOpsManager.batch_remove(packages)
         self.runner.run_command(binary, args)
 
@@ -254,6 +262,7 @@ class _ApplicationsSubTab(QWidget):
 # ---------------------------------------------------------------------------
 # Sub-tab: Repositories
 # ---------------------------------------------------------------------------
+
 
 class _RepositoriesSubTab(QWidget):
     """Sub-tab containing all repository management functionality.
@@ -304,9 +313,7 @@ class _RepositoriesSubTab(QWidget):
         flathub_layout = QVBoxLayout()
         flathub_group.setLayout(flathub_layout)
 
-        self.btn_enable_flathub = QPushButton(
-            self.tr("Enable Flathub Remote")
-        )
+        self.btn_enable_flathub = QPushButton(self.tr("Enable Flathub Remote"))
         self.btn_enable_flathub.setAccessibleName(self.tr("Enable Flathub"))
         self.btn_enable_flathub.clicked.connect(self.enable_flathub)
         flathub_layout.addWidget(self.btn_enable_flathub)
@@ -320,15 +327,12 @@ class _RepositoriesSubTab(QWidget):
 
         copr_layout.addWidget(QLabel(self.tr("Common COPR Repositories:")))
 
-        self.btn_copr_loofi = QPushButton(
-            self.tr("Enable Loofi Fedora Tweaks COPR")
-        )
+        self.btn_copr_loofi = QPushButton(self.tr("Enable Loofi Fedora Tweaks COPR"))
         self.btn_copr_loofi.setAccessibleName(self.tr("Enable Loofi COPR"))
         self.btn_copr_loofi.clicked.connect(
             lambda: self.run_command(
                 "pkexec",
-                ["dnf", "copr", "enable", "-y",
-                 "loofitheboss/loofi-fedora-tweaks"],
+                ["dnf", "copr", "enable", "-y", "loofitheboss/loofi-fedora-tweaks"],
                 self.tr("Enabling Loofi COPR..."),
             )
         )
@@ -350,16 +354,50 @@ class _RepositoriesSubTab(QWidget):
     # -- Repository actions ------------------------------------------------
 
     def enable_rpm_fusion(self):
-        cmd = (
-            "dnf install -y "
-            "https://mirrors.rpmfusion.org/free/fedora/"
-            "rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm "
-            "https://mirrors.rpmfusion.org/nonfree/fedora/"
-            "rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm; "
-            "dnf groupupdate -y core;"
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                ["rpm", "-E", "%fedora"], capture_output=True, text=True, timeout=10
+            )
+            fedora_ver = result.stdout.strip()
+        except Exception as e:
+            logger.debug("Failed to detect Fedora version: %s", e)
+            fedora_ver = "41"  # safe fallback
+
+        free_url = (
+            f"https://mirrors.rpmfusion.org/free/fedora/"
+            f"rpmfusion-free-release-{fedora_ver}.noarch.rpm"
+        )
+        nonfree_url = (
+            f"https://mirrors.rpmfusion.org/nonfree/fedora/"
+            f"rpmfusion-nonfree-release-{fedora_ver}.noarch.rpm"
+        )
+        binary, args, desc = PrivilegedCommand.dnf("install", free_url, nonfree_url)
+        self.run_command(
+            binary,
+            args,
+            self.tr("Enabling RPM Fusion repositories..."),
+        )
+
+    def install_multimedia_codecs(self):
+        binary, args, desc = PrivilegedCommand.dnf(
+            "install",
+            "@multimedia",
+            "@sound-and-video",
+            flags=[
+                "--setopt=install_weak_deps=False",
+                "--exclude=PackageKit-gstreamer-plugin",
+            ],
         )
         self.run_command(
-            "pkexec", ["sh", "-c", cmd],
+            binary,
+            args,
+            self.tr("Installing Multimedia Codecs..."),
+        )
+        self.run_command(
+            "pkexec",
+            ["sh", "-c", cmd],
             self.tr("Enabling RPM Fusion repositories..."),
         )
 
@@ -371,15 +409,20 @@ class _RepositoriesSubTab(QWidget):
             "dnf groupupdate -y sound-and-video"
         )
         self.run_command(
-            "pkexec", ["sh", "-c", cmd],
+            "pkexec",
+            ["sh", "-c", cmd],
             self.tr("Installing Multimedia Codecs..."),
         )
 
     def enable_flathub(self):
         self.run_command(
             "flatpak",
-            ["remote-add", "--if-not-exists", "flathub",
-             "https://flathub.org/repo/flathub.flatpakrepo"],
+            [
+                "remote-add",
+                "--if-not-exists",
+                "flathub",
+                "https://flathub.org/repo/flathub.flatpakrepo",
+            ],
             self.tr("Enabling Flathub..."),
         )
 
@@ -391,13 +434,9 @@ class _RepositoriesSubTab(QWidget):
         self.runner.run_command(cmd, args)
 
     def append_output(self, text):
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
         self.output_area.insertPlainText(text)
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
 
     def command_finished(self, exit_code):
         self.append_output(
@@ -408,6 +447,7 @@ class _RepositoriesSubTab(QWidget):
 # ---------------------------------------------------------------------------
 # Main consolidated tab
 # ---------------------------------------------------------------------------
+
 
 class SoftwareTab(BaseTab):
     """Consolidated software tab merging Applications and Repositories.
@@ -521,11 +561,10 @@ class SoftwareTab(BaseTab):
     def _show_flatpak_sizes(self):
         try:
             from utils.flatpak_manager import FlatpakManager
+
             sizes = FlatpakManager.get_flatpak_sizes()
             total = FlatpakManager.get_total_size()
-            self._flatpak_size_label.setText(
-                self.tr("Total size: {}").format(total)
-            )
+            self._flatpak_size_label.setText(self.tr("Total size: {}").format(total))
             lines = [f"{s.app_id}: {s.size_str}" for s in sizes]
             self._flatpak_output.setPlainText("\n".join(lines) or "No Flatpaks found.")
         except Exception as e:
@@ -534,6 +573,7 @@ class SoftwareTab(BaseTab):
     def _find_orphans(self):
         try:
             from utils.flatpak_manager import FlatpakManager
+
             orphans = FlatpakManager.find_orphan_runtimes()
             lines = [f"🗑 {o}" for o in orphans]
             self._flatpak_output.setPlainText(
@@ -545,6 +585,7 @@ class SoftwareTab(BaseTab):
     def _cleanup_flatpaks(self):
         try:
             from utils.flatpak_manager import FlatpakManager
+
             binary, args, desc = FlatpakManager.cleanup_unused()
             self._flatpak_output.clear()
             self._flatpak_output.setPlainText(f"{desc}\n")
@@ -555,6 +596,7 @@ class SoftwareTab(BaseTab):
     def _show_permissions(self):
         try:
             from utils.flatpak_manager import FlatpakManager
+
             self._flatpak_perms_list.clear()
             all_perms = FlatpakManager.get_all_permissions()
             for app in all_perms:

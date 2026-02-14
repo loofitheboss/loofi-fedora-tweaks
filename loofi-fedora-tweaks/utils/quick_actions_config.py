@@ -72,7 +72,7 @@ class QuickActionsConfig:
                 if isinstance(data, list) and len(data) > 0:
                     return data
         except Exception as e:
-            logger.warning(f"Failed to load quick actions config: {e}")
+            logger.warning("Failed to load quick actions config: %s", e)
         return cls.default_actions()
 
     @classmethod
@@ -88,7 +88,7 @@ class QuickActionsConfig:
             with open(_ACTIONS_FILE, "w") as f:
                 json.dump(actions, f, indent=2)
         except Exception as e:
-            logger.warning(f"Failed to save quick actions config: {e}")
+            logger.warning("Failed to save quick actions config: %s", e)
 
     @classmethod
     def reset_to_defaults(cls) -> List[Dict[str, str]]:

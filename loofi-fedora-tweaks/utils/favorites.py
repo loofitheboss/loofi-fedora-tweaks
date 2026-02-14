@@ -27,7 +27,7 @@ class FavoritesManager:
                 if isinstance(data, list):
                     return data
         except Exception as e:
-            logger.warning(f"Failed to load favorites: {e}")
+            logger.warning("Failed to load favorites: %s", e)
         return []
 
     @staticmethod
@@ -38,7 +38,7 @@ class FavoritesManager:
             with open(_FAVORITES_FILE, "w") as f:
                 json.dump(favorites, f, indent=2)
         except Exception as e:
-            logger.warning(f"Failed to save favorites: {e}")
+            logger.warning("Failed to save favorites: %s", e)
 
     @classmethod
     def get_favorites(cls) -> List[str]:

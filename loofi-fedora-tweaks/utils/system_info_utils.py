@@ -20,8 +20,8 @@ def get_hostname() -> str:
     """Return the system hostname."""
     try:
         return subprocess.getoutput("hostname").strip()
-    except Exception:
-        logger.debug("Failed to get hostname", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get hostname: %s", e)
         return "Unknown"
 
 
@@ -29,8 +29,8 @@ def get_kernel_version() -> str:
     """Return the running kernel version."""
     try:
         return subprocess.getoutput("uname -r").strip()
-    except Exception:
-        logger.debug("Failed to get kernel version", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get kernel version: %s", e)
         return "Unknown"
 
 
@@ -38,20 +38,18 @@ def get_fedora_release() -> str:
     """Return the Fedora release string."""
     try:
         return subprocess.getoutput("cat /etc/fedora-release").strip()
-    except Exception:
-        logger.debug("Failed to get Fedora release", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get Fedora release: %s", e)
         return "Unknown"
 
 
 def get_cpu_model() -> str:
     """Return the CPU model name from lscpu."""
     try:
-        info = subprocess.getoutput(
-            "lscpu | grep 'Model name' | cut -d: -f2"
-        ).strip()
+        info = subprocess.getoutput("lscpu | grep 'Model name' | cut -d: -f2").strip()
         return info if info else "Unknown"
-    except Exception:
-        logger.debug("Failed to get CPU model", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get CPU model: %s", e)
         return "Unknown"
 
 
@@ -59,10 +57,10 @@ def get_ram_usage() -> str:
     """Return human-readable RAM total and used."""
     try:
         return subprocess.getoutput(
-            "free -h | awk '/^Mem:/ {print $2 \" total, \" $3 \" used\"}'"
+            'free -h | awk \'/^Mem:/ {print $2 " total, " $3 " used"}\''
         ).strip()
-    except Exception:
-        logger.debug("Failed to get RAM usage", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get RAM usage: %s", e)
         return "Unknown"
 
 
@@ -72,8 +70,8 @@ def get_disk_usage() -> str:
         return subprocess.getoutput(
             'df -h / | awk \'NR==2 {print $3 "/" $2 " (" $5 " used)"}\''
         ).strip()
-    except Exception:
-        logger.debug("Failed to get disk usage", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get disk usage: %s", e)
         return "Unknown"
 
 
@@ -81,8 +79,8 @@ def get_uptime() -> str:
     """Return human-readable uptime."""
     try:
         return subprocess.getoutput("uptime -p").strip()
-    except Exception:
-        logger.debug("Failed to get uptime", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get uptime: %s", e)
         return "Unknown"
 
 
@@ -95,10 +93,8 @@ def get_battery_status() -> Optional[str]:
         capacity = subprocess.getoutput(
             "cat /sys/class/power_supply/BAT0/capacity"
         ).strip()
-        status = subprocess.getoutput(
-            "cat /sys/class/power_supply/BAT0/status"
-        ).strip()
+        status = subprocess.getoutput("cat /sys/class/power_supply/BAT0/status").strip()
         return f"{capacity}% ({status})"
-    except Exception:
-        logger.debug("Failed to get battery status", exc_info=True)
+    except Exception as e:
+        logger.debug("Failed to get battery status: %s", e)
         return None

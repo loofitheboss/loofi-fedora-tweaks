@@ -9,10 +9,15 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 from pathlib import Path
 
+from utils.log import get_logger
+
+logger = get_logger(__name__)
+
 
 @dataclass
 class ZramResult:
     """Result of a ZRAM operation."""
+
     success: bool
     message: str
     output: str = ""
@@ -21,6 +26,7 @@ class ZramResult:
 @dataclass
 class ZramConfig:
     """Current ZRAM configuration."""
+
     enabled: bool
     size_mb: int
     size_percent: int  # Percentage of RAM
@@ -57,8 +63,8 @@ class ZramManager:
                     if line.startswith("MemTotal:"):
                         kb = int(line.split()[1])
                         return kb // 1024
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read total RAM from /proc/meminfo: %s", e)
         return 8192  # Default fallback
 
     @classmethod
@@ -75,11 +81,14 @@ class ZramManager:
         try:
             result = subprocess.run(
                 ["zramctl", "--noheadings", "--raw"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=15,
             )
             enabled = bool(result.stdout.strip())
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check ZRAM active status: %s", e)
             enabled = False
 
         # Read config file
@@ -107,8 +116,8 @@ class ZramManager:
                                     size_percent = (size_mb * 100) // total_ram
                             elif line.startswith("compression-algorithm"):
                                 algorithm = line.split("=")[1].strip()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Failed to parse ZRAM config file: %s", e)
                 break
 
         size_mb = (total_ram * size_percent) // 100
@@ -118,7 +127,7 @@ class ZramManager:
             size_mb=size_mb,
             size_percent=size_percent,
             algorithm=algorithm,
-            total_ram_mb=total_ram
+            total_ram_mb=total_ram,
         )
 
     @classmethod
@@ -165,13 +174,18 @@ compression-algorithm = {algorithm}
         try:
             # Write to temp file first
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.conf', delete=False) as f:
+
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".conf", delete=False
+            ) as f:
                 f.write(config_content)
                 temp_path = f.name
 
             # Copy with elevated privileges
             cmd = ["pkexec", "cp", temp_path, config_path]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=600
+            )
 
             # Clean up temp file
             os.unlink(temp_path)
@@ -180,7 +194,7 @@ compression-algorithm = {algorithm}
                 return ZramResult(
                     success=True,
                     message=f"ZRAM configured: {size_percent}% RAM, {algorithm}\nReboot to apply changes.",
-                    output=config_content
+                    output=config_content,
                 )
             else:
                 return ZramResult(False, f"Failed to write config: {result.stderr}")
@@ -195,7 +209,9 @@ compression-algorithm = {algorithm}
             config_path = "/etc/systemd/zram-generator.conf"
             if os.path.exists(config_path):
                 cmd = ["pkexec", "rm", config_path]
-                result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, check=False, timeout=600
+                )
                 if result.returncode == 0:
                     return ZramResult(True, "ZRAM disabled. Reboot to apply.")
                 else:
@@ -215,7 +231,9 @@ compression-algorithm = {algorithm}
         try:
             result = subprocess.run(
                 ["zramctl", "--noheadings", "--bytes", "-o", "DATA,DISKSIZE"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=15,
             )
             if result.returncode == 0 and result.stdout.strip():
@@ -225,6 +243,6 @@ compression-algorithm = {algorithm}
                     used = int(parts[0]) // (1024 * 1024)
                     total = int(parts[1]) // (1024 * 1024)
                     return (used, total)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to get ZRAM usage: %s", e)
         return None

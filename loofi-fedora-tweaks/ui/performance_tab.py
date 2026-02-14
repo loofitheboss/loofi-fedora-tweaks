@@ -7,13 +7,23 @@ and tuning history. Uses AutoTuner from utils/auto_tuner.py.
 """
 
 from PyQt6.QtWidgets import (
-    QVBoxLayout, QLabel, QPushButton, QGroupBox,
-    QGridLayout, QTableWidget, QHeaderView,
-    QWidget
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QGroupBox,
+    QGridLayout,
+    QTableWidget,
+    QHeaderView,
+    QWidget,
 )
 from PyQt6.QtCore import QTimer
 from ui.base_tab import BaseTab
-from utils.auto_tuner import AutoTuner, WorkloadProfile, TuningRecommendation, TuningHistoryEntry
+from utils.auto_tuner import (
+    AutoTuner,
+    WorkloadProfile,
+    TuningRecommendation,
+    TuningHistoryEntry,
+)
 import time
 from core.plugins.metadata import PluginMetadata
 from utils.log import get_logger
@@ -142,9 +152,14 @@ class PerformanceTab(BaseTab):
 
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(4)
-        self.history_table.setHorizontalHeaderLabels([
-            self.tr("Time"), self.tr("Workload"), self.tr("Applied"), self.tr("Settings")
-        ])
+        self.history_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Time"),
+                self.tr("Workload"),
+                self.tr("Applied"),
+                self.tr("Settings"),
+            ]
+        )
         self.history_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
@@ -221,8 +236,8 @@ class PerformanceTab(BaseTab):
         )
         try:
             AutoTuner.save_tuning_entry(entry)
-        except Exception:
-            logger.debug("Failed to save tuning history entry", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to save tuning history entry: %s", e)
 
     def _refresh_history(self):
         """Update the history table."""
@@ -232,7 +247,9 @@ class PerformanceTab(BaseTab):
             self.history_table.setRowCount(0)
             recent = list(reversed(history[-10:]))
             if not recent:
-                self.set_table_empty_state(self.history_table, self.tr("No tuning history yet"))
+                self.set_table_empty_state(
+                    self.history_table, self.tr("No tuning history yet")
+                )
                 return
 
             for entry in recent:
@@ -240,14 +257,20 @@ class PerformanceTab(BaseTab):
                 self.history_table.insertRow(row)
 
                 from datetime import datetime
+
                 ts = datetime.fromtimestamp(entry.timestamp).strftime("%Y-%m-%d %H:%M")
                 self.history_table.setItem(row, 0, self.make_table_item(ts))
                 self.history_table.setItem(row, 1, self.make_table_item(entry.workload))
-                self.history_table.setItem(row, 2, self.make_table_item(
-                    "✅" if entry.applied else "❌"
-                ))
+                self.history_table.setItem(
+                    row, 2, self.make_table_item("✅" if entry.applied else "❌")
+                )
                 recs = entry.recommendations
                 summary = f"gov={recs.get('governor', '?')}, swap={recs.get('swappiness', '?')}"
                 self.history_table.setItem(row, 3, self.make_table_item(summary))
-        except Exception:
-            self.set_table_empty_state(self.history_table, self.tr("Failed to load tuning history"), color="#e8556d")
+        except Exception as e:
+            logger.debug("Failed to load tuning history: %s", e)
+            self.set_table_empty_state(
+                self.history_table,
+                self.tr("Failed to load tuning history"),
+                color="#e8556d",
+            )

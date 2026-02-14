@@ -185,14 +185,21 @@ class QuickActionsBar(QDialog):
 
         # Action list
         self._list_widget = QListWidget()
-        self._list_widget.setObjectName("quickActList")
+        self._list_widget.setStyleSheet("""
+            QListWidget {
+                font-size: 13px;
+            }
+            QListWidget::item {
+                padding: 6px 10px;
+            }
+        """)
         self._list_widget.itemActivated.connect(self._on_item_activated)
         self._list_widget.itemClicked.connect(self._on_item_clicked)
         layout.addWidget(self._list_widget, 1)
 
         # Status label
         self._status_label = QLabel()
-        self._status_label.setObjectName("quickActStatus")
+        self._status_label.setStyleSheet("color: #6c7086; font-size: 11px;")
         layout.addWidget(self._status_label)
 
         # Initial population

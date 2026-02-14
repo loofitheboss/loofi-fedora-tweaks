@@ -7,11 +7,13 @@ import subprocess
 from dataclasses import dataclass
 from typing import List
 from services.system import SystemManager
+from utils.commands import PrivilegedCommand
 
 
 @dataclass
 class PackageResult:
     """Result of a package operation."""
+
     success: bool
     message: str
     needs_reboot: bool = False
@@ -52,13 +54,20 @@ class PackageManager:
 
     def _install_dnf(self, packages: List[str]) -> PackageResult:
         """Install packages using DNF."""
-        cmd = ["pkexec", "dnf", "install", "-y"] + packages
+        binary, args, desc = PrivilegedCommand.dnf("install", *packages)
+        cmd = [binary] + args
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=120)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=120
+            )
             if result.returncode == 0:
-                return PackageResult(True, f"Installed: {', '.join(packages)}", output=result.stdout)
+                return PackageResult(
+                    True, f"Installed: {', '.join(packages)}", output=result.stdout
+                )
             else:
-                return PackageResult(False, f"Failed to install: {result.stderr}", output=result.stderr)
+                return PackageResult(
+                    False, f"Failed to install: {result.stderr}", output=result.stderr
+                )
         except Exception as e:
             return PackageResult(False, f"Error: {str(e)}")
 
@@ -67,26 +76,32 @@ class PackageManager:
         # Try --apply-live first for immediate effect
         cmd = ["pkexec", "rpm-ostree", "install", "--apply-live"] + packages
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=600
+            )
             if result.returncode == 0:
                 return PackageResult(
                     True,
                     f"Installed: {', '.join(packages)}",
                     needs_reboot=False,
-                    output=result.stdout
+                    output=result.stdout,
                 )
             elif "cannot apply" in result.stderr.lower():
                 # Fall back to regular install (requires reboot)
                 cmd = ["pkexec", "rpm-ostree", "install"] + packages
-                result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, check=False, timeout=600
+                )
                 if result.returncode == 0:
                     return PackageResult(
                         True,
                         f"Installed (reboot required): {', '.join(packages)}",
                         needs_reboot=True,
-                        output=result.stdout
+                        output=result.stdout,
                     )
-            return PackageResult(False, f"Failed: {result.stderr}", output=result.stderr)
+            return PackageResult(
+                False, f"Failed: {result.stderr}", output=result.stderr
+            )
         except Exception as e:
             return PackageResult(False, f"Error: {str(e)}")
 
@@ -97,7 +112,9 @@ class PackageManager:
             # Assume flathub remote
             cmd = ["flatpak", "install", "-y", "flathub", pkg]
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, check=False, timeout=600
+                )
                 if result.returncode == 0:
                     results.append(f"✓ {pkg}")
                 else:
@@ -113,16 +130,20 @@ class PackageManager:
         if not packages:
             return PackageResult(False, "No packages specified")
 
-        if self.is_atomic:
-            cmd = ["pkexec", "rpm-ostree", "uninstall"] + packages
-        else:
-            cmd = ["pkexec", "dnf", "remove", "-y"] + packages
+        binary, args, desc = PrivilegedCommand.dnf("remove", *packages)
+        cmd = [binary] + args
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=60
+            )
             if result.returncode == 0:
-                needs_reboot = self.is_atomic  # rpm-ostree always needs reboot for removal
-                return PackageResult(True, f"Removed: {', '.join(packages)}", needs_reboot=needs_reboot)
+                needs_reboot = (
+                    self.is_atomic
+                )  # rpm-ostree always needs reboot for removal
+                return PackageResult(
+                    True, f"Removed: {', '.join(packages)}", needs_reboot=needs_reboot
+                )
             else:
                 return PackageResult(False, f"Failed: {result.stderr}")
         except Exception as e:
@@ -130,18 +151,25 @@ class PackageManager:
 
     def update(self) -> PackageResult:
         """Run system update."""
-        if self.is_atomic:
-            cmd = ["pkexec", "rpm-ostree", "upgrade"]
-        else:
-            cmd = ["pkexec", "dnf", "update", "-y"]
+        binary, args, desc = PrivilegedCommand.dnf("update")
+        cmd = [binary] + args
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=60
+            )
             if result.returncode == 0:
                 needs_reboot = self.is_atomic
-                return PackageResult(True, "System updated successfully", needs_reboot=needs_reboot, output=result.stdout)
+                return PackageResult(
+                    True,
+                    "System updated successfully",
+                    needs_reboot=needs_reboot,
+                    output=result.stdout,
+                )
             else:
-                return PackageResult(False, f"Update failed: {result.stderr}", output=result.stderr)
+                return PackageResult(
+                    False, f"Update failed: {result.stderr}", output=result.stderr
+                )
         except Exception as e:
             return PackageResult(False, f"Error: {str(e)}")
 
@@ -152,9 +180,13 @@ class PackageManager:
 
         cmd = ["pkexec", "rpm-ostree", "reset"]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=600)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=600
+            )
             if result.returncode == 0:
-                return PackageResult(True, "Reset to base image (reboot required)", needs_reboot=True)
+                return PackageResult(
+                    True, "Reset to base image (reboot required)", needs_reboot=True
+                )
             else:
                 return PackageResult(False, f"Reset failed: {result.stderr}")
         except Exception as e:

@@ -10,12 +10,18 @@ class SafetyManager:
         Returns True if locked.
         """
         import os
+
         if os.path.exists("/var/run/dnf.pid"):
             return True
         try:
             # Also check process list for 'dnf', 'yum', 'rpm'
             # pgrep returns 0 if found, 1 if not.
-            subprocess.check_call(["pgrep", "-f", "dnf|yum|rpm"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.check_call(
+                ["pgrep", "-f", "dnf|yum|rpm"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=10,
+            )
             return True
         except subprocess.CalledProcessError:
             return False
@@ -37,7 +43,15 @@ class SafetyManager:
                 # Timeshift needs root, but prompts usually handled by GUI or we run this via pkexec if needed.
                 # Here we assume the user might need to enter password if not running as root.
                 # However, for a CLI non-interactive snapshot:
-                cmd = ["pkexec", "timeshift", "--create", "--comments", comment, "--tags", "D"]
+                cmd = [
+                    "pkexec",
+                    "timeshift",
+                    "--create",
+                    "--comments",
+                    comment,
+                    "--tags",
+                    "D",
+                ]
                 subprocess.run(cmd, check=True, timeout=600)
                 return True
             elif tool == "snapper":
@@ -61,7 +75,9 @@ class SafetyManager:
         msg = QMessageBox(parent)
         msg.setWindowTitle("Safety Check")
         msg.setText(f"You are about to: {description}")
-        msg.setInformativeText("It is recommended to create a system snapshot before proceeding.")
+        msg.setInformativeText(
+            "It is recommended to create a system snapshot before proceeding."
+        )
         msg.setIcon(QMessageBox.Icon.Warning)
 
         # Standard Buttons
@@ -70,7 +86,10 @@ class SafetyManager:
 
         btn_snapshot = None
         if tool:
-            btn_snapshot = msg.addButton(f"Create {tool.capitalize()} Snapshot & Continue", QMessageBox.ButtonRole.ActionRole)
+            btn_snapshot = msg.addButton(
+                f"Create {tool.capitalize()} Snapshot & Continue",
+                QMessageBox.ButtonRole.ActionRole,
+            )
             msg.setDefaultButton(btn_snapshot)
         else:
             msg.setDefaultButton(btn_cancel)
@@ -85,12 +104,20 @@ class SafetyManager:
         if tool and clicked == btn_snapshot:
             # Create snapshot
             parent.setDisabled(True)  # Prevent interaction during snapshot
-            success = SafetyManager.create_snapshot(tool, f"Pre-{description.split(' ')[0]}")
+            success = SafetyManager.create_snapshot(
+                tool, f"Pre-{description.split(' ')[0]}"
+            )
             parent.setDisabled(False)
 
             if not success:
-                QMessageBox.warning(parent, "Snapshot Failed", "Could not create snapshot. Proceeding regardless...")
+                QMessageBox.warning(
+                    parent,
+                    "Snapshot Failed",
+                    "Could not create snapshot. Proceeding regardless...",
+                )
             else:
-                QMessageBox.information(parent, "Snapshot Created", "System snapshot created successfully.")
+                QMessageBox.information(
+                    parent, "Snapshot Created", "System snapshot created successfully."
+                )
 
         return True

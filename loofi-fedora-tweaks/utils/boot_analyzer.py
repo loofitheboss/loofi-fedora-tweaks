@@ -5,14 +5,18 @@ Part of v7.5 "Watchtower" update.
 Parses systemd-analyze output to help users identify slow boot services.
 """
 
+import logging
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class ServiceTime:
     """Represents a service's startup time."""
+
     service: str
     time_seconds: float
     is_slow: bool = False  # >5s considered slow
@@ -21,6 +25,7 @@ class ServiceTime:
 @dataclass
 class BootStats:
     """Overall boot timing statistics."""
+
     firmware_time: Optional[float] = None
     loader_time: Optional[float] = None
     kernel_time: Optional[float] = None
@@ -51,7 +56,7 @@ class BootAnalyzer:
                 ["systemd-analyze", "--no-pager"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode != 0:
@@ -64,29 +69,30 @@ class BootAnalyzer:
             # Startup finished in 2.5s (firmware) + 1.2s (loader) + 3.1s (kernel) + 15.2s (userspace) = 22.0s
             import re
 
-            firmware_match = re.search(r'([\d.]+)s \(firmware\)', output)
+            firmware_match = re.search(r"([\d.]+)s \(firmware\)", output)
             if firmware_match:
                 stats.firmware_time = float(firmware_match.group(1))
 
-            loader_match = re.search(r'([\d.]+)s \(loader\)', output)
+            loader_match = re.search(r"([\d.]+)s \(loader\)", output)
             if loader_match:
                 stats.loader_time = float(loader_match.group(1))
 
-            kernel_match = re.search(r'([\d.]+)s \(kernel\)', output)
+            kernel_match = re.search(r"([\d.]+)s \(kernel\)", output)
             if kernel_match:
                 stats.kernel_time = float(kernel_match.group(1))
 
-            userspace_match = re.search(r'([\d.]+)s \(userspace\)', output)
+            userspace_match = re.search(r"([\d.]+)s \(userspace\)", output)
             if userspace_match:
                 stats.userspace_time = float(userspace_match.group(1))
 
-            total_match = re.search(r'= ([\d.]+)s', output)
+            total_match = re.search(r"= ([\d.]+)s", output)
             if total_match:
                 stats.total_time = float(total_match.group(1))
 
             return stats
 
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get boot stats: %s", e)
             return BootStats()
 
     @classmethod
@@ -105,7 +111,7 @@ class BootAnalyzer:
                 ["systemd-analyze", "blame", "--no-pager"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode != 0:
@@ -120,7 +126,7 @@ class BootAnalyzer:
                     continue
 
                 # Parse lines like "15.234s NetworkManager.service"
-                match = re.match(r'([\d.]+)(ms|s|min)\s+(.+)', line)
+                match = re.match(r"([\d.]+)(ms|s|min)\s+(.+)", line)
                 if match:
                     value = float(match.group(1))
                     unit = match.group(2)
@@ -134,15 +140,18 @@ class BootAnalyzer:
                     else:
                         time_seconds = value
 
-                    services.append(ServiceTime(
-                        service=service,
-                        time_seconds=time_seconds,
-                        is_slow=time_seconds >= cls.SLOW_THRESHOLD
-                    ))
+                    services.append(
+                        ServiceTime(
+                            service=service,
+                            time_seconds=time_seconds,
+                            is_slow=time_seconds >= cls.SLOW_THRESHOLD,
+                        )
+                    )
 
             return services
 
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get blame data: %s", e)
             return []
 
     @classmethod
@@ -177,10 +186,11 @@ class BootAnalyzer:
                 ["systemd-analyze", "critical-chain", "--no-pager"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get critical chain: %s", e)
             return ""
 
     @classmethod

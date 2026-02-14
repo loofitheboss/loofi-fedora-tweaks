@@ -11,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Translation directory relative to package root
 _TRANSLATIONS_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)),
-    "resources", "translations"
+    os.path.dirname(os.path.dirname(__file__)), "resources", "translations"
 )
 
 
@@ -82,7 +81,7 @@ class I18nManager:
 
         qm_path = os.path.join(_TRANSLATIONS_DIR, f"{locale}.qm")
         if not os.path.isfile(qm_path):
-            logger.warning(f"Translation file not found: {qm_path}")
+            logger.warning("Translation file not found: %s", qm_path)
             return False
 
         translator = QTranslator()
@@ -90,10 +89,10 @@ class I18nManager:
             app.installTranslator(translator)
             cls._translator = translator
             cls._current_locale = locale
-            logger.info(f"Locale set to: {locale}")
+            logger.info("Locale set to: %s", locale)
             return True
         else:
-            logger.warning(f"Failed to load translation: {qm_path}")
+            logger.warning("Failed to load translation: %s", qm_path)
             return False
 
     @staticmethod
@@ -106,6 +105,7 @@ class I18nManager:
         """
         try:
             import json
+
             config_path = os.path.expanduser(
                 "~/.config/loofi-fedora-tweaks/settings.json"
             )
@@ -113,8 +113,8 @@ class I18nManager:
                 with open(config_path, "r") as f:
                     settings = json.load(f)
                 return str(settings.get("locale", "en"))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read preferred locale from settings: %s", e)
         return "en"
 
     @staticmethod
@@ -127,6 +127,7 @@ class I18nManager:
         """
         try:
             import json
+
             config_dir = os.path.expanduser("~/.config/loofi-fedora-tweaks")
             config_path = os.path.join(config_dir, "settings.json")
 
@@ -140,4 +141,4 @@ class I18nManager:
             with open(config_path, "w") as f:
                 json.dump(settings, f, indent=2)
         except Exception as e:
-            logger.warning(f"Failed to save locale preference: {e}")
+            logger.warning("Failed to save locale preference: %s", e)

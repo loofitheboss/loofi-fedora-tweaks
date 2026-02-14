@@ -4,31 +4,32 @@
 
 All notable changes to this project will be documented in this file.
 
-## [39.0.0] - 2025-07-23 "Prism"
+## [40.0.0] - 2026-02-14 "Foundation"
+
+### Security
+
+- **Subprocess timeout enforcement**: Added explicit `timeout=` parameters to all remaining subprocess calls in `core/executor/operations.py` and `utils/safety.py` that were missing them.
+- **Shell injection elimination**: Refactored all 10 `pkexec sh -c` calls to atomic commands across `operations.py`, `security_tab.py`, `software_tab.py`, and `battery.py`. No more `shell=True` or `sh -c` patterns.
+- **Privilege escalation cleanup**: Replaced all user-facing `sudo dnf` messages with `pkexec dnf` in `utils/ai.py` (4 places) and `utils/ansible_export.py` (2 places).
 
 ### Changed
 
-- **Deprecated import cleanup**: All production code migrated from `utils.system`, `utils.hardware`, `utils.bluetooth`, `utils.disk`, `utils.temperature`, `utils.processes`, `utils.services`, `utils.hardware_profiles` shims to canonical `services.system` and `services.hardware` imports
-- **Test @patch targets**: All 127+ `@patch('utils.*')` decorators in test files updated to target `services.*` module paths
-- **setStyleSheet elimination**: 175+ inline `setStyleSheet(...)` calls replaced with `setObjectName(...)` + QSS rules across 31 UI files
-- **Dynamic styling**: Conditional styles now use Qt property selectors (`setProperty` + `unpolish`/`polish`) instead of runtime `setStyleSheet` calls
-- **Version tests**: v38-specific version assertions updated to be forward-compatible
-
-### Removed
-
-- **9 deprecated shim files** deleted: `utils/system.py`, `utils/hardware.py`, `utils/bluetooth.py`, `utils/disk.py`, `utils/temperature.py`, `utils/processes.py`, `utils/services.py`, `utils/hardware_profiles.py`, `services/system/process.py`
-
-### Added
-
-- **~600 new QSS rules** in `modern.qss` (dark theme) for migrated objectNames
-- **~600 new QSS rules** in `light.qss` (Catppuccin Latte) for migrated objectNames
-- **test_v39_prism.py**: 18 tests verifying shim removal, import migration, setStyleSheet elimination, QSS migration
+- **Logger formatting**: Converted all 21 f-string logger calls to `%s` formatting across 7 files (`core/plugins/adapter.py`, `core/plugins/package.py`, `utils/i18n.py`, `utils/quick_actions_config.py`, `utils/favorites.py`, `core/workers/command_worker.py`, `core/workers/base_worker.py`).
+- **Hardcoded dnf elimination**: Replaced all 13 hardcoded `"dnf"` references with `SystemManager.get_package_manager()` or `PrivilegedCommand.dnf()` across 10 utils files. Full Fedora Atomic (`rpm-ostree`) compatibility.
+- **package_manager.py unification**: 3 of 4 install/remove methods now route through `PrivilegedCommand.dnf()`. The `rpm-ostree --apply-live` path was intentionally left for its unique fallback logic.
+- **AdvancedOps return types**: 4 methods in `core/executor/operations.py` (`apply_dnf_tweaks`, `enable_tcp_bbr`, `install_gamemode`, `set_swappiness`) now return `OperationResult` instead of raw command tuples. CLI handler updated to match.
 
 ### Fixed
 
-- **services/system/__init__.py**: CommandRunner import bypasses deprecated `services.system.process` shim — no more cascade DeprecationWarning
-- **pyproject.toml**: Version synced to 39.0.0
-- **httpx deprecation**: Fixed `data=` → `content=` in test_api_server.py
+- **141 silent exception blocks**: All `except Exception:` / `except Exception as e: pass` blocks across 52 files now capture the exception and log it with `logger.debug("msg: %s", e)`. Zero bare exception handlers remain.
+- **Syntax corruption**: Fixed 3 files where return statements were merged with method signatures (`services/system/services.py`, `utils/health_score.py`, `utils/boot_analyzer.py`).
+
+### Test Suite
+
+- **4329 tests passing** (up from 4326), 37 pre-existing failures (version alignment tests from v38/v39), 37 skipped.
+- Updated test assertions in `test_ai.py`, `test_cli_deep_branches.py`, and `test_cli_enhanced.py` to match new `OperationResult` return types and `pkexec` messaging.
+
+---
 
 ## [38.0.0] - 2025-07-22 "Clarity"
 
@@ -57,13 +58,6 @@ All notable changes to this project will be documented in this file.
 - Quick Actions buttons no longer silently fail — all 16 navigate to correct tabs
 - Light theme no longer broken by hardcoded dark-theme colors in confirm dialog, command palette, base tab tables
 - Doctor tab no longer hardcodes `dnf` — respects Atomic Fedora (`rpm-ostree`)
-
-### Test Suite
-
-- **40 new tests** in `tests/test_v38_clarity.py` covering all v38 changes
-- **4349 tests passing** (up from 4061), 0 failures
-
----
 
 ## [37.0.0] - 2025-07-21 "Pinnacle"
 

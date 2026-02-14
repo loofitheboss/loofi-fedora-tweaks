@@ -6,19 +6,24 @@ Gaming-focused service manager - differentiates from Cockpit by
 focusing on gaming-relevant services like GameMode, Steam, etc.
 """
 
+import logging
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
 
+logger = logging.getLogger(__name__)
+
 
 class UnitScope(Enum):
     """Systemd unit scope."""
+
     SYSTEM = "system"
     USER = "user"
 
 
 class UnitState(Enum):
     """Service state."""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     FAILED = "failed"
@@ -30,6 +35,7 @@ class UnitState(Enum):
 @dataclass
 class ServiceUnit:
     """Represents a systemd service unit."""
+
     name: str
     state: UnitState
     scope: UnitScope
@@ -40,6 +46,7 @@ class ServiceUnit:
 @dataclass
 class Result:
     """Operation result with message."""
+
     success: bool
     message: str
 
@@ -68,8 +75,9 @@ class ServiceManager:
     ]
 
     @classmethod
-    def list_units(cls, scope: UnitScope = UnitScope.USER,
-                   filter_type: str = "all") -> list[ServiceUnit]:
+    def list_units(
+        cls, scope: UnitScope = UnitScope.USER, filter_type: str = "all"
+    ) -> list[ServiceUnit]:
         """
         List systemd service units.
 
@@ -84,8 +92,16 @@ class ServiceManager:
             cmd = ["systemctl"]
             if scope == UnitScope.USER:
                 cmd.append("--user")
-            cmd.extend(["list-units", "--type=service", "--all", "--no-pager",
-                       "--plain", "--no-legend"])
+            cmd.extend(
+                [
+                    "list-units",
+                    "--type=service",
+                    "--all",
+                    "--no-pager",
+                    "--plain",
+                    "--no-legend",
+                ]
+            )
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
@@ -127,7 +143,7 @@ class ServiceManager:
                     state=state,
                     scope=scope,
                     description=description,
-                    is_gaming=is_gaming
+                    is_gaming=is_gaming,
                 )
 
                 # Apply filter
@@ -142,7 +158,8 @@ class ServiceManager:
 
             return units
 
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list systemd units: %s", e)
             return []
 
     @classmethod
@@ -156,7 +173,8 @@ class ServiceManager:
         # System failures (may require auth to view all)
         try:
             failed.extend(cls.list_units(UnitScope.SYSTEM, "failed"))
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list system-scope failed units: %s", e)
             pass
 
         return failed
@@ -286,5 +304,6 @@ class ServiceManager:
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             return result.stdout
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to get unit status: %s", e)
             return ""

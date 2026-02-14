@@ -6,15 +6,21 @@ Provides integration with usbguard to protect against
 BadUSB attacks by controlling USB device access.
 """
 
+import logging
 import subprocess
 import shutil
 from dataclasses import dataclass
 from typing import Optional
 
+from utils.commands import PrivilegedCommand
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -23,6 +29,7 @@ class Result:
 @dataclass
 class USBDevice:
     """Represents a USB device."""
+
     id: str
     name: str
     hash: str
@@ -53,10 +60,11 @@ class USBGuardManager:
                 ["systemctl", "is-active", "usbguard"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             return result.returncode == 0
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check USBGuard service status: %s", e)
             return False
 
     @classmethod
@@ -66,11 +74,11 @@ class USBGuardManager:
             return Result(True, "USBGuard is already installed")
 
         try:
+            binary, args, desc = PrivilegedCommand.dnf(
+                "install", "usbguard", "usbguard-tools"
+            )
             result = subprocess.run(
-                ["pkexec", "dnf", "install", "usbguard", "usbguard-tools", "-y"],
-                capture_output=True,
-                text=True,
-                timeout=120
+                [binary] + args, capture_output=True, text=True, timeout=120
             )
 
             if result.returncode == 0:
@@ -91,7 +99,7 @@ class USBGuardManager:
                 ["pkexec", "systemctl", "enable", "--now", "usbguard"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
@@ -111,10 +119,7 @@ class USBGuardManager:
 
         try:
             result = subprocess.run(
-                ["usbguard", "list-devices"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["usbguard", "list-devices"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode != 0:
@@ -142,23 +147,30 @@ class USBGuardManager:
                     policy = "reject"
 
                 # Extract name (simplified parsing)
-                name = rest.split("name ")[1].split(" ")[0] if "name " in rest else "Unknown"
+                name = (
+                    rest.split("name ")[1].split(" ")[0]
+                    if "name " in rest
+                    else "Unknown"
+                )
 
                 # Extract hash
                 device_hash = ""
                 if "hash " in rest:
                     device_hash = rest.split("hash ")[1].split(" ")[0]
 
-                devices.append(USBDevice(
-                    id=device_id,
-                    name=name.strip('"'),
-                    hash=device_hash,
-                    policy=policy
-                ))
+                devices.append(
+                    USBDevice(
+                        id=device_id,
+                        name=name.strip('"'),
+                        hash=device_hash,
+                        policy=policy,
+                    )
+                )
 
             return devices
 
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list USB devices: %s", e)
             return []
 
     @classmethod
@@ -172,12 +184,7 @@ class USBGuardManager:
             if permanent:
                 cmd.append("-p")
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 return Result(True, f"Device {device_id} allowed")
@@ -197,12 +204,7 @@ class USBGuardManager:
             if permanent:
                 cmd.append("-p")
 
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 return Result(True, f"Device {device_id} blocked")
@@ -229,7 +231,7 @@ class USBGuardManager:
             False,
             f"To change default policy to '{policy}', edit {config_path}:\n"
             f"  ImplicitPolicyTarget={policy}\n"
-            "Then restart usbguard: sudo systemctl restart usbguard"
+            "Then restart usbguard: sudo systemctl restart usbguard",
         )
 
     @classmethod
@@ -270,14 +272,14 @@ done
                 ["pkexec", "usbguard", "generate-policy"],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
                 return Result(
                     True,
                     "Policy generated. Save to /etc/usbguard/rules.conf",
-                    {"policy": result.stdout}
+                    {"policy": result.stdout},
                 )
             else:
                 return Result(False, f"Failed: {result.stderr}")

@@ -2,8 +2,15 @@
 What's New dialog - shows release highlights after version upgrade.
 Part of v14.0 "Horizon Update".
 """
+
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QLabel, QPushButton, QTextEdit, QCheckBox, QHBoxLayout,
+    QDialog,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QCheckBox,
+    QHBoxLayout,
 )
 
 from version import __version__, __version_codename__
@@ -60,9 +67,11 @@ class WhatsNewDialog(QDialog):
         layout = QVBoxLayout(self)
 
         # Header
-        header = QLabel(self.tr("What's New in v{version} \"{codename}\"").format(
-            version=__version__, codename=__version_codename__
-        ))
+        header = QLabel(
+            self.tr('What\'s New in v{version} "{codename}"').format(
+                version=__version__, codename=__version_codename__
+            )
+        )
         header.setObjectName("whatsNewHeader")
         layout.addWidget(header)
 
@@ -79,7 +88,11 @@ class WhatsNewDialog(QDialog):
             content = self.tr("No release notes available for this version.")
 
         # Also show previous version notes
-        versions = sorted(RELEASE_NOTES.keys(), key=lambda v: tuple(int(p) for p in v.split(".")), reverse=True)
+        versions = sorted(
+            RELEASE_NOTES.keys(),
+            key=lambda v: tuple(int(p) for p in v.split(".")),
+            reverse=True,
+        )
         for ver in versions:
             if ver == __version__:
                 continue
@@ -116,10 +129,12 @@ class WhatsNewDialog(QDialog):
         """Check if the dialog should be shown based on last seen version."""
         try:
             from utils.settings import SettingsManager
+
             mgr = SettingsManager.instance()
             last_seen = mgr.get("last_seen_version", "0.0.0")
             return bool(last_seen != __version__)
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to check last seen version: %s", e)
             return True
 
     @staticmethod
@@ -127,8 +142,9 @@ class WhatsNewDialog(QDialog):
         """Mark the current version as seen."""
         try:
             from utils.settings import SettingsManager
+
             mgr = SettingsManager.instance()
             mgr.set("last_seen_version", __version__)
             mgr.save()
-        except Exception:
-            logger.debug("Failed to save last seen version", exc_info=True)
+        except Exception as e:
+            logger.debug("Failed to save last seen version: %s", e)

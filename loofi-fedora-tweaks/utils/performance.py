@@ -4,15 +4,19 @@ Reads from /proc to gather CPU, memory, network, and disk I/O samples
 for live performance graphing. Part of the v9.2 Pulse Update.
 """
 
+import logging
 import time
 from collections import deque
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CpuSample:
     """A single CPU usage sample."""
+
     timestamp: float
     percent: float  # Overall CPU usage %
     per_core: List[float]  # Per-core usage %
@@ -21,6 +25,7 @@ class CpuSample:
 @dataclass
 class MemorySample:
     """A single memory usage sample."""
+
     timestamp: float
     percent: float
     used_bytes: int
@@ -30,6 +35,7 @@ class MemorySample:
 @dataclass
 class NetworkSample:
     """A single network I/O sample."""
+
     timestamp: float
     bytes_sent: int
     bytes_recv: int
@@ -40,6 +46,7 @@ class NetworkSample:
 @dataclass
 class DiskIOSample:
     """A single disk I/O sample."""
+
     timestamp: float
     read_bytes: int
     write_bytes: int
@@ -113,8 +120,8 @@ class PerformanceCollector:
                     # parts[1:] are the time counters
                     if len(parts) >= 5:
                         results.append([int(v) for v in parts[1:9]])
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read /proc/stat: %s", e)
         return results
 
     @staticmethod
@@ -156,8 +163,8 @@ class PerformanceCollector:
                         # Values in /proc/meminfo are in kB
                         value = int(parts[1]) * 1024
                         meminfo[key] = value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read /proc/meminfo: %s", e)
         return meminfo
 
     @staticmethod
@@ -188,12 +195,12 @@ class PerformanceCollector:
                     # Skip loopback
                     if iface == "lo":
                         continue
-                    fields = line[colon_idx + 1:].split()
+                    fields = line[colon_idx + 1 :].split()
                     if len(fields) >= 10:
-                        total_recv += int(fields[0])   # bytes received
-                        total_sent += int(fields[8])   # bytes transmitted
-        except Exception:
-            pass
+                        total_recv += int(fields[0])  # bytes received
+                        total_sent += int(fields[8])  # bytes transmitted
+        except Exception as e:
+            logger.debug("Failed to read /proc/net/dev: %s", e)
         return total_recv, total_sent
 
     @staticmethod
@@ -227,8 +234,8 @@ class PerformanceCollector:
                     sectors_written = int(parts[9])
                     total_read += sectors_read * PerformanceCollector.SECTOR_SIZE
                     total_write += sectors_written * PerformanceCollector.SECTOR_SIZE
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read /proc/diskstats: %s", e)
         return total_read, total_write
 
     # ==================== COLLECTION METHODS ====================
@@ -263,9 +270,7 @@ class PerformanceCollector:
                 return sample
 
             # Calculate overall CPU usage (index 0 is aggregate)
-            overall = self._calc_cpu_percent(
-                self._prev_cpu_times[0], current_times[0]
-            )
+            overall = self._calc_cpu_percent(self._prev_cpu_times[0], current_times[0])
 
             # Calculate per-core usage (indices 1..N)
             per_core = []
@@ -290,7 +295,8 @@ class PerformanceCollector:
             self._prev_cpu_timestamp = now
 
             return sample
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to collect CPU sample: %s", e)
             return None
 
     def collect_memory(self) -> Optional[MemorySample]:
@@ -320,7 +326,8 @@ class PerformanceCollector:
             )
             self._memory_history.append(sample)
             return sample
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to collect memory sample: %s", e)
             return None
 
     def collect_network(self) -> Optional[NetworkSample]:
@@ -372,7 +379,8 @@ class PerformanceCollector:
             self._prev_net_timestamp = now
 
             return sample
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to collect network sample: %s", e)
             return None
 
     def collect_disk_io(self) -> Optional[DiskIOSample]:
@@ -424,7 +432,8 @@ class PerformanceCollector:
             self._prev_disk_timestamp = now
 
             return sample
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to collect disk I/O sample: %s", e)
             return None
 
     def collect_all(self) -> Dict[str, Optional[object]]:
@@ -476,6 +485,7 @@ def _is_partition(device: str) -> bool:
         # Split on 'p' after 'n' portion: nvme0n1 vs nvme0n1p1
         # A partition has a 'p' followed by digits after the namespace number
         import re
+
         if re.match(r"^nvme\d+n\d+p\d+$", device):
             return True
         return False

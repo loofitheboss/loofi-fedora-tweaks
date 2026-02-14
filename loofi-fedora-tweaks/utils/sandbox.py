@@ -6,6 +6,7 @@ Provides Firejail and Bubblewrap wrappers for running
 non-Flatpak applications in sandboxed environments.
 """
 
+import logging
 import os
 import shutil
 import subprocess
@@ -13,10 +14,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
+from utils.commands import PrivilegedCommand
+
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Result:
     """Operation result."""
+
     success: bool
     message: str
     data: Optional[dict] = None
@@ -103,11 +109,9 @@ class SandboxManager:
             return Result(True, "Firejail is already installed")
 
         try:
+            binary, args, desc = PrivilegedCommand.dnf("install", "firejail")
             result = subprocess.run(
-                ["pkexec", "dnf", "install", "firejail", "-y"],
-                capture_output=True,
-                text=True,
-                timeout=120
+                [binary] + args, capture_output=True, text=True, timeout=120
             )
 
             if result.returncode == 0:
@@ -127,7 +131,7 @@ class SandboxManager:
         profile_dirs = [
             "/etc/firejail",
             "/usr/local/etc/firejail",
-            Path.home() / ".config/firejail"
+            Path.home() / ".config/firejail",
         ]
 
         for dir_path in profile_dirs:
@@ -145,7 +149,7 @@ class SandboxManager:
         no_network: bool = False,
         private_home: bool = False,
         read_only_home: bool = False,
-        profile: Optional[str] = None
+        profile: Optional[str] = None,
     ) -> Result:
         """
         Run a command in a Firejail sandbox.
@@ -184,13 +188,11 @@ class SandboxManager:
                 firejail_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                start_new_session=True
+                start_new_session=True,
             )
 
             return Result(
-                True,
-                f"Started sandboxed: {' '.join(command)}",
-                {"pid": process.pid}
+                True, f"Started sandboxed: {' '.join(command)}", {"pid": process.pid}
             )
         except Exception as e:
             return Result(False, f"Failed to start sandbox: {e}")
@@ -201,7 +203,7 @@ class SandboxManager:
         app_name: str,
         exec_command: str,
         no_network: bool = False,
-        private_home: bool = False
+        private_home: bool = False,
     ) -> Result:
         """
         Create a sandboxed .desktop entry for an application.
@@ -246,7 +248,7 @@ Categories=Security;
             return Result(
                 True,
                 f"Created sandboxed launcher: {desktop_file}",
-                {"path": str(desktop_file)}
+                {"path": str(desktop_file)},
             )
         except Exception as e:
             return Result(False, f"Failed to create desktop entry: {e}")
@@ -257,7 +259,7 @@ Categories=Security;
         status: dict[str, Any] = {
             "running": False,
             "sandboxed": False,
-            "restrictions": []
+            "restrictions": [],
         }
 
         # Check if process exists
@@ -281,8 +283,8 @@ Categories=Security;
                             status["restrictions"].append("no_network")
                         if "--private" in cmdline:
                             status["restrictions"].append("private_home")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to read sandbox status for pid %s: %s", pid, e)
 
         return status
 
@@ -300,9 +302,7 @@ class BubblewrapManager:
 
     @classmethod
     def run_minimal_sandbox(
-        cls,
-        command: list[str],
-        share_paths: Optional[list[str]] = None
+        cls, command: list[str], share_paths: Optional[list[str]] = None
     ) -> Result:
         """
         Run command in a minimal Bubblewrap sandbox.
@@ -317,14 +317,27 @@ class BubblewrapManager:
 
         bwrap_cmd = [
             "bwrap",
-            "--ro-bind", "/usr", "/usr",
-            "--ro-bind", "/lib", "/lib",
-            "--ro-bind", "/lib64", "/lib64",
-            "--ro-bind", "/bin", "/bin",
-            "--ro-bind", "/sbin", "/sbin",
-            "--proc", "/proc",
-            "--dev", "/dev",
-            "--tmpfs", "/tmp",
+            "--ro-bind",
+            "/usr",
+            "/usr",
+            "--ro-bind",
+            "/lib",
+            "/lib",
+            "--ro-bind",
+            "/lib64",
+            "/lib64",
+            "--ro-bind",
+            "/bin",
+            "/bin",
+            "--ro-bind",
+            "/sbin",
+            "/sbin",
+            "--proc",
+            "/proc",
+            "--dev",
+            "/dev",
+            "--tmpfs",
+            "/tmp",
             "--unshare-net",  # No network
             "--unshare-pid",  # Separate PID namespace
         ]
@@ -342,13 +355,13 @@ class BubblewrapManager:
                 bwrap_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                start_new_session=True
+                start_new_session=True,
             )
 
             return Result(
                 True,
                 f"Started in minimal sandbox: {' '.join(command)}",
-                {"pid": process.pid}
+                {"pid": process.pid},
             )
         except Exception as e:
             return Result(False, f"Failed to start sandbox: {e}")

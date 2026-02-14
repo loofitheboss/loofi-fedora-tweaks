@@ -27,56 +27,11 @@
 | v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
 | v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
 | v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
-| v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
-| v39.0 | Prism | DONE | Deprecated import migration, inline style elimination, service layer completion |
+| v38.0 | Clarity | ACTIVE | UX polish, theme correctness, stability improvements |
 
 ---
 
-## [DONE] v39.0 "Prism" — Migration & Cleanup
-
-### Scope
-
-Complete the services layer migration started in v23.0. Eliminate all deprecated
-`utils/` import shims and replace 177 inline `setStyleSheet` calls with QSS
-objectNames. Zero deprecation warnings at runtime.
-
-- Migrate 27 deprecated `utils.*` imports in production code to `services.*`
-- Migrate 13 deprecated `utils.*` imports in test files to `services.*`
-- Eliminate 177 inline `setStyleSheet` calls across 15+ UI files (use objectNames + QSS)
-- Add QSS rules in `modern.qss` + `light.qss` for all new objectNames
-- Remove deprecated shim modules once all consumers migrated
-- Zero DeprecationWarning output from test suite
-- Update ARCHITECTURE.md import examples to use `services.*` paths
-
-### Deliverables
-
-- [x] Production code: 27 deprecated imports → `services.*` (16 files)
-- [x] Test code: 13 deprecated imports → `services.*` (5 files)
-- [x] Top 5 UI files: wizard (17), monitor_tab (16), hardware_tab (16), community_tab (14), notification_panel (10) — setStyleSheet → objectNames
-- [x] Remaining 10 UI files: maintenance, automation, profiles, teleport, development, desktop, storage, security, network, diagnostics — setStyleSheet → objectNames
-- [x] QSS rules for all new objectNames in modern.qss + light.qss
-- [x] Remove deprecated utils/ shim modules (system, hardware, bluetooth, disk, temperature, processes, services)
-- [x] Zero DeprecationWarning in test output
-- [x] Update ARCHITECTURE.md import paths
-- [x] Tests for all migration changes
-- [x] CHANGELOG + README + release notes
-
-### Agent Assignment
-
-| Agent | Task |
-|-------|------|
-| CodeGen | Import migration (production + tests), shim removal |
-| Sculptor | setStyleSheet → objectNames conversion, QSS rules |
-| Guardian | Tests, deprecation warning verification |
-| Planner | Release coordination |
-
-### Dependencies
-
-- v38.0 Clarity (clean baseline)
-
----
-
-## [DONE] v38.0 "Clarity" — UX Polish & Theme Correctness
+## [ACTIVE] v38.0 "Clarity" — UX Polish & Theme Correctness
 
 ### Scope
 
@@ -106,8 +61,8 @@ hardening. No new major features — refine what exists.
 - [x] BaseTab: table objectName, optional color params, Copy/Save/Cancel toolbar
 - [x] Undo button in status bar + toast notification system
 - [x] Clickable breadcrumb category (QPushButton with hover underline)
-- [x] Tests for all changes (40 tests in test_v38_clarity.py, 4349 total passing)
-- [x] CHANGELOG + README + release notes
+- [ ] Tests for all changes
+- [ ] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -240,16 +195,16 @@ focused on practical Fedora system management.
 
 ### Deliverables
 
-- [x] Smart Update Manager tab section (conflict preview, scheduling, rollback)
-- [x] Extension manager: GNOME Shell extensions + KDE widgets browser
-- [x] Flatpak Manager: size treemap, permission audit, orphan cleanup
-- [x] Boot config: GRUB theme selector, timeout slider, default kernel picker
-- [x] Wayland display config: scaling, fractional scaling, multi-monitor layout
-- [x] System Backup Wizard: step-by-step guided backup setup
-- [x] Plugin showcase: curated community plugins in marketplace tab
-- [x] First-run wizard v2: interactive system health check + recommended actions
-- [x] Tests for all new features
-- [x] CHANGELOG + README + release notes
+- [ ] Smart Update Manager tab section (conflict preview, scheduling, rollback)
+- [ ] Extension manager: GNOME Shell extensions + KDE widgets browser
+- [ ] Flatpak Manager: size treemap, permission audit, orphan cleanup
+- [ ] Boot config: GRUB theme selector, timeout slider, default kernel picker
+- [ ] Wayland display config: scaling, fractional scaling, multi-monitor layout
+- [ ] System Backup Wizard: step-by-step guided backup setup
+- [ ] Plugin showcase: curated community plugins in marketplace tab
+- [ ] First-run wizard v2: interactive system health check + recommended actions
+- [ ] Tests for all new features
+- [ ] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -324,10 +279,10 @@ focused on practical Fedora system management.
 
 - [x] Fix mypy errors (163→0, Linux-only APIs, type annotations, missing stubs)
 - [x] Fix remaining test failures (3958 passing, 0 failing)
-- [x] Coverage ≥ 80% (achieved in v36.0)
+- [ ] Coverage ≥ 80% (currently 76.8%)
 - [x] Remove continue-on-error from typecheck/test in auto-release.yml and ci.yml (already strict)
-- [x] Add pytest --junitxml + dorny/test-reporter for PR annotations
-- [x] RPM install smoke test in release job
+- [ ] Add pytest --junitxml + dorny/test-reporter for PR annotations
+- [ ] RPM install smoke test in release job
 - [x] CHANGELOG + README + release notes
 
 ### Agent Assignment

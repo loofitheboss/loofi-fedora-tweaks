@@ -27,12 +27,7 @@ class SystemService(BaseSystemService):
     for system detection and information.
     """
 
-    def reboot(
-        self,
-        *,
-        description: str = "",
-        delay_seconds: int = 0
-    ) -> ActionResult:
+    def reboot(self, *, description: str = "", delay_seconds: int = 0) -> ActionResult:
         """Reboot the system using systemctl."""
         desc = description or "Rebooting system"
 
@@ -46,17 +41,18 @@ class SystemService(BaseSystemService):
         worker.wait()
 
         result = worker.get_result()
-        return result if result else ActionResult(
-            success=False,
-            message="Reboot command failed",
-            action_id="system_reboot_failed"
+        return (
+            result
+            if result
+            else ActionResult(
+                success=False,
+                message="Reboot command failed",
+                action_id="system_reboot_failed",
+            )
         )
 
     def shutdown(
-        self,
-        *,
-        description: str = "",
-        delay_seconds: int = 0
+        self, *, description: str = "", delay_seconds: int = 0
     ) -> ActionResult:
         """Shutdown the system using systemctl."""
         desc = description or "Shutting down system"
@@ -71,17 +67,17 @@ class SystemService(BaseSystemService):
         worker.wait()
 
         result = worker.get_result()
-        return result if result else ActionResult(
-            success=False,
-            message="Shutdown command failed",
-            action_id="system_shutdown_failed"
+        return (
+            result
+            if result
+            else ActionResult(
+                success=False,
+                message="Shutdown command failed",
+                action_id="system_shutdown_failed",
+            )
         )
 
-    def suspend(
-        self,
-        *,
-        description: str = ""
-    ) -> ActionResult:
+    def suspend(self, *, description: str = "") -> ActionResult:
         """Suspend the system using systemctl."""
         desc = description or "Suspending system"
 
@@ -90,17 +86,17 @@ class SystemService(BaseSystemService):
         worker.wait()
 
         result = worker.get_result()
-        return result if result else ActionResult(
-            success=False,
-            message="Suspend command failed",
-            action_id="system_suspend_failed"
+        return (
+            result
+            if result
+            else ActionResult(
+                success=False,
+                message="Suspend command failed",
+                action_id="system_suspend_failed",
+            )
         )
 
-    def update_grub(
-        self,
-        *,
-        description: str = ""
-    ) -> ActionResult:
+    def update_grub(self, *, description: str = "") -> ActionResult:
         """Update GRUB configuration."""
         desc = description or "Updating GRUB configuration"
 
@@ -110,36 +106,34 @@ class SystemService(BaseSystemService):
                 grub_cfg = "/etc/grub2-efi.cfg"
             else:
                 grub_cfg = "/etc/grub2.cfg"
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to detect UEFI/BIOS boot mode: %s", e)
             grub_cfg = "/etc/grub2.cfg"  # Fallback
 
         worker = CommandWorker(
-            "pkexec",
-            ["grub2-mkconfig", "-o", grub_cfg],
-            description=desc
+            "pkexec", ["grub2-mkconfig", "-o", grub_cfg], description=desc
         )
         worker.start()
         worker.wait()
 
         result = worker.get_result()
-        return result if result else ActionResult(
-            success=False,
-            message="GRUB update failed",
-            action_id="system_grub_update_failed"
+        return (
+            result
+            if result
+            else ActionResult(
+                success=False,
+                message="GRUB update failed",
+                action_id="system_grub_update_failed",
+            )
         )
 
-    def set_hostname(
-        self,
-        hostname: str,
-        *,
-        description: str = ""
-    ) -> ActionResult:
+    def set_hostname(self, hostname: str, *, description: str = "") -> ActionResult:
         """Set system hostname using hostnamectl."""
         if not hostname or not hostname.strip():
             return ActionResult(
                 success=False,
                 message="Hostname cannot be empty",
-                action_id="system_hostname_empty"
+                action_id="system_hostname_empty",
             )
 
         desc = description or f"Setting hostname to '{hostname}'"
@@ -147,16 +141,20 @@ class SystemService(BaseSystemService):
         worker = CommandWorker(
             "pkexec",
             ["hostnamectl", "set-hostname", hostname.strip()],
-            description=desc
+            description=desc,
         )
         worker.start()
         worker.wait()
 
         result = worker.get_result()
-        return result if result else ActionResult(
-            success=False,
-            message="Hostname update failed",
-            action_id="system_hostname_failed"
+        return (
+            result
+            if result
+            else ActionResult(
+                success=False,
+                message="Hostname update failed",
+                action_id="system_hostname_failed",
+            )
         )
 
     @staticmethod

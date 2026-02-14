@@ -4,15 +4,19 @@ Blocks distracting domains, enables DND, and kills specified processes.
 """
 
 import json
+import logging
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class FocusModeProfile:
     """A Focus Mode profile configuration."""
+
     name: str
     blocked_domains: List[str]
     kill_processes: List[str]
@@ -35,20 +39,29 @@ class FocusMode:
 
     # Default blocked domains
     DEFAULT_BLOCKED = [
-        "reddit.com", "www.reddit.com", "old.reddit.com",
-        "twitter.com", "www.twitter.com", "x.com", "www.x.com",
-        "facebook.com", "www.facebook.com",
-        "instagram.com", "www.instagram.com",
-        "tiktok.com", "www.tiktok.com",
-        "youtube.com", "www.youtube.com",
-        "twitch.tv", "www.twitch.tv",
-        "discord.com", "www.discord.com",
+        "reddit.com",
+        "www.reddit.com",
+        "old.reddit.com",
+        "twitter.com",
+        "www.twitter.com",
+        "x.com",
+        "www.x.com",
+        "facebook.com",
+        "www.facebook.com",
+        "instagram.com",
+        "www.instagram.com",
+        "tiktok.com",
+        "www.tiktok.com",
+        "youtube.com",
+        "www.youtube.com",
+        "twitch.tv",
+        "www.twitch.tv",
+        "discord.com",
+        "www.discord.com",
     ]
 
     # Default processes to kill
-    DEFAULT_KILL_PROCESSES = [
-        "steam", "discord", "slack", "telegram-desktop"
-    ]
+    DEFAULT_KILL_PROCESSES = ["steam", "discord", "slack", "telegram-desktop"]
 
     _active = False
     _active_profile: Optional[str] = None
@@ -67,9 +80,9 @@ class FocusMode:
                         "name": "Default Work Profile",
                         "blocked_domains": cls.DEFAULT_BLOCKED,
                         "kill_processes": cls.DEFAULT_KILL_PROCESSES,
-                        "enable_dnd": True
+                        "enable_dnd": True,
                     }
-                }
+                },
             }
             with open(cls.CONFIG_FILE, "w") as f:
                 json.dump(default_config, f, indent=2)
@@ -81,7 +94,8 @@ class FocusMode:
         try:
             with open(cls.CONFIG_FILE, "r") as f:
                 return dict(json.load(f))
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to load focus mode config: %s", e)
             return {"active": False, "profiles": {}}
 
     @classmethod
@@ -129,7 +143,8 @@ class FocusMode:
             config["profiles"][name] = profile
             cls.save_config(config)
             return True
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to save focus mode profile: %s", e)
             return False
 
     @classmethod
@@ -147,7 +162,8 @@ class FocusMode:
                 cls.save_config(config)
                 return True
             return False
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to delete focus mode profile: %s", e)
             return False
 
     @classmethod
@@ -194,7 +210,7 @@ class FocusMode:
             "message": "",
             "hosts_modified": False,
             "dnd_enabled": False,
-            "processes_killed": []
+            "processes_killed": [],
         }
 
         profile = cls.get_profile(profile_name)
@@ -242,7 +258,7 @@ class FocusMode:
             "success": False,
             "message": "",
             "hosts_restored": False,
-            "dnd_disabled": False
+            "dnd_disabled": False,
         }
 
         # Restore hosts file
@@ -315,13 +331,16 @@ class FocusMode:
                 ["pkexec", "tee", str(cls.HOSTS_FILE)],
                 input=new_hosts.encode(),
                 capture_output=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
                 return {"success": True, "message": f"Blocked {len(domains)} domains"}
             else:
-                return {"success": False, "message": "Failed to modify hosts (pkexec denied?)"}
+                return {
+                    "success": False,
+                    "message": "Failed to modify hosts (pkexec denied?)",
+                }
 
         except subprocess.TimeoutExpired:
             return {"success": False, "message": "pkexec timed out"}
@@ -346,7 +365,7 @@ class FocusMode:
                 ["pkexec", "tee", str(cls.HOSTS_FILE)],
                 input=clean_hosts.encode(),
                 capture_output=True,
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
@@ -399,7 +418,10 @@ class FocusMode:
         if gnome_result["success"]:
             return gnome_result
 
-        return {"success": False, "message": "Could not enable DND (unsupported desktop)"}
+        return {
+            "success": False,
+            "message": "Could not enable DND (unsupported desktop)",
+        }
 
     @classmethod
     def _disable_dnd(cls) -> Dict[str, Any]:
@@ -427,26 +449,43 @@ class FocusMode:
             "Inhibit" if enable else "UnInhibit"
 
             if enable:
-                result = subprocess.run([
-                    "dbus-send", "--session", "--print-reply",
-                    "--dest=org.freedesktop.Notifications",
-                    "/org/freedesktop/Notifications",
-                    "org.freedesktop.Notifications.Inhibit",
-                    "string:loofi-focus-mode",
-                    "string:Focus Mode Active",
-                    "dict:string:string:"
-                ], capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    [
+                        "dbus-send",
+                        "--session",
+                        "--print-reply",
+                        "--dest=org.freedesktop.Notifications",
+                        "/org/freedesktop/Notifications",
+                        "org.freedesktop.Notifications.Inhibit",
+                        "string:loofi-focus-mode",
+                        "string:Focus Mode Active",
+                        "dict:string:string:",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
             else:
                 # For UnInhibit, we'd need the cookie from Inhibit
                 # Simpler approach: use KDE-specific qdbus
-                result = subprocess.run([
-                    "qdbus", "org.kde.plasmashell", "/org/kde/plasmashell",
-                    "org.kde.PlasmaShell.evaluateScript",
-                    "var dnd = dataEngine('notifications'); dnd.connectSource('Inhibited'); dnd.serviceAction('notifications', 'DoNotDisturb').trigger();"
-                ], capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    [
+                        "qdbus",
+                        "org.kde.plasmashell",
+                        "/org/kde/plasmashell",
+                        "org.kde.PlasmaShell.evaluateScript",
+                        "var dnd = dataEngine('notifications'); dnd.connectSource('Inhibited'); dnd.serviceAction('notifications', 'DoNotDisturb').trigger();",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
 
             if result.returncode == 0:
-                return {"success": True, "message": f"KDE DND {'enabled' if enable else 'disabled'}"}
+                return {
+                    "success": True,
+                    "message": f"KDE DND {'enabled' if enable else 'disabled'}",
+                }
 
             return {"success": False, "message": "KDE DND command failed"}
         except Exception as e:
@@ -457,13 +496,24 @@ class FocusMode:
         """Toggle GNOME Do Not Disturb via gsettings."""
         try:
             value = "true" if enable else "false"
-            result = subprocess.run([
-                "gsettings", "set", "org.gnome.desktop.notifications",
-                "show-banners", value
-            ], capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                [
+                    "gsettings",
+                    "set",
+                    "org.gnome.desktop.notifications",
+                    "show-banners",
+                    value,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
 
             if result.returncode == 0:
-                return {"success": True, "message": f"GNOME DND {'enabled' if enable else 'disabled'}"}
+                return {
+                    "success": True,
+                    "message": f"GNOME DND {'enabled' if enable else 'disabled'}",
+                }
 
             return {"success": False, "message": "GNOME DND command failed"}
         except Exception as e:
@@ -485,18 +535,18 @@ class FocusMode:
         for name in process_names:
             try:
                 result = subprocess.run(
-                    ["pkill", "-", name],
-                    capture_output=True,
-                    timeout=5
+                    ["pkill", "-", name], capture_output=True, timeout=5
                 )
                 if result.returncode == 0:
                     killed.append(name)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to kill process: %s", e)
         return killed
 
     @classmethod
-    def get_running_distractions(cls, process_list: Optional[List[str]] = None) -> List[str]:
+    def get_running_distractions(
+        cls, process_list: Optional[List[str]] = None
+    ) -> List[str]:
         """
         Check which distraction processes are currently running.
 
@@ -509,15 +559,14 @@ class FocusMode:
         running = []
         try:
             result = subprocess.run(
-                ["ps", "-eo", "comm"],
-                capture_output=True, text=True, timeout=5
+                ["ps", "-eo", "comm"], capture_output=True, text=True, timeout=5
             )
             processes = result.stdout.lower()
 
             for name in process_list:
                 if name.lower() in processes:
                     running.append(name)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to check running distraction processes: %s", e)
 
         return running

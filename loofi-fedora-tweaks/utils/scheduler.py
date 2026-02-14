@@ -12,11 +12,15 @@ from dataclasses import dataclass, asdict
 from typing import Optional
 from enum import Enum
 
+from services.system import SystemManager
+from utils.commands import PrivilegedCommand
+
 logger = logging.getLogger(__name__)
 
 
 class TaskAction(Enum):
     """Available automated actions."""
+
     CLEANUP = "cleanup"
     UPDATE_CHECK = "update_check"
     SYNC_CONFIG = "sync_config"
@@ -25,6 +29,7 @@ class TaskAction(Enum):
 
 class TaskSchedule(Enum):
     """Schedule triggers."""
+
     DAILY = "daily"
     WEEKLY = "weekly"
     ON_BOOT = "on_boot"
@@ -36,6 +41,7 @@ class TaskSchedule(Enum):
 @dataclass
 class ScheduledTask:
     """Represents a scheduled task."""
+
     id: str
     name: str
     action: str  # TaskAction value
@@ -48,7 +54,7 @@ class ScheduledTask:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'ScheduledTask':
+    def from_dict(cls, data: dict) -> "ScheduledTask":
         return cls(**data)
 
     def is_due(self) -> bool:
@@ -180,13 +186,19 @@ class TaskScheduler:
     @classmethod
     def get_power_trigger_tasks(cls, on_battery: bool) -> list:
         """Get tasks triggered by power state change."""
-        trigger = TaskSchedule.ON_BATTERY.value if on_battery else TaskSchedule.ON_AC.value
+        trigger = (
+            TaskSchedule.ON_BATTERY.value if on_battery else TaskSchedule.ON_AC.value
+        )
         return [t for t in cls.list_tasks() if t.enabled and t.schedule == trigger]
 
     @classmethod
     def get_boot_tasks(cls) -> list:
         """Get tasks that run on boot."""
-        return [t for t in cls.list_tasks() if t.enabled and t.schedule == TaskSchedule.ON_BOOT.value]
+        return [
+            t
+            for t in cls.list_tasks()
+            if t.enabled and t.schedule == TaskSchedule.ON_BOOT.value
+        ]
 
     @classmethod
     def execute_task(cls, task: ScheduledTask) -> tuple:
@@ -229,11 +241,7 @@ class TaskScheduler:
 
         for task in cls.get_due_tasks():
             success, message = cls.execute_task(task)
-            results.append({
-                "task": task.name,
-                "success": success,
-                "message": message
-            })
+            results.append({"task": task.name, "success": success, "message": message})
 
         return results
 
@@ -243,21 +251,27 @@ class TaskScheduler:
     def _run_cleanup(cls) -> tuple:
         """Run system cleanup."""
         try:
-            # Clean DNF cache
+            # Clean package manager cache
+            binary, args, desc = PrivilegedCommand.dnf("clean")
             subprocess.run(
-                ["pkexec", "dnf", "clean", "all"],
-                capture_output=True, check=False,
+                [binary] + args,
+                capture_output=True,
+                check=False,
                 timeout=600,
             )
 
             # Remove orphaned packages (non-interactive)
+            binary, args, desc = PrivilegedCommand.dnf("autoremove")
             subprocess.run(
-                ["dnf", "autoremove", "-y", "--assumeno"],
-                capture_output=True, text=True, check=False,
+                [binary] + args,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=600,
             )
 
             from utils.notifications import NotificationManager
+
             NotificationManager.notify_cleanup_complete(50.0)  # Approximate
 
             return (True, "Cleanup completed")
@@ -269,23 +283,54 @@ class TaskScheduler:
     def _run_update_check(cls) -> tuple:
         """Check for available updates."""
         try:
-            result = subprocess.run(
-                ["dnf", "check-update", "-q"],
-                capture_output=True, text=True, check=False,
-                timeout=600,
-            )
+            if SystemManager.is_atomic():
+                result = subprocess.run(
+                    ["rpm-ostree", "upgrade", "--check"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=600,
+                )
+                if result.returncode == 0 and "AvailableUpdate" in result.stdout:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().split("\n")
+                        if line.strip()
+                    ]
+                    count = len(lines)
 
-            # dnf check-update returns 100 if updates available
-            if result.returncode == 100:
-                lines = [line for line in result.stdout.strip().split("\n") if line.strip()]
-                count = len(lines)
+                    from utils.notifications import NotificationManager
 
-                from utils.notifications import NotificationManager
-                NotificationManager.notify_updates_available(count)
+                    NotificationManager.notify_updates_available(count)
 
-                return (True, f"{count} updates available")
+                    return (True, f"{count} updates available (rpm-ostree)")
+                else:
+                    return (True, "System is up to date")
             else:
-                return (True, "System is up to date")
+                result = subprocess.run(
+                    ["dnf", "check-update", "-q"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=600,
+                )
+
+                # dnf check-update returns 100 if updates available
+                if result.returncode == 100:
+                    lines = [
+                        line
+                        for line in result.stdout.strip().split("\n")
+                        if line.strip()
+                    ]
+                    count = len(lines)
+
+                    from utils.notifications import NotificationManager
+
+                    NotificationManager.notify_updates_available(count)
+
+                    return (True, f"{count} updates available")
+                else:
+                    return (True, "System is up to date")
 
         except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Update check failed: %s", e)
@@ -303,6 +348,7 @@ class TaskScheduler:
 
             if success:
                 from utils.notifications import NotificationManager
+
                 NotificationManager.notify_sync_complete()
 
             return (success, message)
@@ -324,6 +370,7 @@ class TaskScheduler:
 
             if data:
                 from utils.notifications import NotificationManager
+
                 NotificationManager.notify_preset_applied(preset_name)
                 return (True, f"Preset '{preset_name}' applied")
             else:
@@ -341,7 +388,9 @@ class TaskScheduler:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "is-enabled", "loofi-fedora-tweaks"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=60,
             )
             return result.stdout.strip() == "enabled"
@@ -355,7 +404,9 @@ class TaskScheduler:
         try:
             result = subprocess.run(
                 ["systemctl", "--user", "is-active", "loofi-fedora-tweaks"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=60,
             )
             return result.stdout.strip() == "active"

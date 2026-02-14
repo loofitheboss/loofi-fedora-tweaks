@@ -34,6 +34,7 @@ from PyQt6.QtGui import QColor
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
+from utils.commands import PrivilegedCommand
 from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
 from utils.ports import PortAuditor
@@ -572,12 +573,9 @@ class SecurityTab(QWidget, PluginInterface):
 
         btn_remove_tele = QPushButton(self.tr("Remove Fedora Telemetry Packages"))
         btn_remove_tele.setAccessibleName(self.tr("Remove Fedora Telemetry Packages"))
-        tele_cmd = "dnf remove -y abrt* gnome-abrt* || true"
         btn_remove_tele.clicked.connect(
             lambda: self._run_privacy_command(
-                "pkexec",
-                ["sh", "-c", tele_cmd],
-                self.tr("Removing Telemetry Packages..."),
+                *PrivilegedCommand.dnf("remove", "abrt", "gnome-abrt"),
             )
         )
         tele_layout.addWidget(btn_remove_tele)

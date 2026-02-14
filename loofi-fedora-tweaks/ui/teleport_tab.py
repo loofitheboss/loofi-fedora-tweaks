@@ -9,9 +9,20 @@ Provides:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTableWidget, QTableWidgetItem, QHeaderView,
-    QTextEdit, QScrollArea, QFrame, QMessageBox, QFileDialog,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QTextEdit,
+    QScrollArea,
+    QFrame,
+    QMessageBox,
+    QFileDialog,
     QLineEdit,
 )
 
@@ -23,8 +34,11 @@ from utils.mesh_discovery import MeshDiscovery
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
+import logging
 import os
 import time
+
+logger = logging.getLogger(__name__)
 
 
 class TeleportTab(QWidget, PluginInterface):
@@ -66,11 +80,13 @@ class TeleportTab(QWidget, PluginInterface):
         header.setObjectName("header")
         layout.addWidget(header)
 
-        description = QLabel(self.tr(
-            "Capture your development workspace state and restore it "
-            "on another device. Includes git branch, VS Code workspace, "
-            "terminal state, and environment."
-        ))
+        description = QLabel(
+            self.tr(
+                "Capture your development workspace state and restore it "
+                "on another device. Includes git branch, VS Code workspace, "
+                "terminal state, and environment."
+            )
+        )
         description.setWordWrap(True)
         description.setObjectName("teleportDesc")
         layout.addWidget(description)
@@ -158,12 +174,14 @@ class TeleportTab(QWidget, PluginInterface):
         # Table of saved packages
         self.packages_table = QTableWidget(0, 4)
         self.packages_table.setAccessibleName(self.tr("Saved States"))
-        self.packages_table.setHorizontalHeaderLabels([
-            self.tr("Package ID"),
-            self.tr("Source Device"),
-            self.tr("Date"),
-            self.tr("Size"),
-        ])
+        self.packages_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Package ID"),
+                self.tr("Source Device"),
+                self.tr("Date"),
+                self.tr("Size"),
+            ]
+        )
         header = self.packages_table.horizontalHeader()
         if header is not None:
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -288,18 +306,21 @@ class TeleportTab(QWidget, PluginInterface):
         """Refresh the saved packages table."""
         try:
             packages = StateTeleportManager.list_saved_packages()
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to list saved teleport packages: %s", e)
             packages = []
 
         self.packages_table.setRowCount(len(packages))
 
         for row, pkg in enumerate(packages):
             self.packages_table.setItem(
-                row, 0,
+                row,
+                0,
                 QTableWidgetItem(pkg.get("package_id", "")[:12]),
             )
             self.packages_table.setItem(
-                row, 1,
+                row,
+                1,
                 QTableWidgetItem(pkg.get("source_device", "")),
             )
             created = pkg.get("created_at", 0)
@@ -310,9 +331,7 @@ class TeleportTab(QWidget, PluginInterface):
             )
             self.packages_table.setItem(row, 2, QTableWidgetItem(date_str))
             size = pkg.get("size_bytes", 0)
-            self.packages_table.setItem(
-                row, 3, QTableWidgetItem(f"{size} B")
-            )
+            self.packages_table.setItem(row, 3, QTableWidgetItem(f"{size} B"))
 
     def _export_package(self):
         """Export the last captured package to a file."""
@@ -344,10 +363,11 @@ class TeleportTab(QWidget, PluginInterface):
         peers = MeshDiscovery.discover_peers(timeout=3)
 
         if not peers:
-            self.log(self.tr(
-                "No mesh devices found. "
-                "Use 'Export to File' for manual transfer."
-            ))
+            self.log(
+                self.tr(
+                    "No mesh devices found. Use 'Export to File' for manual transfer."
+                )
+            )
             return
 
         # For now, use the first peer found (could add a device selector dialog)
@@ -361,15 +381,13 @@ class TeleportTab(QWidget, PluginInterface):
 
             # If the package file doesn't exist, save it first
             if not os.path.isfile(package_path):
-                StateTeleportManager.save_package_to_file(self._current_package, package_path)
+                StateTeleportManager.save_package_to_file(
+                    self._current_package, package_path
+                )
 
             # Send the file to the peer
             self.log(self.tr("Sending package to {}...").format(peer.name))
-            result = FileDropManager.send_file(
-                peer.address,
-                peer.port,
-                package_path
-            )
+            result = FileDropManager.send_file(peer.address, peer.port, package_path)
 
             if result.success:
                 self.log(self.tr("Package sent to {} successfully.").format(peer.name))
@@ -411,9 +429,7 @@ class TeleportTab(QWidget, PluginInterface):
                 branch=branch,
                 workspace=ws_path,
                 files=files_count,
-                time=time.strftime(
-                    "%Y-%m-%d %H:%M", time.localtime(ws.timestamp)
-                ),
+                time=time.strftime("%Y-%m-%d %H:%M", time.localtime(ws.timestamp)),
             )
             self.restore_preview.setText(preview)
             self.log(self.tr("Package imported successfully."))

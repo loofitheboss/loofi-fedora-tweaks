@@ -3,16 +3,20 @@ Secure Boot Manager - MOK (Machine Owner Key) management.
 Helps users manage Secure Boot for third-party kernel modules.
 """
 
+import logging
 import os
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class SecureBootResult:
     """Result of a Secure Boot operation."""
+
     success: bool
     message: str
     output: str = ""
@@ -22,6 +26,7 @@ class SecureBootResult:
 @dataclass
 class SecureBootStatus:
     """Secure Boot system status."""
+
     secure_boot_enabled: bool
     mok_enrolled: bool
     pending_mok: bool
@@ -51,7 +56,9 @@ class SecureBootManager:
         try:
             result = subprocess.run(
                 ["mokutil", "--sb-state"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=15,
             )
             secure_boot_enabled = "SecureBoot enabled" in result.stdout
@@ -66,30 +73,34 @@ class SecureBootManager:
         try:
             result = subprocess.run(
                 ["mokutil", "--list-enrolled"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=15,
             )
             mok_enrolled = result.returncode == 0 and bool(result.stdout.strip())
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to check enrolled MOKs: %s", e)
 
         # Check for pending MOK enrollment
         pending_mok = False
         try:
             result = subprocess.run(
                 ["mokutil", "--list-new"],
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=15,
             )
             pending_mok = result.returncode == 0 and bool(result.stdout.strip())
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Failed to check pending MOK enrollment: %s", e)
 
         return SecureBootStatus(
             secure_boot_enabled=secure_boot_enabled,
             mok_enrolled=mok_enrolled,
             pending_mok=pending_mok,
-            status_message=status_msg
+            status_message=status_msg,
         )
 
     @classmethod
@@ -114,20 +125,33 @@ class SecureBootManager:
 
             # Generate private key
             cmd_priv = [
-                "openssl", "req", "-new", "-x509",
-                "-newkey", "rsa:2048",
-                "-keyout", str(priv_key),
-                "-outform", "DER",
-                "-out", str(pub_key),
+                "openssl",
+                "req",
+                "-new",
+                "-x509",
+                "-newkey",
+                "rsa:2048",
+                "-keyout",
+                str(priv_key),
+                "-outform",
+                "DER",
+                "-out",
+                str(pub_key),
                 "-nodes",
-                "-days", "36500",
-                "-subj", "/CN=Loofi Fedora Tweaks MOK/"
+                "-days",
+                "36500",
+                "-subj",
+                "/CN=Loofi Fedora Tweaks MOK/",
             ]
 
-            result = subprocess.run(cmd_priv, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd_priv, capture_output=True, text=True, check=False, timeout=60
+            )
 
             if result.returncode != 0:
-                return SecureBootResult(False, f"Key generation failed: {result.stderr}")
+                return SecureBootResult(
+                    False, f"Key generation failed: {result.stderr}"
+                )
 
             # Set proper permissions
             os.chmod(priv_key, 0o600)
@@ -135,7 +159,7 @@ class SecureBootManager:
             return SecureBootResult(
                 success=True,
                 message=f"Keys generated:\n  Private: {priv_key}\n  Public: {pub_key}",
-                output=f"Private key: {priv_key}\nPublic key: {pub_key}"
+                output=f"Private key: {priv_key}\nPublic key: {pub_key}",
             )
 
         except Exception as e:
@@ -156,10 +180,7 @@ class SecureBootManager:
         pub_key = cls.MOK_KEY_DIR / cls.PUBLIC_KEY
 
         if not pub_key.exists():
-            return SecureBootResult(
-                False,
-                "No MOK key found. Generate one first."
-            )
+            return SecureBootResult(False, "No MOK key found. Generate one first.")
 
         try:
             # Import requires password input
@@ -169,7 +190,9 @@ class SecureBootManager:
             result = subprocess.run(
                 cmd,
                 input=f"{password}\n{password}\n",
-                capture_output=True, text=True, check=False,
+                capture_output=True,
+                text=True,
+                check=False,
                 timeout=60,
             )
 
@@ -183,7 +206,7 @@ class SecureBootManager:
                     "3. Select 'Continue'\n"
                     "4. Enter your password\n"
                     "5. Select 'Reboot'",
-                    requires_reboot=True
+                    requires_reboot=True,
                 )
             else:
                 return SecureBootResult(False, f"Import failed: {result.stderr}")
@@ -215,9 +238,10 @@ class SecureBootManager:
         sign_file = None
         for path in [
             "/usr/src/kernels/*/scripts/sign-file",
-            "/lib/modules/*/build/scripts/sign-file"
+            "/lib/modules/*/build/scripts/sign-file",
         ]:
             import glob
+
             matches = glob.glob(path)
             if matches:
                 sign_file = matches[0]
@@ -225,25 +249,26 @@ class SecureBootManager:
 
         if not sign_file:
             return SecureBootResult(
-                False,
-                "sign-file utility not found. Install kernel-devel package."
+                False, "sign-file utility not found. Install kernel-devel package."
             )
 
         try:
             cmd = [
-                "pkexec", sign_file,
+                "pkexec",
+                sign_file,
                 "sha256",
                 str(priv_key),
                 str(pub_key),
-                module_path
+                module_path,
             ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=False, timeout=60
+            )
 
             if result.returncode == 0:
                 return SecureBootResult(
-                    success=True,
-                    message=f"Module signed successfully: {module_path}"
+                    success=True, message=f"Module signed successfully: {module_path}"
                 )
             else:
                 return SecureBootResult(False, f"Signing failed: {result.stderr}")

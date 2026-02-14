@@ -20,6 +20,7 @@ try:
     import dbus
     from dbus.mainloop.glib import DBusGMainLoop
     from gi.repository import GLib
+
     DBUS_AVAILABLE = True
 except ImportError:
     DBUS_AVAILABLE = False
@@ -29,6 +30,7 @@ except ImportError:
 
 class PowerState(Enum):
     """Power source states."""
+
     AC = "ac"
     BATTERY = "battery"
     UNKNOWN = "unknown"
@@ -36,6 +38,7 @@ class PowerState(Enum):
 
 class NetworkState(Enum):
     """Network connection states."""
+
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
@@ -44,6 +47,7 @@ class NetworkState(Enum):
 @dataclass
 class MonitorInfo:
     """Information about a connected monitor."""
+
     name: str
     width: int
     height: int
@@ -160,7 +164,7 @@ class SystemPulse(QObject):
                 bus_name="org.freedesktop.UPower",
                 path="/org/freedesktop/UPower",
                 dbus_interface="org.freedesktop.DBus.Properties",
-                signal_name="PropertiesChanged"
+                signal_name="PropertiesChanged",
             )
 
             # Also watch battery level changes
@@ -169,7 +173,7 @@ class SystemPulse(QObject):
                 bus_name="org.freedesktop.UPower",
                 path="/org/freedesktop/UPower/devices/DisplayDevice",
                 dbus_interface="org.freedesktop.DBus.Properties",
-                signal_name="PropertiesChanged"
+                signal_name="PropertiesChanged",
             )
 
             logger.info("[Pulse] UPower signals registered")
@@ -206,7 +210,10 @@ class SystemPulse(QObject):
             # Try upower CLI first
             result = subprocess.run(
                 ["upower", "-i", "/org/freedesktop/UPower/devices/line_power_AC0"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 stripped = line.strip().lower()
@@ -221,12 +228,18 @@ class SystemPulse(QObject):
 
         # Fallback to sysfs
         try:
-            for ac_path in ["/sys/class/power_supply/AC0/online",
-                            "/sys/class/power_supply/AC/online",
-                            "/sys/class/power_supply/ACAD/online"]:
+            for ac_path in [
+                "/sys/class/power_supply/AC0/online",
+                "/sys/class/power_supply/AC/online",
+                "/sys/class/power_supply/ACAD/online",
+            ]:
                 if os.path.exists(ac_path):
                     with open(ac_path, "r") as f:
-                        return PowerState.AC.value if f.read().strip() == "1" else PowerState.BATTERY.value
+                        return (
+                            PowerState.AC.value
+                            if f.read().strip() == "1"
+                            else PowerState.BATTERY.value
+                        )
         except Exception as e:
             logger.debug("[Pulse] Failed power state via sysfs: %s", e)
 
@@ -243,7 +256,10 @@ class SystemPulse(QObject):
         try:
             result = subprocess.run(
                 ["upower", "-i", "/org/freedesktop/UPower/devices/DisplayDevice"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 if "percentage:" in line.lower():
@@ -253,8 +269,10 @@ class SystemPulse(QObject):
 
         # Fallback to sysfs
         try:
-            for bat_path in ["/sys/class/power_supply/BAT0/capacity",
-                             "/sys/class/power_supply/BAT1/capacity"]:
+            for bat_path in [
+                "/sys/class/power_supply/BAT0/capacity",
+                "/sys/class/power_supply/BAT1/capacity",
+            ]:
                 if os.path.exists(bat_path):
                     with open(bat_path, "r") as f:
                         return int(f.read().strip())
@@ -278,7 +296,7 @@ class SystemPulse(QObject):
                 bus_name="org.freedesktop.NetworkManager",
                 path="/org/freedesktop/NetworkManager",
                 dbus_interface="org.freedesktop.NetworkManager",
-                signal_name="StateChanged"
+                signal_name="StateChanged",
             )
 
             self._system_bus.add_signal_receiver(
@@ -286,7 +304,7 @@ class SystemPulse(QObject):
                 bus_name="org.freedesktop.NetworkManager",
                 path="/org/freedesktop/NetworkManager",
                 dbus_interface="org.freedesktop.DBus.Properties",
-                signal_name="PropertiesChanged"
+                signal_name="PropertiesChanged",
             )
 
             logger.info("[Pulse] NetworkManager signals registered")
@@ -328,7 +346,10 @@ class SystemPulse(QObject):
         try:
             result = subprocess.run(
                 ["nmcli", "-t", "-f", "TYPE,STATE", "connection", "show", "--active"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 if "vpn" in line.lower() and "activated" in line.lower():
@@ -348,7 +369,10 @@ class SystemPulse(QObject):
         try:
             result = subprocess.run(
                 ["nmcli", "-t", "-f", "STATE", "general"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             state = result.stdout.strip().lower()
             if "disconnected" in state:
@@ -372,7 +396,10 @@ class SystemPulse(QObject):
         try:
             result = subprocess.run(
                 ["nmcli", "-t", "-f", "active,ssid", "device", "wifi"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 if line.startswith("yes:"):
@@ -392,8 +419,17 @@ class SystemPulse(QObject):
         """
         ssid = cls.get_wifi_ssid().lower()
         public_patterns = [
-            "guest", "public", "free", "open", "cafe", "coffee",
-            "hotel", "airport", "library", "starbucks", "mcdonalds"
+            "guest",
+            "public",
+            "free",
+            "open",
+            "cafe",
+            "coffee",
+            "hotel",
+            "airport",
+            "library",
+            "starbucks",
+            "mcdonalds",
         ]
         return any(pattern in ssid for pattern in public_patterns)
 
@@ -414,12 +450,12 @@ class SystemPulse(QObject):
                 self._on_monitor_changed,
                 bus_name="org.kde.KScreen",
                 dbus_interface="org.kde.KScreen.Backend",
-                signal_name="configChanged"
+                signal_name="configChanged",
             )
             logger.info("[Pulse] KDE monitor signals registered")
             return
-        except Exception:
-            logger.debug("[Pulse] KDE monitor signals not available")
+        except Exception as e:
+            logger.debug("[Pulse] KDE monitor signals not available: %s", e)
 
         try:
             # GNOME/Mutter uses org.gnome.Mutter.DisplayConfig
@@ -428,7 +464,7 @@ class SystemPulse(QObject):
                 self._on_monitor_changed,
                 bus_name="org.gnome.Mutter.DisplayConfig",
                 dbus_interface="org.gnome.Mutter.DisplayConfig",
-                signal_name="MonitorsChanged"
+                signal_name="MonitorsChanged",
             )
             logger.info("[Pulse] GNOME/Mutter monitor signals registered")
         except Exception as e:
@@ -440,7 +476,11 @@ class SystemPulse(QObject):
         count = len(monitors)
 
         if count != self._last_monitor_count:
-            logger.info("[Pulse] Monitor count changed: %s -> %s", self._last_monitor_count, count)
+            logger.info(
+                "[Pulse] Monitor count changed: %s -> %s",
+                self._last_monitor_count,
+                count,
+            )
             self._last_monitor_count = count
             self.monitor_count_changed.emit(count)
 
@@ -467,7 +507,10 @@ class SystemPulse(QObject):
         try:
             result = subprocess.run(
                 ["xrandr", "--query"],
-                capture_output=True, text=True, check=False, timeout=5
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=5,
             )
             for line in result.stdout.splitlines():
                 if " connected" in line:
@@ -488,13 +531,15 @@ class SystemPulse(QObject):
 
                     is_ultrawide = (width / height) > 2.0 if height > 0 else False
 
-                    monitors.append({
-                        "name": name,
-                        "width": width,
-                        "height": height,
-                        "is_primary": is_primary,
-                        "is_ultrawide": is_ultrawide
-                    })
+                    monitors.append(
+                        {
+                            "name": name,
+                            "width": width,
+                            "height": height,
+                            "is_primary": is_primary,
+                            "is_ultrawide": is_ultrawide,
+                        }
+                    )
         except Exception as e:
             logger.debug("[Pulse] Failed monitor scan via xrandr: %s", e)
 
@@ -503,7 +548,10 @@ class SystemPulse(QObject):
             try:
                 result = subprocess.run(
                     ["kscreen-doctor", "--outputs"],
-                    capture_output=True, text=True, check=False, timeout=5
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=5,
                 )
                 # Parse kscreen-doctor output
                 current_output = None
@@ -518,17 +566,21 @@ class SystemPulse(QObject):
                             "width": 0,
                             "height": 0,
                             "is_primary": False,
-                            "is_ultrawide": False
+                            "is_ultrawide": False,
                         }
                     elif current_output and "enabled" in line.lower():
                         current_output["enabled"] = "true" in line.lower()
-                    elif current_output and "x" in line and "resolution" in line.lower():
+                    elif (
+                        current_output and "x" in line and "resolution" in line.lower()
+                    ):
                         try:
                             res_part = line.split(":")[1].strip().split("@")[0]
                             w, h = map(int, res_part.split("x"))
                             current_output["width"] = w
                             current_output["height"] = h
-                            current_output["is_ultrawide"] = (w / h) > 2.0 if h > 0 else False
+                            current_output["is_ultrawide"] = (
+                                (w / h) > 2.0 if h > 0 else False
+                            )
                         except (ValueError, IndexError):
                             pass
 

@@ -5,9 +5,12 @@ Part of the v9.2 "Pulse Update".
 """
 
 import glob
+import logging
 import os
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 # Sensor type classification by hwmon device name
@@ -19,12 +22,13 @@ _DISK_NAMES = {"nvme", "drivetemp"}
 @dataclass
 class TemperatureSensor:
     """A single temperature reading from a hardware sensor."""
-    name: str           # hwmon device name, e.g. "coretemp", "amdgpu", "nvme0"
-    label: str          # Human-readable label, e.g. "Core 0", "GPU Edge", "Composite"
-    current: float      # Current temperature in Celsius
-    high: float         # High threshold in Celsius (0 if unknown)
-    critical: float     # Critical threshold in Celsius (0 if unknown)
-    sensor_type: str    # One of "cpu", "gpu", "disk", "other"
+
+    name: str  # hwmon device name, e.g. "coretemp", "amdgpu", "nvme0"
+    label: str  # Human-readable label, e.g. "Core 0", "GPU Edge", "Composite"
+    current: float  # Current temperature in Celsius
+    high: float  # High threshold in Celsius (0 if unknown)
+    critical: float  # Critical threshold in Celsius (0 if unknown)
+    sensor_type: str  # One of "cpu", "gpu", "disk", "other"
 
 
 def _classify_sensor(hwmon_name: str) -> str:
@@ -60,7 +64,8 @@ def _read_sysfs_value(path: str) -> Optional[str]:
     try:
         with open(path, "r") as f:
             return f.read().strip()
-    except Exception:
+    except Exception as e:
+        logger.debug("Failed to read sysfs value from %s: %s", path, e)
         return None
 
 
@@ -118,8 +123,11 @@ class TemperatureManager:
         sensors: List[TemperatureSensor] = []
 
         try:
-            hwmon_dirs = glob.glob(os.path.join(TemperatureManager.HWMON_BASE, "hwmon*"))
-        except Exception:
+            hwmon_dirs = glob.glob(
+                os.path.join(TemperatureManager.HWMON_BASE, "hwmon*")
+            )
+        except Exception as e:
+            logger.debug("Failed to glob hwmon directories: %s", e)
             return sensors
 
         for hwmon_dir in sorted(hwmon_dirs):
@@ -133,7 +141,8 @@ class TemperatureManager:
             # Find all temp*_input files in this hwmon device
             try:
                 input_files = glob.glob(os.path.join(hwmon_dir, "temp*_input"))
-            except Exception:
+            except Exception as e:
+                logger.debug("Failed to glob temp input files in %s: %s", hwmon_dir, e)
                 continue
 
             for input_path in sorted(input_files):
@@ -154,14 +163,16 @@ class TemperatureManager:
                 high = _read_millidegree(os.path.join(hwmon_dir, f"{prefix}_max"))
                 critical = _read_millidegree(os.path.join(hwmon_dir, f"{prefix}_crit"))
 
-                sensors.append(TemperatureSensor(
-                    name=hwmon_name,
-                    label=label,
-                    current=current,
-                    high=high,
-                    critical=critical,
-                    sensor_type=sensor_type,
-                ))
+                sensors.append(
+                    TemperatureSensor(
+                        name=hwmon_name,
+                        label=label,
+                        current=current,
+                        high=high,
+                        critical=critical,
+                        sensor_type=sensor_type,
+                    )
+                )
 
         return sensors
 
@@ -176,7 +187,9 @@ class TemperatureManager:
         Returns:
             A list of CPU TemperatureSensor objects.
         """
-        return [s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "cpu"]
+        return [
+            s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "cpu"
+        ]
 
     @staticmethod
     def get_gpu_temps() -> List[TemperatureSensor]:
@@ -189,7 +202,9 @@ class TemperatureManager:
         Returns:
             A list of GPU TemperatureSensor objects.
         """
-        return [s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "gpu"]
+        return [
+            s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "gpu"
+        ]
 
     @staticmethod
     def get_disk_temps() -> List[TemperatureSensor]:
@@ -202,7 +217,9 @@ class TemperatureManager:
         Returns:
             A list of disk TemperatureSensor objects.
         """
-        return [s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "disk"]
+        return [
+            s for s in TemperatureManager.get_all_sensors() if s.sensor_type == "disk"
+        ]
 
     @staticmethod
     def get_hottest() -> Optional[TemperatureSensor]:
