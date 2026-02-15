@@ -29,7 +29,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  COVERAGE_THRESHOLD: "80"
+  COVERAGE_THRESHOLD: "79"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/ci.yml

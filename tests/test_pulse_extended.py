@@ -275,8 +275,10 @@ class TestRegisterUpowerSignals(unittest.TestCase):
         try:
             import dbus as real_dbus
 
+            if real_dbus is None:
+                raise ImportError("dbus is None")
             exc_class = real_dbus.exceptions.DBusException
-        except ImportError:
+        except (ImportError, AttributeError):
             exc_class = Exception
         mock_bus.add_signal_receiver.side_effect = exc_class("test")
         pulse._system_bus = mock_bus
@@ -497,8 +499,10 @@ class TestRegisterNetworkManagerSignals(unittest.TestCase):
         try:
             import dbus as real_dbus
 
+            if real_dbus is None:
+                raise ImportError("dbus is None")
             exc_class = real_dbus.exceptions.DBusException
-        except ImportError:
+        except (ImportError, AttributeError):
             exc_class = Exception
         mock_bus.add_signal_receiver.side_effect = exc_class("test")
         pulse._system_bus = mock_bus

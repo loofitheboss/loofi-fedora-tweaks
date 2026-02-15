@@ -25,6 +25,7 @@ try:
 except ImportError:
     DBUS_AVAILABLE = False
     dbus = None
+    DBusGMainLoop = None  # type: ignore[assignment,misc]
     GLib = None
 
 
