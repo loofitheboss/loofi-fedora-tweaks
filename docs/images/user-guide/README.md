@@ -50,6 +50,9 @@ This script provides:
 - ✅ Post-processing commands for optimization
 - ✅ Verification checklist
 
+**Content Guidelines**: See [`../SCREENSHOT_CONTENT_GUIDE.md`](../SCREENSHOT_CONTENT_GUIDE.md) for
+detailed specifications of what each screenshot should display.
+
 ## Manual Regeneration Instructions
 
 If you prefer manual capture without the script:

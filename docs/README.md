@@ -13,6 +13,7 @@ Central documentation map for Loofi Fedora Tweaks.
 ## Screenshots and Media
 
 - `SCREENSHOT_UPDATE_GUIDE.md` - **Guide for updating screenshots to current version**
+- `SCREENSHOT_CONTENT_GUIDE.md` - **What each screenshot should display (content specs)**
 - `images/user-guide/README.md` - Screenshot catalog and naming map
 - `images/user-guide/` - Current UI screenshots used across user docs
 - `images/archive-v32/` - Legacy screenshots from v32 and earlier

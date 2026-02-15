@@ -80,6 +80,9 @@ This provides:
 - ✅ Post-processing commands
 - ✅ Verification checklist
 
+**Content Guidelines**: Before capturing, review [`docs/SCREENSHOT_CONTENT_GUIDE.md`](SCREENSHOT_CONTENT_GUIDE.md)
+for detailed specifications of what each screenshot should display (ideal states, what to include/avoid).
+
 ### Option 2: Manual Capture
 
 1. **Setup**:
