@@ -1,13 +1,13 @@
 # Loofi Fedora Tweaks — AI Coding Instructions
 
-> **Version**: v33.0.0 "Bastion" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: v40.0.0 "Foundation" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 > See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
 > See `ROADMAP.md` for active development phase.
 
 ## Architecture
 
 PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
-- **GUI** (default): `MainWindow` sidebar with 26 lazy-loaded tabs
+- **GUI** (default): `MainWindow` sidebar with 28 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output support
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
 
@@ -15,7 +15,7 @@ PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fe
 ```
 ui/*_tab.py      -> GUI tabs (PyQt6 widgets, inherit BaseTab for command tabs)
 ui/base_tab.py   -> BaseTab class (shared CommandRunner wiring, output area)
-utils/*.py       -> Business logic (100+ modules), system commands, all reusable ops
+utils/*.py       -> Business logic (105 modules), system commands, all reusable ops
 utils/commands.py -> PrivilegedCommand builder (safe pkexec, no shell strings)
 utils/errors.py  -> Error hierarchy (LoofiError, DnfLockedError, etc.)
 cli/main.py      -> CLI that calls into utils/ (never into ui/)
@@ -25,9 +25,9 @@ plugins/         -> Third-party extensions via LoofiPlugin ABC
 
 **Key rule:** `utils/operations.py` is the shared operations layer. Both GUI and CLI call into it. Never put `subprocess` calls directly in UI code — always extract to a `utils/` module.
 
-## Tab Layout (26 tabs)
+## Tab Layout (28 tabs)
 
-See `ARCHITECTURE.md` § Tab Layout for the full 26-tab table.
+See `ARCHITECTURE.md` § Tab Layout for the full 28-tab table.
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
 ## Critical Patterns
@@ -149,9 +149,10 @@ Only `DashboardTab` and `SystemInfoTab` are eagerly imported.
 
 ## Version Management
 
-Two files must stay in sync when bumping version:
+Three files must stay in sync when bumping version:
 - `loofi-fedora-tweaks/version.py` — `__version__`, `__version_codename__` (source of truth)
 - `loofi-fedora-tweaks.spec` — `Version:`
+- `pyproject.toml` — `version` field
 
 `build_rpm.sh` reads version dynamically from `version.py`.
 
@@ -159,13 +160,13 @@ Two files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (3953 passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (4349 passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
 ## Testing Conventions
 
-- Framework: `unittest` + `unittest.mock` (158 test files, 3953+ tests)
+- Framework: `unittest` + `unittest.mock` (174 test files, 4349+ tests)
 - **All system calls must be mocked** — tests run without root, without real packages
 - See `ARCHITECTURE.md` § Testing Rules for full details
 - Use `@patch` decorators, not context managers
