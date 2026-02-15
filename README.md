@@ -131,6 +131,8 @@ Current UI screenshots (v41) are maintained in:
 
 - [`docs/images/user-guide/README.md`](docs/images/user-guide/README.md)
 
+⚠️ **Note**: Screenshots were last captured at v32.0.0 and need updating to reflect v41 UI. See [`docs/SCREENSHOT_UPDATE_GUIDE.md`](docs/SCREENSHOT_UPDATE_GUIDE.md) for instructions.
+
 Preview gallery:
 
 ![Home Dashboard](docs/images/user-guide/home-dashboard.png)

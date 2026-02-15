@@ -9,8 +9,13 @@ Central documentation map for Loofi Fedora Tweaks.
 - `ADVANCED_ADMIN_GUIDE.md` - Admin/operator runbooks and advanced operations
 - `TROUBLESHOOTING.md` - Common issues and fixes
 - `CONTRIBUTING.md` - Development and contribution workflow
+
+## Screenshots and Media
+
+- `SCREENSHOT_UPDATE_GUIDE.md` - **Guide for updating screenshots to current version**
 - `images/user-guide/README.md` - Screenshot catalog and naming map
 - `images/user-guide/` - Current UI screenshots used across user docs
+- `images/archive-v32/` - Legacy screenshots from v32 and earlier
 
 ## Product and Release Docs
 
@@ -36,6 +41,8 @@ These legacy files are kept for compatibility and historical context.
 
 ## Documentation Maintenance Notes
 
-- User-facing guides are aligned to `v34.0.0 "Citadel"`.
+- User-facing guides are aligned to `v41.0.0 "Coverage"`.
 - Screenshot paths are standardized to `docs/images/user-guide/*.png`.
+- **Screenshots need updating**: Last captured at v32, see `SCREENSHOT_UPDATE_GUIDE.md`
 - When replacing screenshots, keep filenames stable or update all guide references.
+- Use `python scripts/capture_screenshots.py` for guided screenshot capture.
