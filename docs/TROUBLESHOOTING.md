@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — Troubleshooting
 
-Common issues and fixes for v32.x.
+Common issues and fixes for v41.x.
 
 ---
 

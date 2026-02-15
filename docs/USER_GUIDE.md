@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — User Guide
 
-> Version 33.0.0 "Bastion"
+> Version 41.0.0 "Coverage"
 
 This guide covers daily use of Loofi Fedora Tweaks in GUI and CLI mode.
 

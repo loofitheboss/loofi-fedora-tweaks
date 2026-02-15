@@ -6,11 +6,11 @@ Testing guide for Loofi Fedora Tweaks test suite.
 
 ## Test Suite Metrics
 
-- **Test files**: 174 files
-- **Total tests**: 4349+ tests
-- **Coverage**: 74% line coverage
+- **Test files**: 193 files
+- **Total tests**: 5894+ tests
+- **Coverage**: 80% line coverage
 - **Framework**: `unittest` + `unittest.mock`
-- **Status**: 4349 passing, 0 failures
+- **Status**: 5894 collected, 80% coverage
 
 ---
 
@@ -37,7 +37,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_commands.py::TestPriv
 ### With Coverage
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ --cov=loofi-fedora-tweaks --cov-report=html --cov-fail-under=75
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ --cov=loofi-fedora-tweaks --cov-report=html --cov-fail-under=80
 ```
 
 Coverage report: `htmlcov/index.html`
@@ -284,7 +284,7 @@ def test_operation_returns_tuple(self):
 
 ## Coverage Requirements
 
-Aim for **75%+ coverage** for new code. Check coverage:
+Aim for **80%+ coverage** for new code. Check coverage:
 
 ```bash
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ --cov=loofi-fedora-tweaks --cov-report=term-missing

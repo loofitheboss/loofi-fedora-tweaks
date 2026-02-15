@@ -1,17 +1,17 @@
-# Release Notes — Docs Index
+# Release Notes -- Docs Index
 
 > Canonical latest release index lives at:
 > `docs/releases/RELEASE_NOTES.md`
 
 ## Current Release
 
-- **v38.0.0 "Clarity"**
-- Full notes: `docs/releases/RELEASE-NOTES-v38.0.0.md`
+- **v41.0.0 "Coverage"**
+- Full notes: `docs/releases/RELEASE-NOTES-v41.0.0.md`
 
 ## Previous Release
 
-- **v37.0.0 "Pinnacle"**
-- Full notes: `docs/releases/RELEASE-NOTES-v37.0.0.md`
+- **v40.0.0 "Foundation"**
+- Full notes: `docs/releases/RELEASE-NOTES-v40.0.0.md`
 
 ## Why this file exists
 
@@ -23,5 +23,8 @@ For ongoing updates, edit:
 
 ## Previous Release Highlights
 
-- v31.0.0: smart UX features, health score, batch ops, configurable quick actions
-- v30.x and earlier: see versioned files in `docs/releases/`
+- v39.0.0: services layer migration, zero deprecated imports, zero inline styles
+- v38.0.0: UX polish, Doctor tab rewrite, toast notifications, risk badges
+- v37.0.0: smart updates, extensions, backup wizard (28 tabs)
+- v35.0.0: security hardening, subprocess timeouts, audit logging
+- v31.0.0 and earlier: see versioned files in `docs/releases/`

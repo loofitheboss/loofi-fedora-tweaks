@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — Beginner Quick Guide
 
-> Version 33.0.0 "Bastion"
+> Version 41.0.0 "Coverage"
 
 Use this guide for a safe first run in under 10 minutes.
 

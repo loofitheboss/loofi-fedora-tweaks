@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v38.0.0 "Clarity"
+# Loofi Fedora Tweaks v41.0.0 "Coverage"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,13 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v38.0.0">
-    <img src="https://img.shields.io/badge/Release-v38.0.0-blue?style=for-the-badge&logo=github" alt="Release v38.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0">
+    <img src="https://img.shields.io/badge/Release-v41.0.0-blue?style=for-the-badge&logo=github" alt="Release v41.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
   <img src="https://img.shields.io/badge/Package-RPM-orange?style=for-the-badge&logo=redhat" alt="RPM package"/>
-  <img src="https://img.shields.io/badge/Coverage-%E2%89%A579%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 79%"/>
+  <img src="https://img.shields.io/badge/Coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 80%"/>
 </p>
 
 ---
@@ -36,72 +36,33 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v38.0.0?
+## What Is New in v41.0.0?
 
-`v38.0.0 "Clarity"` is a UX polish release — theme correctness, Doctor tab rewrite, Quick Actions wiring, and new undo/toast/toolbar UI:
+`v41.0.0 "Coverage"` is a pure test and CI release with zero production code changes:
 
-- **Doctor Tab rewrite** — Uses `PrivilegedCommand`, `SystemManager`, `self.tr()`, objectNames, accessibility names.
-- **Dashboard username** — Dynamic username via `getpass.getuser()` instead of hardcoded "Loofi".
-- **Quick Actions wired** — All 16 action callbacks navigate to correct tabs via `switch_to_tab()`.
-- **Theme correctness** — 14 inline `setStyleSheet` blocks replaced with objectNames across confirm dialog, command palette, and base tab.
-- **Undo button** — Status bar undo with `HistoryManager` integration.
-- **Toast notifications** — Transient success/error feedback in status bar.
-- **Output toolbar** — Copy/Save/Cancel buttons on all command output sections.
-- **Risk badges** — Color-coded LOW/MEDIUM/HIGH labels on confirm dialog.
-- **~200 new QSS rules** — Both `modern.qss` and `light.qss` updated for all new objectNames.
-- **40 new tests** — 4349 tests passing, 0 failures.
+- **Coverage raised** — From 74% to 80%+ (30,653 statements, 6,125 missed).
+- **23 test files** — Created or expanded, adding ~1,900 new tests (5,894 total).
+- **JUnit annotations** — `dorny/test-reporter` renders test results as GitHub check annotations.
+- **RPM smoke test** — Post-install smoke test gates every release build.
+- **Coverage threshold** — Bumped from 74 to 80 in ci.yml, auto-release.yml, coverage-gate.yml.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v38.0.0.md`](docs/releases/RELEASE-NOTES-v38.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v41.0.0.md`](docs/releases/RELEASE-NOTES-v41.0.0.md)
 
 ---
 
-## What Is New in v37.0.0?
+## What Is New in v40.0.0?
 
-`v37.0.0 "Pinnacle"` is a feature expansion release — smart updates, desktop extension management, Flatpak audit, boot configuration, display settings, and backup wizard.
+`v40.0.0 "Foundation"` is a security hardening release — subprocess timeout enforcement, shell injection elimination, and privilege escalation cleanup.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v37.0.0.md`](docs/releases/RELEASE-NOTES-v37.0.0.md)
-
----
-
-## What Is New in v35.0.0?
-
-`v35.0.0 "Fortress"` is a security hardening release — subprocess timeout enforcement, structured audit logging, and privilege management:
-
-- **Subprocess timeout enforcement** — All subprocess calls across 56+ files now have mandatory timeouts with category-specific defaults.
-- **Structured audit logging** — JSONL audit trail for all privileged actions with auto-rotation, sensitive param redaction, and stderr hashing.
-- **Granular Polkit policies** — Split into 7 purpose-scoped policy files (package, firewall, network, storage, service, kernel, security).
-- **Parameter validation** — `@validated_action` decorator enforces type checking, path traversal detection, and choices validation.
-- **CLI dry-run & timeout** — `--dry-run` flag previews commands without executing, `--timeout` sets global operation timeout.
-- **54 new tests** — Full coverage for timeout enforcement, audit system, and command validation.
-
-Full notes: [`docs/releases/RELEASE-NOTES-v35.0.0.md`](docs/releases/RELEASE-NOTES-v35.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v40.0.0.md`](docs/releases/RELEASE-NOTES-v40.0.0.md)
 
 ---
 
-## What Is New in v34.0.0?
+## What Is New in v39.0.0?
 
-`v34.0.0 "Citadel"` is a polish-only release — light theme fix, stability hardening, and accessibility:
+`v39.0.0 "Prism"` completes the services layer migration — zero deprecated imports, zero inline styles, zero DeprecationWarnings.
 
-- **Light theme rewritten** — Removed 4 dead selectors, added 24+ new selectors, full Catppuccin Latte palette.
-- **CommandRunner hardened** — Configurable timeout, terminate→kill escalation, stderr signal, crash detection.
-- **Zero subprocess in UI** — Extracted all subprocess calls from 7 UI files into 5 new utils modules.
-- **21 silent exceptions fixed** — All `except: pass` blocks now log with `exc_info=True`.
-- **Accessibility** — 314 `setAccessibleName()` calls across all 27 tabs.
-- **4061 tests passing** — 85 new tests for the 5 new utility modules.
-
-Full notes: [`docs/releases/RELEASE-NOTES-v34.0.0.md`](docs/releases/RELEASE-NOTES-v34.0.0.md)
-
----
-
-## What Is New in v33.0.0?
-
-Full notes: [`docs/releases/RELEASE-NOTES-v32.0.0.md`](docs/releases/RELEASE-NOTES-v32.0.0.md)
-
----
-
-## What Is New in v31.0.0?
-
-Full notes: [`docs/releases/RELEASE-NOTES-v31.0.0.md`](docs/releases/RELEASE-NOTES-v31.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v39.0.0.md`](docs/releases/RELEASE-NOTES-v39.0.0.md)
 
 ---
 
@@ -166,7 +127,7 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 ## Screenshots
 
-Current UI screenshots (v32) are maintained in:
+Current UI screenshots (v41) are maintained in:
 
 - [`docs/images/user-guide/README.md`](docs/images/user-guide/README.md)
 
@@ -223,7 +184,7 @@ loofi storage usage
 loofi firewall ports
 ```
 
-### Plugins and Marketplace (v27.x)
+### Plugins and Marketplace
 
 ```bash
 loofi plugins list
@@ -273,7 +234,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 4349+ passing
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 5894+ passing
 ```
 
 Lint:

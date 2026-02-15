@@ -1,41 +1,37 @@
-# Release Notes — Latest
+# Release Notes -- Latest
 
-> **Current release:** v33.0.0 "Bastion"
+> **Current release:** v41.0.0 "Coverage"
 >
 > For versioned release notes see the individual files in this directory:
 > `RELEASE-NOTES-vX.Y.Z.md`
 
-## v33.0.0 "Bastion"
+## v41.0.0 "Coverage"
 
-Testing & CI hardening release — 163 mypy errors fixed to zero, 3953+ tests passing,
-strict CI gates enforced across all jobs.
+Test coverage push release -- coverage raised from 74% to 80%+, 23 test files
+created or expanded (~1,900 new tests, 5,894 total). CI pipeline hardened.
 
-See [RELEASE-NOTES-v33.0.0.md](RELEASE-NOTES-v33.0.0.md) for full details.
+See [RELEASE-NOTES-v41.0.0.md](RELEASE-NOTES-v41.0.0.md) for full details.
 
-## v32.0.0 "Abyss"
+## v40.0.0 "Foundation"
 
-Full visual redesign — new Abyss dark/light theme, activity-based navigation (8 categories),
-sidebar collapse toggle, and Catppuccin color migration across 30+ files.
+Security hardening release -- subprocess timeout enforcement, shell injection
+elimination, privilege escalation cleanup.
 
-See [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) for full details.
-
-### v32.0.1 — CI Pipeline Fix
-
-- Fixed auto-release pipeline (GITHUB_TOKEN anti-recursion workaround)
-- Fixed 9 lint errors across 8 files
-- Fixed adapter drift sync
-- Fixed security scan (tarfile B202 + skip list)
-- Fixed test collection crash (`from __future__ import annotations` in containers.py)
-- Added `continue-on-error` for soft-gate jobs (typecheck, test)
-- Improved workflow with release deduplication, smart build conditions, test artifacts
+See [RELEASE-NOTES-v40.0.0.md](RELEASE-NOTES-v40.0.0.md) for full details.
 
 ## Previous Releases
 
 | Version | Codename | Notes |
 | --------- | ---------- | ------- |
-| v31.0.0 | — | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
-| v30.0.0 | — | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
-| v29.0.0 | — | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |
-| v28.0.0 | — | [RELEASE-NOTES-v28.0.0.md](RELEASE-NOTES-v28.0.0.md) |
-| v27.0.0 | — | [RELEASE-NOTES-v27.0.0.md](RELEASE-NOTES-v27.0.0.md) |
-| v26.0.2 | — | [RELEASE-NOTES-v26.0.2.md](RELEASE-NOTES-v26.0.2.md) |
+| v39.0.0 | Prism | [RELEASE-NOTES-v39.0.0.md](RELEASE-NOTES-v39.0.0.md) |
+| v38.0.0 | Clarity | [RELEASE-NOTES-v38.0.0.md](RELEASE-NOTES-v38.0.0.md) |
+| v37.0.0 | Pinnacle | [RELEASE-NOTES-v37.0.0.md](RELEASE-NOTES-v37.0.0.md) |
+| v35.0.0 | Fortress | [RELEASE-NOTES-v35.0.0.md](RELEASE-NOTES-v35.0.0.md) |
+| v34.0.0 | Citadel | [RELEASE-NOTES-v34.0.0.md](RELEASE-NOTES-v34.0.0.md) |
+| v33.0.0 | Bastion | [RELEASE-NOTES-v33.0.0.md](RELEASE-NOTES-v33.0.0.md) |
+| v32.0.0 | Abyss | [RELEASE-NOTES-v32.0.0.md](RELEASE-NOTES-v32.0.0.md) |
+| v31.0.0 | Smart UX | [RELEASE-NOTES-v31.0.0.md](RELEASE-NOTES-v31.0.0.md) |
+| v30.0.0 | -- | [RELEASE-NOTES-v30.0.0.md](RELEASE-NOTES-v30.0.0.md) |
+| v29.0.0 | -- | [RELEASE-NOTES-v29.0.0.md](RELEASE-NOTES-v29.0.0.md) |
+| v28.0.0 | -- | [RELEASE-NOTES-v28.0.0.md](RELEASE-NOTES-v28.0.0.md) |
+| v27.0.0 | -- | [RELEASE-NOTES-v27.0.0.md](RELEASE-NOTES-v27.0.0.md) |

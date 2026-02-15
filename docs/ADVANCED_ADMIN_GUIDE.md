@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — Advanced Admin Guide
 
-> Version 33.0.0 "Bastion"
+> Version 41.0.0 "Coverage"
 
 Operational runbook for power users and Fedora admins.
 

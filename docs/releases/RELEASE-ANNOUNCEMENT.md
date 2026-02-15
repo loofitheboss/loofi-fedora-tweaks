@@ -1,123 +1,101 @@
-# Loofi Fedora Tweaks v20.0.2-2 "Synapse" Release Announcement
+# Loofi Fedora Tweaks v41.0.0 "Coverage" Release Announcement
 
 ## TL;DR
 
-Loofi Fedora Tweaks v20.0.2-2 "Synapse" is now available! This hotfix focuses on a **KDE top-bar/title-area rendering glitch** while keeping all native window behavior intact.
+Loofi Fedora Tweaks v41.0.0 "Coverage" is now available. This is a pure test and CI release with zero production code changes -- coverage pushed from 74% to 80%+.
 
-**Install now:** `sudo dnf copr enable loofitheboss/loofi-fedora-tweaks && sudo dnf install loofi-fedora-tweaks`
+**Install now:**
 
-**GitHub Release:** https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2
-
----
-
-## What's New in v20.0.2-2 "Synapse"
-
-### 🪟 KDE Top-Bar Rendering Hotfix
-
-Fixed a visual glitch where top client-area content could appear too close to or overlapping the window title/header region on some Fedora KDE Plasma setups (Wayland/X11).
-
-- Main window now explicitly keeps native title-bar flags enabled
-- No frameless/custom title-bar behavior is used for the main app window
-- Native drag, resize, and system window buttons remain unchanged
-
-### 🧪 Regression Guard Added
-
-- New lightweight geometry sanity test: `tests/test_main_window_geometry.py`
-- Verifies central widget and first visible root widget are positioned in valid client-space (`y() >= 0`)
-
----
-
-### Previous v20.0.2 Improvements (still included)
-
-### 🧭 Tab Navigation Usability Fix
-
-Top sub-tabs are now usable even with many sections:
-
-- Scroll buttons enabled for overflowed tab bars
-- Non-expanding tabs keep the bar compact
-- Long labels elide instead of pushing tabs off-screen
-- Scroller buttons styled across all bundled themes
-
-### 📦 Dependency Refresh
-
-Pinned the Python dependencies to the latest stable versions:
-
-- PyQt6 6.10.2
-- requests 2.32.5
-- fastapi 0.128.5
-- uvicorn 0.40.0
-- PyJWT 2.11.0
-- bcrypt 5.0.0
-- httpx 0.28.1
-- python-multipart 0.0.22
-
-### 📦 Installation & Usage
-
-**Fedora 40/41 (via COPR):**
 ```bash
-sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
-sudo dnf install loofi-fedora-tweaks
+pkexec dnf copr enable loofitheboss/loofi-fedora-tweaks && pkexec dnf install loofi-fedora-tweaks
+```
+
+**GitHub Release:** https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0
+
+---
+
+## What's New in v41.0.0 "Coverage"
+
+### Test Coverage Milestone
+
+- Coverage raised from 74% to 80%+ (30,653 statements, 6,125 missed)
+- 23 test files created or expanded (~1,900 new tests)
+- Total test suite: 5,894 tests collected
+
+### CI Pipeline Hardening
+
+- `dorny/test-reporter` renders JUnit XML as GitHub check annotations
+- RPM post-install smoke test gates every release build
+- Coverage threshold bumped from 74 to 80 across all CI workflows
+
+---
+
+### Recent Release Highlights (still included)
+
+### v40.0.0 "Foundation"
+
+Security hardening -- subprocess timeout enforcement, shell injection elimination,
+privilege escalation cleanup, 141 silent exception blocks fixed.
+
+### v39.0.0 "Prism"
+
+Services layer migration -- zero deprecated imports, zero inline styles,
+zero DeprecationWarnings.
+
+### v38.0.0 "Clarity"
+
+UX polish -- Doctor tab rewrite, theme correctness, Quick Actions wiring,
+undo button, toast notifications, output toolbar, risk badges.
+
+---
+
+## Installation & Usage
+
+**Fedora 43 (via COPR):**
+
+```bash
+pkexec dnf copr enable loofitheboss/loofi-fedora-tweaks
+pkexec dnf install loofi-fedora-tweaks
 ```
 
 **GUI Mode (default):**
+
 ```bash
 loofi-fedora-tweaks
 ```
 
+**CLI Mode:**
+
+```bash
+loofi-fedora-tweaks --cli info
+loofi-fedora-tweaks --cli health
+loofi-fedora-tweaks --cli doctor
+```
+
 **Headless Web API:**
+
 ```bash
 loofi-fedora-tweaks --web
 ```
 
-**Generate API Key:**
-```bash
-curl -X POST http://localhost:8000/api/key
-# {"api_key": "loofi_<random_secure_key>"}
-```
+---
 
-**Get JWT Token:**
-```bash
-curl -X POST http://localhost:8000/api/token -d "api_key=loofi_..."
-# {"access_token": "eyJ...", "token_type": "bearer"}
-```
+## Stats
 
-**Execute System Action (with preview):**
-```bash
-curl -X POST http://localhost:8000/api/execute \
-  -H "Authorization: Bearer eyJ..." \
-  -H "Content-Type: application/json" \
-  -d '{"command": "dnf", "args": ["clean", "all"], "preview": true}'
-```
+- **Tests**: 5,894 collected
+- **Coverage**: 80%
+- **Test files**: 193
+- **Tabs**: 28
+- **Utils modules**: 106
 
-### ✅ Tests
+---
 
-- UI smoke suite: 15 passed, 22 skipped (headless)
-- Visual verification recommended on hardware with OpenGL drivers
+## Links
 
-### 📊 Notes
-
-This is a minor, compatibility-safe update focused on UI polish and dependency hygiene.
-
-### 🔗 Links
-
-- **GitHub Release**: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v20.0.2
+- **GitHub Release**: https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0
 - **Full Changelog**: https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/CHANGELOG.md
 - **Documentation**: https://github.com/loofitheboss/loofi-fedora-tweaks#readme
 - **Report Issues**: https://github.com/loofitheboss/loofi-fedora-tweaks/issues
-
-### 🎯 What's Next
-
-- Further UI polish (breadcrumb refinements, notification panel tweaks)
-- Remote management UX improvements
-
-### 💬 Feedback Welcome!
-
-We’d love your feedback on:
-- Tab navigation usability improvements
-- Theme styling for tab scrollers
-- Any regressions you notice after the dependency refresh
-
-Try it out and let us know what you think!
 
 ---
 

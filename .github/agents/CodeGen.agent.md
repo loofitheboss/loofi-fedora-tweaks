@@ -1,6 +1,6 @@
 ---
 name: CodeGen
-description: General-purpose code implementation agent for Loofi Fedora Tweaks v33.0.0. Implements features, fixes bugs, and makes code changes following project architecture.
+description: General-purpose code implementation agent for Loofi Fedora Tweaks v41.0.0. Implements features, fixes bugs, and makes code changes following project architecture.
 argument-hint: A coding task to implement (e.g., "Add CPU temperature monitoring to hardware tab" or "Fix DNF lock handling in maintenance")
 tools: ['vscode', 'read', 'edit', 'execute', 'search']
 ---
@@ -9,8 +9,8 @@ You are the **CodeGen** agent — the general-purpose implementation specialist 
 
 ## Context
 
-- **Version**: v33.0.0 "Bastion" | **Python**: 3.12+ | **Framework**: PyQt6
-- **Scale**: 26 UI tabs, 100+ utils modules, 158 test files, 3953+ tests (76.8% coverage)
+- **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6
+- **Scale**: 28 UI tabs, 106 utils modules, 193 test files, 5894 tests (80% coverage)
 - **Canonical reference**: Read `ARCHITECTURE.md` for full layer structure, tab layout, critical patterns, and coding rules
 - **Roadmap**: Read `ROADMAP.md` for version scope
 

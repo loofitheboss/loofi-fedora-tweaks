@@ -6,7 +6,7 @@ Welcome to the official wiki for **Loofi Fedora Tweaks** — a comprehensive des
 
 Loofi Fedora Tweaks is a PyQt6-based system management application that brings together day-to-day maintenance, diagnostics, tuning, networking, security, and automation in one unified interface.
 
-**Current Version**: v40.0.0 "Foundation"
+**Current Version**: v41.0.0 "Coverage"
 
 ### Key Features
 
@@ -15,7 +15,7 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 - **Plugin architecture** with marketplace support for third-party extensions
 - **Atomic Fedora aware**: Auto-detects Traditional Fedora (`dnf`) vs Atomic Fedora (`rpm-ostree`)
 - **Secure privilege escalation**: All root operations use `pkexec` (Polkit), never `sudo`
-- **Comprehensive test suite**: 4349+ tests with 74% coverage
+- **Comprehensive test suite**: 5894+ tests with 80% coverage
 
 > **Note**: Before using the automatic wiki publishing workflow, you must enable the Wiki feature in your repository settings (Settings → Features → Wikis). The first push may fail if the wiki hasn't been initialized.
 
@@ -51,14 +51,14 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 
 ### Reference
 
-- **[Changelog](Changelog)** — Version history highlights from v25.0.0 to v40.0.0
+- **[Changelog](Changelog)** — Version history highlights from v25.0.0 to v41.0.0
 
 ---
 
 ## Quick Links
 
 - **GitHub Repository**: [loofitheboss/loofi-fedora-tweaks](https://github.com/loofitheboss/loofi-fedora-tweaks)
-- **Latest Release**: [v40.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v40.0.0)
+- **Latest Release**: [v41.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0)
 - **Issues**: [Issue Tracker](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
 - **README**: [Main README](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/README.md)
 - **Architecture Doc**: [ARCHITECTURE.md](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/ARCHITECTURE.md)
@@ -67,7 +67,7 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 
 ## Project Status
 
-- **Latest Stable**: v40.0.0 "Foundation" (February 2026)
+- **Latest Stable**: v41.0.0 "Coverage" (February 2026)
 - **Python**: 3.12+
 - **Framework**: PyQt6
 - **Platform**: Fedora 43+

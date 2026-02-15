@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — AI Coding Instructions
 
-> **Version**: v40.0.0 "Foundation" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 > See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
 > See `ROADMAP.md` for active development phase.
 
@@ -15,7 +15,7 @@ PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fe
 ```
 ui/*_tab.py      -> GUI tabs (PyQt6 widgets, inherit BaseTab for command tabs)
 ui/base_tab.py   -> BaseTab class (shared CommandRunner wiring, output area)
-utils/*.py       -> Business logic (105 modules), system commands, all reusable ops
+utils/*.py       -> Business logic (106 modules), system commands, all reusable ops
 utils/commands.py -> PrivilegedCommand builder (safe pkexec, no shell strings)
 utils/errors.py  -> Error hierarchy (LoofiError, DnfLockedError, etc.)
 cli/main.py      -> CLI that calls into utils/ (never into ui/)
@@ -160,13 +160,13 @@ Three files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (4349 passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (5894 passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
 ## Testing Conventions
 
-- Framework: `unittest` + `unittest.mock` (174 test files, 4349+ tests)
+- Framework: `unittest` + `unittest.mock` (193 test files, 5894+ tests)
 - **All system calls must be mocked** — tests run without root, without real packages
 - See `ARCHITECTURE.md` § Testing Rules for full details
 - Use `@patch` decorators, not context managers

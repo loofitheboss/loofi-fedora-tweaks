@@ -4,9 +4,9 @@
 
 | Version | Supported |
 |---------|-----------|
-| v35.x   | ✅ Active  |
-| v34.x   | ✅ Security fixes only |
-| < v34   | ❌ End of life |
+| v41.x   | Active  |
+| v40.x   | Security fixes only |
+| < v40   | End of life |
 
 ## Reporting a Vulnerability
 

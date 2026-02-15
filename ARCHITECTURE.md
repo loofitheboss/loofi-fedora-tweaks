@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 40.0.0 "Foundation" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -20,7 +20,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── doctor.py             # DependencyDoctor startup check
 │   ├── command_palette.py    # Ctrl+K command palette
 │   └── confirm_dialog.py     # ConfirmActionDialog for dangerous ops
-├── utils/                    # Business logic — 105 modules
+├── utils/                    # Business logic — 106 modules
 │   ├── commands.py           # PrivilegedCommand builder (pkexec, never sudo)
 │   ├── command_runner.py     # CommandRunner (QProcess async wrapper)
 │   ├── system.py             # SystemManager (is_atomic, get_package_manager)
@@ -45,7 +45,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── plugins/                  # Third-party plugin directory
 └── resources/                # Static resources
 
-tests/                        # 174 test files, 4349 tests (74% coverage)
+tests/                        # 193 test files, 5894 tests (80% coverage)
 scripts/                      # Build, workflow, CI scripts
 config/                       # Global config templates
 docs/                         # User guide, release notes, checklists
@@ -209,7 +209,7 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 - **Both paths**: Test success AND failure
 - **No root**: Tests run in CI without privileges
 - **Path setup**: `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))`
-- **Coverage**: 74% current, 80% target
+- **Coverage**: 80% current, 80% target
 
 ## Adding a Feature
 
