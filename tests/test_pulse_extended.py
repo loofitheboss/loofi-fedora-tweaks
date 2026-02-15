@@ -271,16 +271,10 @@ class TestRegisterUpowerSignals(unittest.TestCase):
         """DBusException during registration is caught gracefully."""
         pulse = SystemPulse()
         mock_bus = MagicMock()
-        # Import real dbus if available, else simulate
-        try:
-            import dbus as real_dbus
+        # Use the module-level safe alias that pulse.py itself uses
+        from utils.pulse import _DBusException
 
-            if real_dbus is None:
-                raise ImportError("dbus is None")
-            exc_class = real_dbus.exceptions.DBusException
-        except (ImportError, AttributeError):
-            exc_class = Exception
-        mock_bus.add_signal_receiver.side_effect = exc_class("test")
+        mock_bus.add_signal_receiver.side_effect = _DBusException("test")
         pulse._system_bus = mock_bus
         # Should not raise
         pulse._register_upower_signals()
@@ -496,15 +490,9 @@ class TestRegisterNetworkManagerSignals(unittest.TestCase):
     def test_dbus_exception_handled(self):
         pulse = SystemPulse()
         mock_bus = MagicMock()
-        try:
-            import dbus as real_dbus
+        from utils.pulse import _DBusException
 
-            if real_dbus is None:
-                raise ImportError("dbus is None")
-            exc_class = real_dbus.exceptions.DBusException
-        except (ImportError, AttributeError):
-            exc_class = Exception
-        mock_bus.add_signal_receiver.side_effect = exc_class("test")
+        mock_bus.add_signal_receiver.side_effect = _DBusException("test")
         pulse._system_bus = mock_bus
         pulse._register_networkmanager_signals()
 

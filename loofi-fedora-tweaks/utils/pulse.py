@@ -28,6 +28,9 @@ except ImportError:
     DBusGMainLoop = None  # type: ignore[assignment,misc]
     GLib = None
 
+# Safe exception alias — avoids AttributeError when dbus is None
+_DBusException = dbus.exceptions.DBusException if dbus is not None else Exception
+
 
 class PowerState(Enum):
     """Power source states."""
@@ -178,7 +181,7 @@ class SystemPulse(QObject):
             )
 
             logger.info("[Pulse] UPower signals registered")
-        except dbus.exceptions.DBusException as e:
+        except _DBusException as e:
             logger.warning("[Pulse] Could not register UPower signals: %s", e)
 
     def _on_upower_properties_changed(self, interface, changed, invalidated):
@@ -309,7 +312,7 @@ class SystemPulse(QObject):
             )
 
             logger.info("[Pulse] NetworkManager signals registered")
-        except dbus.exceptions.DBusException as e:
+        except _DBusException as e:
             logger.warning("[Pulse] Could not register NetworkManager signals: %s", e)
 
     def _on_nm_state_changed(self, state):
