@@ -273,7 +273,7 @@ jobs:
           dnf install -y ./rpm-install/*.rpm
       - name: Smoke test — verify binary exists
         run: |
-          which loofi-fedora-tweaks || { echo "::error::Binary not found after RPM install"; exit 1; }
+          command -v loofi-fedora-tweaks || { echo "::error::Binary not found after RPM install"; exit 1; }
       - name: Smoke test — version output
         run: |
           loofi-fedora-tweaks --version
