@@ -17,12 +17,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSION_FILE = ROOT / "loofi-fedora-tweaks" / "version.py"
@@ -39,7 +39,10 @@ def extract_version() -> str:
     """Read __version__ from version.py."""
     ns: dict = {}
     exec(VERSION_FILE.read_text(encoding="utf-8"), ns)
-    return ns["__version__"]
+    version = ns["__version__"]
+    if not isinstance(version, str):
+        raise TypeError(f"Expected __version__ to be str, got {type(version)}")
+    return version
 
 
 def workflow_tag(version: str) -> str:
@@ -61,9 +64,9 @@ def run_tests() -> dict:
     env = {
         "PYTHONPATH": str(ROOT / "loofi-fedora-tweaks"),
         "QT_QPA_PLATFORM": "offscreen",
-        "PATH": subprocess.os.environ.get("PATH", ""),
-        "HOME": subprocess.os.environ.get("HOME", ""),
-        "DISPLAY": subprocess.os.environ.get("DISPLAY", ""),
+        "PATH": os.environ.get("PATH", ""),
+        "HOME": os.environ.get("HOME", ""),
+        "DISPLAY": os.environ.get("DISPLAY", ""),
     }
     start = time.monotonic()
     result = subprocess.run(
@@ -95,8 +98,12 @@ def run_tests() -> dict:
 def _extract_count(line: str, keyword: str) -> int:
     """Extract '2322 passed' -> 2322 from a pytest summary line."""
     import re
-    m = re.search(rf"(\d+)\s+{keyword}", line)
-    return int(m.group(1)) if m else 0
+    # Match singular or plural form of all keywords
+    pattern = rf"(\d+)\s+{keyword}s?"
+    m = re.search(pattern, line)
+    if m:
+        return int(m.group(1))
+    return 0
 
 
 def generate_test_results(version: str, test_data: dict) -> dict:

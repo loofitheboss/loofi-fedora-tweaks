@@ -11,8 +11,9 @@ from unittest.mock import patch
 
 def _load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None, f"Failed to load spec from {path}"
+    assert spec.loader is not None, f"Spec has no loader for {path}"
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module

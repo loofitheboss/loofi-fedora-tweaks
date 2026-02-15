@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 concurrency:
   group: auto-release-${{ github.ref }}
@@ -25,7 +26,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  COVERAGE_THRESHOLD: "74"
+  COVERAGE_THRESHOLD: "80"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/auto-release.yml
@@ -194,6 +195,14 @@ jobs:
         with:
           name: test-results
           path: test-results.xml
+      - name: Test report annotations
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Results
+          path: test-results.xml
+          reporter: java-junit
+          fail-on-error: false
 
   security:
     runs-on: ubuntu-latest
@@ -238,6 +247,37 @@ jobs:
           name: rpm-package
           path: rpmbuild/RPMS/noarch/*.rpm
           if-no-files-found: error
+
+  rpm_smoke_test:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    timeout-minutes: 10
+    needs: [build]
+    if: |
+      !cancelled() &&
+      needs.build.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download RPM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: rpm-install
+      - name: Install RPM
+        run: |
+          dnf install -y ./rpm-install/*.rpm
+      - name: Smoke test — verify binary exists
+        run: |
+          which loofi-fedora-tweaks || { echo "::error::Binary not found after RPM install"; exit 1; }
+      - name: Smoke test — version output
+        run: |
+          loofi-fedora-tweaks --version
+      - name: Smoke test — CLI version
+        run: |
+          loofi-fedora-tweaks --cli --version
+      - name: Smoke test — CLI help
+        run: |
+          loofi-fedora-tweaks --cli --help
 
   build_flatpak:
     runs-on: ubuntu-latest
@@ -297,13 +337,14 @@ jobs:
     if: |
       !cancelled() &&
       needs.build.result == 'success' &&
+      needs.rpm_smoke_test.result == 'success' &&
       github.ref == 'refs/heads/master' &&
       (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
-    needs: [validate, build, build_flatpak, build_sdist]
+    needs: [validate, build, rpm_smoke_test, build_flatpak, build_sdist]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -329,6 +370,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.build.result == 'success' &&
+      needs.rpm_smoke_test.result == 'success' &&
       (github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
       (startsWith(github.ref, 'refs/tags/v') ||
        (github.event_name == 'workflow_dispatch' && inputs.version != '') ||
@@ -339,7 +381,7 @@ jobs:
     permissions:
       contents: write
     needs:
-      [validate, build, auto_tag, build_flatpak, build_sdist]
+      [validate, build, rpm_smoke_test, auto_tag, build_flatpak, build_sdist]
     steps:
       - name: Install release deps
         run: dnf install -y git python3 curl

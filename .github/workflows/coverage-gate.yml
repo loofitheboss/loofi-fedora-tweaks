@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 30
     env:
       QT_QPA_PLATFORM: offscreen
-      COVERAGE_THRESHOLD: "74"
+      COVERAGE_THRESHOLD: "80"
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies

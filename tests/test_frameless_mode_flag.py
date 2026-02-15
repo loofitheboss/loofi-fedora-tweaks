@@ -9,6 +9,7 @@ Skipped in CI where the offscreen Qt platform may crash.
 
 import os
 import unittest
+from typing import Optional, Type
 from unittest.mock import patch, MagicMock
 
 # Skip in CI or offscreen environments — creating real MainWindow spawns
@@ -22,10 +23,12 @@ _SKIP = (
 )
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+_QApplication: Optional[Type['QApplication']] = None
 try:
     from PyQt6.QtWidgets import QApplication
+    _QApplication = QApplication
 except ImportError:
-    QApplication = None
+    _QApplication = None
 
 
 @unittest.skipIf(_SKIP, _SKIP_REASON)
@@ -35,20 +38,20 @@ class TestFramelessModeFlag(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Ensure QApplication exists for PyQt6 tests."""
-        if QApplication is None:
+        if _QApplication is None:
             raise unittest.SkipTest("PyQt6 unavailable in test environment")
-        app_instance = QApplication.instance()
-        if isinstance(app_instance, QApplication):
+        app_instance = _QApplication.instance()
+        if isinstance(app_instance, _QApplication):
             cls.app = app_instance
         elif app_instance is None:
-            cls.app = QApplication([])
+            cls.app = _QApplication([])
         else:
             raise unittest.SkipTest("QApplication unavailable (QCoreApplication is active)")
 
     def setUp(self):
         """Clear environment before each test."""
-        app_instance = QApplication.instance()
-        if not isinstance(app_instance, QApplication):
+        app_instance = _QApplication.instance()
+        if not isinstance(app_instance, _QApplication):
             raise unittest.SkipTest("QApplication unavailable for QWidget tests")
         if "LOOFI_FRAMELESS" in os.environ:
             del os.environ["LOOFI_FRAMELESS"]

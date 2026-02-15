@@ -1,5 +1,7 @@
 {
   "version": "v40.0.0",
   "started_at": "20260214_120000",
-  "status": "completed"
+  "status": "active",
+  "target_version": "v41.0.0",
+  "bumped_at": "2026-02-15T00:37:45.316630+00:00"
 }

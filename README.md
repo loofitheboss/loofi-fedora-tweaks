@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
   <img src="https://img.shields.io/badge/Package-RPM-orange?style=for-the-badge&logo=redhat" alt="RPM package"/>
+  <img src="https://img.shields.io/badge/Coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 80%"/>
 </p>
 
 ---

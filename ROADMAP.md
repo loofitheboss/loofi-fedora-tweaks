@@ -30,6 +30,41 @@
 | v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
 | v39.0 | Prism | DONE | Deprecated import migration, inline style elimination |
 | v40.0 | Foundation | DONE | Correctness & safety hardening, zero shell injection |
+| v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
+
+---
+
+## [DONE] v41.0 "Coverage" — Test Coverage & CI Debt
+
+### Scope
+
+Pure test and CI release. Push test coverage from 74% to 80%+, add JUnit
+annotations via dorny/test-reporter, gate releases on RPM smoke tests,
+and enforce the 80% threshold in all CI workflows. Zero production code changes.
+
+### Deliverables
+
+- [x] Eliminate zero-coverage modules (plugin_cdn_client, battery_shim)
+- [x] Write/expand tests for 7 largest under-tested utils modules
+- [x] Add dedicated test files for 5 biggest untested UI tabs
+- [x] Additional coverage push: 8 more test files to cross 80% threshold
+- [x] dorny/test-reporter for JUnit XML GitHub annotations (ci.yml, auto-release.yml)
+- [x] RPM post-install smoke test job in auto-release.yml
+- [x] COVERAGE_THRESHOLD bumped from 74 to 80 in all 3 workflow files
+- [x] Coverage badge added to README.md
+- [x] Version bump + release notes
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Test | All 23 test files, coverage analysis |
+| Builder | CI workflow improvements |
+| Planner | Release coordination |
+
+### Dependencies
+
+- v40.0 Foundation (clean safety baseline)
 
 ---
 
