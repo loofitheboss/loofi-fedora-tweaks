@@ -1,0 +1,85 @@
+name: Publish to COPR
+
+# Triggers on new GitHub releases (created by auto-release.yml)
+# and can also be run manually via workflow_dispatch.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version without v prefix (e.g. 41.0.0). Leave empty to use version.py."
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: copr-publish
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  COPR_PROJECT: "loofi-fedora-tweaks"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    timeout-minutes: 20
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y rpm-build python3 curl copr-cli
+
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VER="${{ inputs.version }}"
+          else
+            VER=$(python3 -c "exec(open('loofi-fedora-tweaks/version.py').read()); print(__version__)")
+          fi
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${VER}"
+
+      - name: Validate spec version matches
+        run: |
+          SPEC_VER=$(grep '^Version:' loofi-fedora-tweaks.spec | awk '{print $2}')
+          CODE_VER="${{ steps.version.outputs.version }}"
+          if [ "$SPEC_VER" != "$CODE_VER" ]; then
+            echo "::error::Spec version ($SPEC_VER) != code version ($CODE_VER)"
+            exit 1
+          fi
+
+      - name: Build SRPM
+        run: bash scripts/build_srpm.sh
+
+      - name: Configure copr-cli
+        run: |
+          mkdir -p ~/.config
+          cat > ~/.config/copr <<EOF
+          [copr-cli]
+          copr_url = https://copr.fedorainfracloud.org
+          login = ${{ secrets.COPR_LOGIN }}
+          username = ${{ secrets.COPR_USERNAME }}
+          token = ${{ secrets.COPR_TOKEN }}
+          EOF
+          chmod 600 ~/.config/copr
+
+      - name: Submit build to COPR
+        run: |
+          SRPM=$(ls rpmbuild/SRPMS/*.src.rpm | head -1)
+          echo "Submitting ${SRPM} to COPR project ${COPR_PROJECT}"
+          copr-cli build "${COPR_PROJECT}" "${SRPM}" --nowait
+
+      - name: Build summary
+        if: always()
+        run: |
+          VER="${{ steps.version.outputs.version }}"
+          echo "::notice::COPR build submitted for loofi-fedora-tweaks v${VER}"
+          echo ""
+          echo "Track build status at:"
+          echo "  https://copr.fedorainfracloud.org/coprs/${{ secrets.COPR_USERNAME }}/${COPR_PROJECT}/builds/"

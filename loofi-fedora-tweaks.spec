@@ -5,9 +5,11 @@ Summary:        Complete Fedora system management with AI, security, and window 
 
 License:        MIT
 URL:            https://github.com/loofitheboss/loofi-fedora-tweaks
-Source0:        %{name}-%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
+BuildRequires:  python3-devel
+
 Requires:       python3
 Requires:       python3-pyqt6
 Requires:       qt6-qtbase-gui
@@ -38,6 +40,7 @@ mkdir -p "%{buildroot}/usr/share/applications"
 mkdir -p "%{buildroot}/usr/share/polkit-1/actions"
 mkdir -p "%{buildroot}/usr/lib/systemd/user"
 mkdir -p "%{buildroot}/usr/share/icons/hicolor/128x128/apps"
+mkdir -p "%{buildroot}/usr/share/licenses/%{name}"
 
 cp -r loofi-fedora-tweaks/* "%{buildroot}/usr/lib/%{name}/"
 
@@ -65,8 +68,10 @@ install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.kernel.policy 
 install -m 644 loofi-fedora-tweaks/config/org.loofi.fedora-tweaks.security.policy "%{buildroot}/usr/share/polkit-1/actions/"
 install -m 644 loofi-fedora-tweaks/config/loofi-fedora-tweaks.service "%{buildroot}/usr/lib/systemd/user/"
 install -m 644 loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png "%{buildroot}/usr/share/icons/hicolor/128x128/apps/"
+install -Dm 644 LICENSE "%{buildroot}/usr/share/licenses/%{name}/LICENSE"
 
 %files
+%license LICENSE
 %defattr(-,root,root,-)
 /usr/lib/%{name}
 %attr(755,root,root) /usr/bin/%{name}
