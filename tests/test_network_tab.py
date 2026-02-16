@@ -12,6 +12,8 @@ from unittest.mock import patch, MagicMock, mock_open, PropertyMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
+from ui.tab_utils import CONTENT_MARGINS
+
 
 def _make_iface(
     name="wlp2s0",
@@ -172,6 +174,21 @@ class TestNetworkTabInit(unittest.TestCase):
         self.assertIsNotNone(tab._monitor_timer)
 
     @patch("PyQt6.QtCore.QTimer.singleShot")
+    def test_layout_uses_content_margins(self, mock_ss):
+        """Root layout applies standard content margins for safe scrolling."""
+        tab = _create_tab()
+        margins = tab.layout().contentsMargins()
+        self.assertEqual(
+            (
+                margins.left(),
+                margins.top(),
+                margins.right(),
+                margins.bottom(),
+            ),
+            CONTENT_MARGINS,
+        )
+
+    @patch("PyQt6.QtCore.QTimer.singleShot")
     def test_initial_load_deferred(self, mock_ss):
         """__init__ schedules _initial_load via QTimer.singleShot."""
         _create_tab()
@@ -213,6 +230,39 @@ class TestNetworkTabStaticHelpers(unittest.TestCase):
         tab = _create_tab()
         item = tab._make_table_item(42)
         self.assertEqual(item.text(), "42")
+
+    def test_make_container_sets_scroll_and_margins(self):
+        """_make_container wraps layout with scroll area and standard margins."""
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import QAbstractScrollArea, QScrollArea, QVBoxLayout
+
+        from ui.network_tab import NetworkTab
+
+        layout = QVBoxLayout()
+        scroll = NetworkTab._make_container(layout)
+        margins = layout.contentsMargins()
+        self.assertEqual(
+            (
+                margins.left(),
+                margins.top(),
+                margins.right(),
+                margins.bottom(),
+            ),
+            CONTENT_MARGINS,
+        )
+        self.assertIsInstance(scroll, QScrollArea)
+        self.assertEqual(
+            scroll.sizeAdjustPolicy(),
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
+        )
+        self.assertEqual(
+            scroll.horizontalScrollBarPolicy(),
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded,
+        )
+        self.assertEqual(
+            scroll.verticalScrollBarPolicy(),
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded,
+        )
 
 
 # =========================================================================

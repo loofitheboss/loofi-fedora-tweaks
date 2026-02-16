@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 from ui.tooltips import DIAG_NETWORK
 from utils.history import HistoryManager
 from utils.network_monitor import NetworkMonitor
@@ -64,6 +64,7 @@ class NetworkTab(BaseTab):
         self.history = HistoryManager()
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(*CONTENT_MARGINS)
         self.setLayout(layout)
 
         header = QLabel(self.tr("Network"))
@@ -432,13 +433,24 @@ class NetworkTab(BaseTab):
     @staticmethod
     def _make_container(layout):
         """Wrap a QVBoxLayout into a plain QWidget for use as a tab page."""
-        from PyQt6.QtWidgets import QWidget, QScrollArea
+        from PyQt6.QtCore import Qt
+        from PyQt6.QtWidgets import (
+            QAbstractScrollArea,
+            QScrollArea,
+            QWidget,
+        )
 
+        layout.setContentsMargins(*CONTENT_MARGINS)
         inner = QWidget()
         inner.setLayout(layout)
         scroll = QScrollArea()
         scroll.setWidget(inner)
         scroll.setWidgetResizable(True)
+        scroll.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+        )
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         return scroll
 
     def _initial_load(self):
