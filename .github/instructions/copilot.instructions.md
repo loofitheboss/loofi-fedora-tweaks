@@ -1,3 +1,8 @@
+---
+description: Primary Copilot coding agent instructions for Loofi Fedora Tweaks
+applyTo: "**"
+---
+
 # Loofi Fedora Tweaks — AI Coding Instructions
 
 > **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
