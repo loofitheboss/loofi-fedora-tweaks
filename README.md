@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v41.0.0 "Coverage"
+# Loofi Fedora Tweaks v42.0.0 "Sentinel"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,13 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0">
-    <img src="https://img.shields.io/badge/Release-v41.0.0-blue?style=for-the-badge&logo=github" alt="Release v41.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v42.0.0">
+    <img src="https://img.shields.io/badge/Release-v42.0.0-blue?style=for-the-badge&logo=github" alt="Release v42.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
   <img src="https://img.shields.io/badge/Package-RPM-orange?style=for-the-badge&logo=redhat" alt="RPM package"/>
-  <img src="https://img.shields.io/badge/Coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 80%"/>
+  <img src="https://img.shields.io/badge/Coverage-82%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage 82%"/>
   <a href="https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/">
     <img src="https://img.shields.io/badge/COPR-loofitheboss%2Floofi--fedora--tweaks-blue?style=for-the-badge&logo=fedora" alt="COPR"/>
   </a>
@@ -39,15 +39,24 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v42.0.0?
+
+`v42.0.0 "Sentinel"` is a hardening & polish release — exception narrowing, hardcoded dnf elimination, and UX improvements:
+
+- **106 exception handlers narrowed** — `except Exception` replaced with specific types across 30 files.
+- **25+ hardcoded `dnf` references eliminated** — all use `PrivilegedCommand.dnf()` or `SystemManager.get_package_manager()`.
+- **Daemon systemd hardening** — `NoNewPrivileges`, `ProtectSystem=strict`, `SystemCallFilter`.
+- **Software tab search/filter** — case-insensitive filtering by name/description.
+- **High-contrast theme** — new `highcontrast.qss` with settings toggle.
+- **Test stability fixes** — resolved sys.modules pollution causing 35 cross-test failures.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v42.0.0.md`](docs/releases/RELEASE-NOTES-v42.0.0.md)
+
+---
+
 ## What Is New in v41.0.0?
 
-`v41.0.0 "Coverage"` is a pure test and CI release with zero production code changes:
-
-- **Coverage raised** — From 74% to 80%+ (30,653 statements, 6,125 missed).
-- **23 test files** — Created or expanded, adding ~1,900 new tests (5,894 total).
-- **JUnit annotations** — `dorny/test-reporter` renders test results as GitHub check annotations.
-- **RPM smoke test** — Post-install smoke test gates every release build.
-- **Coverage threshold** — Bumped from 74 to 80 in ci.yml, auto-release.yml, coverage-gate.yml.
+`v41.0.0 "Coverage"` is a pure test and CI release — coverage raised from 74% to 80%+, 23 test files created/expanded.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v41.0.0.md`](docs/releases/RELEASE-NOTES-v41.0.0.md)
 
