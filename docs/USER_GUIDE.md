@@ -28,10 +28,17 @@ Core behavior:
 
 ## 2) Install and Launch
 
-Install:
+Install from [Fedora COPR](https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
+sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
+sudo dnf install loofi-fedora-tweaks
+```
+
+Or download the RPM from the [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases) page:
+
+```bash
+sudo dnf install ./loofi-fedora-tweaks-*.noarch.rpm
 ```
 
 Launch:

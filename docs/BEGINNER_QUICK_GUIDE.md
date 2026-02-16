@@ -9,7 +9,8 @@ Use this guide for a safe first run in under 10 minutes.
 ## 1) Install and Launch
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
+sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
+sudo dnf install loofi-fedora-tweaks
 loofi-fedora-tweaks
 ```
 

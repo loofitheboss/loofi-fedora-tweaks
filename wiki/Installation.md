@@ -31,29 +31,28 @@ The following packages enable specific features but are not required for basic f
 
 ## Installation Methods
 
-### Method 1: Quick Install Script (Deprecated)
+### Method 1: Fedora COPR (Recommended)
 
-> ⚠️ **Deprecation Notice**: The quick install script (`install.sh`) is deprecated as of v35.0.0 and will be removed in a future release. Use the RPM or source installation methods instead.
-
-If you still wish to use it, add the `--i-know-what-i-am-doing` flag:
+The package is published on [Fedora COPR](https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/). This gives you automatic updates via `dnf`.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash -s -- --i-know-what-i-am-doing
+# Enable the COPR repository
+sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
+
+# Install the package
+sudo dnf install loofi-fedora-tweaks
 ```
 
-### Method 2: Release RPM (Recommended)
+### Method 2: Release RPM
 
 Download the latest RPM from the [Releases page](https://github.com/loofitheboss/loofi-fedora-tweaks/releases):
 
 ```bash
-# Download the RPM
-curl -LO https://github.com/loofitheboss/loofi-fedora-tweaks/releases/download/v40.0.0/loofi-fedora-tweaks-40.0.0-1.fc43.noarch.rpm
-
 # Install with dnf (Traditional Fedora)
-pkexec dnf install ./loofi-fedora-tweaks-40.0.0-1.fc43.noarch.rpm
+sudo dnf install ./loofi-fedora-tweaks-*.noarch.rpm
 
 # Or with rpm-ostree (Atomic Fedora)
-rpm-ostree install ./loofi-fedora-tweaks-40.0.0-1.fc43.noarch.rpm
+rpm-ostree install ./loofi-fedora-tweaks-*.noarch.rpm
 systemctl reboot
 ```
 
@@ -139,12 +138,21 @@ loofi cleanup all
 
 ## Uninstall
 
+### Uninstall COPR Package
+
+**Traditional Fedora:**
+
+```bash
+sudo dnf remove loofi-fedora-tweaks
+sudo dnf copr remove loofitheboss/loofi-fedora-tweaks
+```
+
 ### Uninstall RPM Package
 
 **Traditional Fedora:**
 
 ```bash
-pkexec dnf remove loofi-fedora-tweaks
+sudo dnf remove loofi-fedora-tweaks
 ```
 
 **Atomic Fedora:**

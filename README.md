@@ -17,6 +17,9 @@
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
   <img src="https://img.shields.io/badge/Package-RPM-orange?style=for-the-badge&logo=redhat" alt="RPM package"/>
   <img src="https://img.shields.io/badge/Coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 80%"/>
+  <a href="https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/">
+    <img src="https://img.shields.io/badge/COPR-loofitheboss%2Floofi--fedora--tweaks-blue?style=for-the-badge&logo=fedora" alt="COPR"/>
+  </a>
 </p>
 
 ---
@@ -68,19 +71,31 @@ Full notes: [`docs/releases/RELEASE-NOTES-v39.0.0.md`](docs/releases/RELEASE-NOT
 
 ## Installation
 
-### Quick Install (Repository Script)
+### Install from COPR (Recommended)
+
+The package is published on [Fedora COPR](https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/). This gives you automatic updates via `dnf`.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
+sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
+sudo dnf install loofi-fedora-tweaks
 ```
 
-### Install From a Release RPM
+To uninstall:
 
 ```bash
-pkexec dnf install ./loofi-fedora-tweaks-*.noarch.rpm
+sudo dnf remove loofi-fedora-tweaks
+sudo dnf copr remove loofitheboss/loofi-fedora-tweaks
 ```
 
-### Run From Source
+### Install from a Release RPM
+
+Download the `.noarch.rpm` from the [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases) page:
+
+```bash
+sudo dnf install ./loofi-fedora-tweaks-*.noarch.rpm
+```
+
+### Run from Source
 
 ```bash
 git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
@@ -271,6 +286,7 @@ Every push to `master` and every pull request runs through two pipelines:
 |----------|------|---------|
 | CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, packaging |
 | Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → build → tag → publish |
+| COPR Publish | `.github/workflows/copr-publish.yml` | Build SRPM and submit to Fedora COPR |
 
 ### Auto Release Flow
 
@@ -281,6 +297,7 @@ push to master
   → build (RPM in Fedora 43 container)
   → auto_tag (creates vX.Y.Z tag if missing)
   → release (publishes GitHub Release with RPM artifact)
+  → copr-publish (builds SRPM and submits to Fedora COPR)
 ```
 
 The pipeline automatically tags and publishes releases when code lands on `master` with a new version in `version.py`. No manual tagging required.
