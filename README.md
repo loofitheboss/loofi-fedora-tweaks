@@ -251,6 +251,15 @@ Optional features may require extra packages (for example: virtualization tools,
 - Changelog: [`CHANGELOG.md`](CHANGELOG.md)
 - Documentation index: [`docs/README.md`](docs/README.md)
 
+### For AI/Copilot Coding Agents
+
+This repository is configured for GitHub Copilot coding agent and other AI assistants:
+
+- [`AGENTS.md`](AGENTS.md) — Primary agent instructions (build, test, patterns)
+- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) — Detailed coding guidelines
+- [`CLAUDE.md`](CLAUDE.md) — Claude Code-specific instructions
+- [`.github/instructions/`](.github/instructions/) — Granular instruction files
+
 ---
 
 ## Development Quick Start
