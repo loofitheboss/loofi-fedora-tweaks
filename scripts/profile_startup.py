@@ -2,7 +2,7 @@
 """Profile application startup time.
 
 Usage:
-    python scripts/profile_startup.py [--gui|--cli]
+    python scripts/profile_startup.py [gui|cli]
 
 Output:
     Prints top 50 slowest functions sorted by cumulative time.
