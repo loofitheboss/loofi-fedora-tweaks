@@ -834,35 +834,35 @@ class TestAgentSchedulerExtended(unittest.TestCase):
     def test_scheduler_start_when_already_running(self):
         """Starting scheduler when already running is a no-op."""
         scheduler = AgentScheduler()
-        scheduler._running = True
-        original_thread = scheduler._thread
+        # Simulate running state: stop_event not set, thread alive
+        scheduler._stop_event.clear()
+        mock_thread = MagicMock()
+        mock_thread.is_alive.return_value = True
+        scheduler._thread = mock_thread
         scheduler.start()
         # Thread should not have been replaced
-        self.assertIs(scheduler._thread, original_thread)
+        self.assertIs(scheduler._thread, mock_thread)
 
     def test_scheduler_stop(self):
-        """Stopping scheduler sets _running to False and sets stop_event."""
+        """Stopping scheduler sets stop_event and joins thread."""
         scheduler = AgentScheduler()
-        scheduler._running = True
         scheduler._stop_event = MagicMock()
         scheduler._thread = MagicMock()
         scheduler._thread.is_alive.return_value = True
 
         scheduler.stop()
-        self.assertFalse(scheduler._running)
         scheduler._stop_event.set.assert_called_once()
         scheduler._thread.join.assert_called_once_with(timeout=5)
 
     def test_scheduler_stop_no_alive_thread(self):
         """Stopping scheduler with no alive thread skips join."""
         scheduler = AgentScheduler()
-        scheduler._running = True
         scheduler._stop_event = MagicMock()
         scheduler._thread = MagicMock()
         scheduler._thread.is_alive.return_value = False
 
         scheduler.stop()
-        self.assertFalse(scheduler._running)
+        scheduler._stop_event.set.assert_called_once()
         scheduler._thread.join.assert_not_called()
 
     def test_scheduler_set_result_callback(self):
@@ -873,10 +873,14 @@ class TestAgentSchedulerExtended(unittest.TestCase):
         self.assertIs(scheduler._on_result, cb)
 
     def test_scheduler_is_running_property(self):
-        """is_running property reflects _running state."""
+        """is_running property reflects _stop_event and thread state."""
         scheduler = AgentScheduler()
         self.assertFalse(scheduler.is_running)
-        scheduler._running = True
+        # Simulate running: stop_event not set, thread alive
+        scheduler._stop_event.clear()
+        mock_thread = MagicMock()
+        mock_thread.is_alive.return_value = True
+        scheduler._thread = mock_thread
         self.assertTrue(scheduler.is_running)
 
     # ==================== _run_loop ====================

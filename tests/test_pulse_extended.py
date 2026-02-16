@@ -87,7 +87,7 @@ class TestSystemPulseInit(unittest.TestCase):
     def test_init_defaults(self):
         pulse = SystemPulse()
         self.assertIsNone(pulse._loop)
-        self.assertFalse(pulse._running)
+        self.assertFalse(pulse._stop_event.is_set())
         self.assertIsNone(pulse._system_bus)
         self.assertIsNone(pulse._last_power_state)
         self.assertIsNone(pulse._last_network_state)
@@ -187,13 +187,13 @@ class TestStartWithDbus(unittest.TestCase):
 
         mock_mainloop.assert_called_once_with(set_as_default=True)
         mock_dbus.SystemBus.assert_called_once()
-        self.assertTrue(pulse._running)
+        self.assertFalse(pulse._stop_event.is_set())
         mock_glib.MainLoop.assert_called_once()
         mock_loop.run.assert_called_once()
 
     @patch("utils.pulse.DBUS_AVAILABLE", True)
     @patch(
-        "utils.pulse.DBusGMainLoop", side_effect=Exception("Operation not permitted")
+        "utils.pulse.DBusGMainLoop", side_effect=OSError("Operation not permitted")
     )
     def test_start_expected_dbus_error_uses_polling(self, mock_mainloop):
         """Expected DBus errors fall back to polling."""
@@ -203,7 +203,7 @@ class TestStartWithDbus(unittest.TestCase):
             mock_poll.assert_called_once()
 
     @patch("utils.pulse.DBUS_AVAILABLE", True)
-    @patch("utils.pulse.DBusGMainLoop", side_effect=Exception("Unexpected crash"))
+    @patch("utils.pulse.DBusGMainLoop", side_effect=RuntimeError("Unexpected crash"))
     def test_start_unexpected_error_uses_polling(self, mock_mainloop):
         """Unexpected DBus errors also fall back to polling."""
         pulse = SystemPulse()
@@ -234,18 +234,16 @@ class TestStop(unittest.TestCase):
 
     def test_stop_with_loop(self):
         pulse = SystemPulse()
-        pulse._running = True
         pulse._loop = MagicMock()
         pulse.stop()
-        self.assertFalse(pulse._running)
+        self.assertTrue(pulse._stop_event.is_set())
         pulse._loop.quit.assert_called_once()
 
     def test_stop_without_loop(self):
         pulse = SystemPulse()
-        pulse._running = True
         pulse._loop = None
         pulse.stop()
-        self.assertFalse(pulse._running)
+        self.assertTrue(pulse._stop_event.is_set())
 
 
 # ---------------------------------------------------------------------------
@@ -375,21 +373,21 @@ class TestGetPowerState(unittest.TestCase):
         mock_run.return_value = MagicMock(stdout="some unrelated data\n", returncode=0)
         self.assertEqual(SystemPulse.get_power_state(), PowerState.UNKNOWN.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="1\n"))
     def test_sysfs_ac0_online(self, mock_exists, mock_run):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/AC0/online"
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="0\n"))
     def test_sysfs_ac0_battery(self, mock_exists, mock_run):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/AC0/online"
         self.assertEqual(SystemPulse.get_power_state(), PowerState.BATTERY.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="1\n"))
     def test_sysfs_ac_path(self, mock_exists, mock_run):
@@ -397,7 +395,7 @@ class TestGetPowerState(unittest.TestCase):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/AC/online"
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="1\n"))
     def test_sysfs_acad_path(self, mock_exists, mock_run):
@@ -405,12 +403,12 @@ class TestGetPowerState(unittest.TestCase):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/ACAD/online"
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists", return_value=False)
     def test_unknown_when_all_fail(self, mock_exists, mock_run):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.UNKNOWN.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists", return_value=True)
     @patch("builtins.open", side_effect=OSError("read error"))
     def test_sysfs_read_exception_returns_unknown(
@@ -439,14 +437,14 @@ class TestGetBatteryLevel(unittest.TestCase):
         mock_run.return_value = MagicMock(stdout="  state: discharging\n", returncode=0)
         self.assertEqual(SystemPulse.get_battery_level(), -1)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="82\n"))
     def test_sysfs_bat0(self, mock_exists, mock_run):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/BAT0/capacity"
         self.assertEqual(SystemPulse.get_battery_level(), 82)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists")
     @patch("builtins.open", mock_open(read_data="55\n"))
     def test_sysfs_bat1(self, mock_exists, mock_run):
@@ -454,12 +452,12 @@ class TestGetBatteryLevel(unittest.TestCase):
         mock_exists.side_effect = lambda p: p == "/sys/class/power_supply/BAT1/capacity"
         self.assertEqual(SystemPulse.get_battery_level(), 55)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists", return_value=False)
     def test_no_battery_returns_minus_one(self, mock_exists, mock_run):
         self.assertEqual(SystemPulse.get_battery_level(), -1)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no upower"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no upower"))
     @patch("utils.pulse.os.path.exists", return_value=True)
     @patch("builtins.open", side_effect=OSError("read error"))
     def test_sysfs_read_exception_returns_minus_one(
@@ -527,7 +525,7 @@ class TestGetNetworkState(unittest.TestCase):
         )
         self.assertEqual(SystemPulse.get_network_state(), NetworkState.CONNECTED.value)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no nmcli"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no nmcli"))
     def test_error_returns_disconnected(self, mock_run):
         self.assertEqual(
             SystemPulse.get_network_state(), NetworkState.DISCONNECTED.value
@@ -681,7 +679,7 @@ class TestCheckVpnActive(unittest.TestCase):
         # Note: this is a known quirk of the substring check
         self.assertTrue(pulse._check_vpn_active())
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("nmcli fail"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("nmcli fail"))
     def test_error_returns_false(self, mock_run):
         pulse = SystemPulse()
         self.assertFalse(pulse._check_vpn_active())
@@ -711,7 +709,7 @@ class TestGetWifiSsid(unittest.TestCase):
         mock_run.return_value = MagicMock(stdout="no:Net1\nno:Net2\n", returncode=0)
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("fail"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("fail"))
     def test_returns_empty_on_error(self, mock_run):
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
 
@@ -824,7 +822,7 @@ class TestRegisterMonitorSignals(unittest.TestCase):
             return mock_session_bus_gnome
 
         mock_dbus.SessionBus.side_effect = session_bus_factory
-        mock_session_bus_kde.add_signal_receiver.side_effect = Exception("no KDE")
+        mock_session_bus_kde.add_signal_receiver.side_effect = OSError("no KDE")
 
         pulse._register_monitor_signals()
         # GNOME path should have been tried
@@ -837,7 +835,7 @@ class TestRegisterMonitorSignals(unittest.TestCase):
         pulse._system_bus = MagicMock()
         mock_session_bus = MagicMock()
         mock_dbus.SessionBus.return_value = mock_session_bus
-        mock_session_bus.add_signal_receiver.side_effect = Exception("no DE")
+        mock_session_bus.add_signal_receiver.side_effect = OSError("no DE")
         # Should not raise
         pulse._register_monitor_signals()
 
@@ -957,7 +955,7 @@ class TestGetConnectedMonitors(unittest.TestCase):
         monitors = SystemPulse.get_connected_monitors()
         self.assertIsInstance(monitors, list)
 
-    @patch("utils.pulse.subprocess.run", side_effect=Exception("no display tools"))
+    @patch("utils.pulse.subprocess.run", side_effect=OSError("no display tools"))
     def test_all_failures_return_empty(self, mock_run):
         monitors = SystemPulse.get_connected_monitors()
         self.assertEqual(monitors, [])
@@ -994,8 +992,8 @@ class TestGetConnectedMonitors(unittest.TestCase):
     def test_xrandr_exception_then_kscreen_exception(self, mock_run):
         """Both xrandr and kscreen-doctor raise exceptions."""
         mock_run.side_effect = [
-            Exception("no xrandr"),
-            Exception("no kscreen"),
+            OSError("no xrandr"),
+            OSError("no kscreen"),
         ]
         monitors = SystemPulse.get_connected_monitors()
         self.assertEqual(monitors, [])
@@ -1078,7 +1076,6 @@ class TestOnMonitorChanged(unittest.TestCase):
 class TestRunPollingFallback(unittest.TestCase):
     """Test polling fallback loop."""
 
-    @patch("time.sleep", side_effect=[None, StopIteration])
     @patch.object(SystemPulse, "get_connected_monitors", return_value=[])
     @patch.object(SystemPulse, "get_network_state", return_value="connected")
     @patch.object(SystemPulse, "get_power_state", return_value="ac")
@@ -1093,23 +1090,24 @@ class TestRunPollingFallback(unittest.TestCase):
         mock_get_power,
         mock_get_net,
         mock_get_mon,
-        mock_sleep,
     ):
         pulse = SystemPulse()
         pulse._last_power_state = None
         pulse._last_network_state = None
         pulse._last_monitor_count = 1  # different from 0 (len([]))
 
-        try:
-            pulse._run_polling_fallback()
-        except StopIteration:
-            pass
+        # Stop after first iteration
+        def stop_on_wait(timeout=None):
+            pulse._stop_event.set()
+
+        with patch.object(pulse._stop_event, "wait", side_effect=stop_on_wait):
+            with patch.object(pulse._stop_event, "is_set", side_effect=[False, True]):
+                pulse._run_polling_fallback()
 
         mock_power.emit.assert_called_with("ac")
         mock_net.emit.assert_called_with("connected")
         mock_mon_count.emit.assert_called_with(0)
 
-    @patch("time.sleep", side_effect=StopIteration)
     @patch.object(
         SystemPulse, "get_connected_monitors", return_value=[{"name": "eDP-1"}]
     )
@@ -1126,43 +1124,41 @@ class TestRunPollingFallback(unittest.TestCase):
         mock_get_power,
         mock_get_net,
         mock_get_mon,
-        mock_sleep,
     ):
         pulse = SystemPulse()
         pulse._last_power_state = "battery"
         pulse._last_network_state = "disconnected"
         pulse._last_monitor_count = 1
 
-        try:
-            pulse._run_polling_fallback()
-        except StopIteration:
-            pass
+        with patch.object(pulse._stop_event, "wait"):
+            with patch.object(pulse._stop_event, "is_set", side_effect=[False, True]):
+                pulse._run_polling_fallback()
 
         mock_power.emit.assert_not_called()
         mock_net.emit.assert_not_called()
         mock_mon_count.emit.assert_not_called()
 
-    @patch("time.sleep")
-    @patch.object(SystemPulse, "get_power_state", side_effect=Exception("poll error"))
+    @patch.object(SystemPulse, "get_power_state", side_effect=OSError("poll error"))
     @patch.object(SystemPulse, "power_state_changed")
-    def test_polling_handles_exception(self, mock_power, mock_get_power, mock_sleep):
+    def test_polling_handles_exception(self, mock_power, mock_get_power):
         """Polling loop handles exceptions and sleeps longer."""
-        call_count = [0]
+        pulse = SystemPulse()
 
-        def sleep_side_effect(seconds):
+        call_count = [0]
+        original_wait = pulse._stop_event.wait
+
+        def wait_side_effect(timeout=None):
             call_count[0] += 1
             if call_count[0] >= 2:
-                raise StopIteration
+                pulse._stop_event.set()
+            return False
 
-        mock_sleep.side_effect = sleep_side_effect
-
-        pulse = SystemPulse()
-        try:
-            pulse._run_polling_fallback()
-        except StopIteration:
-            pass
-        # Exception path sleeps 10 seconds
-        mock_sleep.assert_any_call(10)
+        with patch.object(pulse._stop_event, "wait", side_effect=wait_side_effect):
+            with patch.object(
+                pulse._stop_event, "is_set",
+                side_effect=[False, False, True]
+            ):
+                pulse._run_polling_fallback()
 
 
 # ---------------------------------------------------------------------------

@@ -51,7 +51,7 @@ class SystemManager:
                     if line.startswith("VARIANT="):
                         variant = line.split("=")[1].strip().strip('"')
                         return variant
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.debug("Failed to read variant from /etc/os-release: %s", e)
 
         return "Atomic"  # Generic fallback
@@ -83,6 +83,7 @@ class SystemManager:
                 capture_output=True,
                 text=True,
                 check=False,
+                timeout=15,
             )
             if result.returncode == 0:
                 import json
@@ -92,7 +93,7 @@ class SystemManager:
                 # If there's more than one deployment and first isn't booted, reboot pending
                 if len(deployments) > 1:
                     return not deployments[0].get("booted", False)
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to check pending deployment: %s", e)
 
         return False
@@ -114,6 +115,7 @@ class SystemManager:
                 capture_output=True,
                 text=True,
                 check=False,
+                timeout=15,
             )
             if result.returncode == 0:
                 import json
@@ -128,7 +130,7 @@ class SystemManager:
                                 "requested-local-packages", []
                             ) + dep.get("requested-packages", [])
                             return pkgs
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to get layered packages: %s", e)
 
         return []
@@ -143,9 +145,10 @@ class SystemManager:
         """Check if Flathub remote is configured."""
         try:
             result = subprocess.run(
-                ["flatpak", "remotes"], capture_output=True, text=True, check=False
+                ["flatpak", "remotes"], capture_output=True, text=True, check=False,
+                timeout=10
             )
             return "flathub" in result.stdout.lower()
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check Flathub remote: %s", e)
             return False

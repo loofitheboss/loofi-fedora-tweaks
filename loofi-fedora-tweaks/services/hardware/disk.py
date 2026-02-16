@@ -86,7 +86,7 @@ class DiskManager:
                 free_bytes=usage.free,
                 percent_used=round(percent, 1),
             )
-        except Exception as e:
+        except OSError as e:
             logger.debug("Failed to get disk usage for path %s: %s", path, e)
             return None
 
@@ -141,7 +141,7 @@ class DiskManager:
                         )
                     except (ValueError, IndexError):
                         continue
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get all mount points: %s", e)
 
         return results
@@ -219,5 +219,5 @@ class DiskManager:
 
             results.sort(key=lambda d: d.size_bytes, reverse=True)
             return results[:top_n]
-        except (subprocess.TimeoutExpired, Exception):
+        except (subprocess.SubprocessError, OSError):
             return results

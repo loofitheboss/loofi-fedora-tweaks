@@ -26,7 +26,7 @@ class FavoritesManager:
                     data = json.load(f)
                 if isinstance(data, list):
                     return data
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to load favorites: %s", e)
         return []
 
@@ -37,7 +37,7 @@ class FavoritesManager:
             os.makedirs(_CONFIG_DIR, exist_ok=True)
             with open(_FAVORITES_FILE, "w") as f:
                 json.dump(favorites, f, indent=2)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to save favorites: %s", e)
 
     @classmethod

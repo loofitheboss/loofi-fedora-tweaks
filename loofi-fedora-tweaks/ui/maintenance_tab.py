@@ -16,6 +16,8 @@ from PyQt6.QtGui import QColor
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from ui.tooltips import MAINT_CLEANUP, MAINT_JOURNAL, MAINT_ORPHANS
+from utils.commands import PrivilegedCommand
 from utils.command_runner import CommandRunner
 from services.system import SystemManager
 from core.plugins.metadata import PluginMetadata
@@ -100,8 +102,7 @@ class _UpdatesSubTab(QWidget):
         btn_remove_old.setAccessibleName(self.tr("Remove Old Kernels"))
         btn_remove_old.clicked.connect(
             lambda: self.run_single_command(
-                "pkexec", ["dnf", "remove", "--oldinstallonly", "-y"],
-                self.tr("Removing Old Kernels...")
+                *PrivilegedCommand.dnf("remove", flags=["--oldinstallonly"]),
             )
         )
         kernel_layout.addWidget(btn_remove_old)
@@ -316,10 +317,10 @@ class _CleanupSubTab(QWidget):
 
         btn_dnf_clean = QPushButton(self.tr("Clean DNF Cache"))
         btn_dnf_clean.setAccessibleName(self.tr("Clean DNF Cache"))
+        btn_dnf_clean.setToolTip(MAINT_CLEANUP)
         btn_dnf_clean.clicked.connect(
             lambda: self.run_command(
-                "pkexec", ["dnf", "clean", "all"],
-                self.tr("Cleaning DNF Cache...")
+                *PrivilegedCommand.dnf("clean", "all"),
             )
         )
         cleanup_layout.addWidget(btn_dnf_clean)
@@ -327,11 +328,13 @@ class _CleanupSubTab(QWidget):
         btn_autoremove = QPushButton(self.tr("Remove Unused Packages (Risky)"))
         btn_autoremove.setAccessibleName(self.tr("Remove Unused Packages"))
         btn_autoremove.setObjectName("maintAutoremoveBtn")
+        btn_autoremove.setToolTip(MAINT_ORPHANS)
         btn_autoremove.clicked.connect(self.run_autoremove)
         cleanup_layout.addWidget(btn_autoremove)
 
         btn_journal = QPushButton(self.tr("Vacuum Journal (2 weeks)"))
         btn_journal.setAccessibleName(self.tr("Vacuum Journal"))
+        btn_journal.setToolTip(MAINT_JOURNAL)
         btn_journal.clicked.connect(
             lambda: self.run_command(
                 "pkexec", ["journalctl", "--vacuum-time=2weeks"],
@@ -405,8 +408,7 @@ class _CleanupSubTab(QWidget):
             self, self.tr("Remove Unused Packages (Risky)")
         ):
             self.run_command(
-                "pkexec", ["dnf", "autoremove", "-y"],
-                self.tr("Removing unused packages...")
+                *PrivilegedCommand.dnf("autoremove"),
             )
 
     def run_command(self, cmd, args, description):
@@ -744,7 +746,7 @@ class _SmartUpdatesSubTab(QWidget):
             self._append_output(
                 self.tr("Found {} available updates.\n").format(len(updates))
             )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._append_output(f"[ERROR] {e}\n")
 
     def _preview_conflicts(self):
@@ -761,7 +763,7 @@ class _SmartUpdatesSubTab(QWidget):
                 self.updates_list.addItem(
                     QListWidgetItem(self.tr("No conflicts detected."))
                 )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._append_output(f"[ERROR] {e}\n")
 
     def _schedule_update(self):
@@ -772,7 +774,7 @@ class _SmartUpdatesSubTab(QWidget):
             for binary, args, desc in cmds:
                 self._append_output(f"{desc}\n")
                 self.runner.run_command(binary, args)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._append_output(f"[ERROR] {e}\n")
 
     def _rollback_last(self):
@@ -781,7 +783,7 @@ class _SmartUpdatesSubTab(QWidget):
             binary, args, desc = UpdateManager.rollback_last()
             self._append_output(f"{desc}\n")
             self.runner.run_command(binary, args)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._append_output(f"[ERROR] {e}\n")
 
 

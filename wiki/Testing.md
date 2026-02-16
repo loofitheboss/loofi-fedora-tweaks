@@ -308,7 +308,7 @@ All PRs must pass:
 ### 1. Lint (flake8)
 
 ```bash
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 ```
 
 **Rules:**

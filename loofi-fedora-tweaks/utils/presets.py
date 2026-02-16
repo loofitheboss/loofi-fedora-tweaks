@@ -101,7 +101,7 @@ class PresetManager:
             with open(path, "w") as f:
                 json.dump({"name": name, **data}, f, indent=4)
             return True
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to save preset data: %s", e)
             return False
 
@@ -126,7 +126,7 @@ class PresetManager:
                 subprocess.run(
                     ["gsettings", "set", schema, key, value], check=False, timeout=15
                 )
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to set gsettings %s %s: %s", schema, key, e)
 
     def _get_battery_limit(self):

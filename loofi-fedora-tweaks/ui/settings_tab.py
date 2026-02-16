@@ -106,7 +106,7 @@ class SettingsTab(QWidget, PluginInterface):
         # Theme selector
         self.theme_combo = QComboBox()
         self.theme_combo.setAccessibleName(self.tr("Theme selector"))
-        self.theme_combo.addItems(["dark", "light"])
+        self.theme_combo.addItems(["dark", "light", "highcontrast"])
         self.theme_combo.setCurrentText(self._mgr.get("theme"))
         self.theme_combo.currentTextChanged.connect(self._on_theme_changed)
         form.addRow(self.tr("Theme:"), self.theme_combo)

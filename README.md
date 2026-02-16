@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v41.0.0 "Coverage"
+# Loofi Fedora Tweaks v42.0.0 "Sentinel"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,13 +10,16 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0">
-    <img src="https://img.shields.io/badge/Release-v41.0.0-blue?style=for-the-badge&logo=github" alt="Release v41.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v42.0.0">
+    <img src="https://img.shields.io/badge/Release-v42.0.0-blue?style=for-the-badge&logo=github" alt="Release v42.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
   <img src="https://img.shields.io/badge/Package-RPM-orange?style=for-the-badge&logo=redhat" alt="RPM package"/>
-  <img src="https://img.shields.io/badge/Coverage-%E2%89%A580%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage >= 80%"/>
+  <img src="https://img.shields.io/badge/Coverage-82%25-brightgreen?style=for-the-badge&logo=pytest" alt="Coverage 82%"/>
+  <a href="https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/">
+    <img src="https://img.shields.io/badge/COPR-loofitheboss%2Floofi--fedora--tweaks-blue?style=for-the-badge&logo=fedora" alt="COPR"/>
+  </a>
 </p>
 
 ---
@@ -36,15 +39,24 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v42.0.0?
+
+`v42.0.0 "Sentinel"` is a hardening & polish release — exception narrowing, hardcoded dnf elimination, and UX improvements:
+
+- **106 exception handlers narrowed** — `except Exception` replaced with specific types across 30 files.
+- **25+ hardcoded `dnf` references eliminated** — all use `PrivilegedCommand.dnf()` or `SystemManager.get_package_manager()`.
+- **Daemon systemd hardening** — `NoNewPrivileges`, `ProtectSystem=strict`, `SystemCallFilter`.
+- **Software tab search/filter** — case-insensitive filtering by name/description.
+- **High-contrast theme** — new `highcontrast.qss` with settings toggle.
+- **Test stability fixes** — resolved sys.modules pollution causing 35 cross-test failures.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v42.0.0.md`](docs/releases/RELEASE-NOTES-v42.0.0.md)
+
+---
+
 ## What Is New in v41.0.0?
 
-`v41.0.0 "Coverage"` is a pure test and CI release with zero production code changes:
-
-- **Coverage raised** — From 74% to 80%+ (30,653 statements, 6,125 missed).
-- **23 test files** — Created or expanded, adding ~1,900 new tests (5,894 total).
-- **JUnit annotations** — `dorny/test-reporter` renders test results as GitHub check annotations.
-- **RPM smoke test** — Post-install smoke test gates every release build.
-- **Coverage threshold** — Bumped from 74 to 80 in ci.yml, auto-release.yml, coverage-gate.yml.
+`v41.0.0 "Coverage"` is a pure test and CI release — coverage raised from 74% to 80%+, 23 test files created/expanded.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v41.0.0.md`](docs/releases/RELEASE-NOTES-v41.0.0.md)
 
@@ -68,19 +80,31 @@ Full notes: [`docs/releases/RELEASE-NOTES-v39.0.0.md`](docs/releases/RELEASE-NOT
 
 ## Installation
 
-### Quick Install (Repository Script)
+### Install from COPR (Recommended)
+
+The package is published on [Fedora COPR](https://copr.fedorainfracloud.org/coprs/loofitheboss/loofi-fedora-tweaks/). This gives you automatic updates via `dnf`.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/loofitheboss/loofi-fedora-tweaks/master/install.sh | bash
+sudo dnf copr enable loofitheboss/loofi-fedora-tweaks
+sudo dnf install loofi-fedora-tweaks
 ```
 
-### Install From a Release RPM
+To uninstall:
 
 ```bash
-pkexec dnf install ./loofi-fedora-tweaks-*.noarch.rpm
+sudo dnf remove loofi-fedora-tweaks
+sudo dnf copr remove loofitheboss/loofi-fedora-tweaks
 ```
 
-### Run From Source
+### Install from a Release RPM
+
+Download the `.noarch.rpm` from the [Releases](https://github.com/loofitheboss/loofi-fedora-tweaks/releases) page:
+
+```bash
+sudo dnf install ./loofi-fedora-tweaks-*.noarch.rpm
+```
+
+### Run from Source
 
 ```bash
 git clone https://github.com/loofitheboss/loofi-fedora-tweaks.git
@@ -242,7 +266,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 5894+ passing
 Lint:
 
 ```bash
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 ```
 
 Type check:
@@ -273,6 +297,7 @@ Every push to `master` and every pull request runs through two pipelines:
 |----------|------|---------|
 | CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, packaging |
 | Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → build → tag → publish |
+| COPR Publish | `.github/workflows/copr-publish.yml` | Build SRPM and submit to Fedora COPR |
 
 ### Auto Release Flow
 
@@ -283,6 +308,7 @@ push to master
   → build (RPM in Fedora 43 container)
   → auto_tag (creates vX.Y.Z tag if missing)
   → release (publishes GitHub Release with RPM artifact)
+  → copr-publish (builds SRPM and submits to Fedora COPR)
 ```
 
 The pipeline automatically tags and publishes releases when code lands on `master` with a new version in `version.py`. No manual tagging required.

@@ -11,6 +11,7 @@ Provides:
 
 import logging
 import os
+import shutil
 import subprocess
 import threading
 import time
@@ -445,6 +446,12 @@ class AgentExecutor:
                     data={"dnf_updates": 0, "alert": False},
                 )
             else:
+                if not shutil.which("dnf"):
+                    return AgentResult(
+                        success=True,
+                        message="DNF not available on this system",
+                        data={"dnf_updates": 0, "alert": False},
+                    )
                 result = subprocess.run(
                     ["dnf", "check-update", "--quiet"],
                     capture_output=True,
@@ -511,9 +518,10 @@ class AgentExecutor:
     @staticmethod
     def _op_clean_dnf_cache(settings: Dict[str, Any]) -> AgentResult:
         """Report DNF cache size (actual cleanup requires pkexec)."""
+        cache_path = "/var/cache/dnf" if shutil.which("dnf") else "/var/cache/rpm-ostree"
         try:
             result = subprocess.run(
-                ["du", "-sh", "/var/cache/dnf"],
+                ["du", "-sh", cache_path],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -648,7 +656,6 @@ class AgentScheduler:
     """
 
     def __init__(self):
-        self._running: bool = False
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._on_result: Optional[Callable[[str, AgentResult], None]] = None
@@ -659,9 +666,8 @@ class AgentScheduler:
 
     def start(self):
         """Start the agent scheduler in a background thread."""
-        if self._running:
+        if not self._stop_event.is_set() and self._thread and self._thread.is_alive():
             return
-        self._running = True
         self._stop_event.clear()
         self._thread = threading.Thread(
             target=self._run_loop, daemon=True, name="AgentScheduler"
@@ -671,7 +677,6 @@ class AgentScheduler:
 
     def stop(self):
         """Stop the agent scheduler."""
-        self._running = False
         self._stop_event.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=5)
@@ -679,7 +684,11 @@ class AgentScheduler:
 
     @property
     def is_running(self) -> bool:
-        return self._running
+        return (
+            not self._stop_event.is_set()
+            and self._thread is not None
+            and self._thread.is_alive()
+        )
 
     def _run_loop(self):
         """Main scheduler loop."""

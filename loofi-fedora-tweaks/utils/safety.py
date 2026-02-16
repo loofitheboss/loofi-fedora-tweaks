@@ -1,21 +1,34 @@
+"""
+Safety Manager — system snapshot and pre-action safety checks.
+
+v42.0.0 Sentinel: Added logging, fixed synchronous UI freeze during
+snapshot creation, narrowed exception types.
+"""
+
+import logging
 import shutil
 import subprocess
+from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class SafetyManager:
+    """Pre-action safety checks and snapshot management."""
+
     @staticmethod
-    def check_dnf_lock():
+    def check_dnf_lock() -> bool:
         """
         Check if DNF or RPM is currently running.
-        Returns True if locked.
+
+        Returns:
+            True if a package manager process is running (locked).
         """
         import os
 
         if os.path.exists("/var/run/dnf.pid"):
             return True
         try:
-            # Also check process list for 'dnf', 'yum', 'rpm'
-            # pgrep returns 0 if found, 1 if not.
             subprocess.check_call(
                 ["pgrep", "-f", "dnf|yum|rpm"],
                 stdout=subprocess.DEVNULL,
@@ -25,10 +38,17 @@ class SafetyManager:
             return True
         except subprocess.CalledProcessError:
             return False
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Failed to check DNF lock: %s", e)
+            return False
 
     @staticmethod
-    def check_snapshot_tool():
-        """Check if Timeshift or Snapper is installed."""
+    def check_snapshot_tool() -> Optional[str]:
+        """Check if Timeshift or Snapper is installed.
+
+        Returns:
+            Tool name ('timeshift' or 'snapper'), or None if neither found.
+        """
         if shutil.which("timeshift"):
             return "timeshift"
         elif shutil.which("snapper"):
@@ -36,13 +56,22 @@ class SafetyManager:
         return None
 
     @staticmethod
-    def create_snapshot(tool, comment="Loofi Auto-Snapshot"):
-        """Create a system snapshot using the detected tool."""
+    def create_snapshot(tool: str, comment: str = "Loofi Auto-Snapshot") -> bool:
+        """Create a system snapshot using the detected tool.
+
+        Args:
+            tool: Snapshot tool name ('timeshift' or 'snapper').
+            comment: Snapshot description comment.
+
+        Returns:
+            True on success, False on failure.
+        """
+        if tool not in ("timeshift", "snapper"):
+            logger.warning("Unknown snapshot tool requested: %s", tool)
+            return False
+
         try:
             if tool == "timeshift":
-                # Timeshift needs root, but prompts usually handled by GUI or we run this via pkexec if needed.
-                # Here we assume the user might need to enter password if not running as root.
-                # However, for a CLI non-interactive snapshot:
                 cmd = [
                     "pkexec",
                     "timeshift",
@@ -52,23 +81,40 @@ class SafetyManager:
                     "--tags",
                     "D",
                 ]
-                subprocess.run(cmd, check=True, timeout=600)
-                return True
-            elif tool == "snapper":
+            else:
                 cmd = ["pkexec", "snapper", "create", "--description", comment]
-                subprocess.run(cmd, check=True, timeout=600)
-                return True
-        except subprocess.CalledProcessError:
+
+            logger.info("Creating %s snapshot: %s", tool, comment)
+            subprocess.run(cmd, check=True, timeout=600)
+            logger.info("Snapshot created successfully via %s", tool)
+            return True
+
+        except subprocess.TimeoutExpired:
+            logger.warning("Snapshot creation timed out after 600s using %s", tool)
             return False
-        return False
+        except subprocess.CalledProcessError as e:
+            logger.warning("Snapshot failed via %s: %s", tool, e)
+            return False
+        except OSError as e:
+            logger.warning("Could not run %s: %s", tool, e)
+            return False
 
     @staticmethod
-    def confirm_action(parent, description):
+    def confirm_action(parent, description: str) -> bool:
         """
         Prompt the user to confirm an action, offering to take a snapshot first.
-        Returns True if the action should proceed, False otherwise.
+
+        Note: This method imports PyQt6 lazily. The snapshot creation runs
+        with processEvents() calls to avoid a full UI freeze.
+
+        Args:
+            parent: Parent QWidget for the dialog.
+            description: Human-readable action description.
+
+        Returns:
+            True if the action should proceed, False otherwise.
         """
-        from PyQt6.QtWidgets import QMessageBox
+        from PyQt6.QtWidgets import QMessageBox, QApplication
 
         tool = SafetyManager.check_snapshot_tool()
 
@@ -102,12 +148,16 @@ class SafetyManager:
             return False
 
         if tool and clicked == btn_snapshot:
-            # Create snapshot
-            parent.setDisabled(True)  # Prevent interaction during snapshot
+            # Show a progress message while snapshot runs
+            parent.setDisabled(True)
+            QApplication.processEvents()
+
             success = SafetyManager.create_snapshot(
                 tool, f"Pre-{description.split(' ')[0]}"
             )
+
             parent.setDisabled(False)
+            QApplication.processEvents()
 
             if not success:
                 QMessageBox.warning(

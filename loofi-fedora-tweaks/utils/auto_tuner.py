@@ -415,7 +415,7 @@ class AutoTuner:
 
             usage = (1.0 - idle_delta / total_delta) * 100.0
             return max(0.0, min(100.0, usage))
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.debug("CPU percent read failed: %s", exc)
             return 0.0
 
@@ -475,7 +475,7 @@ class AutoTuner:
 
             iowait_delta = second[4] - first[4]
             return max(0.0, min(100.0, (iowait_delta / total_delta) * 100.0))
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.debug("IO-wait read failed: %s", exc)
             return 0.0
 

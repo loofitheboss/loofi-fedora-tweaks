@@ -41,6 +41,21 @@ class FooTab(QWidget, PluginInterface):  # QWidget MUST come first
 ## Arch Spec Location
 - `.workflow/specs/arch-v25.0.md` — full plugin interface spec, metadata reference table, per-task notes
 
+## Exception Handler Narrowing Rules (applied across services/ and ui/)
+- subprocess.run/Popen in services → `except (subprocess.SubprocessError, OSError)`
+- File I/O (open, sysfs reads, /proc) → `except (OSError, IOError)`
+- glob.glob on sysfs → `except OSError`
+- shutil.disk_usage → `except OSError`
+- UI tabs calling mixed utils (subprocess + file I/O) → `except (RuntimeError, OSError, ValueError)`
+- UI tabs calling BackupWizard/SnapshotManager/UpdateManager → `except (RuntimeError, OSError, ValueError)`
+- save_tuning_entry (pure file I/O) → `except (OSError, IOError)`
+- get_tuning_history (file read + JSON) → `except (OSError, ValueError)`
+- teleport: list_saved_packages → `except (OSError, ValueError)`; send_file → `except (OSError, RuntimeError)`
+- KEEP broad `except Exception` only at: main.py, cli/main.py, top-level entry points
+- `except (ValueError, FileNotFoundError, Exception)` is equivalent to broad → narrow to `except (ValueError, FileNotFoundError, OSError)`
+- hardware_tab.py has NO subprocess import; UI-level service calls bubble as OSError/RuntimeError, not SubprocessError
+
 ## Critical Edit Warning
+
 - When editing class docstrings, be careful not to accidentally insert class body code INSIDE the docstring
 - Always use a separate old_string that ends the docstring with `"""` before placing new class attributes

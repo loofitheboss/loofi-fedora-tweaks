@@ -500,7 +500,7 @@ class NetworkTab(BaseTab):
                 )
                 mac = self._get_mac_address(iface.name)
                 self.iface_table.setItem(i, 4, self._make_table_item(mac))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Failed to load interfaces: %s", e)
             self._set_empty_table_state(
                 self.iface_table, self.tr("Failed to load interfaces")
@@ -512,7 +512,7 @@ class NetworkTab(BaseTab):
         try:
             with open(f"/sys/class/net/{iface_name}/address", "r") as f:
                 return f.read().strip()
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read MAC address for %s: %s", iface_name, e)
             return "—"
 
@@ -890,5 +890,5 @@ class NetworkTab(BaseTab):
                     self.conn_table.setItem(
                         i, 5, self._make_table_item(conn.process_name or "—")
                     )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Monitoring refresh failed: %s", e)

@@ -163,7 +163,7 @@
       "args": [
         "loofi-fedora-tweaks/",
         "--max-line-length=150",
-        "--ignore=E501,W503,E402,E722"
+        "--ignore=E501,W503,E402,E722,E203"
       ],
       "group": "test",
       "problemMatcher": []

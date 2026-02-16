@@ -4,6 +4,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [42.0.0] - 2026-02-16 "Sentinel"
+
+### Security & Hardening
+
+- **Subprocess timeout enforcement**: Added `timeout=` to all remaining `subprocess.run()` calls in `services/hardware/hardware.py` (14 calls) and `services/system/system.py` (3 calls).
+- **Exception narrowing**: Narrowed 106 `except Exception` handlers across 30 files to specific types: `(subprocess.SubprocessError, OSError)` for subprocess, `(json.JSONDecodeError, ValueError)` for JSON, `(ImportError, AttributeError)` for dynamic imports. 33 justified boundaries retained with audit comments.
+- **Hardcoded `dnf` elimination**: Replaced 25+ hardcoded `dnf` references across 15 files (UI + utils layers) with `PrivilegedCommand.dnf()`, `SystemManager.get_package_manager()`, or `shutil.which("dnf")` guards.
+- **Daemon systemd hardening**: Added `NoNewPrivileges=true`, `PrivateTmp=true`, `ProtectSystem=strict`, `ProtectHome=read-only`, `ProtectKernelTunables=true`, `RestrictSUIDSGID=true`, `SystemCallFilter=@system-service` to service unit.
+- **Daemon task validation**: Task actions validated against `TaskAction` enum before execution; unknown actions from config rejected.
+- **Plugin version compatibility**: Added `min_app_version`/`max_app_version` to `PluginMetadata`; auto-update defaults to off.
+- **UI subprocess extraction**: Moved `subprocess.run(["rpm", "-E", "%fedora"])` from `ui/software_tab.py` to `utils/software_utils.py`.
+
+### UX Polish
+
+- **Software tab search/filter**: Added search bar above app list with case-insensitive filtering by name/description.
+- **Focus Mode discoverability**: Added Focus Mode status card to dashboard Quick Actions and "Toggle Focus Mode" to command palette (Ctrl+K).
+- **Tooltip coverage**: Added tooltips for Dashboard, Software, Maintenance, Desktop, and Development tabs.
+- **High-contrast theme**: New `high-contrast.qss` stylesheet with settings toggle.
+
+### Testing
+
+- **5860 tests passing**, 35 skipped, 0 failures.
+- **82% coverage** (up from 80%).
+- Fixed test pollution: module-level stub installation in `test_maintenance_tab.py` and `test_community_tab.py` now properly restores `sys.modules` to prevent cross-test contamination.
+- Fixed 15+ exception narrowing test mismatches (`Exception(...)` → `OSError(...)` / `subprocess.SubprocessError(...)`).
+- Fixed `AgentScheduler` test references for `_stop_event` refactor.
+
 ## [41.0.0] - 2026-02-15 "Coverage"
 
 ### Test Suite

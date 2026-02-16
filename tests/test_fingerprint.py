@@ -116,7 +116,7 @@ class TestFingerprintWorkerRun(unittest.TestCase):
 
         worker.enroll_fail.emit.assert_called_once()
 
-    @patch('utils.fingerprint.subprocess.Popen', side_effect=Exception("fprintd not found"))
+    @patch('utils.fingerprint.subprocess.Popen', side_effect=OSError("fprintd not found"))
     def test_run_handles_exception(self, mock_popen):
         """run() emits enroll_fail on exception."""
         worker = FingerprintWorker()

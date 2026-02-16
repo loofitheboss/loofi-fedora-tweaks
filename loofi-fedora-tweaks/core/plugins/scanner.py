@@ -120,7 +120,7 @@ class PluginScanner:
                         "Discovered plugin: %s v%s",
                         manifest.name, manifest.version
                     )
-            except Exception as exc:
+            except (OSError, ValueError, TypeError) as exc:
                 logger.warning(
                     "Failed to validate plugin '%s': %s",
                     plugin_id, exc
@@ -234,7 +234,7 @@ class PluginScanner:
             manifest = self._parse_manifest(manifest_path)
             if not manifest:
                 return None
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError, ValueError, TypeError) as exc:
             logger.warning(
                 "Failed to parse manifest for '%s': %s",
                 plugin_dir.name, exc
@@ -275,7 +275,7 @@ class PluginScanner:
         """
         try:
             raw = json.loads(manifest_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, json.JSONDecodeError, ValueError, TypeError) as exc:
             logger.error("Failed to read/parse manifest: %s", exc)
             return None
 
@@ -392,6 +392,6 @@ class PluginScanner:
             current = self._parse_version(APP_VERSION)
             required = self._parse_version(min_version)
             return current >= required
-        except Exception as exc:
+        except (ValueError, TypeError, AttributeError) as exc:
             logger.warning("Version comparison failed: %s", exc)
             return False

@@ -73,7 +73,7 @@ class KernelManager:
                 cmdline = f.read().strip()
             # Split but preserve quoted strings
             return cmdline.split()
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read /proc/cmdline: %s", e)
             return []
 
@@ -92,7 +92,7 @@ class KernelManager:
                         # Extract value between quotes
                         value = line.split("=", 1)[1].strip().strip('"')
                         return value.split() if value else []
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read default GRUB parameters: %s", e)
         return []
 
@@ -114,7 +114,7 @@ class KernelManager:
             return KernelResult(
                 success=True, message="Backup created", backup_path=str(backup_path)
             )
-        except Exception as e:
+        except OSError as e:
             return KernelResult(False, f"Backup failed: {str(e)}")
 
     @classmethod
@@ -156,7 +156,7 @@ class KernelManager:
                     message=f"Failed to add parameter: {result.stderr}",
                     output=result.stderr,
                 )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return KernelResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -198,7 +198,7 @@ class KernelManager:
                     message=f"Failed to remove parameter: {result.stderr}",
                     output=result.stderr,
                 )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return KernelResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -250,5 +250,5 @@ class KernelManager:
                 )
             else:
                 return KernelResult(False, f"Restore failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return KernelResult(False, f"Error: {str(e)}")

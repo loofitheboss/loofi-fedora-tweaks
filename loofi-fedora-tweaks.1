@@ -1,0 +1,133 @@
+.\" Man page for loofi-fedora-tweaks
+.TH LOOFI\-FEDORA\-TWEAKS 1 "2026-02-16" "42.0.0" "Loofi Fedora Tweaks Manual"
+.SH NAME
+loofi\-fedora\-tweaks \- comprehensive system management for Fedora
+.SH SYNOPSIS
+.B loofi\-fedora\-tweaks
+[\fB\-\-daemon\fR]
+[\fB\-\-cli\fR [\fIcommand\fR ...]]
+[\fB\-\-web\fR]
+[\fB\-\-version\fR]
+.SH DESCRIPTION
+.B loofi\-fedora\-tweaks
+is a PyQt6 desktop application for Fedora 43+ (KDE Plasma) providing
+system maintenance, developer tooling, AI integration, security hardening,
+window management, virtualization, mesh networking, and workspace state
+teleportation.
+.PP
+When launched without options, the graphical user interface is displayed.
+.SH OPTIONS
+.TP
+.BR \-d ", " \-\-daemon
+Run as a background daemon for scheduled tasks.  The daemon is managed
+by a systemd user unit (\fBloofi\-fedora\-tweaks.service\fR).
+.TP
+.BR \-c ", " \-\-cli " [" \fIcommand\fR " ...]"
+Run in command\-line mode.  Any remaining arguments are forwarded to the
+CLI dispatcher (see \fBCLI COMMANDS\fR below).
+.TP
+.B \-\-web
+Run the headless Loofi Web API server (FastAPI/Uvicorn).
+.TP
+.BR \-v ", " \-\-version
+Print the version string and exit.
+.SH CLI COMMANDS
+The following subcommands are available in CLI mode
+(\fB\-\-cli\fR):
+.TP
+.B info
+Show system information.
+.TP
+.B health
+System health check overview.
+.TP
+.B disk \fR[\fB\-\-details\fR]
+Display disk usage.  With \fB\-\-details\fR, show large directories.
+.TP
+.B processes \fR[\fB\-n\fR \fIcount\fR] [\fB\-\-sort\fR \fIcpu\fR|\fImemory\fR]
+Show top processes sorted by CPU (default) or memory usage.
+.TP
+.B temperature
+Show hardware temperature readings.
+.TP
+.B netmon \fR[\fB\-\-connections\fR]
+Network interface monitoring.
+.TP
+.B cleanup \fR[\fIaction\fR] [\fB\-\-days\fR \fIN\fR]
+System cleanup.  Actions: \fBall\fR (default), \fBdnf\fR, \fBjournal\fR,
+\fBtrim\fR, \fBautoremove\fR, \fBrpmdb\fR.
+.TP
+.B tweak \fIaction\fR \fR[\fB\-\-profile\fR \fIname\fR] [\fB\-\-limit\fR \fIN\fR]
+Hardware tweaks.  Actions: \fBpower\fR, \fBaudio\fR, \fBbattery\fR, \fBstatus\fR.
+.TP
+.B advanced \fIaction\fR \fR[\fB\-\-value\fR \fIN\fR]
+Advanced optimizations.  Actions: \fBdnf\-tweaks\fR, \fBbbr\fR,
+\fBgamemode\fR, \fBswappiness\fR.
+.TP
+.B network dns \fR[\fB\-\-provider\fR \fIname\fR]
+Network configuration.  Providers: \fBcloudflare\fR (default), \fBgoogle\fR,
+\fBquad9\fR, \fBopendns\fR.
+.TP
+.B doctor
+Check system dependencies and diagnostics.
+.TP
+.B hardware
+Show detected hardware profile.
+.TP
+.B plugins \fIaction\fR \fR[\fIname\fR]
+Manage plugins.  Actions: \fBlist\fR, \fBenable\fR, \fBdisable\fR.
+.TP
+.B plugin\-marketplace \fIaction\fR \fR[\fIplugin\fR]
+Plugin marketplace operations.  Actions: \fBsearch\fR, \fBinstall\fR,
+\fBuninstall\fR, \fBupdate\fR, \fBinfo\fR, \fBlist\-installed\fR.
+.TP
+.B vm \fIaction\fR \fR[\fIname\fR]
+Virtual machine management.  Actions: \fBlist\fR, \fBstatus\fR,
+\fBstart\fR, \fBstop\fR.
+.TP
+.B vfio \fIaction\fR
+GPU passthrough assistant.  Actions: \fBcheck\fR, \fBgpus\fR, \fBplan\fR.
+.TP
+.B mesh \fIaction\fR
+Loofi Link mesh networking.  Actions: \fBdiscover\fR, \fBstatus\fR.
+.TP
+.B support\-bundle
+Export a support bundle ZIP for troubleshooting.
+.SH GLOBAL CLI FLAGS
+.TP
+.B \-\-json
+Output in JSON format for scripting.
+.TP
+.BI \-\-timeout " seconds"
+Operation timeout (default: 300).
+.TP
+.B \-\-dry\-run
+Show commands without executing them.
+.SH FILES
+.TP
+.I /usr/lib/loofi\-fedora\-tweaks/
+Application directory containing all Python modules and assets.
+.TP
+.I ~/.local/share/loofi\-fedora\-tweaks/
+User data directory (logs, plugins, settings).
+.TP
+.I ~/.local/share/loofi\-fedora\-tweaks/startup.log
+Startup and runtime log.
+.SH ENVIRONMENT
+.TP
+.B PYTHONPATH
+Set automatically by the launcher script to include the application
+directory.
+.SH SECURITY
+All privileged operations use \fBpkexec\fR(1) via polkit policies.  The
+application never uses \fBsudo\fR.
+.SH BUGS
+Report bugs at \fIhttps://github.com/loofitheboss/loofi\-fedora\-tweaks/issues\fR.
+.SH AUTHOR
+Loofi
+.SH LICENSE
+MIT License.
+.SH SEE ALSO
+.BR pkexec (1),
+.BR polkit (8),
+.BR systemctl (1)

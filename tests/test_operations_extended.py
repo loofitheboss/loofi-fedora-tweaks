@@ -538,7 +538,7 @@ class TestAdvancedOpsApplyDnfTweaks(unittest.TestCase):
     @patch("core.executor.operations.subprocess.run")
     def test_apply_dnf_tweaks_exception(self, mock_run):
         """Test handling of unexpected exception during tee."""
-        mock_run.side_effect = Exception("unexpected")
+        mock_run.side_effect = OSError("unexpected")
         result = AdvancedOps.apply_dnf_tweaks()
         self.assertFalse(result.success)
         self.assertIn("unexpected", result.message)
@@ -694,7 +694,7 @@ class TestAdvancedOpsInstallGamemode(unittest.TestCase):
             ["dnf", "install", "-y", "gamemode"],
             "Installing...",
         )
-        mock_run.side_effect = Exception("disk full")
+        mock_run.side_effect = OSError("disk full")
         result = AdvancedOps.install_gamemode()
         self.assertFalse(result.success)
         self.assertIn("disk full", result.message)
@@ -818,7 +818,7 @@ class TestAdvancedOpsSetSwappiness(unittest.TestCase):
     @patch("core.executor.operations.subprocess.run")
     def test_set_swappiness_exception(self, mock_run):
         """Test handling of exception during swappiness set."""
-        mock_run.side_effect = Exception("kaboom")
+        mock_run.side_effect = OSError("kaboom")
         result = AdvancedOps.set_swappiness(10)
         self.assertFalse(result.success)
         self.assertIn("kaboom", result.message)

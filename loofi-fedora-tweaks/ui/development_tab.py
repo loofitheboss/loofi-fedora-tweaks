@@ -18,6 +18,8 @@ from PyQt6.QtGui import QAction
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from ui.tooltips import DEV_VSCODE, DEV_LANGUAGES, DEV_CONTAINERS  # noqa: F401 — DEV_TOOLBOX reserved
+from utils.commands import PrivilegedCommand
 from utils.containers import ContainerManager, ContainerStatus
 from utils.devtools import DevToolsManager
 from utils.vscode import VSCodeManager
@@ -251,6 +253,7 @@ class DevelopmentTab(BaseTab):
         # Create button
         create_btn = QPushButton(self.tr("Create"))
         create_btn.setAccessibleName(self.tr("Create"))
+        create_btn.setToolTip(DEV_CONTAINERS)
         create_btn.clicked.connect(self._create_container)
         form_layout.addWidget(create_btn)
 
@@ -433,11 +436,12 @@ class DevelopmentTab(BaseTab):
             self.refresh_containers()
 
     def _install_distrobox(self):
-        """Install distrobox via DNF."""
+        """Install distrobox via package manager."""
+        binary, args, desc = PrivilegedCommand.dnf("install", "distrobox")
         self._distrobox_runner = CommandRunner()
         self._distrobox_runner.finished.connect(self._on_distrobox_install_finished)
         self._distrobox_runner.output_received.connect(lambda t: self.append_output(t))
-        self._distrobox_runner.run_command("pkexec", ["dnf", "install", "distrobox", "-y"])
+        self._distrobox_runner.run_command(binary, args)
         self.append_output(self.tr("Installing Distrobox...\n"))
 
     def _on_distrobox_install_finished(self, exit_code: int):
@@ -504,6 +508,7 @@ class DevelopmentTab(BaseTab):
 
         self.pyenv_btn = QPushButton(self.tr("Install PyEnv + Python 3.12"))
         self.pyenv_btn.setAccessibleName(self.tr("Install PyEnv + Python 3.12"))
+        self.pyenv_btn.setToolTip(DEV_LANGUAGES)
         self.pyenv_btn.clicked.connect(lambda: self._install_tool("pyenv"))
         pyenv_layout.addWidget(self.pyenv_btn)
         layout.addLayout(pyenv_layout)
@@ -516,6 +521,7 @@ class DevelopmentTab(BaseTab):
 
         self.nvm_btn = QPushButton(self.tr("Install NVM + Node LTS"))
         self.nvm_btn.setAccessibleName(self.tr("Install NVM + Node LTS"))
+        self.nvm_btn.setToolTip(DEV_LANGUAGES)
         self.nvm_btn.clicked.connect(lambda: self._install_tool("nvm"))
         nvm_layout.addWidget(self.nvm_btn)
         layout.addLayout(nvm_layout)
@@ -528,6 +534,7 @@ class DevelopmentTab(BaseTab):
 
         self.rust_btn = QPushButton(self.tr("Install Rustup"))
         self.rust_btn.setAccessibleName(self.tr("Install Rustup"))
+        self.rust_btn.setToolTip(DEV_LANGUAGES)
         self.rust_btn.clicked.connect(lambda: self._install_tool("rustup"))
         rust_layout.addWidget(self.rust_btn)
         layout.addLayout(rust_layout)
@@ -570,6 +577,7 @@ class DevelopmentTab(BaseTab):
 
         install_btn = QPushButton(self.tr("Install Extensions"))
         install_btn.setAccessibleName(self.tr("Install Extensions"))
+        install_btn.setToolTip(DEV_VSCODE)
         install_btn.clicked.connect(self._install_vscode_profile)
         profile_layout.addWidget(install_btn)
 

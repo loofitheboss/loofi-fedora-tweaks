@@ -80,7 +80,7 @@ class TestGetInstalledExtensions(unittest.TestCase):
         self.assertEqual(VSCodeManager.get_installed_extensions(), [])
 
     @patch.object(VSCodeManager, "get_vscode_command", return_value="code")
-    @patch("utils.vscode.subprocess.run", side_effect=Exception("fail"))
+    @patch("utils.vscode.subprocess.run", side_effect=OSError("fail"))
     def test_exception_returns_empty(self, mock_run, mock_cmd):
         self.assertEqual(VSCodeManager.get_installed_extensions(), [])
 

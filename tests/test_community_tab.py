@@ -1879,5 +1879,10 @@ class TestFetchMarketplaceThread(unittest.TestCase):
         self.assertTrue(hasattr(FetchMarketplaceThread, "finished"))
 
 
+def tearDownModule():
+    """Remove stub ui.community_tab so later tests import the real module."""
+    sys.modules.pop("ui.community_tab", None)
+
+
 if __name__ == "__main__":
     unittest.main()

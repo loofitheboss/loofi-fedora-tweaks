@@ -50,6 +50,34 @@ EXPECTED_CONSTANTS = {
     "SETTINGS_LANGUAGE",
     "SETTINGS_AUTOSTART",
     "SETTINGS_NOTIFICATIONS",
+    # Dashboard
+    "DASH_HEALTH_SCORE",
+    "DASH_QUICK_ACTIONS",
+    "DASH_FOCUS_MODE",
+    "DASH_SYSTEM_OVERVIEW",
+    # Software
+    "SW_SEARCH",
+    "SW_INSTALL",
+    "SW_BATCH_INSTALL",
+    "SW_BATCH_REMOVE",
+    "SW_RPM_FUSION",
+    "SW_CODECS",
+    "SW_FLATHUB",
+    # Maintenance
+    "MAINT_CLEANUP",
+    "MAINT_JOURNAL",
+    "MAINT_FLATPAK_CLEANUP",
+    "MAINT_ORPHANS",
+    # Desktop
+    "DESK_THEME",
+    "DESK_FONTS",
+    "DESK_EXTENSIONS",
+    "DESK_WALLPAPER",
+    # Development
+    "DEV_TOOLBOX",
+    "DEV_VSCODE",
+    "DEV_LANGUAGES",
+    "DEV_CONTAINERS",
 }
 
 

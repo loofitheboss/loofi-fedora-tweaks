@@ -45,7 +45,7 @@ class TestGetToolStatus(unittest.TestCase):
         self.assertFalse(installed)
 
     @patch("shutil.which", return_value="/home/user/.cargo/bin/rustup")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_rustup_installed_version_fail(self, mock_run, mock_which):
         installed, version = DevToolsManager.get_tool_status("rustup")
         self.assertTrue(installed)
@@ -82,10 +82,11 @@ class TestInstallPyenv(unittest.TestCase):
         self.assertTrue(r.success)
         self.assertIn("already installed", r.message)
 
+    @patch.object(DevToolsManager, "_download_and_execute")
     @patch.object(DevToolsManager, "_add_shell_config")
     @patch("subprocess.run")
     @patch.object(DevToolsManager, "get_tool_status", return_value=(False, "not installed"))
-    def test_success(self, mock_status, mock_run, mock_config):
+    def test_success(self, mock_status, mock_run, mock_config, mock_download):
         mock_run.return_value = MagicMock(returncode=0)
         r = DevToolsManager.install_pyenv()
         self.assertTrue(r.success)
@@ -97,7 +98,7 @@ class TestInstallPyenv(unittest.TestCase):
         r = DevToolsManager.install_pyenv()
         self.assertFalse(r.success)
 
-    @patch("subprocess.run", side_effect=Exception("network error"))
+    @patch("subprocess.run", side_effect=OSError("network error"))
     @patch.object(DevToolsManager, "get_tool_status", return_value=(False, ""))
     def test_exception(self, mock_status, mock_run):
         r = DevToolsManager.install_pyenv()
@@ -111,10 +112,9 @@ class TestInstallNvm(unittest.TestCase):
         r = DevToolsManager.install_nvm()
         self.assertTrue(r.success)
 
-    @patch("subprocess.run")
+    @patch.object(DevToolsManager, "_download_and_execute")
     @patch.object(DevToolsManager, "get_tool_status", return_value=(False, ""))
-    def test_success(self, mock_status, mock_run):
-        mock_run.return_value = MagicMock(returncode=0)
+    def test_success(self, mock_status, mock_download):
         r = DevToolsManager.install_nvm()
         self.assertTrue(r.success)
 
@@ -132,11 +132,10 @@ class TestInstallRustup(unittest.TestCase):
         r = DevToolsManager.install_rustup()
         self.assertTrue(r.success)
 
+    @patch.object(DevToolsManager, "_download_and_execute")
     @patch.object(DevToolsManager, "_add_shell_config")
-    @patch("subprocess.run")
     @patch.object(DevToolsManager, "get_tool_status", return_value=(False, ""))
-    def test_success(self, mock_status, mock_run, mock_config):
-        mock_run.return_value = MagicMock(returncode=0)
+    def test_success(self, mock_status, mock_config, mock_download):
         r = DevToolsManager.install_rustup()
         self.assertTrue(r.success)
 

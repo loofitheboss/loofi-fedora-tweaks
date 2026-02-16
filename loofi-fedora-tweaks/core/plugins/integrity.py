@@ -116,7 +116,7 @@ class IntegrityVerifier:
                 success=False,
                 error=f"Failed to read archive: {exc}"
             )
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             logger.error("Unexpected error during checksum verification: %s", exc)
             return VerificationResult(
                 success=False,
@@ -204,7 +204,7 @@ class IntegrityVerifier:
                 success=False,
                 error="GPG verification timed out"
             )
-        except Exception as exc:
+        except (subprocess.SubprocessError, OSError) as exc:
             logger.error("Unexpected error during signature verification: %s", exc)
             return VerificationResult(
                 success=False,
@@ -256,7 +256,7 @@ class IntegrityVerifier:
 
             logger.info("Generated %d checksums", len(checksums))
 
-        except Exception as exc:
+        except (OSError, IOError) as exc:
             logger.error("Failed to generate checksums: %s", exc)
 
         return checksums
@@ -320,7 +320,7 @@ class IntegrityVerifier:
             logger.info("All directory checksums verified successfully")
             return VerificationResult(success=True)
 
-        except Exception as exc:
+        except (OSError, IOError) as exc:
             logger.error("Failed to verify directory checksums: %s", exc)
             return VerificationResult(
                 success=False,

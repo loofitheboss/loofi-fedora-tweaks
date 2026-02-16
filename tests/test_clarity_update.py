@@ -164,7 +164,7 @@ class TestOllamaStopService(unittest.TestCase):
         result = OllamaManager.stop_service()
         self.assertTrue(result.success)
 
-    @patch("subprocess.run", side_effect=Exception("test error"))
+    @patch("subprocess.run", side_effect=OSError("test error"))
     @patch("utils.ai.OllamaManager.is_running", return_value=True)
     @patch("utils.ai.OllamaManager.is_installed", return_value=True)
     def test_stop_handles_exception(self, mock_installed, mock_running, mock_run):

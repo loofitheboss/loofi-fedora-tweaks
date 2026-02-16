@@ -89,7 +89,7 @@ class TestListContainers(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=1)
         self.assertEqual(ContainerManager.list_containers(), [])
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     @patch("shutil.which", return_value="/usr/bin/distrobox")
     def test_exception(self, mock_which, mock_run):
         self.assertEqual(ContainerManager.list_containers(), [])
@@ -178,7 +178,7 @@ class TestCreateContainer(unittest.TestCase):
         self.assertIn("timed out", r.message)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
-    @patch("subprocess.run", side_effect=Exception("oops"))
+    @patch("subprocess.run", side_effect=OSError("oops"))
     def test_exception(self, mock_run, mock_which):
         r = ContainerManager.create_container("mybox")
         self.assertFalse(r.success)
@@ -200,7 +200,7 @@ class TestEnterContainer(unittest.TestCase):
         self.assertEqual(result, mock_proc)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
-    @patch("subprocess.Popen", side_effect=Exception("fail"))
+    @patch("subprocess.Popen", side_effect=OSError("fail"))
     def test_exception(self, mock_popen, mock_which):
         result = ContainerManager.enter_container("test")
         self.assertIsNone(result)
@@ -250,7 +250,7 @@ class TestDeleteContainer(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = ContainerManager.delete_container("test")
         self.assertFalse(r.success)
@@ -278,7 +278,7 @@ class TestStopContainer(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = ContainerManager.stop_container("test")
         self.assertFalse(r.success)
@@ -318,7 +318,7 @@ class TestExportApp(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = ContainerManager.export_app_from_container("mybox", "firefox")
         self.assertFalse(r.success)

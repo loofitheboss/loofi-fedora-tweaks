@@ -119,7 +119,7 @@ class TestUpdateGrub(unittest.TestCase):
         args = MockWorker.call_args[0]
         self.assertIn("/etc/grub2.cfg", args[1])
 
-    @patch("os.path.exists", side_effect=Exception("boom"))
+    @patch("os.path.exists", side_effect=OSError("boom"))
     def test_update_grub_detection_error(self, mock_exists, MockWorker):
         r = _FakeResult(True)
         MockWorker.return_value = _make_worker(r)

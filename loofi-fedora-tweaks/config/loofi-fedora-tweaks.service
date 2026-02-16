@@ -10,6 +10,17 @@ ExecStart=/usr/bin/loofi-fedora-tweaks --daemon
 Restart=on-failure
 RestartSec=10
 Environment=PYTHONUNBUFFERED=1
+# Security hardening (v42.0.0 Sentinel)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.config/loofi-fedora-tweaks
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallFilter=@system-service
 
 [Install]
 WantedBy=default.target

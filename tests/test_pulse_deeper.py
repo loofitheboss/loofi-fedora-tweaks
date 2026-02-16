@@ -71,20 +71,20 @@ class TestGetPowerState(unittest.TestCase):
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="1\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_ac_via_sysfs(self, mock_run, mock_exists):
         from utils.pulse import PowerState, SystemPulse
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="0\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_battery_via_sysfs(self, mock_run, mock_exists):
         from utils.pulse import PowerState, SystemPulse
         self.assertEqual(SystemPulse.get_power_state(), PowerState.BATTERY.value)
 
     @patch("os.path.exists", return_value=False)
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_unknown_fallback(self, mock_run, mock_exists):
         from utils.pulse import PowerState, SystemPulse
         self.assertEqual(SystemPulse.get_power_state(), PowerState.UNKNOWN.value)
@@ -101,13 +101,13 @@ class TestGetBatteryLevel(unittest.TestCase):
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="72\n"))
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_via_sysfs(self, mock_run, mock_exists):
         from utils.pulse import SystemPulse
         self.assertEqual(SystemPulse.get_battery_level(), 72)
 
     @patch("os.path.exists", return_value=False)
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_no_battery(self, mock_run, mock_exists):
         from utils.pulse import SystemPulse
         self.assertEqual(SystemPulse.get_battery_level(), -1)
@@ -132,7 +132,7 @@ class TestGetNetworkState(unittest.TestCase):
         from utils.pulse import NetworkState, SystemPulse
         self.assertEqual(SystemPulse.get_network_state(), NetworkState.CONNECTING.value)
 
-    @patch("subprocess.run", side_effect=Exception("no nmcli"))
+    @patch("subprocess.run", side_effect=OSError("no nmcli"))
     def test_fallback(self, mock_run):
         from utils.pulse import NetworkState, SystemPulse
         self.assertEqual(SystemPulse.get_network_state(), NetworkState.DISCONNECTED.value)
@@ -153,7 +153,7 @@ class TestGetWifiSsid(unittest.TestCase):
         from utils.pulse import SystemPulse
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_error(self, mock_run):
         from utils.pulse import SystemPulse
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
@@ -198,7 +198,7 @@ class TestCheckVpnActive(unittest.TestCase):
         pulse = SystemPulse.__new__(SystemPulse)
         self.assertFalse(pulse._check_vpn_active())
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_error(self, mock_run):
         from utils.pulse import SystemPulse
         pulse = SystemPulse.__new__(SystemPulse)
@@ -227,7 +227,7 @@ class TestGetConnectedMonitors(unittest.TestCase):
         self.assertEqual(len(monitors), 1)
         self.assertTrue(monitors[0]["is_ultrawide"])
 
-    @patch("subprocess.run", side_effect=Exception("no xrandr"))
+    @patch("subprocess.run", side_effect=OSError("no xrandr"))
     def test_no_xrandr(self, mock_run):
         from utils.pulse import SystemPulse
         monitors = SystemPulse.get_connected_monitors()

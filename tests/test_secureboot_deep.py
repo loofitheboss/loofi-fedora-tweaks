@@ -62,7 +62,7 @@ class TestGetStatus(unittest.TestCase):
         status = SecureBootManager.get_status()
         self.assertTrue(status.pending_mok)
 
-    @patch("subprocess.run", side_effect=Exception("general error"))
+    @patch("subprocess.run", side_effect=OSError("general error"))
     def test_exception_in_sb_state(self, mock_run):
         status = SecureBootManager.get_status()
         self.assertFalse(status.secure_boot_enabled)
@@ -92,7 +92,7 @@ class TestGenerateKey(unittest.TestCase):
         r = SecureBootManager.generate_key("longpassword123")
         self.assertFalse(r.success)
 
-    @patch("pathlib.Path.mkdir", side_effect=Exception("no space"))
+    @patch("pathlib.Path.mkdir", side_effect=OSError("no space"))
     def test_mkdir_failure(self, mock_mkdir):
         r = SecureBootManager.generate_key("longpassword123")
         self.assertFalse(r.success)
@@ -122,7 +122,7 @@ class TestImportKey(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("pathlib.Path.exists", return_value=True)
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_exists):
         r = SecureBootManager.import_key("password123")
         self.assertFalse(r.success)
@@ -173,7 +173,7 @@ class TestSignModule(unittest.TestCase):
     @patch("glob.glob", return_value=["/usr/src/kernels/6.0/scripts/sign-file"])
     @patch("os.path.exists", return_value=True)
     @patch("pathlib.Path.exists", return_value=True)
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_path, mock_os, mock_glob):
         r = SecureBootManager.sign_module("/lib/modules/test.ko")
         self.assertFalse(r.success)

@@ -31,6 +31,8 @@ from PyQt6.QtWidgets import (
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from ui.tooltips import DESK_THEME, DESK_FONTS  # noqa: F401 — DESK_EXTENSIONS, DESK_WALLPAPER reserved
+from utils.commands import PrivilegedCommand
 from utils.tiling import TilingManager, DotfileManager
 from utils.kwin_tiling import KWinManager
 from core.plugins.metadata import PluginMetadata
@@ -404,6 +406,7 @@ class DesktopTab(BaseTab):
 
         self.theme_combo = QComboBox()
         self.theme_combo.setAccessibleName(self.tr("KDE global theme"))
+        self.theme_combo.setToolTip(DESK_THEME)
         self.themes = {
             self.tr("Breeze Dark"): "org.kde.breezedark.desktop",
             self.tr("Breeze Light"): "org.kde.breeze.desktop",
@@ -429,9 +432,7 @@ class DesktopTab(BaseTab):
         btn_papirus.setAccessibleName(self.tr("Install Papirus Icons"))
         btn_papirus.clicked.connect(
             lambda: self.run_command(
-                "pkexec",
-                ["dnf", "install", "-y", "papirus-icon-theme"],
-                self.tr("Installing Papirus Icons..."),
+                *PrivilegedCommand.dnf("install", "papirus-icon-theme"),
             )
         )
         icon_layout.addWidget(btn_papirus)
@@ -440,9 +441,7 @@ class DesktopTab(BaseTab):
         btn_tela.setAccessibleName(self.tr("Install Tela Icons"))
         btn_tela.clicked.connect(
             lambda: self.run_command(
-                "pkexec",
-                ["dnf", "install", "-y", "tela-icon-theme"],
-                self.tr("Installing Tela Icons..."),
+                *PrivilegedCommand.dnf("install", "tela-icon-theme"),
             )
         )
         icon_layout.addWidget(btn_tela)
@@ -456,22 +455,20 @@ class DesktopTab(BaseTab):
 
         btn_firacode = QPushButton(self.tr("FiraCode Nerd Font"))
         btn_firacode.setAccessibleName(self.tr("FiraCode Nerd Font"))
+        btn_firacode.setToolTip(DESK_FONTS)
         btn_firacode.clicked.connect(
             lambda: self.run_command(
-                "pkexec",
-                ["dnf", "install", "-y", "fira-code-fonts"],
-                self.tr("Installing FiraCode..."),
+                *PrivilegedCommand.dnf("install", "fira-code-fonts"),
             )
         )
         fonts_layout.addWidget(btn_firacode)
 
         btn_jetbrains = QPushButton(self.tr("JetBrains Mono"))
         btn_jetbrains.setAccessibleName(self.tr("JetBrains Mono"))
+        btn_jetbrains.setToolTip(DESK_FONTS)
         btn_jetbrains.clicked.connect(
             lambda: self.run_command(
-                "pkexec",
-                ["dnf", "install", "-y", "jetbrains-mono-fonts"],
-                self.tr("Installing JetBrains Mono..."),
+                *PrivilegedCommand.dnf("install", "jetbrains-mono-fonts"),
             )
         )
         fonts_layout.addWidget(btn_jetbrains)
@@ -581,7 +578,7 @@ class DesktopTab(BaseTab):
             if not displays:
                 self.display_list.addItem(self.tr("No displays detected"))
             self.append_output(self.tr("Detected {} displays.\n").format(len(displays)))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.display_list.clear()
             self.display_list.addItem(f"Error: {e}")
 
@@ -598,7 +595,7 @@ class DesktopTab(BaseTab):
                     info.get("compositor", "?"),
                 )
             )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to load session info: %s", e)
             self.display_session_info.setText(self.tr("Session info unavailable"))
 
@@ -609,7 +606,7 @@ class DesktopTab(BaseTab):
 
             binary, args, desc = WaylandDisplayManager.enable_fractional_scaling()
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _disable_fractional(self):
@@ -619,5 +616,5 @@ class DesktopTab(BaseTab):
 
             binary, args, desc = WaylandDisplayManager.disable_fractional_scaling()
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")

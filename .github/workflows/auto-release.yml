@@ -134,7 +134,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install flake8
-      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 
   typecheck:
     runs-on: ubuntu-latest
@@ -244,7 +244,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install build deps
-        run: dnf install -y rpm-build python3
+        run: dnf install -y rpm-build python3 python3-devel
       - name: Build RPM
         run: bash scripts/build_rpm.sh
       - uses: actions/upload-artifact@v4

@@ -200,7 +200,7 @@ class TestGetCurrentUsage(unittest.TestCase):
         self.assertEqual(used_mb, 100)  # 104857600 / (1024*1024)
         self.assertEqual(total_mb, 8192)  # 8589934592 / (1024*1024)
 
-    @patch('utils.zram.subprocess.run', side_effect=Exception("fail"))
+    @patch('utils.zram.subprocess.run', side_effect=OSError("fail"))
     def test_get_current_usage_error(self, mock_run):
         """get_current_usage returns None on error."""
         usage = ZramManager.get_current_usage()

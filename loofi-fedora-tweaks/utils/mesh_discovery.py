@@ -153,7 +153,7 @@ class MeshDiscovery:
             )
         except subprocess.TimeoutExpired:
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to run avahi-browse for peer discovery: %s", e)
             return []
 
@@ -231,7 +231,7 @@ class MeshDiscovery:
                 stderr=subprocess.PIPE,
             )
             return Result(success=True, message="mDNS service registered.")
-        except Exception as exc:
+        except (subprocess.SubprocessError, OSError) as exc:
             cls._publish_process = None
             return Result(success=False, message=f"Failed to register service: {exc}")
 
@@ -250,7 +250,7 @@ class MeshDiscovery:
             cls._publish_process.wait(timeout=5)
             cls._publish_process = None
             return Result(success=True, message="mDNS service unregistered.")
-        except Exception as exc:
+        except (subprocess.SubprocessError, OSError) as exc:
             cls._publish_process = None
             return Result(success=False, message=f"Failed to unregister service: {exc}")
 

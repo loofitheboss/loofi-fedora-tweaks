@@ -120,7 +120,7 @@ class PerformanceCollector:
                     # parts[1:] are the time counters
                     if len(parts) >= 5:
                         results.append([int(v) for v in parts[1:9]])
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read /proc/stat: %s", e)
         return results
 
@@ -163,7 +163,7 @@ class PerformanceCollector:
                         # Values in /proc/meminfo are in kB
                         value = int(parts[1]) * 1024
                         meminfo[key] = value
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read /proc/meminfo: %s", e)
         return meminfo
 
@@ -195,11 +195,11 @@ class PerformanceCollector:
                     # Skip loopback
                     if iface == "lo":
                         continue
-                    fields = line[colon_idx + 1:].split()
+                    fields = line[colon_idx + 1 :].split()
                     if len(fields) >= 10:
                         total_recv += int(fields[0])  # bytes received
                         total_sent += int(fields[8])  # bytes transmitted
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read /proc/net/dev: %s", e)
         return total_recv, total_sent
 
@@ -234,7 +234,7 @@ class PerformanceCollector:
                     sectors_written = int(parts[9])
                     total_read += sectors_read * PerformanceCollector.SECTOR_SIZE
                     total_write += sectors_written * PerformanceCollector.SECTOR_SIZE
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read /proc/diskstats: %s", e)
         return total_read, total_write
 
@@ -295,7 +295,7 @@ class PerformanceCollector:
             self._prev_cpu_timestamp = now
 
             return sample
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             logger.debug("Failed to collect CPU sample: %s", e)
             return None
 
@@ -326,7 +326,7 @@ class PerformanceCollector:
             )
             self._memory_history.append(sample)
             return sample
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             logger.debug("Failed to collect memory sample: %s", e)
             return None
 
@@ -379,7 +379,7 @@ class PerformanceCollector:
             self._prev_net_timestamp = now
 
             return sample
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug("Failed to collect network sample: %s", e)
             return None
 
@@ -432,7 +432,7 @@ class PerformanceCollector:
             self._prev_disk_timestamp = now
 
             return sample
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             logger.debug("Failed to collect disk I/O sample: %s", e)
             return None
 

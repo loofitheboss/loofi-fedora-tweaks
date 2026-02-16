@@ -92,7 +92,7 @@ class TestRunSandboxed(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertIn("not installed", result.message)
 
-    @patch('utils.sandbox.subprocess.Popen', side_effect=Exception("exec failed"))
+    @patch('utils.sandbox.subprocess.Popen', side_effect=OSError("exec failed"))
     @patch.object(SandboxManager, 'is_firejail_installed', return_value=True)
     def test_run_sandboxed_exception(self, mock_installed, mock_popen):
         """run_sandboxed handles exception gracefully."""

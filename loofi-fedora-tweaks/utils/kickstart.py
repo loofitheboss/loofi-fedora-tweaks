@@ -99,7 +99,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
                     if "X11 Layout" in line:
                         return line.split(":")[-1].strip() or "us"
             return "us"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get keyboard layout: %s", e)
             return "us"
 
@@ -123,7 +123,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
             if result.returncode == 0:
                 return result.stdout.strip() or "UTC"
             return "UTC"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get timezone: %s", e)
             return "UTC"
 
@@ -187,7 +187,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
                         if not any(p.startswith(x) for x in excluded)
                     ]
                 return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.debug("Failed to get user-installed packages: %s", e)
             return []
 
@@ -209,7 +209,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
                     a.strip() for a in result.stdout.strip().split("\n") if a.strip()
                 ]
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get Flatpak apps: %s", e)
             return []
 
@@ -293,7 +293,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
                 {"path": str(path), "size": len(content)},
             )
 
-        except Exception as e:
+        except (OSError, IOError) as e:
             return Result(False, f"Failed to save Kickstart: {e}")
 
     @classmethod
@@ -320,5 +320,5 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
             else:
                 return Result(False, f"Validation errors:\n{result.stderr}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Validation failed: {e}")

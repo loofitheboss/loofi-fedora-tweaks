@@ -54,7 +54,7 @@ class FingerprintWorker(QThread):
 
             process.terminate()
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             self.enroll_fail.emit(str(e))
 
     def stop(self):

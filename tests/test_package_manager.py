@@ -122,7 +122,7 @@ class TestInstallRpmOstree(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertTrue(result.needs_reboot)
 
-    @patch('utils.package_manager.subprocess.run', side_effect=Exception("exec failed"))
+    @patch('utils.package_manager.subprocess.run', side_effect=OSError("exec failed"))
     @patch('utils.package_manager.SystemManager')
     def test_install_rpm_ostree_exception(self, mock_sys, mock_run):
         """rpm-ostree install handles exception."""

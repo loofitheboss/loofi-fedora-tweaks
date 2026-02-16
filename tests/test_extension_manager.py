@@ -232,7 +232,7 @@ class TestSearchAvailable(unittest.TestCase):
     @patch("urllib.request.urlopen")
     def test_search_gnome_network_error(self, mock_urlopen):
         """Network error returns empty list."""
-        mock_urlopen.side_effect = Exception("Network error")
+        mock_urlopen.side_effect = OSError("Network error")
         result = ExtensionManager.search_available("test")
         self.assertEqual(len(result), 0)
 

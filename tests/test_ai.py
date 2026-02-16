@@ -30,7 +30,7 @@ class TestOllamaManager(unittest.TestCase):
 
     @patch("utils.ai.subprocess.run")
     def test_is_running_fallback_to_pgrep(self, mock_run):
-        mock_run.side_effect = [Exception("svc fail"), MagicMock(returncode=0)]
+        mock_run.side_effect = [OSError("svc fail"), MagicMock(returncode=0)]
         self.assertTrue(OllamaManager.is_running())
 
     @patch("utils.ai.OllamaManager.is_installed", return_value=True)

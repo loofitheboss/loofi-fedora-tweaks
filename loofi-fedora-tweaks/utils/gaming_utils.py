@@ -47,6 +47,6 @@ class GamingUtils:
                 return "installed"
 
             return "missing"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check GameMode status: %s", e)
             return "error"

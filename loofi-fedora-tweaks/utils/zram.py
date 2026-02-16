@@ -63,7 +63,7 @@ class ZramManager:
                     if line.startswith("MemTotal:"):
                         kb = int(line.split()[1])
                         return kb // 1024
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.debug("Failed to read total RAM from /proc/meminfo: %s", e)
         return 8192  # Default fallback
 
@@ -87,7 +87,7 @@ class ZramManager:
                 timeout=15,
             )
             enabled = bool(result.stdout.strip())
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check ZRAM active status: %s", e)
             enabled = False
 
@@ -116,7 +116,7 @@ class ZramManager:
                                     size_percent = (size_mb * 100) // total_ram
                             elif line.startswith("compression-algorithm"):
                                 algorithm = line.split("=")[1].strip()
-                except Exception as e:
+                except (OSError, ValueError, IndexError) as e:
                     logger.debug("Failed to parse ZRAM config file: %s", e)
                 break
 
@@ -199,7 +199,7 @@ compression-algorithm = {algorithm}
             else:
                 return ZramResult(False, f"Failed to write config: {result.stderr}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return ZramResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -217,7 +217,7 @@ compression-algorithm = {algorithm}
                 else:
                     return ZramResult(False, f"Failed: {result.stderr}")
             return ZramResult(True, "ZRAM already disabled.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return ZramResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -243,6 +243,6 @@ compression-algorithm = {algorithm}
                     used = int(parts[0]) // (1024 * 1024)
                     total = int(parts[1]) // (1024 * 1024)
                     return (used, total)
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.debug("Failed to get ZRAM usage: %s", e)
         return None

@@ -447,7 +447,7 @@ class PluginSandbox:
 
             logger.info("Plugin '%s' sandboxed successfully", self.plugin_id)
 
-        except Exception as exc:
+        except (ImportError, AttributeError, OSError, RuntimeError, TypeError) as exc:
             # Fail-safe: log but don't crash
             logger.warning(
                 "Failed to sandbox plugin '%s': %s. Allowing plugin execution.",
@@ -480,7 +480,7 @@ class PluginSandbox:
 
             logger.debug("Plugin '%s' unsandboxed", self.plugin_id)
 
-        except Exception as exc:
+        except (AttributeError, RuntimeError) as exc:
             logger.warning(
                 "Failed to unwrap plugin '%s': %s",
                 self.plugin_id, exc

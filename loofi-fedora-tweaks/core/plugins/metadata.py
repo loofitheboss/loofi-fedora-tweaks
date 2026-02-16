@@ -12,6 +12,8 @@ class PluginMetadata:
     icon: str                        # unicode emoji or icon ref string
     badge: str                       # "recommended" | "advanced" | ""
     version: str = "1.0.0"          # plugin version string
+    min_app_version: str = ""       # minimum app version required (empty = no limit)
+    max_app_version: str = ""       # maximum app version supported (empty = no limit)
     requires: tuple[str, ...] = ()   # dependency plugin IDs (tuple for hashability)
     compat: dict[str, Any] = field(  # {min_fedora: 38, de: ["gnome","kde"], ...}
         default_factory=dict

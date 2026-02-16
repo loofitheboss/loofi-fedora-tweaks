@@ -174,7 +174,7 @@ class AgentNotifier:
             return NotificationManager.send(
                 title=title, body=body, icon=icon, urgency=urgency
             )
-        except Exception as exc:
+        except (ImportError, AttributeError, OSError) as exc:
             logger.debug("Desktop notification failed: %s", exc)
             return False
 
@@ -190,7 +190,7 @@ class AgentNotifier:
                 message=result.message[:200],
                 category=category,
             )
-        except Exception as exc:
+        except (ImportError, AttributeError, OSError) as exc:
             logger.debug("In-app notification failed: %s", exc)
 
     @staticmethod

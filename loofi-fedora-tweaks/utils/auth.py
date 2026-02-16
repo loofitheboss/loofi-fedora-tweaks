@@ -49,7 +49,7 @@ class AuthManager:
         ConfigManager.save_config(config)
         try:
             cls._auth_path().write_text("1")
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to write auth marker file: %s", e)
 
     @classmethod
@@ -89,7 +89,7 @@ class AuthManager:
         data = cls._load_auth_data()
         try:
             jwt.decode(token, data["jwt_secret"], algorithms=[cls._ALGORITHM])
-        except Exception as e:
+        except (jwt.InvalidTokenError, KeyError, ValueError) as e:
             logger.debug("JWT token verification failed: %s", e)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"

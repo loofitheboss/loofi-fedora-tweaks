@@ -119,7 +119,7 @@ class DependencyResolver:
                 else:
                     return True
 
-        except Exception as exc:
+        except (ValueError, TypeError, AttributeError) as exc:
             logger.error("Version comparison failed: %s", exc)
             return False
 

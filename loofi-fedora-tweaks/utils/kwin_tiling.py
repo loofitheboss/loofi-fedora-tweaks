@@ -117,7 +117,7 @@ class KWinManager:
                 return Result(False, f"Failed: {result.stderr}")
 
             return Result(True, "Quick tiling enabled. Restart KWin to apply.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -159,7 +159,7 @@ class KWinManager:
                 return Result(False, f"Failed: {result.stderr}")
 
             return Result(True, f"Bound {shortcut} to {action_name}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -245,7 +245,7 @@ class KWinManager:
                 return Result(True, "KWin reconfigured")
             else:
                 return Result(False, "Failed to reconfigure KWin")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -405,7 +405,7 @@ class KWinManager:
                 f"Window rule added for {window_class}",
                 {"rule_number": new_rule_num},
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -430,7 +430,7 @@ class KWinManager:
                     windows.append({"info": line.strip()})
 
             return windows
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to query KWin window list: %s", e)
             return windows
 

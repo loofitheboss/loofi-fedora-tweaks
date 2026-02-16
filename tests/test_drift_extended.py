@@ -401,7 +401,7 @@ class TestSystemStateGathering(unittest.TestCase):
     @patch('builtins.open')
     def test_get_kernel_params_returns_empty_on_error(self, mock_open):
         """_get_kernel_params returns empty list on error."""
-        mock_open.side_effect = Exception("Read error")
+        mock_open.side_effect = OSError("Read error")
 
         detector = DriftDetector()
         params = detector._get_kernel_params()

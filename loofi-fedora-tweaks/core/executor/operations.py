@@ -108,7 +108,7 @@ class TweakOps:
                 timeout=10,
             )
             return result.stdout.strip() if result.returncode == 0 else "unknown"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get power profile: %s", e)
             return "unknown"
 
@@ -147,7 +147,7 @@ class TweakOps:
             if result.returncode == 0:
                 return OperationResult(True, f"Battery limit set to {limit}%")
             return OperationResult(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return OperationResult(False, str(e))
 
     @staticmethod
@@ -215,7 +215,7 @@ class AdvancedOps:
             if result.returncode == 0:
                 return OperationResult(True, "DNF optimizations applied")
             return OperationResult(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, IOError) as e:
             return OperationResult(False, str(e))
 
     @staticmethod
@@ -250,7 +250,7 @@ class AdvancedOps:
             if result.returncode == 0:
                 return OperationResult(True, "TCP BBR enabled")
             return OperationResult(False, f"sysctl reload failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return OperationResult(False, str(e))
 
     @staticmethod
@@ -282,7 +282,7 @@ class AdvancedOps:
             if result.returncode == 0:
                 return OperationResult(True, f"GameMode installed for {user}")
             return OperationResult(False, f"usermod failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return OperationResult(False, str(e))
 
     @staticmethod
@@ -319,7 +319,7 @@ class AdvancedOps:
             if result.returncode == 0:
                 return OperationResult(True, f"Swappiness set to {value}")
             return OperationResult(False, f"sysctl reload failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return OperationResult(False, str(e))
 
 
@@ -389,7 +389,7 @@ class NetworkOps:
                 True, f"DNS set to {provider} ({primary}, {secondary})"
             )
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return OperationResult(False, str(e))
 
 

@@ -103,6 +103,10 @@ def _build_feature_registry() -> list[dict]:
         {"name": "Telemetry", "category": "Security & Privacy", "keywords": [
             "telemetry", "privacy", "tracking", "analytics", "disable"], "action": "Privacy"},
 
+        # Focus Mode
+        {"name": "Focus Mode", "category": "Productivity", "keywords": ["focus", "distraction", "dnd", "do not disturb", "block", "productivity", "work"], "action": "Home"},
+        {"name": "Toggle Focus Mode", "category": "Productivity", "keywords": ["toggle", "focus", "enable", "disable", "start", "stop"], "action": "Home"},
+
         # Network
         {"name": "DNS Provider", "category": "Network", "keywords": ["dns", "nameserver",
                                                                      "cloudflare", "google", "quad9", "resolver"], "action": "Network"},

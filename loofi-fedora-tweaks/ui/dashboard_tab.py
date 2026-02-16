@@ -33,6 +33,7 @@ from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
+from ui.tooltips import DASH_HEALTH_SCORE, DASH_QUICK_ACTIONS, DASH_FOCUS_MODE, DASH_SYSTEM_OVERVIEW
 from services.system.processes import ProcessManager
 from utils.commands import PrivilegedCommand
 from services.system import SystemManager
@@ -41,6 +42,7 @@ from utils.monitor import SystemMonitor
 from utils.history import HistoryManager
 from utils.health_score import HealthScoreManager
 from utils.quick_actions_config import QuickActionsConfig
+from utils.focus_mode import FocusMode
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -258,6 +260,7 @@ class DashboardTab(QWidget, PluginInterface):
         self._build_top_processes()
         self._build_recent_actions()
         self._build_quick_actions()
+        self._build_focus_mode_control()
         self._inner.addStretch()
 
         scroll.setWidget(container)
@@ -293,7 +296,7 @@ class DashboardTab(QWidget, PluginInterface):
 
         try:
             username = getpass.getuser().capitalize()
-        except Exception as e:
+        except (OSError, KeyError) as e:
             logger.debug("Failed to get username: %s", e)
             username = "User"
         header = QLabel(self.tr("Welcome back, {name}! 👋").format(name=username))
@@ -336,6 +339,7 @@ class DashboardTab(QWidget, PluginInterface):
         card_layout = QHBoxLayout(card)
 
         self._health_gauge = HealthScoreWidget()
+        self._health_gauge.setToolTip(DASH_HEALTH_SCORE)
         card_layout.addWidget(self._health_gauge)
 
         # Recommendations area
@@ -364,6 +368,7 @@ class DashboardTab(QWidget, PluginInterface):
 
         # CPU card
         cpu_card = self._card()
+        cpu_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         cpu_inner = QVBoxLayout(cpu_card)
         self.lbl_cpu = QLabel("🔥 CPU: —")
         self.lbl_cpu.setObjectName("metricLabel")
@@ -374,6 +379,7 @@ class DashboardTab(QWidget, PluginInterface):
 
         # RAM card
         ram_card = self._card()
+        ram_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         ram_inner = QVBoxLayout(ram_card)
         self.lbl_ram = QLabel("🧠 RAM: —")
         self.lbl_ram.setObjectName("metricLabel")
@@ -384,6 +390,7 @@ class DashboardTab(QWidget, PluginInterface):
 
         # Network card
         net_card = self._card()
+        net_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         net_inner = QVBoxLayout(net_card)
         self.lbl_net = QLabel("🌐 Network: —")
         self.lbl_net.setObjectName("metricLabel")
@@ -474,7 +481,7 @@ class DashboardTab(QWidget, PluginInterface):
                     )
                 else:
                     lbl.setText("—")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to refresh process list: %s", e)
 
     # ==================================================================
@@ -508,7 +515,7 @@ class DashboardTab(QWidget, PluginInterface):
                     lbl.setText(f"  {ts}  —  {action}")
                 else:
                     lbl.setText("—")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError, KeyError) as e:
             logger.debug("Failed to refresh action history: %s", e)
 
     # ==================================================================
@@ -518,6 +525,7 @@ class DashboardTab(QWidget, PluginInterface):
     def _build_quick_actions(self):
         section_label = QLabel(self.tr("Quick Actions"))
         section_label.setObjectName("sectionTitle")
+        section_label.setToolTip(DASH_QUICK_ACTIONS)
         self._inner.addWidget(section_label)
 
         self._quick_actions_grid = QGridLayout()
@@ -575,6 +583,7 @@ class DashboardTab(QWidget, PluginInterface):
         self._refresh_processes()
         self._refresh_history()
         self._refresh_health_score()
+        self._refresh_focus_mode_status()
 
     # ==================================================================
     # Network
@@ -592,7 +601,7 @@ class DashboardTab(QWidget, PluginInterface):
                 )
             self._prev_rx = rx
             self._prev_tx = tx
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logger.debug("Failed to refresh network stats: %s", e)
 
     @staticmethod
@@ -666,9 +675,62 @@ class DashboardTab(QWidget, PluginInterface):
             else:
                 recs_text = "✅ System is healthy — no issues detected"
             self._health_recs.setText(recs_text)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to calculate health score: %s", e)
             self._health_recs.setText("Could not calculate health score")
+
+    # ==================================================================
+    # Focus Mode (v42.0 Sentinel)
+    # ==================================================================
+
+    def _build_focus_mode_control(self):
+        """Build Focus Mode toggle control on dashboard."""
+        section_label = QLabel(self.tr("Focus Mode"))
+        section_label.setObjectName("sectionTitle")
+        self._inner.addWidget(section_label)
+
+        try:
+            is_active = FocusMode.is_active()
+        except (OSError, RuntimeError):
+            is_active = False
+
+        status_text = self.tr("Focus Mode: ON") if is_active else self.tr("Focus Mode: OFF")
+        color = "#a6e3a1" if is_active else "#6c7086"
+
+        self._focus_mode_btn = self._action_btn(
+            status_text, "🎯", color, self._toggle_focus_mode,
+        )
+        self._focus_mode_btn.setToolTip(DASH_FOCUS_MODE)
+        self._inner.addWidget(self._focus_mode_btn)
+
+    def _toggle_focus_mode(self, checked=False):
+        """Toggle Focus Mode on/off."""
+        try:
+            result = FocusMode.toggle()
+            if result.get("success"):
+                is_active = FocusMode.is_active()
+                self._update_focus_btn(is_active)
+            else:
+                logger.warning("Focus Mode toggle failed: %s", result.get("message"))
+        except (OSError, RuntimeError) as e:
+            logger.warning("Focus Mode toggle error: %s", e)
+
+    def _refresh_focus_mode_status(self):
+        """Refresh focus mode button to reflect current state."""
+        try:
+            is_active = FocusMode.is_active()
+            self._update_focus_btn(is_active)
+        except (OSError, RuntimeError):
+            pass
+
+    def _update_focus_btn(self, is_active: bool):
+        """Update focus mode button text and color."""
+        status_text = self.tr("Focus Mode: ON") if is_active else self.tr("Focus Mode: OFF")
+        color = "#a6e3a1" if is_active else "#6c7086"
+        self._focus_mode_btn.setText("🎯  %s" % status_text)
+        self._focus_mode_btn.setProperty("accentColor", color)
+        self._focus_mode_btn.style().unpolish(self._focus_mode_btn)
+        self._focus_mode_btn.style().polish(self._focus_mode_btn)
 
     # ==================================================================
     # Helpers

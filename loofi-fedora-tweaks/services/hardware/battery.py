@@ -30,7 +30,7 @@ class BatteryManager:
             os.makedirs(os.path.dirname(self.CONFIG_PATH), exist_ok=True)
             with open(self.CONFIG_PATH, "w") as f:
                 f.write(str(limit))
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to save battery config: %s", e)
 
         # 2. Create the Systemd Service content
@@ -111,6 +111,6 @@ WantedBy=multi-user.target
 
             return "echo", [f"Battery limit set to {limit}%"]
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Error preparing battery service: %s", e)
             return None, None

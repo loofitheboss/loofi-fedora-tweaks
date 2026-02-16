@@ -64,10 +64,10 @@ done
         try:
             result = subprocess.run(
                 ["pkexec", "bash", "-c", script],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=30
             )
             return result.returncode == 0
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set governor: %s", e)
             return False
 
@@ -110,7 +110,7 @@ done
             try:
                 result = subprocess.run(
                     ["envycontrol", "--query"],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=10
                 )
                 output = result.stdout.lower()
                 if "integrated" in output:
@@ -119,7 +119,7 @@ done
                     return "hybrid"
                 elif "nvidia" in output:
                     return "nvidia"
-            except (subprocess.SubprocessError, OSError) as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("envycontrol query failed: %s", e)
 
         # Check supergfxctl (ASUS)
@@ -127,10 +127,10 @@ done
             try:
                 result = subprocess.run(
                     ["supergfxctl", "-g"],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=10
                 )
                 return result.stdout.strip().lower()
-            except (subprocess.SubprocessError, OSError) as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 logger.debug("supergfxctl query failed: %s", e)
 
         return "unknown"
@@ -155,13 +155,13 @@ done
             try:
                 result = subprocess.run(
                     ["pkexec", "envycontrol", "--switch", mode],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=30
                 )
                 if result.returncode == 0:
                     return (True, f"GPU mode set to '{mode}'. Logout/reboot required.")
                 else:
                     return (False, result.stderr)
-            except (subprocess.SubprocessError, OSError) as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 return (False, str(e))
 
         # Try supergfxctl
@@ -170,13 +170,13 @@ done
             try:
                 result = subprocess.run(
                     ["pkexec", "supergfxctl", "-m", mode_map.get(mode, mode)],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=30
                 )
                 if result.returncode == 0:
                     return (True, f"GPU mode set to '{mode}'. Logout/reboot required.")
                 else:
                     return (False, result.stderr)
-            except (subprocess.SubprocessError, OSError) as e:
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
                 return (False, str(e))
 
         return (False, "No GPU switching tool found. Install 'envycontrol' or 'supergfxctl'.")
@@ -207,11 +207,11 @@ done
         try:
             result = subprocess.run(
                 ["nbfc", "config", "-l"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             if result.returncode == 0:
                 return [line.strip() for line in result.stdout.strip().split("\n") if line.strip()]
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list NBFC profiles: %s", e)
         return []
 
@@ -224,12 +224,12 @@ done
         try:
             result = subprocess.run(
                 ["nbfc", "status", "-a"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             for line in result.stdout.split("\n"):
                 if "Selected Config" in line or "Config" in line:
                     return line.split(":")[-1].strip()
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get NBFC config: %s", e)
         return None
 
@@ -242,10 +242,10 @@ done
         try:
             result = subprocess.run(
                 ["pkexec", "nbfc", "config", "-s", profile],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=30
             )
             return result.returncode == 0
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set NBFC profile: %s", e)
             return False
 
@@ -263,16 +263,16 @@ done
                 # Auto mode
                 result = subprocess.run(
                     ["pkexec", "nbfc", "set", "-a"],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=30
                 )
             else:
                 # Manual speed
                 result = subprocess.run(
                     ["pkexec", "nbfc", "set", "-s", str(min(100, max(0, speed)))],
-                    capture_output=True, text=True, check=False
+                    capture_output=True, text=True, check=False, timeout=30
                 )
             return result.returncode == 0
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set fan speed: %s", e)
             return False
 
@@ -287,7 +287,7 @@ done
         try:
             result = subprocess.run(
                 ["nbfc", "status", "-a"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             for line in result.stdout.split("\n"):
                 if "Current Speed" in line or "Speed" in line:
@@ -300,7 +300,7 @@ done
                         status["temperature"] = float(line.split(":")[-1].strip().replace("°C", "").replace("C", ""))
                     except ValueError:
                         pass
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get fan status: %s", e)
 
         return status
@@ -321,10 +321,10 @@ done
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "get"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             return result.stdout.strip()
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get power profile: %s", e)
             return "unknown"
 
@@ -344,10 +344,10 @@ done
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "set", profile],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             return result.returncode == 0
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to set power profile: %s", e)
             return False
 
@@ -360,7 +360,7 @@ done
         try:
             result = subprocess.run(
                 ["powerprofilesctl", "list"],
-                capture_output=True, text=True, check=False
+                capture_output=True, text=True, check=False, timeout=10
             )
             profiles = []
             for line in result.stdout.split("\n"):
@@ -372,7 +372,7 @@ done
                     elif line in ["power-saver", "balanced", "performance"]:
                         profiles.append(line)
             return profiles if profiles else ["power-saver", "balanced", "performance"]
-        except (subprocess.SubprocessError, OSError) as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list power profiles: %s", e)
             return ["power-saver", "balanced", "performance"]
 

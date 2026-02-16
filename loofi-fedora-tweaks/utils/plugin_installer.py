@@ -66,7 +66,7 @@ class PluginInstaller:
             with open(self.state_file, 'r') as f:
                 state: Dict[str, Dict] = json.load(f)
                 return state
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError) as exc:
             logger.error("Failed to load state: %s", exc)
             return {}
 
@@ -76,7 +76,7 @@ class PluginInstaller:
             with open(self.state_file, 'w') as f:
                 json.dump(state, f, indent=2)
             return True
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError) as exc:
             logger.error("Failed to save state: %s", exc)
             return False
 
@@ -178,7 +178,7 @@ class PluginInstaller:
         except json.JSONDecodeError as exc:
             logger.error("Invalid JSON in manifest: %s", exc)
             return None
-        except Exception as exc:
+        except (OSError, KeyError, ValueError) as exc:
             logger.error("Failed to parse manifest: %s", exc)
             return None
 
@@ -333,7 +333,7 @@ class PluginInstaller:
                 installed_path=plugin_dir
             )
 
-        except Exception as exc:
+        except (OSError, urllib.error.URLError) as exc:
             logger.error("Installation failed: %s", exc)
             return InstallerResult(
                 success=False,
@@ -396,7 +396,7 @@ class PluginInstaller:
                 backup_path=backup_path
             )
 
-        except Exception as exc:
+        except OSError as exc:
             logger.error("Uninstall failed: %s", exc)
             return InstallerResult(
                 success=False,
@@ -474,7 +474,7 @@ class PluginInstaller:
                 backup_path=backup_path
             )
 
-        except Exception as exc:
+        except OSError as exc:
             logger.error("Update failed: %s", exc)
             return InstallerResult(
                 success=False,
@@ -538,7 +538,7 @@ class PluginInstaller:
                 backup_path=backup_path
             )
 
-        except Exception as exc:
+        except OSError as exc:
             logger.error("Rollback failed: %s", exc)
             return InstallerResult(
                 success=False,
@@ -592,7 +592,7 @@ class PluginInstaller:
                 }
             )
 
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError) as exc:
             logger.error("Check update failed: %s", exc)
             return InstallerResult(
                 success=False,
@@ -641,7 +641,7 @@ class PluginInstaller:
                 data=installed
             )
 
-        except Exception as exc:
+        except OSError as exc:
             logger.error("Failed to list installed plugins: %s", exc)
             return InstallerResult(
                 success=False,

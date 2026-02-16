@@ -269,14 +269,14 @@ class LogsTab(BaseTab):
                 units = SmartLogViewer.get_unit_list()
                 for unit in units[:50]:
                     self.unit_combo.addItem(unit)
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError) as e:
                 logger.debug("Failed to load systemd unit list: %s", e)
             # Restore selection
             idx = self.unit_combo.findText(current_text)
             if idx >= 0:
                 self.unit_combo.setCurrentIndex(idx)
 
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.pattern_table,
                 self.tr("Failed to load log summary"),
@@ -327,7 +327,7 @@ class LogsTab(BaseTab):
                 self.log_table.setItem(row, 3, msg_item)
 
             self.append_output(f"Fetched {len(entries)} log entries\n")
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.log_table, self.tr("Failed to fetch logs"), color="#e8556d"
             )
@@ -352,7 +352,7 @@ class LogsTab(BaseTab):
             )
             SmartLogViewer.export_logs(entries, path, format=fmt)
             self.append_output(f"Logs exported to {path}\n")
-        except Exception as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             self.append_output(f"Export error: {exc}\n")
 
     def _toggle_live(self):
@@ -406,7 +406,7 @@ class LogsTab(BaseTab):
                 self._live_row_count += 1
 
             self._trim_live_buffer()
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Live log error: {exc}\n")
 
     def _trim_live_buffer(self):

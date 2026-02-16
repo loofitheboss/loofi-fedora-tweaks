@@ -212,7 +212,7 @@ class StorageTab(BaseTab):
                 self.disk_table.setItem(
                     row, 4, self.make_table_item("Yes" if disk.rm else "No")
                 )
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.disk_table, self.tr("Failed to load disks"), color="#e8556d"
             )
@@ -242,7 +242,7 @@ class StorageTab(BaseTab):
                 self.mount_table.setItem(
                     row, 5, self.make_table_item(mount.use_percent)
                 )
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.mount_table,
                 self.tr("Failed to load mount points"),
@@ -297,7 +297,7 @@ class StorageTab(BaseTab):
                 self.lbl_smart_realloc.style().polish(self.lbl_smart_realloc)
 
             self.append_output(f"SMART check complete for {device}\n")
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"SMART error: {exc}\n")
 
     def _trim_ssd(self):
@@ -316,7 +316,7 @@ class StorageTab(BaseTab):
             result = StorageManager.trim_ssd()
             icon = "✅" if result.success else "❌"
             self.append_output(f"{icon} {result.message}\n")
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Trim error: {exc}\n")
 
     def _check_filesystem(self):
@@ -345,5 +345,5 @@ class StorageTab(BaseTab):
             result = StorageManager.check_filesystem(device)
             icon = "✅" if result.success else "⚠️"
             self.append_output(f"{icon} {result.message}\n")
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Check error: {exc}\n")
