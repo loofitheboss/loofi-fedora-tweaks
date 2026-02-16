@@ -1,8 +1,3 @@
----
-description: Comprehensive coding instructions for Loofi Fedora Tweaks. Covers architecture, patterns, testing, and critical rules.
-applyTo: "**"
----
-
 # Loofi Fedora Tweaks — AI Coding Instructions
 
 > **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
