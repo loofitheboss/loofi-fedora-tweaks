@@ -258,7 +258,7 @@ Optional features may require extra packages (for example: virtualization tools,
 Run tests:
 
 ```bash
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 5894+ passing
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 5895 tests collected
 ```
 
 Lint:
