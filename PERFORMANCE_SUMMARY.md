@@ -1,8 +1,7 @@
 # Performance Analysis Summary
 
 **Date**: 2026-02-16
-**Branch**: `claude/improve-slow-code`
-**Commit**: e91057a
+_Analysis context_: Codebase state as of the analysis date above.
 
 ---
 

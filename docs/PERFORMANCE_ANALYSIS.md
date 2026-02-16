@@ -14,20 +14,20 @@ This document identifies performance bottlenecks and inefficiencies discovered t
 - 4 MEDIUM priority issues (polling patterns, resource management)
 - 3 LOW priority issues (optimization opportunities)
 
-**Total Estimated Impact**: ~500ms reduction in startup time, ~80% reduction in metric collection overhead, elimination of GUI freezes.
+**Total Estimated Impact**: ~2s reduction in startup time (aggregate across all targeted optimizations), ~80% reduction in metric collection overhead, elimination of GUI freezes.
 
 ---
 
 ## Critical Priority Issues
 
-### 1. Blocking Subprocess in UI Layer (CRITICAL)
+### 1. Blocking I/O in UI Layer (CRITICAL)
 
 **File**: `loofi-fedora-tweaks/ui/wizard.py:90`
 **Issue**: Synchronous `os.listdir("/sys/class/drm/")` during wizard initialization blocks GUI thread.
 
 **Impact**: First-run wizard can freeze for 100-500ms on systems with many DRM devices.
 
-**Violation**: Architecture rule "Never subprocess in UI" - extends to blocking I/O.
+**Violation**: Architecture rule "Never block in UI" (subprocess or filesystem I/O).
 
 **Recommendation**:
 ```python
