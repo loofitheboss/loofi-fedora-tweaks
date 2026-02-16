@@ -112,7 +112,7 @@ jobs:
 
       - name: Post PR security summary
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const icon = (s) => s === 'pass' ? '✅' : s === 'warn' ? '⚠️' : '❌';

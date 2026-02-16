@@ -42,7 +42,7 @@ jobs:
             --timeout=60 -q
       - name: Comment coverage on PR
         if: ${{ always() }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
