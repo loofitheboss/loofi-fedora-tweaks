@@ -98,7 +98,7 @@ install -Dm 644 LICENSE "%{buildroot}/usr/share/licenses/%{name}/LICENSE"
 - package_manager.py unified through PrivilegedCommand.dnf()
 - Fedora Atomic (rpm-ostree) compatibility across all package operations
 
-* Fri Jul 18 2025 Loofi <loofi@example.com> - 34.0.0-1
+* Fri Feb 14 2026 Loofi <loofi@example.com> - 34.0.0-1
 - v34.0.0 "Citadel" — Polish & Stability
 - Light theme completely rewritten (Catppuccin Latte, 24+ new selectors)
 - CommandRunner hardened (timeout, kill escalation, crash detection)
