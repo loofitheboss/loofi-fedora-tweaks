@@ -1,3 +1,8 @@
+---
+description: Mandatory system hardening and stabilization rules. All security and privilege escalation changes must follow these guidelines.
+applyTo: "**"
+---
+
 # SYSTEM_HARDENING_AND_STABILIZATION_GUIDE
 
 ## Purpose
