@@ -36,6 +36,6 @@ These legacy files are kept for compatibility and historical context.
 
 ## Documentation Maintenance Notes
 
-- User-facing guides are aligned to `v42.0.0 "Sentinel"`.
+- User-facing guides are aligned to `v43.0.0 "Stabilization-Only"`.
 - Screenshot paths are standardized to `docs/images/user-guide/*.png`.
 - When replacing screenshots, keep filenames stable or update all guide references.

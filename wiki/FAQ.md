@@ -410,9 +410,9 @@ git pull origin master
 - Bug fixes accumulate
 
 **Versioning**: Semantic Versioning (v`MAJOR.MINOR.PATCH`)
-- **Major** (v40.0.0 → v41.0.0): Breaking changes, major features
-- **Minor** (v40.0.0 → v40.1.0): New features, backwards compatible
-- **Patch** (v40.0.0 → v40.0.1): Bug fixes only
+- **Major** (v42.0.0 → v43.0.0): Breaking changes, major features
+- **Minor** (v43.0.0 → v43.1.0): New features, backwards compatible
+- **Patch** (v43.0.0 → v43.0.1): Bug fixes only
 
 See: [Changelog](Changelog) for version history
 

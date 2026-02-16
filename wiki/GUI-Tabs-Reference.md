@@ -1,6 +1,6 @@
 # GUI Tabs Reference
 
-Complete reference for all 29 feature tabs in Loofi Fedora Tweaks, organized by the 8 activity-based categories.
+Complete reference for all 28 feature tabs in Loofi Fedora Tweaks, organized by the 8 activity-based categories.
 
 ---
 

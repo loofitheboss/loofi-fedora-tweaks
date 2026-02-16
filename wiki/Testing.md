@@ -7,10 +7,10 @@ Testing guide for Loofi Fedora Tweaks test suite.
 ## Test Suite Metrics
 
 - **Test files**: 193 files
-- **Total tests**: 5894+ tests
-- **Coverage**: 80% line coverage
+- **Total tests**: 5878+ tests
+- **Coverage**: 82% line coverage
 - **Framework**: `unittest` + `unittest.mock`
-- **Status**: 5894 collected, 80% coverage
+- **Status**: 5878 passing, 35 skipped
 
 ---
 

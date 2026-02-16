@@ -8,6 +8,40 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ## Latest Release
 
+### v43.0.0 "Stabilization-Only" (2026-02-16)
+
+**Strict hardening release** with policy enforcement gate and runtime cleanup. Zero new features.
+
+**Key Changes:**
+- Added `scripts/check_stabilization_rules.py` AST checker enforcing timeout, UI subprocess ban, hardcoded `dnf` ban, and broad-exception allowlist rules
+- Wired stabilization checker into CI, coverage-gate, and auto-release workflows
+- Standardized all workflow coverage thresholds to 80%
+- Extracted First-Run Wizard health checks to `utils/wizard_health.py` (UI now has zero subprocess logic)
+- Removed remaining executable hardcoded `dnf` command paths from package/update/health/export stacks
+- Narrowed broad exception handlers to explicit types with documented boundary wrappers
+
+**Test Suite**: 5,878 tests passing, 82.33% coverage
+
+---
+
+## Recent Releases
+
+### v42.0.0 "Sentinel" (2026-02-16)
+
+**Security hardening and UX polish release** with subprocess timeout completion and exception narrowing.
+
+**Key Changes:**
+- Subprocess timeout enforcement: Added `timeout=` to all remaining calls in hardware/system services
+- Exception narrowing: 106 `except Exception` handlers narrowed to specific types across 30 files
+- Hardcoded `dnf` elimination: 25+ references replaced with `PrivilegedCommand.dnf()` / `SystemManager.get_package_manager()`
+- Daemon systemd hardening with NoNewPrivileges, PrivateTmp, ProtectSystem, etc.
+- Software tab search/filter UI added
+- High-contrast theme with settings toggle
+
+**Test Suite**: 5,860 tests passing, 82% coverage
+
+---
+
 ### v41.0.0 "Coverage" (2026-02-15)
 
 **Test coverage push release** with zero production code changes. Coverage raised from 74% to 80%+ and CI pipeline hardened.
@@ -205,6 +239,8 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 | Version | Codename | Date | Milestone |
 |---------|----------|------|-----------|
+| v43.0.0 | Stabilization-Only | 2026-02-16 | Policy enforcement, 5878 tests, 82.33% coverage |
+| v42.0.0 | Sentinel | 2026-02-16 | Security hardening, 5860 tests, 82% coverage |
 | v41.0.0 | Coverage | 2026-02-15 | 80% coverage, 5894 tests |
 | v40.0.0 | Foundation | 2026-02-14 | Security hardening complete |
 | v38.0.0 | Clarity | 2025-07-22 | UX polish, 4349 tests |
@@ -220,9 +256,9 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ## Statistics
 
-**Current (v41.0.0):**
-- **Tests**: 5,894 collected
-- **Coverage**: 80%
+**Current (v43.0.0):**
+- **Tests**: 5,878 passing
+- **Coverage**: 82.33%
 - **Test files**: 193
 - **Tabs**: 28
 - **Utils modules**: 106
@@ -235,6 +271,8 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 Each major/minor release has a thematic codename:
 
+- **v43**: "Stabilization-Only" — Policy enforcement gate
+- **v42**: "Sentinel" — Security hardening completion
 - **v41**: "Coverage" — Test coverage milestone
 - **v40**: "Foundation" — Core stability
 - **v39**: "Prism" — Services migration

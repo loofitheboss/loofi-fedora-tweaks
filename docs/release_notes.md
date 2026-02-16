@@ -5,10 +5,16 @@
 
 ## Current Release
 
+- **v43.0.0 "Stabilization-Only"**
+- Full notes: `docs/releases/RELEASE-NOTES-v43.0.0.md`
+
+## Previous Releases
+
+- **v42.0.0 "Sentinel"**
+- Full notes: `docs/releases/RELEASE-NOTES-v42.0.0.md`
+
 - **v41.0.0 "Coverage"**
 - Full notes: `docs/releases/RELEASE-NOTES-v41.0.0.md`
-
-## Previous Release
 
 - **v40.0.0 "Foundation"**
 - Full notes: `docs/releases/RELEASE-NOTES-v40.0.0.md`
