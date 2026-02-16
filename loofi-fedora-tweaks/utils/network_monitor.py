@@ -267,7 +267,7 @@ class NetworkMonitor:
                     # e.g. "inet 192.168.1.42/24 brd 192.168.1.255 scope global ..."
                     addr_cidr = line.split()[1]
                     return addr_cidr.split("/")[0]
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get interface IP for %s: %s", name, e)
         return ""
 
@@ -317,7 +317,7 @@ class NetworkMonitor:
                     "bytes_sent": int(fields[8]),
                     "packets_sent": int(fields[9]),
                 }
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read /proc/net/dev: %s", e)
         return stats
 
@@ -351,7 +351,7 @@ class NetworkMonitor:
                 return "ethernet"
             if dev_type == 65534:  # ARPHRD_NONE -- tunnels, VPNs
                 return "vpn"
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to classify interface %s: %s", name, e)
 
         return "other"
@@ -363,7 +363,7 @@ class NetworkMonitor:
             with open(f"/sys/class/net/{name}/operstate", "r") as f:
                 state = f.read().strip().lower()
             return state == "up"
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to check interface state for %s: %s", name, e)
             return False
 
@@ -413,7 +413,7 @@ class NetworkMonitor:
                     )
                 except (ValueError, IndexError):
                     continue
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to parse %s: %s", path, e)
         return entries
 
@@ -438,7 +438,7 @@ class NetworkMonitor:
             # host byte order (little-endian on x86).
             if len(host_hex) != 32:
                 return (host_hex, port)
-            words = [host_hex[i:i + 8] for i in range(0, 32, 8)]
+            words = [host_hex[i : i + 8] for i in range(0, 32, 8)]
             byte_groups = []
             for word in words:
                 # Convert each 4-byte word from little-endian
@@ -451,7 +451,7 @@ class NetworkMonitor:
             else:
                 try:
                     addr = socket.inet_ntop(socket.AF_INET6, raw)
-                except Exception as e:
+                except (OSError, ValueError) as e:
                     logger.debug("Failed to decode IPv6 address: %s", e)
                     addr = host_hex
         else:
@@ -459,7 +459,7 @@ class NetworkMonitor:
             try:
                 packed = struct.pack("<I", int(host_hex, 16))
                 addr = socket.inet_ntoa(packed)
-            except Exception as e:
+            except (OSError, ValueError, struct.error) as e:
                 logger.debug("Failed to decode IPv4 address: %s", e)
                 addr = host_hex
 
@@ -479,7 +479,7 @@ class NetworkMonitor:
         inode_map: Dict[str, Tuple[int, str]] = {}
         try:
             pids = [entry for entry in os.listdir("/proc") if entry.isdigit()]
-        except Exception as e:
+        except OSError as e:
             logger.debug("Failed to list /proc entries: %s", e)
             return inode_map
 
@@ -520,6 +520,6 @@ class NetworkMonitor:
         try:
             with open(f"/proc/{pid}/comm", "r") as f:
                 return f.read().strip()
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read process name for pid %s: %s", pid, e)
             return ""

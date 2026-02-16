@@ -977,6 +977,7 @@ _MODULE_KEYS = [
     "PyQt6.QtWidgets",
     "PyQt6.QtCore",
     "PyQt6.QtGui",
+    "ui",
     "ui.base_tab",
     "ui.tab_utils",
     "ui.lazy_widget",
@@ -1654,7 +1655,7 @@ class TestShowToast(unittest.TestCase):
         sys.modules["ui.notification_toast"] = types.ModuleType("ui.notification_toast")
         # Make NotificationToast raise
         sys.modules["ui.notification_toast"].NotificationToast = MagicMock(
-            side_effect=Exception("import failed")
+            side_effect=RuntimeError("import failed")
         )
         self.win._toast_widget = None
         # Should not raise
@@ -1976,7 +1977,7 @@ class TestCloseEvent(unittest.TestCase):
     def test_close_cleanup_exception_handling(self):
         """closeEvent handles cleanup exceptions gracefully."""
         page = MagicMock()
-        page.cleanup.side_effect = Exception("cleanup error")
+        page.cleanup.side_effect = RuntimeError("cleanup error")
         self.win.pages = {"broken": page}
         self.win.tray_icon = None
         event = MagicMock()
@@ -2188,7 +2189,7 @@ class TestNotificationBadge(unittest.TestCase):
     def test_badge_hidden_on_exception(self):
         """Badge is hidden when notification center raises."""
         nc_mod = sys.modules["utils.notification_center"]
-        nc_mod.NotificationCenter = MagicMock(side_effect=Exception("DB error"))
+        nc_mod.NotificationCenter = MagicMock(side_effect=RuntimeError("DB error"))
         self.win._notif_badge._visible = True
         self.win._refresh_notif_badge()
         self.assertFalse(self.win._notif_badge._visible)
@@ -2315,7 +2316,7 @@ class TestOnUndoClicked(unittest.TestCase):
         """_on_undo_clicked handles exception gracefully."""
         mod = _get_module()
         original = getattr(mod, "HistoryManager", None)
-        mod.HistoryManager = MagicMock(side_effect=Exception("DB error"))
+        mod.HistoryManager = MagicMock(side_effect=RuntimeError("DB error"))
         try:
             self.win._on_undo_clicked()
             self.win.show_status_toast.assert_called()
@@ -2343,7 +2344,7 @@ class TestStartPulseListener(unittest.TestCase):
     def test_pulse_listener_exception(self):
         """_start_pulse_listener handles exception gracefully."""
         pulse_mod = sys.modules["utils.pulse"]
-        pulse_mod.SystemPulse = MagicMock(side_effect=Exception("DBus error"))
+        pulse_mod.SystemPulse = MagicMock(side_effect=RuntimeError("DBus error"))
         self.win._start_pulse_listener()
         # Should not raise, pulse remains None or whatever was set before
 
@@ -2475,7 +2476,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
     def test_refresh_update_check_exception(self):
         """_refresh_status_indicators handles update check failure."""
         uc_mod = sys.modules["utils.update_checker"]
-        uc_mod.UpdateChecker.check = MagicMock(side_effect=Exception("timeout"))
+        uc_mod.UpdateChecker.check = MagicMock(side_effect=RuntimeError("timeout"))
 
         disk_mod = sys.modules["services.hardware.disk"]
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)

@@ -39,6 +39,7 @@ from utils.sandbox import SandboxManager
 from utils.usbguard import USBGuardManager
 from utils.ports import PortAuditor
 from utils.command_runner import CommandRunner
+from services.system import SystemManager
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
@@ -591,16 +592,26 @@ class SecurityTab(QWidget, PluginInterface):
 
         btn_check_updates = QPushButton(self.tr("Check for Security Updates"))
         btn_check_updates.setAccessibleName(self.tr("Check for Security Updates"))
-        btn_check_updates.clicked.connect(
-            lambda: self._run_privacy_command(
+        btn_check_updates.clicked.connect(self._check_security_updates)
+        sec_layout.addWidget(btn_check_updates)
+
+        return group
+
+    def _check_security_updates(self):
+        """Check for security updates using the appropriate package manager."""
+        pm = SystemManager.get_package_manager()
+        if pm == "rpm-ostree":
+            self._run_privacy_command(
+                "rpm-ostree",
+                ["update", "--check", "--preview"],
+                self.tr("Checking for updates (rpm-ostree)..."),
+            )
+        else:
+            self._run_privacy_command(
                 "dnf",
                 ["check-update", "--security"],
                 self.tr("Checking for Security Updates..."),
             )
-        )
-        sec_layout.addWidget(btn_check_updates)
-
-        return group
 
     def log(self, message: str):
         """Add message to log."""

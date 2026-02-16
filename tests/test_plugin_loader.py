@@ -196,7 +196,7 @@ class TestPluginLoaderLoadBuiltins:
             ("ui.b_tab", "BPlugin"),
         ]
         with patch("core.plugins.loader._BUILTIN_PLUGINS", entries), \
-             patch("importlib.import_module", side_effect=Exception("crash")), \
+             patch("importlib.import_module", side_effect=ImportError("crash")), \
              caplog.at_level(logging.WARNING):
             loaded = loader.load_builtins()
 

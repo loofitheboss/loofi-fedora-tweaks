@@ -207,7 +207,7 @@ class PluginMarketplace:
         except json.JSONDecodeError as exc:
             logger.error("JSON decode error: %s", exc)
             return None
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.error("Unexpected error fetching %s: %s", url, exc)
             return None
 
@@ -239,7 +239,7 @@ class PluginMarketplace:
         except json.JSONDecodeError as exc:
             logger.error("JSON decode error posting to %s: %s", url, exc)
             return None
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.error("Unexpected POST error %s: %s", url, exc)
             return None
 
@@ -329,7 +329,7 @@ class PluginMarketplace:
             return MarketplaceResult(success=False, error=self._map_http_error(exc))
         except urllib.error.URLError as exc:
             return MarketplaceResult(success=False, error=f"Network error: {exc.reason}")
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             return MarketplaceResult(success=False, error=f"Failed to fetch reviews: {exc}")
 
     def submit_review(
@@ -370,7 +370,7 @@ class PluginMarketplace:
             return MarketplaceResult(success=False, error=self._map_http_error(exc))
         except urllib.error.URLError as exc:
             return MarketplaceResult(success=False, error=f"Network error: {exc.reason}")
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             return MarketplaceResult(success=False, error=f"Failed to submit review: {exc}")
 
     def get_rating_aggregate(self, plugin_id: str) -> MarketplaceResult:
@@ -411,7 +411,7 @@ class PluginMarketplace:
             return MarketplaceResult(success=False, error=f"Network error: {exc.reason}")
         except (TypeError, ValueError):
             return MarketplaceResult(success=False, error="Invalid aggregate response format")
-        except Exception as exc:
+        except OSError as exc:
             return MarketplaceResult(success=False, error=f"Failed to fetch rating aggregate: {exc}")
 
     def _parse_plugin_entry(self, entry: Dict) -> Optional[PluginMetadata]:
@@ -464,7 +464,7 @@ class PluginMarketplace:
                 publisher_badge=publisher_badge
             )
 
-        except Exception as exc:
+        except (KeyError, ValueError, TypeError) as exc:
             logger.error("Failed to parse plugin entry: %s", exc)
             return None
 
@@ -616,7 +616,7 @@ class PluginMarketplace:
 
             return MarketplaceResult(success=True, data=plugins, source="network")
 
-        except Exception as exc:
+        except OSError as exc:
             logger.error("Failed to fetch plugin index: %s", exc)
             return MarketplaceResult(
                 success=False,
@@ -777,7 +777,7 @@ class PluginMarketplace:
                 success=False,
                 error=f"Failed to save archive: {exc}"
             )
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
             logger.error("Unexpected error downloading %s: %s", plugin_id, exc)
             return MarketplaceResult(
                 success=False,

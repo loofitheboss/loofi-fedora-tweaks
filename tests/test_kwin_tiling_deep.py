@@ -104,7 +104,7 @@ class TestEnableQuickTiling(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/kwriteconfig6")
-    @patch("subprocess.run", side_effect=Exception("boom"))
+    @patch("subprocess.run", side_effect=OSError("boom"))
     def test_exception(self, mock_run, mock_which):
         r = KWinManager.enable_quick_tiling()
         self.assertFalse(r.success)
@@ -139,7 +139,7 @@ class TestSetKeybinding(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/kwriteconfig6")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = KWinManager.set_keybinding("Meta+H", "left")
         self.assertFalse(r.success)
@@ -204,7 +204,7 @@ class TestReconfigureKwin(unittest.TestCase):
         r = KWinManager.reconfigure_kwin()
         self.assertFalse(r.success)
 
-    @patch("subprocess.run", side_effect=Exception("no dbus"))
+    @patch("subprocess.run", side_effect=OSError("no dbus"))
     def test_exception(self, mock_run):
         r = KWinManager.reconfigure_kwin()
         self.assertFalse(r.success)
@@ -240,7 +240,7 @@ class TestAddWindowRule(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", side_effect=lambda c: "/usr/bin/kwriteconfig6" if "kwrite" in c else None)
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = KWinManager.add_window_rule("app")
         self.assertFalse(r.success)
@@ -260,7 +260,7 @@ class TestGetWindowList(unittest.TestCase):
         result = KWinManager.get_window_list()
         self.assertEqual(result, [])
 
-    @patch("subprocess.run", side_effect=Exception("no qdbus"))
+    @patch("subprocess.run", side_effect=OSError("no qdbus"))
     def test_exception(self, mock_run):
         result = KWinManager.get_window_list()
         self.assertEqual(result, [])

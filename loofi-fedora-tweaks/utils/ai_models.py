@@ -221,7 +221,7 @@ class AIModelManager:
 
         except FileNotFoundError:
             return Result(False, "Ollama binary not found")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Download error: {e}")
 
     @staticmethod
@@ -265,7 +265,7 @@ class AIModelManager:
 
         except subprocess.TimeoutExpired:
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list installed Ollama models: %s", e)
             return []
 

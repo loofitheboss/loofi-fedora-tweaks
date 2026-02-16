@@ -209,7 +209,7 @@ class PerformanceTab(BaseTab):
 
             # Refresh history
             self._refresh_history()
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Detection error: {exc}\n")
 
     def _apply_recommendation(self):
@@ -236,7 +236,7 @@ class PerformanceTab(BaseTab):
         )
         try:
             AutoTuner.save_tuning_entry(entry)
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to save tuning history entry: %s", e)
 
     def _refresh_history(self):
@@ -267,7 +267,7 @@ class PerformanceTab(BaseTab):
                 recs = entry.recommendations
                 summary = f"gov={recs.get('governor', '?')}, swap={recs.get('swappiness', '?')}"
                 self.history_table.setItem(row, 3, self.make_table_item(summary))
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.debug("Failed to load tuning history: %s", e)
             self.set_table_empty_state(
                 self.history_table,

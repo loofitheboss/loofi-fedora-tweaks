@@ -641,7 +641,7 @@ class TestStopVM(unittest.TestCase):
     def test_stop_generic_exception(self, mock_which, mock_run):
         """Returns error message on unexpected exception."""
         mock_which.return_value = "/usr/bin/virsh"
-        mock_run.side_effect = RuntimeError("bus error")
+        mock_run.side_effect = OSError("bus error")
 
         result = VMManager.stop_vm("vm1")
         self.assertFalse(result.success)

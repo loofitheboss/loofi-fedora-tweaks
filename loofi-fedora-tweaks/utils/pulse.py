@@ -6,6 +6,7 @@ Runs in a separate thread to avoid freezing the GUI.
 
 import os
 import subprocess
+import threading
 from typing import Optional, Any
 from dataclasses import dataclass
 from enum import Enum
@@ -86,7 +87,7 @@ class SystemPulse(QObject):
     def __init__(self):
         super().__init__()
         self._loop: Optional[Any] = None
-        self._running = False
+        self._stop_event = threading.Event()
         self._system_bus = None
         self._last_power_state: Optional[str] = None
         self._last_network_state: Optional[str] = None
@@ -107,7 +108,7 @@ class SystemPulse(QObject):
         try:
             DBusGMainLoop(set_as_default=True)
             self._system_bus = dbus.SystemBus()
-            self._running = True
+            self._stop_event.clear()
 
             # Register signal handlers
             self._register_upower_signals()
@@ -120,7 +121,7 @@ class SystemPulse(QObject):
             self._loop = GLib.MainLoop()
             self._loop.run()
 
-        except Exception as e:
+        except (_DBusException, OSError, RuntimeError) as e:
             if self._is_expected_dbus_unavailable(e):
                 logger.info(
                     "[Pulse] DBus not accessible (%s), using polling fallback",
@@ -149,7 +150,7 @@ class SystemPulse(QObject):
 
     def stop(self):
         """Stop the DBus listener loop."""
-        self._running = False
+        self._stop_event.set()
         if self._loop:
             self._loop.quit()
 
@@ -227,7 +228,7 @@ class SystemPulse(QObject):
                         return PowerState.AC.value
                     elif val == "no":
                         return PowerState.BATTERY.value
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("[Pulse] Failed power state via upower: %s", e)
 
         # Fallback to sysfs
@@ -244,7 +245,7 @@ class SystemPulse(QObject):
                             if f.read().strip() == "1"
                             else PowerState.BATTERY.value
                         )
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("[Pulse] Failed power state via sysfs: %s", e)
 
         return PowerState.UNKNOWN.value
@@ -268,7 +269,7 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if "percentage:" in line.lower():
                     return int(line.split(":")[1].strip().rstrip("%"))
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             logger.debug("[Pulse] Failed battery level via upower: %s", e)
 
         # Fallback to sysfs
@@ -280,7 +281,7 @@ class SystemPulse(QObject):
                 if os.path.exists(bat_path):
                     with open(bat_path, "r") as f:
                         return int(f.read().strip())
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("[Pulse] Failed battery level via sysfs: %s", e)
 
         return -1
@@ -358,7 +359,7 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if "vpn" in line.lower() and "activated" in line.lower():
                     return True
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("[Pulse] Failed VPN check: %s", e)
         return False
 
@@ -385,7 +386,7 @@ class SystemPulse(QObject):
                 return NetworkState.CONNECTING.value
             elif "connected" in state:
                 return NetworkState.CONNECTED.value
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("[Pulse] Failed network state via nmcli: %s", e)
         return NetworkState.DISCONNECTED.value
 
@@ -408,7 +409,7 @@ class SystemPulse(QObject):
             for line in result.stdout.splitlines():
                 if line.startswith("yes:"):
                     return line.split(":", 1)[1]
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("[Pulse] Failed Wi-Fi SSID via nmcli: %s", e)
         return ""
 
@@ -458,7 +459,7 @@ class SystemPulse(QObject):
             )
             logger.info("[Pulse] KDE monitor signals registered")
             return
-        except Exception as e:
+        except (_DBusException, OSError) as e:
             logger.debug("[Pulse] KDE monitor signals not available: %s", e)
 
         try:
@@ -471,7 +472,7 @@ class SystemPulse(QObject):
                 signal_name="MonitorsChanged",
             )
             logger.info("[Pulse] GNOME/Mutter monitor signals registered")
-        except Exception as e:
+        except (_DBusException, OSError) as e:
             logger.warning("[Pulse] Could not register monitor signals: %s", e)
 
     def _on_monitor_changed(self, *args):
@@ -544,7 +545,7 @@ class SystemPulse(QObject):
                             "is_ultrawide": is_ultrawide,
                         }
                     )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("[Pulse] Failed monitor scan via xrandr: %s", e)
 
         # Fallback: try kscreen-doctor for KDE Wayland
@@ -590,7 +591,7 @@ class SystemPulse(QObject):
 
                 if current_output:
                     monitors.append(current_output)
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("[Pulse] Failed monitor scan via kscreen-doctor: %s", e)
 
         return monitors
@@ -601,12 +602,10 @@ class SystemPulse(QObject):
 
     def _run_polling_fallback(self):
         """Fallback polling mode when DBus is unavailable."""
-        import time
-
         logger.info("[Pulse] Running in polling fallback mode")
-        self._running = True
+        self._stop_event.clear()
 
-        while self._running:
+        while not self._stop_event.is_set():
             try:
                 # Check power state
                 power = self.get_power_state()
@@ -626,11 +625,11 @@ class SystemPulse(QObject):
                     self._last_monitor_count = len(monitors)
                     self.monitor_count_changed.emit(len(monitors))
 
-                time.sleep(5)  # Poll every 5 seconds
+                self._stop_event.wait(timeout=5)  # Poll every 5 seconds
 
-            except Exception as e:
+            except (OSError, RuntimeError) as e:
                 logger.warning("[Pulse] Polling error: %s", e)
-                time.sleep(10)
+                self._stop_event.wait(timeout=10)
 
 
 class PulseThread(QThread):

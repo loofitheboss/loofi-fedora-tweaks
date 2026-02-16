@@ -96,7 +96,7 @@ class AnsibleExporter:
                         if not any(p.startswith(x) for x in excluded_prefixes)
                     ]
                 return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to get installed packages: %s", e)
             return []
 
@@ -118,7 +118,7 @@ class AnsibleExporter:
                     a.strip() for a in result.stdout.strip().split("\n") if a.strip()
                 ]
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get Flatpak apps: %s", e)
             return []
 
@@ -152,7 +152,7 @@ class AnsibleExporter:
                 if result.returncode == 0:
                     value = result.stdout.strip().strip("'")
                     settings[f"{schema}/{key}"] = value
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to read gsetting %s/%s: %s", schema, key, e)
 
         return settings
@@ -183,7 +183,7 @@ class AnsibleExporter:
                                     repos.append(repo)
                     return repos
                 return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get enabled repos: %s", e)
             return []
 
@@ -387,7 +387,7 @@ Edit `site.yml` to add or remove packages, apps, or settings before running.
                 {"path": str(path), "readme": str(readme_path)},
             )
 
-        except Exception as e:
+        except (OSError, IOError) as e:
             return Result(False, f"Failed to save playbook: {e}")
 
     @classmethod
@@ -426,5 +426,5 @@ Edit `site.yml` to add or remove packages, apps, or settings before running.
             else:
                 return Result(False, f"Validation issues:\n{result.stdout}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Validation failed: {e}")

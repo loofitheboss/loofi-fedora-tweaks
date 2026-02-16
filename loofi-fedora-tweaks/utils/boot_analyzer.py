@@ -91,7 +91,7 @@ class BootAnalyzer:
 
             return stats
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get boot stats: %s", e)
             return BootStats()
 
@@ -150,7 +150,7 @@ class BootAnalyzer:
 
             return services
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get blame data: %s", e)
             return []
 
@@ -189,7 +189,7 @@ class BootAnalyzer:
                 timeout=30,
             )
             return result.stdout if result.returncode == 0 else ""
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get critical chain: %s", e)
             return ""
 

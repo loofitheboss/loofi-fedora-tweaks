@@ -312,7 +312,7 @@ class VMManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "VM creation timed out after 2 minutes.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error creating VM: {e}")
 
     # ==================== START / STOP / DELETE ====================
@@ -335,7 +335,7 @@ class VMManager:
                 return Result(False, f"Failed to start VM: {error}")
         except subprocess.TimeoutExpired:
             return Result(False, "Start operation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error starting VM: {e}")
 
     @classmethod
@@ -356,7 +356,7 @@ class VMManager:
                 return Result(False, f"Failed to shut down VM: {error}")
         except subprocess.TimeoutExpired:
             return Result(False, "Shutdown operation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error shutting down VM: {e}")
 
     @classmethod
@@ -377,7 +377,7 @@ class VMManager:
                 return Result(False, f"Failed to force-stop VM: {error}")
         except subprocess.TimeoutExpired:
             return Result(False, "Force-stop operation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error force-stopping VM: {e}")
 
     @classmethod
@@ -407,7 +407,7 @@ class VMManager:
                 return Result(False, f"Failed to delete VM: {error}")
         except subprocess.TimeoutExpired:
             return Result(False, "Delete operation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error deleting VM: {e}")
 
     # ==================== STORAGE & USER HELPERS ====================

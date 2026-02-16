@@ -6,11 +6,15 @@ Handles installation of version managers:
 - PyEnv for Python
 - NVM for Node.js
 - Rustup for Rust
+
+v42.0.0 Sentinel: Replaced curl-pipe-bash with download-then-execute pattern.
 """
 
 import logging
+import os
 import subprocess
 import shutil
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -103,7 +107,7 @@ export NVM_DIR="$HOME/.nvm"
                     )
                     version = result.stdout.strip().split("\n")[0]
                     return True, version
-                except Exception as e:
+                except (subprocess.SubprocessError, OSError) as e:
                     logger.debug("Failed to get version for %s: %s", tool, e)
                     return True, "installed"
 
@@ -124,6 +128,48 @@ export NVM_DIR="$HOME/.nvm"
             Dict mapping tool key to (installed, version) tuple.
         """
         return {tool: cls.get_tool_status(tool) for tool in cls.INSTALLERS}
+
+    @classmethod
+    def _download_and_execute(
+        cls,
+        url: str,
+        script_name: str,
+        extra_args: list | None = None,
+        timeout: int = 300,
+    ) -> None:
+        """Download a script to a temp file, then execute it.
+
+        This avoids piping curl output directly to bash, which is a
+        supply-chain risk (partial downloads can execute incomplete scripts).
+
+        Args:
+            url: URL to download.
+            script_name: Human-readable name for logging.
+            extra_args: Additional arguments to pass to bash.
+            timeout: Timeout for both download and execution.
+
+        Raises:
+            subprocess.CalledProcessError: If download or execution fails.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            script_path = os.path.join(tmpdir, f"{script_name}.sh")
+
+            # Download script first
+            subprocess.run(
+                ["curl", "-fsSL", "-o", script_path, url],
+                check=True,
+                timeout=timeout,
+            )
+
+            # Verify file was downloaded and is non-empty
+            if not os.path.exists(script_path) or os.path.getsize(script_path) == 0:
+                raise subprocess.CalledProcessError(
+                    1, f"curl {url}", stderr=f"Downloaded script {script_name} is empty"
+                )
+
+            # Execute downloaded script
+            cmd = ["bash", script_path] + (extra_args or [])
+            subprocess.run(cmd, check=True, timeout=timeout)
 
     @classmethod
     def install_pyenv(cls, python_version: str = "3.12") -> Result:
@@ -158,10 +204,10 @@ export NVM_DIR="$HOME/.nvm"
             binary, args, desc = PrivilegedCommand.dnf("install", *required_deps)
             subprocess.run([binary] + args, check=True, timeout=300)
 
-            # Install pyenv via official script
-            subprocess.run(
-                ["bash", "-c", "curl -fsSL https://pyenv.run | bash"],
-                check=True,
+            # Download and execute pyenv installer (no pipe-to-bash)
+            cls._download_and_execute(
+                url="https://pyenv.run",
+                script_name="pyenv-installer",
                 timeout=300,
             )
 
@@ -178,7 +224,7 @@ export NVM_DIR="$HOME/.nvm"
 
         except subprocess.CalledProcessError as e:
             return Result(False, f"Installation failed: {e}")
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -197,14 +243,10 @@ export NVM_DIR="$HOME/.nvm"
             return Result(True, "NVM is already installed.")
 
         try:
-            # Install NVM via official script
-            subprocess.run(
-                [
-                    "bash",
-                    "-c",
-                    "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash",
-                ],
-                check=True,
+            # Download and execute NVM installer (no pipe-to-bash)
+            cls._download_and_execute(
+                url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh",
+                script_name="nvm-installer",
                 timeout=120,
             )
 
@@ -219,7 +261,7 @@ export NVM_DIR="$HOME/.nvm"
 
         except subprocess.CalledProcessError as e:
             return Result(False, f"Installation failed: {e}")
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -235,14 +277,11 @@ export NVM_DIR="$HOME/.nvm"
             return Result(True, "Rustup is already installed.")
 
         try:
-            # Install rustup non-interactively
-            subprocess.run(
-                [
-                    "bash",
-                    "-c",
-                    "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
-                ],
-                check=True,
+            # Download and execute rustup installer (no pipe-to-bash)
+            cls._download_and_execute(
+                url="https://sh.rustup.rs",
+                script_name="rustup-init",
+                extra_args=["-s", "--", "-y"],
                 timeout=300,
             )
 
@@ -257,7 +296,7 @@ export NVM_DIR="$HOME/.nvm"
 
         except subprocess.CalledProcessError as e:
             return Result(False, f"Installation failed: {e}")
-        except Exception as e:
+        except (OSError, subprocess.SubprocessError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod

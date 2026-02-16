@@ -153,7 +153,7 @@ class SnapshotTab(BaseTab):
                 if label.style() is not None:
                     label.style().unpolish(label)
                     label.style().polish(label)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Backend check failed: {exc}\n")
 
     def _refresh_snapshots(self):
@@ -187,7 +187,7 @@ class SnapshotTab(BaseTab):
 
             count = self.snap_table.rowCount()
             self.append_output(f"Found {count} snapshot(s)\n")
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.snap_table, self.tr("Failed to load snapshots"), color="#e8556d"
             )
@@ -205,7 +205,7 @@ class SnapshotTab(BaseTab):
             binary, args, desc = SnapshotManager.create_snapshot(label.strip())
             self.run_command(binary, args, desc)
             QTimer.singleShot(3000, self._refresh_snapshots)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Error creating snapshot: {exc}\n")
 
     def _delete_snapshot(self):
@@ -233,5 +233,5 @@ class SnapshotTab(BaseTab):
             binary, args, desc = SnapshotManager.delete_snapshot(snap_id, backend)
             self.run_command(binary, args, desc)
             QTimer.singleShot(3000, self._refresh_snapshots)
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.append_output(f"Error deleting snapshot: {exc}\n")

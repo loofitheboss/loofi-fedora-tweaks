@@ -247,7 +247,7 @@ class TestCollectCpu(unittest.TestCase):
         pc = PerformanceCollector()
         self.assertIsNone(pc.collect_cpu())
 
-    @patch.object(PerformanceCollector, '_read_proc_stat', side_effect=Exception("fail"))
+    @patch.object(PerformanceCollector, '_read_proc_stat', side_effect=OSError("fail"))
     def test_exception_returns_none(self, mock_read):
         pc = PerformanceCollector()
         self.assertIsNone(pc.collect_cpu())
@@ -323,7 +323,7 @@ class TestCollectNetwork(unittest.TestCase):
         self.assertAlmostEqual(sample.send_rate, 1000.0, delta=50)
         self.assertEqual(len(pc.get_network_history()), 2)
 
-    @patch.object(PerformanceCollector, '_read_proc_net_dev', side_effect=Exception)
+    @patch.object(PerformanceCollector, '_read_proc_net_dev', side_effect=ValueError)
     def test_exception_returns_none(self, mock_read):
         pc = PerformanceCollector()
         self.assertIsNone(pc.collect_network())
@@ -358,7 +358,7 @@ class TestCollectDiskIO(unittest.TestCase):
         self.assertAlmostEqual(sample.read_rate, 100000.0, delta=100)
         self.assertAlmostEqual(sample.write_rate, 50000.0, delta=100)
 
-    @patch.object(PerformanceCollector, '_read_proc_diskstats', side_effect=Exception)
+    @patch.object(PerformanceCollector, '_read_proc_diskstats', side_effect=ValueError)
     def test_exception_returns_none(self, mock_read):
         pc = PerformanceCollector()
         self.assertIsNone(pc.collect_disk_io())

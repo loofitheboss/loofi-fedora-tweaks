@@ -125,7 +125,7 @@ class SystemMonitor:
                 used_bytes=used,
                 percent_used=round(percent, 1),
             )
-        except Exception as e:
+        except (OSError, IOError, ValueError, KeyError) as e:
             logger.debug("Failed to read memory info from /proc/meminfo: %s", e)
             return None
 
@@ -146,7 +146,7 @@ class SystemMonitor:
                 load_15min=round(load_15, 2),
                 core_count=core_count,
             )
-        except Exception as e:
+        except OSError as e:
             logger.debug("Failed to get CPU load averages: %s", e)
             return None
 
@@ -175,7 +175,7 @@ class SystemMonitor:
                 parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
 
             return ", ".join(parts)
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read uptime from /proc/uptime: %s", e)
             return "unknown"
 
@@ -185,12 +185,17 @@ class SystemMonitor:
         try:
             with open("/etc/hostname", "r") as f:
                 return f.read().strip()
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read hostname from /etc/hostname: %s", e)
             try:
-                return subprocess.getoutput("hostname").strip()
-            except Exception as e:
-                logger.debug("Failed to get hostname via hostname command: %s", e)
+                result = subprocess.run(
+                    ["hostname"], capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    return result.stdout.strip()
+                return "unknown"
+            except (subprocess.SubprocessError, OSError) as e2:
+                logger.debug("Failed to get hostname via hostname command: %s", e2)
                 return "unknown"
 
     @classmethod

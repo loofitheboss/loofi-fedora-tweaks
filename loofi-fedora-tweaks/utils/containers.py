@@ -125,7 +125,7 @@ class ContainerManager:
 
         except subprocess.TimeoutExpired:
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list distrobox containers: %s", e)
             return []
 
@@ -191,7 +191,7 @@ class ContainerManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Container creation timed out after 5 minutes.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error creating container: {e}")
 
     @classmethod
@@ -219,7 +219,7 @@ class ContainerManager:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to enter container: %s", e)
             return None
 
@@ -268,7 +268,7 @@ class ContainerManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Delete operation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error deleting container: {e}")
 
     @classmethod
@@ -296,7 +296,7 @@ class ContainerManager:
                 error = result.stderr.strip() or result.stdout.strip()
                 return Result(False, f"Failed to stop container: {error}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error stopping container: {e}")
 
     @classmethod
@@ -350,5 +350,5 @@ class ContainerManager:
                 error = result.stderr.strip() or result.stdout.strip()
                 return Result(False, f"Failed to export app: {error}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error exporting app: {e}")

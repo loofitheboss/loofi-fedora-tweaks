@@ -6,6 +6,7 @@ Tracks system state and alerts when it deviates from applied presets.
 import json
 import hashlib
 import logging
+import shutil
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass, asdict
@@ -242,7 +243,7 @@ class DriftDetector:
         try:
             with open("/proc/cmdline", "r") as f:
                 return f.read().strip().split()
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read kernel params: %s", e)
             return []
 
@@ -263,6 +264,8 @@ class DriftDetector:
                     return list(deployments[0].get("requested-packages", []))
 
             # Fallback: get manually installed packages
+            if not shutil.which("dnf"):
+                return []
             result = subprocess.run(
                 ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
                 capture_output=True, text=True, check=False,

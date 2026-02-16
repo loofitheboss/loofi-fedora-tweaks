@@ -71,7 +71,7 @@ class QuickActionsConfig:
                     data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
                     return data
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to load quick actions config: %s", e)
         return cls.default_actions()
 
@@ -87,7 +87,7 @@ class QuickActionsConfig:
             os.makedirs(_CONFIG_DIR, exist_ok=True)
             with open(_ACTIONS_FILE, "w") as f:
                 json.dump(actions, f, indent=2)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to save quick actions config: %s", e)
 
     @classmethod

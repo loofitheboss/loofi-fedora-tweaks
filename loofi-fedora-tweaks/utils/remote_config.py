@@ -32,7 +32,7 @@ class AppConfigFetcher(QThread):
                         self._save_cache(data)
                         self.config_ready.emit(data)
                         return
-            except Exception as e:
+            except (OSError, ValueError, json.JSONDecodeError) as e:
                 logger.warning("Remote fetch failed: %s", e)
 
         # 2. Try Cache
@@ -42,7 +42,7 @@ class AppConfigFetcher(QThread):
                     data = json.load(f)
                     self.config_ready.emit(data)
                     return
-            except Exception as e:
+            except (OSError, json.JSONDecodeError) as e:
                 logger.warning("Cache load failed: %s", e)
 
         # 3. Fallback to Local Package
@@ -52,7 +52,7 @@ class AppConfigFetcher(QThread):
                     data = json.load(f)
                     self.config_ready.emit(data)
                     return
-            except Exception as e:
+            except (OSError, json.JSONDecodeError) as e:
                 self.config_error.emit(f"Failed to load any config: {e}")
         else:
             self.config_error.emit("No configuration found.")
@@ -62,5 +62,5 @@ class AppConfigFetcher(QThread):
             os.makedirs(self.CACHE_DIR, exist_ok=True)
             with open(self.CACHE_FILE, 'w') as f:
                 json.dump(data, f, indent=4)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to save cache: %s", e)

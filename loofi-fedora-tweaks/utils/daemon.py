@@ -1,6 +1,44 @@
 """
 Daemon - Background service for scheduled task execution.
-Runs as a systemd user service.
+
+SECURITY CONTRACT
+-----------------
+This daemon runs as a systemd user service and performs ONLY these operations:
+
+1. Scheduled Task Execution (via TaskScheduler.execute_task):
+   - CLEANUP: dnf/rpm-ostree cache cleaning and autoremove
+   - UPDATE_CHECK: Check for system updates (read-only, no installation)
+   - SYNC_CONFIG: Sync configuration to GitHub Gist (requires auth token)
+   - APPLY_PRESET: Apply saved system presets
+
+   All task actions are validated against ALLOWED_ACTIONS in scheduler.py.
+   Unknown/disallowed actions are rejected and audit logged.
+
+2. Power State Monitoring:
+   - Reads /sys/class/power_supply/* (read-only)
+   - Uses upower command (read-only query)
+   - Triggers tasks on battery/AC transitions
+
+3. Plugin Update Checking:
+   - Checks plugin repositories for updates (if auto-update enabled)
+   - Downloads and installs plugin updates
+   - Respects plugin_auto_update config flag (default: False)
+
+SAFETY GUARANTEES
+-----------------
+- No arbitrary command execution: All actions validated via ALLOWED_ACTIONS
+- No direct subprocess calls with user-controlled input
+- All privileged operations go through PrivilegedCommand
+- Audit logging for all task executions (successful and failed)
+- Graceful shutdown on SIGTERM/SIGINT
+
+DATA ACCESS
+-----------
+- Reads: ~/.config/loofi-fedora-tweaks/scheduler.json
+- Writes: Task last_run timestamps
+- Audit: All executions logged via AuditLogger
+
+See utils/scheduler.py for task action definitions.
 """
 
 import time
@@ -68,7 +106,7 @@ class Daemon:
                         return "ac" if f.read().strip() == "1" else "battery"
 
             return "ac"  # Default to AC if unknown
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to detect power state: %s", e)
             return "ac"
 
@@ -133,7 +171,7 @@ class Daemon:
         """Check for plugin updates and auto-update if enabled."""
         # Check if auto-update is enabled in config
         config = ConfigManager.load_config()
-        if not config.get("plugin_auto_update", True):
+        if not config.get("plugin_auto_update", False):
             return
 
         logger.info("Checking for plugin updates...")
@@ -172,7 +210,7 @@ class Daemon:
                             "Failed to update %s: %s", plugin_name, update_result.error
                         )
 
-        except Exception as e:
+        except (ImportError, AttributeError, OSError) as e:
             logger.error("Error checking plugin updates: %s", e, exc_info=True)
 
     @classmethod

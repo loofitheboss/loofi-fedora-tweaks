@@ -63,7 +63,7 @@ class ProcessManager:
                     if line.startswith("MemTotal:"):
                         parts = line.split()
                         return int(parts[1]) * 1024  # kB to bytes
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read total memory from /proc/meminfo: %s", e)
         return 1  # Avoid division by zero
 
@@ -77,7 +77,7 @@ class ProcessManager:
                     parts = line.strip().split(":")
                     if len(parts) >= 3:
                         uid_map[int(parts[2])] = parts[0]
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to read uid-user map from /etc/passwd: %s", e)
         return uid_map
 
@@ -317,11 +317,11 @@ class ProcessManager:
                     False,
                     "pkexec not found - cannot send signal to privileged process",
                 )
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 return False, f"Failed to signal process {pid}: {e}"
         except ProcessLookupError:
             return False, f"Process {pid} not found"
-        except Exception as e:
+        except OSError as e:
             return False, f"Error signaling process {pid}: {e}"
 
     @staticmethod
@@ -367,7 +367,7 @@ class ProcessManager:
             return False, f"Timed out renicing process {pid}"
         except FileNotFoundError:
             return False, "renice command not found"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return False, f"Error renicing process {pid}: {e}"
 
     @classmethod

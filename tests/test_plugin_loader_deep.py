@@ -221,7 +221,7 @@ class TestRestorePreviousPlugin(unittest.TestCase):
         loader = PluginLoader()
         loader._registry = MagicMock()
         loader._registry.get.return_value = None
-        loader._registry.register.side_effect = Exception("boom")
+        loader._registry.register.side_effect = RuntimeError("boom")
         result = loader._restore_previous_plugin("test-id", MagicMock())
         self.assertFalse(result)
 

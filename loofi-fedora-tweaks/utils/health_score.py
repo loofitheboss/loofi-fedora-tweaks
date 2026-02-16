@@ -4,6 +4,7 @@ Aggregates system metrics into a single 0–100 health score.
 """
 
 import logging
+import shutil
 from dataclasses import dataclass, field
 from typing import List
 
@@ -88,7 +89,7 @@ class HealthScoreManager:
             elif pct >= 75:
                 recommendation = "Disk usage above 75% — consider freeing space"
             return score, recommendation
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.debug("Failed to score disk usage: %s", e)
             return 50, None
 
@@ -114,7 +115,7 @@ class HealthScoreManager:
                 score = 60
                 recommendation = "System hasn't been rebooted in over 30 days"
             return score, recommendation
-        except Exception as e:
+        except (OSError, IOError) as e:
             logger.debug("Failed to score uptime: %s", e)
             return 50, None
 
@@ -153,6 +154,8 @@ class HealthScoreManager:
                 else:
                     return 50, None
             else:
+                if not shutil.which("dnf"):
+                    return 75, None  # Can't check — dnf not available
                 result = subprocess.run(
                     ["dnf", "check-update", "--quiet"],
                     capture_output=True,
@@ -181,7 +184,7 @@ class HealthScoreManager:
                     return score, recommendation
                 else:
                     return 50, None
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check for updates: %s", e)
             return 75, None  # Can't check — assume moderate
 

@@ -117,7 +117,7 @@ class VSCodeManager:
                     )
                     if result.returncode == 0:
                         return f"flatpak run {app}"
-                except Exception as e:
+                except (subprocess.SubprocessError, OSError) as e:
                     logger.debug("Flatpak VS Code detection failed: %s", e)
 
         return None
@@ -162,7 +162,7 @@ class VSCodeManager:
                     if ext.strip()
                 ]
             return []
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list installed extensions: %s", e)
             return []
 
@@ -204,7 +204,7 @@ class VSCodeManager:
 
         except subprocess.TimeoutExpired:
             return Result(False, "Installation timed out.")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -380,7 +380,7 @@ class VSCodeManager:
 
         except json.JSONDecodeError:
             return Result(False, "Could not parse existing settings.json")
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             return Result(False, f"Error updating settings: {e}")
 
     @classmethod

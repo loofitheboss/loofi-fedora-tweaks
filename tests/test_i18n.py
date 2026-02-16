@@ -89,7 +89,7 @@ class TestI18nManager(unittest.TestCase):
         finally:
             os.unlink(temp_path)
 
-    @patch('builtins.open', side_effect=Exception("IO error"))
+    @patch('builtins.open', side_effect=OSError("IO error"))
     @patch('os.path.isfile', return_value=True)
     @patch('os.path.expanduser', return_value="/tmp/settings.json")
     def test_get_preferred_locale_error(self, mock_expand, mock_isfile, mock_open):
@@ -106,7 +106,7 @@ class TestI18nManager(unittest.TestCase):
         I18nManager.save_preferred_locale("sv")
         mock_open.assert_called()
 
-    @patch('builtins.open', side_effect=Exception("IO error"))
+    @patch('builtins.open', side_effect=OSError("IO error"))
     @patch('os.path.isfile', return_value=False)
     @patch('os.makedirs')
     @patch('os.path.expanduser', return_value="/tmp/config/settings.json")

@@ -118,7 +118,7 @@ class SandboxManager:
                 return Result(True, "Firejail installed successfully")
             else:
                 return Result(False, f"Installation failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Installation error: {e}")
 
     @classmethod
@@ -194,7 +194,7 @@ class SandboxManager:
             return Result(
                 True, f"Started sandboxed: {' '.join(command)}", {"pid": process.pid}
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Failed to start sandbox: {e}")
 
     @classmethod
@@ -250,7 +250,7 @@ Categories=Security;
                 f"Created sandboxed launcher: {desktop_file}",
                 {"path": str(desktop_file)},
             )
-        except Exception as e:
+        except (OSError, IOError) as e:
             return Result(False, f"Failed to create desktop entry: {e}")
 
     @classmethod
@@ -283,7 +283,7 @@ Categories=Security;
                             status["restrictions"].append("no_network")
                         if "--private" in cmdline:
                             status["restrictions"].append("private_home")
-        except Exception as e:
+        except (OSError, IOError, ValueError) as e:
             logger.debug("Failed to read sandbox status for pid %s: %s", pid, e)
 
         return status
@@ -363,5 +363,5 @@ class BubblewrapManager:
                 f"Started in minimal sandbox: {' '.join(command)}",
                 {"pid": process.pid},
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Failed to start sandbox: {e}")

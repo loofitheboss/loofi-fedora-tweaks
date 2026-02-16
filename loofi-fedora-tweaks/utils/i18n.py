@@ -113,7 +113,7 @@ class I18nManager:
                 with open(config_path, "r") as f:
                     settings = json.load(f)
                 return str(settings.get("locale", "en"))
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to read preferred locale from settings: %s", e)
         return "en"
 
@@ -140,5 +140,5 @@ class I18nManager:
             os.makedirs(config_dir, exist_ok=True)
             with open(config_path, "w") as f:
                 json.dump(settings, f, indent=2)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning("Failed to save locale preference: %s", e)

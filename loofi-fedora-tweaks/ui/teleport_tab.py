@@ -299,14 +299,14 @@ class TeleportTab(QWidget, PluginInterface):
             self.log(self.tr("State captured successfully."))
             self._refresh_packages()
 
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError) as exc:
             self.log(self.tr("Failed to capture state: {}").format(str(exc)))
 
     def _refresh_packages(self):
         """Refresh the saved packages table."""
         try:
             packages = StateTeleportManager.list_saved_packages()
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.debug("Failed to list saved teleport packages: %s", e)
             packages = []
 
@@ -394,7 +394,7 @@ class TeleportTab(QWidget, PluginInterface):
             else:
                 self.log(self.tr("Failed to send package: {}").format(result.message))
 
-        except Exception as e:
+        except (OSError, RuntimeError) as e:
             self.log(self.tr("Error sending package: {}").format(str(e)))
 
     def _import_package(self):
@@ -434,7 +434,7 @@ class TeleportTab(QWidget, PluginInterface):
             self.restore_preview.setText(preview)
             self.log(self.tr("Package imported successfully."))
 
-        except (ValueError, FileNotFoundError, Exception) as exc:
+        except (ValueError, FileNotFoundError, OSError) as exc:
             self.log(self.tr("Failed to import package: {}").format(str(exc)))
 
     def _apply_teleport(self):

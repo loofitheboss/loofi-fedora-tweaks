@@ -106,7 +106,7 @@ class SystemService(BaseSystemService):
                 grub_cfg = "/etc/grub2-efi.cfg"
             else:
                 grub_cfg = "/etc/grub2.cfg"
-        except Exception as e:
+        except OSError as e:
             logger.debug("Failed to detect UEFI/BIOS boot mode: %s", e)
             grub_cfg = "/etc/grub2.cfg"  # Fallback
 

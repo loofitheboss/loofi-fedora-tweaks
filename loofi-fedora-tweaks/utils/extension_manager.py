@@ -319,6 +319,6 @@ class ExtensionManager:
                         homepage=f"https://extensions.gnome.org/extension/{ext.get('pk', '')}/",
                         desktop="gnome",
                     ))
-        except Exception as e:
+        except (OSError, ValueError, json.JSONDecodeError) as e:
             logger.error("Failed to search GNOME extensions: %s", e)
         return extensions

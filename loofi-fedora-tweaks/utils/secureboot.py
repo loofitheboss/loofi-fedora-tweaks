@@ -65,7 +65,7 @@ class SecureBootManager:
             status_msg = result.stdout.strip()
         except FileNotFoundError:
             status_msg = "mokutil not installed"
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             status_msg = f"Error checking status: {e}"
 
         # Check for enrolled MOKs
@@ -79,7 +79,7 @@ class SecureBootManager:
                 timeout=15,
             )
             mok_enrolled = result.returncode == 0 and bool(result.stdout.strip())
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check enrolled MOKs: %s", e)
 
         # Check for pending MOK enrollment
@@ -93,7 +93,7 @@ class SecureBootManager:
                 timeout=15,
             )
             pending_mok = result.returncode == 0 and bool(result.stdout.strip())
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check pending MOK enrollment: %s", e)
 
         return SecureBootStatus(
@@ -162,7 +162,7 @@ class SecureBootManager:
                 output=f"Private key: {priv_key}\nPublic key: {pub_key}",
             )
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return SecureBootResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -211,7 +211,7 @@ class SecureBootManager:
             else:
                 return SecureBootResult(False, f"Import failed: {result.stderr}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return SecureBootResult(False, f"Error: {str(e)}")
 
     @classmethod
@@ -273,7 +273,7 @@ class SecureBootManager:
             else:
                 return SecureBootResult(False, f"Signing failed: {result.stderr}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return SecureBootResult(False, f"Error: {str(e)}")
 
     @classmethod

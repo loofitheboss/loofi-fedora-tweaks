@@ -61,6 +61,7 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
 
     On failure: raises ValidationError and logs to audit.
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -68,6 +69,7 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
             import inspect
 
             from utils.errors import ValidationError
+
             sig = inspect.signature(func)
             bound = sig.bind(*args, **kwargs)
             bound.apply_defaults()
@@ -81,9 +83,12 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
 
                 # Required check
                 if constraints.get("required", False):
-                    if value is None or (isinstance(value, str) and value.strip() == ""):
+                    if value is None or (
+                        isinstance(value, str) and value.strip() == ""
+                    ):
                         audit.log_validation_failure(
-                            action=action_name, param=pname,
+                            action=action_name,
+                            param=pname,
                             detail="Required parameter is empty or missing",
                             params=param_map,
                         )
@@ -99,7 +104,8 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
                 expected_type = constraints.get("type")
                 if expected_type and not isinstance(value, expected_type):
                     audit.log_validation_failure(
-                        action=action_name, param=pname,
+                        action=action_name,
+                        param=pname,
                         detail=f"Expected {expected_type.__name__}, got {type(value).__name__}",
                         params=param_map,
                     )
@@ -111,7 +117,8 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
                 # Path traversal check for strings
                 if isinstance(value, str) and _check_path_traversal(value):
                     audit.log_validation_failure(
-                        action=action_name, param=pname,
+                        action=action_name,
+                        param=pname,
                         detail="Path traversal detected",
                         params=param_map,
                     )
@@ -124,7 +131,8 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
                 min_len = constraints.get("min_len")
                 if min_len and isinstance(value, str) and len(value) < min_len:
                     audit.log_validation_failure(
-                        action=action_name, param=pname,
+                        action=action_name,
+                        param=pname,
                         detail=f"Value too short (min {min_len})",
                         params=param_map,
                     )
@@ -137,7 +145,8 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
                 choices = constraints.get("choices")
                 if choices and value not in choices:
                     audit.log_validation_failure(
-                        action=action_name, param=pname,
+                        action=action_name,
+                        param=pname,
                         detail=f"Invalid choice '{value}', expected one of {choices}",
                         params=param_map,
                     )
@@ -147,7 +156,9 @@ def validated_action(schema: Dict[str, Dict[str, Any]]) -> Callable:
                     )
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -183,9 +194,10 @@ class PrivilegedCommand:
         params = {"cmd": cmd, "description": desc}
 
         if dry_run:
-            audit.log(action=action_name, params=params,
-                      exit_code=None, dry_run=True)
-            return subprocess.CompletedProcess(args=cmd, returncode=-1, stdout="", stderr="")
+            audit.log(action=action_name, params=params, exit_code=None, dry_run=True)
+            return subprocess.CompletedProcess(
+                args=cmd, returncode=-1, stdout="", stderr=""
+            )
 
         try:
             result = subprocess.run(
@@ -200,6 +212,7 @@ class PrivilegedCommand:
             return result
         except subprocess.TimeoutExpired:
             from utils.errors import CommandTimeoutError
+
             audit.log(
                 action=action_name,
                 params=params,
@@ -218,7 +231,7 @@ class PrivilegedCommand:
             return f"{args[0]}.{args[1]}"
         if binary == "pkexec" and len(args) == 1:
             return args[0]
-        return f"{binary}.{args[0]}" if args else binary
+        return f"{binary}.{args[0]}"
 
     @staticmethod
     def get_polkit_action_id(cmd_tuple: CommandTuple) -> Optional[str]:
@@ -233,12 +246,26 @@ class PrivilegedCommand:
         return POLKIT_MAP.get(binary)
 
     @staticmethod
-    @validated_action({
-        "action": {"type": str, "required": True, "choices": (
-            "install", "remove", "update", "clean", "autoremove",
-            "upgrade", "downgrade", "reinstall", "info", "search",
-        )},
-    })
+    @validated_action(
+        {
+            "action": {
+                "type": str,
+                "required": True,
+                "choices": (
+                    "install",
+                    "remove",
+                    "update",
+                    "clean",
+                    "autoremove",
+                    "upgrade",
+                    "downgrade",
+                    "reinstall",
+                    "info",
+                    "search",
+                ),
+            },
+        }
+    )
     def dnf(action: str, *packages: str, flags: list | None = None) -> CommandTuple:
         """Build a DNF command tuple (cmd, args, description).
 
@@ -249,17 +276,38 @@ class PrivilegedCommand:
 
         if pm == "rpm-ostree":
             if action == "install":
-                return ("pkexec", ["rpm-ostree", "install"] + list(packages), f"Installing {', '.join(packages)} via rpm-ostree...")
+                return (
+                    "pkexec",
+                    ["rpm-ostree", "install"] + list(packages),
+                    f"Installing {', '.join(packages)} via rpm-ostree...",
+                )
             elif action == "remove":
-                return ("pkexec", ["rpm-ostree", "uninstall"] + list(packages), f"Removing {', '.join(packages)} via rpm-ostree...")
+                return (
+                    "pkexec",
+                    ["rpm-ostree", "uninstall"] + list(packages),
+                    f"Removing {', '.join(packages)} via rpm-ostree...",
+                )
             elif action == "update":
-                return ("pkexec", ["rpm-ostree", "upgrade"], "Upgrading system via rpm-ostree...")
+                return (
+                    "pkexec",
+                    ["rpm-ostree", "upgrade"],
+                    "Upgrading system via rpm-ostree...",
+                )
             elif action == "clean":
-                return ("pkexec", ["rpm-ostree", "cleanup", "--base"], "Cleaning rpm-ostree base...")
+                return (
+                    "pkexec",
+                    ["rpm-ostree", "cleanup", "--base"],
+                    "Cleaning rpm-ostree base...",
+                )
             else:
-                return ("pkexec", ["rpm-ostree", action] + list(packages), f"rpm-ostree {action}...")
+                return (
+                    "pkexec",
+                    ["rpm-ostree"] + action.split() + list(packages),
+                    f"rpm-ostree {action}...",
+                )
         else:
-            args = ["dnf", action, "-y"] + flag_list + list(packages)
+            action_parts = action.split()
+            args = ["dnf"] + action_parts + ["-y"] + flag_list + list(packages)
             desc_map = {
                 "install": f"Installing {', '.join(packages)}...",
                 "remove": f"Removing {', '.join(packages)}...",
@@ -271,40 +319,72 @@ class PrivilegedCommand:
             return ("pkexec", args, desc)
 
     @staticmethod
-    @validated_action({
-        "action": {"type": str, "required": True},
-        "service": {"type": str, "required": True, "min_len": 1},
-    })
+    @validated_action(
+        {
+            "action": {"type": str, "required": True},
+            "service": {"type": str, "required": True, "min_len": 1},
+        }
+    )
     def systemctl(action: str, service: str, user: bool = False) -> CommandTuple:
         """Build a systemctl command tuple."""
         if user:
-            return ("systemctl", ["--user", action, service], f"{action.title()} user service {service}...")
-        return ("pkexec", ["systemctl", action, service], f"{action.title()} system service {service}...")
+            return (
+                "systemctl",
+                ["--user", action, service],
+                f"{action.title()} user service {service}...",
+            )
+        return (
+            "pkexec",
+            ["systemctl", action, service],
+            f"{action.title()} system service {service}...",
+        )
 
     @staticmethod
-    @validated_action({
-        "key": {"type": str, "required": True, "min_len": 1},
-        "value": {"type": str, "required": True},
-    })
+    @validated_action(
+        {
+            "key": {"type": str, "required": True, "min_len": 1},
+            "value": {"type": str, "required": True},
+        }
+    )
     def sysctl(key: str, value: str) -> CommandTuple:
         """Build a sysctl set command tuple."""
-        return ("pkexec", ["sysctl", "-w", f"{key}={value}"], f"Setting {key} = {value}...")
+        return (
+            "pkexec",
+            ["sysctl", "-w", f"{key}={value}"],
+            f"Setting {key} = {value}...",
+        )
 
     @staticmethod
-    @validated_action({
-        "path": {"type": str, "required": True, "min_len": 1},
-        "content": {"type": str, "required": True},
-    })
+    @validated_action(
+        {
+            "path": {"type": str, "required": True, "min_len": 1},
+            "content": {"type": str, "required": True},
+        }
+    )
     def write_file(path: str, content: str) -> CommandTuple:
         """Write content to a file via pkexec tee."""
         return ("pkexec", ["tee", path], f"Writing to {path}...")
 
     @staticmethod
+    @validated_action(
+        {
+            "action": {"type": str, "required": True},
+        }
+    )
     def flatpak(action: str, *args: str) -> CommandTuple:
         """Build a flatpak command tuple."""
         return ("flatpak", [action] + list(args), f"Flatpak {action}...")
 
     @staticmethod
+    @validated_action(
+        {
+            "action": {
+                "type": str,
+                "required": True,
+                "choices": ("update", "get-updates", "refresh", "get-devices"),
+            },
+        }
+    )
     def fwupd(action: str = "update") -> CommandTuple:
         """Build a fwupdmgr command tuple."""
         return ("pkexec", ["fwupdmgr", action, "-y"], f"Firmware {action}...")
@@ -312,7 +392,11 @@ class PrivilegedCommand:
     @staticmethod
     def journal_vacuum(time: str = "2weeks") -> CommandTuple:
         """Build a journal vacuum command tuple."""
-        return ("pkexec", ["journalctl", f"--vacuum-time={time}"], f"Vacuuming journal ({time})...")
+        return (
+            "pkexec",
+            ["journalctl", f"--vacuum-time={time}"],
+            f"Vacuuming journal ({time})...",
+        )
 
     @staticmethod
     def fstrim() -> CommandTuple:

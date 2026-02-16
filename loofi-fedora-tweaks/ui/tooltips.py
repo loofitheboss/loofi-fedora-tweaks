@@ -36,6 +36,39 @@ MESH_PAIR = "Pair with a discovered node using a one-time code"
 TELEPORT_SEND = "Send the selected file or clipboard to a paired node"
 TELEPORT_RECEIVE = "Accept an incoming transfer from a paired node"
 
+# ── Dashboard Tab ──────────────────────────────────────────────────
+DASH_HEALTH_SCORE = "Overall system health grade based on CPU, RAM, disk, uptime, and updates"
+DASH_QUICK_ACTIONS = "Common actions you can run with one click"
+DASH_FOCUS_MODE = "Toggle Focus Mode to silence notifications and reduce distractions"
+DASH_SYSTEM_OVERVIEW = "Key system metrics at a glance"
+
+# ── Software Tab ──────────────────────────────────────────────────
+SW_SEARCH = "Filter the application list by name or description"
+SW_INSTALL = "Install this application using the system package manager"
+SW_BATCH_INSTALL = "Install all selected applications in a single transaction"
+SW_BATCH_REMOVE = "Remove all selected applications in a single transaction"
+SW_RPM_FUSION = "Enable RPM Fusion repositories for additional packages and codecs"
+SW_CODECS = "Install multimedia codecs for video and audio playback"
+SW_FLATHUB = "Enable the Flathub remote for Flatpak applications"
+
+# ── Maintenance Tab ──────────────────────────────────────────────────
+MAINT_CLEANUP = "Remove cached packages and orphaned dependencies"
+MAINT_JOURNAL = "Vacuum old systemd journal entries to free disk space"
+MAINT_FLATPAK_CLEANUP = "Remove unused Flatpak runtimes and cached data"
+MAINT_ORPHANS = "Find and remove packages no longer needed by any installed software"
+
+# ── Desktop Tab ──────────────────────────────────────────────────
+DESK_THEME = "Select the GTK / icon / cursor theme for your desktop"
+DESK_FONTS = "Configure system fonts, hinting, and antialiasing"
+DESK_EXTENSIONS = "Manage GNOME Shell extensions"
+DESK_WALLPAPER = "Set the desktop wallpaper"
+
+# ── Development Tab ──────────────────────────────────────────────────
+DEV_TOOLBOX = "Create and manage Toolbx development containers"
+DEV_VSCODE = "Install or configure Visual Studio Code and extensions"
+DEV_LANGUAGES = "Install programming language runtimes and toolchains"
+DEV_CONTAINERS = "Manage Podman containers for development workloads"
+
 # ── Settings Dialog ──────────────────────────────────────────────────
 SETTINGS_THEME = "Switch between light, dark, and system-follow themes"
 SETTINGS_LANGUAGE = "UI language — requires restart to take full effect"

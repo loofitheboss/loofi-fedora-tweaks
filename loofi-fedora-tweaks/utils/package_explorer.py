@@ -5,6 +5,7 @@ Part of v16.0 "Horizon".
 Supports DNF (traditional), rpm-ostree (atomic), and Flatpak.
 """
 
+import shutil
 import subprocess
 import logging
 from dataclasses import dataclass
@@ -77,7 +78,8 @@ class PackageExplorer:
     def _search_dnf(cls, query: str) -> List[PackageInfo]:
         """Search packages via DNF/rpm-ostree."""
         try:
-            # Use dnf even on Atomic — it can still search
+            if not shutil.which("dnf"):
+                return []
             cmd = ["dnf", "search", "--quiet", query]
             result = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=30
@@ -331,6 +333,8 @@ class PackageExplorer:
     @classmethod
     def recently_installed(cls, days: int = 30) -> List[PackageInfo]:
         """Get packages installed in the last N days via DNF history."""
+        if not shutil.which("dnf"):
+            return []
         try:
             cmd = ["dnf", "history", "list", "--reverse"]
             result = subprocess.run(
@@ -373,6 +377,8 @@ class PackageExplorer:
     @classmethod
     def get_package_info(cls, name: str) -> Optional[PackageInfo]:
         """Get detailed info for a specific package."""
+        if not shutil.which("dnf"):
+            return None
         try:
             cmd = ["dnf", "info", "--quiet", name]
             result = subprocess.run(

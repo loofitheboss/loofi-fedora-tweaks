@@ -39,7 +39,7 @@ class TestIsRunning(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=3)
         self.assertFalse(USBGuardManager.is_running())
 
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("fail"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run):
         self.assertFalse(USBGuardManager.is_running())
 
@@ -68,7 +68,7 @@ class TestInstall(unittest.TestCase):
         self.assertFalse(result.success)
 
     @patch.object(USBGuardManager, "is_installed", return_value=False)
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("timeout"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("timeout"))
     def test_install_exception(self, mock_run, mock_inst):
         result = USBGuardManager.install()
         self.assertFalse(result.success)
@@ -97,7 +97,7 @@ class TestStartService(unittest.TestCase):
         self.assertFalse(result.success)
 
     @patch.object(USBGuardManager, "is_installed", return_value=True)
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("err"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("err"))
     def test_start_exception(self, mock_run, mock_inst):
         result = USBGuardManager.start_service()
         self.assertFalse(result.success)
@@ -130,7 +130,7 @@ class TestListDevices(unittest.TestCase):
         self.assertEqual(USBGuardManager.list_devices(), [])
 
     @patch.object(USBGuardManager, "is_installed", return_value=True)
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("fail"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("fail"))
     def test_exception_returns_empty(self, mock_run, mock_inst):
         self.assertEqual(USBGuardManager.list_devices(), [])
 
@@ -191,7 +191,7 @@ class TestBlockDevice(unittest.TestCase):
         self.assertIn("-p", args)
 
     @patch.object(USBGuardManager, "is_installed", return_value=True)
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("err"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("err"))
     def test_block_exception(self, mock_run, mock_inst):
         result = USBGuardManager.block_device("2")
         self.assertFalse(result.success)
@@ -247,7 +247,7 @@ class TestGenerateInitialPolicy(unittest.TestCase):
         self.assertFalse(result.success)
 
     @patch.object(USBGuardManager, "is_installed", return_value=True)
-    @patch("utils.usbguard.subprocess.run", side_effect=Exception("err"))
+    @patch("utils.usbguard.subprocess.run", side_effect=OSError("err"))
     def test_exception(self, mock_run, mock_inst):
         result = USBGuardManager.generate_initial_policy()
         self.assertFalse(result.success)

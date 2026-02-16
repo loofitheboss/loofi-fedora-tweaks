@@ -615,7 +615,7 @@ class HardwareTab(QWidget, PluginInterface):
                 )
             else:
                 self.lbl_bt_devices.setText(self.tr("Paired devices: none"))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to refresh Bluetooth status: %s", e)
             self.lbl_bt_status.setText(
                 self.tr("Bluetooth: ❌ bluetoothctl not available")
@@ -716,7 +716,7 @@ class HardwareTab(QWidget, PluginInterface):
             cmdline = BootConfigManager.get_current_cmdline()
             kernel_line = cmdline.split("\n")[0] if cmdline else "unknown"
             self.lbl_boot_info.setText(self.tr("Current: {}").format(kernel_line[:80]))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to load boot info: %s", e)
             self.lbl_boot_info.setText(self.tr("Current kernel: detection failed"))
 
@@ -733,7 +733,7 @@ class HardwareTab(QWidget, PluginInterface):
                 self.hw_output_area.setPlainText(
                     "\n".join(lines) or "No kernels found."
                 )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             if hasattr(self, "hw_output_area"):
                 self.hw_output_area.setPlainText(f"[ERROR] {e}")
 
@@ -750,7 +750,7 @@ class HardwareTab(QWidget, PluginInterface):
             ]
             if hasattr(self, "hw_output_area"):
                 self.hw_output_area.setPlainText("\n".join(lines))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             if hasattr(self, "hw_output_area"):
                 self.hw_output_area.setPlainText(f"[ERROR] {e}")
 
@@ -761,7 +761,7 @@ class HardwareTab(QWidget, PluginInterface):
             seconds = self.boot_timeout_spin.value()
             binary, args, desc = BootConfigManager.set_timeout(seconds)
             self._run_hw_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             if hasattr(self, "hw_output_area"):
                 self.hw_output_area.setPlainText(f"[ERROR] {e}")
 
@@ -771,7 +771,7 @@ class HardwareTab(QWidget, PluginInterface):
 
             binary, args, desc = BootConfigManager.apply_grub_changes()
             self._run_hw_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             if hasattr(self, "hw_output_area"):
                 self.hw_output_area.setPlainText(f"[ERROR] {e}")
 
@@ -794,7 +794,7 @@ class HardwareTab(QWidget, PluginInterface):
                         int(status["speed"]), int(status["temperature"])
                     )
                 )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to refresh hardware status: %s", e)
 
     def show_toast(self, message: str):

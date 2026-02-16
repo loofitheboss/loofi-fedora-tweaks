@@ -246,7 +246,7 @@ class TestVMManagerCreateVM(unittest.TestCase):
         self.assertIn("4096", cmd)
         self.assertIn("4", cmd)
 
-    @patch("subprocess.run", side_effect=Exception("kaboom"))
+    @patch("subprocess.run", side_effect=OSError("kaboom"))
     @patch("os.path.isfile", return_value=True)
     @patch("os.path.isdir", return_value=True)
     @patch("shutil.which", return_value="/usr/bin/dummy")

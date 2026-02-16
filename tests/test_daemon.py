@@ -87,7 +87,7 @@ class TestGetPowerState(unittest.TestCase):
     @patch('utils.daemon.subprocess.run')
     def test_get_power_state_exception_returns_ac(self, mock_run):
         """get_power_state returns 'ac' on exception."""
-        mock_run.side_effect = Exception("Command failed")
+        mock_run.side_effect = OSError("Command failed")
         result = Daemon.get_power_state()
         self.assertEqual(result, "ac")
 

@@ -114,7 +114,7 @@ class TestSaveProfile(unittest.TestCase):
         result = FocusMode.save_profile("new", {"blocked_domains": []})
         self.assertTrue(result)
 
-    @patch.object(FocusMode, 'load_config', side_effect=Exception("write fail"))
+    @patch.object(FocusMode, 'load_config', side_effect=OSError("write fail"))
     def test_failure(self, _):
         result = FocusMode.save_profile("bad", {})
         self.assertFalse(result)
@@ -196,7 +196,7 @@ class TestRestoreHosts(unittest.TestCase):
         result = FocusMode._restore_hosts()
         self.assertTrue(result["success"])
 
-    @patch("builtins.open", side_effect=Exception("fail"))
+    @patch("builtins.open", side_effect=OSError("fail"))
     def test_failure(self, _):
         result = FocusMode._restore_hosts()
         self.assertFalse(result["success"])
@@ -278,7 +278,7 @@ class TestKillProcesses(unittest.TestCase):
         killed = FocusMode._kill_processes(["nonexistent"])
         self.assertEqual(killed, [])
 
-    @patch("subprocess.run", side_effect=Exception("err"))
+    @patch("subprocess.run", side_effect=OSError("err"))
     def test_exception(self, _):
         killed = FocusMode._kill_processes(["bad"])
         self.assertEqual(killed, [])
@@ -291,7 +291,7 @@ class TestGetRunningDistractions(unittest.TestCase):
         self.assertIn("steam", running)
         self.assertNotIn("discord", running)
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, _):
         self.assertEqual(FocusMode.get_running_distractions(), [])
 

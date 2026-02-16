@@ -1,10 +1,14 @@
 """
 Report Exporter — v31.0 Smart UX
 Exports system information as Markdown or HTML report.
+
+v42.0.0 Sentinel: Replaced subprocess.getoutput() with safe alternatives.
 """
 
 import logging
 import os
+import platform
+import socket
 import subprocess
 from datetime import datetime
 from typing import Dict, Optional
@@ -16,6 +20,45 @@ class ReportExporter:
     """Exports system information in Markdown or HTML format."""
 
     @staticmethod
+    def _read_file(path: str) -> Optional[str]:
+        """Read a file safely, returning None on error.
+
+        Args:
+            path: Absolute file path.
+
+        Returns:
+            File contents stripped, or None on failure.
+        """
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                return f.read().strip()
+        except (OSError, IOError) as e:
+            logger.debug("Failed to read %s: %s", path, e)
+            return None
+
+    @staticmethod
+    def _run_cmd(cmd: list, timeout: int = 10) -> Optional[str]:
+        """Run a command safely and return stdout.
+
+        Args:
+            cmd: Command as argument list (no shell).
+            timeout: Subprocess timeout in seconds.
+
+        Returns:
+            Stripped stdout, or None on failure.
+        """
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=timeout
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+            return None
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug("Command %s failed: %s", cmd, e)
+            return None
+
+    @staticmethod
     def gather_system_info() -> Dict[str, str]:
         """
         Collect all system information for the report.
@@ -23,86 +66,77 @@ class ReportExporter:
         Returns:
             Dictionary of system info key-value pairs.
         """
-        info = {}
+        info: Dict[str, str] = {}
+
+        # Hostname — use socket (no subprocess needed)
         try:
-            info["hostname"] = subprocess.getoutput("hostname").strip()
-        except Exception as e:
+            info["hostname"] = socket.gethostname()
+        except OSError as e:
             logger.debug("Failed to get hostname: %s", e)
             info["hostname"] = "Unknown"
 
-        try:
-            info["kernel"] = subprocess.getoutput("uname -r").strip()
-        except Exception as e:
-            logger.debug("Failed to get kernel version: %s", e)
-            info["kernel"] = "Unknown"
+        # Kernel — use platform (no subprocess needed)
+        info["kernel"] = platform.release() or "Unknown"
 
-        try:
-            info["fedora_version"] = subprocess.getoutput(
-                "cat /etc/fedora-release"
-            ).strip()
-        except Exception as e:
-            logger.debug("Failed to get Fedora version: %s", e)
-            info["fedora_version"] = "Unknown"
+        # Fedora release — read the file directly (not cat via shell)
+        fedora_release = ReportExporter._read_file("/etc/fedora-release")
+        info["fedora_version"] = fedora_release or "Unknown"
 
-        try:
-            cpu = subprocess.getoutput(
-                "lscpu | grep 'Model name' | cut -d: -f2"
-            ).strip()
-            info["cpu"] = cpu if cpu else "Unknown"
-        except Exception as e:
-            logger.debug("Failed to get CPU model: %s", e)
-            info["cpu"] = "Unknown"
+        # CPU model — parse lscpu output without shell pipes
+        lscpu_out = ReportExporter._run_cmd(["lscpu"])
+        cpu = "Unknown"
+        if lscpu_out:
+            for line in lscpu_out.splitlines():
+                if "Model name" in line:
+                    parts = line.split(":", 1)
+                    if len(parts) == 2:
+                        cpu = parts[1].strip()
+                    break
+        info["cpu"] = cpu
 
-        try:
-            mem = subprocess.getoutput(
-                'free -h | awk \'/^Mem:/ {print $2 " total, " $3 " used"}\''
-            ).strip()
-            info["ram"] = mem
-        except Exception as e:
-            logger.debug("Failed to get RAM usage: %s", e)
-            info["ram"] = "Unknown"
+        # RAM — parse free output without awk
+        free_out = ReportExporter._run_cmd(["free", "-h"])
+        ram = "Unknown"
+        if free_out:
+            for line in free_out.splitlines():
+                if line.startswith("Mem:"):
+                    fields = line.split()
+                    if len(fields) >= 3:
+                        ram = f"{fields[1]} total, {fields[2]} used"
+                    break
+        info["ram"] = ram
 
-        try:
-            disk = subprocess.getoutput(
-                'df -h / | awk \'NR==2 {print $3 "/" $2 " (" $5 " used)"}\''
-            ).strip()
-            info["disk_root"] = disk
-        except Exception as e:
-            logger.debug("Failed to get disk usage: %s", e)
-            info["disk_root"] = "Unknown"
+        # Disk — parse df output without awk
+        df_out = ReportExporter._run_cmd(["df", "-h", "/"])
+        disk = "Unknown"
+        if df_out:
+            lines = df_out.splitlines()
+            if len(lines) >= 2:
+                fields = lines[1].split()
+                if len(fields) >= 5:
+                    disk = f"{fields[2]}/{fields[1]} ({fields[4]} used)"
+        info["disk_root"] = disk
 
-        try:
-            info["uptime"] = subprocess.getoutput("uptime -p").strip()
-        except Exception as e:
-            logger.debug("Failed to get uptime: %s", e)
-            info["uptime"] = "Unknown"
+        # Uptime
+        uptime_out = ReportExporter._run_cmd(["uptime", "-p"])
+        info["uptime"] = uptime_out or "Unknown"
 
-        try:
-            if os.path.exists("/sys/class/power_supply/BAT0/capacity"):
-                capacity = subprocess.getoutput(
-                    "cat /sys/class/power_supply/BAT0/capacity"
-                ).strip()
-                status = subprocess.getoutput(
-                    "cat /sys/class/power_supply/BAT0/status"
-                ).strip()
-                info["battery"] = f"{capacity}% ({status})"
-            else:
-                info["battery"] = "No battery detected"
-        except Exception as e:
-            logger.debug("Failed to get battery status: %s", e)
-            info["battery"] = "Unknown"
+        # Battery — read sysfs directly (not cat via shell)
+        bat_cap = ReportExporter._read_file("/sys/class/power_supply/BAT0/capacity")
+        if bat_cap is not None:
+            bat_status = (
+                ReportExporter._read_file("/sys/class/power_supply/BAT0/status")
+                or "Unknown"
+            )
+            info["battery"] = f"{bat_cap}% ({bat_status})"
+        else:
+            info["battery"] = "No battery detected"
 
-        try:
-            info["architecture"] = subprocess.getoutput("uname -m").strip()
-        except Exception as e:
-            logger.debug("Failed to get architecture: %s", e)
-            info["architecture"] = "Unknown"
+        # Architecture — use platform (no subprocess needed)
+        info["architecture"] = platform.machine() or "Unknown"
 
-        try:
-            info["desktop"] = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
-        except Exception as e:
-            logger.debug("Failed to get desktop environment: %s", e)
-            info["desktop"] = "Unknown"
+        # Desktop environment
+        info["desktop"] = os.environ.get("XDG_CURRENT_DESKTOP", "Unknown")
 
         info["report_date"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

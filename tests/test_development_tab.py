@@ -493,6 +493,7 @@ _MODULE_KEYS = [
     "PyQt6.QtWidgets",
     "PyQt6.QtCore",
     "PyQt6.QtGui",
+    "ui",
     "ui.base_tab",
     "ui.tab_utils",
     "core.plugins.interface",

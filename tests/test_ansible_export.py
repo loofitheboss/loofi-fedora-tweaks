@@ -555,7 +555,7 @@ class TestAnsibleExporter(unittest.TestCase):
 
     @patch(
         "utils.ansible_export.AnsibleExporter.generate_playbook",
-        side_effect=Exception("boom"),
+        side_effect=OSError("boom"),
     )
     def test_save_playbook_failure(self, mock_generate):
         """Save playbook returns failure object when generation fails."""

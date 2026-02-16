@@ -5,6 +5,7 @@ Supports time-based and power-state triggers.
 
 import logging
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -13,6 +14,7 @@ from typing import Optional
 from enum import Enum
 
 from services.system import SystemManager
+from utils.audit import AuditLogger
 from utils.commands import PrivilegedCommand
 
 logger = logging.getLogger(__name__)
@@ -25,6 +27,10 @@ class TaskAction(Enum):
     UPDATE_CHECK = "update_check"
     SYNC_CONFIG = "sync_config"
     APPLY_PRESET = "apply_preset"
+
+
+# Allowed actions - derived from TaskAction enum for validation
+ALLOWED_ACTIONS = frozenset(action.value for action in TaskAction)
 
 
 class TaskSchedule(Enum):
@@ -203,12 +209,39 @@ class TaskScheduler:
     @classmethod
     def execute_task(cls, task: ScheduledTask) -> tuple:
         """
-        Execute a scheduled task.
+        Execute a scheduled task with action validation and audit logging.
 
         Returns:
             (success: bool, message: str)
         """
         from utils.notifications import NotificationManager
+
+        auditor = AuditLogger()
+
+        # Validate action against allowed set before execution
+        if task.action not in ALLOWED_ACTIONS:
+            auditor.log_validation_failure(
+                action="scheduler.execute_task",
+                param="action",
+                detail="Disallowed action: %s" % task.action,
+                params={"task_id": task.id, "task_name": task.name,
+                        "action": task.action},
+            )
+            logger.warning(
+                "Rejected task with disallowed action: %s (action=%s)",
+                task.name, task.action,
+            )
+            return (False, "Disallowed action: %s" % task.action)
+
+        # Log task execution start
+        auditor.log(
+            action="scheduler.task.%s" % task.action,
+            params={
+                "task_id": task.id,
+                "task_name": task.name,
+                "schedule": task.schedule,
+            },
+        )
 
         try:
             if task.action == TaskAction.CLEANUP.value:
@@ -220,7 +253,7 @@ class TaskScheduler:
             elif task.action == TaskAction.APPLY_PRESET.value:
                 result = cls._run_apply_preset(task.preset_name)
             else:
-                return (False, f"Unknown action: {task.action}")
+                return (False, "Unknown action: %s" % task.action)
 
             # Update last run time
             cls.update_last_run(task.id)
@@ -307,6 +340,8 @@ class TaskScheduler:
                 else:
                     return (True, "System is up to date")
             else:
+                if not shutil.which("dnf"):
+                    return (True, "System is up to date (dnf not available)")
                 result = subprocess.run(
                     ["dnf", "check-update", "-q"],
                     capture_output=True,

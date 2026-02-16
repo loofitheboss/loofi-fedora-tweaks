@@ -68,7 +68,7 @@ class PackageManager:
                 return PackageResult(
                     False, f"Failed to install: {result.stderr}", output=result.stderr
                 )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return PackageResult(False, f"Error: {str(e)}")
 
     def _install_rpm_ostree(self, packages: List[str]) -> PackageResult:
@@ -102,7 +102,7 @@ class PackageManager:
             return PackageResult(
                 False, f"Failed: {result.stderr}", output=result.stderr
             )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return PackageResult(False, f"Error: {str(e)}")
 
     def _install_flatpak(self, packages: List[str]) -> PackageResult:
@@ -119,7 +119,7 @@ class PackageManager:
                     results.append(f"✓ {pkg}")
                 else:
                     results.append(f"✗ {pkg}: {result.stderr[:50]}")
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 results.append(f"✗ {pkg}: {str(e)}")
 
         success = all("✓" in r for r in results)
@@ -146,7 +146,7 @@ class PackageManager:
                 )
             else:
                 return PackageResult(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return PackageResult(False, f"Error: {str(e)}")
 
     def update(self) -> PackageResult:
@@ -170,7 +170,7 @@ class PackageManager:
                 return PackageResult(
                     False, f"Update failed: {result.stderr}", output=result.stderr
                 )
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return PackageResult(False, f"Error: {str(e)}")
 
     def reset_to_base(self) -> PackageResult:
@@ -189,7 +189,7 @@ class PackageManager:
                 )
             else:
                 return PackageResult(False, f"Reset failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return PackageResult(False, f"Error: {str(e)}")
 
     def get_layered_packages(self) -> List[str]:

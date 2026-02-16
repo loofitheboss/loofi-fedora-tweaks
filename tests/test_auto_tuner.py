@@ -605,10 +605,10 @@ class TestInternalHelpers(unittest.TestCase):
         result = AutoTuner._read_cpu_percent()
         self.assertEqual(result, 0.0)
 
-    @patch('utils.auto_tuner.time.sleep', side_effect=RuntimeError("sleep failed"))
+    @patch('utils.auto_tuner.time.sleep', side_effect=OSError("sleep failed"))
     @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times', return_value=[100, 0, 0, 900, 0, 0, 0, 0])
     def test_read_cpu_percent_exception_path(self, mock_agg, mock_sleep):
-        """Test _read_cpu_percent catches unexpected exceptions and returns 0."""
+        """Test _read_cpu_percent catches OSError and returns 0."""
         result = AutoTuner._read_cpu_percent()
         self.assertEqual(result, 0.0)
 
@@ -626,10 +626,10 @@ class TestInternalHelpers(unittest.TestCase):
         mock_agg.side_effect = [snap, snap]
         self.assertEqual(AutoTuner._read_io_wait(), 0.0)
 
-    @patch('utils.auto_tuner.time.sleep', side_effect=RuntimeError("sleep failed"))
+    @patch('utils.auto_tuner.time.sleep', side_effect=OSError("sleep failed"))
     @patch('utils.auto_tuner.AutoTuner._read_aggregate_cpu_times', return_value=[100, 0, 0, 900, 10, 0, 0, 0])
     def test_read_io_wait_exception_path(self, mock_agg, mock_sleep):
-        """Test _read_io_wait catches unexpected exception and returns 0."""
+        """Test _read_io_wait catches OSError and returns 0."""
         self.assertEqual(AutoTuner._read_io_wait(), 0.0)
 
     @patch('utils.auto_tuner.os.listdir', side_effect=OSError("boom"))

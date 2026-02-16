@@ -255,7 +255,7 @@ class BackupTab(BaseTab):
                 self._detected_tool = tool
 
             self.append_output(self.tr("Tool detection complete: {}\n").format(tool))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Tool detection failed: %s", e)
             self.tool_status.setText(self.tr("Detection failed: {}").format(e))
 
@@ -272,7 +272,7 @@ class BackupTab(BaseTab):
             tool = getattr(self, "_detected_tool", None)
             binary, args, description = BackupWizard.create_snapshot(tool=tool, description=desc)
             self.run_command(binary, args, description)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _load_snapshots(self):
@@ -293,7 +293,7 @@ class BackupTab(BaseTab):
                 BaseTab.set_table_empty_state(self.snap_table, self.tr("No snapshots found"))
 
             self.append_output(self.tr("Found {} snapshots.\n").format(len(snapshots)))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Failed to load snapshots: %s", e)
             self.append_output(f"[ERROR] {e}\n")
 
@@ -314,7 +314,7 @@ class BackupTab(BaseTab):
             tool = tool_item.text() if tool_item else None
             binary, args, desc = BackupWizard.restore_snapshot(snap_id.text(), tool=tool)
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _delete_selected(self):
@@ -334,5 +334,5 @@ class BackupTab(BaseTab):
             tool = tool_item.text() if tool_item else None
             binary, args, desc = BackupWizard.delete_snapshot(snap_id.text(), tool=tool)
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")

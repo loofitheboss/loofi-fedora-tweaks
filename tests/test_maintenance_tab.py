@@ -246,6 +246,16 @@ _mt = importlib.import_module("ui.maintenance_tab")
 _QMessageBox = sys.modules["PyQt6.QtWidgets"].QMessageBox
 _SystemManager = sys.modules["services.system"].SystemManager
 
+# Restore original modules immediately so collection of other test files
+# is not polluted.  Keep ui.maintenance_tab — @patch decorators need it.
+for _name, _orig in _original_modules.items():
+    if _name == "ui.maintenance_tab":
+        continue
+    if _orig is not None:
+        sys.modules[_name] = _orig
+    else:
+        sys.modules.pop(_name, None)
+
 
 # ===================================================================
 # Test: MaintenanceTab
@@ -1081,7 +1091,7 @@ class TestSmartUpdatesSubTab(unittest.TestCase):
 
     @patch(
         "utils.update_manager.UpdateManager.check_updates",
-        side_effect=Exception("Network error"),
+        side_effect=OSError("Network error"),
     )
     def test_check_updates_error(self, mock_check):
         """_check_updates() appends error message on exception."""
@@ -1114,7 +1124,7 @@ class TestSmartUpdatesSubTab(unittest.TestCase):
 
     @patch(
         "utils.update_manager.UpdateManager.preview_conflicts",
-        side_effect=Exception("Parse error"),
+        side_effect=OSError("Parse error"),
     )
     def test_preview_conflicts_error(self, mock_preview):
         """_preview_conflicts() appends error on exception."""
@@ -1154,7 +1164,7 @@ class TestSmartUpdatesSubTab(unittest.TestCase):
 
     @patch(
         "utils.update_manager.UpdateManager.schedule_update",
-        side_effect=Exception("Schedule failed"),
+        side_effect=OSError("Schedule failed"),
     )
     def test_schedule_update_error(self, mock_schedule):
         """_schedule_update() appends error on exception."""
@@ -1194,7 +1204,7 @@ class TestSmartUpdatesSubTab(unittest.TestCase):
 
     @patch(
         "utils.update_manager.UpdateManager.rollback_last",
-        side_effect=Exception("Rollback failed"),
+        side_effect=OSError("Rollback failed"),
     )
     def test_rollback_last_error(self, mock_rollback):
         """_rollback_last() appends error on exception."""

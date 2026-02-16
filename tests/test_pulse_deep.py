@@ -35,18 +35,18 @@ class TestGetPowerState(unittest.TestCase):
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="1\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_ac_via_sysfs(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.AC.value)
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="0\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_battery_via_sysfs(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.BATTERY.value)
 
     @patch("os.path.exists", return_value=False)
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_unknown_fallback(self, _run, _exists):
         self.assertEqual(SystemPulse.get_power_state(), PowerState.UNKNOWN.value)
 
@@ -63,12 +63,12 @@ class TestGetBatteryLevel(unittest.TestCase):
 
     @patch("os.path.exists", return_value=True)
     @patch("builtins.open", unittest.mock.mock_open(read_data="42\n"))
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_battery_via_sysfs(self, _run, _exists):
         self.assertEqual(SystemPulse.get_battery_level(), 42)
 
     @patch("os.path.exists", return_value=False)
-    @patch("subprocess.run", side_effect=Exception("no upower"))
+    @patch("subprocess.run", side_effect=OSError("no upower"))
     def test_no_battery(self, _run, _exists):
         self.assertEqual(SystemPulse.get_battery_level(), -1)
 
@@ -100,7 +100,7 @@ class TestGetNetworkState(unittest.TestCase):
         mock_run.return_value = MagicMock(stdout="connecting\n")
         self.assertEqual(SystemPulse.get_network_state(), NetworkState.CONNECTING.value)
 
-    @patch("subprocess.run", side_effect=Exception("no nmcli"))
+    @patch("subprocess.run", side_effect=OSError("no nmcli"))
     def test_error_returns_disconnected(self, _):
         self.assertEqual(SystemPulse.get_network_state(), NetworkState.DISCONNECTED.value)
 
@@ -125,7 +125,7 @@ class TestGetWifiSSID(unittest.TestCase):
         mock_run.return_value = MagicMock(stdout="no:SomeNet\n")
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
 
-    @patch("subprocess.run", side_effect=Exception("no nmcli"))
+    @patch("subprocess.run", side_effect=OSError("no nmcli"))
     def test_error_returns_empty(self, _):
         self.assertEqual(SystemPulse.get_wifi_ssid(), "")
 
@@ -223,7 +223,7 @@ class TestGetConnectedMonitors(unittest.TestCase):
             cmd = args[0]
             m = MagicMock()
             if cmd[0] == "xrandr":
-                raise Exception("no xrandr")
+                raise OSError("no xrandr")
             else:
                 m.stdout = (
                     "Output: 1 eDP-1\n"
@@ -238,7 +238,7 @@ class TestGetConnectedMonitors(unittest.TestCase):
         monitors = SystemPulse.get_connected_monitors()
         self.assertEqual(len(monitors), 2)
 
-    @patch("subprocess.run", side_effect=Exception("no display tools"))
+    @patch("subprocess.run", side_effect=OSError("no display tools"))
     def test_no_tools_returns_empty(self, _):
         self.assertEqual(SystemPulse.get_connected_monitors(), [])
 
@@ -260,7 +260,7 @@ class TestCheckVpnActive(unittest.TestCase):
         pulse = SystemPulse.__new__(SystemPulse)
         self.assertFalse(pulse._check_vpn_active())
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_vpn_check_error(self, _):
         pulse = SystemPulse.__new__(SystemPulse)
         self.assertFalse(pulse._check_vpn_active())

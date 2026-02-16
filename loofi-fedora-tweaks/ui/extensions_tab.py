@@ -141,7 +141,7 @@ class ExtensionsTab(BaseTab):
                 self.install_btn.setEnabled(False)
                 self.remove_btn.setEnabled(False)
                 self.append_output(self.tr("Extension management not supported on this desktop.\n"))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.warning("Desktop detection failed: %s", e)
             self.de_label.setText(self.tr("Desktop: Unknown"))
 
@@ -171,7 +171,7 @@ class ExtensionsTab(BaseTab):
                 BaseTab.set_table_empty_state(self.table, self.tr("No extensions found"))
 
             self.append_output(self.tr("Loaded {} extensions.\n").format(len(extensions)))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.error("Failed to load extensions: %s", e)
             self.append_output(self.tr("[ERROR] Failed to load extensions: {}\n").format(e))
 
@@ -200,7 +200,7 @@ class ExtensionsTab(BaseTab):
             else:
                 binary, args, desc = ExtensionManager.disable(uuid)
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _install_extension(self):
@@ -213,7 +213,7 @@ class ExtensionsTab(BaseTab):
             from utils.extension_manager import ExtensionManager
             binary, args, desc = ExtensionManager.install(uuid)
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _remove_selected(self):
@@ -229,7 +229,7 @@ class ExtensionsTab(BaseTab):
             from utils.extension_manager import ExtensionManager
             binary, args, desc = ExtensionManager.remove(name_item.text())
             self.run_command(binary, args, desc)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
 
     def _filter_table(self):

@@ -31,6 +31,31 @@
 | v39.0 | Prism | DONE | Deprecated import migration, inline style elimination |
 | v40.0 | Foundation | DONE | Correctness & safety hardening, zero shell injection |
 | v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
+| v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
+
+---
+
+## [DONE] v42.0 "Sentinel" — Hardening & Polish
+
+### Scope
+
+Closes remaining stabilization gaps (Phases 5-6), eliminates all verified rule
+violations, and delivers targeted UX polish. Zero new major features.
+
+### Deliverables
+
+- [x] Subprocess timeout enforcement for services/hardware and services/system
+- [x] Narrow 106 `except Exception` handlers to specific types across 30 files
+- [x] Eliminate 25+ hardcoded `dnf` references in UI and utils layers
+- [x] Extract subprocess calls from UI layer to utils
+- [x] Daemon systemd hardening (sandboxing directives)
+- [x] Plugin version compatibility gates and auto-update default-off
+- [x] Daemon task action validation against TaskAction enum
+- [x] Software tab search/filter bar
+- [x] Focus Mode dashboard card + command palette entry
+- [x] Tooltip coverage for 5 most-used tabs
+- [x] High-contrast theme
+- [x] Version bump to 42.0.0
 
 ---
 

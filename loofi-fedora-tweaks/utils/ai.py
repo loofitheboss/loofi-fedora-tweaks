@@ -95,7 +95,7 @@ class OllamaManager:
                 timeout=5,
             )
             return result.returncode == 0
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check Ollama service status via systemctl: %s", e)
             # Check if process is running
             try:
@@ -103,7 +103,7 @@ class OllamaManager:
                     ["pgrep", "-x", "ollama"], capture_output=True, text=True, timeout=5
                 )
                 return result.returncode == 0
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to check Ollama process via pgrep: %s", e)
                 return False
 
@@ -131,7 +131,7 @@ class OllamaManager:
                 return Result(False, f"Installation failed: {result.stderr}")
         except subprocess.TimeoutExpired:
             return Result(False, "Installation timed out")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Installation error: {e}")
 
     @classmethod
@@ -152,7 +152,7 @@ class OllamaManager:
                 start_new_session=True,
             )
             return Result(True, "Ollama service started")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Failed to start: {e}")
 
     @classmethod
@@ -186,7 +186,7 @@ class OllamaManager:
                 return Result(True, "Ollama process stopped")
 
             return Result(False, "Could not stop Ollama")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Failed to stop: {e}")
 
     @classmethod
@@ -218,7 +218,7 @@ class OllamaManager:
                         )
 
             return models
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list Ollama models: %s", e)
             return []
 
@@ -256,7 +256,7 @@ class OllamaManager:
             else:
                 return Result(False, f"Download failed: {' '.join(output[-3:])}")
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Download error: {e}")
 
     @classmethod
@@ -274,7 +274,7 @@ class OllamaManager:
                 return Result(True, f"Model '{model_name}' deleted")
             else:
                 return Result(False, f"Delete failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Delete error: {e}")
 
     @classmethod
@@ -309,7 +309,7 @@ class OllamaManager:
                 return Result(False, f"Generation failed: {result.stderr}")
         except subprocess.TimeoutExpired:
             return Result(False, "Response timed out")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
 
@@ -348,23 +348,19 @@ class LlamaCppManager:
                         "llama.cpp package found. Install with: pkexec rpm-ostree install llama-cpp",
                     )
             else:
-                result = subprocess.run(
-                    ["dnf", "list", "llama-cpp"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                )
-                if result.returncode == 0:
-                    return Result(
-                        False,
-                        "llama.cpp package found. Install with: pkexec dnf install llama-cpp",
+                if shutil.which("dnf"):
+                    result = subprocess.run(
+                        ["dnf", "list", "llama-cpp"],
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
                     )
-            if result.returncode == 0:
-                return Result(
-                    False,
-                    "llama.cpp package found. Install with: pkexec dnf install llama-cpp",
-                )
-        except Exception as e:
+                    if result.returncode == 0:
+                        return Result(
+                            False,
+                            "llama.cpp package found. Install with: pkexec dnf install llama-cpp",
+                        )
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check llama.cpp package availability: %s", e)
 
         return Result(
@@ -396,11 +392,14 @@ class AIConfigManager:
         if cuda_found:
             return Result(True, "CUDA toolkit is already configured")
 
+        pm = SystemManager.get_package_manager()
+        install_cmd = "pkexec %s install" % pm
         return Result(
             False,
             "CUDA toolkit not found. Install with:\n"
-            "pkexec dnf install cuda-toolkit\n"
-            "Or enable RPM Fusion and install: pkexec dnf install nvidia-driver-cuda",
+            "%s cuda-toolkit\n"
+            "Or enable RPM Fusion and install: %s nvidia-driver-cuda"
+            % (install_cmd, install_cmd),
         )
 
     @classmethod
@@ -416,13 +415,14 @@ class AIConfigManager:
                 )
                 if "AMD" not in result.stdout or "VGA" not in result.stdout:
                     return Result(False, "AMD GPU not detected")
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to detect AMD GPU via lspci: %s", e)
 
+            pm = SystemManager.get_package_manager()
             return Result(
                 False,
                 "ROCm not installed. Install with:\n"
-                "pkexec dnf install rocm-hip rocm-runtime rocm-smi",
+                "pkexec %s install rocm-hip rocm-runtime rocm-smi" % pm,
             )
 
         return Result(True, "ROCm is configured and ready")
@@ -451,7 +451,7 @@ class AIConfigManager:
                         result["total_mb"] = int(parts[0].strip())
                         result["used_mb"] = int(parts[1].strip())
                         result["free_mb"] = int(parts[2].strip())
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to query NVIDIA GPU memory: %s", e)
 
         return result

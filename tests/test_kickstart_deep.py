@@ -46,7 +46,7 @@ class TestGetKeyboardLayout(unittest.TestCase):
         layout = KickstartGenerator._get_keyboard_layout()
         self.assertEqual(layout, "us")
 
-    @patch("subprocess.run", side_effect=Exception("no localectl"))
+    @patch("subprocess.run", side_effect=OSError("no localectl"))
     def test_exception(self, mock_run):
         layout = KickstartGenerator._get_keyboard_layout()
         self.assertEqual(layout, "us")
@@ -94,7 +94,7 @@ class TestGetTimezone(unittest.TestCase):
         tz = KickstartGenerator._get_timezone()
         self.assertEqual(tz, "UTC")
 
-    @patch("subprocess.run", side_effect=Exception("no timedatectl"))
+    @patch("subprocess.run", side_effect=OSError("no timedatectl"))
     def test_exception(self, mock_run):
         tz = KickstartGenerator._get_timezone()
         self.assertEqual(tz, "UTC")
@@ -129,7 +129,7 @@ class TestGetUserPackages(unittest.TestCase):
         pkgs = KickstartGenerator._get_user_packages()
         self.assertEqual(pkgs, [])
 
-    @patch("subprocess.run", side_effect=Exception("no dnf"))
+    @patch("subprocess.run", side_effect=OSError("no dnf"))
     def test_exception(self, mock_run):
         pkgs = KickstartGenerator._get_user_packages()
         self.assertEqual(pkgs, [])
@@ -160,7 +160,7 @@ class TestGetFlatpakApps(unittest.TestCase):
         self.assertEqual(apps, [])
 
     @patch("shutil.which", return_value="/usr/bin/flatpak")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         apps = KickstartGenerator._get_flatpak_apps()
         self.assertEqual(apps, [])
@@ -248,7 +248,7 @@ class TestValidateKickstart(unittest.TestCase):
         self.assertFalse(r.success)
 
     @patch("shutil.which", return_value="/usr/bin/ksvalidator")
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run, mock_which):
         r = KickstartGenerator.validate_kickstart(Path("/tmp/test.ks"))
         self.assertFalse(r.success)

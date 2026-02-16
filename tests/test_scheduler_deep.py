@@ -295,7 +295,7 @@ class TestTaskSchedulerExecution(unittest.TestCase):
         t = ScheduledTask(id="u", name="Unk", action="nonexistent", schedule="daily")
         ok, msg = TaskScheduler.execute_task(t)
         self.assertFalse(ok)
-        self.assertIn("Unknown action", msg)
+        self.assertIn("Disallowed action", msg)
 
     @patch("utils.scheduler.TaskScheduler._run_cleanup", side_effect=OSError("fail"))
     def test_execute_oserror(self, _):

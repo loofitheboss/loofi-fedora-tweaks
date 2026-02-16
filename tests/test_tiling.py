@@ -170,7 +170,7 @@ class TestReloadConfig(unittest.TestCase):
         self.assertFalse(result.success)
 
     @patch.object(TilingManager, "is_hyprland", return_value=True)
-    @patch("utils.tiling.subprocess.run", side_effect=Exception("err"))
+    @patch("utils.tiling.subprocess.run", side_effect=OSError("err"))
     def test_reload_exception(self, mock_run, mock_hypr):
         result = TilingManager.reload_config()
         self.assertFalse(result.success)

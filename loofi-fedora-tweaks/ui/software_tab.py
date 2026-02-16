@@ -19,12 +19,17 @@ from PyQt6.QtWidgets import (
     QTabWidget,
     QCheckBox,
     QListWidget,
+    QLineEdit,
 )
 
 import logging
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
+from ui.tooltips import (
+    SW_BATCH_INSTALL, SW_BATCH_REMOVE, SW_CODECS,
+    SW_FLATHUB, SW_RPM_FUSION, SW_SEARCH,
+)
 from utils.commands import PrivilegedCommand
 from utils.software_utils import SoftwareUtils
 from utils.command_runner import CommandRunner
@@ -70,16 +75,27 @@ class _ApplicationsSubTab(QWidget):
         batch_layout.addStretch()
         self.btn_batch_install = QPushButton(self.tr("📥 Install Selected"))
         self.btn_batch_install.setAccessibleName(self.tr("Install selected packages"))
+        self.btn_batch_install.setToolTip(SW_BATCH_INSTALL)
         self.btn_batch_install.clicked.connect(self._batch_install)
         self.btn_batch_install.setEnabled(False)
         batch_layout.addWidget(self.btn_batch_install)
 
         self.btn_batch_remove = QPushButton(self.tr("🗑️ Remove Selected"))
         self.btn_batch_remove.setAccessibleName(self.tr("Remove selected packages"))
+        self.btn_batch_remove.setToolTip(SW_BATCH_REMOVE)
         self.btn_batch_remove.clicked.connect(self._batch_remove)
         self.btn_batch_remove.setEnabled(False)
         batch_layout.addWidget(self.btn_batch_remove)
         layout.addLayout(batch_layout)
+
+        # v42.0: Search/filter bar
+        self._search_bar = QLineEdit()
+        self._search_bar.setPlaceholderText(self.tr("Search applications..."))
+        self._search_bar.setAccessibleName(self.tr("Search applications"))
+        self._search_bar.setToolTip(SW_SEARCH)
+        self._search_bar.setClearButtonEnabled(True)
+        self._search_bar.textChanged.connect(self._filter_apps)
+        layout.addWidget(self._search_bar)
 
         # Scroll Area for apps list
         scroll = QScrollArea()
@@ -258,6 +274,25 @@ class _ApplicationsSubTab(QWidget):
         binary, args, desc = BatchOpsManager.batch_remove(packages)
         self.runner.run_command(binary, args)
 
+    def _filter_apps(self, text: str):
+        """Filter visible app rows by name or description (case-insensitive)."""
+        query = text.strip().lower()
+        for i in range(self.scroll_layout.count()):
+            item = self.scroll_layout.itemAt(i)
+            widget = item.widget() if item else None
+            if widget is None:
+                continue
+            if not isinstance(widget, QFrame):
+                continue
+            # Search through QLabel children for name and description text
+            labels = widget.findChildren(QLabel)
+            match = not query  # Show all when query is empty
+            for lbl in labels:
+                if query in lbl.text().lower():
+                    match = True
+                    break
+            widget.setVisible(match)
+
 
 # ---------------------------------------------------------------------------
 # Sub-tab: Repositories
@@ -296,6 +331,7 @@ class _RepositoriesSubTab(QWidget):
             self.tr("Enable RPM Fusion (Free & Non-Free)")
         )
         self.btn_enable_fusion.setAccessibleName(self.tr("Enable RPM Fusion"))
+        self.btn_enable_fusion.setToolTip(SW_RPM_FUSION)
         self.btn_enable_fusion.clicked.connect(self.enable_rpm_fusion)
         fusion_layout.addWidget(self.btn_enable_fusion)
 
@@ -303,6 +339,7 @@ class _RepositoriesSubTab(QWidget):
             self.tr("Install Multimedia Codecs (ffmpeg, gstreamer, etc.)")
         )
         self.btn_install_codecs.setAccessibleName(self.tr("Install codecs"))
+        self.btn_install_codecs.setToolTip(SW_CODECS)
         self.btn_install_codecs.clicked.connect(self.install_multimedia_codecs)
         fusion_layout.addWidget(self.btn_install_codecs)
 
@@ -315,6 +352,7 @@ class _RepositoriesSubTab(QWidget):
 
         self.btn_enable_flathub = QPushButton(self.tr("Enable Flathub Remote"))
         self.btn_enable_flathub.setAccessibleName(self.tr("Enable Flathub"))
+        self.btn_enable_flathub.setToolTip(SW_FLATHUB)
         self.btn_enable_flathub.clicked.connect(self.enable_flathub)
         flathub_layout.addWidget(self.btn_enable_flathub)
 
@@ -331,9 +369,9 @@ class _RepositoriesSubTab(QWidget):
         self.btn_copr_loofi.setAccessibleName(self.tr("Enable Loofi COPR"))
         self.btn_copr_loofi.clicked.connect(
             lambda: self.run_command(
-                "pkexec",
-                ["dnf", "copr", "enable", "-y", "loofitheboss/loofi-fedora-tweaks"],
-                self.tr("Enabling Loofi COPR..."),
+                *PrivilegedCommand.dnf(
+                    "copr enable", "loofitheboss/loofi-fedora-tweaks"
+                ),
             )
         )
         copr_layout.addWidget(self.btn_copr_loofi)
@@ -354,16 +392,7 @@ class _RepositoriesSubTab(QWidget):
     # -- Repository actions ------------------------------------------------
 
     def enable_rpm_fusion(self):
-        import subprocess
-
-        try:
-            result = subprocess.run(
-                ["rpm", "-E", "%fedora"], capture_output=True, text=True, timeout=10
-            )
-            fedora_ver = result.stdout.strip()
-        except Exception as e:
-            logger.debug("Failed to detect Fedora version: %s", e)
-            fedora_ver = "41"  # safe fallback
+        fedora_ver = SoftwareUtils.get_fedora_version()
 
         free_url = (
             f"https://mirrors.rpmfusion.org/free/fedora/"
@@ -549,7 +578,7 @@ class SoftwareTab(BaseTab):
             self._flatpak_size_label.setText(self.tr("Total size: {}").format(total))
             lines = [f"{s.app_id}: {s.size_str}" for s in sizes]
             self._flatpak_output.setPlainText("\n".join(lines) or "No Flatpaks found.")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._flatpak_output.setPlainText(f"[ERROR] {e}")
 
     def _find_orphans(self):
@@ -561,7 +590,7 @@ class SoftwareTab(BaseTab):
             self._flatpak_output.setPlainText(
                 "\n".join(lines) if lines else "No orphan runtimes found."
             )
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._flatpak_output.setPlainText(f"[ERROR] {e}")
 
     def _cleanup_flatpaks(self):
@@ -572,7 +601,7 @@ class SoftwareTab(BaseTab):
             self._flatpak_output.clear()
             self._flatpak_output.setPlainText(f"{desc}\n")
             self._flatpak_runner.run_command(binary, args)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._flatpak_output.setPlainText(f"[ERROR] {e}")
 
     def _show_permissions(self):
@@ -587,5 +616,5 @@ class SoftwareTab(BaseTab):
                 )
             if not all_perms:
                 self._flatpak_perms_list.addItem("No Flatpak apps found.")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             self._flatpak_output.setPlainText(f"[ERROR] {e}")

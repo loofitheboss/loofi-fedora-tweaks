@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
             self.pulse_thread = PulseThread(self.pulse)
             self.pulse.moveToThread(self.pulse_thread)
             self.pulse_thread.start()
-        except Exception as e:
+        except (RuntimeError, OSError) as e:
             logger.debug("Failed to start pulse listener: %s", e)
 
     def _build_favorites_section(self):
@@ -569,7 +569,7 @@ class MainWindow(QMainWindow):
                 self.show_status_toast(result.message)
             else:
                 self.show_status_toast(result.message, error=True)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Undo failed: %s", e)
             self.show_status_toast(self.tr("Undo failed"), error=True)
         self._undo_btn.setVisible(False)
@@ -843,7 +843,7 @@ class MainWindow(QMainWindow):
                 self._notif_badge.setVisible(True)
             else:
                 self._notif_badge.setVisible(False)
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.debug("Failed to refresh notification badge: %s", e)
             self._notif_badge.setVisible(False)
 
@@ -857,7 +857,7 @@ class MainWindow(QMainWindow):
             self._toast_widget.show_toast(title, message, category)
             # Refresh badge since a new notification likely exists
             self._refresh_notif_badge()
-        except Exception as e:
+        except (RuntimeError, ImportError) as e:
             logger.debug("Failed to show toast notification: %s", e)
 
     def _refresh_status_indicators(self):
@@ -871,7 +871,7 @@ class MainWindow(QMainWindow):
                 self._set_tab_status("Maintenance", "warning", "Updates available")
             else:
                 self._set_tab_status("Maintenance", "ok", "Up to date")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check for updates: %s", e)
             self._set_tab_status("Maintenance", "", "")
 
@@ -891,7 +891,7 @@ class MainWindow(QMainWindow):
                     )
                 else:
                     self._set_tab_status("Storage", "ok", "Healthy")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check disk space: %s", e)
             self._set_tab_status("Storage", "", "")
 
@@ -1041,7 +1041,7 @@ class MainWindow(QMainWindow):
                 if hasattr(page, "cleanup"):
                     try:
                         page.cleanup()
-                    except Exception as e:
+                    except (RuntimeError, OSError) as e:
                         logger.debug("Failed to cleanup page on close: %s", e)
             event.accept()
 
@@ -1065,12 +1065,14 @@ class MainWindow(QMainWindow):
         """
         Load and apply a QSS theme by name.
 
-        Supported names: ``"dark"`` (modern.qss) and ``"light"`` (light.qss).
+        Supported names: ``"dark"`` (modern.qss), ``"light"`` (light.qss),
+        and ``"highcontrast"`` (highcontrast.qss).
         Falls back silently to no stylesheet if the file is missing.
         """
         theme_map = {
             "dark": "modern.qss",
             "light": "light.qss",
+            "highcontrast": "highcontrast.qss",
         }
         filename = theme_map.get(name, "modern.qss")
         assets_dir = os.path.join(os.path.dirname(__file__), "..", "assets")

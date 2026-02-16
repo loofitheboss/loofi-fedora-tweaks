@@ -63,7 +63,7 @@ class USBGuardManager:
                 timeout=5,
             )
             return result.returncode == 0
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check USBGuard service status: %s", e)
             return False
 
@@ -85,7 +85,7 @@ class USBGuardManager:
                 return Result(True, "USBGuard installed successfully")
             else:
                 return Result(False, f"Installation failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Installation error: {e}")
 
     @classmethod
@@ -106,7 +106,7 @@ class USBGuardManager:
                 return Result(True, "USBGuard service started")
             else:
                 return Result(False, f"Failed to start: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -169,7 +169,7 @@ class USBGuardManager:
 
             return devices
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list USB devices: %s", e)
             return []
 
@@ -190,7 +190,7 @@ class USBGuardManager:
                 return Result(True, f"Device {device_id} allowed")
             else:
                 return Result(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -210,7 +210,7 @@ class USBGuardManager:
                 return Result(True, f"Device {device_id} blocked")
             else:
                 return Result(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -283,5 +283,5 @@ done
                 )
             else:
                 return Result(False, f"Failed: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")

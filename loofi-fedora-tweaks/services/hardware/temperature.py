@@ -64,7 +64,7 @@ def _read_sysfs_value(path: str) -> Optional[str]:
     try:
         with open(path, "r") as f:
             return f.read().strip()
-    except Exception as e:
+    except (OSError, IOError) as e:
         logger.debug("Failed to read sysfs value from %s: %s", path, e)
         return None
 
@@ -126,7 +126,7 @@ class TemperatureManager:
             hwmon_dirs = glob.glob(
                 os.path.join(TemperatureManager.HWMON_BASE, "hwmon*")
             )
-        except Exception as e:
+        except OSError as e:
             logger.debug("Failed to glob hwmon directories: %s", e)
             return sensors
 
@@ -141,7 +141,7 @@ class TemperatureManager:
             # Find all temp*_input files in this hwmon device
             try:
                 input_files = glob.glob(os.path.join(hwmon_dir, "temp*_input"))
-            except Exception as e:
+            except OSError as e:
                 logger.debug("Failed to glob temp input files in %s: %s", hwmon_dir, e)
                 continue
 

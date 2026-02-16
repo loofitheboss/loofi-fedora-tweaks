@@ -211,7 +211,7 @@ class TestSendDesktop(unittest.TestCase):
         call_kwargs = mock_send.call_args[1]
         self.assertIn("Agent1", call_kwargs["title"])
 
-    @patch("utils.notifications.NotificationManager.send", side_effect=Exception("fail"))
+    @patch("utils.notifications.NotificationManager.send", side_effect=OSError("fail"))
     def test_exception(self, mock_send):
         result = _make_result()
         self.assertFalse(AgentNotifier._send_desktop("Agent1", result))
@@ -227,7 +227,7 @@ class TestSendInApp(unittest.TestCase):
         AgentNotifier._send_in_app("Agent1", result)
         mock_nc.add.assert_called_once()
 
-    @patch("utils.notification_center.NotificationCenter", side_effect=Exception("fail"))
+    @patch("utils.notification_center.NotificationCenter", side_effect=OSError("fail"))
     def test_exception(self, mock_nc_cls):
         result = _make_result()
         AgentNotifier._send_in_app("Agent1", result)  # Should not raise

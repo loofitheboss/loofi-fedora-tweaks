@@ -15,6 +15,7 @@ from core.plugins.scanner import PluginScanner
 from core.plugins.adapter import PluginAdapter
 from core.plugins.sandbox import create_sandbox
 from utils.plugin_base import LoofiPlugin
+from version import __version__ as APP_VERSION
 
 log = logging.getLogger(__name__)
 
@@ -96,6 +97,47 @@ class PluginLoader:
         self._external_snapshots: dict[str, str] = {}
         self._external_context: dict = {}
 
+    @staticmethod
+    def _parse_version(ver_str: str) -> tuple[int, ...]:
+        """Parse semantic version string to tuple for comparison."""
+        if not ver_str or not isinstance(ver_str, str):
+            return (0,)
+        try:
+            clean_ver = ver_str.strip().lstrip("v")
+            parts = clean_ver.split(".")
+            return tuple(int(p) for p in parts if p.isdigit())
+        except (ValueError, AttributeError):
+            return (0,)
+
+    def _check_version_compatibility(
+        self, plugin_id: str, min_version: str, max_version: str
+    ) -> tuple[bool, str]:
+        """Check if plugin version requirements match current app version."""
+        if not min_version and not max_version:
+            return (True, "")
+        try:
+            app_ver = self._parse_version(APP_VERSION)
+            if min_version:
+                min_ver = self._parse_version(min_version)
+                if app_ver < min_ver:
+                    reason = "Plugin requires app version >= %s, current: %s" % (
+                        min_version, APP_VERSION,
+                    )
+                    log.warning("Plugin '%s' version incompatible: %s", plugin_id, reason)
+                    return (False, reason)
+            if max_version:
+                max_ver = self._parse_version(max_version)
+                if app_ver > max_ver:
+                    reason = "Plugin supports app version <= %s, current: %s" % (
+                        max_version, APP_VERSION,
+                    )
+                    log.warning("Plugin '%s' version incompatible: %s", plugin_id, reason)
+                    return (False, reason)
+            return (True, "")
+        except (ValueError, TypeError, AttributeError) as exc:
+            log.error("Version comparison failed for plugin '%s': %s", plugin_id, exc)
+            return (False, "Version comparison error: %s" % exc)
+
     def load_builtins(self, context: dict | None = None) -> list[str]:
         """
         Import all built-in plugin modules, instantiate, validate, and register.
@@ -110,7 +152,7 @@ class PluginLoader:
                 self._registry.register(plugin)
                 loaded.append(plugin.metadata().id)
                 log.debug("Loaded plugin: %s", plugin.metadata().id)
-            except Exception as exc:
+            except (ImportError, AttributeError, TypeError) as exc:
                 log.warning("Failed to load plugin %s.%s: %s", module_path, class_name, exc)
         return loaded
 
@@ -186,6 +228,21 @@ class PluginLoader:
                 if context:
                     adapter.set_context(context)
 
+                # Check app version compatibility
+                metadata = adapter.metadata()
+                min_ver = getattr(metadata, "min_app_version", "")
+                max_ver = getattr(metadata, "max_app_version", "")
+                if min_ver or max_ver:
+                    ver_ok, ver_reason = self._check_version_compatibility(
+                        plugin_id, min_ver, max_ver,
+                    )
+                    if not ver_ok:
+                        log.warning(
+                            "Plugin '%s' version incompatible: %s",
+                            plugin_id, ver_reason,
+                        )
+                        continue
+
                 # Check compatibility
                 compat_result = self._detector.check_plugin_compat(adapter.metadata().compat)
 
@@ -212,7 +269,7 @@ class PluginLoader:
                     manifest.name, manifest.version
                 )
 
-            except Exception as exc:
+            except (ImportError, AttributeError, OSError, RuntimeError) as exc:
                 log.error(
                     "Failed to load plugin '%s': %s",
                     plugin_id, exc, exc_info=True
@@ -331,7 +388,7 @@ class PluginLoader:
                 rolled_back=False,
             )
 
-        except Exception as exc:
+        except (ImportError, AttributeError, OSError, RuntimeError) as exc:
             restored = self._restore_previous_plugin(previous_registry_id, previous_plugin)
             return HotReloadResult(
                 plugin_id=plugin_id,
@@ -346,7 +403,7 @@ class PluginLoader:
             if self._registry.get(previous_registry_id) is None:
                 self._registry.register(previous_plugin)
             return True
-        except Exception as exc:
+        except (RuntimeError, TypeError) as exc:
             log.error(
                 "Rollback failed for plugin '%s': %s",
                 previous_registry_id,
@@ -437,7 +494,7 @@ class PluginLoader:
             )
             return None
 
-        except Exception as exc:
+        except (TypeError, AttributeError, RuntimeError) as exc:
             log.error(
                 "Error instantiating plugin '%s': %s",
                 manifest.id, exc, exc_info=True

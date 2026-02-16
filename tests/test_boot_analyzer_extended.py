@@ -119,7 +119,7 @@ class TestGetBootStats(unittest.TestCase):
     @patch('utils.boot_analyzer.subprocess.run')
     def test_get_boot_stats_handles_exception(self, mock_run):
         """get_boot_stats returns empty BootStats on exception."""
-        mock_run.side_effect = Exception("Command failed")
+        mock_run.side_effect = OSError("Command failed")
 
         stats = BootAnalyzer.get_boot_stats()
 
@@ -203,7 +203,7 @@ class TestGetBlameData(unittest.TestCase):
     @patch('utils.boot_analyzer.subprocess.run')
     def test_get_blame_data_handles_exception(self, mock_run):
         """get_blame_data returns empty list on exception."""
-        mock_run.side_effect = Exception("Command failed")
+        mock_run.side_effect = OSError("Command failed")
 
         services = BootAnalyzer.get_blame_data()
 
@@ -278,7 +278,7 @@ class TestGetCriticalChain(unittest.TestCase):
     @patch('utils.boot_analyzer.subprocess.run')
     def test_get_critical_chain_handles_exception(self, mock_run):
         """get_critical_chain returns empty string on exception."""
-        mock_run.side_effect = Exception("Command failed")
+        mock_run.side_effect = OSError("Command failed")
 
         result = BootAnalyzer.get_critical_chain()
 

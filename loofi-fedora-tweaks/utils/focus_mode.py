@@ -94,7 +94,7 @@ class FocusMode:
         try:
             with open(cls.CONFIG_FILE, "r") as f:
                 return dict(json.load(f))
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to load focus mode config: %s", e)
             return {"active": False, "profiles": {}}
 
@@ -143,7 +143,7 @@ class FocusMode:
             config["profiles"][name] = profile
             cls.save_config(config)
             return True
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to save focus mode profile: %s", e)
             return False
 
@@ -162,7 +162,7 @@ class FocusMode:
                 cls.save_config(config)
                 return True
             return False
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.debug("Failed to delete focus mode profile: %s", e)
             return False
 
@@ -344,7 +344,7 @@ class FocusMode:
 
         except subprocess.TimeoutExpired:
             return {"success": False, "message": "pkexec timed out"}
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return {"success": False, "message": str(e)}
 
     @classmethod
@@ -373,7 +373,7 @@ class FocusMode:
             else:
                 return {"success": False, "message": "Failed to restore hosts"}
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return {"success": False, "message": str(e)}
 
     @classmethod
@@ -488,7 +488,7 @@ class FocusMode:
                 }
 
             return {"success": False, "message": "KDE DND command failed"}
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return {"success": False, "message": str(e)}
 
     @classmethod
@@ -516,7 +516,7 @@ class FocusMode:
                 }
 
             return {"success": False, "message": "GNOME DND command failed"}
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return {"success": False, "message": str(e)}
 
     # -------------------------------------------------------------------------
@@ -539,7 +539,7 @@ class FocusMode:
                 )
                 if result.returncode == 0:
                     killed.append(name)
-            except Exception as e:
+            except (subprocess.SubprocessError, OSError) as e:
                 logger.debug("Failed to kill process: %s", e)
         return killed
 
@@ -566,7 +566,7 @@ class FocusMode:
             for name in process_list:
                 if name.lower() in processes:
                     running.append(name)
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to check running distraction processes: %s", e)
 
         return running

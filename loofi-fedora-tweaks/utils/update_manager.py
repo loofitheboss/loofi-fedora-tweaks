@@ -8,6 +8,7 @@ and transaction rollback for both DNF and rpm-ostree systems.
 
 import json
 import logging
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -81,6 +82,8 @@ class UpdateManager:
     def _check_updates_dnf() -> List[UpdateEntry]:
         """Check updates via DNF."""
         updates: List[UpdateEntry] = []
+        if not shutil.which("dnf"):
+            return updates
         try:
             result = subprocess.run(
                 ["dnf", "check-update", "--quiet"],
@@ -154,6 +157,9 @@ class UpdateManager:
 
         if SystemManager.is_atomic():
             return UpdateManager._preview_conflicts_ostree(packages)
+
+        if not shutil.which("dnf"):
+            return conflicts
 
         try:
             cmd = ["dnf", "check-update", "--assumeno"]
@@ -241,7 +247,8 @@ class UpdateManager:
             update_cmd = "rpm-ostree upgrade"
         else:
             pkg_str = " ".join(schedule.packages) if schedule.packages else ""
-            update_cmd = f"dnf update -y {pkg_str}".strip()
+            update_cmd = "dnf update -y %s" % pkg_str
+            update_cmd = update_cmd.strip()
 
         service_content = (
             f"[Unit]\n"
@@ -289,8 +296,8 @@ class UpdateManager:
         if SystemManager.is_atomic():
             return ("pkexec", ["rpm-ostree", "rollback"], "Rolling back to previous deployment...")
 
-        return ("pkexec", ["dnf", "history", "undo", "last", "-y"],
-                "Rolling back last DNF transaction...")
+        binary, args, _ = PrivilegedCommand.dnf("history undo last")
+        return (binary, args, "Rolling back last DNF transaction...")
 
     @staticmethod
     def get_update_history(limit: int = 10) -> List[dict]:
@@ -322,6 +329,8 @@ class UpdateManager:
             except (subprocess.TimeoutExpired, OSError, json.JSONDecodeError) as e:
                 logger.error("Failed to get rpm-ostree history: %s", e)
         else:
+            if not shutil.which("dnf"):
+                return history
             try:
                 result = subprocess.run(
                     ["dnf", "history", "list", f"--last={limit}"],

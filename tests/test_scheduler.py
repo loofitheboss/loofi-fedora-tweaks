@@ -79,7 +79,7 @@ class TestTaskScheduler(unittest.TestCase):
         task = ScheduledTask(id="x", name="Unknown", action="invalid", schedule=TaskSchedule.DAILY.value)
         success, message = TaskScheduler.execute_task(task)
         self.assertFalse(success)
-        self.assertIn("Unknown action", message)
+        self.assertIn("Disallowed action", message)
 
     @patch('utils.notifications.NotificationManager.notify_task_complete')
     @patch('utils.scheduler.TaskScheduler.update_last_run', return_value=True)

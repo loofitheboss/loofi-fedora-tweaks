@@ -734,7 +734,7 @@ class TestRestartUnit(unittest.TestCase):
     @patch("services.system.services.subprocess.run")
     def test_restart_unit_exception(self, mock_run):
         """restart_unit returns success=False on exception."""
-        mock_run.side_effect = RuntimeError("unexpected")
+        mock_run.side_effect = OSError("unexpected")
         result = ServiceManager.restart_unit("foo", UnitScope.USER)
         self.assertFalse(result.success)
         self.assertIn("Error", result.message)

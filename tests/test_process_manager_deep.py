@@ -217,7 +217,7 @@ class TestKillProcess(unittest.TestCase):
         self.assertIn("Invalid PID", msg)
 
     @patch("os.kill", side_effect=PermissionError)
-    @patch("subprocess.run", side_effect=Exception("general"))
+    @patch("subprocess.run", side_effect=OSError("general"))
     def test_general_exception(self, mock_run, mock_kill):
         ok, msg = ProcessManager.kill_process(1234)
         self.assertFalse(ok)
@@ -263,7 +263,7 @@ class TestReniceProcess(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("not found", msg)
 
-    @patch("subprocess.run", side_effect=Exception("fail"))
+    @patch("subprocess.run", side_effect=OSError("fail"))
     def test_exception(self, mock_run):
         ok, msg = ProcessManager.renice_process(1234, 0)
         self.assertFalse(ok)

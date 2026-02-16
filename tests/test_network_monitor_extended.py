@@ -438,7 +438,7 @@ class TestNetworkMonitorExtended(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=1, stdout="")
         self.assertEqual(NetworkMonitor.get_interface_ip("eth0"), "")
 
-    @patch("utils.network_monitor.subprocess.run", side_effect=Exception("timeout"))
+    @patch("utils.network_monitor.subprocess.run", side_effect=OSError("timeout"))
     def test_get_interface_ip_subprocess_exception(self, mock_run):
         """Subprocess exception in get_interface_ip returns empty string."""
         self.assertEqual(NetworkMonitor.get_interface_ip("eth0"), "")

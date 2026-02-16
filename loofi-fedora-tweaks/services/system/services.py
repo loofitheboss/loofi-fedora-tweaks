@@ -158,7 +158,7 @@ class ServiceManager:
 
             return units
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list systemd units: %s", e)
             return []
 
@@ -173,7 +173,7 @@ class ServiceManager:
         # System failures (may require auth to view all)
         try:
             failed.extend(cls.list_units(UnitScope.SYSTEM, "failed"))
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to list system-scope failed units: %s", e)
             pass
 
@@ -214,7 +214,7 @@ class ServiceManager:
                 return Result(True, f"Started {name}")
             else:
                 return Result(False, f"Failed to start {name}: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -233,7 +233,7 @@ class ServiceManager:
                 return Result(True, f"Stopped {name}")
             else:
                 return Result(False, f"Failed to stop {name}: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -252,7 +252,7 @@ class ServiceManager:
                 return Result(True, f"Restarted {name}")
             else:
                 return Result(False, f"Failed to restart {name}: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -271,7 +271,7 @@ class ServiceManager:
                 return Result(True, f"Masked {name}")
             else:
                 return Result(False, f"Failed to mask {name}: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -290,7 +290,7 @@ class ServiceManager:
                 return Result(True, f"Unmasked {name}")
             else:
                 return Result(False, f"Failed to unmask {name}: {result.stderr}")
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return Result(False, f"Error: {e}")
 
     @classmethod
@@ -304,6 +304,6 @@ class ServiceManager:
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             return result.stdout
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             logger.debug("Failed to get unit status: %s", e)
             return ""
