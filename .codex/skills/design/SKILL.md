@@ -1,4 +1,3 @@
-````skill
 ---
 name: design
 description: Create or update architecture specs for the ACTIVE version before implementation.
@@ -43,5 +42,3 @@ One-line version scope.
 - Every new util must have a paired test plan
 - Every new UI tab needs BaseTab inheritance plan
 - Reference `.github/workflow/prompts/design.md` for full prompt
-
-````

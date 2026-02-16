@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      QT_QPA_PLATFORM: offscreen
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +29,8 @@ jobs:
           sudo apt-get install -y libegl1
 
       - name: Install Python dependencies
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-timeout flake8 mypy PyQt6-stubs bandit

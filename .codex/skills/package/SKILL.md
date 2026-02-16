@@ -1,4 +1,3 @@
-````skill
 ---
 name: package
 description: Build and verify distribution packages (RPM, Flatpak, AppImage, sdist) for the current version.
@@ -52,5 +51,3 @@ description: Build and verify distribution packages (RPM, Flatpak, AppImage, sdi
 - All build scripts must be executable (`chmod +x`)
 - Include workflow reports in commit: `git add .workflow/reports/`
 - Reference `.github/workflow/prompts/package.md` for full prompt
-
-````
