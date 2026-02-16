@@ -43,7 +43,7 @@ Runs on every **push** and **pull request**.
 - name: Lint with flake8
   run: |
     flake8 loofi-fedora-tweaks/ --max-line-length=150 \
-      --ignore=E501,W503,E402,E722
+      --ignore=E501,W503,E402,E722,E203
 ```
 
 **Rules:**
@@ -361,7 +361,7 @@ Run all CI checks locally before pushing:
 
 ```bash
 # Lint
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 
 # Type check
 mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary

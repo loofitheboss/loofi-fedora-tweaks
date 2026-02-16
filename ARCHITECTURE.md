@@ -234,7 +234,7 @@ Three files MUST stay in sync (use `scripts/bump_version.py` for cascade):
 ./run.sh                                                    # Dev run
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v   # Tests
 bash scripts/build_rpm.sh                                   # Build RPM
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 ```
 
 ## Config & Conventions

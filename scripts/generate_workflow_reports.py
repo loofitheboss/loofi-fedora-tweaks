@@ -138,7 +138,7 @@ def generate_test_results(version: str, test_data: dict) -> dict:
         ],
         "lint": {
             "tool": "flake8",
-            "args": "--max-line-length=150 --ignore=E501,W503,E402,E722",
+            "args": "--max-line-length=150 --ignore=E501,W503,E402,E722,E203",
             "status": "pass",
         },
         "release_gate": {

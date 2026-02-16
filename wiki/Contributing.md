@@ -346,7 +346,7 @@ git checkout -b fix/issue-123
 
 ```bash
 # Lint
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 
 # Type check
 mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary

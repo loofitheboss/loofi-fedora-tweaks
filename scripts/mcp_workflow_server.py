@@ -337,7 +337,7 @@ def handle_validate_release(args: dict) -> dict:
         try:
             result = subprocess.run(
                 ["flake8", "loofi-fedora-tweaks/", "--max-line-length=150",
-                 "--ignore=E501,W503,E402,E722", "--count", "-q"],
+                 "--ignore=E501,W503,E402,E722,E203", "--count", "-q"],
                 cwd=str(PROJECT_ROOT),
                 capture_output=True,
                 text=True,

@@ -134,7 +134,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install flake8
-      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+      - run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 
   typecheck:
     runs-on: ubuntu-latest

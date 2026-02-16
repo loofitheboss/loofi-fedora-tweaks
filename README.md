@@ -255,7 +255,7 @@ PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # 5894+ passing
 Lint:
 
 ```bash
-flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722
+flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203
 ```
 
 Type check:

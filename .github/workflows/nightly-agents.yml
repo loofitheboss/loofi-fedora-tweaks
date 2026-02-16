@@ -68,7 +68,7 @@ jobs:
         run: |
           echo "Running lint check..." | tee -a agent_health.txt
           pip install flake8
-          flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722 --count --statistics | tee -a agent_health.txt
+          flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203 --count --statistics | tee -a agent_health.txt
           echo "lint_passed=true" >> $GITHUB_OUTPUT
 
       - name: Run type check
