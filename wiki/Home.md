@@ -6,16 +6,16 @@ Welcome to the official wiki for **Loofi Fedora Tweaks** — a comprehensive des
 
 Loofi Fedora Tweaks is a PyQt6-based system management application that brings together day-to-day maintenance, diagnostics, tuning, networking, security, and automation in one unified interface.
 
-**Current Version**: v41.0.0 "Coverage"
+**Current Version**: v42.0.0 "Sentinel"
 
 ### Key Features
 
-- **28 feature tabs** organized into 8 activity-based categories
+- **29 feature tabs** organized into 8 activity-based categories
 - **4 run modes**: GUI (default), CLI with `--json` output, Daemon scheduler, and Web API
 - **Plugin architecture** with marketplace support for third-party extensions
 - **Atomic Fedora aware**: Auto-detects Traditional Fedora (`dnf`) vs Atomic Fedora (`rpm-ostree`)
 - **Secure privilege escalation**: All root operations use `pkexec` (Polkit), never `sudo`
-- **Comprehensive test suite**: 5894+ tests with 80% coverage
+- **Comprehensive test suite**: 5895 tests with 82% coverage
 
 > **Note**: Before using the automatic wiki publishing workflow, you must enable the Wiki feature in your repository settings (Settings → Features → Wikis). The first push may fail if the wiki hasn't been initialized.
 
@@ -31,7 +31,7 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 
 ### Features & Usage
 
-- **[GUI Tabs Reference](GUI-Tabs-Reference)** — Complete reference for all 28 tabs organized by category
+- **[GUI Tabs Reference](GUI-Tabs-Reference)** — Complete reference for all 29 tabs organized by category
 - **[CLI Reference](CLI-Reference)** — All CLI commands with examples and JSON output
 - **[Configuration](Configuration)** — Config files, themes, QSS styling, app catalog
 
@@ -51,14 +51,14 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 
 ### Reference
 
-- **[Changelog](Changelog)** — Version history highlights from v25.0.0 to v41.0.0
+- **[Changelog](Changelog)** — Version history highlights from v25.0.0 to v42.0.0
 
 ---
 
 ## Quick Links
 
 - **GitHub Repository**: [loofitheboss/loofi-fedora-tweaks](https://github.com/loofitheboss/loofi-fedora-tweaks)
-- **Latest Release**: [v41.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v41.0.0)
+- **Latest Release**: [v42.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v42.0.0)
 - **Issues**: [Issue Tracker](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
 - **README**: [Main README](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/README.md)
 - **Architecture Doc**: [ARCHITECTURE.md](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/ARCHITECTURE.md)
@@ -67,7 +67,7 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 
 ## Project Status
 
-- **Latest Stable**: v41.0.0 "Coverage" (February 2026)
+- **Latest Stable**: v42.0.0 "Sentinel" (February 2026)
 - **Python**: 3.12+
 - **Framework**: PyQt6
 - **Platform**: Fedora 43+
