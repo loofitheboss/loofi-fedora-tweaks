@@ -24,7 +24,7 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ---
 
-## Recent Releases
+## Recent Releases (Latest)
 
 ### v42.0.0 "Sentinel" (2026-02-16)
 
