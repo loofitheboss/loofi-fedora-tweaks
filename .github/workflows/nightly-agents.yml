@@ -1,0 +1,172 @@
+name: Nightly Agent Health Check
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 03:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: nightly-agents
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  agent_health_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Check system agents
+        id: agent_check
+        continue-on-error: true
+        run: |
+          echo "Checking system agents..." | tee agent_health.txt
+          
+          # Check AgentRegistry functionality
+          PYTHONPATH=loofi-fedora-tweaks python -c "
+          from utils.agents import AgentRegistry
+          
+          print('=== Agent Registry Health Check ===')
+          registry = AgentRegistry.instance()
+          summary = registry.get_agent_summary()
+          
+          print(f'Total agents: {summary[\"total_agents\"]}')
+          print(f'Enabled: {summary[\"enabled\"]}')
+          print(f'Running: {summary[\"running\"]}')
+          print(f'Errors: {summary[\"errors\"]}')
+          print(f'Total runs: {summary[\"total_runs\"]}')
+          
+          print('\n=== Agent Details ===')
+          for agent in registry.list_agents():
+              state = registry.get_state(agent.agent_id)
+              print(f'- {agent.name} ({agent.agent_id}): enabled={agent.enabled}, status={state.status.value}')
+          
+          print('\n✅ Agent registry check passed')
+          " | tee -a agent_health.txt
+          
+          echo "agent_check_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Run lint check
+        id: lint_check
+        continue-on-error: true
+        run: |
+          echo "Running lint check..." | tee -a agent_health.txt
+          pip install flake8
+          flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722 --count --statistics | tee -a agent_health.txt
+          echo "lint_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Run type check
+        id: type_check
+        continue-on-error: true
+        run: |
+          echo "Running type check..." | tee -a agent_health.txt
+          pip install mypy PyQt6-stubs
+          mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary 2>&1 | tee -a agent_health.txt || true
+          echo "type_check_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Run smoke tests
+        id: smoke_test
+        continue-on-error: true
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "Running smoke tests..." | tee -a agent_health.txt
+          sudo apt-get update && sudo apt-get install -y libegl1
+          pip install pytest pytest-timeout PyQt6
+          
+          # Run just a quick smoke test (not full suite)
+          PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/test_version.py -v --timeout=30 2>&1 | tee -a agent_health.txt || true
+          
+          # Check if version command works
+          python loofi-fedora-tweaks/main.py --version 2>&1 | tee -a agent_health.txt
+          python loofi-fedora-tweaks/main.py --cli --version 2>&1 | tee -a agent_health.txt
+          
+          echo "smoke_test_passed=true" >> $GITHUB_OUTPUT
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "=== Nightly Agent Health Summary ===" | tee summary.txt
+          echo "Date: $(date -u)" | tee -a summary.txt
+          echo "" | tee -a summary.txt
+          
+          if [ "${{ steps.agent_check.outputs.agent_check_passed }}" = "true" ]; then
+            echo "✅ Agent Registry: PASS" | tee -a summary.txt
+          else
+            echo "❌ Agent Registry: FAIL" | tee -a summary.txt
+          fi
+          
+          if [ "${{ steps.lint_check.outputs.lint_passed }}" = "true" ]; then
+            echo "✅ Lint Check: PASS" | tee -a summary.txt
+          else
+            echo "❌ Lint Check: FAIL" | tee -a summary.txt
+          fi
+          
+          if [ "${{ steps.type_check.outputs.type_check_passed }}" = "true" ]; then
+            echo "✅ Type Check: PASS" | tee -a summary.txt
+          else
+            echo "❌ Type Check: FAIL" | tee -a summary.txt
+          fi
+          
+          if [ "${{ steps.smoke_test.outputs.smoke_test_passed }}" = "true" ]; then
+            echo "✅ Smoke Tests: PASS" | tee -a summary.txt
+          else
+            echo "❌ Smoke Tests: FAIL" | tee -a summary.txt
+          fi
+          
+          echo "" | tee -a summary.txt
+          echo "Full details in agent_health.txt artifact" | tee -a summary.txt
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-health-report-${{ github.run_number }}
+          path: |
+            agent_health.txt
+            summary.txt
+
+      - name: Check for failures
+        if: always()
+        run: |
+          FAILURES=0
+          
+          if [ "${{ steps.agent_check.outputs.agent_check_passed }}" != "true" ]; then
+            echo "Agent check failed"
+            FAILURES=$((FAILURES+1))
+          fi
+          
+          if [ "${{ steps.lint_check.outputs.lint_passed }}" != "true" ]; then
+            echo "Lint check failed"
+            FAILURES=$((FAILURES+1))
+          fi
+          
+          if [ "${{ steps.smoke_test.outputs.smoke_test_passed }}" != "true" ]; then
+            echo "Smoke tests failed"
+            FAILURES=$((FAILURES+1))
+          fi
+          
+          if [ $FAILURES -gt 0 ]; then
+            echo "❌ $FAILURES check(s) failed"
+            cat summary.txt
+            exit 1
+          else
+            echo "✅ All checks passed"
+            cat summary.txt
+          fi

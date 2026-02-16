@@ -1,0 +1,283 @@
+name: Agent Dispatch
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to process'
+        required: true
+        type: number
+      target_version:
+        description: 'Target version (e.g., v42.0.0 or 42.0.0)'
+        required: true
+        type: string
+      phase:
+        description: 'Phase to execute (plan, design, build, test, doc, package, release, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - plan
+          - design
+          - build
+          - test
+          - doc
+          - package
+          - release
+      assistant:
+        description: 'Assistant to use (copilot, claude, codex)'
+        required: true
+        default: 'copilot'
+        type: choice
+        options:
+          - copilot
+          - claude
+          - codex
+      live_run:
+        description: 'Run without --dry-run (DANGER: will modify repository)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: agent-dispatch-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  extract_version:
+    if: github.event_name == 'issues' && contains(github.event.label.name, 'agent-task')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.extract.outputs.version }}
+      has_version: ${{ steps.extract.outputs.has_version }}
+    steps:
+      - name: Extract version from issue
+        id: extract
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title;
+            const body = issue.body || '';
+            
+            // Pattern: vX.Y.Z or X.Y.Z
+            const versionPattern = /v?(\d+\.\d+\.?\d*)/g;
+            
+            let version = null;
+            
+            // Try title first
+            const titleMatch = title.match(versionPattern);
+            if (titleMatch) {
+              version = titleMatch[0];
+            } else {
+              // Try body
+              const bodyMatch = body.match(versionPattern);
+              if (bodyMatch) {
+                version = bodyMatch[0];
+              }
+            }
+            
+            if (version) {
+              core.setOutput('version', version);
+              core.setOutput('has_version', 'true');
+              core.info(`Extracted version: ${version}`);
+            } else {
+              core.setOutput('has_version', 'false');
+              core.warning('No version found in issue title or body');
+            }
+
+  dispatch_from_issue:
+    needs: extract_version
+    if: needs.extract_version.outputs.has_version == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run workflow (dry-run by default)
+        id: run_workflow
+        continue-on-error: true
+        run: |
+          VERSION="${{ needs.extract_version.outputs.version }}"
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          
+          # Default to dry-run for safety (issue-triggered runs)
+          python scripts/workflow_runner.py \
+            --phase all \
+            --target-version "$VERSION" \
+            --assistant copilot \
+            --mode write \
+            --issue "$ISSUE_NUM" \
+            --dry-run \
+            --lock-ttl-minutes 120 > workflow_output.txt 2>&1
+          
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Post workflow results to issue
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const issueNumber = context.payload.issue.number;
+            const exitCode = '${{ steps.run_workflow.outputs.exit_code }}';
+            
+            let output = '';
+            try {
+              output = fs.readFileSync('workflow_output.txt', 'utf8');
+            } catch (e) {
+              output = 'No output captured';
+            }
+            
+            // Truncate if too long
+            if (output.length > 50000) {
+              output = output.substring(0, 50000) + '\n\n... (truncated)';
+            }
+            
+            const status = exitCode === '0' ? '✅ Success' : '❌ Failed';
+            
+            const comment = `## Agent Dispatch Results (Dry Run)
+            
+            **Status**: ${status}
+            **Exit Code**: ${exitCode}
+            **Version**: ${{ needs.extract_version.outputs.version }}
+            **Issue**: #${issueNumber}
+            
+            <details>
+            <summary>Workflow Output</summary>
+            
+            \`\`\`
+            ${output}
+            \`\`\`
+            
+            </details>
+            
+            > ℹ️ This was a **dry-run**. To execute for real, use workflow_dispatch with \`live_run: true\`.
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: comment
+            });
+
+  dispatch_manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run workflow
+        id: run_workflow
+        continue-on-error: true
+        env:
+          DRY_RUN_FLAG: ${{ inputs.live_run == false && '--dry-run' || '' }}
+        run: |
+          python scripts/workflow_runner.py \
+            --phase "${{ inputs.phase }}" \
+            --target-version "${{ inputs.target_version }}" \
+            --assistant "${{ inputs.assistant }}" \
+            --mode write \
+            --issue "${{ inputs.issue_number }}" \
+            $DRY_RUN_FLAG \
+            --lock-ttl-minutes 120 > workflow_output.txt 2>&1
+          
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Upload workflow output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-output
+          path: workflow_output.txt
+
+      - name: Post results to issue
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const issueNumber = ${{ inputs.issue_number }};
+            const exitCode = '${{ steps.run_workflow.outputs.exit_code }}';
+            const isDryRun = ${{ inputs.live_run == false }};
+            
+            let output = '';
+            try {
+              output = fs.readFileSync('workflow_output.txt', 'utf8');
+            } catch (e) {
+              output = 'No output captured';
+            }
+            
+            // Truncate if too long
+            if (output.length > 50000) {
+              output = output.substring(0, 50000) + '\n\n... (truncated)';
+            }
+            
+            const status = exitCode === '0' ? '✅ Success' : '❌ Failed';
+            const runType = isDryRun ? 'Dry Run' : '🔴 **LIVE RUN**';
+            
+            const comment = `## Agent Dispatch Results (${runType})
+            
+            **Status**: ${status}
+            **Exit Code**: ${exitCode}
+            **Phase**: ${{ inputs.phase }}
+            **Version**: ${{ inputs.target_version }}
+            **Assistant**: ${{ inputs.assistant }}
+            **Issue**: #${issueNumber}
+            
+            <details>
+            <summary>Workflow Output</summary>
+            
+            \`\`\`
+            ${output}
+            \`\`\`
+            
+            </details>
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: comment
+            });
+
+      - name: Fail job if workflow failed
+        if: steps.run_workflow.outputs.exit_code != '0'
+        run: exit 1
