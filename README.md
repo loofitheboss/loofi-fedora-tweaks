@@ -287,6 +287,56 @@ bash scripts/build_rpm.sh
 
 ---
 
+## AI-Assisted Development (GitHub Copilot)
+
+This repository is fully configured for GitHub Copilot coding agent with comprehensive custom instructions:
+
+### Instruction Files
+
+- **Repository-wide**: `.github/copilot-instructions.md` (211 lines) - Architecture, patterns, testing
+- **Path-specific**: `.github/instructions/*.instructions.md` - Context-aware instructions
+  - `copilot.instructions.md` - Comprehensive coding guidelines
+  - `test.instructions.md` - Testing patterns (applies to test files)
+  - `workflow.instructions.md` - Workflow pipeline rules
+  - `primary.instructions.md` - AI developer role and token discipline
+  - `system_hardening_and_stabilization_guide.md` - Security and privilege rules
+- **Agent instructions**: Root-level `AGENTS.md`, `CLAUDE.md`, `ARCHITECTURE.md`
+- **VS Code agents**: `.github/agents/*.agent.md` - 8 specialized agents
+
+### Quick Start with Copilot
+
+```bash
+# Ask Copilot to implement a feature
+# Copilot will automatically use repository instructions
+
+# Example prompts:
+# "Add a new feature tab for disk encryption management"
+# "Create tests for the new hardware profile detection"
+# "Refactor utils/security.py to use PrivilegedCommand"
+```
+
+### MCP Server Integration
+
+The repository includes MCP (Model Context Protocol) server configuration:
+
+- `.copilot/mcp-config.json` - GitHub MCP and workflow automation
+- `docs/mcp-setup.md` - Setup guide for VS Code and Copilot CLI
+
+For detailed MCP setup instructions, see [`docs/mcp-setup.md`](docs/mcp-setup.md).
+
+### Key Coding Principles for AI
+
+1. ✅ Use `PrivilegedCommand.dnf()` - never hardcode `dnf`
+2. ✅ Inherit from `BaseTab` for command tabs
+3. ✅ Extract subprocess calls to `utils/` modules
+4. ✅ Mock all system calls in tests (no root required)
+5. ✅ Set `timeout` on all subprocess operations
+6. ✅ Support both Traditional and Atomic Fedora
+
+For complete instructions, see `.github/copilot-instructions.md`.
+
+---
+
 ## CI/CD Pipeline
 
 Every push to `master` and every pull request runs through two pipelines:
