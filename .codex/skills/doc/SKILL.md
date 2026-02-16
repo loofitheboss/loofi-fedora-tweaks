@@ -1,4 +1,3 @@
-````skill
 ---
 name: doc
 description: Update documentation (CHANGELOG, README, release notes) for the current version.
@@ -43,5 +42,3 @@ description: Update documentation (CHANGELOG, README, release notes) for the cur
 - Must complete P4 (Test) before starting P5
 - No undocumented changes — every task maps to a CHANGELOG entry
 - Reference `.github/workflow/prompts/document.md` for full prompt
-
-````

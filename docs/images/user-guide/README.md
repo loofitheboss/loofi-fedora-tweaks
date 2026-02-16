@@ -4,9 +4,19 @@ Canonical screenshot assets for user-facing docs.
 
 **Last verified**: v41.0.0 "Coverage"
 
-**Status**: Screenshots were last captured at v32.0.0 "Abyss" and need to be
-recaptured to reflect the current v41.0.0 UI (theme refinements from v34-v39,
-QSS objectName migration from v39, and new tab layouts from v37).
+**Status**: 🔴 Screenshots require updating
+
+Screenshots were last captured at v32.0.0 "Abyss" (9 months ago) and **need to be
+recaptured** to reflect the current v41.0.0 UI:
+
+- Theme refinements from v34-v39
+- QSS objectName migration from v39
+- New tab layouts from v37 (Extensions, Backup tabs)
+- Updated dashboard widgets from v38-v40
+- Coverage reporting UI from v41
+
+**Automation Available**: Use `python scripts/capture_screenshots.py` for guided
+manual capture process with detailed instructions and status checking.
 
 ## Current Files
 
@@ -27,17 +37,59 @@ QSS objectName migration from v39, and new tab layouts from v37).
 - `docs/ADVANCED_ADMIN_GUIDE.md`
 - `README.md`
 
-## Regeneration Instructions
+## Quick Start
 
-Screenshots must be captured manually on a running instance. To regenerate:
+**Automated Guide**:
+```bash
+python scripts/capture_screenshots.py
+```
 
-1. Launch the app: `./run.sh` or `PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py`
-2. Set the window to a consistent size (e.g., 1280x800).
-3. Use the default dark theme (Abyss Dark / `modern.qss`).
-4. Navigate to each tab listed above and capture the screenshot.
-5. Save with the **same filename** to avoid breaking doc references.
-6. Optimize images: `optipng -o5 *.png` or similar.
-7. Verify rendering in Markdown preview before merging.
+This script provides:
+- ✅ Step-by-step navigation instructions for each screenshot
+- ✅ Status check of existing screenshots
+- ✅ Post-processing commands for optimization
+- ✅ Verification checklist
+
+**Content Guidelines**: See [`../SCREENSHOT_CONTENT_GUIDE.md`](../SCREENSHOT_CONTENT_GUIDE.md) for
+detailed specifications of what each screenshot should display.
+
+## Manual Regeneration Instructions
+
+If you prefer manual capture without the script:
+
+1. **Launch the app**: 
+   ```bash
+   ./run.sh
+   # OR
+   PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py
+   ```
+
+2. **Window setup**:
+   - Set consistent size: 1280x800 or 1440x900 (recommended)
+   - Do NOT maximize window (for consistent sizing)
+   - Use default dark theme (Abyss Dark / `modern.qss`)
+
+3. **Screenshot tool**:
+   - GNOME: Press PrtSc or use GNOME Screenshot
+   - KDE: Spectacle (`spectacle -r` for region capture)
+   - CLI: `scrot`, `flameshot`, or `import` (ImageMagick)
+
+4. **Capture each tab** (see table below)
+
+5. **Save with exact filename** to avoid breaking doc references
+
+6. **Optimize images**:
+   ```bash
+   cd docs/images/user-guide/
+   optipng -o5 *.png
+   # OR
+   pngcrush -brute *.png
+   ```
+
+7. **Verify rendering**:
+   - Check file sizes: `ls -lh *.png` (should be < 200KB each)
+   - Preview in markdown: `grip README.md` or GitHub preview
+   - Test all documentation files render correctly
 
 ### Tabs to screenshot (priority order)
 
@@ -59,3 +111,54 @@ Screenshots must be captured manually on a running instance. To regenerate:
 - `backup-tab.png` -- Manage > Backup (new in v37)
 - `diagnostics-tab.png` -- Developer > Diagnostics
 - `agents-tab.png` -- Automation > Agents
+
+## UI Changes Since v32 (When Screenshots Were Last Captured)
+
+**v33-v36**: Base stabilization, no major UI changes
+
+**v37 "Convergence"**:
+- ✨ New **Extensions** tab under Manage
+- ✨ New **Backup** tab under Manage
+- Tab organization improvements
+
+**v38 "Precision"**:
+- Dashboard widgets redesign
+- Better responsive layouts
+
+**v39 "Prism"**:
+- 🎨 QSS objectName migration (cleaner CSS targeting)
+- Services layer integration (no direct UI impact)
+
+**v40 "Foundation"**:
+- Security hardening (UI prompts may look slightly different)
+- Subprocess timeout enforcement
+
+**v41 "Coverage"** (current):
+- No UI changes (pure testing and CI release)
+
+**Priority**: Screenshots should reflect v37+ changes, especially new tabs.
+
+## Legacy Screenshots (Archived)
+
+The following legacy screenshots are stored in `docs/images/archive-v32/`:
+
+- `boot_tab.png` (57KB) - May be outdated, check if still referenced
+- `dashboard.png` (36KB) - Likely superseded by `home-dashboard.png`
+- `marketplace.png` (64KB) - Likely superseded by `community-marketplace.png`
+
+**Action needed**: 
+1. Search codebase for references: `grep -r "boot_tab\|dashboard\.png\|marketplace\.png" docs/`
+2. If unreferenced, keep archived; otherwise replace with updated captures
+3. If referenced, update with new captures or redirect to user-guide images
+
+## Logo and Icon Assets
+
+Application branding assets in `loofi-fedora-tweaks/assets/`:
+
+- `loofi-fedora-tweaks.png` (512x512, 162KB) - Main logo, referenced in README
+- `icon.png` (512x512, 162KB) - App icon
+
+**Status**: ✅ Logos are current and appropriate for v41.0.0
+
+These are not screenshots but generated/designed assets. No update needed unless
+rebranding is desired.

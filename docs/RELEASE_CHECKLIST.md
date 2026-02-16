@@ -50,6 +50,15 @@ After running the bump script, fill in the scaffolded files:
 - [ ] `docs/USER_GUIDE.md` — Update if behavior changed
 - [ ] `docs/TROUBLESHOOTING.md` — Update if new failure modes added
 
+### Screenshots (if UI changed)
+
+If the release includes UI changes, verify screenshots are current:
+
+- [ ] Check screenshot status: `python scripts/capture_screenshots.py`
+- [ ] If outdated, follow `docs/SCREENSHOT_UPDATE_GUIDE.md` to recapture
+- [ ] Verify screenshots render in all documentation
+- [ ] Update `docs/images/user-guide/README.md` with "Last verified" date
+
 ---
 
 ## 2. Pre-Push Validation
