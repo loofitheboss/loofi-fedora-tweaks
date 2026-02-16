@@ -694,7 +694,7 @@ def run_phase(
             "phase_name": "P3 BUILD",
             "model": phase_models["build"],
             "inputs": [artifacts["arch"], artifacts["tasks"]],
-            "prompt": PROMPTS_DIR / "implement.md",
+            "prompt": PROMPTS_DIR / "build.md",
             "instruction": "Implement the architecture spec using minimal diffs.",
             "artifacts": [],
         },
