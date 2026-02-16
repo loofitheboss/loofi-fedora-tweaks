@@ -116,7 +116,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         try:
             summary = VirtualizationManager.get_summary()
             self.banner_label.setText(summary)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError, TypeError) as e:
             logger.debug("Failed to refresh virtualization status banner: %s", e)
             self.banner_label.setText(self.tr("Could not query virtualization status."))
 

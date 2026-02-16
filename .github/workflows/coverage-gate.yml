@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 30
     env:
       QT_QPA_PLATFORM: offscreen
-      COVERAGE_THRESHOLD: "79"
+      COVERAGE_THRESHOLD: "80"
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
@@ -30,6 +30,8 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
           cache-dependency-path: requirements.txt
+      - name: Stabilization rules
+        run: python3 scripts/check_stabilization_rules.py
       - run: pip install -r requirements.txt pytest pytest-cov pytest-timeout PyQt6
       - name: Run tests with coverage
         continue-on-error: true

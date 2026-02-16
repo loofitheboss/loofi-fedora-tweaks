@@ -154,7 +154,7 @@ class AgentScheduler:
             # Publish agent completion event
             self._publish_agent_event(agent, overall_success, results)
 
-        except Exception as exc:
+        except (RuntimeError, ValueError, TypeError, OSError) as exc:
             logger.error(
                 "Agent '%s' execution failed: %s",
                 agent.name,

@@ -96,8 +96,9 @@ class ConfigManager:
                 # rpm-ostree status doesn't directly list repos, fall back gracefully
                 return repos
             else:
+                package_manager = SystemManager.get_package_manager()
                 result = subprocess.run(
-                    ["dnf", "repolist", "--enabled", "-q"],
+                    [package_manager, "repolist", "--enabled", "-q"],
                     capture_output=True,
                     text=True,
                     check=False,

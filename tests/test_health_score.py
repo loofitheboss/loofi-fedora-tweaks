@@ -4,6 +4,7 @@ Tests for HealthScoreManager — v31.0 Smart UX
 import unittest
 import sys
 import os
+import subprocess
 from unittest.mock import patch, MagicMock
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -201,7 +202,7 @@ class TestHealthScoreManager(unittest.TestCase):
         score, rec = HealthScoreManager._score_updates()
         self.assertEqual(score, 85)
 
-    @patch('subprocess.run', side_effect=Exception("timeout"))
+    @patch('subprocess.run', side_effect=subprocess.SubprocessError("timeout"))
     def test_score_updates_error(self, mock_run):
         """Update check error returns moderate score."""
         score, rec = HealthScoreManager._score_updates()

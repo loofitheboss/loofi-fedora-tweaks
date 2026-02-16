@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v42.0.0 "Sentinel"
+# Loofi Fedora Tweaks v43.0.0 "Stabilization-Only"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v42.0.0">
-    <img src="https://img.shields.io/badge/Release-v42.0.0-blue?style=for-the-badge&logo=github" alt="Release v42.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v43.0.0">
+    <img src="https://img.shields.io/badge/Release-v43.0.0-blue?style=for-the-badge&logo=github" alt="Release v43.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -39,18 +39,18 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v42.0.0?
+## What Is New in v43.0.0?
 
-`v42.0.0 "Sentinel"` is a hardening & polish release — exception narrowing, hardcoded dnf elimination, and UX improvements:
+`v43.0.0 "Stabilization-Only"` is a strict hardening release focused on policy enforcement and regression-proofing:
 
-- **106 exception handlers narrowed** — `except Exception` replaced with specific types across 30 files.
-- **25+ hardcoded `dnf` references eliminated** — all use `PrivilegedCommand.dnf()` or `SystemManager.get_package_manager()`.
-- **Daemon systemd hardening** — `NoNewPrivileges`, `ProtectSystem=strict`, `SystemCallFilter`.
-- **Software tab search/filter** — case-insensitive filtering by name/description.
-- **High-contrast theme** — new `highcontrast.qss` with settings toggle.
-- **Test stability fixes** — resolved sys.modules pollution causing 35 cross-test failures.
+- **Stabilization policy checker added** — AST gate enforces timeout usage, UI subprocess ban, hardcoded executable `dnf` bans, and explicit broad-exception allowlist boundaries.
+- **CI/release hardening gate enabled** — checker now runs in `ci.yml`, `auto-release.yml`, and `coverage-gate.yml`.
+- **Coverage gates normalized to 80%** across all workflow files.
+- **Wizard health checks extracted to utils** — `ui/wizard.py` no longer runs subprocess directly.
+- **Remaining executable hardcoded `dnf` invocations removed** from package/update/health/export stacks.
+- **5878 tests passing**, 82.33% coverage.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v42.0.0.md`](docs/releases/RELEASE-NOTES-v42.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v43.0.0.md`](docs/releases/RELEASE-NOTES-v43.0.0.md)
 
 ---
 

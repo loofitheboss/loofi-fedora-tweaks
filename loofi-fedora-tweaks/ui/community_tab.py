@@ -343,7 +343,7 @@ class CommunityTab(QWidget, PluginInterface):
                 self.featured_list.addItem(
                     QListWidgetItem(self.tr("No featured plugins available."))
                 )
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError, ValueError, TypeError) as e:
             self.featured_list.clear()
             self.featured_list.addItem(QListWidgetItem(f"Error: {e}"))
 

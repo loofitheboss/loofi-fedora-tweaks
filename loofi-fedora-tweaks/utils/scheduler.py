@@ -340,10 +340,11 @@ class TaskScheduler:
                 else:
                     return (True, "System is up to date")
             else:
-                if not shutil.which("dnf"):
+                package_manager = SystemManager.get_package_manager()
+                if not shutil.which(package_manager):
                     return (True, "System is up to date (dnf not available)")
                 result = subprocess.run(
-                    ["dnf", "check-update", "-q"],
+                    [package_manager, "check-update", "-q"],
                     capture_output=True,
                     text=True,
                     check=False,

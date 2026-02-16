@@ -106,7 +106,7 @@ class SystemInfoTab(QWidget, PluginInterface):
                 self.labels["battery"].setText(battery)
             else:
                 self.labels["battery"].setText(self.tr("No battery detected"))
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError, TypeError) as e:
             logger.debug("Failed to refresh system info: %s", e)
 
     def _export_report(self):
@@ -124,5 +124,5 @@ class SystemInfoTab(QWidget, PluginInterface):
         if path:
             try:
                 ReportExporter.save_report(path, fmt)
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError, TypeError) as e:
                 logger.debug("Failed to export system report: %s", e)

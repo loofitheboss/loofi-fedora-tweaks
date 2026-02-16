@@ -52,7 +52,7 @@ class APIServer:
             try:
                 token = AuthManager.issue_token(api_key)
                 return {"access_token": token, "token_type": "bearer"}
-            except Exception as e:
+            except (RuntimeError, ValueError, OSError) as e:
                 raise HTTPException(status_code=401, detail=str(e))
 
         @app.post("/api/key")

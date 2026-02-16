@@ -68,7 +68,7 @@ def _show_error_dialog(exc: Exception) -> None:
         msg.setText(_format_user_message(exc))
         msg.setDetailedText(traceback.format_exc())
         msg.exec()
-    except Exception as e:
+    except (ImportError, RuntimeError, OSError, ValueError, TypeError) as e:
         # If we can't show a dialog, just log it
         logger.debug("Failed to show error dialog: %s", e)
 

@@ -69,8 +69,9 @@ class AnsibleExporter:
                         ]
                 return []
             else:
+                package_manager = SystemManager.get_package_manager()
                 result = subprocess.run(
-                    ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
+                    [package_manager, "repoquery", "--userinstalled", "--qf", "%{name}"],
                     capture_output=True,
                     text=True,
                     timeout=60,
@@ -165,8 +166,9 @@ class AnsibleExporter:
                 # On Atomic, repos are managed differently; fall back gracefully
                 return []
             else:
+                package_manager = SystemManager.get_package_manager()
                 result = subprocess.run(
-                    ["dnf", "repolist", "--enabled", "-q"],
+                    [package_manager, "repolist", "--enabled", "-q"],
                     capture_output=True,
                     text=True,
                     timeout=30,

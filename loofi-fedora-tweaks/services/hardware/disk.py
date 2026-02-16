@@ -105,6 +105,7 @@ class DiskManager:
                 capture_output=True,
                 text=True,
                 check=False,
+                timeout=10,
             )
             if output.returncode != 0:
                 return results

@@ -160,8 +160,9 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
                         ]
                 return []
             else:
+                package_manager = SystemManager.get_package_manager()
                 result = subprocess.run(
-                    ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
+                    [package_manager, "repoquery", "--userinstalled", "--qf", "%{name}"],
                     capture_output=True,
                     text=True,
                     timeout=60,

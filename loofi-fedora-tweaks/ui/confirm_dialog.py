@@ -186,7 +186,7 @@ class ConfirmActionDialog(QDialog):
                 else:
                     mgr.set("confirm_dangerous_actions", False)
                 mgr.save()
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError, TypeError) as e:
                 logger.debug("Failed to save confirmation preference: %s", e)
 
         # Record snapshot request
@@ -239,7 +239,7 @@ class ConfirmActionDialog(QDialog):
                         return True
                 if not mgr.get("confirm_dangerous_actions"):
                     return True
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError, TypeError) as e:
                 logger.debug("Failed to read confirmation preference: %s", e)
 
         dialog = ConfirmActionDialog(

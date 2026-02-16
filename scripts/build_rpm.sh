@@ -16,6 +16,8 @@ mkdir -p "$STAGE/loofi-fedora-tweaks"
 cp -r loofi-fedora-tweaks/* "$STAGE/loofi-fedora-tweaks/"
 cp loofi-fedora-tweaks.desktop "$STAGE/"
 cp LICENSE "$STAGE/"
+cp README.md "$STAGE/"
+cp loofi-fedora-tweaks.1 "$STAGE/"
 
 # Ensure Python cache artifacts are never packaged
 find "$STAGE" -type d -name "__pycache__" -prune -exec rm -rf {} +

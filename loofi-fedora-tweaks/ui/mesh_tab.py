@@ -344,7 +344,7 @@ class MeshTab(QWidget, PluginInterface):
             else:
                 self.log(self.tr("Failed to sync clipboard to {}.").format(peer.name))
 
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError, TypeError) as e:
             self.log(self.tr("Error syncing clipboard: {}").format(str(e)))
 
     def on_generate_pairing_code(self):

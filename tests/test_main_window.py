@@ -2450,7 +2450,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
         uc_mod = sys.modules["utils.update_checker"]
         mock_info = MagicMock()
         mock_info.is_newer = True
-        uc_mod.UpdateChecker.check = MagicMock(return_value=mock_info)
+        uc_mod.UpdateChecker.check_for_updates = MagicMock(return_value=mock_info)
 
         disk_mod = sys.modules["services.hardware.disk"]
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)
@@ -2465,7 +2465,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
         uc_mod = sys.modules["utils.update_checker"]
         mock_info = MagicMock()
         mock_info.is_newer = False
-        uc_mod.UpdateChecker.check = MagicMock(return_value=mock_info)
+        uc_mod.UpdateChecker.check_for_updates = MagicMock(return_value=mock_info)
 
         disk_mod = sys.modules["services.hardware.disk"]
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)
@@ -2476,7 +2476,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
     def test_refresh_update_check_exception(self):
         """_refresh_status_indicators handles update check failure."""
         uc_mod = sys.modules["utils.update_checker"]
-        uc_mod.UpdateChecker.check = MagicMock(side_effect=RuntimeError("timeout"))
+        uc_mod.UpdateChecker.check_for_updates = MagicMock(side_effect=RuntimeError("timeout"))
 
         disk_mod = sys.modules["services.hardware.disk"]
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)

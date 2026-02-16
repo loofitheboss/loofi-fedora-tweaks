@@ -720,7 +720,7 @@ class TestInstallWorker(unittest.TestCase):
     @patch("utils.devtools.DevToolsManager.install_rustup")
     def test_run_rustup_exception(self, mock_install):
         """Rustup install exception is caught and emitted."""
-        mock_install.side_effect = Exception("curl failed")
+        mock_install.side_effect = RuntimeError("curl failed")
         w = self._make_worker("rustup")
         results = []
         w.finished.connect(lambda t, s, m: results.append((t, s, m)))

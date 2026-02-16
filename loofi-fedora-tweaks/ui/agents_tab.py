@@ -336,7 +336,7 @@ class AgentsTab(BaseTab):
         """Periodic refresh of all data."""
         try:
             self._refresh_dashboard()
-        except Exception as exc:
+        except (RuntimeError, OSError, ValueError, TypeError, KeyError) as exc:
             logger.debug("Dashboard refresh failed: %s", exc)
 
     def _refresh_dashboard(self):

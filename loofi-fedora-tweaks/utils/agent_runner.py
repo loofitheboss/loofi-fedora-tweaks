@@ -118,7 +118,7 @@ class AgentExecutor:
             result.action_id = action.action_id
             return result
 
-        except Exception as exc:
+        except (RuntimeError, ValueError, TypeError, OSError, subprocess.SubprocessError) as exc:
             logger.error(
                 "Agent %s action %s failed: %s",
                 agent.name,
@@ -446,14 +446,15 @@ class AgentExecutor:
                     data={"dnf_updates": 0, "alert": False},
                 )
             else:
-                if not shutil.which("dnf"):
+                package_manager = SystemManager.get_package_manager()
+                if not shutil.which(package_manager):
                     return AgentResult(
                         success=True,
                         message="DNF not available on this system",
                         data={"dnf_updates": 0, "alert": False},
                     )
                 result = subprocess.run(
-                    ["dnf", "check-update", "--quiet"],
+                    [package_manager, "check-update", "--quiet"],
                     capture_output=True,
                     text=True,
                     timeout=60,
@@ -738,7 +739,7 @@ class AgentScheduler:
             if self._on_result:
                 try:
                     self._on_result(agent.agent_id, result)
-                except Exception as exc:
+                except (RuntimeError, ValueError, TypeError, OSError) as exc:
                     logger.error("Result callback error: %s", exc)
 
             # Send notifications
@@ -769,7 +770,7 @@ class AgentScheduler:
             if self._on_result:
                 try:
                     self._on_result(agent_id, result)
-                except Exception as exc:
+                except (RuntimeError, ValueError, TypeError, OSError) as exc:
                     logger.error("Result callback error in run_agent_now: %s", exc)
 
             # Send notifications
@@ -788,5 +789,5 @@ class AgentScheduler:
                 self._notifier = AgentNotifier()
             notif_config = AgentNotificationConfig.from_dict(agent.notification_config)
             self._notifier.notify(agent.agent_id, agent.name, result, notif_config)
-        except Exception as exc:
+        except (ImportError, RuntimeError, ValueError, TypeError, OSError) as exc:
             logger.debug("Notification skipped: %s", exc)

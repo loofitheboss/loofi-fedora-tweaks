@@ -116,7 +116,7 @@ class PluginAdapter(PluginInterface):
                 )
             logger.debug("Created widget for %s", self._wrapped.info.name)
             return widget
-        except Exception as e:
+        except (TypeError, AttributeError, RuntimeError, ValueError) as e:
             logger.error(
                 "Failed to create widget for %s: %s", self._wrapped.info.name, e
             )
@@ -135,7 +135,7 @@ class PluginAdapter(PluginInterface):
         if hasattr(self._wrapped, "on_load") and callable(self._wrapped.on_load):
             try:
                 self._wrapped.on_load()
-            except Exception as e:
+            except (TypeError, AttributeError, RuntimeError, ValueError) as e:
                 logger.warning(
                     "Plugin %s on_load() failed: %s", self._wrapped.info.name, e
                 )

@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        42.0.0
+Version:        43.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -98,6 +98,9 @@ PYTHONPATH=loofi-fedora-tweaks python3 -c "import main; print('Import OK')" || :
 %preun
 %systemd_user_preun %{name}.service
 
+%postun
+%systemd_user_postun_with_restart %{name}.service
+
 %files
 %license LICENSE
 %doc README.md
@@ -116,6 +119,15 @@ PYTHONPATH=loofi-fedora-tweaks python3 -c "import main; print('Import OK')" || :
 %{_mandir}/man1/%{name}.1*
 
 %changelog
+* Mon Feb 16 2026 Loofi <loofi@example.com> - 43.0.0-1
+- v43.0.0 "Stabilization-Only" — Strict Compliance
+- Added AST stabilization policy gate (timeouts, UI subprocess, hardcoded dnf, broad-exception allowlist)
+- Enforced checker in CI and auto-release workflows
+- Raised all coverage thresholds to 80%
+- Extracted wizard health checks to utils/wizard_health.py (UI now has zero subprocess calls)
+- Eliminated remaining executable hardcoded dnf invocations in package/update/health/export stacks
+- Narrowed broad exceptions to explicit handlers and boundary allowlist
+
 * Mon Feb 16 2026 Loofi <loofi@example.com> - 42.0.0-1
 - v42.0.0 "Sentinel" — Hardening & Polish
 - 106 exception handlers narrowed to specific types across 30 files

@@ -125,7 +125,7 @@ def main():
             from PyQt6.QtWidgets import QApplication, QMessageBox
             from PyQt6.QtCore import QTranslator, QLocale
             from ui.main_window import MainWindow
-        except Exception as exc:
+        except ImportError as exc:
             _log.critical("Failed to import GUI modules: %s", exc, exc_info=True)
             _notify_error("Loofi — Import Error", str(exc))
             sys.exit(1)
@@ -167,7 +167,7 @@ def main():
             _log.info("MainWindow shown successfully")
             sys.exit(app.exec())
 
-        except Exception as exc:
+        except (OSError, RuntimeError, ValueError, ImportError) as exc:
             _log.critical("GUI startup crashed: %s", exc, exc_info=True)
             # Try to show a Qt error dialog if QApplication exists
             try:
@@ -178,7 +178,7 @@ def main():
                         f"The application failed to start:\n\n{exc}\n\n"
                         f"Check the log at:\n{LOG_FILE}",
                     )
-            except Exception as e:
+            except (RuntimeError, OSError, ValueError) as e:
                 _log.debug("Failed to show Qt error dialog: %s", e)
             _notify_error("Loofi — Startup Crash", str(exc))
             print(f"FATAL: {exc}", file=sys.stderr)

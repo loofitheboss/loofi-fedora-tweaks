@@ -25,6 +25,12 @@ class DnfPackageService(BasePackageService):
     Delegates to DNF package manager for traditional Fedora installations.
     """
 
+    @staticmethod
+    def _package_manager_binary() -> str:
+        """Return the non-atomic package manager binary for this service."""
+        package_manager = SystemManager.get_package_manager()
+        return "dnf" if package_manager == "rpm-ostree" else package_manager
+
     def install(
         self,
         packages: List[str],
@@ -41,9 +47,14 @@ class DnfPackageService(BasePackageService):
             )
 
         desc = description or f"Installing {len(packages)} package(s) with DNF"
+        package_manager = self._package_manager_binary()
 
         # Use CommandWorker for async execution
-        worker = CommandWorker("pkexec", ["dnf", "install", "-y"] + packages, description=desc)
+        worker = CommandWorker(
+            "pkexec",
+            [package_manager, "install", "-y"] + packages,
+            description=desc,
+        )
 
         if callback:
             worker.progress.connect(lambda msg, pct: callback(msg, pct))
@@ -71,7 +82,12 @@ class DnfPackageService(BasePackageService):
             return ActionResult(success=False, message="No packages specified")
 
         desc = description or f"Removing {len(packages)} package(s) with DNF"
-        worker = CommandWorker("pkexec", ["dnf", "remove", "-y"] + packages, description=desc)
+        package_manager = self._package_manager_binary()
+        worker = CommandWorker(
+            "pkexec",
+            [package_manager, "remove", "-y"] + packages,
+            description=desc,
+        )
 
         if callback:
             worker.progress.connect(lambda msg, pct: callback(msg, pct))
@@ -89,12 +105,13 @@ class DnfPackageService(BasePackageService):
         callback: Optional[Callable[..., None]] = None
     ) -> ActionResult:
         """Update packages using DNF with pkexec."""
+        package_manager = self._package_manager_binary()
         if packages:
             desc = description or f"Updating {len(packages)} package(s) with DNF"
-            args = ["pkexec", "dnf", "update", "-y"] + packages
+            args = ["pkexec", package_manager, "update", "-y"] + packages
         else:
             desc = description or "Updating all packages with DNF"
-            args = ["pkexec", "dnf", "update", "-y"]
+            args = ["pkexec", package_manager, "update", "-y"]
 
         worker = CommandWorker("pkexec", args[1:], description=desc)
         if callback:
@@ -107,7 +124,12 @@ class DnfPackageService(BasePackageService):
 
     def search(self, query: str, *, limit: int = 50) -> ActionResult:
         """Search for packages using DNF."""
-        worker = CommandWorker("dnf", ["search", query], description=f"Searching for '{query}'")
+        package_manager = self._package_manager_binary()
+        worker = CommandWorker(
+            package_manager,
+            ["search", query],
+            description=f"Searching for '{query}'",
+        )
         worker.start()
         worker.wait()
         result = worker.get_result()
@@ -122,7 +144,12 @@ class DnfPackageService(BasePackageService):
 
     def info(self, package: str) -> ActionResult:
         """Get package information using DNF."""
-        worker = CommandWorker("dnf", ["info", package], description=f"Getting info for '{package}'")
+        package_manager = self._package_manager_binary()
+        worker = CommandWorker(
+            package_manager,
+            ["info", package],
+            description=f"Getting info for '{package}'",
+        )
         worker.start()
         worker.wait()
         result = worker.get_result()
@@ -135,7 +162,12 @@ class DnfPackageService(BasePackageService):
 
     def list_installed(self) -> ActionResult:
         """List installed packages using DNF."""
-        worker = CommandWorker("dnf", ["list", "installed"], description="Listing installed packages")
+        package_manager = self._package_manager_binary()
+        worker = CommandWorker(
+            package_manager,
+            ["list", "installed"],
+            description="Listing installed packages",
+        )
         worker.start()
         worker.wait()
         result = worker.get_result()

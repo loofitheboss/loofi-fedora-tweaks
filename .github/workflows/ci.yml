@@ -29,7 +29,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  COVERAGE_THRESHOLD: "79"
+  COVERAGE_THRESHOLD: "80"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/ci.yml
@@ -72,6 +72,16 @@ jobs:
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: pip install mypy PyQt6-stubs
       - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
+
+  stabilization_rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: python3 scripts/check_stabilization_rules.py
 
   test:
     runs-on: ubuntu-latest

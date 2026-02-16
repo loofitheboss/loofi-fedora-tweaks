@@ -32,6 +32,47 @@
 | v40.0 | Foundation | DONE | Correctness & safety hardening, zero shell injection |
 | v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
 | v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
+| v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
+
+---
+
+## [DONE] v43.0 "Stabilization-Only" — Strict Compliance
+
+### Scope
+
+Stabilization-only release focused on enforcing hardening invariants across runtime,
+tests, and CI. No major features.
+
+### Deliverables
+
+- [x] Zero UI-layer subprocess execution
+- [x] Zero untimed `subprocess.run/check_output/call` in runtime source
+- [x] Zero executable hardcoded `dnf` command invocations in runtime paths
+- [x] Broad `except Exception` narrowed to explicit allowlist boundary handlers
+- [x] New stabilization regression checker enforced in CI/release workflows
+- [x] Coverage threshold aligned to 80% in all workflow gates
+- [x] Tests updated/added for all changed modules
+- [x] Version/docs/release artifacts completed for 43.0.0
+
+### Gate Status
+
+- Standard package command still requires host `python3-devel`.
+- Local package validation completed via `rpmbuild --nodeps` fallback and produced `rpmbuild/RPMS/noarch/loofi-fedora-tweaks-43.0.0-1.fc43.noarch.rpm`.
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| project-coordinator | workflow state alignment and task orchestration |
+| backend-builder | policy checker, services/utils hardening, command-path refactors |
+| frontend-integration-builder | wizard subprocess extraction + UI exception narrowing |
+| code-implementer | core/cli exception narrowing and shared hardening |
+| test-writer | targeted regression and compliance test updates |
+| release-planner | version/docs/release artifact completion |
+
+### Dependencies
+
+- v42.0 Sentinel (stabilization baseline)
 
 ---
 

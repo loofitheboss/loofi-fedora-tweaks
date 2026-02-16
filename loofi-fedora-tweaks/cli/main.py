@@ -87,7 +87,7 @@ def run_operation(op_result, timeout=None):
                 exit_code=None,
                 dry_run=True,
             )
-        except Exception as e:
+        except (ImportError, OSError, RuntimeError, TypeError, ValueError) as e:
             logger.debug("Failed to log dry-run audit entry: %s", e)
         if _json_output:
             _output_json({"dry_run": True, "command": full_cmd, "description": desc})
@@ -117,7 +117,7 @@ def run_operation(op_result, timeout=None):
     except subprocess.TimeoutExpired:
         _print(f"❌ Timed out after {op_timeout}s")
         return False
-    except Exception as e:
+    except (subprocess.SubprocessError, OSError) as e:
         _print(f"❌ Error: {e}")
         return False
 
@@ -1429,7 +1429,7 @@ def cmd_preset(args):
             else:
                 _print(f"✅ Exported preset '{args.name}' to {args.path}")
             return 0
-        except Exception as e:
+        except (OSError, TypeError, ValueError) as e:
             _print(f"❌ Export failed: {e}")
             return 1
 

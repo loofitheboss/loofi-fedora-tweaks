@@ -154,10 +154,11 @@ class HealthScoreManager:
                 else:
                     return 50, None
             else:
-                if not shutil.which("dnf"):
+                package_manager = SystemManager.get_package_manager()
+                if not shutil.which(package_manager):
                     return 75, None  # Can't check — dnf not available
                 result = subprocess.run(
-                    ["dnf", "check-update", "--quiet"],
+                    [package_manager, "check-update", "--quiet"],
                     capture_output=True,
                     text=True,
                     timeout=30,

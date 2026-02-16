@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, mock_open, patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from services.hardware.hardware import HardwareManager
+from services.hardware.disk import DiskManager
 
 
 class TestCpuGovernors(unittest.TestCase):
@@ -277,6 +278,20 @@ class TestAiCapabilities(unittest.TestCase):
         }
         summary = HardwareManager.get_ai_summary()
         self.assertIn('No AI hardware acceleration', summary)
+
+
+class TestDiskManagerTimeouts(unittest.TestCase):
+    """DiskManager timeout enforcement tests."""
+
+    @patch('services.hardware.disk.subprocess.run')
+    def test_get_all_mount_points_uses_timeout(self, mock_run):
+        """get_all_mount_points should enforce timeout on df command."""
+        mock_run.return_value = MagicMock(returncode=0, stdout="target size used avail pcent source\n")
+
+        DiskManager.get_all_mount_points()
+
+        self.assertEqual(mock_run.call_count, 1)
+        self.assertEqual(mock_run.call_args.kwargs.get('timeout'), 10)
 
     @patch('services.hardware.hardware.HardwareManager.get_ai_capabilities')
     def test_get_ai_summary_with_cuda(self, mock_caps):

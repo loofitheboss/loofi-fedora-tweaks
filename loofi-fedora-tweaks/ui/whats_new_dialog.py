@@ -133,7 +133,7 @@ class WhatsNewDialog(QDialog):
             mgr = SettingsManager.instance()
             last_seen = mgr.get("last_seen_version", "0.0.0")
             return bool(last_seen != __version__)
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError, ValueError, TypeError) as e:
             logger.debug("Failed to check last seen version: %s", e)
             return True
 

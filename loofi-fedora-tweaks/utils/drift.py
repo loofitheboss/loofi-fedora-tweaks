@@ -13,6 +13,8 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 from datetime import datetime
 
+from services.system import SystemManager
+
 logger = logging.getLogger(__name__)
 
 
@@ -264,10 +266,11 @@ class DriftDetector:
                     return list(deployments[0].get("requested-packages", []))
 
             # Fallback: get manually installed packages
-            if not shutil.which("dnf"):
+            package_manager = SystemManager.get_package_manager()
+            if not shutil.which(package_manager):
                 return []
             result = subprocess.run(
-                ["dnf", "repoquery", "--userinstalled", "--qf", "%{name}"],
+                [package_manager, "repoquery", "--userinstalled", "--qf", "%{name}"],
                 capture_output=True, text=True, check=False,
                 timeout=600,
             )

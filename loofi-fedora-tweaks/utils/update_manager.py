@@ -82,11 +82,12 @@ class UpdateManager:
     def _check_updates_dnf() -> List[UpdateEntry]:
         """Check updates via DNF."""
         updates: List[UpdateEntry] = []
-        if not shutil.which("dnf"):
+        package_manager = SystemManager.get_package_manager()
+        if not shutil.which(package_manager):
             return updates
         try:
             result = subprocess.run(
-                ["dnf", "check-update", "--quiet"],
+                [package_manager, "check-update", "--quiet"],
                 capture_output=True, text=True, timeout=120,
             )
             # dnf check-update returns 100 when updates are available
@@ -296,8 +297,12 @@ class UpdateManager:
         if SystemManager.is_atomic():
             return ("pkexec", ["rpm-ostree", "rollback"], "Rolling back to previous deployment...")
 
-        binary, args, _ = PrivilegedCommand.dnf("history undo last")
-        return (binary, args, "Rolling back last DNF transaction...")
+        package_manager = SystemManager.get_package_manager()
+        return (
+            "pkexec",
+            [package_manager, "history", "undo", "last"],
+            "Rolling back last DNF transaction...",
+        )
 
     @staticmethod
     def get_update_history(limit: int = 10) -> List[dict]:
@@ -329,11 +334,12 @@ class UpdateManager:
             except (subprocess.TimeoutExpired, OSError, json.JSONDecodeError) as e:
                 logger.error("Failed to get rpm-ostree history: %s", e)
         else:
-            if not shutil.which("dnf"):
+            package_manager = SystemManager.get_package_manager()
+            if not shutil.which(package_manager):
                 return history
             try:
                 result = subprocess.run(
-                    ["dnf", "history", "list", f"--last={limit}"],
+                    [package_manager, "history", "list", f"--last={limit}"],
                     capture_output=True, text=True, timeout=30,
                 )
                 if result.returncode == 0:

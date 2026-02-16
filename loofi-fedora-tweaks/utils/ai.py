@@ -348,9 +348,9 @@ class LlamaCppManager:
                         "llama.cpp package found. Install with: pkexec rpm-ostree install llama-cpp",
                     )
             else:
-                if shutil.which("dnf"):
+                if shutil.which(pm):
                     result = subprocess.run(
-                        ["dnf", "list", "llama-cpp"],
+                        [pm, "list", "llama-cpp"],
                         capture_output=True,
                         text=True,
                         timeout=10,

@@ -26,7 +26,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  COVERAGE_THRESHOLD: "79"
+  COVERAGE_THRESHOLD: "80"
   PIP_CACHE_FILES: |
     requirements.txt
     .github/workflows/auto-release.yml
@@ -149,6 +149,16 @@ jobs:
       - run: pip install mypy PyQt6-stubs
       - run: mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary --warn-return-any
 
+  stabilization_rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: python3 scripts/check_stabilization_rules.py
+
   docs_gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -231,13 +241,14 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:43
     timeout-minutes: 20
-    needs: [validate, adapter_drift, lint, typecheck, docs_gate, test, security]
+    needs: [validate, adapter_drift, lint, typecheck, stabilization_rules, docs_gate, test, security]
     if: |
       !cancelled() &&
       needs.validate.result == 'success' &&
       needs.adapter_drift.result == 'success' &&
       needs.lint.result == 'success' &&
       needs.typecheck.result == 'success' &&
+      needs.stabilization_rules.result == 'success' &&
       needs.test.result == 'success' &&
       needs.docs_gate.result == 'success' &&
       needs.security.result == 'success'

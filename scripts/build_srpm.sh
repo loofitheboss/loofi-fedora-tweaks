@@ -16,12 +16,28 @@ BUILD_DIR="/tmp/loofi-fedora-tweaks-srpm"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
-# Download the source tarball from the GitHub release tag.
-# COPR will re-download it during the build, but rpmbuild -bs needs the
-# file present to create the SRPM.
+SOURCE_TARBALL="$BUILD_DIR/rpmbuild/SOURCES/loofi-fedora-tweaks-${VERSION}.tar.gz"
 TARBALL_URL="${REPO_URL}/archive/v${VERSION}/loofi-fedora-tweaks-${VERSION}.tar.gz"
+
+# Prefer canonical release source tarball; fall back to local archive when
+# the release tag is not yet available.
 echo "Downloading source tarball: ${TARBALL_URL}"
-curl -fSL -o "$BUILD_DIR/rpmbuild/SOURCES/loofi-fedora-tweaks-${VERSION}.tar.gz" "$TARBALL_URL"
+if ! curl -fSL -o "$SOURCE_TARBALL" "$TARBALL_URL"; then
+  echo "Release tarball unavailable; creating source tarball from local checkout"
+  if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git archive \
+      --format=tar.gz \
+      --prefix="loofi-fedora-tweaks-${VERSION}/" \
+      -o "$SOURCE_TARBALL" \
+      HEAD
+  else
+    tar \
+      --exclude-vcs \
+      --transform "s#^#loofi-fedora-tweaks-${VERSION}/#" \
+      -czf "$SOURCE_TARBALL" \
+      .
+  fi
+fi
 
 # Copy spec
 cp loofi-fedora-tweaks.spec "$BUILD_DIR/rpmbuild/SPECS/"

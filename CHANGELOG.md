@@ -4,6 +4,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [43.0.0] - 2026-02-16 "Stabilization-Only"
+
+### Security & Hardening
+
+- Added `scripts/check_stabilization_rules.py`, an AST policy checker enforcing:
+  - required `timeout=` on `subprocess.run/check_output/call`
+  - zero UI-layer `subprocess` calls
+  - zero executable hardcoded `dnf` subprocess/`CommandWorker` invocations
+  - strict broad-exception allowlist boundaries
+- Wired stabilization checker into `.github/workflows/ci.yml`, `.github/workflows/auto-release.yml`, and `.github/workflows/coverage-gate.yml`.
+- Raised all `COVERAGE_THRESHOLD` workflow values from `79` to `80`.
+- Added missing timeout in `services/hardware/disk.py` (`DiskManager.get_all_mount_points()`).
+- Extracted wizard health subprocess logic into `utils/wizard_health.py`; `ui/wizard.py` now consumes utility output only.
+- Removed remaining executable hardcoded `dnf` command paths from package/update/health/export stacks via `SystemManager.get_package_manager()`.
+- Narrowed broad exceptions across CLI/UI/core runtime paths; retained only explicit boundary wrappers in checker allowlist.
+
+### Testing
+
+- Added `tests/test_check_stabilization_rules.py` for checker rule and allowlist coverage.
+- Added `tests/test_wizard_health.py` for extracted wizard health checks.
+- Added `tests/test_v43_stabilization.py` for repository-wide stabilization invariants.
+- Added `tests/test_version.py` for dynamic version alignment checks across `version.py`, `pyproject.toml`, and `.spec`.
+- Full suite: **5878 passed**, **35 skipped**, **0 failed**.
+- Coverage gate: **82.33%** (threshold: 80%).
+
 ## [42.0.0] - 2026-02-16 "Sentinel"
 
 ### Security & Hardening

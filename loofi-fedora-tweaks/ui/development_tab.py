@@ -56,7 +56,7 @@ class InstallWorker(QThread):
                 result = type('Result', (), {'success': False, 'message': 'Unknown tool'})()
 
             self.finished.emit(self.tool, result.success, result.message)
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError, TypeError) as e:
             self.finished.emit(self.tool, False, str(e))
 
 
@@ -373,7 +373,7 @@ class DevelopmentTab(BaseTab):
                         self.tr("Opened terminal in container '{}'.\n").format(container_name)
                     )
                     return
-                except Exception as e:
+                except (RuntimeError, OSError, ValueError, TypeError) as e:
                     self.append_output(
                         self.tr("Failed to open {}: {}\n").format(term_name, e)
                     )

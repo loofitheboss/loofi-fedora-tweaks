@@ -31,6 +31,7 @@ from PyQt6.QtGui import QFont
 
 from services.hardware.hardware_profiles import detect_hardware_profile
 from utils.log import get_logger
+from utils.wizard_health import WizardHealth
 
 logger = get_logger(__name__)
 
@@ -647,110 +648,13 @@ class FirstRunWizard(QDialog):
 
     def _populate_health(self):
         """Run health checks and display results."""
-        import shutil
-        import subprocess
-
         # Clear previous results
         while self._health_layout.count() > 1:
             item = self._health_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
 
-        self._health_results = {}
-        checks = []
-
-        # 1. Disk space
-        try:
-            stat = os.statvfs("/")
-            free_gb = (stat.f_bavail * stat.f_frsize) / (1024**3)
-            total_gb = (stat.f_blocks * stat.f_frsize) / (1024**3)
-            pct_used = ((total_gb - free_gb) / total_gb * 100) if total_gb else 0
-            if free_gb < 5:
-                checks.append(
-                    (
-                        "⚠️",
-                        f"Low disk space: {free_gb:.1f} GB free ({pct_used:.0f}% used)",
-                        "warning",
-                    )
-                )
-            else:
-                checks.append(
-                    (
-                        "✅",
-                        f"Disk space OK: {free_gb:.1f} GB free ({pct_used:.0f}% used)",
-                        "ok",
-                    )
-                )
-            self._health_results["disk_free_gb"] = round(free_gb, 1)
-        except OSError:
-            checks.append(("❓", "Could not check disk space", "unknown"))
-
-        # 2. Package manager state
-        if shutil.which("dnf"):
-            try:
-                result = subprocess.run(
-                    ["dnf", "check", "--duplicates"],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                )
-                if result.returncode == 0:
-                    checks.append(("✅", "Package state healthy (no duplicates)", "ok"))
-                else:
-                    checks.append(
-                        ("⚠️", "Package issues detected (duplicates found)", "warning")
-                    )
-                self._health_results["pkg_healthy"] = result.returncode == 0
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                checks.append(("❓", "Could not check package state", "unknown"))
-        else:
-            checks.append(("ℹ️", "DNF not found (atomic system?)", "info"))
-
-        # 3. Firewall status
-        if shutil.which("firewall-cmd"):
-            try:
-                result = subprocess.run(
-                    ["firewall-cmd", "--state"],
-                    capture_output=True,
-                    text=True,
-                    timeout=5,
-                )
-                if "running" in result.stdout.lower():
-                    checks.append(("✅", "Firewall is running", "ok"))
-                else:
-                    checks.append(("⚠️", "Firewall is NOT running", "warning"))
-                self._health_results["firewall_running"] = (
-                    "running" in result.stdout.lower()
-                )
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                checks.append(("❓", "Could not check firewall status", "unknown"))
-        else:
-            checks.append(("❓", "firewall-cmd not found", "unknown"))
-
-        # 4. Backup tool availability
-        if shutil.which("timeshift") or shutil.which("snapper"):
-            tool = "timeshift" if shutil.which("timeshift") else "snapper"
-            checks.append(("✅", f"Backup tool available: {tool}", "ok"))
-            self._health_results["backup_tool"] = tool
-        else:
-            checks.append(
-                ("⚠️", "No backup tool installed (timeshift/snapper)", "warning")
-            )
-            self._health_results["backup_tool"] = None
-
-        # 5. SELinux status
-        try:
-            result = subprocess.run(
-                ["getenforce"], capture_output=True, text=True, timeout=5
-            )
-            mode = result.stdout.strip()
-            if mode == "Enforcing":
-                checks.append(("✅", f"SELinux: {mode}", "ok"))
-            else:
-                checks.append(("ℹ️", f"SELinux: {mode}", "info"))
-            self._health_results["selinux"] = mode
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            checks.append(("❓", "Could not check SELinux", "unknown"))
+        checks, self._health_results = WizardHealth.run_health_checks()
 
         # Display results
         for icon, text, level in checks:

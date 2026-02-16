@@ -276,7 +276,7 @@ class DependencyResolver:
                 conflicts=[]
             )
 
-        except Exception as exc:
+        except (RuntimeError, ValueError, TypeError, OSError) as exc:
             logger.error("Dependency resolution failed: %s", exc)
             errors.append(DependencyError(
                 plugin_id="unknown",
