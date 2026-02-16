@@ -866,7 +866,7 @@ class MainWindow(QMainWindow):
             # Maintenance: check for updates
             from utils.update_checker import UpdateChecker
 
-            update_info = UpdateChecker.check()
+            update_info = UpdateChecker.check_for_updates(timeout=5, use_cache=True)
             if update_info and update_info.is_newer:
                 self._set_tab_status("Maintenance", "warning", "Updates available")
             else:
