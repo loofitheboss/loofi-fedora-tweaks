@@ -212,6 +212,9 @@ class StorageTab(BaseTab):
                 self.disk_table.setItem(
                     row, 4, self.make_table_item("Yes" if disk.rm else "No")
                 )
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.disk_table)
         except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.disk_table, self.tr("Failed to load disks"), color="#e8556d"
@@ -242,6 +245,9 @@ class StorageTab(BaseTab):
                 self.mount_table.setItem(
                     row, 5, self.make_table_item(mount.use_percent)
                 )
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.mount_table)
         except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.mount_table,

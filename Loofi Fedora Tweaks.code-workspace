@@ -101,6 +101,9 @@
 		"python.testing.pytestEnabled": true,
 		"python.testing.unittestEnabled": false,
 		"python.testing.nosetestsEnabled": false,
-		"python.testing.autoTestDiscoverOnSaveEnabled": false
+		"python.testing.autoTestDiscoverOnSaveEnabled": false,
+		"claudeCode.useTerminal": true,
+		"claudeCode.initialPermissionMode": "bypassPermissions",
+		"claudeCode.allowDangerouslySkipPermissions": true
 	}
 }

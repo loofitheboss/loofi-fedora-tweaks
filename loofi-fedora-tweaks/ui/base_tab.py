@@ -15,10 +15,10 @@ v31.0.2: Added configure_table() for readable data rows across all tabs.
 
 import logging
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QTextEdit,
-    QTableWidget, QTableWidgetItem, QPushButton, QFileDialog
+    QStyledItemDelegate, QTableWidget, QTableWidgetItem, QPushButton, QFileDialog
 )
 from PyQt6.QtGui import QColor
 from utils.command_runner import CommandRunner
@@ -26,6 +26,27 @@ from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
+
+
+class _ReadableTableItemDelegate(QStyledItemDelegate):
+    """Force stable table item painting across fonts, DPI, and QSS variants."""
+
+    def __init__(self, min_row_height: int, parent=None):
+        super().__init__(parent)
+        self._min_row_height = min_row_height
+
+    def initStyleOption(self, option, index):
+        """Ensure text stays vertically centered in every table cell."""
+        super().initStyleOption(option, index)
+        option.displayAlignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+
+    def sizeHint(self, option, index) -> QSize:
+        """Guarantee a non-clipped row height for rendered item text."""
+        hint = super().sizeHint(option, index)
+        if hint.height() < self._min_row_height:
+            hint.setHeight(self._min_row_height)
+        return hint
+
 
 _STUB_META = PluginMetadata(
     id="__stub__",
@@ -208,14 +229,33 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         """
         table.setAlternatingRowColors(True)
         table.verticalHeader().setVisible(False)
-        table.verticalHeader().setDefaultSectionSize(36)
+        # Account for fallback glyphs (emoji/status symbols) that can exceed base metrics.
+        metrics = table.fontMetrics()
+        probe_height = metrics.boundingRect("Ag 🟢 ✅ ⚠️").height()
+        row_height = max(44, metrics.height() + 20, probe_height + 20)
+        table.verticalHeader().setMinimumSectionSize(row_height)
+        table.verticalHeader().setDefaultSectionSize(row_height)
+        table.setItemDelegate(_ReadableTableItemDelegate(row_height, table))
+        table.setWordWrap(False)
+        table.setTextElideMode(Qt.TextElideMode.ElideRight)
         table.setShowGrid(True)
         table.setObjectName("baseTable")
+        BaseTab.ensure_table_row_heights(table)
+
+    @staticmethod
+    def ensure_table_row_heights(table: QTableWidget) -> None:
+        """Normalize existing row heights to the configured minimum."""
+        min_height = table.verticalHeader().minimumSectionSize()
+        for row in range(table.rowCount()):
+            table.resizeRowToContents(row)
+            if table.rowHeight(row) < min_height:
+                table.setRowHeight(row, min_height)
 
     @staticmethod
     def make_table_item(text, color: str = "") -> QTableWidgetItem:
         """Create a table item. Color is applied via QSS by default."""
         item = QTableWidgetItem(str(text))
+        item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         if color:
             item.setForeground(QColor(color))
         return item
@@ -230,3 +270,4 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         table.setItem(0, 0, msg_item)
         for col in range(1, table.columnCount()):
             table.setItem(0, col, BaseTab.make_table_item("", color=color))
+        BaseTab.ensure_table_row_heights(table)

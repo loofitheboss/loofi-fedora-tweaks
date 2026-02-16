@@ -13,6 +13,7 @@ INSTRUCTIONS:
    - `CHANGELOG.md` has version entry
    - `docs/releases/RELEASE-NOTES-vXX.md` exists
    - Version sync validated (version.py, .spec, pyproject.toml)
+   - Fedora review gate passes (`python3 scripts/check_fedora_review.py`)
 2. Read AGENTS.md for version management rules.
 3. Prepare branch/tag release commands:
    - Git tag creation
@@ -31,6 +32,7 @@ RELEASE CHECKLIST TEMPLATE:
 - [ ] CHANGELOG.md updated
 - [ ] Release notes exist
 - [ ] Task artifact complete
+- [ ] Fedora review gate passes (`scripts/check_fedora_review.py`)
 
 ### Release Steps
 1. Create git tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`

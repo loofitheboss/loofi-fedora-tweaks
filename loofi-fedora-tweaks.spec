@@ -1,5 +1,5 @@
 Name:           loofi-fedora-tweaks
-Version:        43.0.0
+Version:        44.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
 
@@ -119,6 +119,13 @@ PYTHONPATH=loofi-fedora-tweaks python3 -c "import main; print('Import OK')" || :
 %{_mandir}/man1/%{name}.1*
 
 %changelog
+* Mon Feb 16 2026 Loofi <loofi@example.com> - 44.0.0-1
+- v44.0.0 "Review Gate" — Fedora review workflow enforcement
+- Added scripts/check_fedora_review.py for lightweight fedora-review health gating
+- Enforced fedora-review gate for workflow_runner write-mode package/release phases
+- Added required fedora_review job to CI and auto-release workflows
+- Updated workflow docs/prompts and release docs for fedora-review prerequisite
+
 * Mon Feb 16 2026 Loofi <loofi@example.com> - 43.0.0-1
 - v43.0.0 "Stabilization-Only" — Strict Compliance
 - Added AST stabilization policy gate (timeouts, UI subprocess, hardcoded dnf, broad-exception allowlist)

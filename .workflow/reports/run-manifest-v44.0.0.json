@@ -1,0 +1,85 @@
+{
+  "version": "v44.0.0",
+  "assistant": "codex",
+  "owner": "loofi",
+  "mode": "write",
+  "issue": null,
+  "started_at": "2026-02-16T19:30:00+01:00",
+  "updated_at": "2026-02-16T20:06:05+01:00",
+  "phases": [
+    {
+      "phase": "plan",
+      "phase_name": "P1 PLAN",
+      "status": "success",
+      "timestamp": "2026-02-16T19:35:00+01:00",
+      "artifacts": [
+        ".workflow/specs/tasks-v44.0.0.md"
+      ]
+    },
+    {
+      "phase": "design",
+      "phase_name": "P2 DESIGN",
+      "status": "success",
+      "timestamp": "2026-02-16T19:40:00+01:00",
+      "artifacts": []
+    },
+    {
+      "phase": "build",
+      "phase_name": "P3 BUILD",
+      "status": "success",
+      "timestamp": "2026-02-16T19:50:00+01:00",
+      "artifacts": [
+        "scripts/check_fedora_review.py",
+        "scripts/workflow_runner.py",
+        ".github/workflows/ci.yml",
+        ".github/workflows/auto-release.yml"
+      ]
+    },
+    {
+      "phase": "test",
+      "phase_name": "P4 TEST",
+      "status": "success",
+      "timestamp": "2026-02-16T20:00:00+01:00",
+      "artifacts": [
+        ".workflow/reports/test-results-v44.0.0.json",
+        "tests/test_check_fedora_review.py",
+        "tests/test_workflow_runner_locks.py",
+        "tests/test_workflow_fedora_review_contract.py"
+      ]
+    },
+    {
+      "phase": "document",
+      "phase_name": "P5 DOCUMENT",
+      "status": "success",
+      "timestamp": "2026-02-16T20:03:00+01:00",
+      "artifacts": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/RELEASE_CHECKLIST.md",
+        "docs/releases/RELEASE-NOTES-v44.0.0.md"
+      ]
+    },
+    {
+      "phase": "package",
+      "phase_name": "P6 PACKAGE",
+      "status": "success",
+      "timestamp": "2026-02-16T20:04:00+01:00",
+      "artifacts": [
+        "loofi-fedora-tweaks.spec",
+        "pyproject.toml",
+        "loofi-fedora-tweaks/version.py"
+      ]
+    },
+    {
+      "phase": "release",
+      "phase_name": "P7 RELEASE",
+      "status": "success",
+      "timestamp": "2026-02-16T20:06:05+01:00",
+      "artifacts": [
+        "ROADMAP.md",
+        ".workflow/specs/.race-lock.json",
+        ".workflow/reports/run-manifest-v44.0.0.json"
+      ]
+    }
+  ]
+}

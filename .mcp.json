@@ -5,8 +5,8 @@
       "args": ["-y", "@upstash/context7-mcp"]
     },
     "fetch": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-fetch"]
+      "command": "python3",
+      "args": ["-m", "mcp_server_fetch"]
     },
     "github": {
       "command": "npx",

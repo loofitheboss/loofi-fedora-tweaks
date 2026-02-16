@@ -169,6 +169,10 @@ class ExtensionsTab(BaseTab):
 
             if not extensions:
                 BaseTab.set_table_empty_state(self.table, self.tr("No extensions found"))
+            else:
+                normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+                if callable(normalize):
+                    normalize(self.table)
 
             self.append_output(self.tr("Loaded {} extensions.\n").format(len(extensions)))
         except (RuntimeError, OSError, ValueError) as e:

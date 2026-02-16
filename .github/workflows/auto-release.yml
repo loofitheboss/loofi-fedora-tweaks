@@ -159,6 +159,17 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: python3 scripts/check_stabilization_rules.py
 
+  fedora_review:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Fedora review tool
+        run: dnf install -y python3 fedora-review
+      - name: Fedora review gate
+        run: python3 scripts/check_fedora_review.py
+
   docs_gate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -241,7 +252,7 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:43
     timeout-minutes: 20
-    needs: [validate, adapter_drift, lint, typecheck, stabilization_rules, docs_gate, test, security]
+    needs: [validate, adapter_drift, lint, typecheck, stabilization_rules, docs_gate, test, security, fedora_review]
     if: |
       !cancelled() &&
       needs.validate.result == 'success' &&
@@ -249,6 +260,7 @@ jobs:
       needs.lint.result == 'success' &&
       needs.typecheck.result == 'success' &&
       needs.stabilization_rules.result == 'success' &&
+      needs.fedora_review.result == 'success' &&
       needs.test.result == 'success' &&
       needs.docs_gate.result == 'success' &&
       needs.security.result == 'success'

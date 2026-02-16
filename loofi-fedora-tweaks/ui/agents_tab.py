@@ -423,6 +423,9 @@ class AgentsTab(BaseTab):
             actions_layout.addWidget(btn_notify)
 
             self.agent_table.setCellWidget(row, 7, actions_widget)
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.agent_table)
 
     def _toggle_agent(self, agent_id: str, currently_enabled: bool):
         registry = self._get_registry()
@@ -523,6 +526,9 @@ class AgentsTab(BaseTab):
             self.activity_table.setItem(row, 3, result_item)
 
             self.activity_table.setItem(row, 4, QTableWidgetItem(item["message"][:100]))
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.activity_table)
 
     def _toggle_notifications(self, agent_id: str, currently_enabled: bool):
         """Toggle notification config for an agent."""

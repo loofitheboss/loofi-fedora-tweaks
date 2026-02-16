@@ -83,6 +83,17 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: python3 scripts/check_stabilization_rules.py
 
+  fedora_review:
+    runs-on: ubuntu-latest
+    container: fedora:43
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Fedora review tool
+        run: dnf install -y python3 fedora-review
+      - name: Fedora review gate
+        run: python3 scripts/check_fedora_review.py
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30

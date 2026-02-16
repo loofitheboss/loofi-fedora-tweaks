@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v43.0.0 "Stabilization-Only"
+# Loofi Fedora Tweaks v44.0.0 "Review Gate"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v43.0.0">
-    <img src="https://img.shields.io/badge/Release-v43.0.0-blue?style=for-the-badge&logo=github" alt="Release v43.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v44.0.0">
+    <img src="https://img.shields.io/badge/Release-v44.0.0-blue?style=for-the-badge&logo=github" alt="Release v44.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -39,6 +39,20 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
+## What Is New in v44.0.0?
+
+`v44.0.0 "Review Gate"` enforces Fedora review tooling as a prerequisite for packaging and release workflows:
+
+- **Fedora review gate checker** — `scripts/check_fedora_review.py` validates `fedora-review` presence and health.
+- **Workflow runner gating** — write-mode `package`/`release` phases now fail fast when Fedora review checks fail.
+- **CI pipeline enforcement** — required `fedora_review` job added to both `ci.yml` and `auto-release.yml`.
+- **Workflow docs updated** — PIPELINE, QUICKSTART, and phase prompts document the new prerequisite.
+- **Full test contracts** — checker, runner gate, and CI workflow contract tests added.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v44.0.0.md`](docs/releases/RELEASE-NOTES-v44.0.0.md)
+
+---
+
 ## What Is New in v43.0.0?
 
 `v43.0.0 "Stabilization-Only"` is a strict hardening release focused on policy enforcement and regression-proofing:
@@ -48,7 +62,6 @@ It is designed to be practical for both casual users and advanced users:
 - **Coverage gates normalized to 80%** across all workflow files.
 - **Wizard health checks extracted to utils** — `ui/wizard.py` no longer runs subprocess directly.
 - **Remaining executable hardcoded `dnf` invocations removed** from package/update/health/export stacks.
-- **5878 tests passing**, 82.33% coverage.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v43.0.0.md`](docs/releases/RELEASE-NOTES-v43.0.0.md)
 
@@ -293,8 +306,8 @@ Every push to `master` and every pull request runs through two pipelines:
 
 | Pipeline | File | Purpose |
 |----------|------|---------|
-| CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, packaging |
-| Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → build → tag → publish |
+| CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, plus required Fedora review gate |
+| Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → fedora_review → build → tag → publish |
 | COPR Publish | `.github/workflows/copr-publish.yml` | Build SRPM and submit to Fedora COPR |
 
 ### Auto Release Flow
@@ -302,12 +315,15 @@ Every push to `master` and every pull request runs through two pipelines:
 ```
 push to master
   → validate (version alignment, packaging scripts)
-  → adapter_drift, lint, typecheck, test, security, docs_gate (parallel)
+  → adapter_drift, lint, typecheck, test, security, docs_gate, fedora_review (parallel)
   → build (RPM in Fedora 43 container)
   → auto_tag (creates vX.Y.Z tag if missing)
   → release (publishes GitHub Release with RPM artifact)
   → copr-publish (builds SRPM and submits to Fedora COPR)
 ```
+
+`fedora_review` runs `python3 scripts/check_fedora_review.py`, which requires `fedora-review`
+and validates lightweight health probes (`fedora-review -V` and `fedora-review -d`).
 
 The pipeline automatically tags and publishes releases when code lands on `master` with a new version in `version.py`. No manual tagging required.
 

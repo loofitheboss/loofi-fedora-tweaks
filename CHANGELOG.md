@@ -4,6 +4,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [44.0.0] - 2026-02-16 "Review Gate"
+
+### CI/CD & Workflow Hardening
+
+- Added `scripts/check_fedora_review.py` to enforce a lightweight Fedora review tool gate:
+  - validates `fedora-review` availability in `PATH`
+  - probes `fedora-review -V` and `fedora-review -d` with explicit timeout handling
+- Updated `scripts/workflow_runner.py` to block write-mode `package` and `release` phases when the Fedora review gate fails.
+- Updated `scripts/workflow-runner.sh` usage text to document the Fedora review prerequisite.
+- Added required `fedora_review` job to `.github/workflows/ci.yml`.
+- Added required `fedora_review` job to `.github/workflows/auto-release.yml` and made `build` depend on it as a hard gate.
+
+### Documentation
+
+- Updated workflow docs/prompts to include the Fedora review prerequisite:
+  - `.github/workflow/PIPELINE.md`
+  - `.github/workflow/QUICKSTART.md`
+  - `.github/workflow/prompts/package.md`
+  - `.github/workflow/prompts/release.md`
+- Updated user/release docs:
+  - `README.md`
+  - `docs/RELEASE_CHECKLIST.md`
+  - `docs/releases/RELEASE-NOTES-v44.0.0.md`
+
+### Testing
+
+- Added `tests/test_check_fedora_review.py` covering success, missing binary, probe failure, and timeout paths.
+- Extended `tests/test_workflow_runner_locks.py` with package/release gate blocking assertions and review-mode pass-through validation.
+- Added `tests/test_workflow_fedora_review_contract.py` to enforce CI/auto-release gate presence and dependency wiring.
+
 ## [43.0.0] - 2026-02-16 "Stabilization-Only"
 
 ### Security & Hardening

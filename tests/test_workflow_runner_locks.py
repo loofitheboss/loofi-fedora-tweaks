@@ -240,3 +240,127 @@ def test_run_agent_review_mode_writes_report(mock_which, mock_run, tmp_path):
     assert metadata["review_output"] == str(review_output)
     assert review_output.exists()
     assert "review output" in review_output.read_text(encoding="utf-8")
+
+
+def test_run_phase_blocks_package_when_fedora_review_gate_fails():
+    module = _load_module(
+        "workflow_runner_package_gate_blocked_test",
+        Path("scripts/workflow_runner.py"),
+    )
+    phase_models = {
+        "plan": "gpt-5.3-codex",
+        "design": "gpt-5.3-codex",
+        "build": "gpt-4o",
+        "test": "gpt-4o",
+        "doc": "gpt-4o-mini",
+        "package": "gpt-4o-mini",
+        "release": "gpt-4o-mini",
+    }
+    module.ensure_writer_lock = lambda *args, **kwargs: (True, "ok")
+    module.run_fedora_review_gate = lambda: (False, "fedora-review missing")
+    module.validate_phase_ordering = lambda *args, **kwargs: (True, "ok")
+    module.should_enforce_task_contract = lambda version_tag: False
+    module.run_agent = lambda **kwargs: (_ for _ in ()).throw(
+        AssertionError("run_agent should not be called when gate fails")
+    )
+
+    code, entry = module.run_phase(
+        phase="package",
+        version_tag="v44.0.0",
+        dry_run=False,
+        phase_models=phase_models,
+        assistant="codex",
+        mode="write",
+        owner="tester",
+        issue=None,
+        lock_ttl_minutes=60,
+        skip_race_check=True,
+        force_phase=True,
+    )
+
+    assert code == 1
+    assert entry["status"] == "blocked"
+    assert "fedora-review gate failed" in entry["error"]
+
+
+def test_run_phase_blocks_release_when_fedora_review_gate_fails():
+    module = _load_module(
+        "workflow_runner_release_gate_blocked_test",
+        Path("scripts/workflow_runner.py"),
+    )
+    phase_models = {
+        "plan": "gpt-5.3-codex",
+        "design": "gpt-5.3-codex",
+        "build": "gpt-4o",
+        "test": "gpt-4o",
+        "doc": "gpt-4o-mini",
+        "package": "gpt-4o-mini",
+        "release": "gpt-4o-mini",
+    }
+    module.ensure_writer_lock = lambda *args, **kwargs: (True, "ok")
+    module.run_fedora_review_gate = lambda: (False, "fedora-review missing")
+    module.validate_phase_ordering = lambda *args, **kwargs: (True, "ok")
+    module.should_enforce_task_contract = lambda version_tag: False
+    module.run_agent = lambda **kwargs: (_ for _ in ()).throw(
+        AssertionError("run_agent should not be called when gate fails")
+    )
+
+    code, entry = module.run_phase(
+        phase="release",
+        version_tag="v44.0.0",
+        dry_run=False,
+        phase_models=phase_models,
+        assistant="codex",
+        mode="write",
+        owner="tester",
+        issue=None,
+        lock_ttl_minutes=60,
+        skip_race_check=True,
+        force_phase=True,
+    )
+
+    assert code == 1
+    assert entry["status"] == "blocked"
+    assert "fedora-review gate failed" in entry["error"]
+
+
+def test_run_phase_review_mode_skips_fedora_review_gate():
+    module = _load_module(
+        "workflow_runner_review_mode_skips_gate_test",
+        Path("scripts/workflow_runner.py"),
+    )
+    phase_models = {
+        "plan": "gpt-5.3-codex",
+        "design": "gpt-5.3-codex",
+        "build": "gpt-4o",
+        "test": "gpt-4o",
+        "doc": "gpt-4o-mini",
+        "package": "gpt-4o-mini",
+        "release": "gpt-4o-mini",
+    }
+    gate_calls = {"count": 0}
+
+    def _gate():
+        gate_calls["count"] += 1
+        return True, "ok"
+
+    module.run_fedora_review_gate = _gate
+    module.should_enforce_task_contract = lambda version_tag: False
+    module.run_agent = lambda **kwargs: (0, {"status": "success"})
+
+    code, entry = module.run_phase(
+        phase="package",
+        version_tag="v44.0.0",
+        dry_run=False,
+        phase_models=phase_models,
+        assistant="codex",
+        mode="review",
+        owner="tester",
+        issue=None,
+        lock_ttl_minutes=60,
+        force_phase=True,
+    )
+
+    assert code == 0
+    assert entry["phase"] == "package"
+    assert gate_calls["count"] == 0

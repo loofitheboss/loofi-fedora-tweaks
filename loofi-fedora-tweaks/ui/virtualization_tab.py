@@ -211,6 +211,9 @@ class VirtualizationTab(QWidget, PluginInterface):
             self.vm_table.setItem(row, 1, self.make_table_item(vm.state))
             self.vm_table.setItem(row, 2, self.make_table_item(str(vm.memory_mb)))
             self.vm_table.setItem(row, 3, self.make_table_item(str(vm.vcpus)))
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.vm_table)
         self.log(self.tr("VM list refreshed ({} VMs).").format(len(vms)))
 
     def _get_selected_vm_name(self) -> str:

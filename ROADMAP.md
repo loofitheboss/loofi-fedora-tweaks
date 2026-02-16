@@ -33,6 +33,40 @@
 | v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
 | v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
 | v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
+| v44.0 | Review Gate | ACTIVE | Fedora review prerequisite enforcement for workflow and CI pipelines |
+
+---
+
+## [ACTIVE] v44.0 "Review Gate" — Fedora Review Gate Requirement
+
+### Scope
+
+Packaging/release workflow hardening release focused on requiring Fedora review tooling
+before package and release execution paths. No product feature expansion.
+
+### Deliverables
+
+- [x] Added lightweight Fedora review checker (`scripts/check_fedora_review.py`)
+- [x] Enforced write-mode `package`/`release` gate in `scripts/workflow_runner.py`
+- [x] Added required `fedora_review` job in `.github/workflows/ci.yml`
+- [x] Added required `fedora_review` job in `.github/workflows/auto-release.yml`
+- [x] Added workflow contract tests for Fedora review gate presence
+- [x] Updated workflow docs/prompts to describe new prerequisite
+- [x] Updated README/release checklist/changelog/release notes for v44 scope
+- [x] Version artifacts aligned to 44.0.0 (`version.py`, `pyproject.toml`, `.spec`)
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| project-coordinator | v44 workflow state setup and roadmap activation |
+| backend-builder | checker script + workflow runner + CI workflow wiring |
+| test-writer | checker, runner gate, and workflow contract test coverage |
+| release-planner | docs, release notes, version and report artifact alignment |
+
+### Dependencies
+
+- v43.0 Stabilization-Only (policy baseline)
 
 ---
 

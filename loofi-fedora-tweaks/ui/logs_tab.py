@@ -260,6 +260,9 @@ class LogsTab(BaseTab):
                         row, 0, self.make_table_item(pattern_name)
                     )
                     self.pattern_table.setItem(row, 1, self.make_table_item(str(count)))
+                normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+                if callable(normalize):
+                    normalize(self.pattern_table)
 
             # Populate unit combo from top units
             current_text = self.unit_combo.currentText()
@@ -325,6 +328,9 @@ class LogsTab(BaseTab):
                     msg_item.setForeground(QColor("#e8556d"))
                     msg_item.setToolTip(f"Pattern: {entry.pattern_match}")
                 self.log_table.setItem(row, 3, msg_item)
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.log_table)
 
             self.append_output(f"Fetched {len(entries)} log entries\n")
         except (RuntimeError, OSError, ValueError) as exc:

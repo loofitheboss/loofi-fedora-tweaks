@@ -348,6 +348,7 @@ QTableWidget, QTreeWidget, QTableView, QTreeView {
     gridline-color: #ccd0da;
     selection-background-color: #bcc0cc;
     selection-color: #4c4f69;
+    padding: 0px;
 }
 
 QHeaderView::section {
@@ -377,8 +378,7 @@ QHeaderView::section:vertical {
 
 QTableWidget::item, QTreeWidget::item {
     color: #4c4f69;
-    padding: 6px 8px;
-    min-height: 28px;
+    padding: 2px 8px;
     border-bottom: 1px solid #dce0e8;
 }
 
@@ -845,6 +845,10 @@ QTableWidget#baseTable QHeaderView::section {
     border: none;
     padding: 6px 8px;
     font-weight: 600;
+}
+
+QTableWidget#baseTable::item {
+    padding: 2px 8px;
 }
 
 /* ===== Undo Button ===== */

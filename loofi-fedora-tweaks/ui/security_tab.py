@@ -416,6 +416,10 @@ class SecurityTab(QWidget, PluginInterface):
                 status_item.setForeground(QColor("#e8556d"))
             self.port_table.setItem(row, 4, status_item)
 
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.port_table)
+
     def _block_port(self):
         """Block selected port."""
         row = self.port_table.currentRow()

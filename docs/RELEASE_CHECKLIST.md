@@ -66,6 +66,9 @@ flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E
 # Adapter sync check
 python3 scripts/sync_ai_adapters.py --check
 
+# Fedora review gate prerequisite
+python3 scripts/check_fedora_review.py
+
 # Tests (subset — full suite runs in CI)
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -x --tb=short -q
 ```
@@ -89,7 +92,7 @@ The **Auto Release Pipeline** runs automatically on every push to `master`:
 ```
 push to master
   -> validate (version alignment + packaging scripts)
-  -> adapter_drift, lint, typecheck, test, security, docs_gate (parallel)
+  -> adapter_drift, lint, typecheck, test, security, docs_gate, fedora_review (parallel)
   -> build (RPM in Fedora 43 container)
   -> auto_tag (creates vX.Y.Z tag if missing)
   -> release (publishes GitHub Release with RPM artifact)
@@ -100,7 +103,7 @@ push to master
 - **Auto-tag**: Creates `vX.Y.Z` tag from `version.py` if it doesn't exist
 - **Idempotent release**: Skips publish if release already exists for that tag
 - **Non-blocking gates**: `typecheck` and `test` use `continue-on-error: true` (soft gates)
-- **Hard gates**: `validate`, `adapter_drift`, `lint`, `docs_gate` must pass for build to proceed
+- **Hard gates**: `validate`, `adapter_drift`, `lint`, `docs_gate`, `fedora_review` must pass for build to proceed
 
 ### If the pipeline fails
 
