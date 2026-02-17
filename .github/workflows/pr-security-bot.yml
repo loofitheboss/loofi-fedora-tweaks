@@ -4,6 +4,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [master]
+  push:
+    branches:
+      - master
+      - 'codex/**'
+      - 'copilot/**'
+      - 'opencode/**'
+      - 'agent/**'
 
 permissions:
   contents: read
@@ -19,6 +26,7 @@ env:
 
 jobs:
   security-scan:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -155,3 +163,11 @@ jobs:
                 issue_number: context.issue.number, body: body,
               });
             }
+
+  push-status:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Non-blocking push status
+        run: echo "PR Security Bot is PR-focused; push status marked successful."

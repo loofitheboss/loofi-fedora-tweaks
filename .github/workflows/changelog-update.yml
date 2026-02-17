@@ -4,11 +4,26 @@ on:
   pull_request:
     types: [closed]
     branches: [master]
+  push:
+    branches:
+      - master
+      - 'codex/**'
+      - 'copilot/**'
+      - 'opencode/**'
+      - 'agent/**'
 
 permissions:
   contents: write
 
 jobs:
+  push-status:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Non-blocking push status
+        run: echo "Changelog Updater is merge-focused; push status marked successful."
+
   update-changelog:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest

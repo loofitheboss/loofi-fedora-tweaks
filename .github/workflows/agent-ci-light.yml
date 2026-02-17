@@ -1,0 +1,36 @@
+name: Agent CI Light
+
+on:
+  push:
+    branches:
+      - 'codex/**'
+      - 'copilot/**'
+      - 'opencode/**'
+      - 'agent/**'
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  fast-validate:
+    if: github.event_name == 'push' || startsWith(github.head_ref, 'codex/') || startsWith(github.head_ref, 'copilot/') || startsWith(github.head_ref, 'opencode/') || startsWith(github.head_ref, 'agent/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+      - name: Install lightweight checks
+        run: pip install flake8
+      - name: Stabilization rules
+        run: python3 scripts/check_stabilization_rules.py
+      - name: Lint
+        run: flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E203

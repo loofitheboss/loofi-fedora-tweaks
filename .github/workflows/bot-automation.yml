@@ -4,6 +4,13 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
     branches: [master]
+  push:
+    branches:
+      - master
+      - 'codex/**'
+      - 'copilot/**'
+      - 'opencode/**'
+      - 'agent/**'
   issues:
     types: [opened, labeled]
   schedule:
@@ -15,6 +22,14 @@ permissions:
   issues: write
 
 jobs:
+  push-status:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Non-blocking push status
+        run: echo "Bot Automation is event-driven; push status marked successful."
+
   auto-label-pr:
     if: github.event_name == 'pull_request' && github.event.action == 'opened'
     runs-on: ubuntu-latest

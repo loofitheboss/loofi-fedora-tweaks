@@ -7,6 +7,17 @@ on:
       - 'docs/**'
       - '**/*.md'
       - '.github/ISSUE_TEMPLATE/**'
+  push:
+    branches:
+      - master
+      - 'codex/**'
+      - 'copilot/**'
+      - 'opencode/**'
+      - 'agent/**'
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/ISSUE_TEMPLATE/**'
 
 permissions:
   contents: read
@@ -14,6 +25,7 @@ permissions:
 
 jobs:
   coverage:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -60,3 +72,11 @@ jobs:
             } catch (e) {
               console.log('Could not parse coverage report:', e.message);
             }
+
+  push-status:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Non-blocking push status
+        run: echo "Coverage Gate is PR-focused; push status marked successful."
