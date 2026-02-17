@@ -636,7 +636,7 @@ class _OverlaysSubTab(QWidget):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            self.reboot_runner.run_command("systemctl", ["reboot"])
+            self.reboot_runner.run_command("pkexec", ["systemctl", "reboot"])
 
 
 # ---------------------------------------------------------------------------

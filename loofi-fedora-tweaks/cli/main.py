@@ -1,7 +1,6 @@
 """
 Loofi CLI - Command-line interface for Loofi Fedora Tweaks.
 Enables headless operation and scripting.
-v18.0.0 "Sentinel"
 """
 
 import argparse
@@ -3539,19 +3538,27 @@ def main(argv: Optional[List[str]] = None):
         "self-update", help="Check/download verified Loofi updates"
     )
     update_parser.add_argument(
-        "action", choices=["check", "run"], default="run", nargs="?"
+        "action", choices=["check", "run"], default="run", nargs="?",
+        help="Self-update action: check for updates or run the update"
     )
     update_parser.add_argument(
-        "--channel", choices=["auto", "rpm", "flatpak", "appimage"], default="auto"
+        "--channel", choices=["auto", "rpm", "flatpak", "appimage"], default="auto",
+        help="Update channel to use (default: auto-detect)"
     )
     update_parser.add_argument(
-        "--download-dir", default="~/.cache/loofi-fedora-tweaks/updates"
+        "--download-dir", default="~/.cache/loofi-fedora-tweaks/updates",
+        help="Directory to download updates to"
     )
-    update_parser.add_argument("--timeout", type=int, default=30)
-    update_parser.add_argument("--no-cache", action="store_true")
-    update_parser.add_argument("--checksum", default="")
-    update_parser.add_argument("--signature-path")
-    update_parser.add_argument("--public-key-path")
+    update_parser.add_argument("--timeout", type=int, default=30,
+                               help="Download timeout in seconds (default: 30)")
+    update_parser.add_argument("--no-cache", action="store_true",
+                               help="Skip cached update packages")
+    update_parser.add_argument("--checksum", default="",
+                               help="Expected SHA256 checksum of the update package")
+    update_parser.add_argument("--signature-path",
+                               help="Path to GPG signature file for verification")
+    update_parser.add_argument("--public-key-path",
+                               help="Path to GPG public key for signature verification")
 
     # v18.0 Sentinel - Agent management
     agent_parser = subparsers.add_parser(

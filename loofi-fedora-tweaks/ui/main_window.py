@@ -83,7 +83,9 @@ class MainWindow(QMainWindow):
         # appear to bleed into the top chrome when frameless/custom hints are used.
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, False)
         self.setWindowFlag(Qt.WindowType.CustomizeWindowHint, False)
-        self.setWindowTitle(self.tr(f"Loofi Fedora Tweaks v{__version__}"))
+        self.setWindowTitle(
+            self.tr("Loofi Fedora Tweaks v%1").replace("%1", __version__)
+        )
         self.resize(1100, 700)
         self.setMinimumSize(800, 500)
 

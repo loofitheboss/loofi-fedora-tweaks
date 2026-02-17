@@ -1011,10 +1011,10 @@ class TestOverlaysSubTab(unittest.TestCase):
         staticmethod(lambda *a, **kw: _QMessageBox.StandardButton.Yes),
     )
     def test_reboot_system_confirm_yes(self):
-        """reboot_system() runs systemctl reboot when confirmed."""
+        """reboot_system() runs pkexec systemctl reboot when confirmed."""
         tab, _ = self._make_tab()
         tab.reboot_system()
-        tab.reboot_runner.run_command.assert_called_once_with("systemctl", ["reboot"])
+        tab.reboot_runner.run_command.assert_called_once_with("pkexec", ["systemctl", "reboot"])
 
 
 # ===================================================================

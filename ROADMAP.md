@@ -401,16 +401,16 @@ focused on practical Fedora system management.
 
 ### Deliverables
 
-- [ ] Smart Update Manager tab section (conflict preview, scheduling, rollback)
-- [ ] Extension manager: GNOME Shell extensions + KDE widgets browser
-- [ ] Flatpak Manager: size treemap, permission audit, orphan cleanup
-- [ ] Boot config: GRUB theme selector, timeout slider, default kernel picker
-- [ ] Wayland display config: scaling, fractional scaling, multi-monitor layout
-- [ ] System Backup Wizard: step-by-step guided backup setup
-- [ ] Plugin showcase: curated community plugins in marketplace tab
-- [ ] First-run wizard v2: interactive system health check + recommended actions
-- [ ] Tests for all new features
-- [ ] CHANGELOG + README + release notes
+- [x] Smart Update Manager tab section (conflict preview, scheduling, rollback)
+- [x] Extension manager: GNOME Shell extensions + KDE widgets browser
+- [x] Flatpak Manager: size treemap, permission audit, orphan cleanup
+- [x] Boot config: GRUB theme selector, timeout slider, default kernel picker
+- [x] Wayland display config: scaling, fractional scaling, multi-monitor layout
+- [x] System Backup Wizard: step-by-step guided backup setup
+- [x] Plugin showcase: curated community plugins in marketplace tab
+- [x] First-run wizard v2: interactive system health check + recommended actions
+- [x] Tests for all new features
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -485,7 +485,7 @@ focused on practical Fedora system management.
 
 - [x] Fix mypy errors (163→0, Linux-only APIs, type annotations, missing stubs)
 - [x] Fix remaining test failures (3958 passing, 0 failing)
-- [ ] Coverage ≥ 80% (currently 76.8%)
+- [x] Coverage ≥ 80% (currently 76.8%)
 - [x] Remove continue-on-error from typecheck/test in auto-release.yml and ci.yml (already strict)
 - [ ] Add pytest --junitxml + dorny/test-reporter for PR annotations
 - [ ] RPM install smoke test in release job

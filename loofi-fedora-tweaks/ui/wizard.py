@@ -391,7 +391,7 @@ class FirstRunWizard(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(14)
 
-        header = QLabel(self.tr("\u2705 Step 3: Review & Apply"))
+        header = QLabel(self.tr("\u2705 Step 5: Review & Apply"))
         hfont = QFont()
         hfont.setPointSize(13)
         hfont.setBold(True)

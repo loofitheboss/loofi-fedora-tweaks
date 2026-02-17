@@ -523,7 +523,7 @@ QLabel#bcPage {
 }
 
 QLabel#bcDesc {
-    color: #999999;
+    color: #cccccc;
     font-size: 10pt;
     font-style: italic;
 }
@@ -544,7 +544,7 @@ QLabel#statusText {
 }
 
 QLabel#statusHints {
-    color: #999999;
+    color: #cccccc;
     font-size: 10pt;
 }
 
@@ -557,7 +557,7 @@ QLabel#statusVersion {
 
 /* ===== Sidebar Footer ===== */
 QLabel#sidebarFooter {
-    color: #999999;
+    color: #cccccc;
     font-size: 10pt;
     background-color: #0a0a0a;
     border-top: 2px solid #333333;
