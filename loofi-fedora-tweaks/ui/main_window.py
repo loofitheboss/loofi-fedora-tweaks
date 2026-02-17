@@ -5,10 +5,11 @@ Main Window - v25.0 "Plugin Architecture"
 
 import logging
 import os
+from dataclasses import dataclass, field
 
 from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.registry import CATEGORY_ICONS
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtGui import QFontMetrics, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QFrame,
@@ -45,6 +46,18 @@ _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 _ROLE_STATUS = Qt.ItemDataRole.UserRole + 3  # "ok" | "warning" | "error" | ""
 _ROLE_NAME = Qt.ItemDataRole.UserRole + 4  # Raw tab name (without badges/status)
 _ROLE_ICON = Qt.ItemDataRole.UserRole + 5  # Semantic icon token
+
+
+@dataclass
+class SidebarEntry:
+    """Indexed sidebar tab entry for O(1) lookups by plugin ID."""
+
+    plugin_id: str
+    display_name: str
+    tree_item: QTreeWidgetItem
+    page_widget: QWidget
+    metadata: PluginMetadata
+    status: str = field(default="")
 
 
 class DisabledPluginPage(QWidget):
@@ -250,8 +263,10 @@ class MainWindow(QMainWindow):
 
         main_layout.addLayout(right_side)
 
-        # Initialize Pages
-        self.pages = {}
+        # Initialize sidebar index infrastructure
+        self._sidebar_index: dict[str, SidebarEntry] = {}
+        self._category_items: dict[str, QTreeWidgetItem] = {}
+        self._pages_cache: dict[str, QWidget] | None = None
 
         # Build sidebar from PluginRegistry (v25.0 plugin architecture)
         context = {
@@ -305,6 +320,26 @@ class MainWindow(QMainWindow):
         # First-run wizard
         self._check_first_run()
 
+    @property
+    def pages(self) -> dict[str, QWidget]:
+        """Backward-compatible accessor. Returns {display_name: widget} view."""
+        if self._pages_cache is None:
+            self._pages_cache = {
+                entry.display_name: entry.page_widget
+                for entry in self._sidebar_index.values()
+            }
+        return self._pages_cache
+
+    @pages.setter
+    def pages(self, value: dict) -> None:
+        """Backward-compatible setter. Accepts a plain dict (e.g. in tests) and stores it as the cache."""
+        # Always (re)initialize real dicts — avoids _Dummy leaking in from test stubs
+        if not isinstance(getattr(self, "_sidebar_index", None), dict):
+            self._sidebar_index = {}
+        if not isinstance(getattr(self, "_category_items", None), dict):
+            self._category_items = {}
+        self._pages_cache = value
+
     def _build_sidebar_from_registry(self, context: dict) -> None:
         """Source all tabs from PluginRegistry. Replaces 26 hardcoded add_page() calls."""
         from core.plugins.compat import CompatibilityDetector
@@ -316,8 +351,17 @@ class MainWindow(QMainWindow):
 
         registry = PluginRegistry.instance()
 
+        # Experience level filtering
+        from utils.experience_level import ExperienceLevelManager
+        from utils.favorites import FavoritesManager
+
+        level = ExperienceLevelManager.get_level()
+        favorites = FavoritesManager.get_favorites()
+
         for plugin in registry:
             meta = plugin.metadata()
+            if not ExperienceLevelManager.is_tab_visible(meta.id, level, favorites):
+                continue
             compat = plugin.check_compat(detector)
             lazy = self._wrap_in_lazy(plugin)
             self._add_plugin_page(meta, lazy, compat)
@@ -505,7 +549,22 @@ class MainWindow(QMainWindow):
         # Store widget reference
         item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
         self.content_area.addWidget(page_widget)
-        self.pages[name] = widget
+
+        # Populate sidebar index (O(1) lookup by plugin_id)
+        plugin_id = name.lower().replace(" ", "_")
+        meta = PluginMetadata(
+            id=plugin_id, name=name, description=description,
+            category=category, icon=icon, badge=badge,
+        )
+        entry = SidebarEntry(
+            plugin_id=plugin_id,
+            display_name=name,
+            tree_item=item,
+            page_widget=widget,  # original widget (not wrapped) — matches old self.pages[name]=widget
+            metadata=meta,
+        )
+        self._sidebar_index[plugin_id] = entry
+        self._pages_cache = None  # invalidate cache
 
     def _wrap_page_widget(self, widget: QWidget) -> QScrollArea:
         """
@@ -1032,6 +1091,23 @@ class MainWindow(QMainWindow):
                 wizard.exec()
             except ImportError:
                 logger.debug("First-run wizard module not available", exc_info=True)
+
+        # Launch guided tour if not yet completed (v47.0)
+        try:
+            from utils.guided_tour import GuidedTourManager
+            if GuidedTourManager.needs_tour():
+                from ui.tour_overlay import TourOverlay
+                self._tour_overlay = TourOverlay(self)
+                self._tour_overlay.tour_completed.connect(
+                    lambda: self.show_toast(
+                        self.tr("Welcome"),
+                        self.tr("Tour complete! Explore at your own pace."),
+                        "general",
+                    )
+                )
+                QTimer.singleShot(500, self._tour_overlay.start)
+        except (ImportError, RuntimeError) as e:
+            logger.debug("Guided tour not available: %s", e)
 
     def setup_tray(self):
         from PyQt6.QtGui import QAction, QIcon
