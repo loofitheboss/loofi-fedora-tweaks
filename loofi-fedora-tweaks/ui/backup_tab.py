@@ -291,6 +291,10 @@ class BackupTab(BaseTab):
 
             if not snapshots:
                 BaseTab.set_table_empty_state(self.snap_table, self.tr("No snapshots found"))
+            else:
+                normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+                if callable(normalize):
+                    normalize(self.snap_table)
 
             self.append_output(self.tr("Found {} snapshots.\n").format(len(snapshots)))
         except (RuntimeError, OSError, ValueError) as e:

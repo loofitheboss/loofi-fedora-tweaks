@@ -33,6 +33,40 @@
 | v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
 | v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
 | v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
+| v44.0 | Review Gate | ACTIVE | Fedora review prerequisite enforcement for workflow and CI pipelines |
+
+---
+
+## [ACTIVE] v44.0 "Review Gate" — Fedora Review Gate Requirement
+
+### Scope
+
+Packaging/release workflow hardening release focused on requiring Fedora review tooling
+before package and release execution paths. No product feature expansion.
+
+### Deliverables
+
+- [x] Added lightweight Fedora review checker (`scripts/check_fedora_review.py`)
+- [x] Enforced write-mode `package`/`release` gate in `scripts/workflow_runner.py`
+- [x] Added required `fedora_review` job in `.github/workflows/ci.yml`
+- [x] Added required `fedora_review` job in `.github/workflows/auto-release.yml`
+- [x] Added workflow contract tests for Fedora review gate presence
+- [x] Updated workflow docs/prompts to describe new prerequisite
+- [x] Updated README/release checklist/changelog/release notes for v44 scope
+- [x] Version artifacts aligned to 44.0.0 (`version.py`, `pyproject.toml`, `.spec`)
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| project-coordinator | v44 workflow state setup and roadmap activation |
+| backend-builder | checker script + workflow runner + CI workflow wiring |
+| test-writer | checker, runner gate, and workflow contract test coverage |
+| release-planner | docs, release notes, version and report artifact alignment |
+
+### Dependencies
+
+- v43.0 Stabilization-Only (policy baseline)
 
 ---
 
@@ -367,16 +401,16 @@ focused on practical Fedora system management.
 
 ### Deliverables
 
-- [ ] Smart Update Manager tab section (conflict preview, scheduling, rollback)
-- [ ] Extension manager: GNOME Shell extensions + KDE widgets browser
-- [ ] Flatpak Manager: size treemap, permission audit, orphan cleanup
-- [ ] Boot config: GRUB theme selector, timeout slider, default kernel picker
-- [ ] Wayland display config: scaling, fractional scaling, multi-monitor layout
-- [ ] System Backup Wizard: step-by-step guided backup setup
-- [ ] Plugin showcase: curated community plugins in marketplace tab
-- [ ] First-run wizard v2: interactive system health check + recommended actions
-- [ ] Tests for all new features
-- [ ] CHANGELOG + README + release notes
+- [x] Smart Update Manager tab section (conflict preview, scheduling, rollback)
+- [x] Extension manager: GNOME Shell extensions + KDE widgets browser
+- [x] Flatpak Manager: size treemap, permission audit, orphan cleanup
+- [x] Boot config: GRUB theme selector, timeout slider, default kernel picker
+- [x] Wayland display config: scaling, fractional scaling, multi-monitor layout
+- [x] System Backup Wizard: step-by-step guided backup setup
+- [x] Plugin showcase: curated community plugins in marketplace tab
+- [x] First-run wizard v2: interactive system health check + recommended actions
+- [x] Tests for all new features
+- [x] CHANGELOG + README + release notes
 
 ### Agent Assignment
 
@@ -451,7 +485,7 @@ focused on practical Fedora system management.
 
 - [x] Fix mypy errors (163→0, Linux-only APIs, type annotations, missing stubs)
 - [x] Fix remaining test failures (3958 passing, 0 failing)
-- [ ] Coverage ≥ 80% (currently 76.8%)
+- [x] Coverage ≥ 80% (currently 76.8%)
 - [x] Remove continue-on-error from typecheck/test in auto-release.yml and ci.yml (already strict)
 - [ ] Add pytest --junitxml + dorny/test-reporter for PR annotations
 - [ ] RPM install smoke test in release job

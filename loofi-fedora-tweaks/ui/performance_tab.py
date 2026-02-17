@@ -267,6 +267,9 @@ class PerformanceTab(BaseTab):
                 recs = entry.recommendations
                 summary = f"gov={recs.get('governor', '?')}, swap={recs.get('swappiness', '?')}"
                 self.history_table.setItem(row, 3, self.make_table_item(summary))
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.history_table)
         except (OSError, ValueError) as e:
             logger.debug("Failed to load tuning history: %s", e)
             self.set_table_empty_state(

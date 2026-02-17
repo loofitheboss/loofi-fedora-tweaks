@@ -52,6 +52,7 @@ Examples:
 Environment:
   PYTHON_VERSION: Python 3.12+ required
   PYTHONPATH: Set to loofi-fedora-tweaks directory
+  fedora-review: required for write-mode package/release phases
 
 Legacy Usage (still supported):
   $0 <version> [phase] [runner args...]

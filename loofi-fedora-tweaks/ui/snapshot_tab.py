@@ -184,6 +184,9 @@ class SnapshotTab(BaseTab):
                 )
                 self.snap_table.setItem(row, 3, self.make_table_item(ts_str))
                 self.snap_table.setItem(row, 4, self.make_table_item(snap.size_str))
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.snap_table)
 
             count = self.snap_table.rowCount()
             self.append_output(f"Found {count} snapshot(s)\n")

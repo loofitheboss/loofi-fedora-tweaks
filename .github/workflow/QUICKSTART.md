@@ -30,6 +30,9 @@ python3 scripts/workflow_runner.py --phase test --target-version v24.0 --assista
 
 - P3 Build reads only architecture + tasks artifacts.
 - P3 Build does not read `ROADMAP.md`.
+- In write mode, `package` and `release` require Fedora review tooling:
+  - `python3 scripts/check_fedora_review.py`
+  - install prerequisite: `dnf install -y fedora-review`
 
 ## Legacy Runner
 

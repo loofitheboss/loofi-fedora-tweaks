@@ -12,7 +12,7 @@ Sub-tabs:
 import logging
 import os
 
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -465,6 +465,9 @@ class NetworkTab(BaseTab):
     def _make_table_item(text: str) -> QTableWidgetItem:
         """Create a table item with explicit readable foreground color."""
         item = QTableWidgetItem(str(text))
+        item.setTextAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         item.setForeground(QColor("#e4e8f4"))
         return item
 
@@ -475,6 +478,9 @@ class NetworkTab(BaseTab):
         table.setItem(0, 0, self._make_table_item(message))
         if table.columnCount() > 1:
             table.setSpan(0, 0, 1, table.columnCount())
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(table)
 
     def _on_tab_changed(self, index):
         """Start/stop monitoring timer based on active sub-tab."""
@@ -505,13 +511,16 @@ class NetworkTab(BaseTab):
                 self.iface_table.setItem(
                     i, 1, self._make_table_item(iface.type.capitalize())
                 )
-                status = "🟢 Up" if iface.is_up else "🔴 Down"
+                status = "Up" if iface.is_up else "Down"
                 self.iface_table.setItem(i, 2, self._make_table_item(status))
                 self.iface_table.setItem(
                     i, 3, self._make_table_item(iface.ip_address or "—")
                 )
                 mac = self._get_mac_address(iface.name)
                 self.iface_table.setItem(i, 4, self._make_table_item(mac))
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.iface_table)
         except (RuntimeError, OSError, ValueError) as e:
             logger.error("Failed to load interfaces: %s", e)
             self._set_empty_table_state(
@@ -543,6 +552,9 @@ class NetworkTab(BaseTab):
                 self.wifi_table.setItem(i, 1, self._make_table_item(row[1]))
                 self.wifi_table.setItem(i, 2, self._make_table_item(row[2]))
                 self.wifi_table.setItem(i, 3, self._make_table_item(row[3]))
+            normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+            if callable(normalize):
+                normalize(self.wifi_table)
         self.append_output(
             self.tr("WiFi scan complete. {} networks found.\n").format(len(rows))
         )
@@ -584,6 +596,9 @@ class NetworkTab(BaseTab):
             self.vpn_table.setItem(i, 0, self._make_table_item(name))
             self.vpn_table.setItem(i, 1, self._make_table_item(conn_type))
             self.vpn_table.setItem(i, 2, self._make_table_item(status))
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.vpn_table)
         if not vpn_rows:
             self._set_empty_table_state(
                 self.vpn_table, self.tr("No VPN connections configured")
@@ -869,6 +884,9 @@ class NetworkTab(BaseTab):
                     self.traffic_table.setItem(
                         i, 5, self._make_table_item(iface.recv_rate_human)
                     )
+                normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+                if callable(normalize):
+                    normalize(self.traffic_table)
 
             # Active connections
             connections = NetworkMonitor.get_active_connections()
@@ -902,5 +920,8 @@ class NetworkTab(BaseTab):
                     self.conn_table.setItem(
                         i, 5, self._make_table_item(conn.process_name or "—")
                     )
+                normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+                if callable(normalize):
+                    normalize(self.conn_table)
         except (RuntimeError, OSError, ValueError) as e:
             logger.error("Monitoring refresh failed: %s", e)

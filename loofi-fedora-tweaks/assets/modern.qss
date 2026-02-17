@@ -379,14 +379,13 @@ QTableWidget, QTreeWidget, QTableView, QTreeView {
     gridline-color: #1c2030;
     selection-background-color: #1a2535;
     selection-color: #39c5cf;
-    padding: 2px;
+    padding: 0px;
     font-size: 10.5pt;
 }
 
 QTableWidget::item, QTreeWidget::item {
     color: #e6edf3;
-    padding: 6px 8px;
-    min-height: 28px;
+    padding: 2px 8px;
     border-bottom: 1px solid #12151d;
 }
 
@@ -888,6 +887,10 @@ QTableWidget#baseTable {
     gridline-color: #2d3348;
     selection-background-color: #5c6578;
     selection-color: #ffffff;
+}
+
+QTableWidget#baseTable::item {
+    padding: 2px 8px;
 }
 
 QTableWidget#baseTable QHeaderView::section {

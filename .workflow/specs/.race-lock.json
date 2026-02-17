@@ -1,8 +1,7 @@
 {
-  "version": "v43.0.0",
-  "started_at": "20260216_080000",
-  "status": "done",
-  "target_version": "v43.0.0",
-  "bumped_at": "2026-02-16T08:00:00+00:00",
-  "completed_at": "2026-02-16T12:30:00+01:00"
+  "version": "v44.0.0",
+  "started_at": "20260216_170000",
+  "status": "active",
+  "target_version": "v44.0.0",
+  "bumped_at": "2026-02-16T17:00:00+00:00"
 }

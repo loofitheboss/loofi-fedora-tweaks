@@ -3,7 +3,7 @@
 > Agent: release-planner | Model: GPT-4o-mini | Cost: LABOR-LIGHT
 
 ROLE: Packaging Verifier
-INPUT: `loofi-fedora-tweaks/version.py` + `loofi-fedora-tweaks.spec` + `pyproject.toml` + AGENTS.md (conventions)
+INPUT: `loofi-fedora-tweaks/version.py` + `loofi-fedora-tweaks.spec` + `pyproject.toml` + `scripts/check_fedora_review.py` + AGENTS.md (conventions)
 GOAL: Verify package metadata and scripts are release-ready.
 
 INSTRUCTIONS:
@@ -16,8 +16,11 @@ INSTRUCTIONS:
    - `scripts/build_rpm.sh`
    - `scripts/build_flatpak.sh`
    - `scripts/build_sdist.sh`
-4. Report mismatches and fix safe metadata inconsistencies.
-5. Write concise packaging status summary.
+4. Validate Fedora review gate prerequisites:
+   - `scripts/check_fedora_review.py` exists
+   - `fedora-review` is required for write-mode package/release phases
+5. Report mismatches and fix safe metadata inconsistencies.
+6. Write concise packaging status summary.
 
 VERSION SYNC RULE (from AGENTS.md):
 - All three files MUST have matching version numbers
@@ -29,6 +32,7 @@ CHECKS:
 - [ ] .spec `Version:` matches target version
 - [ ] pyproject.toml `version` matches target version
 - [ ] Packaging scripts are executable
+- [ ] Fedora review gate prerequisites are documented and validated
 - [ ] No blocking package metadata errors
 
 RULES:

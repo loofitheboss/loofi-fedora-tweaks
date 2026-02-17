@@ -33,6 +33,8 @@ LOCK_FILE = SPECS_DIR / ".race-lock.json"
 WRITER_LOCK_FILE = SPECS_DIR / ".writer-lock.json"
 MODEL_ROUTER_FILE = ROOT / ".github" / "workflow" / "model-router.toml"
 PROMPTS_DIR = ROOT / ".github" / "workflow" / "prompts"
+FEDORA_REVIEW_CHECK_SCRIPT = ROOT / "scripts" / "check_fedora_review.py"
+FEDORA_REVIEW_GATED_PHASES = {"package", "release"}
 
 PHASE_ORDER = ["plan", "design", "build", "test", "doc", "package", "release"]
 DEFAULT_PHASE_MODELS = {
@@ -592,6 +594,34 @@ def validate_phase_ordering(phase: str, version_tag: str) -> tuple[bool, str]:
     return True, "ok"
 
 
+def run_fedora_review_gate(timeout_seconds: int = 60) -> tuple[bool, str]:
+    """Run lightweight Fedora review prerequisite checks."""
+    if not FEDORA_REVIEW_CHECK_SCRIPT.exists():
+        return False, f"missing checker script: {FEDORA_REVIEW_CHECK_SCRIPT}"
+
+    command = [sys.executable, str(FEDORA_REVIEW_CHECK_SCRIPT)]
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired:
+        return False, f"checker timed out after {timeout_seconds}s"
+    except (subprocess.SubprocessError, OSError) as exc:
+        return False, f"checker execution failed: {exc}"
+
+    if result.returncode != 0:
+        stdout = result.stdout.strip()
+        stderr = result.stderr.strip()
+        details = stdout or stderr or f"exit code {result.returncode}"
+        return False, details
+
+    return True, "ok"
+
+
 def run_phase(
     phase: str,
     version_tag: str,
@@ -629,6 +659,19 @@ def run_phase(
         )
         if not ok:
             return 1, {"phase": phase, "status": "blocked", "error": reason, "timestamp": isoformat_utc()}
+
+    if mode == "write" and phase in FEDORA_REVIEW_GATED_PHASES and not dry_run:
+        gate_ok, gate_reason = run_fedora_review_gate()
+        if not gate_ok:
+            return (
+                1,
+                {
+                    "phase": phase,
+                    "status": "blocked",
+                    "error": f"fedora-review gate failed: {gate_reason}",
+                    "timestamp": isoformat_utc(),
+                },
+            )
 
     if phase == "plan":
         base_instruction = f"Write output only to {artifacts['tasks']}"

@@ -56,6 +56,15 @@ python3 scripts/workflow_runner.py --phase release --target-version v25.0
 python3 scripts/workflow_runner.py --phase all --target-version v25.0
 ```
 
+## Fedora Review Prerequisite (Package/Release)
+
+- In `--mode write`, phases `package` and `release` run `scripts/check_fedora_review.py`.
+- The checker requires `fedora-review` to be installed and healthy (`-V` and `-d` probes).
+- Install prerequisite on Fedora hosts:
+```bash
+dnf install -y fedora-review
+```
+
 ## Assistant-Aware Execution
 ```bash
 # Write mode with lock metadata

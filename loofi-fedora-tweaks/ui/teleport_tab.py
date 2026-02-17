@@ -332,6 +332,9 @@ class TeleportTab(QWidget, PluginInterface):
             self.packages_table.setItem(row, 2, QTableWidgetItem(date_str))
             size = pkg.get("size_bytes", 0)
             self.packages_table.setItem(row, 3, QTableWidgetItem(f"{size} B"))
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.packages_table)
 
     def _export_package(self):
         """Export the last captured package to a file."""

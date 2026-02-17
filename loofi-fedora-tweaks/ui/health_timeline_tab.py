@@ -235,6 +235,9 @@ class HealthTimelineTab(QWidget, PluginInterface):
             self.metrics_table.setItem(row, 1, QTableWidgetItem(f"{m['value']:.2f}"))
             self.metrics_table.setItem(row, 2, QTableWidgetItem(m["unit"]))
             self.metrics_table.setItem(row, 3, QTableWidgetItem(str(m["id"])))
+        normalize = getattr(BaseTab, "ensure_table_row_heights", None)
+        if callable(normalize):
+            normalize(self.metrics_table)
 
     def _record_snapshot(self):
         """Record a system health snapshot."""
