@@ -270,6 +270,10 @@ class _UpdatesSubTab(QWidget):
             self.btn_update_all.setEnabled(True)
             self.progress_bar.setValue(100)
             self.progress_bar.setFormat(self.tr("100% - Done"))
+            if exit_code == 0:
+                self.show_success("Maintenance", self.tr("Update completed successfully"))
+            else:
+                self.show_error("Maintenance", self.tr("Update failed (exit code {})").format(exit_code))
 
     def run_single_command(self, cmd, args, description):
         self.output_area.clear()
@@ -429,6 +433,10 @@ class _CleanupSubTab(QWidget):
         self.append_output(
             self.tr("\nCommand finished with exit code: {}").format(exit_code)
         )
+        if exit_code == 0:
+            self.show_success("Cleaning", self.tr("Cleanup completed successfully"))
+        else:
+            self.show_error("Cleaning", self.tr("Cleanup failed (exit code {})").format(exit_code))
 
 
 # ---------------------------------------------------------------------------

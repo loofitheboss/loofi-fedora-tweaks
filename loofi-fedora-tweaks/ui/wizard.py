@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QScrollArea,
     QCheckBox,
+    QProgressBar,
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -241,11 +242,22 @@ class FirstRunWizard(QDialog):
         self._step_label.setObjectName("wizardStepLabel")
         root_layout.addWidget(self._step_label)
 
+        # Progress bar (v47.0)
+        self._progress_bar = QProgressBar()
+        self._progress_bar.setMinimum(0)
+        self._progress_bar.setMaximum(6)
+        self._progress_bar.setValue(1)
+        self._progress_bar.setTextVisible(False)
+        self._progress_bar.setFixedHeight(6)
+        self._progress_bar.setObjectName("wizardProgressBar")
+        root_layout.addWidget(self._progress_bar)
+
         # Stacked pages ------------------------------------------------
         self._stack = QStackedWidget()
         root_layout.addWidget(self._stack, 1)
 
         self._stack.addWidget(self._build_step1())
+        self._stack.addWidget(self._build_step_experience_level())
         self._stack.addWidget(self._build_step2())
         self._stack.addWidget(self._build_step4_health())
         self._stack.addWidget(self._build_step5_actions())
@@ -333,14 +345,92 @@ class FirstRunWizard(QDialog):
         layout.addStretch()
         return page
 
-    def _build_step2(self) -> QWidget:
-        """Step 2 - Use Case Selection."""
+    def _build_step_experience_level(self) -> QWidget:
+        """Step 2 - Experience Level Selection (v47.0)."""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(14)
 
-        header = QLabel(self.tr("\U0001f3af Step 2: Choose Your Use Case"))
+        header = QLabel(self.tr("\U0001f393 Step 2: Experience Level"))
+        hfont = QFont()
+        hfont.setPointSize(13)
+        hfont.setBold(True)
+        header.setFont(hfont)
+        layout.addWidget(header)
+
+        desc = QLabel(
+            self.tr(
+                "Choose your experience level. This controls which tabs are "
+                "visible in the sidebar. You can change this later in Settings."
+            )
+        )
+        desc.setWordWrap(True)
+        desc.setObjectName("wizardDesc")
+        layout.addWidget(desc)
+
+        self._exp_button_group = QButtonGroup(self)
+        levels = [
+            (
+                "beginner",
+                self.tr("\U0001f331 Beginner"),
+                self.tr("Essential tools only — ideal for new Fedora users. Shows 12 core tabs."),
+            ),
+            (
+                "intermediate",
+                self.tr("\U0001f4bb Intermediate"),
+                self.tr("Core tools plus development, extensions, and customization. Shows 20 tabs."),
+            ),
+            (
+                "advanced",
+                self.tr("\U0001f680 Advanced"),
+                self.tr("Full access to all 28 tabs and every feature."),
+            ),
+        ]
+        self._exp_radios: dict[str, QRadioButton] = {}
+        for idx, (key, label, tip) in enumerate(levels):
+            radio = QRadioButton(f"  {label}")
+            radio.setToolTip(tip)
+            radio.setObjectName("wizardUseCaseRadio")
+            if key == "beginner":
+                radio.setChecked(True)
+            self._exp_button_group.addButton(radio, idx)
+            self._exp_radios[key] = radio
+            layout.addWidget(radio)
+
+            tip_label = QLabel(f"    {tip}")
+            tip_label.setWordWrap(True)
+            tip_label.setObjectName("wizardDesc")
+            layout.addWidget(tip_label)
+
+        layout.addStretch()
+        return page
+
+    def _capture_experience_level(self):
+        """Read selected experience level and apply it."""
+        try:
+            from utils.experience_level import ExperienceLevel, ExperienceLevelManager
+            level_map = {
+                "beginner": ExperienceLevel.BEGINNER,
+                "intermediate": ExperienceLevel.INTERMEDIATE,
+                "advanced": ExperienceLevel.ADVANCED,
+            }
+            for key, radio in self._exp_radios.items():
+                if radio.isChecked():
+                    ExperienceLevelManager.set_level(level_map[key])
+                    return
+            ExperienceLevelManager.set_level(ExperienceLevel.BEGINNER)
+        except (ImportError, RuntimeError) as e:
+            logger.debug("Failed to set experience level: %s", e)
+
+    def _build_step2(self) -> QWidget:
+        """Step 3 - Use Case Selection."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(14)
+
+        header = QLabel(self.tr("\U0001f3af Step 3: Choose Your Use Case"))
         hfont = QFont()
         hfont.setPointSize(13)
         hfont.setBold(True)
@@ -391,7 +481,7 @@ class FirstRunWizard(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(14)
 
-        header = QLabel(self.tr("\u2705 Step 5: Review & Apply"))
+        header = QLabel(self.tr("\u2705 Step 6: Review & Apply"))
         hfont = QFont()
         hfont.setPointSize(13)
         hfont.setBold(True)
@@ -420,27 +510,36 @@ class FirstRunWizard(QDialog):
         card_layout.addWidget(self._lbl_summary)
 
         layout.addWidget(card, 1)
+
+        # Apply feedback label (v47.0)
+        self._apply_feedback_label = QLabel()
+        self._apply_feedback_label.setWordWrap(True)
+        self._apply_feedback_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self._apply_feedback_label)
+
         return page
 
     # -- Navigation logic -----------------------------------------------
 
     def _set_step(self, index: int):
         """Switch visible step and update buttons."""
-        index = max(0, min(index, 4))
+        index = max(0, min(index, 5))
         self._stack.setCurrentIndex(index)
 
         step_names = [
-            self.tr("Step 1 of 5: Detection"),
-            self.tr("Step 2 of 5: Use Case"),
-            self.tr("Step 3 of 5: Health Check"),
-            self.tr("Step 4 of 5: Recommendations"),
-            self.tr("Step 5 of 5: Apply"),
+            self.tr("Step 1 of 6: Detection"),
+            self.tr("Step 2 of 6: Experience Level"),
+            self.tr("Step 3 of 6: Use Case"),
+            self.tr("Step 4 of 6: Health Check"),
+            self.tr("Step 5 of 6: Recommendations"),
+            self.tr("Step 6 of 6: Apply"),
         ]
         self._step_label.setText(step_names[index])
+        self._progress_bar.setValue(index + 1)
 
         self._btn_back.setVisible(index > 0)
 
-        if index < 4:
+        if index < 5:
             self._btn_next.setText(self.tr("Next \u2192"))
             self._btn_next.setProperty("wizardMode", "next")
         else:
@@ -454,18 +553,20 @@ class FirstRunWizard(QDialog):
         # Populate contents when entering a step
         if index == 0:
             self._populate_step1()
-        elif index == 2:
-            self._populate_health()
         elif index == 3:
-            self._populate_actions()
+            self._populate_health()
         elif index == 4:
+            self._populate_actions()
+        elif index == 5:
             self._populate_step3()
 
     def _go_next(self):
         current = self._stack.currentIndex()
         if current == 1:
+            self._capture_experience_level()
+        if current == 2:
             self._capture_use_case()
-        if current < 4:
+        if current < 5:
             self._set_step(current + 1)
         else:
             self._apply()
@@ -513,6 +614,16 @@ class FirstRunWizard(QDialog):
             json.dump(v2_data, fh, indent=2)
 
         logger.info("First-run wizard v2 completed. Profile: %s", profile_data)
+
+        # Show apply feedback (v47.0)
+        if hasattr(self, "_apply_feedback_label"):
+            self._apply_feedback_label.setText(
+                self.tr("\u2705 Setup complete! Your preferences have been saved.")
+            )
+            self._apply_feedback_label.setStyleSheet(
+                "color: #2ecc71; font-weight: bold; padding: 8px;"
+            )
+
         self.accept()
 
     # -- Data helpers ---------------------------------------------------
@@ -581,7 +692,7 @@ class FirstRunWizard(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(14)
 
-        header = QLabel(self.tr("\U0001fa7a Step 3: System Health Check"))
+        header = QLabel(self.tr("\U0001fa7a Step 4: System Health Check"))
         hfont = QFont()
         hfont.setPointSize(13)
         hfont.setBold(True)
@@ -618,7 +729,7 @@ class FirstRunWizard(QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(14)
 
-        header = QLabel(self.tr("\U0001f4cb Step 4: Recommended Actions"))
+        header = QLabel(self.tr("\U0001f4cb Step 5: Recommended Actions"))
         hfont = QFont()
         hfont.setPointSize(13)
         hfont.setBold(True)

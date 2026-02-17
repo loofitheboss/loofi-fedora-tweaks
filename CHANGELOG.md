@@ -4,6 +4,57 @@
 
 All notable changes to this project will be documented in this file.
 
+## [47.0.0] - 2026-02-18 "Experience"
+
+### UX Experience System
+
+- Added Experience Level system (Beginner/Intermediate/Advanced) with sidebar tab filtering
+- Beginner mode shows 12 essential tabs; Advanced shows all 28
+- Favorites override level filtering — pinned tabs always visible
+- Experience level selector added to Settings → Behavior tab
+
+### Actionable Feedback
+
+- Added toast notification convenience methods to BaseTab: `show_toast()`, `show_success()`, `show_error()`, `show_info()`
+- Command completion auto-shows success/error toast notifications
+- Toast integration wired through MainWindow parent chain
+
+### Health Score Drill-Down
+
+- Health score gauge is now clickable — opens detailed breakdown dialog
+- Per-component health scores (CPU, RAM, Disk, Uptime, Updates) with progress bars
+- Actionable fix suggestions with "Fix it →" buttons that navigate to relevant tabs
+
+### Settings UX
+
+- Added contextual help text to all three settings sub-tabs (Appearance, Behavior, Advanced)
+- Experience level descriptions update dynamically when changed
+
+### Guided Tour
+
+- Added 5-step guided tour overlay for new users
+- Semi-transparent spotlight overlay highlights UI elements
+- Tour automatically launches on first run, remembered as complete
+
+### Command Palette Actions
+
+- Command palette now supports executable quick commands (not just navigation)
+- Quick commands with bound handlers appear with ⚡ prefix
+- Built-in quick command registry with 10 predefined commands
+
+### Dashboard Undo
+
+- Added "Recent Changes" card to dashboard with inline undo buttons
+- Undo executes reversal commands from action history
+- HistoryEntry dataclass with UUID-based IDs for targeted undo
+
+### Infrastructure
+
+- Version bump: 47.0.0 "Experience" (version.py, .spec, pyproject.toml)
+- 8 new test files with 115 new tests (6016 total, all passing)
+- New utils modules: experience_level.py, health_detail.py, guided_tour.py, quick_commands.py
+- New UI components: health_detail_dialog.py, tour_overlay.py
+
 ## [46.0.0] - 2026-02-17 "Navigator"
 
 ### Navigation & UX

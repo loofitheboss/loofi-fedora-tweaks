@@ -370,6 +370,59 @@ class MainWindow(QMainWindow):
         """Wrap plugin.create_widget() in LazyWidget for deferred instantiation."""
         return LazyWidget(plugin.create_widget)
 
+    def _find_or_create_category(self, category: str) -> QTreeWidgetItem:
+        """Find or create a category tree item, using cache for O(1) lookup."""
+        if category in self._category_items:
+            return self._category_items[category]
+
+        category_item = QTreeWidgetItem(self.sidebar)
+        category_item.setText(0, category)
+        category_item.setData(0, _ROLE_DESC, category)
+        category_item.setExpanded(True)
+        self._set_tree_item_icon(category_item, CATEGORY_ICONS.get(category, ""))
+        self._category_items[category] = category_item
+        return category_item
+
+    def _create_tab_item(
+        self,
+        category_item: QTreeWidgetItem,
+        name: str,
+        icon: str,
+        badge: str = "",
+        description: str = "",
+        disabled: bool = False,
+        disabled_reason: str = "",
+    ) -> QTreeWidgetItem:
+        """Create a sidebar tree item for a tab."""
+        badge_suffix = ""
+        if badge == "recommended":
+            badge_suffix = "  ★"
+        elif badge == "advanced":
+            badge_suffix = "  ⚙"
+
+        item = QTreeWidgetItem(category_item)
+        item.setText(0, f"{name}{badge_suffix}")
+        item.setData(0, _ROLE_NAME, name)
+        self._set_tree_item_icon(item, icon)
+
+        if disabled:
+            item.setDisabled(True)
+            tooltip = disabled_reason if disabled_reason else f"{name} is not available on this system."
+            item.setToolTip(0, tooltip)
+        else:
+            item.setData(0, _ROLE_DESC, description)
+            item.setData(0, _ROLE_BADGE, badge)
+            if description:
+                item.setToolTip(0, description)
+
+        return item
+
+    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry") -> None:
+        """Register a tab in the sidebar index and content area."""
+        self._sidebar_index[plugin_id] = entry
+        self._pages_cache = None  # invalidate backward-compat cache
+        self.content_area.addWidget(entry.page_widget)
+
     def _add_plugin_page(
         self,
         meta: PluginMetadata,
@@ -377,16 +430,24 @@ class MainWindow(QMainWindow):
         compat: CompatStatus,
     ) -> None:
         """Register a plugin page in the sidebar and content area."""
-        self.add_page(
-            name=meta.name,
-            icon=meta.icon,
-            widget=widget,
-            category=meta.category,
-            description=meta.description,
-            badge=meta.badge,
-            disabled=not compat.compatible,
-            disabled_reason=compat.reason,
+        category_item = self._find_or_create_category(meta.category)
+        item = self._create_tab_item(
+            category_item, meta.name, meta.icon, meta.badge,
+            meta.description, disabled=not compat.compatible, disabled_reason=compat.reason,
         )
+        if not compat.compatible:
+            page_widget = self._wrap_page_widget(DisabledPluginPage(meta, compat.reason))
+        else:
+            page_widget = self._wrap_page_widget(widget)
+        item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
+        entry = SidebarEntry(
+            plugin_id=meta.id,
+            display_name=meta.name,
+            tree_item=item,
+            page_widget=widget,
+            metadata=meta,
+        )
+        self._register_in_index(meta.id, entry)
 
     def _start_pulse_listener(self):
         """Initialize and start the Pulse event listener."""
@@ -489,82 +550,27 @@ class MainWindow(QMainWindow):
         disabled: bool = False,
         disabled_reason: str = "",
     ) -> None:
-        cat_label = category
+        category_item = self._find_or_create_category(category)
+        item = self._create_tab_item(category_item, name, icon, badge, description, disabled, disabled_reason)
 
-        # Find or create category item
-        category_item = None
-        for i in range(self.sidebar.topLevelItemCount()):
-            item = self.sidebar.topLevelItem(i)
-            if item.text(0) == cat_label or item.data(0, _ROLE_DESC) == category:
-                category_item = item
-                break
-
-        if not category_item:
-            category_item = QTreeWidgetItem(self.sidebar)
-            category_item.setText(0, cat_label)
-            # Store raw category name
-            category_item.setData(0, _ROLE_DESC, category)
-            category_item.setExpanded(True)
-            self._set_tree_item_icon(category_item, CATEGORY_ICONS.get(category, ""))
-
-        # Badge suffix
-        badge_suffix = ""
-        if badge == "recommended":
-            badge_suffix = "  ★"
-        elif badge == "advanced":
-            badge_suffix = "  ⚙"
-
-        item = QTreeWidgetItem(category_item)
-        item.setText(0, f"{name}{badge_suffix}")
-        item.setData(0, _ROLE_NAME, name)
-        self._set_tree_item_icon(item, icon)
-
-        # Disabled plugin: show placeholder page and gray out sidebar item
         if disabled:
             placeholder_meta = PluginMetadata(
-                id=name.lower().replace(" ", "_"),
-                name=name,
-                description=description,
-                category=category,
-                icon=icon,
-                badge=badge,
+                id=name.lower().replace(" ", "_"), name=name, description=description,
+                category=category, icon=icon, badge=badge,
             )
-            page_widget = self._wrap_page_widget(
-                DisabledPluginPage(placeholder_meta, disabled_reason)
-            )
-            item.setDisabled(True)
-            tooltip = (
-                disabled_reason
-                if disabled_reason
-                else f"{name} is not available on this system."
-            )
-            item.setToolTip(0, tooltip)
+            page_widget = self._wrap_page_widget(DisabledPluginPage(placeholder_meta, disabled_reason))
         else:
             page_widget = self._wrap_page_widget(widget)
-            item.setData(0, _ROLE_DESC, description)
-            item.setData(0, _ROLE_BADGE, badge)
-            if description:
-                item.setToolTip(0, description)
 
-        # Store widget reference
         item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
-        self.content_area.addWidget(page_widget)
 
-        # Populate sidebar index (O(1) lookup by plugin_id)
         plugin_id = name.lower().replace(" ", "_")
-        meta = PluginMetadata(
-            id=plugin_id, name=name, description=description,
-            category=category, icon=icon, badge=badge,
-        )
+        meta = PluginMetadata(id=plugin_id, name=name, description=description, category=category, icon=icon, badge=badge)
         entry = SidebarEntry(
-            plugin_id=plugin_id,
-            display_name=name,
-            tree_item=item,
-            page_widget=widget,  # original widget (not wrapped) — matches old self.pages[name]=widget
-            metadata=meta,
+            plugin_id=plugin_id, display_name=name, tree_item=item,
+            page_widget=widget, metadata=meta,
         )
-        self._sidebar_index[plugin_id] = entry
-        self._pages_cache = None  # invalidate cache
+        self._register_in_index(plugin_id, entry)
 
     def _wrap_page_widget(self, widget: QWidget) -> QScrollArea:
         """

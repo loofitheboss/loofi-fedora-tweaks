@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 44.0.0 "Review Gate" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 47.0.0 "Experience" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -19,9 +19,11 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── lazy_widget.py        # Lazy tab loader
 │   ├── wizard.py             # First-run wizard
 │   ├── doctor.py             # DependencyDoctor startup check
-│   ├── command_palette.py    # Ctrl+K command palette
-│   └── confirm_dialog.py     # ConfirmActionDialog for dangerous ops
-├── utils/                    # Business logic — 106 modules
+│   ├── command_palette.py    # Ctrl+K command palette with quick commands
+│   ├── confirm_dialog.py     # ConfirmActionDialog for dangerous ops
+│   ├── health_detail_dialog.py  # Health score drill-down modal (v47.0)
+│   └── tour_overlay.py       # First-run guided tour spotlight overlay (v47.0)
+├── utils/                    # Business logic — 110 modules
 │   ├── commands.py           # PrivilegedCommand builder (pkexec, never sudo)
 │   ├── command_runner.py     # CommandRunner (QProcess async wrapper)
 │   ├── system.py             # SystemManager (is_atomic, get_package_manager)
@@ -29,6 +31,10 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── errors.py             # Error hierarchy (LoofiError, DnfLockedError, etc.)
 │   ├── safety.py             # SafetyManager — snapshot prompts before risky ops
 │   ├── history.py            # HistoryManager — action logging with undo
+│   ├── experience_level.py   # ExperienceLevelManager — beginner/intermediate/advanced mode
+│   ├── health_detail.py      # HealthDetailManager — per-component scores and fixes
+│   ├── guided_tour.py        # GuidedTourManager — first-run guided tour steps
+│   ├── quick_commands.py     # QuickCommandRegistry — command palette quick actions
 │   ├── hardware_profiles.py  # Auto-detect hardware via /sys/class/dmi/
 │   ├── daemon.py             # Background scheduler (--daemon mode)
 │   └── remote_config.py      # Remote config fetch with local fallback
@@ -46,7 +52,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── plugins/                  # Third-party plugin directory
 └── resources/                # Static resources
 
-tests/                        # 200 test files, 4349 tests (74% coverage)
+tests/                        # 208 test files, 6016+ tests (82% coverage)
 scripts/                      # Build, workflow, CI scripts
 config/                       # Global config templates
 docs/                         # User guide, release notes, checklists

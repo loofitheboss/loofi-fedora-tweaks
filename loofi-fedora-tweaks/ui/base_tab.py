@@ -122,6 +122,10 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         self.append_output(
             self.tr("\nCommand finished with exit code: {}").format(exit_code)
         )
+        if exit_code == 0:
+            self.show_success(self.tr("Command completed successfully"))
+        else:
+            self.show_error(self.tr("Command failed (exit code {})").format(exit_code))
 
     def on_error(self, error_msg):
         """Handle command errors."""
@@ -203,6 +207,41 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         """Cancel the currently running command."""
         if self.runner:
             self.runner.cancel()
+
+    # ---------------------------------------------------------------- Toast feedback
+
+    def _find_main_window(self):
+        """Walk up parent chain to find MainWindow (not self)."""
+        widget = self.parent() if hasattr(self, 'parent') else None
+        while widget is not None:
+            if hasattr(widget, 'show_toast') and widget is not self:
+                return widget
+            widget = widget.parent() if hasattr(widget, 'parent') else None
+        return None
+
+    def show_toast(self, title: str, message: str, category: str = "general") -> None:
+        """Show a toast notification via the MainWindow.
+
+        Args:
+            title: Toast title text.
+            message: Toast message body.
+            category: Notification category for accent color.
+        """
+        mw = self._find_main_window()
+        if mw:
+            mw.show_toast(title, message, category)
+
+    def show_success(self, message: str) -> None:
+        """Show a success toast notification."""
+        self.show_toast(self.tr("Success"), message, "general")
+
+    def show_error(self, message: str) -> None:
+        """Show an error toast notification."""
+        self.show_toast(self.tr("Error"), message, "security")
+
+    def show_info(self, message: str) -> None:
+        """Show an informational toast notification."""
+        self.show_toast(self.tr("Info"), message, "system")
 
     # ---------------------------------------------------------------- PluginInterface
 

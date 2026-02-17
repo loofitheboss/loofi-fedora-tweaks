@@ -35,7 +35,8 @@
 | v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
 | v44.0 | Review Gate | DONE | Fedora review prerequisite enforcement for workflow and CI pipelines |
 | v45.0 | Housekeeping | DONE | Stability fixes, safe guidance cleanup, reliability UX consistency |
-| v46.0 | Navigator | ACTIVE | Category clarity, navigation consistency, release packaging alignment |
+| v46.0 | Navigator | DONE | Category clarity, navigation consistency, release packaging alignment |
+| v47.0 | Experience | ACTIVE | UX experience levels, actionable feedback, health drill-down, guided tour |
 
 ---
 
