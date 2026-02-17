@@ -8,6 +8,23 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ## Latest Release
 
+### v46.0.0 "Navigator" (2026-02-17)
+
+**Navigation clarity release** focused on taxonomy consistency and release packaging alignment.
+
+**Key Changes:**
+- Sidebar categories standardized to technical groups (`System`, `Packages`, `Hardware`, `Network`, `Security`, `Appearance`, `Tools`, `Maintenance`)
+- Tab metadata categories/orders aligned with registry definitions
+- Command palette category grouping aligned with sidebar taxonomy
+- Release pipeline gate fixes (workflow specs + race-lock alignment)
+- Release assets published: RPM, Flatpak, and source tarball
+
+**Test Suite**: 5,901 passed, 35 skipped
+
+---
+
+## Recent Releases
+
 ### v41.0.0 "Coverage" (2026-02-15)
 
 **Test coverage push release** with zero production code changes. Coverage raised from 74% to 80%+ and CI pipeline hardened.
@@ -22,8 +39,6 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 **Test Suite**: 5,894 tests collected, 80% coverage
 
 ---
-
-## Recent Releases
 
 ### v40.0.0 "Foundation" (2026-02-14)
 
