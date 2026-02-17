@@ -14,6 +14,7 @@ The release standardizes tab grouping under a technical category model, aligns c
 - Unified navigation taxonomy across sidebar and command palette
 - Registry/category alignment cleanup for all tab metadata
 - Updated tab-reference and architecture documentation to reflect current structure
+- Semantic icon-pack rollout with theme-aware tinting for clearer light/dark readability
 
 ## Changes
 
@@ -22,10 +23,15 @@ The release standardizes tab grouping under a technical category model, aligns c
 - Reorganized tab categories and ordering for clearer discoverability
 - Updated command palette category labels to match sidebar taxonomy
 - Updated category-oriented metadata tests for affected tabs
+- Replaced emoji-style icon references in navigation flows with semantic icon IDs routed through `ui/icon_pack.py`
+- Added selection-aware sidebar icon tint variants and normalized icon sizing (`17x17`) for tighter visual integration
 
 ### Added
 
 - New release notes file for v46.0.0
+- Bundled icon-pack assets in both runtime locations:
+  - `assets/icons/`
+  - `loofi-fedora-tweaks/assets/icons/`
 
 ### Fixed
 

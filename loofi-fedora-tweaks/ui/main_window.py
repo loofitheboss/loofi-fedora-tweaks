@@ -8,7 +8,7 @@ import os
 
 from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.registry import CATEGORY_ICONS
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFontMetrics, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
     QFrame,
@@ -34,6 +34,7 @@ from services.system import SystemManager  # noqa: F401  (re-exported for legacy
 from version import __version__
 
 from core.plugins import PluginInterface, PluginRegistry
+from ui.icon_pack import get_qicon, icon_tint_variant
 from ui.lazy_widget import LazyWidget
 
 logger = get_logger(__name__)
@@ -42,6 +43,8 @@ logger = get_logger(__name__)
 _ROLE_DESC = Qt.ItemDataRole.UserRole + 1  # Tab description string
 _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 _ROLE_STATUS = Qt.ItemDataRole.UserRole + 3  # "ok" | "warning" | "error" | ""
+_ROLE_NAME = Qt.ItemDataRole.UserRole + 4  # Raw tab name (without badges/status)
+_ROLE_ICON = Qt.ItemDataRole.UserRole + 5  # Semantic icon token
 
 
 class DisabledPluginPage(QWidget):
@@ -52,7 +55,7 @@ class DisabledPluginPage(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label = QLabel(
-            f"{meta.icon}  {meta.name} is not available on this system.\n\n{reason}"
+            f"{meta.name} is not available on this system.\n\n{reason}"
         )
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setObjectName("disabledPluginLabel")
@@ -159,7 +162,9 @@ class MainWindow(QMainWindow):
         self.sidebar.setRootIsDecorated(True)
         self.sidebar.setUniformRowHeights(True)
         self.sidebar.setAnimated(True)
+        self.sidebar.setIconSize(QSize(17, 17))
         self.sidebar.currentItemChanged.connect(self.change_page)
+        self.sidebar.currentItemChanged.connect(self._on_sidebar_selection_changed)
         # v31.0: Context menu for favorites
         self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
@@ -350,14 +355,15 @@ class MainWindow(QMainWindow):
             logger.debug("Failed to start pulse listener: %s", e)
 
     def _build_favorites_section(self):
-        """Build a ⭐ Favorites category at the top of the sidebar with pinned tabs."""
+        """Build a Favorites category at the top of the sidebar with pinned tabs."""
         favorites = FavoritesManager.get_favorites()
         if not favorites:
             return
 
         # Create Favorites category at position 0
         fav_category = QTreeWidgetItem()
-        fav_category.setText(0, "⭐ Favorites")
+        fav_category.setText(0, "Favorites")
+        self._set_tree_item_icon(fav_category, "status-ok")
         fav_category.setExpanded(True)
         self.sidebar.insertTopLevelItem(0, fav_category)
 
@@ -367,8 +373,9 @@ class MainWindow(QMainWindow):
                 # Match by tab name (case-insensitive)
                 if name.lower().replace(" ", "_") == fav_id or name.lower() == fav_id:
                     item = QTreeWidgetItem(fav_category)
-                    item.setText(0, f"📌  {name}")
+                    item.setText(0, name)
                     item.setData(0, _ROLE_DESC, f"Pinned: {name}")
+                    item.setData(0, _ROLE_NAME, name)
 
                     # Find the original widget in the content area
                     for i in range(self.sidebar.topLevelItemCount()):
@@ -385,8 +392,10 @@ class MainWindow(QMainWindow):
                                     Qt.ItemDataRole.UserRole,
                                     child.data(0, Qt.ItemDataRole.UserRole),
                                 )
+                                self._copy_tree_item_icon(child, item)
                                 break
                     break
+        self._refresh_sidebar_icon_tints()
 
     def _sidebar_context_menu(self, pos):
         """Show context menu for sidebar items with favorite toggle."""
@@ -396,20 +405,18 @@ class MainWindow(QMainWindow):
 
         from PyQt6.QtWidgets import QMenu
 
-        # Extract tab name (strip icon prefix and badge suffixes)
-        raw_name = item.text(0).replace("  ★", "").replace("  ⚙", "")
-        # Remove emoji prefix (first 2-3 chars + spaces)
-        parts = raw_name.split("  ", 1)
-        tab_name = parts[1] if len(parts) > 1 else raw_name.strip()
-        tab_id = tab_name.lower().replace(" ", "_")
+        tab_name = item.data(0, _ROLE_NAME)
+        if not tab_name:
+            tab_name = item.text(0).replace("  ★", "").replace("  ⚙", "").strip()
+        tab_id = str(tab_name).lower().replace(" ", "_")
 
         menu = QMenu(self)
         is_fav = FavoritesManager.is_favorite(tab_id)
 
         if is_fav:
-            action = menu.addAction(self.tr("⭐ Remove from Favorites"))
+            action = menu.addAction(self.tr("Remove from Favorites"))
         else:
-            action = menu.addAction(self.tr("⭐ Add to Favorites"))
+            action = menu.addAction(self.tr("Add to Favorites"))
 
         result = menu.exec(self.sidebar.mapToGlobal(pos))
         if result == action:
@@ -425,6 +432,7 @@ class MainWindow(QMainWindow):
                 self.sidebar.takeTopLevelItem(i)
                 break
         self._build_favorites_section()
+        self._refresh_sidebar_icon_tints()
 
     def add_page(
         self,
@@ -437,9 +445,7 @@ class MainWindow(QMainWindow):
         disabled: bool = False,
         disabled_reason: str = "",
     ) -> None:
-        # Build display label for category (with icon prefix if available)
-        cat_icon = CATEGORY_ICONS.get(category, "")
-        cat_label = f"{cat_icon}  {category}" if cat_icon else category
+        cat_label = category
 
         # Find or create category item
         category_item = None
@@ -455,6 +461,7 @@ class MainWindow(QMainWindow):
             # Store raw category name
             category_item.setData(0, _ROLE_DESC, category)
             category_item.setExpanded(True)
+            self._set_tree_item_icon(category_item, CATEGORY_ICONS.get(category, ""))
 
         # Badge suffix
         badge_suffix = ""
@@ -464,7 +471,9 @@ class MainWindow(QMainWindow):
             badge_suffix = "  ⚙"
 
         item = QTreeWidgetItem(category_item)
-        item.setText(0, f"{icon}  {name}{badge_suffix}")
+        item.setText(0, f"{name}{badge_suffix}")
+        item.setData(0, _ROLE_NAME, name)
+        self._set_tree_item_icon(item, icon)
 
         # Disabled plugin: show placeholder page and gray out sidebar item
         if disabled:
@@ -535,15 +544,78 @@ class MainWindow(QMainWindow):
         category = ""
         if parent:
             category = parent.data(0, _ROLE_DESC) or parent.text(0)
-        # Strip badge suffixes for display
-        raw = item.text(0)
-        page_name = raw.replace("  ★", "").replace("  ⚙", "")
+        page_name = item.data(0, _ROLE_NAME)
+        if not page_name:
+            raw = item.text(0)
+            page_name = raw.replace("  ★", "").replace("  ⚙", "")
+        page_name = str(page_name)
         desc = item.data(0, _ROLE_DESC) or ""
         self._bc_category.setText(category)
         self._bc_page.setText(page_name)
         self._bc_desc.setText(desc)
         # Store parent item ref for breadcrumb click (v38.0)
         self._bc_parent_item = parent
+
+    def _set_tree_item_icon(self, item: QTreeWidgetItem, icon_value: str) -> None:
+        """Apply bundled icon-pack icon to a tree item when available."""
+        if not icon_value:
+            return
+        item.setData(0, _ROLE_ICON, icon_value)
+        self._apply_tree_item_icon(item)
+
+    def _apply_tree_item_icon(self, item: QTreeWidgetItem) -> None:
+        """Apply the correct icon tint for the item's current selection state."""
+        icon_value = item.data(0, _ROLE_ICON)
+        if not icon_value:
+            return
+        selected = self._is_sidebar_item_selected(item)
+        tint = icon_tint_variant(str(icon_value), selected=selected)
+        icon = get_qicon(str(icon_value), size=17, tint=tint)
+        if hasattr(item, "setIcon"):
+            try:
+                item.setIcon(0, icon)
+            except (TypeError, ValueError):
+                logger.debug("Failed to apply tree icon", exc_info=True)
+
+    def _copy_tree_item_icon(self, source: QTreeWidgetItem, target: QTreeWidgetItem) -> None:
+        """Copy an existing icon from source to target item when supported."""
+        icon_value = source.data(0, _ROLE_ICON)
+        if icon_value:
+            target.setData(0, _ROLE_ICON, icon_value)
+            self._apply_tree_item_icon(target)
+            return
+        if not hasattr(source, "icon") or not hasattr(target, "setIcon"):
+            return
+        try:
+            target.setIcon(0, source.icon(0))
+        except (TypeError, ValueError):
+            logger.debug("Failed to copy tree icon", exc_info=True)
+
+    def _is_sidebar_item_selected(self, item: QTreeWidgetItem) -> bool:
+        """Return True when item is current row or current row's parent category."""
+        current = self.sidebar.currentItem() if hasattr(self, "sidebar") else None
+        if current is None:
+            return False
+        if current is item:
+            return True
+        if item.parent() is None and current.parent() is item:
+            return True
+        return False
+
+    def _refresh_sidebar_icon_tints(self) -> None:
+        """Reapply icon variants after selection changes."""
+        iterator = QTreeWidgetItemIterator(self.sidebar)
+        while iterator.value():
+            item = iterator.value()
+            if item is None:
+                break
+            if item.data(0, _ROLE_ICON):
+                self._apply_tree_item_icon(item)
+            iterator += 1
+
+    def _on_sidebar_selection_changed(self, current, previous) -> None:
+        """Keep sidebar icon tint hierarchy in sync with the selected row."""
+        self._refresh_sidebar_icon_tints()
 
     def _on_breadcrumb_category_click(self):
         """Navigate to the first page of the current breadcrumb category."""
@@ -760,7 +832,9 @@ class MainWindow(QMainWindow):
 
         # Bell button
         self.notif_bell = QToolButton()
-        self.notif_bell.setText("\U0001f514")  # Bell emoji
+        self.notif_bell.setText("")
+        self.notif_bell.setIcon(get_qicon("notifications", size=17))
+        self.notif_bell.setIconSize(QSize(17, 17))
         self.notif_bell.setStyleSheet(
             "QToolButton { border: none; font-size: 20px; padding: 5px; }"
             "QToolButton:hover { background-color: #1c2030; border-radius: 6px; }"
@@ -899,9 +973,8 @@ class MainWindow(QMainWindow):
 
     def _set_tab_status(self, tab_name: str, status: str, tooltip: str = ""):
         """Set a colored status indicator on a sidebar tab item."""
-        # Status dot unicode
-        dots = {"ok": "🟢", "warning": "🟡", "error": "🔴"}
-        dot = dots.get(status, "")
+        markers = {"ok": " [OK]", "warning": " [WARN]", "error": " [ERR]"}
+        marker = markers.get(status, "")
 
         iterator = QTreeWidgetItemIterator(self.sidebar)
         while iterator.value():
@@ -909,12 +982,11 @@ class MainWindow(QMainWindow):
             if item is None:
                 break
             if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
-                # Strip any existing status dot, add new one
                 text = item.text(0)
-                for d in dots.values():
-                    text = text.replace(f" {d}", "")
-                if dot:
-                    text = f"{text} {dot}"
+                for suffix in markers.values():
+                    text = text.replace(suffix, "")
+                if marker:
+                    text = f"{text}{marker}"
                 item.setText(0, text)
                 item.setData(0, _ROLE_STATUS, status)
                 if tooltip:

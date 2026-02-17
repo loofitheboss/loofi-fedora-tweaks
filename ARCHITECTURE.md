@@ -15,6 +15,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── base_tab.py           # BaseTab ABC — shared CommandRunner wiring, output area
 │   ├── *_tab.py              # Feature tabs (inherit BaseTab for command tabs)
 │   ├── main_window.py        # MainWindow with sidebar + lazy-loaded tab stack
+│   ├── icon_pack.py          # Semantic icon resolver + theme-aware tinting
 │   ├── lazy_widget.py        # Lazy tab loader
 │   ├── wizard.py             # First-run wizard
 │   ├── doctor.py             # DependencyDoctor startup check
@@ -38,7 +39,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   └── plugins/              # Plugin engine (LoofiPlugin ABC)
 ├── services/                 # Service layer (future expansion)
 ├── config/                   # apps.json, polkit policy, systemd unit
-├── assets/                   # modern.qss, icons, resources
+├── assets/                   # modern.qss, icon-pack, resources
 ├── agents/                   # Agent runtime (in-app AI orchestration)
 ├── api/                      # REST API server
 ├── web/                      # Web dashboard
@@ -80,14 +81,14 @@ completions/                  # Shell completions (bash, zsh)
 
 | Order | Category | Icon |
 | --- | --- | --- |
-| 1 | System | 🖥️ |
-| 2 | Packages | 📦 |
-| 3 | Hardware | ⚡ |
-| 4 | Network | 🌐 |
-| 5 | Security | 🛡️ |
-| 6 | Appearance | 🎨 |
-| 7 | Tools | 🛠️ |
-| 8 | Maintenance | 📋 |
+| 1 | System | `overview-dashboard` |
+| 2 | Packages | `packages-software` |
+| 3 | Hardware | `hardware-performance` |
+| 4 | Network | `network-connectivity` |
+| 5 | Security | `security-shield` |
+| 6 | Appearance | `appearance-theme` |
+| 7 | Tools | `developer-tools` |
+| 8 | Maintenance | `maintenance-health` |
 
 | # | Tab | File | Consolidates |
 | --- | ----- | ------ | ------------- |
@@ -205,14 +206,32 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 ### 9. Lazy Tab Loading
 
 ```python
-# In MainWindow._lazy_tab():
-"mytab": lambda: __import__("ui.mytab_tab", fromlist=["MyTabTab"]).MyTabTab(),
+from core.plugins.loader import PluginLoader
+from core.plugins.registry import PluginRegistry
+from ui.lazy_widget import LazyWidget
+
+loader = PluginLoader(detector=detector)
+loader.load_builtins(context=context)
+for plugin in PluginRegistry.instance():
+    meta = plugin.metadata()
+    lazy_widget = LazyWidget(plugin.create_widget)
+    self.add_page(name=meta.name, icon=meta.icon, widget=lazy_widget, category=meta.category)
 ```
 
 ### 10. Safety & History
 
 - `SafetyManager.confirm_action()` — snapshot prompt before risky ops
 - `HistoryManager.log_change()` — action log with undo commands (max 50)
+
+### 11. Icon System (Semantic IDs + Theme Tint)
+
+- Sidebar, dashboard, and quick actions use semantic icon IDs (for example `home`, `update`, `security-shield`) instead of emoji glyphs.
+- Runtime loading and tinting are centralized in `ui/icon_pack.py`.
+- Icon roots are checked in this order:
+  - `assets/icons/`
+  - `loofi-fedora-tweaks/assets/icons/`
+- `icon-map.json` maps semantic IDs to assets; SVG is preferred with PNG fallback (`16`, `20`, `24`, `32`).
+- Main sidebar applies selection-aware tint variants so active rows are brighter and inactive rows stay integrated with the theme.
 
 ## Testing Rules
 
@@ -230,7 +249,7 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 2. **UI**: `ui/new_feature_tab.py` — inherit `BaseTab`
 3. **CLI**: Subcommand in `cli/main.py` with `--json`
 4. **Test**: `tests/test_new_feature.py` — mock all system calls
-5. **Register**: `MainWindow._lazy_tab()` + `add_page()` with icon
+5. **Register**: plugin metadata + registry category with semantic `icon="..."` token (no emoji)
 6. **Docs**: `CHANGELOG.md`, `README.md`
 
 ## Version Management
@@ -255,6 +274,7 @@ flake8 loofi-fedora-tweaks/ --max-line-length=150 --ignore=E501,W503,E402,E722,E
 - **Config dir**: `~/.config/loofi-fedora-tweaks/`
 - **App catalog**: `config/apps.json`
 - **QSS**: `assets/modern.qss` — use `setObjectName()` for targeting
+- **Icon pack**: `assets/icons/` + `loofi-fedora-tweaks/assets/icons/` (`svg/`, `png/`, `icon-map.json`)
 - **i18n**: `self.tr("...")` for all user-visible strings
 - **Naming**: `ui/*_tab.py` → `*Tab`; `utils/*.py` → `*Manager`/`*Ops` with `@staticmethod`
 - **Plugins**: Extend `LoofiPlugin` ABC, place in `plugins/<name>/plugin.py`

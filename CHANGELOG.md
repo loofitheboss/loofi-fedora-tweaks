@@ -12,9 +12,23 @@ All notable changes to this project will be documented in this file.
 - Realigned tab metadata categories/orders across the UI so all tabs map to defined registry categories with no orphan category names.
 - Updated command palette category labels to match the new sidebar taxonomy for consistent discoverability.
 
+### Icon System & Visual Polish
+
+- Replaced emoji-first navigation icon flow with semantic icon IDs resolved through `ui/icon_pack.py`.
+- Added bundled icon pack assets in both runtime locations:
+  - `assets/icons/`
+  - `loofi-fedora-tweaks/assets/icons/`
+- Added theme-aware, per-icon tint palettes for light and dark themes to improve legibility without visual stickiness.
+- Added selection-aware sidebar icon tint variants so active rows read clearly while inactive rows remain integrated.
+- Normalized sidebar, dashboard quick-action, command-surface icon sizing to `17x17` for consistent visual fit.
+
 ### Documentation
 
 - Updated `ARCHITECTURE.md` with the current sidebar category model.
+- Updated `README.md` with semantic icon system details and icon asset locations.
+- Updated icon-pack usage docs in:
+  - `assets/icons/README.md`
+  - `loofi-fedora-tweaks/assets/icons/README.md`
 - Rewrote `wiki/GUI-Tabs-Reference.md` to reflect the new category organization and tab placement.
 - Added release notes scaffold `docs/releases/RELEASE-NOTES-v46.0.0.md`.
 

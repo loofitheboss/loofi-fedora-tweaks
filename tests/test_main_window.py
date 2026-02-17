@@ -1328,10 +1328,10 @@ class TestAddPage(unittest.TestCase):
         self.assertGreater(self.win.content_area.count(), 0)
 
     def test_add_page_with_category_icon(self):
-        """add_page prepends category icon from CATEGORY_ICONS."""
+        """add_page keeps category labels clean while assigning icons."""
         self.win.add_page("Dashboard", "📊", MagicMock(), category="Overview")
         cat = self.win.sidebar.topLevelItem(0)
-        self.assertIn("📊", cat.text(0))
+        self.assertEqual(cat.text(0), "Overview")
 
     def test_add_page_multiple_categories(self):
         """add_page creates separate categories for different names."""
@@ -2492,38 +2492,38 @@ class TestSetTabStatus(unittest.TestCase):
         self.win = _make_window(skip_init=True)
 
     def test_set_tab_status_ok(self):
-        """_set_tab_status adds green dot for 'ok' status."""
+        """_set_tab_status adds [OK] marker for 'ok' status."""
         mod = _get_module()
         self.win.add_page("Maintenance", "🔧", MagicMock(), category="System")
         self.win._set_tab_status("Maintenance", "ok", "Healthy")
         cat = self.win.sidebar.topLevelItem(0)
         child = cat.child(0)
-        self.assertIn("🟢", child.text(0))
+        self.assertIn("[OK]", child.text(0))
 
     def test_set_tab_status_warning(self):
-        """_set_tab_status adds yellow dot for 'warning' status."""
+        """_set_tab_status adds [WARN] marker for 'warning' status."""
         self.win.add_page("Storage", "💾", MagicMock(), category="System")
         self.win._set_tab_status("Storage", "warning", "75% used")
         cat = self.win.sidebar.topLevelItem(0)
         child = cat.child(0)
-        self.assertIn("🟡", child.text(0))
+        self.assertIn("[WARN]", child.text(0))
 
     def test_set_tab_status_error(self):
-        """_set_tab_status adds red dot for 'error' status."""
+        """_set_tab_status adds [ERR] marker for 'error' status."""
         self.win.add_page("Storage", "💾", MagicMock(), category="System")
         self.win._set_tab_status("Storage", "error", "90% full")
         cat = self.win.sidebar.topLevelItem(0)
         child = cat.child(0)
-        self.assertIn("🔴", child.text(0))
+        self.assertIn("[ERR]", child.text(0))
 
     def test_set_tab_status_empty_clears_dot(self):
-        """_set_tab_status with empty status removes existing dot."""
+        """_set_tab_status with empty status removes existing marker."""
         self.win.add_page("Maintenance", "🔧", MagicMock(), category="System")
         self.win._set_tab_status("Maintenance", "ok", "Good")
         self.win._set_tab_status("Maintenance", "", "")
         cat = self.win.sidebar.topLevelItem(0)
         child = cat.child(0)
-        self.assertNotIn("🟢", child.text(0))
+        self.assertNotIn("[OK]", child.text(0))
 
     def test_set_tab_status_nonexistent_tab(self):
         """_set_tab_status does nothing for non-existent tab."""

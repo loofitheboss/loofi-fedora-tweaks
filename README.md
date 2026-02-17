@@ -46,6 +46,7 @@ It is designed to be practical for both casual users and advanced users:
 - **Category reorganization** — standardized technical categories across sidebar navigation.
 - **Metadata alignment** — tab metadata categories/orders are fully aligned with registry definitions.
 - **Command palette consistency** — category labels match sidebar taxonomy.
+- **Icon system polish** — semantic icon pack with theme-aware tinting and selection-aware sidebar icon contrast.
 - **Release pipeline hardening** — v46 workflow specs and race-lock alignment fixed release gate failures.
 
 Full notes: [`docs/releases/RELEASE-NOTES-v46.0.0.md`](docs/releases/RELEASE-NOTES-v46.0.0.md)
@@ -146,18 +147,32 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 ---
 
+## Icon System
+
+- Semantic icon IDs are used across sidebar categories, tabs, dashboard quick actions, and command surfaces.
+- Runtime icon resolution/tinting is handled by `loofi-fedora-tweaks/ui/icon_pack.py`.
+- Asset locations (kept mirrored for dev/runtime packaging):
+  - `assets/icons/`
+  - `loofi-fedora-tweaks/assets/icons/`
+- Pack structure:
+  - `svg/` source icons
+  - `png/16`, `png/20`, `png/24`, `png/32` raster fallbacks
+  - `icon-map.json` semantic id map
+
+---
+
 ## Built-In Tabs
 
 | Category | Tabs |
 |----------|------|
-| 🏠 Overview | Home, System Info, System Monitor |
-| 📦 Manage | Software, Maintenance, Snapshots, Virtualization, Extensions, Backup |
-| 🔧 Hardware | Hardware, Performance, Storage, Gaming |
-| 🌐 Network & Security | Network, Loofi Link, Security & Privacy |
-| 🎨 Personalize | Desktop, Profiles, Settings |
-| 💻 Developer | Development, AI Lab, State Teleport |
-| 🤖 Automation | Agents, Automation |
-| 📊 Health & Logs | Health, Logs, Diagnostics, Community |
+| System | Home, System Info, System Monitor, Community |
+| Packages | Software, Maintenance, Snapshots |
+| Hardware | Hardware, Performance, Storage, Gaming |
+| Network | Network, Loofi Link |
+| Security | Security & Privacy, Backup |
+| Appearance | Desktop, Profiles, Extensions, Settings |
+| Tools | Development, AI Lab, Virtualization |
+| Maintenance | Agents, Automation, Diagnostics, Health, Logs, State Teleport |
 
 ---
 

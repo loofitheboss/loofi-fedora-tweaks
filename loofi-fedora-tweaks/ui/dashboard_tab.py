@@ -27,12 +27,13 @@ from PyQt6.QtWidgets import (
     QProgressBar,
     QScrollArea,
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
 
+from ui.icon_pack import get_qicon
 from ui.tooltips import DASH_HEALTH_SCORE, DASH_QUICK_ACTIONS, DASH_FOCUS_MODE, DASH_SYSTEM_OVERVIEW
 from services.system.processes import ProcessManager
 from utils.commands import PrivilegedCommand
@@ -222,7 +223,7 @@ class DashboardTab(QWidget, PluginInterface):
         name="Home",
         description="Live system overview with graphs, metrics, and quick actions.",
         category="System",
-        icon="🏠",
+        icon="home",
         badge="recommended",
         order=10,
     )
@@ -299,13 +300,13 @@ class DashboardTab(QWidget, PluginInterface):
         except (OSError, KeyError) as e:
             logger.debug("Failed to get username: %s", e)
             username = "User"
-        header = QLabel(self.tr("Welcome back, {name}! 👋").format(name=username))
+        header = QLabel(self.tr("Welcome back, {name}!").format(name=username))
         header.setObjectName("header")
         left_col.addWidget(header)
 
         variant = SystemManager.get_variant_name()
         pkg_mgr = SystemManager.get_package_manager()
-        badge = QLabel(f"💻 {variant} ({pkg_mgr})")
+        badge = QLabel(f"{variant} ({pkg_mgr})")
         badge.setObjectName("systemBadge")
         left_col.addWidget(badge, alignment=Qt.AlignmentFlag.AlignLeft)
 
@@ -317,14 +318,15 @@ class DashboardTab(QWidget, PluginInterface):
         self.reboot_banner = QFrame()
         self.reboot_banner.setObjectName("rebootBanner")
         rb_layout = QHBoxLayout(self.reboot_banner)
-        lbl = QLabel(self.tr("⚠️ Pending changes require reboot!"))
+        lbl = QLabel(self.tr("Pending changes require reboot!"))
         lbl.setObjectName("rebootLabel")
         rb_layout.addWidget(lbl)
         rb_layout.addStretch()
-        reboot_btn = QPushButton(self.tr("🔁 Reboot Now"))
+        reboot_btn = QPushButton(self.tr("Reboot Now"))
         reboot_btn.setObjectName("rebootButton")
         reboot_btn.setAccessibleName(self.tr("Reboot system now"))
         reboot_btn.clicked.connect(self._reboot)
+        reboot_btn.setIcon(get_qicon("restart", size=17))
         rb_layout.addWidget(reboot_btn)
         self._inner.addWidget(self.reboot_banner)
         self.reboot_banner.setVisible(SystemManager.has_pending_deployment())
@@ -370,7 +372,7 @@ class DashboardTab(QWidget, PluginInterface):
         cpu_card = self._card()
         cpu_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         cpu_inner = QVBoxLayout(cpu_card)
-        self.lbl_cpu = QLabel("🔥 CPU: —")
+        self.lbl_cpu = QLabel("CPU: —")
         self.lbl_cpu.setObjectName("metricLabel")
         cpu_inner.addWidget(self.lbl_cpu)
         self.spark_cpu = SparkLine("#e8556d")
@@ -381,7 +383,7 @@ class DashboardTab(QWidget, PluginInterface):
         ram_card = self._card()
         ram_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         ram_inner = QVBoxLayout(ram_card)
-        self.lbl_ram = QLabel("🧠 RAM: —")
+        self.lbl_ram = QLabel("RAM: —")
         self.lbl_ram.setObjectName("metricLabel")
         ram_inner.addWidget(self.lbl_ram)
         self.spark_ram = SparkLine("#39c5cf")
@@ -392,7 +394,7 @@ class DashboardTab(QWidget, PluginInterface):
         net_card = self._card()
         net_card.setToolTip(DASH_SYSTEM_OVERVIEW)
         net_inner = QVBoxLayout(net_card)
-        self.lbl_net = QLabel("🌐 Network: —")
+        self.lbl_net = QLabel("Network: —")
         self.lbl_net.setObjectName("metricLabel")
         net_inner.addWidget(self.lbl_net)
         self.lbl_net_detail = QLabel("↓ 0 B/s   ↑ 0 B/s")
@@ -410,7 +412,7 @@ class DashboardTab(QWidget, PluginInterface):
     def _build_storage_section(self) -> None:
         self.storage_card = self._card()
         self.storage_inner = QVBoxLayout(self.storage_card)
-        title = QLabel(self.tr("💿 Storage"))
+        title = QLabel(self.tr("Storage"))
         title.setObjectName("sectionTitle")
         self.storage_inner.addWidget(title)
         self.storage_bars: list = []
@@ -458,7 +460,7 @@ class DashboardTab(QWidget, PluginInterface):
     def _build_top_processes(self) -> None:
         card = self._card()
         inner = QVBoxLayout(card)
-        title = QLabel(self.tr("🔝 Top Processes"))
+        title = QLabel(self.tr("Top Processes"))
         title.setObjectName("sectionTitle")
         inner.addWidget(title)
         self.process_labels: list = []
@@ -491,7 +493,7 @@ class DashboardTab(QWidget, PluginInterface):
     def _build_recent_actions(self) -> None:
         card = self._card()
         inner = QVBoxLayout(card)
-        title = QLabel(self.tr("📋 Recent Actions"))
+        title = QLabel(self.tr("Recent Actions"))
         title.setObjectName("sectionTitle")
         inner.addWidget(title)
         self.history_labels: list = []
@@ -549,7 +551,7 @@ class DashboardTab(QWidget, PluginInterface):
             target = action.get("target_tab", "")
             btn = self._action_btn(
                 action.get("label", "Action"),
-                action.get("icon", "⚡"),
+                action.get("icon", "settings"),
                 action.get("color", "#39c5cf"),
                 lambda checked, t=target: self._go_to_tab(t),
             )
@@ -565,14 +567,14 @@ class DashboardTab(QWidget, PluginInterface):
         if cpu:
             pct = cpu.load_percent
             self.spark_cpu.add_value(pct)
-            self.lbl_cpu.setText(f"🔥 CPU: {pct:.0f}%")
+            self.lbl_cpu.setText(f"CPU: {pct:.0f}%")
 
         mem = SystemMonitor.get_memory_info()
         if mem:
             pct = mem.percent_used
             self.spark_ram.add_value(pct)
             self.lbl_ram.setText(
-                f"🧠 RAM: {mem.used_human} / {mem.total_human} ({pct:.0f}%)"
+                f"RAM: {mem.used_human} / {mem.total_human} ({pct:.0f}%)"
             )
 
         self._refresh_network()
@@ -595,7 +597,7 @@ class DashboardTab(QWidget, PluginInterface):
             if self._prev_rx > 0:
                 dl = (rx - self._prev_rx) / 2
                 ul = (tx - self._prev_tx) / 2
-                self.lbl_net.setText("🌐 Network")
+                self.lbl_net.setText("Network")
                 self.lbl_net_detail.setText(
                     f"↓ {self._human_speed(dl)}   ↑ {self._human_speed(ul)}"
                 )
@@ -673,7 +675,7 @@ class DashboardTab(QWidget, PluginInterface):
             if hs.recommendations:
                 recs_text = "\n".join(f"• {r}" for r in hs.recommendations[:3])
             else:
-                recs_text = "✅ System is healthy — no issues detected"
+                recs_text = "System is healthy. No issues detected."
             self._health_recs.setText(recs_text)
         except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to calculate health score: %s", e)
@@ -698,7 +700,7 @@ class DashboardTab(QWidget, PluginInterface):
         color = "#a6e3a1" if is_active else "#6c7086"
 
         self._focus_mode_btn = self._action_btn(
-            status_text, "🎯", color, self._toggle_focus_mode,
+            status_text, "settings", color, self._toggle_focus_mode,
         )
         self._focus_mode_btn.setToolTip(DASH_FOCUS_MODE)
         self._inner.addWidget(self._focus_mode_btn)
@@ -727,7 +729,7 @@ class DashboardTab(QWidget, PluginInterface):
         """Update focus mode button text and color."""
         status_text = self.tr("Focus Mode: ON") if is_active else self.tr("Focus Mode: OFF")
         color = "#a6e3a1" if is_active else "#6c7086"
-        self._focus_mode_btn.setText("🎯  %s" % status_text)
+        self._focus_mode_btn.setText("%s" % status_text)
         self._focus_mode_btn.setProperty("accentColor", color)
         self._focus_mode_btn.style().unpolish(self._focus_mode_btn)
         self._focus_mode_btn.style().polish(self._focus_mode_btn)
@@ -758,11 +760,13 @@ class DashboardTab(QWidget, PluginInterface):
 
     @staticmethod
     def _action_btn(text: str, icon: str, color: str, callback) -> QPushButton:
-        btn = QPushButton(f"{icon}  {text}")
+        btn = QPushButton(text)
         btn.setObjectName("quickActionButton")
         btn.setAccessibleName(text)
         btn.setProperty("accentColor", color)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.setIcon(get_qicon(icon, size=17))
+        btn.setIconSize(QSize(17, 17))
         btn.clicked.connect(callback)
         return btn
 

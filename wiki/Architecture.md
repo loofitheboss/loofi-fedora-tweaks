@@ -14,6 +14,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 │   ├── base_tab.py           # BaseTab ABC — shared CommandRunner wiring, output area
 │   ├── *_tab.py              # Feature tabs (inherit BaseTab for command tabs)
 │   ├── main_window.py        # MainWindow with sidebar + lazy-loaded tab stack
+│   ├── icon_pack.py          # Semantic icon resolver + theme-aware tinting
 │   ├── lazy_widget.py        # Lazy tab loader
 │   ├── wizard.py             # First-run wizard
 │   ├── doctor.py             # DependencyDoctor startup check
@@ -219,8 +220,16 @@ Polkit policies are in `config/` directory (7 purpose-scoped files).
 Tabs load on first view via `ui/lazy_widget.py`:
 
 ```python
-# In MainWindow._lazy_tab():
-"mytab": lambda: __import__("ui.mytab_tab", fromlist=["MyTabTab"]).MyTabTab(),
+from core.plugins.loader import PluginLoader
+from core.plugins.registry import PluginRegistry
+from ui.lazy_widget import LazyWidget
+
+loader = PluginLoader(detector=detector)
+loader.load_builtins(context=context)
+for plugin in PluginRegistry.instance():
+    meta = plugin.metadata()
+    lazy_widget = LazyWidget(plugin.create_widget)
+    self.add_page(name=meta.name, icon=meta.icon, widget=lazy_widget, category=meta.category)
 ```
 
 Only `DashboardTab` and `SystemInfoTab` are eagerly imported.
@@ -300,9 +309,10 @@ bash scripts/build_rpm.sh
 - **Config directory**: `~/.config/loofi-fedora-tweaks/`
 - **App catalog**: `config/apps.json` (fetched remotely via `utils/remote_config.py`)
 - **QSS themes**: `assets/modern.qss` (dark), `assets/light.qss` (light)
+- **Icon pack**: `assets/icons/` + `loofi-fedora-tweaks/assets/icons/` (`svg/`, `png/`, `icon-map.json`)
 - **i18n**: `self.tr("...")` for all user-visible strings
 - **Plugins**: Extend `LoofiPlugin` ABC from `utils/plugin_base.py`
-- **Tab registration**: `MainWindow._lazy_tab()` loaders + `add_page()` with emoji icon
+- **Tab registration**: plugin metadata + registry category + semantic icon id (`PluginMetadata.icon`)
 
 ---
 
@@ -314,7 +324,7 @@ Follow this 6-step checklist:
 2. **UI**: Create `ui/new_feature_tab.py` — inherit `BaseTab`, use `self.run_command()`
 3. **CLI**: Add subcommand in `cli/main.py` with `--json` support
 4. **Tests**: Create `tests/test_new_feature.py` — mock all system calls, test both paths
-5. **Register**: Add lazy loader in `MainWindow._lazy_tab()` + `add_page()` with icon
+5. **Register**: Add plugin metadata/registry entry with semantic `icon="..."` token (no emoji)
 6. **Docs**: Update `CHANGELOG.md`, `README.md`, release notes
 
 ---
@@ -341,7 +351,7 @@ plugins/
   "description": "Plugin description",
   "permissions": ["network", "filesystem"],
   "min_app_version": "40.0.0",
-  "icon": "🔌"
+  "icon": "developer-tools"
 }
 ```
 

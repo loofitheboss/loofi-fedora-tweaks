@@ -15,16 +15,16 @@ CATEGORY_ORDER: dict[str, int] = {
     "Maintenance": 7,
 }
 
-# Category icons — prepended to category headers in the sidebar tree.
+# Category icons — semantic ids resolved by ui/icon_pack.py.
 CATEGORY_ICONS: dict[str, str] = {
-    "System": "🖥️",
-    "Packages": "📦",
-    "Hardware": "⚡",
-    "Network": "🌐",
-    "Security": "🛡️",
-    "Appearance": "🎨",
-    "Tools": "🛠️",
-    "Maintenance": "📋",
+    "System": "overview-dashboard",
+    "Packages": "packages-software",
+    "Hardware": "hardware-performance",
+    "Network": "network-connectivity",
+    "Security": "security-shield",
+    "Appearance": "appearance-theme",
+    "Tools": "developer-tools",
+    "Maintenance": "maintenance-health",
 }
 
 

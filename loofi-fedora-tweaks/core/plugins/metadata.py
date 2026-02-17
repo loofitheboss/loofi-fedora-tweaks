@@ -9,7 +9,7 @@ class PluginMetadata:
     name: str                        # display name
     description: str                 # tooltip and breadcrumb text
     category: str                    # sidebar category group, e.g. "System"
-    icon: str                        # unicode emoji or icon ref string
+    icon: str                        # semantic icon id (or legacy icon ref string)
     badge: str                       # "recommended" | "advanced" | ""
     version: str = "1.0.0"          # plugin version string
     min_app_version: str = ""       # minimum app version required (empty = no limit)
