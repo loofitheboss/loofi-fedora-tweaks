@@ -15,7 +15,7 @@ Loofi Fedora Tweaks is a PyQt6-based system management application that brings t
 - **Plugin architecture** with marketplace support for third-party extensions
 - **Atomic Fedora aware**: Auto-detects Traditional Fedora (`dnf`) vs Atomic Fedora (`rpm-ostree`)
 - **Secure privilege escalation**: All root operations use `pkexec` (Polkit), never `sudo`
-- **Comprehensive test suite**: 5901 tests passing (35 skipped)
+- **Comprehensive test suite**: 5,936 collected (5,901 passed, 35 skipped)
 
 > **Note**: Before using the automatic wiki publishing workflow, you must enable the Wiki feature in your repository settings (Settings → Features → Wikis). The first push may fail if the wiki hasn't been initialized.
 

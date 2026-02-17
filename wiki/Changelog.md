@@ -19,7 +19,7 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 - Release pipeline gate fixes (workflow specs + race-lock alignment)
 - Release assets published: RPM, Flatpak, and source tarball
 
-**Test Suite**: 5,901 passed, 35 skipped
+**Test Suite**: 5,936 collected (5,901 passed, 35 skipped)
 
 ---
 
