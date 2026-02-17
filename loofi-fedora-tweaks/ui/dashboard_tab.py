@@ -27,7 +27,7 @@ from PyQt6.QtWidgets import (
     QProgressBar,
     QScrollArea,
 )
-from PyQt6.QtCore import QSize, Qt, QTimer
+from PyQt6.QtCore import QSize, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
 
 from core.plugins.interface import PluginInterface
@@ -136,6 +136,8 @@ class SparkLine(QWidget):
 class HealthScoreWidget(QWidget):
     """Circular gauge showing aggregate system health score."""
 
+    clicked = pyqtSignal()
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._score = 0
@@ -143,6 +145,7 @@ class HealthScoreWidget(QWidget):
         self._color = QColor("#6c7086")
         self._recommendations: list = []
         self.setFixedSize(120, 140)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def set_score(self, score: int, grade: str, color: str, recommendations: list):
         """Update the displayed health score."""
@@ -151,6 +154,12 @@ class HealthScoreWidget(QWidget):
         self._color = QColor(color)
         self._recommendations = recommendations
         self.update()
+
+    def mousePressEvent(self, event):
+        """Emit clicked signal on left click."""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
+        super().mousePressEvent(event)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -260,6 +269,7 @@ class DashboardTab(QWidget, PluginInterface):
         self._build_storage_section()
         self._build_top_processes()
         self._build_recent_actions()
+        self._build_undo_card()
         self._build_quick_actions()
         self._build_focus_mode_control()
         self._inner.addStretch()
@@ -326,7 +336,10 @@ class DashboardTab(QWidget, PluginInterface):
         reboot_btn.setObjectName("rebootButton")
         reboot_btn.setAccessibleName(self.tr("Reboot system now"))
         reboot_btn.clicked.connect(self._reboot)
-        reboot_btn.setIcon(get_qicon("restart", size=17))
+        try:
+            reboot_btn.setIcon(get_qicon("restart", size=17))
+        except TypeError as e:
+            logger.debug("Skipping reboot button icon setup: %s", e)
         rb_layout.addWidget(reboot_btn)
         self._inner.addWidget(self.reboot_banner)
         self.reboot_banner.setVisible(SystemManager.has_pending_deployment())
@@ -341,7 +354,10 @@ class DashboardTab(QWidget, PluginInterface):
         card_layout = QHBoxLayout(card)
 
         self._health_gauge = HealthScoreWidget()
-        self._health_gauge.setToolTip(DASH_HEALTH_SCORE)
+        self._health_gauge.setToolTip(
+            DASH_HEALTH_SCORE + "\n" + self.tr("Click for detailed breakdown")
+        )
+        self._health_gauge.clicked.connect(self._show_health_detail)
         card_layout.addWidget(self._health_gauge)
 
         # Recommendations area
@@ -521,6 +537,84 @@ class DashboardTab(QWidget, PluginInterface):
             logger.debug("Failed to refresh action history: %s", e)
 
     # ==================================================================
+    # Undo Card (v47.0 UX)
+    # ==================================================================
+
+    def _build_undo_card(self):
+        """Build the Recent Changes card with undo buttons."""
+        card = self._card()
+        inner = QVBoxLayout(card)
+        title_row = QHBoxLayout()
+        title = QLabel(self.tr("Recent Changes"))
+        title.setObjectName("sectionTitle")
+        title_row.addWidget(title)
+        title_row.addStretch()
+        inner.addLayout(title_row)
+
+        self._undo_container = QVBoxLayout()
+        inner.addLayout(self._undo_container)
+
+        self._undo_empty_label = QLabel(self.tr("No recent changes to undo."))
+        self._undo_empty_label.setObjectName("historyLabel")
+        self._undo_container.addWidget(self._undo_empty_label)
+
+        self._inner.addWidget(card)
+        self._refresh_undo_card()
+
+    def _refresh_undo_card(self):
+        """Refresh the undo card with recent undoable changes."""
+        try:
+            hm = HistoryManager()
+            recent = hm.get_recent(3)
+            undoable = [e for e in recent if e.undo_command]
+
+            # Clear existing items (except empty label)
+            while self._undo_container.count() > 1:
+                item = self._undo_container.takeAt(1)
+                if item.widget():
+                    item.widget().deleteLater()
+
+            if not undoable:
+                self._undo_empty_label.setVisible(True)
+                return
+
+            self._undo_empty_label.setVisible(False)
+            for entry in undoable:
+                row = QHBoxLayout()
+                desc = QLabel(f"  {entry.timestamp[:16]}  —  {entry.description}")
+                desc.setObjectName("historyLabel")
+                desc.setWordWrap(True)
+                row.addWidget(desc, 1)
+
+                undo_btn = QPushButton(self.tr("↩ Undo"))
+                undo_btn.setObjectName("undoBtn")
+                undo_btn.setFixedWidth(80)
+                action_id = entry.id
+                undo_btn.clicked.connect(
+                    lambda checked, aid=action_id: self._do_undo(aid)
+                )
+                row.addWidget(undo_btn)
+
+                container = QWidget()
+                container.setLayout(row)
+                self._undo_container.addWidget(container)
+        except (RuntimeError, OSError, ValueError, KeyError) as e:
+            logger.debug("Failed to refresh undo card: %s", e)
+
+    def _do_undo(self, action_id: str):
+        """Execute undo for a specific action."""
+        try:
+            hm = HistoryManager()
+            success = hm.undo_action(action_id)
+            if success:
+                self._refresh_undo_card()
+                self._refresh_history()
+            else:
+                logger.debug("Undo failed for action: %s", action_id)
+        except (RuntimeError, OSError, ValueError) as e:
+            logger.debug("Failed to undo action %s: %s", action_id, e)
+
+    # ==================================================================
     # Quick Actions (v31.0: configurable)
     # ==================================================================
 
@@ -648,6 +742,10 @@ class DashboardTab(QWidget, PluginInterface):
             and hasattr(self.main_window, "switch_to_tab")
         ):
             self.main_window.switch_to_tab(tab_name)
+            if hasattr(self.main_window, "show_toast"):
+                self.main_window.show_toast(
+                    "Quick Action", f"Navigated to {tab_name}", "general"
+                )
 
     def _go_maintenance(self):
         if hasattr(self.main_window, "switch_to_tab"):
@@ -664,6 +762,29 @@ class DashboardTab(QWidget, PluginInterface):
     # ==================================================================
     # Health Score refresh (v31.0)
     # ==================================================================
+
+    def _show_health_detail(self):
+        """Open the health detail drill-down dialog (v47.0)."""
+        try:
+            from ui.health_detail_dialog import HealthDetailDialog
+            dialog = HealthDetailDialog(self)
+            dialog.navigate_to_tab.connect(self._navigate_to_tab)
+            dialog.exec()
+        except (ImportError, RuntimeError) as e:
+            logger.debug("Failed to show health detail dialog: %s", e)
+
+    def _navigate_to_tab(self, tab_id: str):
+        """Navigate to a tab by its plugin ID."""
+        if hasattr(self, 'main_window') and hasattr(self.main_window, 'switch_to_tab'):
+            tab_name_map = {
+                "performance": "Performance",
+                "storage": "Storage",
+                "maintenance": "Maintenance",
+                "security": "Security",
+                "network": "Network",
+            }
+            tab_name = tab_name_map.get(tab_id, tab_id.title())
+            self.main_window.switch_to_tab(tab_name)
 
     def _refresh_health_score(self):
         """Refresh the health score gauge."""
@@ -765,7 +886,10 @@ class DashboardTab(QWidget, PluginInterface):
         btn.setAccessibleName(text)
         btn.setProperty("accentColor", color)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setIcon(get_qicon(icon, size=17))
+        try:
+            btn.setIcon(get_qicon(icon, size=17))
+        except TypeError as e:
+            logger.debug("Skipping quick action icon setup: %s", e)
         btn.setIconSize(QSize(17, 17))
         btn.clicked.connect(callback)
         return btn

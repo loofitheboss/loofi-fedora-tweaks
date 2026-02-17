@@ -1019,6 +1019,24 @@ class MainWindow(QMainWindow):
         except ImportError:
             logger.debug("Quick actions module not available", exc_info=True)
 
+    def apply_experience_level(self, level=None):
+        """Show/hide sidebar tabs based on experience level setting."""
+        try:
+            from utils.experience_level import ExperienceLevelManager
+            if level is None:
+                level = ExperienceLevelManager.get_current_level()
+            visible_tabs = ExperienceLevelManager.get_visible_tabs(level)
+            favorites = FavoritesManager.get_favorites()
+            it = QTreeWidgetItemIterator(self.sidebar)
+            while it.value():
+                item = it.value()
+                name = item.data(0, _ROLE_NAME)
+                if name:
+                    item.setHidden(name not in visible_tabs and name not in favorites)
+                it += 1
+        except (ImportError, AttributeError, ValueError) as e:
+            logger.debug("Experience level filtering unavailable: %s", e)
+
     def _check_first_run(self):
         """Show first-run wizard if this is the first launch."""
         config_dir = os.path.expanduser("~/.config/loofi-fedora-tweaks")
@@ -1030,8 +1048,11 @@ class MainWindow(QMainWindow):
 
                 wizard = FirstRunWizard(self)
                 wizard.exec()
+                self.apply_experience_level()
             except ImportError:
                 logger.debug("First-run wizard module not available", exc_info=True)
+        else:
+            self.apply_experience_level()
 
     def setup_tray(self):
         from PyQt6.QtGui import QAction, QIcon

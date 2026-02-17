@@ -40,8 +40,10 @@ def _build_feature_registry() -> list[dict]:
         category  - tab / section it belongs to
         keywords  - list of extra search tokens
         action    - tab name string passed to the on_action callback
+        type      - 'navigate' (default) or 'execute' for quick commands
+        execute   - callable for 'execute' type entries
     """
-    return [
+    features = [
         # Home
         {"name": "Dashboard", "category": "System", "keywords": ["home", "overview", "welcome", "status"], "action": "Home"},
         {"name": "System Overview", "category": "System", "keywords": ["health", "summary", "quick actions"], "action": "Home"},
@@ -163,6 +165,29 @@ def _build_feature_registry() -> list[dict]:
         {"name": "Boot Analysis", "category": "Maintenance", "keywords": ["boot", "startup", "systemd-analyze", "blame", "time"], "action": "Boot"},
         {"name": "Kernel Params", "category": "Maintenance", "keywords": ["kernel", "parameter", "cmdline", "grub", "boot"], "action": "Boot"},
     ]
+
+    # Add quick commands (v47.0)
+    try:
+        from utils.quick_commands import QuickCommandRegistry
+        registry = QuickCommandRegistry.instance()
+        # Auto-register builtins if empty
+        if not registry.list_all():
+            for cmd in QuickCommandRegistry.get_builtin_commands():
+                registry.register(cmd)
+        for cmd in registry.list_all():
+            if cmd.action is not None:
+                features.append({
+                    "name": f"⚡ {cmd.name}",
+                    "category": cmd.category,
+                    "keywords": cmd.keywords,
+                    "action": "",
+                    "type": "execute",
+                    "execute": cmd.action,
+                })
+    except (ImportError, RuntimeError):
+        pass
+
+    return features
 
 
 # -----------------------------------------------------------------------
@@ -328,7 +353,25 @@ class CommandPalette(QDialog):
     def _activate_item(self, item: QListWidgetItem):
         """Trigger the on_action callback for the selected feature."""
         entry = item.data(Qt.ItemDataRole.UserRole)
-        if entry and callable(self._on_action):
+        if not entry:
+            self.accept()
+            return
+
+        entry_type = entry.get("type", "navigate")
+
+        if entry_type == "execute":
+            # Quick command: execute the handler directly
+            handler = entry.get("execute")
+            if callable(handler):
+                logger.info(
+                    "Command palette: executing '%s'",
+                    entry.get("name", ""),
+                )
+                try:
+                    handler()
+                except (RuntimeError, OSError, ValueError) as e:
+                    logger.debug("Quick command failed: %s", e)
+        elif callable(self._on_action):
             tab_name = entry.get("action", "")
             if tab_name:
                 logger.info(

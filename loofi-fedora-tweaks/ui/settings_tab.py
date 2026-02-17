@@ -103,6 +103,14 @@ class SettingsTab(QWidget, PluginInterface):
         form = QFormLayout(page)
         form.setSpacing(12)
 
+        # Help text (v47.0)
+        help_label = QLabel(self.tr(
+            "Choose your visual theme. 'Follow system theme' auto-detects your desktop preference."
+        ))
+        help_label.setWordWrap(True)
+        help_label.setObjectName("settingsHelpText")
+        form.addRow(help_label)
+
         # Theme selector
         self.theme_combo = QComboBox()
         self.theme_combo.setAccessibleName(self.tr("Theme selector"))
@@ -133,6 +141,22 @@ class SettingsTab(QWidget, PluginInterface):
         page = QWidget()
         form = QFormLayout(page)
         form.setSpacing(12)
+
+        # Experience Level selector (v47.0)
+        from utils.experience_level import ExperienceLevelManager
+        self.experience_combo = QComboBox()
+        self.experience_combo.setAccessibleName(self.tr("Experience level"))
+        self.experience_combo.addItems(["Beginner", "Intermediate", "Advanced"])
+        current_level = ExperienceLevelManager.get_level()
+        level_index = {"beginner": 0, "intermediate": 1, "advanced": 2}
+        self.experience_combo.setCurrentIndex(level_index.get(current_level.value, 0))
+        self.experience_combo.currentIndexChanged.connect(self._on_experience_level_changed)
+        form.addRow(self.tr("Experience Level:"), self.experience_combo)
+
+        self._experience_desc = QLabel(self._experience_description(current_level))
+        self._experience_desc.setWordWrap(True)
+        self._experience_desc.setObjectName("settingsHelpText")
+        form.addRow("", self._experience_desc)
 
         self.start_minimized_cb = QCheckBox(self.tr("Start minimized to tray"))
         self.start_minimized_cb.setAccessibleName(self.tr("Start minimized to tray"))
@@ -182,6 +206,15 @@ class SettingsTab(QWidget, PluginInterface):
         layout = QVBoxLayout(page)
         layout.setSpacing(12)
 
+        # Help text (v47.0)
+        help_label = QLabel(self.tr(
+            "Advanced settings for debugging and maintenance. "
+            "Only change these if you know what you're doing."
+        ))
+        help_label.setWordWrap(True)
+        help_label.setObjectName("settingsHelpText")
+        layout.addWidget(help_label)
+
         # Log level
         log_group = QGroupBox(self.tr("Logging"))
         log_form = QFormLayout(log_group)
@@ -216,6 +249,30 @@ class SettingsTab(QWidget, PluginInterface):
         return page
 
     # ------------------------------------------------------------ Slots --
+
+    def _experience_description(self, level) -> str:
+        """Return a user-friendly description for the experience level."""
+        from utils.experience_level import ExperienceLevel
+        descriptions = {
+            ExperienceLevel.BEGINNER: self.tr(
+                "Simplified view with essential tools — ideal for new Fedora users."
+            ),
+            ExperienceLevel.INTERMEDIATE: self.tr(
+                "Core tools plus development and customization options."
+            ),
+            ExperienceLevel.ADVANCED: self.tr(
+                "Full access to all tabs and features."
+            ),
+        }
+        return descriptions.get(level, "")
+
+    def _on_experience_level_changed(self, index: int):
+        """Handle experience level combo box change."""
+        from utils.experience_level import ExperienceLevel, ExperienceLevelManager
+        level_map = {0: ExperienceLevel.BEGINNER, 1: ExperienceLevel.INTERMEDIATE, 2: ExperienceLevel.ADVANCED}
+        level = level_map.get(index, ExperienceLevel.BEGINNER)
+        ExperienceLevelManager.set_level(level)
+        self._experience_desc.setText(self._experience_description(level))
 
     def _on_theme_changed(self, theme_name: str):
         self._mgr.set("theme", theme_name)

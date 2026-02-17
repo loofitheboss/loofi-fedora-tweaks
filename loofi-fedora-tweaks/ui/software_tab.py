@@ -226,7 +226,10 @@ class _ApplicationsSubTab(QWidget):
         )
         # Refresh list to update status if installation succeeded
         if exit_code == 0:
+            self.show_success("Software", self.tr("Operation completed successfully"))
             self.refresh_list()
+        else:
+            self.show_error("Software", self.tr("Operation failed (exit code {})").format(exit_code))
 
     # v31.0: Batch operations
 
@@ -453,6 +456,10 @@ class _RepositoriesSubTab(QWidget):
         self.append_output(
             self.tr("\nCommand finished with exit code: {}").format(exit_code)
         )
+        if exit_code == 0:
+            self.show_success("Flatpak", self.tr("Operation completed successfully"))
+        else:
+            self.show_error("Flatpak", self.tr("Operation failed (exit code {})").format(exit_code))
 
 
 # ---------------------------------------------------------------------------
