@@ -32,7 +32,16 @@ def test_auto_release_build_requires_fedora_review_gate_success():
     text = _read_text(AUTO_RELEASE_WORKFLOW)
 
     assert (
-        "needs: [validate, adapter_drift, lint, typecheck, stabilization_rules, "
+        "needs: [validate, adapter_drift, pipeline_gate, lint, typecheck, stabilization_rules, "
         "docs_gate, test, security, fedora_review]"
     ) in text
     assert "needs.fedora_review.result == 'success'" in text
+
+
+def test_auto_release_has_pipeline_gate_job():
+    text = _read_text(AUTO_RELEASE_WORKFLOW)
+
+    assert "pipeline_gate:" in text
+    assert "Validate workflow specs exist" in text
+    assert "Validate race-lock version" in text
+    assert "needs.pipeline_gate.result == 'success'" in text

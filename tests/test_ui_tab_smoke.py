@@ -162,7 +162,7 @@ class TestWhatsNewDialog(unittest.TestCase):
 
     def test_mark_seen_exception(self):
         from ui.whats_new_dialog import WhatsNewDialog
-        with patch("utils.settings.SettingsManager.instance", side_effect=Exception):
+        with patch("utils.settings.SettingsManager.instance", side_effect=OSError("settings unavailable")):
             WhatsNewDialog.mark_seen()  # Should not raise
 
 

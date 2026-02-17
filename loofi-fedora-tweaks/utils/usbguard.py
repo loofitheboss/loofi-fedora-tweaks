@@ -231,7 +231,7 @@ class USBGuardManager:
             False,
             f"To change default policy to '{policy}', edit {config_path}:\n"
             f"  ImplicitPolicyTarget={policy}\n"
-            "Then restart usbguard: sudo systemctl restart usbguard",
+            "Then restart usbguard: pkexec systemctl restart usbguard",
         )
 
     @classmethod

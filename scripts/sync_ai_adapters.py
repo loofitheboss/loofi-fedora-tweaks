@@ -201,6 +201,7 @@ RENDERABLE_FILES = [
     ".github/instructions/workflow.instructions.md",
     ".github/copilot-instructions.md",
     "AGENTS.md",
+    "ARCHITECTURE.md",
     "CLAUDE.md",
 ]
 

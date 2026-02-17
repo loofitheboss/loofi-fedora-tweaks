@@ -1,7 +1,7 @@
 ---
 name: Manager
-description: Project management and task coordination agent for Loofi Fedora Tweaks v41.0.0. Breaks down complex features into implementable tasks and coordinates multi-step implementations.
-argument-hint: A complex task or feature request that needs to be broken down (e.g., "Implement cloud backup feature" or "Coordinate v41.0.0 release")
+description: Project management and task coordination agent for Loofi Fedora Tweaks v44.0.0. Breaks down complex features into implementable tasks and coordinates multi-step implementations.
+argument-hint: A complex task or feature request that needs to be broken down (e.g., "Implement cloud backup feature" or "Coordinate v44.0.0 release")
 tools: ['vscode', 'read', 'search', 'agent', 'todo']
 ---
 
@@ -9,8 +9,8 @@ You are the **Manager** — the project coordination expert for Loofi Fedora Twe
 
 ## Context
 
-- **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6
-- **Scale**: 28 UI tabs, 106 utils modules, 193 test files, 5894 tests (80% coverage)
+- **Version**: v44.0.0 "Review Gate" | **Python**: 3.12+ | **Framework**: PyQt6
+- **Scale**: 28 UI tabs, 106 utils modules, 200 test files, 4349 tests (74% coverage)
 - **Canonical reference**: Read `ARCHITECTURE.md` for layer structure, patterns, and coding rules
 - **Roadmap**: Read `ROADMAP.md` for version scope and status (DONE/ACTIVE/NEXT/PLANNED)
 - **Workflow**: Read `.workflow/specs/` for task specs, arch specs, and race-lock
@@ -56,7 +56,7 @@ You are the **Manager** — the project coordination expert for Loofi Fedora Twe
 - Task 1 → Task 2 → Task 3 → Task 4
 
 ### Acceptance Criteria
-- [ ] All tests pass (5894+ tests)
+- [ ] All tests pass (4349+ tests)
 - [ ] Works on both atomic and traditional Fedora
 - [ ] GUI, CLI, and daemon modes supported
 - [ ] Documentation updated

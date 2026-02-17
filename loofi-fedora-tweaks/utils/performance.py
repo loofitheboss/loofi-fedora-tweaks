@@ -195,7 +195,7 @@ class PerformanceCollector:
                     # Skip loopback
                     if iface == "lo":
                         continue
-                    fields = line[colon_idx + 1 :].split()
+                    fields = line[colon_idx + 1:].split()
                     if len(fields) >= 10:
                         total_recv += int(fields[0])  # bytes received
                         total_sent += int(fields[8])  # bytes transmitted

@@ -676,6 +676,8 @@ class TestDetectTools(unittest.TestCase):
         bw.get_available_tools.return_value = []
         tab._detect_tools()
         self.assertIn("No backup tool", tab.tool_status.text())
+        self.assertIn("pkexec", tab.tool_status.text())
+        self.assertNotIn("sudo ", tab.tool_status.text())
 
     def test_detect_no_tool_disables_next(self):
         """No tool found disables the next button."""

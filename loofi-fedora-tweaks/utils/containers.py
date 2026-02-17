@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from utils.install_hints import build_install_hint
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,7 +154,7 @@ class ContainerManager:
         if not cls.is_available():
             return Result(
                 False,
-                "Distrobox is not installed. Install with: sudo dnf install distrobox",
+                f"Distrobox is not installed. {build_install_hint('distrobox')}",
             )
 
         # Validate name

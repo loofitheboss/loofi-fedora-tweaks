@@ -28,9 +28,13 @@ Central documentation map for Loofi Fedora Tweaks.
 
 ## Legacy/Archive Notes
 
-- `releases/release_notes.md`
-- `releases/RELEASE_NOTES.md`
-- `release_notes.md`
+- Canonical latest release index: `releases/RELEASE_NOTES.md`
+- Compatibility aliases: `releases/release_notes.md`, `release_notes.md`
+
+## Planning and Reports
+
+- `plans/` - planning prompts and roadmap audits
+- `reports/` - implementation and quality diagnostics
 
 These legacy files are kept for compatibility and historical context.
 

@@ -26,7 +26,7 @@ class DnfLockedError(LoofiError):
         super().__init__(
             "Another package manager is currently running.",
             code="DNF_LOCKED",
-            hint="Wait for the other package manager to finish, or run 'sudo rm -f /var/run/dnf.pid' if it's stale.",
+            hint="Wait for the other package manager to finish. If the lock appears stale, reboot or inspect running package-manager processes.",
             recoverable=True,
         )
 

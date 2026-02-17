@@ -209,6 +209,8 @@ class TestSetDefaultPolicy(unittest.TestCase):
         # Returns instructions (not actual modification)
         self.assertFalse(result.success)
         self.assertIn("block", result.message)
+        self.assertIn("pkexec systemctl restart usbguard", result.message)
+        self.assertNotIn("sudo ", result.message)
 
 
 class TestLockScreenRule(unittest.TestCase):

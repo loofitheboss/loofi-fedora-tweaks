@@ -4,6 +4,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [45.0.0] - 2026-02-17 "Housekeeping"
+
+### Stability & Compliance
+
+- Fixed flake8 `E203` lint violations in:
+  - `loofi-fedora-tweaks/utils/network_monitor.py`
+  - `loofi-fedora-tweaks/utils/performance.py`
+- Replaced remaining runtime `sudo` guidance in key user-facing messages:
+  - backup tool install hints in `ui/backup_tab.py`
+  - Distrobox install hint in `utils/containers.py`
+  - VS Code install hint in `utils/state_teleport.py`
+  - USBGuard restart hint in `utils/usbguard.py`
+  - package-manager lock recovery hint in `utils/errors.py`
+- Added `utils/install_hints.py` to standardize package-manager-aware `pkexec` install messaging.
+
+### Reliability UX
+
+- Missing-tool flows now render package-manager-aware install hints using `SystemManager.get_package_manager()`.
+- Guidance text is now safer and avoids destructive lockfile deletion suggestions.
+
+### Hardening
+
+- Narrowed `except Exception` in `ui/whats_new_dialog.py::mark_seen()` to explicit expected exception types while preserving fail-safe behavior.
+
+### Testing
+
+- Added `tests/test_install_hints.py`.
+- Updated tests to validate safe guidance messaging and narrowed exception behavior:
+  - `tests/test_backup_tab.py`
+  - `tests/test_containers_deep.py`
+  - `tests/test_teleport.py`
+  - `tests/test_usbguard.py`
+  - `tests/test_v10_features.py`
+  - `tests/test_error_handler.py`
+  - `tests/test_ui_tab_smoke.py`
+
 ## [44.0.0] - 2026-02-16 "Review Gate"
 
 ### CI/CD & Workflow Hardening

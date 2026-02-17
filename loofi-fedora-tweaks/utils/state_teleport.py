@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from utils.containers import Result
+from utils.install_hints import build_install_hint
 from utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -421,8 +422,7 @@ class StateTeleportManager:
         if not shutil.which("code"):
             return Result(
                 False,
-                "VS Code is not installed. Install with: "
-                "sudo dnf install code",
+                f"VS Code is not installed. {build_install_hint('code')}",
             )
 
         try:

@@ -58,7 +58,8 @@ class TestErrors(unittest.TestCase):
     def test_dnf_locked_error_hint(self):
         """DnfLockedError provides a useful recovery hint."""
         err = DnfLockedError()
-        self.assertIn("dnf.pid", err.hint)
+        self.assertIn("package-manager processes", err.hint)
+        self.assertNotIn("sudo ", err.hint)
 
     def test_privilege_error_with_operation(self):
         """PrivilegeError includes the operation name in its message."""

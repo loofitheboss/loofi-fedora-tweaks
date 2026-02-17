@@ -1,6 +1,6 @@
 # Loofi Fedora Tweaks — AI Coding Instructions
 
-> **Version**: v41.0.0 "Coverage" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: v44.0.0 "Review Gate" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 > See `ARCHITECTURE.md` for canonical architecture, layer rules, tab layout, and critical patterns.
 > See `ROADMAP.md` for active development phase.
 
@@ -160,13 +160,13 @@ Three files must stay in sync when bumping version:
 
 ```bash
 ./run.sh                                              # Dev run (needs .venv with PyQt6)
-PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (5894 passing)
+PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v  # Run tests (4349 passing)
 ./build_rpm.sh                                        # Build RPM -> rpmbuild/RPMS/noarch/
 ```
 
 ## Testing Conventions
 
-- Framework: `unittest` + `unittest.mock` (193 test files, 5894+ tests)
+- Framework: `unittest` + `unittest.mock` (200 test files, 4349+ tests)
 - **All system calls must be mocked** — tests run without root, without real packages
 - See `ARCHITECTURE.md` § Testing Rules for full details
 - Use `@patch` decorators, not context managers

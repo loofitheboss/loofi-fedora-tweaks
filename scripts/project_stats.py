@@ -262,6 +262,7 @@ CHECKED_FILES = [
     ".github/instructions/workflow.instructions.md",
     ".github/copilot-instructions.md",
     "AGENTS.md",
+    "ARCHITECTURE.md",
     "CLAUDE.md",
 ]
 
@@ -326,9 +327,20 @@ def main() -> int:
         action="store_true",
         help="Print stats JSON to stdout instead of writing file",
     )
+    parser.add_argument(
+        "--format",
+        choices=["json", "template"],
+        default="json",
+        help="Output format: json (default) or template ({{variable}} substitution map)",
+    )
     args = parser.parse_args()
 
     stats = gather_stats()
+
+    if args.format == "template":
+        for key, value in sorted(stats.items()):
+            print(f"{{{{{key}}}}} = {value}")
+        return 0
 
     if args.json_only:
         print(json.dumps(stats, indent=2))

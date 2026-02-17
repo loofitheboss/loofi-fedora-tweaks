@@ -117,7 +117,6 @@ jobs:
       - run: python loofi-fedora-tweaks/main.py --cli --version
       - name: Run tests
         id: run_tests
-        continue-on-error: true
         run: |
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
             --tb=short \

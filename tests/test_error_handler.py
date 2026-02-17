@@ -98,6 +98,7 @@ class TestFormatUserMessage(unittest.TestCase):
         msg = _format_user_message(exc)
         self.assertIn("DNF_LOCKED", msg)
         self.assertIn("Wait for", msg)
+        self.assertNotIn("sudo ", msg)
 
     def test_privilege_error(self):
         exc = PrivilegeError("install packages")

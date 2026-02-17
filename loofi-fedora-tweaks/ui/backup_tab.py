@@ -12,13 +12,22 @@ Step 4: View results + existing snapshots
 import logging
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
-    QStackedWidget, QGroupBox, QTableWidget, QHeaderView,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QLineEdit,
+    QStackedWidget,
+    QGroupBox,
+    QTableWidget,
+    QHeaderView,
     QAbstractItemView,
 )
 
-from ui.base_tab import BaseTab
 from core.plugins.metadata import PluginMetadata
+from ui.base_tab import BaseTab
+from utils.install_hints import build_install_hint
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +105,12 @@ class BackupTab(BaseTab):
         page = QWidget()
         layout = QVBoxLayout(page)
 
-        info = QLabel(self.tr(
-            "This wizard helps you create and manage system snapshots.\n"
-            "Supported tools: Timeshift, Snapper."
-        ))
+        info = QLabel(
+            self.tr(
+                "This wizard helps you create and manage system snapshots.\n"
+                "Supported tools: Timeshift, Snapper."
+            )
+        )
         info.setWordWrap(True)
         layout.addWidget(info)
 
@@ -158,19 +169,24 @@ class BackupTab(BaseTab):
 
         # Snapshot table
         self.snap_table = QTableWidget(0, 4)
-        self.snap_table.setHorizontalHeaderLabels([
-            self.tr("ID"),
-            self.tr("Date"),
-            self.tr("Description"),
-            self.tr("Tool"),
-        ])
+        self.snap_table.setHorizontalHeaderLabels(
+            [
+                self.tr("ID"),
+                self.tr("Date"),
+                self.tr("Description"),
+                self.tr("Tool"),
+            ]
+        )
         h_header = self.snap_table.horizontalHeader()
         assert h_header is not None
         h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        self.snap_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.snap_table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.snap_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.snap_table)
         layout.addWidget(self.snap_table)
 
@@ -200,7 +216,8 @@ class BackupTab(BaseTab):
             self.stack.setCurrentIndex(idx - 1)
         self.back_btn.setEnabled(self.stack.currentIndex() > 0)
         self.next_btn.setText(
-            self.tr("Finish") if self.stack.currentIndex() == self.stack.count() - 1
+            self.tr("Finish")
+            if self.stack.currentIndex() == self.stack.count() - 1
             else self.tr("Next →")
         )
 
@@ -215,7 +232,8 @@ class BackupTab(BaseTab):
                 self._load_snapshots()
         self.back_btn.setEnabled(self.stack.currentIndex() > 0)
         self.next_btn.setText(
-            self.tr("Finish") if self.stack.currentIndex() == self.stack.count() - 1
+            self.tr("Finish")
+            if self.stack.currentIndex() == self.stack.count() - 1
             else self.tr("Next →")
         )
 
@@ -234,23 +252,32 @@ class BackupTab(BaseTab):
         """Detect available backup tools."""
         try:
             from utils.backup_wizard import BackupWizard
+
             tool = BackupWizard.detect_backup_tool()
             available = BackupWizard.get_available_tools()
 
             if tool == "none":
-                self.tool_status.setText(self.tr(
-                    "⚠ No backup tool found.\n"
-                    "Install timeshift or snapper:\n"
-                    "  sudo dnf install timeshift\n"
-                    "  sudo dnf install snapper"
-                ))
+                install_timeshift = build_install_hint("timeshift")
+                install_snapper = build_install_hint("snapper")
+                self.tool_status.setText(
+                    self.tr(
+                        "⚠ No backup tool found.\n"
+                        "Install timeshift or snapper:\n"
+                        "  {timeshift}\n"
+                        "  {snapper}"
+                    ).format(
+                        timeshift=install_timeshift,
+                        snapper=install_snapper,
+                    )
+                )
                 self.next_btn.setEnabled(False)
             else:
                 tools_str = ", ".join(available)
-                self.tool_status.setText(self.tr(
-                    "✓ Backup tool detected: {}\n"
-                    "Available tools: {}"
-                ).format(tool, tools_str))
+                self.tool_status.setText(
+                    self.tr("✓ Backup tool detected: {}\nAvailable tools: {}").format(
+                        tool, tools_str
+                    )
+                )
                 self.next_btn.setEnabled(True)
                 self._detected_tool = tool
 
@@ -268,9 +295,12 @@ class BackupTab(BaseTab):
         """Create a system snapshot."""
         try:
             from utils.backup_wizard import BackupWizard
+
             desc = self.desc_input.text().strip() or "Loofi backup"
             tool = getattr(self, "_detected_tool", None)
-            binary, args, description = BackupWizard.create_snapshot(tool=tool, description=desc)
+            binary, args, description = BackupWizard.create_snapshot(
+                tool=tool, description=desc
+            )
             self.run_command(binary, args, description)
         except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
@@ -279,6 +309,7 @@ class BackupTab(BaseTab):
         """Load existing snapshots into the table."""
         try:
             from utils.backup_wizard import BackupWizard
+
             tool = getattr(self, "_detected_tool", None)
             snapshots = BackupWizard.list_snapshots(tool=tool)
             self.snap_table.setRowCount(len(snapshots))
@@ -286,11 +317,15 @@ class BackupTab(BaseTab):
             for row, snap in enumerate(snapshots):
                 self.snap_table.setItem(row, 0, BaseTab.make_table_item(snap.id))
                 self.snap_table.setItem(row, 1, BaseTab.make_table_item(snap.date))
-                self.snap_table.setItem(row, 2, BaseTab.make_table_item(snap.description))
+                self.snap_table.setItem(
+                    row, 2, BaseTab.make_table_item(snap.description)
+                )
                 self.snap_table.setItem(row, 3, BaseTab.make_table_item(snap.tool))
 
             if not snapshots:
-                BaseTab.set_table_empty_state(self.snap_table, self.tr("No snapshots found"))
+                BaseTab.set_table_empty_state(
+                    self.snap_table, self.tr("No snapshots found")
+                )
             else:
                 normalize = getattr(BaseTab, "ensure_table_row_heights", None)
                 if callable(normalize):
@@ -315,8 +350,11 @@ class BackupTab(BaseTab):
 
         try:
             from utils.backup_wizard import BackupWizard
+
             tool = tool_item.text() if tool_item else None
-            binary, args, desc = BackupWizard.restore_snapshot(snap_id.text(), tool=tool)
+            binary, args, desc = BackupWizard.restore_snapshot(
+                snap_id.text(), tool=tool
+            )
             self.run_command(binary, args, desc)
         except (RuntimeError, OSError, ValueError) as e:
             self.append_output(f"[ERROR] {e}\n")
@@ -335,6 +373,7 @@ class BackupTab(BaseTab):
 
         try:
             from utils.backup_wizard import BackupWizard
+
             tool = tool_item.text() if tool_item else None
             binary, args, desc = BackupWizard.delete_snapshot(snap_id.text(), tool=tool)
             self.run_command(binary, args, desc)

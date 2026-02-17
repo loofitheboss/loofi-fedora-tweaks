@@ -33,11 +33,12 @@
 | v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
 | v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
 | v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
-| v44.0 | Review Gate | ACTIVE | Fedora review prerequisite enforcement for workflow and CI pipelines |
+| v44.0 | Review Gate | DONE | Fedora review prerequisite enforcement for workflow and CI pipelines |
+| v45.0 | Housekeeping | ACTIVE | Stability fixes, safe guidance cleanup, reliability UX consistency |
 
 ---
 
-## [ACTIVE] v44.0 "Review Gate" — Fedora Review Gate Requirement
+## [DONE] v44.0 "Review Gate" — Fedora Review Gate Requirement
 
 ### Scope
 
@@ -67,6 +68,37 @@ before package and release execution paths. No product feature expansion.
 ### Dependencies
 
 - v43.0 Stabilization-Only (policy baseline)
+
+---
+
+## [ACTIVE] v45.0 "Housekeeping" — Stability and Reliability UX
+
+### Scope
+
+Low-risk stabilization release focused on policy-compliant messaging,
+targeted bugfixes, and consistent reliability UX. No major feature expansion.
+
+### Planned Deliverables
+
+- [x] Resolve current lint blockers in runtime modules
+- [x] Remove remaining `sudo` guidance strings in runtime user-facing messages
+- [x] Add package-manager-aware install hint helper for consistent messaging
+- [x] Narrow non-boundary broad exception handling in UI settings persistence flow
+- [x] Add/adjust tests for hint generation and updated guidance behavior
+- [x] Align v45.0.0 version and release artifacts (`version.py`, `pyproject.toml`, `.spec`, changelog, release notes)
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| project-coordinator | v45 scope and workflow sequencing |
+| backend-builder | runtime lint/compliance fixes and helper integration |
+| test-writer | targeted regression and behavior tests for changed modules |
+| release-planner | version alignment and release documentation for 45.0.0 |
+
+### Dependencies
+
+- v44.0 Review Gate (workflow baseline)
 
 ---
 

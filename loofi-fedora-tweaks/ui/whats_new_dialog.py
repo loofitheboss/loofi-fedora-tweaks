@@ -146,5 +146,5 @@ class WhatsNewDialog(QDialog):
             mgr = SettingsManager.instance()
             mgr.set("last_seen_version", __version__)
             mgr.save()
-        except Exception as e:
+        except (ImportError, RuntimeError, OSError, ValueError, TypeError, AttributeError) as e:
             logger.debug("Failed to save last seen version: %s", e)

@@ -611,6 +611,8 @@ class TestRestore(unittest.TestCase):
 
         self.assertFalse(result.success)
         self.assertIn("not installed", result.message)
+        self.assertIn("pkexec", result.message)
+        self.assertNotIn("sudo ", result.message)
 
     def test_restore_vscode_no_path(self):
         """Returns failure when no workspace path is provided."""

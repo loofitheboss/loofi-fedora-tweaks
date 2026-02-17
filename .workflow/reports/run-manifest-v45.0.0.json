@@ -1,0 +1,97 @@
+{
+  "version": "v45.0.0",
+  "assistant": "codex",
+  "owner": "loofi",
+  "mode": "write",
+  "issue": null,
+  "started_at": "2026-02-17T02:52:10Z",
+  "updated_at": "2026-02-17T03:09:04Z",
+  "phases": [
+    {
+      "phase": "plan",
+      "phase_name": "P1 PLAN",
+      "status": "success",
+      "timestamp": "2026-02-17T02:55:00Z",
+      "artifacts": [
+        "ROADMAP.md",
+        ".workflow/specs/tasks-v45.0.0.md"
+      ]
+    },
+    {
+      "phase": "design",
+      "phase_name": "P2 DESIGN",
+      "status": "success",
+      "timestamp": "2026-02-17T02:56:00Z",
+      "artifacts": []
+    },
+    {
+      "phase": "build",
+      "phase_name": "P3 BUILD",
+      "status": "success",
+      "timestamp": "2026-02-17T03:02:00Z",
+      "artifacts": [
+        "loofi-fedora-tweaks/utils/install_hints.py",
+        "loofi-fedora-tweaks/ui/backup_tab.py",
+        "loofi-fedora-tweaks/utils/containers.py",
+        "loofi-fedora-tweaks/utils/state_teleport.py",
+        "loofi-fedora-tweaks/utils/errors.py",
+        "loofi-fedora-tweaks/utils/usbguard.py",
+        "loofi-fedora-tweaks/ui/whats_new_dialog.py",
+        "loofi-fedora-tweaks/utils/network_monitor.py",
+        "loofi-fedora-tweaks/utils/performance.py"
+      ]
+    },
+    {
+      "phase": "test",
+      "phase_name": "P4 TEST",
+      "status": "success",
+      "timestamp": "2026-02-17T03:07:00Z",
+      "artifacts": [
+        ".workflow/reports/test-results-v45.0.0.json",
+        "tests/test_install_hints.py",
+        "tests/test_backup_tab.py",
+        "tests/test_containers_deep.py",
+        "tests/test_teleport.py",
+        "tests/test_usbguard.py",
+        "tests/test_v10_features.py",
+        "tests/test_error_handler.py",
+        "tests/test_ui_tab_smoke.py"
+      ]
+    },
+    {
+      "phase": "document",
+      "phase_name": "P5 DOCUMENT",
+      "status": "success",
+      "timestamp": "2026-02-17T03:08:00Z",
+      "artifacts": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs/releases/RELEASE_NOTES.md",
+        "docs/releases/RELEASE-NOTES-v45.0.0.md"
+      ]
+    },
+    {
+      "phase": "package",
+      "phase_name": "P6 PACKAGE",
+      "status": "success",
+      "timestamp": "2026-02-17T03:08:30Z",
+      "artifacts": [
+        "loofi-fedora-tweaks/version.py",
+        "pyproject.toml",
+        "loofi-fedora-tweaks.spec"
+      ]
+    },
+    {
+      "phase": "release",
+      "phase_name": "P7 RELEASE",
+      "status": "success",
+      "timestamp": "2026-02-17T03:09:04Z",
+      "artifacts": [
+        "ROADMAP.md",
+        ".workflow/specs/.race-lock.json",
+        ".workflow/specs/tasks-v45.0.0.md",
+        ".workflow/reports/run-manifest-v45.0.0.json"
+      ]
+    }
+  ]
+}

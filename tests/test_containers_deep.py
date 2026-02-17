@@ -122,6 +122,8 @@ class TestCreateContainer(unittest.TestCase):
         r = ContainerManager.create_container("test")
         self.assertFalse(r.success)
         self.assertIn("not installed", r.message)
+        self.assertIn("pkexec", r.message)
+        self.assertNotIn("sudo ", r.message)
 
     @patch("shutil.which", return_value="/usr/bin/distrobox")
     def test_invalid_name(self, mock_which):

@@ -20,7 +20,7 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 # Dev run
 ./run.sh
 
-# Run full test suite
+# Run full test suite (~4349 tests, ~75s)
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
 
 # Run a single test file
@@ -47,7 +47,7 @@ python scripts/bump_version.py
 
 ## ARCHITECTURE
 
-PyQt6 desktop app — **Python 3.12+**, **Fedora Linux**, **28 feature tabs**, **106 utils modules**, **80% test coverage**.
+PyQt6 desktop app — **Python 3.12+**, **Fedora Linux**, **28 feature tabs**, **106 utils modules**, **74% test coverage**.
 
 Three entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--json`), `--daemon` (background scheduler).
 
@@ -152,7 +152,7 @@ class TestManager(unittest.TestCase):
 
 ## AGENT SYSTEM
 
-7 Claude agents in `.github/claude-agents/` (canonical definitions in `.github/agents/*.agent.md`):
+7 Claude Code agents in `.github/claude-agents/` (8 Copilot agents in `.github/agents/*.agent.md`):
 
 - **project-coordinator** — task decomposition, dependency ordering
 - **architecture-advisor** — architectural design, module structure
@@ -174,6 +174,8 @@ See `.github/instructions/system_hardening_and_stabilization_guide.md`:
 - If unsure, default to restrictive behavior
 
 ## RELEASE RULES
+
+**Current version:** v44.0.0 "Review Gate"
 
 For every vX.Y.0: update `version.py` + `.spec` + `pyproject.toml` (via `bump_version.py`), complete `CHANGELOG.md`, update `README.md`, run full test suite, build and verify RPM.
 

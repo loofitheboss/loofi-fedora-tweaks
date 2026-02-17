@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v44.0.0 "Review Gate"
+# Loofi Fedora Tweaks v45.0.0 "Housekeeping"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v44.0.0">
-    <img src="https://img.shields.io/badge/Release-v44.0.0-blue?style=for-the-badge&logo=github" alt="Release v44.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v45.0.0">
+    <img src="https://img.shields.io/badge/Release-v45.0.0-blue?style=for-the-badge&logo=github" alt="Release v45.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -39,17 +39,17 @@ It is designed to be practical for both casual users and advanced users:
 
 ---
 
-## What Is New in v44.0.0?
+## What Is New in v45.0.0?
 
-`v44.0.0 "Review Gate"` enforces Fedora review tooling as a prerequisite for packaging and release workflows:
+`v45.0.0 "Housekeeping"` is a stability-first release focused on safer runtime guidance and reliability UX consistency:
 
-- **Fedora review gate checker** — `scripts/check_fedora_review.py` validates `fedora-review` presence and health.
-- **Workflow runner gating** — write-mode `package`/`release` phases now fail fast when Fedora review checks fail.
-- **CI pipeline enforcement** — required `fedora_review` job added to both `ci.yml` and `auto-release.yml`.
-- **Workflow docs updated** — PIPELINE, QUICKSTART, and phase prompts document the new prerequisite.
-- **Full test contracts** — checker, runner gate, and CI workflow contract tests added.
+- **Safe hint standardization** — new `utils/install_hints.py` provides package-manager-aware `pkexec` install guidance.
+- **Runtime guidance cleanup** — removed remaining `sudo` guidance text in backup/container/teleport/usbguard/error flows.
+- **Targeted lint fixes** — removed `E203` blockers in `network_monitor.py` and `performance.py`.
+- **Exception hardening** — narrowed `WhatsNewDialog.mark_seen()` to explicit expected exception types.
+- **Focused regression tests** — added and updated tests for hint generation and user-facing messaging paths.
 
-Full notes: [`docs/releases/RELEASE-NOTES-v44.0.0.md`](docs/releases/RELEASE-NOTES-v44.0.0.md)
+Full notes: [`docs/releases/RELEASE-NOTES-v45.0.0.md`](docs/releases/RELEASE-NOTES-v45.0.0.md)
 
 ---
 

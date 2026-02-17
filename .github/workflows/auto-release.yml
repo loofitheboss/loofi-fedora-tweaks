@@ -123,6 +123,48 @@ jobs:
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/sync_ai_adapters.py --check
 
+  pipeline_gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [validate]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate workflow specs exist
+        run: |
+          VER="v${{ needs.validate.outputs.version }}"
+          TASKS=".workflow/specs/tasks-${VER}.md"
+          ARCH=".workflow/specs/arch-${VER}.md"
+          MISSING=0
+
+          if [ ! -f "$TASKS" ]; then
+            echo "::error::Missing task spec: $TASKS"
+            MISSING=1
+          fi
+          if [ ! -f "$ARCH" ]; then
+            echo "::error::Missing arch spec: $ARCH"
+            MISSING=1
+          fi
+
+          if [ "$MISSING" -eq 1 ]; then
+            echo "Workflow specs are missing for ${VER}."
+            echo "Run: python3 scripts/bump_version.py ${VER#v}"
+            exit 1
+          fi
+
+      - name: Validate race-lock version
+        run: |
+          VER="v${{ needs.validate.outputs.version }}"
+          LOCK=".workflow/specs/.race-lock.json"
+          if [ ! -f "$LOCK" ]; then
+            echo "::error::Race lock file missing: $LOCK"
+            exit 1
+          fi
+          LOCK_VER=$(python3 -c "import json; print(json.load(open('$LOCK'))['version'])")
+          if [ "$LOCK_VER" != "$VER" ]; then
+            echo "::error::Race lock version ($LOCK_VER) does not match release version ($VER)"
+            exit 1
+          fi
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -205,7 +247,6 @@ jobs:
       - run: python loofi-fedora-tweaks/main.py --cli --version
       - name: Run tests
         id: run_tests
-        continue-on-error: true
         run: |
           PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v \
             --tb=short \
@@ -254,11 +295,12 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:43
     timeout-minutes: 20
-    needs: [validate, adapter_drift, lint, typecheck, stabilization_rules, docs_gate, test, security, fedora_review]
+    needs: [validate, adapter_drift, pipeline_gate, lint, typecheck, stabilization_rules, docs_gate, test, security, fedora_review]
     if: |
       !cancelled() &&
       needs.validate.result == 'success' &&
       needs.adapter_drift.result == 'success' &&
+      needs.pipeline_gate.result == 'success' &&
       needs.lint.result == 'success' &&
       needs.typecheck.result == 'success' &&
       needs.stabilization_rules.result == 'success' &&

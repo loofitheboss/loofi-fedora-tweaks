@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 42.0.0 "Sentinel" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 44.0.0 "Review Gate" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -11,7 +11,7 @@
 loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── main.py                   # Entry point — GUI (default), CLI (--cli), Daemon (--daemon)
 ├── version.py                # __version__, __version_codename__, __app_name__
-├── ui/                       # PyQt6 widgets — 29 feature tabs + base class
+├── ui/                       # PyQt6 widgets — 28 feature tabs + base class
 │   ├── base_tab.py           # BaseTab ABC — shared CommandRunner wiring, output area
 │   ├── *_tab.py              # Feature tabs (inherit BaseTab for command tabs)
 │   ├── main_window.py        # MainWindow with sidebar + lazy-loaded tab stack
@@ -45,7 +45,7 @@ loofi-fedora-tweaks/          # Application root (on PYTHONPATH)
 ├── plugins/                  # Third-party plugin directory
 └── resources/                # Static resources
 
-tests/                        # 193 test files, 5895 tests (82% coverage)
+tests/                        # 200 test files, 4349 tests (74% coverage)
 scripts/                      # Build, workflow, CI scripts
 config/                       # Global config templates
 docs/                         # User guide, release notes, checklists
@@ -59,7 +59,7 @@ completions/                  # Shell completions (bash, zsh)
 
 | Mode | Flag | Module | Purpose |
 | ------ | ------ | -------- | --------- |
-| **GUI** | (default) | `main.py` → `MainWindow` | PyQt6 desktop app with 29 lazy-loaded tabs |
+| **GUI** | (default) | `main.py` → `MainWindow` | PyQt6 desktop app with 28 lazy-loaded tabs |
 | **CLI** | `--cli` | `cli/main.py` | Subcommands with `--json` output |
 | **Daemon** | `--daemon` | `utils/daemon.py` | Background scheduler |
 
@@ -209,7 +209,7 @@ Always use `SystemManager.get_package_manager()` — **never hardcode `dnf`**.
 - **Both paths**: Test success AND failure
 - **No root**: Tests run in CI without privileges
 - **Path setup**: `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))`
-- **Coverage**: 80% current, 80% target
+- **Coverage**: 74% current, 80% target
 
 ## Adding a Feature
 
