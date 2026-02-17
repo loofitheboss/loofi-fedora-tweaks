@@ -71,9 +71,12 @@ class SidebarItemDelegate(QStyledItemDelegate):
         "error": QColor(244, 67, 54),     # red
     }
 
-    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index) -> None:
+    def paint(self, painter: "QPainter | None", option: QStyleOptionViewItem, index) -> None:
         """Paint the item, adding a colored status dot on the right when status is set."""
         super().paint(painter, option, index)
+
+        if painter is None:
+            return
 
         status = index.data(_ROLE_STATUS)
         if not status or status not in self._STATUS_COLORS:
@@ -460,7 +463,7 @@ class MainWindow(QMainWindow):
 
         return item
 
-    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry", scroll_widget: QWidget = None) -> None:
+    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry", scroll_widget: "QWidget | None" = None) -> None:
         """Register a tab in the sidebar index and content area.
 
         Args:

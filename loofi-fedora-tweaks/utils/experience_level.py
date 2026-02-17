@@ -104,7 +104,7 @@ class ExperienceLevelManager:
         return []
 
     @staticmethod
-    def is_tab_visible(tab_id: str, level: ExperienceLevel, favorites: List[str] = None) -> bool:
+    def is_tab_visible(tab_id: str, level: ExperienceLevel, favorites: "List[str] | None" = None) -> bool:
         """Check if a specific tab should be visible at the given level.
 
         Favorited tabs are always visible regardless of experience level.
