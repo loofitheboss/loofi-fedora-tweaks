@@ -1,9 +1,21 @@
 # Release Notes -- Latest
 
-> **Current release:** v41.0.0 "Coverage"
+> **Current release:** v44.0.0 "Review Gate"
 >
 > For versioned release notes see the individual files in this directory:
 > `RELEASE-NOTES-vX.Y.Z.md`
+
+## v44.0.0 "Review Gate"
+
+Fedora review enforcement release — new checker (`scripts/check_fedora_review.py`), workflow runner gating for write-mode `package`/`release`, and required `fedora_review` job in CI/auto-release pipelines.
+
+See [RELEASE-NOTES-v44.0.0.md](RELEASE-NOTES-v44.0.0.md) for full details.
+
+## v43.0.0 "Stabilization-Only"
+
+Strict compliance hardening — stabilization rules checker enforced across CI, coverage-gate, and auto-release; wizard health checks extracted to utils; remaining hardcoded `dnf` calls removed.
+
+See [RELEASE-NOTES-v43.0.0.md](RELEASE-NOTES-v43.0.0.md) for full details.
 
 ## v41.0.0 "Coverage"
 

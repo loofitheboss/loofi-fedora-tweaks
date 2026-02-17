@@ -5,13 +5,13 @@
 
 ## Current Release
 
-- **v41.0.0 "Coverage"**
-- Full notes: `docs/releases/RELEASE-NOTES-v41.0.0.md`
+- **v44.0.0 "Review Gate"**
+- Full notes: `docs/releases/RELEASE-NOTES-v44.0.0.md`
 
 ## Previous Release
 
-- **v40.0.0 "Foundation"**
-- Full notes: `docs/releases/RELEASE-NOTES-v40.0.0.md`
+- **v43.0.0 "Stabilization-Only"**
+- Full notes: `docs/releases/RELEASE-NOTES-v43.0.0.md`
 
 ## Why this file exists
 
@@ -23,6 +23,8 @@ For ongoing updates, edit:
 
 ## Previous Release Highlights
 
+- v41.0.0: coverage milestone, CI hardening
+- v40.0.0: security hardening, timeout enforcement
 - v39.0.0: services layer migration, zero deprecated imports, zero inline styles
 - v38.0.0: UX polish, Doctor tab rewrite, toast notifications, risk badges
 - v37.0.0: smart updates, extensions, backup wizard (28 tabs)

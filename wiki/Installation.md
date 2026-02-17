@@ -106,10 +106,12 @@ loofi-fedora-tweaks --cli doctor
 
 Expected output from `--cli info`:
 ```
-Loofi Fedora Tweaks v40.0.0 "Foundation"
-Python: 3.12.x
-OS: Fedora 43
-Package Manager: dnf (or rpm-ostree on Atomic)
+═══════════════════════════════════════════
+   Loofi Fedora Tweaks v44.0.0 CLI
+═══════════════════════════════════════════
+🖥️  System: Traditional Fedora
+📦 Package Manager: dnf
+⚡ Power Profile: balanced
 ```
 
 ### Optional Shell Alias

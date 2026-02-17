@@ -8,6 +8,34 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ## Latest Release
 
+### v44.0.0 "Review Gate" (2026-02-16)
+
+**Fedora review enforcement release** that blocks package/release workflows when `fedora-review` is missing or unhealthy.
+
+**Key Changes:**
+- New `scripts/check_fedora_review.py` checker and contract tests
+- Workflow runner gating for write-mode `package`/`release`
+- Required `fedora_review` CI job in `ci.yml` and `auto-release.yml`
+- Workflow docs updated with Fedora review prerequisite
+
+**Test Suite**: 5,895 tests collected, 82% coverage
+
+---
+
+## Recent Releases
+
+### v43.0.0 "Stabilization-Only" (2026-02-16)
+
+**Strict compliance hardening release** — timeout enforcement, UI subprocess bans, and hardcoded `dnf` guardrails are now enforced by an AST checker and CI gates.
+
+**Key Changes:**
+- `scripts/check_stabilization_rules.py` added and enforced in CI/auto-release/coverage-gate
+- Wizard health checks extracted to utils (UI no longer calls subprocess directly)
+- Coverage thresholds standardized to 80 across workflows
+- Remaining executable hardcoded `dnf` calls removed from package/update/health/export paths
+
+**Test Suite**: 5,895 tests collected, 82% coverage
+
 ### v41.0.0 "Coverage" (2026-02-15)
 
 **Test coverage push release** with zero production code changes. Coverage raised from 74% to 80%+ and CI pipeline hardened.
@@ -18,8 +46,6 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 - `dorny/test-reporter` renders JUnit XML as GitHub check annotations
 - RPM post-install smoke test gates every release build
 - Coverage threshold bumped from 74 to 80 in ci.yml, auto-release.yml, coverage-gate.yml
-
-**Test Suite**: 5,894 tests collected, 80% coverage
 
 ---
 
@@ -205,6 +231,8 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 | Version | Codename | Date | Milestone |
 |---------|----------|------|-----------|
+| v44.0.0 | Review Gate | 2026-02-16 | Fedora review gate; 82% coverage, 5,895 tests |
+| v43.0.0 | Stabilization-Only | 2026-02-16 | Policy checker enforced across CI/release |
 | v41.0.0 | Coverage | 2026-02-15 | 80% coverage, 5894 tests |
 | v40.0.0 | Foundation | 2026-02-14 | Security hardening complete |
 | v38.0.0 | Clarity | 2025-07-22 | UX polish, 4349 tests |
@@ -220,9 +248,9 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 ## Statistics
 
-**Current (v41.0.0):**
-- **Tests**: 5,894 collected
-- **Coverage**: 80%
+**Current (v44.0.0):**
+- **Tests**: 5,895 collected
+- **Coverage**: 82%
 - **Test files**: 193
 - **Tabs**: 28
 - **Utils modules**: 106
@@ -235,6 +263,8 @@ For the complete changelog with all changes, see [CHANGELOG.md](https://github.c
 
 Each major/minor release has a thematic codename:
 
+- **v44**: "Review Gate" — Fedora review prerequisite enforcement
+- **v43**: "Stabilization-Only" — Policy enforcement hardening
 - **v41**: "Coverage" — Test coverage milestone
 - **v40**: "Foundation" — Core stability
 - **v39**: "Prism" — Services migration
