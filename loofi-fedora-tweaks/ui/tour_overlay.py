@@ -110,10 +110,11 @@ class TourOverlay(QWidget):
 
     def _position_card(self, step: TourStep):
         """Position the card relative to the target widget."""
-        if not self.parent():
+        parent = self.parentWidget()
+        if parent is None:
             return
 
-        parent_rect = self.parent().rect()
+        parent_rect = parent.rect()
         card_w = self._card.width()
         card_h = self._card.sizeHint().height()
 

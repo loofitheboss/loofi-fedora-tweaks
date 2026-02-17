@@ -775,7 +775,7 @@ class DashboardTab(QWidget, PluginInterface):
 
     def _navigate_to_tab(self, tab_id: str):
         """Navigate to a tab by its plugin ID."""
-        if hasattr(self, 'main_window') and hasattr(self.main_window, 'switch_to_tab'):
+        if hasattr(self, 'main_window') and self.main_window is not None and hasattr(self.main_window, 'switch_to_tab'):
             tab_name_map = {
                 "performance": "Performance",
                 "storage": "Storage",
@@ -784,7 +784,7 @@ class DashboardTab(QWidget, PluginInterface):
                 "network": "Network",
             }
             tab_name = tab_name_map.get(tab_id, tab_id.title())
-            self.main_window.switch_to_tab(tab_name)
+            self.main_window.switch_to_tab(tab_name)  # type: ignore[union-attr]
 
     def _refresh_health_score(self):
         """Refresh the health score gauge."""

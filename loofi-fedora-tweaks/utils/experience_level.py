@@ -8,7 +8,7 @@ all 28 tabs.
 """
 
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from utils.log import get_logger
 from utils.settings import SettingsManager
@@ -104,7 +104,7 @@ class ExperienceLevelManager:
         return []
 
     @staticmethod
-    def is_tab_visible(tab_id: str, level: ExperienceLevel, favorites: List[str] = None) -> bool:
+    def is_tab_visible(tab_id: str, level: ExperienceLevel, favorites: Optional[List[str]] = None) -> bool:
         """Check if a specific tab should be visible at the given level.
 
         Favorited tabs are always visible regardless of experience level.

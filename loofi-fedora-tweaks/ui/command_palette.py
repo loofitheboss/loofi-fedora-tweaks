@@ -43,7 +43,7 @@ def _build_feature_registry() -> list[dict]:
         type      - 'navigate' (default) or 'execute' for quick commands
         execute   - callable for 'execute' type entries
     """
-    features = [
+    features: list[dict] = [
         # Home
         {"name": "Dashboard", "category": "System", "keywords": ["home", "overview", "welcome", "status"], "action": "Home"},
         {"name": "System Overview", "category": "System", "keywords": ["health", "summary", "quick actions"], "action": "Home"},
