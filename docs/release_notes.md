@@ -21,7 +21,7 @@ For ongoing updates, edit:
 - `docs/releases/RELEASE_NOTES.md` (latest summary/index)
 - `docs/releases/RELEASE-NOTES-vX.Y.Z.md` (version-specific details)
 
-## Previous Release Highlights
+## Historical Release Highlights
 
 - v41.0.0: coverage milestone, CI hardening
 - v40.0.0: security hardening, timeout enforcement
