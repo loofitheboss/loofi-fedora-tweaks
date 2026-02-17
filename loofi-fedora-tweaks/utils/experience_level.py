@@ -125,6 +125,16 @@ class ExperienceLevelManager:
         return tab_id in visible
 
     @staticmethod
+    def get_all_declared_tab_ids() -> set:
+        """Return all tab IDs declared in any experience level list.
+
+        Returns:
+            Set of tab ID strings from all level lists. INTERMEDIATE is the
+            superset of BEGINNER, so this returns the INTERMEDIATE set.
+        """
+        return set(_INTERMEDIATE_TABS)
+
+    @staticmethod
     def get_default_for_profile(profile_name: str) -> ExperienceLevel:
         """Suggest an experience level based on the wizard's use-case profile.
 
