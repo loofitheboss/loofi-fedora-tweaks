@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.py$'; then flake8 \"$CLAUDE_FILE_PATH\" --max-line-length=150 --ignore=E501,W503,E402,E722,E203 --quiet 2>/dev/null || true; fi"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.(env|secret|key)$|mcp\\.env'; then echo 'BLOCKED: Cannot edit secrets/env files' >&2; exit 1; fi"
+      }
+    ]
+  }
+}
