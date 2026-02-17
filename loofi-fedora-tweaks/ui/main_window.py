@@ -473,41 +473,25 @@ class MainWindow(QMainWindow):
         if not favorites:
             return
 
-        # Create Favorites category at position 0
         fav_category = QTreeWidgetItem()
         fav_category.setText(0, "Favorites")
         self._set_tree_item_icon(fav_category, "status-ok")
         fav_category.setExpanded(True)
         self.sidebar.insertTopLevelItem(0, fav_category)
 
-        # Find matching page widgets and duplicate entries under Favorites
         for fav_id in favorites:
-            for name, widget in self.pages.items():
-                # Match by tab name (case-insensitive)
-                if name.lower().replace(" ", "_") == fav_id or name.lower() == fav_id:
-                    item = QTreeWidgetItem(fav_category)
-                    item.setText(0, name)
-                    item.setData(0, _ROLE_DESC, f"Pinned: {name}")
-                    item.setData(0, _ROLE_NAME, name)
+            entry = self._sidebar_index.get(fav_id)
+            if not entry:
+                logger.warning("Stale favorite ignored: %s", fav_id)
+                continue
 
-                    # Find the original widget in the content area
-                    for i in range(self.sidebar.topLevelItemCount()):
-                        cat = self.sidebar.topLevelItem(i)
-                        if cat == fav_category:
-                            continue
-                        for j in range(cat.childCount()):
-                            child = cat.child(j)
-                            if name in child.text(0) and child.data(
-                                0, Qt.ItemDataRole.UserRole
-                            ):
-                                item.setData(
-                                    0,
-                                    Qt.ItemDataRole.UserRole,
-                                    child.data(0, Qt.ItemDataRole.UserRole),
-                                )
-                                self._copy_tree_item_icon(child, item)
-                                break
-                    break
+            item = QTreeWidgetItem(fav_category)
+            item.setText(0, entry.display_name)
+            item.setData(0, _ROLE_DESC, f"Pinned: {entry.display_name}")
+            item.setData(0, _ROLE_NAME, entry.display_name)
+            item.setData(0, Qt.ItemDataRole.UserRole, entry.tree_item.data(0, Qt.ItemDataRole.UserRole))
+            self._copy_tree_item_icon(entry.tree_item, item)
+
         self._refresh_sidebar_icon_tints()
 
     def _sidebar_context_menu(self, pos):
@@ -745,16 +729,24 @@ class MainWindow(QMainWindow):
         self._status_label.style().polish(self._status_label)
 
     def switch_to_tab(self, name):
-        """Helper for Dashboard and Command Palette to switch tabs."""
-        # Search all items
-        iterator = QTreeWidgetItemIterator(self.sidebar)
-        while iterator.value():
-            item = iterator.value()
-            # Check if it matches and is a page (has widget data)
-            if name in item.text(0) and item.data(0, Qt.ItemDataRole.UserRole):
-                self.sidebar.setCurrentItem(item)
+        """Switch to a tab by plugin ID (primary) or display name (fallback)."""
+        entry = self._sidebar_index.get(name)
+        if entry:
+            self.sidebar.setCurrentItem(entry.tree_item)
+            return
+
+        # Fallback: search by display name
+        for entry in self._sidebar_index.values():
+            if name in entry.display_name:
+                logger.debug(
+                    "switch_to_tab: matched by display name '%s', prefer plugin ID '%s'",
+                    name,
+                    entry.plugin_id,
+                )
+                self.sidebar.setCurrentItem(entry.tree_item)
                 return
-            iterator += 1
+
+        logger.debug("switch_to_tab: no match for '%s'", name)
 
     def _setup_command_palette_shortcut(self):
         """Register Ctrl+K shortcut for the command palette."""
@@ -1017,12 +1009,12 @@ class MainWindow(QMainWindow):
 
             update_info = UpdateChecker.check_for_updates(timeout=5, use_cache=True)
             if update_info and update_info.is_newer:
-                self._set_tab_status("Maintenance", "warning", "Updates available")
+                self._set_tab_status("maintenance", "warning", "Updates available")
             else:
-                self._set_tab_status("Maintenance", "ok", "Up to date")
+                self._set_tab_status("maintenance", "ok", "Up to date")
         except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check for updates: %s", e)
-            self._set_tab_status("Maintenance", "", "")
+            self._set_tab_status("maintenance", "", "")
 
         try:
             # Storage: check disk space
@@ -1032,43 +1024,33 @@ class MainWindow(QMainWindow):
             if usage and hasattr(usage, "percent_used"):
                 if usage.percent_used >= 90:
                     self._set_tab_status(
-                        "Storage", "error", f"Disk {usage.percent_used:.0f}% full"
+                        "storage", "error", f"Disk {usage.percent_used:.0f}% full"
                     )
                 elif usage.percent_used >= 75:
                     self._set_tab_status(
-                        "Storage", "warning", f"Disk {usage.percent_used:.0f}% used"
+                        "storage", "warning", f"Disk {usage.percent_used:.0f}% used"
                     )
                 else:
-                    self._set_tab_status("Storage", "ok", "Healthy")
+                    self._set_tab_status("storage", "ok", "Healthy")
         except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check disk space: %s", e)
-            self._set_tab_status("Storage", "", "")
+            self._set_tab_status("storage", "", "")
 
-    def _set_tab_status(self, tab_name: str, status: str, tooltip: str = ""):
-        """Set a colored status indicator on a sidebar tab item."""
-        markers = {"ok": " [OK]", "warning": " [WARN]", "error": " [ERR]"}
-        marker = markers.get(status, "")
+    def _set_tab_status(self, tab_id: str, status: str, tooltip: str = ""):
+        """Set a colored status indicator on a sidebar tab by plugin ID. O(1) lookup."""
+        entry = self._sidebar_index.get(tab_id)
+        if not entry:
+            logger.debug("_set_tab_status: unknown tab_id %s", tab_id)
+            return
 
-        iterator = QTreeWidgetItemIterator(self.sidebar)
-        while iterator.value():
-            item = iterator.value()
-            if item is None:
-                break
-            if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
-                text = item.text(0)
-                for suffix in markers.values():
-                    text = text.replace(suffix, "")
-                if marker:
-                    text = f"{text}{marker}"
-                item.setText(0, text)
-                item.setData(0, _ROLE_STATUS, status)
-                if tooltip:
-                    existing = item.data(0, _ROLE_DESC) or ""
-                    item.setToolTip(
-                        0, f"{existing}\n[{tooltip}]" if existing else tooltip
-                    )
-                break
-            iterator += 1
+        entry.status = status
+        entry.tree_item.setData(0, _ROLE_STATUS, status)
+
+        if tooltip:
+            desc = entry.metadata.description or ""
+            entry.tree_item.setToolTip(
+                0, f"{desc}\n[{tooltip}]" if desc else tooltip
+            )
 
     def _setup_quick_actions(self):
         """Register Ctrl+Shift+K shortcut for Quick Actions bar."""

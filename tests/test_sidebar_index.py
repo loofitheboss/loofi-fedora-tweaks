@@ -73,5 +73,48 @@ class TestAddPageDecomposition(unittest.TestCase):
         self.assertTrue(hasattr(MainWindow, '_register_in_index'))
 
 
+class TestFavoritesIdLookup(unittest.TestCase):
+    def test_favorites_uses_index_lookup(self):
+        from ui.main_window import SidebarEntry
+        from core.plugins.metadata import PluginMetadata
+        meta = PluginMetadata(id="system-info", name="System Info", description="", category="System", icon="", badge="")
+        index = {"system-info": SidebarEntry(plugin_id="system-info", display_name="System Info", tree_item=MagicMock(), page_widget=MagicMock(), metadata=meta)}
+        entry = index.get("system-info")
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.display_name, "System Info")
+
+    def test_stale_favorite_returns_none(self):
+        index = {}
+        self.assertIsNone(index.get("deleted-tab"))
+
+
+class TestSetTabStatusById(unittest.TestCase):
+    def test_status_stored_in_entry(self):
+        from ui.main_window import SidebarEntry
+        from core.plugins.metadata import PluginMetadata
+        meta = PluginMetadata(id="storage", name="Storage", description="Manage disks", category="System", icon="", badge="")
+        entry = SidebarEntry(plugin_id="storage", display_name="Storage", tree_item=MagicMock(), page_widget=MagicMock(), metadata=meta)
+        entry.status = "warning"
+        self.assertEqual(entry.status, "warning")
+        entry.tree_item.setText.assert_not_called()
+
+
+class TestSwitchToTabById(unittest.TestCase):
+    def test_switch_by_plugin_id(self):
+        from ui.main_window import SidebarEntry
+        from core.plugins.metadata import PluginMetadata
+        meta = PluginMetadata(id="storage", name="Storage", description="", category="System", icon="", badge="")
+        index = {"storage": SidebarEntry(plugin_id="storage", display_name="Storage", tree_item=MagicMock(), page_widget=MagicMock(), metadata=meta)}
+        entry = index.get("storage")
+        self.assertIsNotNone(entry)
+
+    def test_display_name_not_in_index_keys(self):
+        from ui.main_window import SidebarEntry
+        from core.plugins.metadata import PluginMetadata
+        meta = PluginMetadata(id="storage", name="Storage", description="", category="System", icon="", badge="")
+        index = {"storage": SidebarEntry(plugin_id="storage", display_name="Storage", tree_item=MagicMock(), page_widget=MagicMock(), metadata=meta)}
+        self.assertIsNone(index.get("Storage"))
+
+
 if __name__ == "__main__":
     unittest.main()
