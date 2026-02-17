@@ -294,7 +294,8 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         )
         header_height = header.height() if header is not None else 0
         frame = table.frameWidth() * 2
-        scroll_h = table.horizontalScrollBar().sizeHint().height()
+        h_scroll = table.horizontalScrollBar()
+        scroll_h = h_scroll.sizeHint().height() if h_scroll is not None else 0
         rows = max(1, table.rowCount())
         visible_rows = min(rows, max_visible_rows)
         table_height = (
