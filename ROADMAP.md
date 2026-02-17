@@ -37,6 +37,7 @@
 | v45.0 | Housekeeping | DONE | Stability fixes, safe guidance cleanup, reliability UX consistency |
 | v46.0 | Navigator | DONE | Category clarity, navigation consistency, release packaging alignment |
 | v47.0 | Experience | ACTIVE | UX experience levels, actionable feedback, health drill-down, guided tour |
+| v48.0 | Sidebar Index | ACTIVE | Tab/sidebar restructure with O(1) ID-based lookups |
 
 ---
 
