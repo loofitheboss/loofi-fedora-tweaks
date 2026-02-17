@@ -21,6 +21,7 @@ concurrency:
 env:
   PYTHON_VERSION: "3.12"
   COPR_PROJECT: "loofi-fedora-tweaks"
+  COPR_CHROOTS: "fedora-43-x86_64 fedora-44-x86_64 fedora-45-x86_64"
 
 jobs:
   publish:
@@ -73,13 +74,20 @@ jobs:
         run: |
           SRPM=$(ls rpmbuild/SRPMS/*.src.rpm | head -1)
           echo "Submitting ${SRPM} to COPR project ${COPR_PROJECT}"
-          copr-cli build "${COPR_PROJECT}" "${SRPM}" --nowait
+          CHROOT_ARGS=""
+          for chroot in ${COPR_CHROOTS}; do
+            CHROOT_ARGS="${CHROOT_ARGS} --chroot ${chroot}"
+          done
+          echo "Target chroots:${CHROOT_ARGS}"
+          # shellcheck disable=SC2086
+          copr-cli build "${COPR_PROJECT}" "${SRPM}" --nowait ${CHROOT_ARGS}
 
       - name: Build summary
         if: always()
         run: |
           VER="${{ steps.version.outputs.version }}"
           echo "::notice::COPR build submitted for loofi-fedora-tweaks v${VER}"
+          echo "::notice::Target chroots: ${COPR_CHROOTS}"
           echo ""
           echo "Track build status at:"
           echo "  https://copr.fedorainfracloud.org/coprs/${{ secrets.COPR_USERNAME }}/${COPR_PROJECT}/builds/"
