@@ -331,8 +331,9 @@ def _is_dark_theme() -> bool:
         app = QApplication.instance()
         if app is None:
             return True
-        base_color = app.palette().color(QPalette.ColorRole.Base)
-        return base_color.lightness() < 128
+        qt_app: QApplication = app  # type: ignore[assignment]
+        lightness: int = qt_app.palette().color(QPalette.ColorRole.Base).lightness()
+        return lightness < 128
     except (ImportError, AttributeError, RuntimeError, TypeError, ValueError):
         return True
 
