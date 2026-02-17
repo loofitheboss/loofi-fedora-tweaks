@@ -54,7 +54,10 @@ def test_development_tab_init(mock_which, mock_co, mock_run):
 
 @patch("subprocess.run", return_value=MagicMock(returncode=0, stdout=""))
 @patch("subprocess.check_output", return_value="")
-def test_dashboard_tab_init(mock_co, mock_run):
+@patch("ui.dashboard_tab.get_qicon", return_value=MagicMock())
+def test_dashboard_tab_init(mock_icon, mock_co, mock_run):
+    from PyQt6.QtGui import QIcon
+    mock_icon.return_value = QIcon()
     from ui.dashboard_tab import DashboardTab
     tab = DashboardTab()
     _tab_refs.append(tab)

@@ -4,6 +4,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [48.0.0] - 2026-02-17 "Sidebar Index"
+
+### Sidebar Architecture
+
+- Added `SidebarEntry` dataclass and `SidebarIndex` dict keyed by `PluginMetadata.id` for O(1) tab lookups
+- Decomposed monolithic `add_page()` into `_find_or_create_category()`, `_create_tab_item()`, `_register_in_index()`
+- Backward-compatible `pages` property returns `{display_name: widget}` view with cache
+
+### Fixed
+
+- Fixed fragile favorites matching — uses O(1) ID-based lookup instead of name heuristic
+- Fixed status string munging — uses data roles + `SidebarItemDelegate` colored dots
+- Fixed `switch_to_tab()` — O(1) plugin ID lookup with display name fallback
+- Fixed experience level sync drift — build-time validation warns on orphaned/advanced-only tab IDs
+
+### Added
+
+- `SidebarItemDelegate(QStyledItemDelegate)` renders green/amber/red status dots
+- `ExperienceLevelManager.get_all_declared_tab_ids()` for sync validation
+- Loader order comment in `core/plugins/loader.py`
+- 20 new tests in `tests/test_sidebar_index.py`
+
 ## [47.0.0] - 2026-02-18 "Experience"
 
 ### UX Experience System

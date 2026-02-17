@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import cast
 
 from PyQt6.QtGui import QIcon
 
@@ -331,8 +332,10 @@ def _is_dark_theme() -> bool:
         app = QApplication.instance()
         if app is None:
             return True
-        base_color = app.palette().color(QPalette.ColorRole.Base)
-        return base_color.lightness() < 128
+        qt_app = cast(QApplication, app)
+        base_color = qt_app.palette().color(QPalette.ColorRole.Base)
+        lightness: int = base_color.lightness()
+        return lightness < 128
     except (ImportError, AttributeError, RuntimeError, TypeError, ValueError):
         return True
 
