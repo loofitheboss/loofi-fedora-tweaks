@@ -5,11 +5,12 @@ Main Window - v25.0 "Plugin Architecture"
 
 import logging
 import os
+from dataclasses import dataclass, field
 
 from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.registry import CATEGORY_ICONS
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QFontMetrics, QKeySequence, QShortcut
+from PyQt6.QtCore import QRect, QSize, Qt, QTimer
+from PyQt6.QtGui import QColor, QFontMetrics, QKeySequence, QPainter, QShortcut
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -18,6 +19,8 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QStackedWidget,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTreeWidget,
     QTreeWidgetItem,
     QTreeWidgetItemIterator,
@@ -45,6 +48,51 @@ _ROLE_BADGE = Qt.ItemDataRole.UserRole + 2  # "recommended" | "advanced" | ""
 _ROLE_STATUS = Qt.ItemDataRole.UserRole + 3  # "ok" | "warning" | "error" | ""
 _ROLE_NAME = Qt.ItemDataRole.UserRole + 4  # Raw tab name (without badges/status)
 _ROLE_ICON = Qt.ItemDataRole.UserRole + 5  # Semantic icon token
+
+
+@dataclass
+class SidebarEntry:
+    """Indexed sidebar tab entry for O(1) lookups by plugin ID."""
+
+    plugin_id: str
+    display_name: str
+    tree_item: QTreeWidgetItem
+    page_widget: QWidget
+    metadata: PluginMetadata
+    status: str = field(default="")
+
+
+class SidebarItemDelegate(QStyledItemDelegate):
+    """Custom delegate that renders status dots on sidebar tab items."""
+
+    _STATUS_COLORS = {
+        "ok": QColor(76, 175, 80),       # green
+        "warning": QColor(255, 193, 7),   # amber
+        "error": QColor(244, 67, 54),     # red
+    }
+
+    def paint(self, painter: "QPainter | None", option: QStyleOptionViewItem, index) -> None:
+        """Paint the item, adding a colored status dot on the right when status is set."""
+        super().paint(painter, option, index)
+
+        if painter is None:
+            return
+
+        status = index.data(_ROLE_STATUS)
+        if not status or status not in self._STATUS_COLORS:
+            return
+
+        color = self._STATUS_COLORS[status]
+        dot_size = 8
+        x = option.rect.right() - dot_size - 8
+        y = option.rect.center().y() - dot_size // 2
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(color)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawEllipse(QRect(x, y, dot_size, dot_size))
+        painter.restore()
 
 
 class DisabledPluginPage(QWidget):
@@ -165,6 +213,7 @@ class MainWindow(QMainWindow):
         self.sidebar.setIconSize(QSize(17, 17))
         self.sidebar.currentItemChanged.connect(self.change_page)
         self.sidebar.currentItemChanged.connect(self._on_sidebar_selection_changed)
+        self.sidebar.setItemDelegate(SidebarItemDelegate(self.sidebar))
         # v31.0: Context menu for favorites
         self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
@@ -250,8 +299,10 @@ class MainWindow(QMainWindow):
 
         main_layout.addLayout(right_side)
 
-        # Initialize Pages
-        self.pages = {}
+        # Initialize sidebar index infrastructure
+        self._sidebar_index: dict[str, SidebarEntry] = {}
+        self._category_items: dict[str, QTreeWidgetItem] = {}
+        self._pages_cache: dict[str, QWidget] | None = None
 
         # Build sidebar from PluginRegistry (v25.0 plugin architecture)
         context = {
@@ -305,6 +356,26 @@ class MainWindow(QMainWindow):
         # First-run wizard
         self._check_first_run()
 
+    @property
+    def pages(self) -> dict[str, QWidget]:
+        """Backward-compatible accessor. Returns {display_name: widget} view."""
+        if self._pages_cache is None:
+            self._pages_cache = {
+                entry.display_name: entry.page_widget
+                for entry in self._sidebar_index.values()
+            }
+        return self._pages_cache
+
+    @pages.setter
+    def pages(self, value: dict) -> None:
+        """Backward-compatible setter. Accepts a plain dict (e.g. in tests) and stores it as the cache."""
+        # Always (re)initialize real dicts — avoids _Dummy leaking in from test stubs
+        if not isinstance(getattr(self, "_sidebar_index", None), dict):
+            self._sidebar_index = {}
+        if not isinstance(getattr(self, "_category_items", None), dict):
+            self._category_items = {}
+        self._pages_cache = value
+
     def _build_sidebar_from_registry(self, context: dict) -> None:
         """Source all tabs from PluginRegistry. Replaces 26 hardcoded add_page() calls."""
         from core.plugins.compat import CompatibilityDetector
@@ -316,15 +387,95 @@ class MainWindow(QMainWindow):
 
         registry = PluginRegistry.instance()
 
+        # Experience level filtering
+        from utils.experience_level import ExperienceLevelManager
+        from utils.favorites import FavoritesManager
+
+        level = ExperienceLevelManager.get_level()
+        favorites = FavoritesManager.get_favorites()
+
         for plugin in registry:
             meta = plugin.metadata()
+            if not ExperienceLevelManager.is_tab_visible(meta.id, level, favorites):
+                continue
             compat = plugin.check_compat(detector)
             lazy = self._wrap_in_lazy(plugin)
             self._add_plugin_page(meta, lazy, compat)
 
+        # Validate experience level tab lists against registry
+        declared_ids = ExperienceLevelManager.get_all_declared_tab_ids()
+        registered_ids = set(self._sidebar_index.keys())
+        orphaned = declared_ids - registered_ids
+        for tab_id in sorted(orphaned):
+            logger.warning("Experience level references unknown tab: %s", tab_id)
+        advanced_only = registered_ids - declared_ids
+        if advanced_only:
+            logger.info("Tabs only visible to ADVANCED users: %s", sorted(advanced_only))
+
     def _wrap_in_lazy(self, plugin: PluginInterface) -> LazyWidget:
         """Wrap plugin.create_widget() in LazyWidget for deferred instantiation."""
         return LazyWidget(plugin.create_widget)
+
+    def _find_or_create_category(self, category: str) -> QTreeWidgetItem:
+        """Find or create a category tree item, using cache for O(1) lookup."""
+        if category in self._category_items:
+            return self._category_items[category]
+
+        category_item = QTreeWidgetItem(self.sidebar)
+        category_item.setText(0, category)
+        category_item.setData(0, _ROLE_DESC, category)
+        category_item.setExpanded(True)
+        self._set_tree_item_icon(category_item, CATEGORY_ICONS.get(category, ""))
+        self._category_items[category] = category_item
+        return category_item
+
+    def _create_tab_item(
+        self,
+        category_item: QTreeWidgetItem,
+        name: str,
+        icon: str,
+        badge: str = "",
+        description: str = "",
+        disabled: bool = False,
+        disabled_reason: str = "",
+    ) -> QTreeWidgetItem:
+        """Create a sidebar tree item for a tab."""
+        badge_suffix = ""
+        if badge == "recommended":
+            badge_suffix = "  ★"
+        elif badge == "advanced":
+            badge_suffix = "  ⚙"
+
+        item = QTreeWidgetItem(category_item)
+        item.setText(0, f"{name}{badge_suffix}")
+        item.setData(0, _ROLE_NAME, name)
+        self._set_tree_item_icon(item, icon)
+
+        if disabled:
+            item.setDisabled(True)
+            tooltip = disabled_reason if disabled_reason else f"{name} is not available on this system."
+            item.setToolTip(0, tooltip)
+        else:
+            item.setData(0, _ROLE_DESC, description)
+            item.setData(0, _ROLE_BADGE, badge)
+            if description:
+                item.setToolTip(0, description)
+
+        return item
+
+    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry", scroll_widget: "QWidget | None" = None) -> None:
+        """Register a tab in the sidebar index and content area.
+
+        Args:
+            plugin_id: Canonical plugin identifier (key in _sidebar_index).
+            entry: SidebarEntry holding the original (unwrapped) page widget.
+            scroll_widget: Wrapped scroll-area widget to add to the content stack.
+                           When None, entry.page_widget is added directly.
+        """
+        self._sidebar_index[plugin_id] = entry
+        self._pages_cache = None  # invalidate backward-compat cache
+        target = scroll_widget if scroll_widget is not None else entry.page_widget
+        self.content_area.addWidget(target)
 
     def _add_plugin_page(
         self,
@@ -333,16 +484,24 @@ class MainWindow(QMainWindow):
         compat: CompatStatus,
     ) -> None:
         """Register a plugin page in the sidebar and content area."""
-        self.add_page(
-            name=meta.name,
-            icon=meta.icon,
-            widget=widget,
-            category=meta.category,
-            description=meta.description,
-            badge=meta.badge,
-            disabled=not compat.compatible,
-            disabled_reason=compat.reason,
+        category_item = self._find_or_create_category(meta.category)
+        item = self._create_tab_item(
+            category_item, meta.name, meta.icon, meta.badge,
+            meta.description, disabled=not compat.compatible, disabled_reason=compat.reason,
         )
+        if not compat.compatible:
+            page_widget = self._wrap_page_widget(DisabledPluginPage(meta, compat.reason))
+        else:
+            page_widget = self._wrap_page_widget(widget)
+        item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
+        entry = SidebarEntry(
+            plugin_id=meta.id,
+            display_name=meta.name,
+            tree_item=item,
+            page_widget=widget,
+            metadata=meta,
+        )
+        self._register_in_index(meta.id, entry, scroll_widget=page_widget)
 
     def _start_pulse_listener(self):
         """Initialize and start the Pulse event listener."""
@@ -360,41 +519,25 @@ class MainWindow(QMainWindow):
         if not favorites:
             return
 
-        # Create Favorites category at position 0
         fav_category = QTreeWidgetItem()
         fav_category.setText(0, "Favorites")
         self._set_tree_item_icon(fav_category, "status-ok")
         fav_category.setExpanded(True)
         self.sidebar.insertTopLevelItem(0, fav_category)
 
-        # Find matching page widgets and duplicate entries under Favorites
         for fav_id in favorites:
-            for name, widget in self.pages.items():
-                # Match by tab name (case-insensitive)
-                if name.lower().replace(" ", "_") == fav_id or name.lower() == fav_id:
-                    item = QTreeWidgetItem(fav_category)
-                    item.setText(0, name)
-                    item.setData(0, _ROLE_DESC, f"Pinned: {name}")
-                    item.setData(0, _ROLE_NAME, name)
+            entry = self._sidebar_index.get(fav_id)
+            if not entry:
+                logger.warning("Stale favorite ignored: %s", fav_id)
+                continue
 
-                    # Find the original widget in the content area
-                    for i in range(self.sidebar.topLevelItemCount()):
-                        cat = self.sidebar.topLevelItem(i)
-                        if cat == fav_category:
-                            continue
-                        for j in range(cat.childCount()):
-                            child = cat.child(j)
-                            if name in child.text(0) and child.data(
-                                0, Qt.ItemDataRole.UserRole
-                            ):
-                                item.setData(
-                                    0,
-                                    Qt.ItemDataRole.UserRole,
-                                    child.data(0, Qt.ItemDataRole.UserRole),
-                                )
-                                self._copy_tree_item_icon(child, item)
-                                break
-                    break
+            item = QTreeWidgetItem(fav_category)
+            item.setText(0, entry.display_name)
+            item.setData(0, _ROLE_DESC, f"Pinned: {entry.display_name}")
+            item.setData(0, _ROLE_NAME, entry.display_name)
+            item.setData(0, Qt.ItemDataRole.UserRole, entry.tree_item.data(0, Qt.ItemDataRole.UserRole))
+            self._copy_tree_item_icon(entry.tree_item, item)
+
         self._refresh_sidebar_icon_tints()
 
     def _sidebar_context_menu(self, pos):
@@ -434,6 +577,23 @@ class MainWindow(QMainWindow):
         self._build_favorites_section()
         self._refresh_sidebar_icon_tints()
 
+    def _rebuild_sidebar_for_experience_level(self):
+        """Rebuild sidebar when experience level changes."""
+        self.sidebar.clear()
+        self._sidebar_index.clear()
+        self._category_items.clear()
+        self._pages_cache = None
+        while self.content_area.count():
+            w = self.content_area.widget(0)
+            self.content_area.removeWidget(w)
+        context = {
+            "main_window": self,
+            "config_manager": ConfigManager,
+        }
+        self._build_sidebar_from_registry(context)
+        self._build_favorites_section()
+        self._refresh_sidebar_icon_tints()
+
     def add_page(
         self,
         name: str,
@@ -445,67 +605,27 @@ class MainWindow(QMainWindow):
         disabled: bool = False,
         disabled_reason: str = "",
     ) -> None:
-        cat_label = category
+        category_item = self._find_or_create_category(category)
+        item = self._create_tab_item(category_item, name, icon, badge, description, disabled, disabled_reason)
 
-        # Find or create category item
-        category_item = None
-        for i in range(self.sidebar.topLevelItemCount()):
-            item = self.sidebar.topLevelItem(i)
-            if item.text(0) == cat_label or item.data(0, _ROLE_DESC) == category:
-                category_item = item
-                break
-
-        if not category_item:
-            category_item = QTreeWidgetItem(self.sidebar)
-            category_item.setText(0, cat_label)
-            # Store raw category name
-            category_item.setData(0, _ROLE_DESC, category)
-            category_item.setExpanded(True)
-            self._set_tree_item_icon(category_item, CATEGORY_ICONS.get(category, ""))
-
-        # Badge suffix
-        badge_suffix = ""
-        if badge == "recommended":
-            badge_suffix = "  ★"
-        elif badge == "advanced":
-            badge_suffix = "  ⚙"
-
-        item = QTreeWidgetItem(category_item)
-        item.setText(0, f"{name}{badge_suffix}")
-        item.setData(0, _ROLE_NAME, name)
-        self._set_tree_item_icon(item, icon)
-
-        # Disabled plugin: show placeholder page and gray out sidebar item
         if disabled:
             placeholder_meta = PluginMetadata(
-                id=name.lower().replace(" ", "_"),
-                name=name,
-                description=description,
-                category=category,
-                icon=icon,
-                badge=badge,
+                id=name.lower().replace(" ", "_"), name=name, description=description,
+                category=category, icon=icon, badge=badge,
             )
-            page_widget = self._wrap_page_widget(
-                DisabledPluginPage(placeholder_meta, disabled_reason)
-            )
-            item.setDisabled(True)
-            tooltip = (
-                disabled_reason
-                if disabled_reason
-                else f"{name} is not available on this system."
-            )
-            item.setToolTip(0, tooltip)
+            page_widget = self._wrap_page_widget(DisabledPluginPage(placeholder_meta, disabled_reason))
         else:
             page_widget = self._wrap_page_widget(widget)
-            item.setData(0, _ROLE_DESC, description)
-            item.setData(0, _ROLE_BADGE, badge)
-            if description:
-                item.setToolTip(0, description)
 
-        # Store widget reference
         item.setData(0, Qt.ItemDataRole.UserRole, page_widget)
-        self.content_area.addWidget(page_widget)
-        self.pages[name] = widget
+
+        plugin_id = name.lower().replace(" ", "_")
+        meta = PluginMetadata(id=plugin_id, name=name, description=description, category=category, icon=icon, badge=badge)
+        entry = SidebarEntry(
+            plugin_id=plugin_id, display_name=name, tree_item=item,
+            page_widget=widget, metadata=meta,
+        )
+        self._register_in_index(plugin_id, entry, scroll_widget=page_widget)
 
     def _wrap_page_widget(self, widget: QWidget) -> QScrollArea:
         """
@@ -672,16 +792,24 @@ class MainWindow(QMainWindow):
         self._status_label.style().polish(self._status_label)
 
     def switch_to_tab(self, name):
-        """Helper for Dashboard and Command Palette to switch tabs."""
-        # Search all items
-        iterator = QTreeWidgetItemIterator(self.sidebar)
-        while iterator.value():
-            item = iterator.value()
-            # Check if it matches and is a page (has widget data)
-            if name in item.text(0) and item.data(0, Qt.ItemDataRole.UserRole):
-                self.sidebar.setCurrentItem(item)
+        """Switch to a tab by plugin ID (primary) or display name (fallback)."""
+        entry = self._sidebar_index.get(name)
+        if entry:
+            self.sidebar.setCurrentItem(entry.tree_item)
+            return
+
+        # Fallback: search by display name
+        for entry in self._sidebar_index.values():
+            if name in entry.display_name:
+                logger.debug(
+                    "switch_to_tab: matched by display name '%s', prefer plugin ID '%s'",
+                    name,
+                    entry.plugin_id,
+                )
+                self.sidebar.setCurrentItem(entry.tree_item)
                 return
-            iterator += 1
+
+        logger.debug("switch_to_tab: no match for '%s'", name)
 
     def _setup_command_palette_shortcut(self):
         """Register Ctrl+K shortcut for the command palette."""
@@ -944,12 +1072,12 @@ class MainWindow(QMainWindow):
 
             update_info = UpdateChecker.check_for_updates(timeout=5, use_cache=True)
             if update_info and update_info.is_newer:
-                self._set_tab_status("Maintenance", "warning", "Updates available")
+                self._set_tab_status("maintenance", "warning", "Updates available")
             else:
-                self._set_tab_status("Maintenance", "ok", "Up to date")
+                self._set_tab_status("maintenance", "ok", "Up to date")
         except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check for updates: %s", e)
-            self._set_tab_status("Maintenance", "", "")
+            self._set_tab_status("maintenance", "", "")
 
         try:
             # Storage: check disk space
@@ -959,43 +1087,33 @@ class MainWindow(QMainWindow):
             if usage and hasattr(usage, "percent_used"):
                 if usage.percent_used >= 90:
                     self._set_tab_status(
-                        "Storage", "error", f"Disk {usage.percent_used:.0f}% full"
+                        "storage", "error", f"Disk {usage.percent_used:.0f}% full"
                     )
                 elif usage.percent_used >= 75:
                     self._set_tab_status(
-                        "Storage", "warning", f"Disk {usage.percent_used:.0f}% used"
+                        "storage", "warning", f"Disk {usage.percent_used:.0f}% used"
                     )
                 else:
-                    self._set_tab_status("Storage", "ok", "Healthy")
+                    self._set_tab_status("storage", "ok", "Healthy")
         except (RuntimeError, OSError, ValueError) as e:
             logger.debug("Failed to check disk space: %s", e)
-            self._set_tab_status("Storage", "", "")
+            self._set_tab_status("storage", "", "")
 
-    def _set_tab_status(self, tab_name: str, status: str, tooltip: str = ""):
-        """Set a colored status indicator on a sidebar tab item."""
-        markers = {"ok": " [OK]", "warning": " [WARN]", "error": " [ERR]"}
-        marker = markers.get(status, "")
+    def _set_tab_status(self, tab_id: str, status: str, tooltip: str = ""):
+        """Set a colored status indicator on a sidebar tab by plugin ID. O(1) lookup."""
+        entry = self._sidebar_index.get(tab_id)
+        if not entry:
+            logger.debug("_set_tab_status: unknown tab_id %s", tab_id)
+            return
 
-        iterator = QTreeWidgetItemIterator(self.sidebar)
-        while iterator.value():
-            item = iterator.value()
-            if item is None:
-                break
-            if item.data(0, Qt.ItemDataRole.UserRole) and tab_name in item.text(0):
-                text = item.text(0)
-                for suffix in markers.values():
-                    text = text.replace(suffix, "")
-                if marker:
-                    text = f"{text}{marker}"
-                item.setText(0, text)
-                item.setData(0, _ROLE_STATUS, status)
-                if tooltip:
-                    existing = item.data(0, _ROLE_DESC) or ""
-                    item.setToolTip(
-                        0, f"{existing}\n[{tooltip}]" if existing else tooltip
-                    )
-                break
-            iterator += 1
+        entry.status = status
+        entry.tree_item.setData(0, _ROLE_STATUS, status)
+
+        if tooltip:
+            desc = entry.metadata.description or ""
+            entry.tree_item.setToolTip(
+                0, f"{desc}\n[{tooltip}]" if desc else tooltip
+            )
 
     def _setup_quick_actions(self):
         """Register Ctrl+Shift+K shortcut for Quick Actions bar."""
@@ -1053,6 +1171,23 @@ class MainWindow(QMainWindow):
                 logger.debug("First-run wizard module not available", exc_info=True)
         else:
             self.apply_experience_level()
+
+        # Launch guided tour if not yet completed (v47.0)
+        try:
+            from utils.guided_tour import GuidedTourManager
+            if GuidedTourManager.needs_tour():
+                from ui.tour_overlay import TourOverlay
+                self._tour_overlay = TourOverlay(self)
+                self._tour_overlay.tour_completed.connect(
+                    lambda: self.show_toast(
+                        self.tr("Welcome"),
+                        self.tr("Tour complete! Explore at your own pace."),
+                        "general",
+                    )
+                )
+                QTimer.singleShot(500, self._tour_overlay.start)
+        except (ImportError, RuntimeError) as e:
+            logger.debug("Guided tour not available: %s", e)
 
     def setup_tray(self):
         from PyQt6.QtGui import QAction, QIcon
@@ -1132,7 +1267,8 @@ class MainWindow(QMainWindow):
             event.ignore()
         else:
             # Clean up page resources (timers, schedulers)
-            for page in self.pages.values():
+            for entry in self._sidebar_index.values():
+                page = entry.page_widget
                 if hasattr(page, "cleanup"):
                     try:
                         page.cleanup()

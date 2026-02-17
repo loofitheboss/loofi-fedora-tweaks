@@ -19,8 +19,9 @@ from version import __version__ as APP_VERSION
 
 log = logging.getLogger(__name__)
 
-# Ordered list of (module_path, class_name) for all 26 built-in tabs.
-# Order here determines initial registration order; PluginMetadata.order refines within category.
+# NOTE: List order below does NOT affect sidebar order.
+# Final sidebar order is determined by (CATEGORY_ORDER rank, PluginMetadata.order).
+# See core/plugins/registry.py for CATEGORY_ORDER.
 _BUILTIN_PLUGINS: list[tuple[str, str]] = [
     ("ui.dashboard_tab", "DashboardTab"),
     ("ui.agents_tab", "AgentsTab"),

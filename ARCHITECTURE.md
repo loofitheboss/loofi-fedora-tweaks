@@ -129,6 +129,21 @@ completions/                  # Shell completions (bash, zsh)
 
 Consolidated tabs use `QTabWidget` for sub-navigation within the tab.
 
+### Sidebar Index (v48.0)
+
+The sidebar uses a `SidebarIndex` (`dict[str, SidebarEntry]`) keyed by `PluginMetadata.id` for O(1) tab lookups. `SidebarEntry` holds the tree item, page widget, metadata, and status.
+
+Key methods:
+
+- `_find_or_create_category(category)` — cached category item lookup
+- `_create_tab_item(...)` — creates tree item with badge and icon
+- `_register_in_index(plugin_id, entry)` — populates index and content area
+- `add_page(...)` — public API orchestrator (backward-compatible)
+- `switch_to_tab(name)` — O(1) by plugin ID, fallback by display name
+- `_set_tab_status(tab_id, status)` — O(1) status update via data role
+
+Status rendering uses `SidebarItemDelegate` with colored dots instead of text markers.
+
 ## Critical Patterns
 
 ### 1. PrivilegedCommand (ALWAYS unpack)
