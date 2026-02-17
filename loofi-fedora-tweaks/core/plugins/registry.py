@@ -5,26 +5,26 @@ from core.plugins.interface import PluginInterface
 # Explicit category ordering — controls sidebar top-to-bottom sequence.
 # Lower value = higher in sidebar.  Categories not listed sort after all listed ones.
 CATEGORY_ORDER: dict[str, int] = {
-    "Overview": 0,
-    "Manage": 1,
+    "System": 0,
+    "Packages": 1,
     "Hardware": 2,
-    "Network & Security": 3,
-    "Personalize": 4,
-    "Developer": 5,
-    "Automation": 6,
-    "Health & Logs": 7,
+    "Network": 3,
+    "Security": 4,
+    "Appearance": 5,
+    "Tools": 6,
+    "Maintenance": 7,
 }
 
 # Category icons — prepended to category headers in the sidebar tree.
 CATEGORY_ICONS: dict[str, str] = {
-    "Overview": "📊",
-    "Manage": "🔧",
-    "Hardware": "🖥️",
-    "Network & Security": "🌐",
-    "Personalize": "🎨",
-    "Developer": "🛠️",
-    "Automation": "🤖",
-    "Health & Logs": "📋",
+    "System": "🖥️",
+    "Packages": "📦",
+    "Hardware": "⚡",
+    "Network": "🌐",
+    "Security": "🛡️",
+    "Appearance": "🎨",
+    "Tools": "🛠️",
+    "Maintenance": "📋",
 }
 
 

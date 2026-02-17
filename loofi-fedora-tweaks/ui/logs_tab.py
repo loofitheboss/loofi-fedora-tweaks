@@ -38,7 +38,7 @@ class LogsTab(BaseTab):
         id="logs",
         name="Logs",
         description="Smart log viewer with pattern detection, error summary, and log export.",
-        category="Health & Logs",
+        category="Maintenance",
         icon="📋",
         badge="advanced",
         order=20,

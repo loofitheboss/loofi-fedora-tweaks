@@ -142,10 +142,10 @@ class AutomationTab(BaseTab):
         id="automation",
         name="Automation",
         description="Schedule tasks and replicate system configurations automatically.",
-        category="Automation",
+        category="Maintenance",
         icon="⏰",
         badge="",
-        order=20,
+        order=50,
     )
 
     def metadata(self) -> PluginMetadata:

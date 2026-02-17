@@ -26,7 +26,7 @@ class SystemInfoTab(QWidget, PluginInterface):
         id="system_info",
         name="System Info",
         description="Detailed system information including hardware specs, kernel, and uptime.",
-        category="Overview",
+        category="System",
         icon="ℹ️",
         badge="recommended",
         order=20,

@@ -81,7 +81,7 @@ class CommunityTab(QWidget, PluginInterface):
         id="community",
         name="Community",
         description="Browse and apply community presets and configurations from the marketplace.",
-        category="Automation",
+        category="System",
         icon="🌍",
         badge="",
         order=40,

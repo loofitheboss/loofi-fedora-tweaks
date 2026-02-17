@@ -33,7 +33,7 @@ class SnapshotTab(BaseTab):
         id="snapshots",
         name="Snapshots",
         description="Unified snapshot management across Timeshift, Snapper, and Btrfs backends.",
-        category="Manage",
+        category="Packages",
         icon="📸",
         badge="advanced",
         order=30,

@@ -43,7 +43,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         id="health",
         name="Health",
         description="System health metrics timeline for tracking CPU, RAM, disk, and thermal trends.",
-        category="Health & Logs",
+        category="Maintenance",
         icon="📈",
         badge="",
         order=10,

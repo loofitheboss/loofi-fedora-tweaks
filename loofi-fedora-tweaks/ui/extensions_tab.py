@@ -36,10 +36,10 @@ class ExtensionsTab(BaseTab):
         id="extensions",
         name="Extensions",
         description="Manage GNOME Shell and KDE Plasma desktop extensions.",
-        category="Personalize",
+        category="Appearance",
         icon="🧩",
         badge="new",
-        order=15,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:

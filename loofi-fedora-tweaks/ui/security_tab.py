@@ -51,10 +51,10 @@ class SecurityTab(QWidget, PluginInterface):
         id="security",
         name="Security & Privacy",
         description="Security hardening including firewall, USB guard, port auditing, and telemetry removal.",
-        category="Network & Security",
+        category="Security",
         icon="🛡️",
         badge="recommended",
-        order=20,
+        order=10,
     )
 
     def metadata(self) -> PluginMetadata:

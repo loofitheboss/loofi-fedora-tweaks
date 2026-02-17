@@ -48,10 +48,10 @@ class TeleportTab(QWidget, PluginInterface):
         id="teleport",
         name="State Teleport",
         description="Capture and restore workspace state including git repos and environment snapshots.",
-        category="Automation",
+        category="Maintenance",
         icon="📡",
         badge="advanced",
-        order=30,
+        order=60,
     )
 
     def metadata(self) -> PluginMetadata:

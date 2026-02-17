@@ -49,10 +49,10 @@ class AgentsTab(BaseTab):
         id="agents",
         name="Agents",
         description="Manage autonomous system agents for automated monitoring and maintenance.",
-        category="Automation",
+        category="Maintenance",
         icon="🤖",
         badge="",
-        order=10,
+        order=40,
     )
 
     def metadata(self) -> PluginMetadata:

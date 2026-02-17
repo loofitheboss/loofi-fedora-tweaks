@@ -750,9 +750,9 @@ class TestDevelopmentTabInit(unittest.TestCase):
         self.assertEqual(meta.name, "Development")
 
     def test_metadata_category(self):
-        """Tab metadata category is Developer."""
+        """Tab metadata category is Tools."""
         tab = _make_tab()
-        self.assertEqual(tab._METADATA.category, "Developer")
+        self.assertEqual(tab._METADATA.category, "Tools")
 
     def test_metadata_description(self):
         """Tab metadata has a description."""

@@ -45,7 +45,7 @@ class DesktopTab(BaseTab):
         id="desktop",
         name="Desktop",
         description="Window manager configuration, tiling setup, theming, and dotfile synchronization.",
-        category="Personalize",
+        category="Appearance",
         icon="🎨",
         badge="",
         order=10,

@@ -933,10 +933,10 @@ class DiagnosticsTab(BaseTab):
         id="diagnostics",
         name="Diagnostics",
         description="System diagnostics including service health, boot analysis, and journal review.",
-        category="Developer",
+        category="Maintenance",
         icon="🔭",
         badge="",
-        order=40,
+        order=30,
     )
 
     def metadata(self) -> PluginMetadata:

@@ -802,7 +802,7 @@ class MaintenanceTab(BaseTab):
         id="maintenance",
         name="Maintenance",
         description="System updates, cache cleanup, and overlay management for Fedora.",
-        category="Manage",
+        category="Packages",
         icon="🔧",
         badge="recommended",
         order=20,

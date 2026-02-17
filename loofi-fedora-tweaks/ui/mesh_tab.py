@@ -30,10 +30,10 @@ class MeshTab(QWidget, PluginInterface):
         id="mesh",
         name="Loofi Link",
         description="Mesh network device discovery, clipboard sync, and file transfer between peers.",
-        category="Network & Security",
+        category="Network",
         icon="🔗",
         badge="advanced",
-        order=30,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:

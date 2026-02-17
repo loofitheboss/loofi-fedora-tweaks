@@ -4,6 +4,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [46.0.0] - 2026-02-17 "Navigator"
+
+### Navigation & UX
+
+- Reorganized sidebar taxonomy into clear technical categories: `System`, `Packages`, `Hardware`, `Network`, `Security`, `Appearance`, `Tools`, and `Maintenance`.
+- Realigned tab metadata categories/orders across the UI so all tabs map to defined registry categories with no orphan category names.
+- Updated command palette category labels to match the new sidebar taxonomy for consistent discoverability.
+
+### Documentation
+
+- Updated `ARCHITECTURE.md` with the current sidebar category model.
+- Rewrote `wiki/GUI-Tabs-Reference.md` to reflect the new category organization and tab placement.
+- Added release notes scaffold `docs/releases/RELEASE-NOTES-v46.0.0.md`.
+
+### Testing
+
+- Updated category assertions in metadata-focused tab tests:
+  - `tests/test_backup_tab.py`
+  - `tests/test_community_tab.py`
+  - `tests/test_development_tab.py`
+  - `tests/test_diagnostics_tab.py`
+  - `tests/test_maintenance_tab.py`
+  - `tests/test_monitor_tab.py`
+  - `tests/test_network_tab.py`
+- Validation run: **5901 passed**, **35 skipped**, **0 failed**.
+
 ## [45.0.0] - 2026-02-17 "Housekeeping"
 
 ### Stability & Compliance
@@ -23,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 - Missing-tool flows now render package-manager-aware install hints using `SystemManager.get_package_manager()`.
 - Guidance text is now safer and avoids destructive lockfile deletion suggestions.
+- Reorganized sidebar navigation into clearer technical categories (`System`, `Packages`, `Hardware`, `Network`, `Security`, `Appearance`, `Tools`, `Maintenance`) with aligned tab metadata and command palette grouping.
 
 ### Hardening
 

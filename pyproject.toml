@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loofi_fedora_tweaks"
-version = "45.0.0"
+version = "46.0.0"
 description = "A comprehensive Fedora Linux system management tool with GUI, CLI, and daemon modes"
 readme = "README.md"
 requires-python = ">=3.12"

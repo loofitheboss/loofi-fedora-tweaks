@@ -41,10 +41,10 @@ class BackupTab(BaseTab):
         id="backup",
         name="Backup",
         description="Create, manage, and restore system snapshots via Timeshift or Snapper.",
-        category="Maintain",
+        category="Security",
         icon="💾",
         badge="new",
-        order=15,
+        order=20,
     )
 
     def metadata(self) -> PluginMetadata:

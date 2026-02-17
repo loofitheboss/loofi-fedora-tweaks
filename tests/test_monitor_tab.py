@@ -327,8 +327,8 @@ class TestMonitorTabMetadata(unittest.TestCase):
         self.assertEqual(self.tab.metadata().name, "System Monitor")
 
     def test_metadata_category(self):
-        """metadata().category should be 'Overview'."""
-        self.assertEqual(self.tab.metadata().category, "Overview")
+        """metadata().category should be 'System'."""
+        self.assertEqual(self.tab.metadata().category, "System")
 
     def test_metadata_icon(self):
         """metadata().icon should be the bar-chart emoji."""

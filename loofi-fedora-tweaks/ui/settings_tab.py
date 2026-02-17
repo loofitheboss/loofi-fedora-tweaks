@@ -27,10 +27,10 @@ class SettingsTab(QWidget, PluginInterface):
         id="settings",
         name="Settings",
         description="Configure appearance, behavior, and advanced application options.",
-        category="Personalize",
+        category="Appearance",
         icon="⚙️",
         badge="",
-        order=30,
+        order=100,
     )
 
     def __init__(self):

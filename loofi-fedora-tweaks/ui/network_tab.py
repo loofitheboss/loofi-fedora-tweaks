@@ -45,7 +45,7 @@ class NetworkTab(BaseTab):
         id="network",
         name="Network",
         description="Comprehensive network management including connections, DNS, privacy, and monitoring.",
-        category="Network & Security",
+        category="Network",
         icon="🌐",
         badge="recommended",
         order=10,

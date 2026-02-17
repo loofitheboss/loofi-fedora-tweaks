@@ -1684,8 +1684,8 @@ class TestDiagnosticsTabMetadata(unittest.TestCase):
         self.assertIn('name="Diagnostics"', self.source)
 
     def test_metadata_category(self):
-        """Metadata category is 'Developer'."""
-        self.assertIn('category="Developer"', self.source)
+        """Metadata category is 'Maintenance'."""
+        self.assertIn('category="Maintenance"', self.source)
 
     def test_create_widget_returns_self(self):
         """create_widget returns self."""

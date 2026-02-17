@@ -471,7 +471,7 @@ class SoftwareTab(BaseTab):
         id="software",
         name="Software",
         description="Application installer and repository management for Fedora packages.",
-        category="Manage",
+        category="Packages",
         icon="📦",
         badge="recommended",
         order=10,

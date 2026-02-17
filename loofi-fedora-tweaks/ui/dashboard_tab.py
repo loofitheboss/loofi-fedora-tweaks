@@ -221,7 +221,7 @@ class DashboardTab(QWidget, PluginInterface):
         id="dashboard",
         name="Home",
         description="Live system overview with graphs, metrics, and quick actions.",
-        category="Overview",
+        category="System",
         icon="🏠",
         badge="recommended",
         order=10,

@@ -30,7 +30,7 @@ class StorageTab(BaseTab):
         id="storage",
         name="Storage",
         description="Disk information, SMART health monitoring, and filesystem management.",
-        category="Manage",
+        category="Hardware",
         icon="💾",
         badge="",
         order=40,

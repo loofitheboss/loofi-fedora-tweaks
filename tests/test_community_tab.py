@@ -523,10 +523,10 @@ class TestCommunityTabMetadata(unittest.TestCase):
         self.assertEqual(meta.name, "Community")
 
     def test_metadata_has_correct_category(self):
-        """metadata() returns metadata with category 'Automation'."""
+        """metadata() returns metadata with category 'System'."""
         tab = _make_tab()
         meta = tab.metadata()
-        self.assertEqual(meta.category, "Automation")
+        self.assertEqual(meta.category, "System")
 
     def test_metadata_has_order(self):
         """metadata() returns metadata with numeric order."""

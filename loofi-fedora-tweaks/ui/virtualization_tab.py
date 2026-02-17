@@ -56,7 +56,7 @@ class VirtualizationTab(QWidget, PluginInterface):
         id="virtualization",
         name="Virtualization",
         description="VM lifecycle management, GPU passthrough setup, and disposable virtual machines.",
-        category="Developer",
+        category="Tools",
         icon="🖥️",
         badge="advanced",
         order=20,

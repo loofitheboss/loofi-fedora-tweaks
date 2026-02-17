@@ -282,8 +282,8 @@ class TestMaintenanceTabMetadata(unittest.TestCase):
         self.assertEqual(self.tab.metadata().name, "Maintenance")
 
     def test_metadata_category(self):
-        """metadata().category is 'Manage'."""
-        self.assertEqual(self.tab.metadata().category, "Manage")
+        """metadata().category is 'Packages'."""
+        self.assertEqual(self.tab.metadata().category, "Packages")
 
     def test_metadata_icon(self):
         """metadata() has an icon set."""

@@ -34,7 +34,8 @@
 | v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
 | v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
 | v44.0 | Review Gate | DONE | Fedora review prerequisite enforcement for workflow and CI pipelines |
-| v45.0 | Housekeeping | ACTIVE | Stability fixes, safe guidance cleanup, reliability UX consistency |
+| v45.0 | Housekeeping | DONE | Stability fixes, safe guidance cleanup, reliability UX consistency |
+| v46.0 | Navigator | ACTIVE | Category clarity, navigation consistency, release packaging alignment |
 
 ---
 
@@ -71,7 +72,28 @@ before package and release execution paths. No product feature expansion.
 
 ---
 
-## [ACTIVE] v45.0 "Housekeeping" — Stability and Reliability UX
+## [ACTIVE] v46.0 "Navigator" — Navigation Clarity & Release Alignment
+
+### Scope
+
+Technical category reorganization and navigation consistency release that improves
+discoverability and sidebar clarity while keeping runtime behavior unchanged.
+
+### Planned Deliverables
+
+- [x] Reorganized tab categories into a clear technical model (`System`, `Packages`, `Hardware`, `Network`, `Security`, `Appearance`, `Tools`, `Maintenance`)
+- [x] Updated plugin metadata categories/orders across tab modules
+- [x] Aligned command palette category labels to the new taxonomy
+- [x] Updated category-related tests and validated full test/lint pass
+- [x] Align v46.0.0 version and release artifacts (`version.py`, `pyproject.toml`, `.spec`, changelog, release notes)
+
+### Dependencies
+
+- v45.0 Housekeeping (stability baseline)
+
+---
+
+## [DONE] v45.0 "Housekeeping" — Stability and Reliability UX
 
 ### Scope
 

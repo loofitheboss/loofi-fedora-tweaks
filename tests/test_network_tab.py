@@ -98,7 +98,7 @@ class TestNetworkTabMetadata(unittest.TestCase):
     def test_metadata_category(self, mock_ss):
         """metadata() returns correct category."""
         tab = _create_tab()
-        self.assertEqual(tab.metadata().category, "Network & Security")
+        self.assertEqual(tab.metadata().category, "Network")
 
     @patch("PyQt6.QtCore.QTimer.singleShot")
     def test_metadata_badge(self, mock_ss):

@@ -932,7 +932,7 @@ class MonitorTab(QWidget, PluginInterface):
         id="monitor",
         name="System Monitor",
         description="Live CPU, memory, and process monitoring with performance graphs.",
-        category="Overview",
+        category="System",
         icon="📊",
         badge="recommended",
         order=30,

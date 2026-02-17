@@ -30,10 +30,10 @@ class ProfilesTab(QWidget, PluginInterface):
         id="profiles",
         name="Profiles",
         description="System profile quick-switch for applying and managing configuration profiles.",
-        category="Personalize",
+        category="Appearance",
         icon="👤",
         badge="",
-        order=20,
+        order=30,
     )
 
     def metadata(self) -> PluginMetadata:

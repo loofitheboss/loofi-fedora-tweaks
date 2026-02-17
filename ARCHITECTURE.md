@@ -76,6 +76,19 @@ completions/                  # Shell completions (bash, zsh)
 
 ## Tab Layout (28 Feature Tabs)
 
+### Sidebar Categories
+
+| Order | Category | Icon |
+| --- | --- | --- |
+| 1 | System | 🖥️ |
+| 2 | Packages | 📦 |
+| 3 | Hardware | ⚡ |
+| 4 | Network | 🌐 |
+| 5 | Security | 🛡️ |
+| 6 | Appearance | 🎨 |
+| 7 | Tools | 🛠️ |
+| 8 | Maintenance | 📋 |
+
 | # | Tab | File | Consolidates |
 | --- | ----- | ------ | ------------- |
 | 1 | Home | `dashboard_tab.py` | Dashboard |

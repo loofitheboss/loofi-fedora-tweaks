@@ -27,7 +27,7 @@ class GamingTab(BaseTab):
         category="Hardware",
         icon="🎮",
         badge="",
-        order=30,
+        order=40,
     )
 
     def metadata(self) -> PluginMetadata:
