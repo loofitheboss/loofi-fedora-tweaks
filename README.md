@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v47.0.0 "Experience"
+# Loofi Fedora Tweaks v48.0.0 "Sidebar Index"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v47.0.0">
-    <img src="https://img.shields.io/badge/Release-v47.0.0-blue?style=for-the-badge&logo=github" alt="Release v47.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v48.0.0">
+    <img src="https://img.shields.io/badge/Release-v48.0.0-blue?style=for-the-badge&logo=github" alt="Release v48.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -36,6 +36,21 @@ It is designed to be practical for both casual users and advanced users:
 - Optional headless web API mode.
 - Privileged actions routed through `pkexec` prompts.
 - Automatic detection of Traditional Fedora (`dnf`) and Atomic Fedora (`rpm-ostree`).
+
+---
+
+## What Is New in v48.0.0?
+
+`v48.0.0 "Sidebar Index"` restructures the sidebar architecture with O(1) ID-based lookups:
+
+- **SidebarEntry Dataclass** — Centralized per-tab state container keyed by `PluginMetadata.id` replacing fragile dict lookups.
+- **Decomposed add_page()** — Split into `_find_or_create_category()`, `_create_tab_item()`, and `_register_in_index()` focused helpers.
+- **Favorites Fix** — O(1) ID-based matching replaces the broken `name.lower().replace()` heuristic. Stale favorites are logged.
+- **Status Dot Rendering** — `SidebarItemDelegate` paints colored dots (green/amber/red) instead of `[OK]`/`[WARN]`/`[ERR]` text markers.
+- **O(1) Navigation** — `switch_to_tab()` and `_set_tab_status()` use direct index lookups instead of tree iteration.
+- **Experience Level Validation** — Build-time warnings for orphaned or advanced-only tab IDs catch sync drift.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v48.0.0.md`](docs/releases/RELEASE-NOTES-v48.0.0.md)
 
 ---
 
