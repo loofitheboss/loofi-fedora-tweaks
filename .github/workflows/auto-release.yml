@@ -586,3 +586,70 @@ jobs:
             ASSETS=$(ls release-assets/ 2>/dev/null | tr '\n' ', ' || echo "none")
             echo "::notice::Published release ${TAG} with artifacts: ${ASSETS}"
           fi
+
+  # Publish to COPR directly after release (avoids GITHUB_TOKEN event limitation
+  # where release:published events from GITHUB_TOKEN don't trigger other workflows)
+  copr_publish:
+    if: |
+      !cancelled() &&
+      needs.release.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+    runs-on: ubuntu-latest
+    container: fedora:43
+    timeout-minutes: 20
+    needs: [validate, release]
+    env:
+      COPR_PROJECT: "loofi-fedora-tweaks"
+      COPR_CHROOTS: "fedora-43-x86_64 fedora-44-x86_64 fedora-45-x86_64"
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y rpm-build python3 curl copr-cli
+
+      - uses: actions/checkout@v4
+
+      - name: Validate spec version matches
+        run: |
+          SPEC_VER=$(grep '^Version:' loofi-fedora-tweaks.spec | awk '{print $2}')
+          CODE_VER="${{ needs.validate.outputs.version }}"
+          if [ "$SPEC_VER" != "$CODE_VER" ]; then
+            echo "::error::Spec version ($SPEC_VER) != code version ($CODE_VER)"
+            exit 1
+          fi
+
+      - name: Build SRPM
+        run: bash scripts/build_srpm.sh
+
+      - name: Configure copr-cli
+        run: |
+          mkdir -p ~/.config
+          cat > ~/.config/copr <<EOF
+          [copr-cli]
+          copr_url = https://copr.fedorainfracloud.org
+          login = ${{ secrets.COPR_LOGIN }}
+          username = ${{ secrets.COPR_USERNAME }}
+          token = ${{ secrets.COPR_TOKEN }}
+          EOF
+          chmod 600 ~/.config/copr
+
+      - name: Submit build to COPR
+        run: |
+          SRPM=$(ls rpmbuild/SRPMS/*.src.rpm | head -1)
+          VER="${{ needs.validate.outputs.version }}"
+          echo "Submitting ${SRPM} (v${VER}) to COPR project ${COPR_PROJECT}"
+          CHROOT_ARGS=""
+          for chroot in ${COPR_CHROOTS}; do
+            CHROOT_ARGS="${CHROOT_ARGS} --chroot ${chroot}"
+          done
+          echo "Target chroots:${CHROOT_ARGS}"
+          # shellcheck disable=SC2086
+          copr-cli build "${COPR_PROJECT}" "${SRPM}" --nowait ${CHROOT_ARGS}
+
+      - name: COPR build summary
+        if: always()
+        run: |
+          VER="${{ needs.validate.outputs.version }}"
+          echo "::notice::COPR build submitted for loofi-fedora-tweaks v${VER}"
+          echo "::notice::Target chroots: ${COPR_CHROOTS}"
+          echo "Track build status at:"
+          echo "  https://copr.fedorainfracloud.org/coprs/${{ secrets.COPR_USERNAME }}/${COPR_PROJECT}/builds/"

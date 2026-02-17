@@ -120,6 +120,26 @@ PYTHONPATH=loofi-fedora-tweaks python3 -c "import main; print('Import OK')" || :
 %{_mandir}/man1/%{name}.1*
 
 %changelog
+* Mon Feb 17 2026 Loofi <loofi@example.com> - 48.0.0-1
+- v48.0.0 "Sidebar Index" — Sidebar restructure with O(1) lookups
+- SidebarEntry dataclass and SidebarIndex for O(1) tab lookups
+- Decomposed add_page() into focused helpers
+- Fixed favorites, status, navigation with ID-based lookups
+- SidebarItemDelegate for colored status dots
+- Experience level sync validation
+
+* Mon Feb 17 2026 Loofi <loofi@example.com> - 47.0.0-1
+- v47.0.0 "Experience" — UX improvements for all skill levels
+- Added experience level system (beginner, intermediate, advanced)
+- Tour overlay for first-time users
+- Contextual tooltips and progressive disclosure
+
+* Mon Feb 17 2026 Loofi <loofi@example.com> - 46.0.0-1
+- v46.0.0 "Navigator" — Navigation and discoverability improvements
+
+* Mon Feb 17 2026 Loofi <loofi@example.com> - 45.0.0-1
+- v45.0.0 "Housekeeping" — Code cleanup and documentation alignment
+
 * Mon Feb 16 2026 Loofi <loofi@example.com> - 44.0.0-1
 - v44.0.0 "Review Gate" — Fedora review workflow enforcement
 - Added scripts/check_fedora_review.py for lightweight fedora-review health gating

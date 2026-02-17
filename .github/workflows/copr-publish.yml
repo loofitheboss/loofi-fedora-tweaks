@@ -1,13 +1,13 @@
 name: Publish to COPR
 
-# Manual-only trigger to prevent unintended COPR publishes.
-# Previously also triggered on release:published, which caused every
-# auto-release to be sent to COPR automatically.
+# Manual trigger for ad-hoc COPR publishes.
+# Automatic COPR publishing is handled by the copr_publish job in auto-release.yml
+# (chained directly after the release job to avoid GITHUB_TOKEN event limitations).
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version without v prefix (e.g. 41.0.0). Leave empty to use version.py."
+        description: "Version without v prefix (e.g. 48.0.0). Leave empty to use version.py."
         required: false
 
 permissions:
