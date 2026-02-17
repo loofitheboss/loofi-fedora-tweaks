@@ -417,11 +417,19 @@ class MainWindow(QMainWindow):
 
         return item
 
-    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry") -> None:
-        """Register a tab in the sidebar index and content area."""
+    def _register_in_index(self, plugin_id: str, entry: "SidebarEntry", scroll_widget: QWidget = None) -> None:
+        """Register a tab in the sidebar index and content area.
+
+        Args:
+            plugin_id: Canonical plugin identifier (key in _sidebar_index).
+            entry: SidebarEntry holding the original (unwrapped) page widget.
+            scroll_widget: Wrapped scroll-area widget to add to the content stack.
+                           When None, entry.page_widget is added directly.
+        """
         self._sidebar_index[plugin_id] = entry
         self._pages_cache = None  # invalidate backward-compat cache
-        self.content_area.addWidget(entry.page_widget)
+        target = scroll_widget if scroll_widget is not None else entry.page_widget
+        self.content_area.addWidget(target)
 
     def _add_plugin_page(
         self,
@@ -447,7 +455,7 @@ class MainWindow(QMainWindow):
             page_widget=widget,
             metadata=meta,
         )
-        self._register_in_index(meta.id, entry)
+        self._register_in_index(meta.id, entry, scroll_widget=page_widget)
 
     def _start_pulse_listener(self):
         """Initialize and start the Pulse event listener."""
@@ -570,7 +578,7 @@ class MainWindow(QMainWindow):
             plugin_id=plugin_id, display_name=name, tree_item=item,
             page_widget=widget, metadata=meta,
         )
-        self._register_in_index(plugin_id, entry)
+        self._register_in_index(plugin_id, entry, scroll_widget=page_widget)
 
     def _wrap_page_widget(self, widget: QWidget) -> QScrollArea:
         """

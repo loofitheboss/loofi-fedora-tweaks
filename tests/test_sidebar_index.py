@@ -59,5 +59,19 @@ class TestSidebarEntry(unittest.TestCase):
         self.assertEqual(entry.status, "ok")
 
 
+class TestAddPageDecomposition(unittest.TestCase):
+    def test_main_window_has_find_or_create_category(self):
+        from ui.main_window import MainWindow
+        self.assertTrue(hasattr(MainWindow, '_find_or_create_category'))
+
+    def test_main_window_has_create_tab_item(self):
+        from ui.main_window import MainWindow
+        self.assertTrue(hasattr(MainWindow, '_create_tab_item'))
+
+    def test_main_window_has_register_in_index(self):
+        from ui.main_window import MainWindow
+        self.assertTrue(hasattr(MainWindow, '_register_in_index'))
+
+
 if __name__ == "__main__":
     unittest.main()

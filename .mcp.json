@@ -2,7 +2,7 @@
   "mcpServers": {
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "args": ["-y", "@upstash/context7-mcp@latest"]
     },
     "fetch": {
       "command": "python3",
@@ -12,18 +12,16 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GH_TOKEN}"
       }
     },
     "loofi-agent-sync": {
       "command": "python3",
-      "args": ["scripts/mcp_agent_sync_server.py"],
-      "cwd": "${workspaceFolder}"
+      "args": ["scripts/mcp_agent_sync_server.py"]
     },
     "loofi-workflow": {
       "command": "python3",
-      "args": ["scripts/mcp_workflow_server.py"],
-      "cwd": "${workspaceFolder}"
+      "args": ["scripts/mcp_workflow_server.py"]
     }
   }
 }
