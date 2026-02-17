@@ -115,6 +115,7 @@ class SnapshotTab(BaseTab):
         )
         self.snap_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.snap_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.snap_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.snap_table)
         self.set_table_empty_state(
             self.snap_table,

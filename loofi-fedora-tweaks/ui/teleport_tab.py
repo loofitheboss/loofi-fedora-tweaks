@@ -189,6 +189,7 @@ class TeleportTab(QWidget, PluginInterface):
         self.packages_table.setSelectionBehavior(
             QTableWidget.SelectionBehavior.SelectRows
         )
+        self.packages_table.setProperty("maxVisibleRows", 3)
         BaseTab.configure_table(self.packages_table)
         layout.addWidget(self.packages_table)
 

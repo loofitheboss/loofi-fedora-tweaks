@@ -216,6 +216,7 @@ class SecurityTab(QWidget, PluginInterface):
             QHeaderView.ResizeMode.Stretch
         )
         self.port_table.setMaximumHeight(150)
+        self.port_table.setProperty("maxVisibleRows", 3)
         BaseTab.configure_table(self.port_table)
         layout.addWidget(self.port_table)
 

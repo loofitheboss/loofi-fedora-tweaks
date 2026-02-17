@@ -158,6 +158,7 @@ class VirtualizationTab(QWidget, PluginInterface):
             header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.vm_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.vm_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.vm_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.vm_table)
         layout.addWidget(self.vm_table)
 

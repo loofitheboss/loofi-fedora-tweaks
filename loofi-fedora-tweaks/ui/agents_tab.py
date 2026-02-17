@@ -12,10 +12,22 @@ Provides:
 import logging
 import time
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTableWidget, QTableWidgetItem, QHeaderView,
-    QTabWidget, QTextEdit, QLineEdit, QCheckBox, QSpinBox,
-    QMessageBox, QGridLayout,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QTabWidget,
+    QTextEdit,
+    QLineEdit,
+    QCheckBox,
+    QSpinBox,
+    QMessageBox,
+    QGridLayout,
 )
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QFont
@@ -163,17 +175,25 @@ class AgentsTab(BaseTab):
         # Agent table
         self.agent_table = QTableWidget()
         self.agent_table.setColumnCount(8)
-        self.agent_table.setHorizontalHeaderLabels([
-            self.tr("Name"), self.tr("Type"), self.tr("Status"),
-            self.tr("Runs"), self.tr("Last Run"), self.tr("Enabled"),
-            self.tr("Notify"), self.tr("Actions"),
-        ])
+        self.agent_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Name"),
+                self.tr("Type"),
+                self.tr("Status"),
+                self.tr("Runs"),
+                self.tr("Last Run"),
+                self.tr("Enabled"),
+                self.tr("Notify"),
+                self.tr("Actions"),
+            ]
+        )
         header = self.agent_table.horizontalHeader()
         if header is not None:
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
             header.setSectionResizeMode(7, QHeaderView.ResizeMode.Fixed)
         self.agent_table.setColumnWidth(7, 200)
         self.agent_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.agent_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.agent_table)
         layout.addWidget(self.agent_table)
 
@@ -199,15 +219,19 @@ class AgentsTab(BaseTab):
         goal_box = QGroupBox(self.tr("Create Agent from Goal"))
         goal_layout = QVBoxLayout(goal_box)
 
-        goal_layout.addWidget(QLabel(self.tr(
-            "Describe what you want your agent to do, or pick a template below:"
-        )))
+        goal_layout.addWidget(
+            QLabel(
+                self.tr(
+                    "Describe what you want your agent to do, or pick a template below:"
+                )
+            )
+        )
 
         self.goal_input = QLineEdit()
         self.goal_input.setAccessibleName(self.tr("Agent goal input"))
-        self.goal_input.setPlaceholderText(self.tr(
-            "e.g., 'Keep my system healthy' or 'Watch for security threats'"
-        ))
+        self.goal_input.setPlaceholderText(
+            self.tr("e.g., 'Keep my system healthy' or 'Watch for security threats'")
+        )
         goal_layout.addWidget(self.goal_input)
 
         # Template buttons
@@ -277,14 +301,22 @@ class AgentsTab(BaseTab):
 
         self.activity_table = QTableWidget()
         self.activity_table.setColumnCount(5)
-        self.activity_table.setHorizontalHeaderLabels([
-            self.tr("Time"), self.tr("Agent"), self.tr("Action"),
-            self.tr("Result"), self.tr("Message"),
-        ])
+        self.activity_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Time"),
+                self.tr("Agent"),
+                self.tr("Action"),
+                self.tr("Result"),
+                self.tr("Message"),
+            ]
+        )
         header = self.activity_table.horizontalHeader()
         if header is not None:
             header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-        self.activity_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.activity_table.setSelectionBehavior(
+            QTableWidget.SelectionBehavior.SelectRows
+        )
+        self.activity_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.activity_table)
         layout.addWidget(self.activity_table)
 
@@ -303,11 +335,13 @@ class AgentsTab(BaseTab):
 
     def _get_registry(self):
         from utils.agents import AgentRegistry
+
         return AgentRegistry.instance()
 
     def _get_scheduler(self):
         if self._scheduler is None:
             from utils.agent_runner import AgentScheduler
+
             self._scheduler = AgentScheduler()
             self._scheduler.set_result_callback(self._on_agent_result)
         return self._scheduler
@@ -356,7 +390,9 @@ class AgentsTab(BaseTab):
             ts = time.strftime("%H:%M:%S", time.localtime(item["timestamp"]))
             icon = "✅" if item["success"] else "❌"
             lines.append(f"{ts} {icon} [{item['agent_name']}] {item['message']}")
-        self.activity_preview.setPlainText("\n".join(lines) if lines else self.tr("No recent activity"))
+        self.activity_preview.setPlainText(
+            "\n".join(lines) if lines else self.tr("No recent activity")
+        )
 
     def _refresh_agents_table(self):
         registry = self._get_registry()
@@ -380,7 +416,9 @@ class AgentsTab(BaseTab):
 
             last_run = ""
             if state.last_run:
-                last_run = time.strftime("%Y-%m-%d %H:%M", time.localtime(state.last_run))
+                last_run = time.strftime(
+                    "%Y-%m-%d %H:%M", time.localtime(state.last_run)
+                )
             self.agent_table.setItem(row, 4, QTableWidgetItem(last_run))
 
             self.agent_table.setItem(
@@ -398,12 +436,16 @@ class AgentsTab(BaseTab):
             actions_layout = QHBoxLayout(actions_widget)
             actions_layout.setContentsMargins(2, 2, 2, 2)
 
-            btn_toggle = QPushButton(self.tr("Disable") if agent.enabled else self.tr("Enable"))
+            btn_toggle = QPushButton(
+                self.tr("Disable") if agent.enabled else self.tr("Enable")
+            )
             btn_toggle.setAccessibleName(
                 self.tr("Disable agent") if agent.enabled else self.tr("Enable agent")
             )
             btn_toggle.clicked.connect(
-                lambda checked, aid=agent.agent_id, en=agent.enabled: self._toggle_agent(aid, en)
+                lambda checked, aid=agent.agent_id, en=agent.enabled: (
+                    self._toggle_agent(aid, en)
+                )
             )
             actions_layout.addWidget(btn_toggle)
 
@@ -418,7 +460,9 @@ class AgentsTab(BaseTab):
             btn_notify.setAccessibleName(self.tr("Toggle notifications"))
             btn_notify.setToolTip(self.tr("Toggle notifications"))
             btn_notify.clicked.connect(
-                lambda checked, aid=agent.agent_id, ne=notif_enabled: self._toggle_notifications(aid, ne)
+                lambda checked, aid=agent.agent_id, ne=notif_enabled: (
+                    self._toggle_notifications(aid, ne)
+                )
             )
             actions_layout.addWidget(btn_notify)
 
@@ -452,12 +496,14 @@ class AgentsTab(BaseTab):
         goal = self.goal_input.text().strip()
         if not goal:
             QMessageBox.warning(
-                self, self.tr("No Goal"),
-                self.tr("Please enter a goal or select a template.")
+                self,
+                self.tr("No Goal"),
+                self.tr("Please enter a goal or select a template."),
             )
             return
 
         from utils.agent_planner import AgentPlanner
+
         plan = AgentPlanner.plan_from_goal(goal)
 
         # Store for creation
@@ -487,8 +533,9 @@ class AgentsTab(BaseTab):
     def _create_agent_from_plan(self):
         if not hasattr(self, "_current_plan") or self._current_plan is None:
             QMessageBox.warning(
-                self, self.tr("No Plan"),
-                self.tr("Generate a plan first using the Goal input above.")
+                self,
+                self.tr("No Plan"),
+                self.tr("Generate a plan first using the Goal input above."),
             )
             return
 
@@ -538,10 +585,14 @@ class AgentsTab(BaseTab):
             return
         if currently_enabled:
             agent.notification_config["enabled"] = False
-            self.append_output(self.tr("Notifications disabled for {}\n").format(agent_id))
+            self.append_output(
+                self.tr("Notifications disabled for {}\n").format(agent_id)
+            )
         else:
             agent.notification_config["enabled"] = True
-            self.append_output(self.tr("Notifications enabled for {}\n").format(agent_id))
+            self.append_output(
+                self.tr("Notifications enabled for {}\n").format(agent_id)
+            )
         registry.save()
         self._refresh_agents_table()
 

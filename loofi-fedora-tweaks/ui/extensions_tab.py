@@ -9,9 +9,16 @@ removing GNOME Shell and KDE Plasma extensions.
 import logging
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
-    QComboBox, QTableWidget,
-    QHeaderView, QAbstractItemView,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QLineEdit,
+    QComboBox,
+    QTableWidget,
+    QHeaderView,
+    QAbstractItemView,
 )
 
 from ui.base_tab import BaseTab
@@ -71,11 +78,13 @@ class ExtensionsTab(BaseTab):
         filter_row.addWidget(self.search_input)
 
         self.status_filter = QComboBox()
-        self.status_filter.addItems([
-            self.tr("All"),
-            self.tr("Enabled"),
-            self.tr("Disabled"),
-        ])
+        self.status_filter.addItems(
+            [
+                self.tr("All"),
+                self.tr("Enabled"),
+                self.tr("Disabled"),
+            ]
+        )
         self.status_filter.currentIndexChanged.connect(self._filter_table)
         filter_row.addWidget(self.status_filter)
 
@@ -87,12 +96,14 @@ class ExtensionsTab(BaseTab):
 
         # --- Extensions Table ---
         self.table = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels([
-            self.tr("Extension"),
-            self.tr("Status"),
-            self.tr("Desktop"),
-            self.tr("Actions"),
-        ])
+        self.table.setHorizontalHeaderLabels(
+            [
+                self.tr("Extension"),
+                self.tr("Status"),
+                self.tr("Desktop"),
+                self.tr("Actions"),
+            ]
+        )
         h_header = self.table.horizontalHeader()
         assert h_header is not None
         h_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
@@ -100,6 +111,7 @@ class ExtensionsTab(BaseTab):
         h_header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         h_header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.table)
         layout.addWidget(self.table)
 
@@ -133,14 +145,19 @@ class ExtensionsTab(BaseTab):
         """Detect and display current desktop environment."""
         try:
             from utils.extension_manager import ExtensionManager
+
             de = ExtensionManager.detect_desktop()
             labels = {"gnome": "GNOME Shell", "kde": "KDE Plasma", "unknown": "Unknown"}
-            self.de_label.setText(self.tr("Desktop: {}").format(labels.get(de.value, de.value)))
+            self.de_label.setText(
+                self.tr("Desktop: {}").format(labels.get(de.value, de.value))
+            )
 
             if not ExtensionManager.is_supported():
                 self.install_btn.setEnabled(False)
                 self.remove_btn.setEnabled(False)
-                self.append_output(self.tr("Extension management not supported on this desktop.\n"))
+                self.append_output(
+                    self.tr("Extension management not supported on this desktop.\n")
+                )
         except (RuntimeError, OSError, ValueError) as e:
             logger.warning("Desktop detection failed: %s", e)
             self.de_label.setText(self.tr("Desktop: Unknown"))
@@ -149,14 +166,15 @@ class ExtensionsTab(BaseTab):
         """Load installed extensions into the table."""
         try:
             from utils.extension_manager import ExtensionManager
+
             extensions = ExtensionManager.list_installed()
             self.table.setRowCount(len(extensions))
 
             for row, ext in enumerate(extensions):
                 # Name
-                self.table.setItem(row, 0, BaseTab.make_table_item(
-                    ext.name or ext.uuid
-                ))
+                self.table.setItem(
+                    row, 0, BaseTab.make_table_item(ext.name or ext.uuid)
+                )
                 # Status
                 status = self.tr("Enabled") if ext.enabled else self.tr("Disabled")
                 color = "#4caf50" if ext.enabled else "#ff9800"
@@ -168,16 +186,22 @@ class ExtensionsTab(BaseTab):
                 self.table.setCellWidget(row, 3, action_widget)
 
             if not extensions:
-                BaseTab.set_table_empty_state(self.table, self.tr("No extensions found"))
+                BaseTab.set_table_empty_state(
+                    self.table, self.tr("No extensions found")
+                )
             else:
                 normalize = getattr(BaseTab, "ensure_table_row_heights", None)
                 if callable(normalize):
                     normalize(self.table)
 
-            self.append_output(self.tr("Loaded {} extensions.\n").format(len(extensions)))
+            self.append_output(
+                self.tr("Loaded {} extensions.\n").format(len(extensions))
+            )
         except (RuntimeError, OSError, ValueError) as e:
             logger.error("Failed to load extensions: %s", e)
-            self.append_output(self.tr("[ERROR] Failed to load extensions: {}\n").format(e))
+            self.append_output(
+                self.tr("[ERROR] Failed to load extensions: {}\n").format(e)
+            )
 
     def _create_action_buttons(self, ext) -> QWidget:
         """Create enable/disable toggle button for an extension row."""
@@ -187,10 +211,14 @@ class ExtensionsTab(BaseTab):
 
         if ext.enabled:
             btn = QPushButton(self.tr("Disable"))
-            btn.clicked.connect(lambda checked, u=ext.uuid: self._toggle_extension(u, False))
+            btn.clicked.connect(
+                lambda checked, u=ext.uuid: self._toggle_extension(u, False)
+            )
         else:
             btn = QPushButton(self.tr("Enable"))
-            btn.clicked.connect(lambda checked, u=ext.uuid: self._toggle_extension(u, True))
+            btn.clicked.connect(
+                lambda checked, u=ext.uuid: self._toggle_extension(u, True)
+            )
 
         layout.addWidget(btn)
         return widget
@@ -199,6 +227,7 @@ class ExtensionsTab(BaseTab):
         """Enable or disable an extension."""
         try:
             from utils.extension_manager import ExtensionManager
+
             if enable:
                 binary, args, desc = ExtensionManager.enable(uuid)
             else:
@@ -215,6 +244,7 @@ class ExtensionsTab(BaseTab):
             return
         try:
             from utils.extension_manager import ExtensionManager
+
             binary, args, desc = ExtensionManager.install(uuid)
             self.run_command(binary, args, desc)
         except (RuntimeError, OSError, ValueError) as e:
@@ -231,6 +261,7 @@ class ExtensionsTab(BaseTab):
             return
         try:
             from utils.extension_manager import ExtensionManager
+
             binary, args, desc = ExtensionManager.remove(name_item.text())
             self.run_command(binary, args, desc)
         except (RuntimeError, OSError, ValueError) as e:

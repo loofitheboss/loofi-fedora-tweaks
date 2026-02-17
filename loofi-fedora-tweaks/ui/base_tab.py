@@ -84,7 +84,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
 
     # Subclasses MUST override _METADATA with their own PluginMetadata
     _METADATA: PluginMetadata = _STUB_META
-    _DEFAULT_TABLE_VISIBLE_ROWS = 4
+    _DEFAULT_TABLE_VISIBLE_ROWS = 3
 
     def __init__(self):
         super().__init__()
@@ -252,6 +252,8 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         table.setTextElideMode(Qt.TextElideMode.ElideRight)
         table.setShowGrid(True)
         table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        if table.property("maxVisibleRows") is None:
+            table.setProperty("maxVisibleRows", BaseTab._DEFAULT_TABLE_VISIBLE_ROWS)
         table.setObjectName("baseTable")
         BaseTab.ensure_table_row_heights(table)
 
@@ -266,10 +268,16 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
             table.resizeRowToContents(row)
             if table.rowHeight(row) < min_height:
                 table.setRowHeight(row, min_height)
+        max_rows = BaseTab._resolve_table_row_limit(table)
+        BaseTab.fit_table_height(table, max_visible_rows=max_rows)
+
+    @staticmethod
+    def _resolve_table_row_limit(table: QTableWidget) -> int:
+        """Read per-table visible row cap with a safe default."""
         max_rows = table.property("maxVisibleRows")
         if not isinstance(max_rows, int) or max_rows < 1:
-            max_rows = BaseTab._DEFAULT_TABLE_VISIBLE_ROWS
-        BaseTab.fit_table_height(table, max_visible_rows=max_rows)
+            return BaseTab._DEFAULT_TABLE_VISIBLE_ROWS
+        return max_rows
 
     @staticmethod
     def fit_table_height(table: QTableWidget, max_visible_rows: int = 4) -> None:

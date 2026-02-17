@@ -73,3 +73,13 @@ class TestBaseTabConfigureTable(unittest.TestCase):
         row_height = table.verticalHeader().defaultSectionSize()
         max_expected = table.horizontalHeader().height() + (row_height * 2) + 64
         self.assertLessEqual(table.height(), max_expected)
+
+    def test_configure_table_sets_default_max_visible_rows_property(self):
+        """configure_table applies default visible row cap when absent."""
+        table = QTableWidget(0, 2)
+
+        BaseTab.configure_table(table)
+
+        self.assertEqual(
+            table.property("maxVisibleRows"), BaseTab._DEFAULT_TABLE_VISIBLE_ROWS
+        )

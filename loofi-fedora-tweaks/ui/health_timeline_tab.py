@@ -11,10 +11,22 @@ Provides:
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTextEdit, QScrollArea, QFrame, QTableWidget,
-    QTableWidgetItem, QHeaderView, QComboBox, QSpinBox,
-    QFileDialog, QMessageBox,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QScrollArea,
+    QFrame,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
+    QComboBox,
+    QSpinBox,
+    QFileDialog,
+    QMessageBox,
 )
 
 from ui.base_tab import BaseTab
@@ -63,11 +75,13 @@ class HealthTimelineTab(QWidget, PluginInterface):
         header.setObjectName("healthTlHeader")
         layout.addWidget(header)
 
-        description = QLabel(self.tr(
-            "Track system health metrics over time including CPU temperature, "
-            "RAM usage, disk space, and load average. Record snapshots and "
-            "export data for analysis."
-        ))
+        description = QLabel(
+            self.tr(
+                "Track system health metrics over time including CPU temperature, "
+                "RAM usage, disk space, and load average. Record snapshots and "
+                "export data for analysis."
+            )
+        )
         description.setWordWrap(True)
         description.setObjectName("healthTlDesc")
         layout.addWidget(description)
@@ -115,9 +129,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
         view_layout.addWidget(QLabel(self.tr("Metric Type:")))
         self.metric_combo = QComboBox()
         self.metric_combo.setAccessibleName(self.tr("Metric Type"))
-        self.metric_combo.addItems([
-            "cpu_temp", "ram_usage", "disk_usage", "load_avg"
-        ])
+        self.metric_combo.addItems(["cpu_temp", "ram_usage", "disk_usage", "load_avg"])
         self.metric_combo.currentTextChanged.connect(self._refresh_table)
         view_layout.addWidget(self.metric_combo)
 
@@ -138,16 +150,19 @@ class HealthTimelineTab(QWidget, PluginInterface):
         self.metrics_table = QTableWidget()
         self.metrics_table.setAccessibleName(self.tr("Recent Metrics"))
         self.metrics_table.setColumnCount(4)
-        self.metrics_table.setHorizontalHeaderLabels([
-            self.tr("Timestamp"),
-            self.tr("Value"),
-            self.tr("Unit"),
-            self.tr("ID"),
-        ])
+        self.metrics_table.setHorizontalHeaderLabels(
+            [
+                self.tr("Timestamp"),
+                self.tr("Value"),
+                self.tr("Unit"),
+                self.tr("ID"),
+            ]
+        )
         self.metrics_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch
         )
         self.metrics_table.setMaximumHeight(250)
+        self.metrics_table.setProperty("maxVisibleRows", 4)
         BaseTab.configure_table(self.metrics_table)
         table_layout.addWidget(self.metrics_table)
         layout.addWidget(table_group)
@@ -198,10 +213,12 @@ class HealthTimelineTab(QWidget, PluginInterface):
         """Refresh the summary section."""
         summary = self.timeline.get_summary(hours=24)
         if not summary:
-            self.summary_label.setText(self.tr(
-                "No metrics recorded in the last 24 hours. "
-                "Click 'Record Snapshot' to capture current system state."
-            ))
+            self.summary_label.setText(
+                self.tr(
+                    "No metrics recorded in the last 24 hours. "
+                    "Click 'Record Snapshot' to capture current system state."
+                )
+            )
             return
 
         lines = []
@@ -281,8 +298,7 @@ class HealthTimelineTab(QWidget, PluginInterface):
             self,
             self.tr("Prune Data"),
             self.tr(
-                "Delete metrics older than 30 days?\n"
-                "This action cannot be undone."
+                "Delete metrics older than 30 days?\nThis action cannot be undone."
             ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
@@ -304,11 +320,13 @@ class HealthTimelineTab(QWidget, PluginInterface):
         anomalies = self.timeline.detect_anomalies(metric_type, hours)
 
         if not anomalies:
-            self.anomaly_label.setText(self.tr(
-                "No anomalies detected in {} (last {} hours).".format(
-                    metric_type, hours
+            self.anomaly_label.setText(
+                self.tr(
+                    "No anomalies detected in {} (last {} hours).".format(
+                        metric_type, hours
+                    )
                 )
-            ))
+            )
             self.log(self.tr("No anomalies detected."))
             return
 
