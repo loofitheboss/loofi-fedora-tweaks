@@ -116,5 +116,61 @@ class TestSwitchToTabById(unittest.TestCase):
         self.assertIsNone(index.get("Storage"))
 
 
+class TestSidebarItemDelegate(unittest.TestCase):
+    def test_delegate_class_exists(self):
+        from ui.main_window import SidebarItemDelegate
+        self.assertTrue(callable(SidebarItemDelegate))
+
+    def test_status_colors_defined(self):
+        from ui.main_window import SidebarItemDelegate
+        delegate = SidebarItemDelegate()
+        self.assertIn("ok", delegate._STATUS_COLORS)
+        self.assertIn("warning", delegate._STATUS_COLORS)
+        self.assertIn("error", delegate._STATUS_COLORS)
+
+    def test_status_colors_are_three_values(self):
+        from ui.main_window import SidebarItemDelegate
+        delegate = SidebarItemDelegate()
+        self.assertEqual(len(delegate._STATUS_COLORS), 3)
+
+    def test_delegate_inherits_qstyleditemdelegate(self):
+        from PyQt6.QtWidgets import QStyledItemDelegate
+        from ui.main_window import SidebarItemDelegate
+        self.assertTrue(issubclass(SidebarItemDelegate, QStyledItemDelegate))
+
+
+class TestExperienceLevelValidation(unittest.TestCase):
+    def test_get_all_declared_tab_ids_returns_set(self):
+        from utils.experience_level import ExperienceLevelManager
+        result = ExperienceLevelManager.get_all_declared_tab_ids()
+        self.assertIsInstance(result, set)
+        self.assertIn("dashboard", result)
+        self.assertIn("development", result)
+
+    def test_beginner_tabs_subset_of_declared(self):
+        from utils.experience_level import ExperienceLevelManager, _BEGINNER_TABS
+        declared = ExperienceLevelManager.get_all_declared_tab_ids()
+        for tab_id in _BEGINNER_TABS:
+            self.assertIn(tab_id, declared)
+
+    def test_declared_ids_includes_intermediate(self):
+        from utils.experience_level import ExperienceLevelManager, _INTERMEDIATE_TABS
+        declared = ExperienceLevelManager.get_all_declared_tab_ids()
+        for tab_id in _INTERMEDIATE_TABS:
+            self.assertIn(tab_id, declared)
+
+    def test_declared_ids_is_nonempty(self):
+        from utils.experience_level import ExperienceLevelManager
+        result = ExperienceLevelManager.get_all_declared_tab_ids()
+        self.assertGreater(len(result), 0)
+
+
+class TestRebuildSidebarMethodExists(unittest.TestCase):
+    def test_main_window_has_rebuild_sidebar_for_experience_level(self):
+        from ui.main_window import MainWindow
+        self.assertTrue(hasattr(MainWindow, '_rebuild_sidebar_for_experience_level'))
+        self.assertTrue(callable(getattr(MainWindow, '_rebuild_sidebar_for_experience_level')))
+
+
 if __name__ == "__main__":
     unittest.main()

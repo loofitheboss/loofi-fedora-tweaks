@@ -9,8 +9,8 @@ from dataclasses import dataclass, field
 
 from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.registry import CATEGORY_ICONS
-from PyQt6.QtCore import QSize, Qt, QTimer
-from PyQt6.QtGui import QFontMetrics, QKeySequence, QShortcut
+from PyQt6.QtCore import QRect, QSize, Qt, QTimer
+from PyQt6.QtGui import QColor, QFontMetrics, QKeySequence, QPainter, QShortcut
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -19,6 +19,8 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QStackedWidget,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
     QTreeWidget,
     QTreeWidgetItem,
     QTreeWidgetItemIterator,
@@ -58,6 +60,36 @@ class SidebarEntry:
     page_widget: QWidget
     metadata: PluginMetadata
     status: str = field(default="")
+
+
+class SidebarItemDelegate(QStyledItemDelegate):
+    """Custom delegate that renders status dots on sidebar tab items."""
+
+    _STATUS_COLORS = {
+        "ok": QColor(76, 175, 80),       # green
+        "warning": QColor(255, 193, 7),   # amber
+        "error": QColor(244, 67, 54),     # red
+    }
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index) -> None:
+        """Paint the item, adding a colored status dot on the right when status is set."""
+        super().paint(painter, option, index)
+
+        status = index.data(_ROLE_STATUS)
+        if not status or status not in self._STATUS_COLORS:
+            return
+
+        color = self._STATUS_COLORS[status]
+        dot_size = 8
+        x = option.rect.right() - dot_size - 8
+        y = option.rect.center().y() - dot_size // 2
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(color)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.drawEllipse(QRect(x, y, dot_size, dot_size))
+        painter.restore()
 
 
 class DisabledPluginPage(QWidget):
@@ -178,6 +210,7 @@ class MainWindow(QMainWindow):
         self.sidebar.setIconSize(QSize(17, 17))
         self.sidebar.currentItemChanged.connect(self.change_page)
         self.sidebar.currentItemChanged.connect(self._on_sidebar_selection_changed)
+        self.sidebar.setItemDelegate(SidebarItemDelegate(self.sidebar))
         # v31.0: Context menu for favorites
         self.sidebar.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.sidebar.customContextMenuRequested.connect(self._sidebar_context_menu)
@@ -366,6 +399,16 @@ class MainWindow(QMainWindow):
             lazy = self._wrap_in_lazy(plugin)
             self._add_plugin_page(meta, lazy, compat)
 
+        # Validate experience level tab lists against registry
+        declared_ids = ExperienceLevelManager.get_all_declared_tab_ids()
+        registered_ids = set(self._sidebar_index.keys())
+        orphaned = declared_ids - registered_ids
+        for tab_id in sorted(orphaned):
+            logger.warning("Experience level references unknown tab: %s", tab_id)
+        advanced_only = registered_ids - declared_ids
+        if advanced_only:
+            logger.info("Tabs only visible to ADVANCED users: %s", sorted(advanced_only))
+
     def _wrap_in_lazy(self, plugin: PluginInterface) -> LazyWidget:
         """Wrap plugin.create_widget() in LazyWidget for deferred instantiation."""
         return LazyWidget(plugin.create_widget)
@@ -528,6 +571,23 @@ class MainWindow(QMainWindow):
             if item and "Favorites" in item.text(0):
                 self.sidebar.takeTopLevelItem(i)
                 break
+        self._build_favorites_section()
+        self._refresh_sidebar_icon_tints()
+
+    def _rebuild_sidebar_for_experience_level(self):
+        """Rebuild sidebar when experience level changes."""
+        self.sidebar.clear()
+        self._sidebar_index.clear()
+        self._category_items.clear()
+        self._pages_cache = None
+        while self.content_area.count():
+            w = self.content_area.widget(0)
+            self.content_area.removeWidget(w)
+        context = {
+            "main_window": self,
+            "config_manager": ConfigManager,
+        }
+        self._build_sidebar_from_registry(context)
         self._build_favorites_section()
         self._refresh_sidebar_icon_tints()
 
@@ -1183,7 +1243,8 @@ class MainWindow(QMainWindow):
             event.ignore()
         else:
             # Clean up page resources (timers, schedulers)
-            for page in self.pages.values():
+            for entry in self._sidebar_index.values():
+                page = entry.page_widget
                 if hasattr(page, "cleanup"):
                     try:
                         page.cleanup()

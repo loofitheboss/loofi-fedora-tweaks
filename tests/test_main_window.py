@@ -689,6 +689,8 @@ def _install_stubs():
     qt_widgets.QGroupBox = _Dummy
     qt_widgets.QApplication = _DummyQApplication
     qt_widgets.QToolButton = _DummyToolButton
+    qt_widgets.QStyledItemDelegate = _Dummy
+    qt_widgets.QStyleOptionViewItem = _Dummy
 
     # -- PyQt6.QtCore --
     qt_core = types.ModuleType("PyQt6.QtCore")
@@ -709,6 +711,7 @@ def _install_stubs():
     )
     qt_core.QTimer = _DummyTimer
     qt_core.QSize = _Dummy
+    qt_core.QRect = _Dummy
     qt_core.pyqtSignal = _DummySignal
     qt_core.QShortcut = _DummyShortcut
     qt_core.QKeySequence = lambda x: x
@@ -718,6 +721,7 @@ def _install_stubs():
     qt_gui.QIcon = _Dummy
     qt_gui.QFont = _Dummy
     qt_gui.QColor = _Dummy
+    qt_gui.QPainter = _Dummy
     qt_gui.QFontMetrics = _DummyFontMetrics
     qt_gui.QAction = _DummyAction
     qt_gui.QShortcut = _DummyShortcut
@@ -1968,7 +1972,13 @@ class TestCloseEvent(unittest.TestCase):
         """closeEvent calls cleanup on pages that have it."""
         page_with_cleanup = MagicMock()
         page_with_cleanup.cleanup = MagicMock()
-        self.win.pages = {"test": page_with_cleanup}
+        mod = _get_module()
+        entry = mod.SidebarEntry(
+            plugin_id="test", display_name="Test",
+            tree_item=MagicMock(), page_widget=page_with_cleanup,
+            metadata=MagicMock(),
+        )
+        self.win._sidebar_index = {"test": entry}
         self.win.tray_icon = None
         event = MagicMock()
         self.win.closeEvent(event)
@@ -1978,7 +1988,13 @@ class TestCloseEvent(unittest.TestCase):
         """closeEvent handles cleanup exceptions gracefully."""
         page = MagicMock()
         page.cleanup.side_effect = RuntimeError("cleanup error")
-        self.win.pages = {"broken": page}
+        mod = _get_module()
+        entry = mod.SidebarEntry(
+            plugin_id="broken", display_name="Broken",
+            tree_item=MagicMock(), page_widget=page,
+            metadata=MagicMock(),
+        )
+        self.win._sidebar_index = {"broken": entry}
         self.win.tray_icon = None
         event = MagicMock()
         self.win.closeEvent(event)  # Should not raise
