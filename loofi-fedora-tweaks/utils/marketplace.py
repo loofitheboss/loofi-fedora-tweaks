@@ -81,6 +81,23 @@ class PresetMarketplace:
     def __init__(self):
         self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
+    @staticmethod
+    def _resolve_writable_presets_dir() -> Path:
+        """Resolve a writable presets directory with sandbox-safe fallback."""
+        primary = Path.home() / ".local/share/loofi-fedora-tweaks/presets"
+        try:
+            primary.mkdir(parents=True, exist_ok=True)
+            probe = primary / ".write_test"
+            with open(probe, "w", encoding="utf-8") as f:
+                f.write("ok")
+            probe.unlink(missing_ok=True)
+            return primary
+        except OSError as e:
+            logger.debug("Primary presets dir unavailable, using /tmp fallback: %s", e)
+            fallback = Path("/tmp/loofi-fedora-tweaks/presets")
+            fallback.mkdir(parents=True, exist_ok=True)
+            return fallback
+
     def fetch_index(self, force_refresh: bool = False) -> MarketplaceResult:
         """
         Fetch the preset index from the marketplace.
@@ -145,9 +162,8 @@ class PresetMarketplace:
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode())
 
-            # Save to local presets directory
-            presets_dir = Path.home() / ".local/share/loofi-fedora-tweaks/presets"
-            presets_dir.mkdir(parents=True, exist_ok=True)
+            # Save to local presets directory (fallback when HOME is not writable)
+            presets_dir = self._resolve_writable_presets_dir()
 
             # Use preset ID as filename
             preset_file = presets_dir / f"{preset.id}.json"

@@ -51,6 +51,10 @@ _operation_timeout = 300
 # Global dry-run flag (v35.0 Fortress)
 _dry_run = False
 
+# Keep the original timeline class reference so tests can patch either
+# cli.main.HealthTimeline or utils.health_timeline.HealthTimeline.
+_DEFAULT_HEALTH_TIMELINE_CLASS = HealthTimeline
+
 
 def _print(text):
     """Print text (suppressed in JSON mode)."""
@@ -1695,7 +1699,12 @@ def cmd_profile(args):
 
 def cmd_health_history(args):
     """Handle health-history subcommand."""
-    timeline = HealthTimeline()
+    timeline_cls = HealthTimeline
+    if timeline_cls is _DEFAULT_HEALTH_TIMELINE_CLASS:
+        from utils import health_timeline as health_timeline_module
+
+        timeline_cls = health_timeline_module.HealthTimeline
+    timeline = timeline_cls()
 
     if args.action == "show":
         summary = timeline.get_summary(hours=24)

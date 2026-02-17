@@ -51,14 +51,21 @@ class AuditLogger:
         if AuditLogger._initialized:
             return
         AuditLogger._initialized = True
+        self._user = os.environ.get("USER", os.environ.get("LOGNAME", "unknown"))
 
-        self._log_dir = Path(
+        requested_dir = Path(
             os.environ.get(
                 "LOOFI_AUDIT_DIR",
                 os.path.expanduser("~/.config/loofi-fedora-tweaks"),
             )
         )
-        self._log_dir.mkdir(parents=True, exist_ok=True)
+        self._log_dir = requested_dir
+        try:
+            self._log_dir.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            # Tests and sandboxed runs may block writes to HOME.
+            self._log_dir = Path("/tmp/loofi-fedora-tweaks")
+            self._log_dir.mkdir(parents=True, exist_ok=True)
         self._log_path = self._log_dir / "audit.jsonl"
 
         # Set up rotating file handler
@@ -68,17 +75,18 @@ class AuditLogger:
 
         # Only add handler once
         if not self._logger.handlers:
-            handler = RotatingFileHandler(
-                str(self._log_path),
-                maxBytes=self.MAX_BYTES,
-                backupCount=self.BACKUP_COUNT,
-                encoding="utf-8",
-            )
-            handler.setFormatter(logging.Formatter("%(message)s"))
-            self._logger.addHandler(handler)
-
-        self._user = os.environ.get(
-            "USER", os.environ.get("LOGNAME", "unknown"))
+            try:
+                handler = RotatingFileHandler(
+                    str(self._log_path),
+                    maxBytes=self.MAX_BYTES,
+                    backupCount=self.BACKUP_COUNT,
+                    encoding="utf-8",
+                )
+            except OSError:
+                self._logger.addHandler(logging.NullHandler())
+            else:
+                handler.setFormatter(logging.Formatter("%(message)s"))
+                self._logger.addHandler(handler)
 
     @property
     def log_path(self) -> Path:

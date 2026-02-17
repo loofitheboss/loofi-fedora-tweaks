@@ -29,7 +29,6 @@ ALLOWED_BROAD_EXCEPTIONS = {
     ("loofi-fedora-tweaks/utils/daemon.py", "Daemon.run"),
     ("loofi-fedora-tweaks/ui/lazy_widget.py", "LazyWidget.showEvent"),
     ("loofi-fedora-tweaks/utils/error_handler.py", "_log_error"),
-    ("loofi-fedora-tweaks/ui/whats_new_dialog.py", "WhatsNewDialog.mark_seen"),
 }
 
 
