@@ -2457,7 +2457,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
 
         self.win._refresh_status_indicators()
         self.win._set_tab_status.assert_any_call(
-            "Maintenance", "warning", "Updates available"
+            "maintenance", "warning", "Updates available"
         )
 
     def test_refresh_no_updates(self):
@@ -2471,7 +2471,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)
 
         self.win._refresh_status_indicators()
-        self.win._set_tab_status.assert_any_call("Maintenance", "ok", "Up to date")
+        self.win._set_tab_status.assert_any_call("maintenance", "ok", "Up to date")
 
     def test_refresh_update_check_exception(self):
         """_refresh_status_indicators handles update check failure."""
@@ -2482,7 +2482,7 @@ class TestRefreshStatusIndicators(unittest.TestCase):
         disk_mod.DiskManager.get_disk_usage = MagicMock(return_value=None)
 
         self.win._refresh_status_indicators()
-        self.win._set_tab_status.assert_any_call("Maintenance", "", "")
+        self.win._set_tab_status.assert_any_call("maintenance", "", "")
 
 
 class TestSetTabStatus(unittest.TestCase):
@@ -2492,42 +2492,40 @@ class TestSetTabStatus(unittest.TestCase):
         self.win = _make_window(skip_init=True)
 
     def test_set_tab_status_ok(self):
-        """_set_tab_status adds [OK] marker for 'ok' status."""
-        mod = _get_module()
+        """_set_tab_status stores 'ok' status on the index entry."""
         self.win.add_page("Maintenance", "🔧", MagicMock(), category="System")
-        self.win._set_tab_status("Maintenance", "ok", "Healthy")
-        cat = self.win.sidebar.topLevelItem(0)
-        child = cat.child(0)
-        self.assertIn("[OK]", child.text(0))
+        self.win._set_tab_status("maintenance", "ok", "Healthy")
+        entry = self.win._sidebar_index.get("maintenance")
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.status, "ok")
 
     def test_set_tab_status_warning(self):
-        """_set_tab_status adds [WARN] marker for 'warning' status."""
+        """_set_tab_status stores 'warning' status on the index entry."""
         self.win.add_page("Storage", "💾", MagicMock(), category="System")
-        self.win._set_tab_status("Storage", "warning", "75% used")
-        cat = self.win.sidebar.topLevelItem(0)
-        child = cat.child(0)
-        self.assertIn("[WARN]", child.text(0))
+        self.win._set_tab_status("storage", "warning", "75% used")
+        entry = self.win._sidebar_index.get("storage")
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.status, "warning")
 
     def test_set_tab_status_error(self):
-        """_set_tab_status adds [ERR] marker for 'error' status."""
+        """_set_tab_status stores 'error' status on the index entry."""
         self.win.add_page("Storage", "💾", MagicMock(), category="System")
-        self.win._set_tab_status("Storage", "error", "90% full")
-        cat = self.win.sidebar.topLevelItem(0)
-        child = cat.child(0)
-        self.assertIn("[ERR]", child.text(0))
+        self.win._set_tab_status("storage", "error", "90% full")
+        entry = self.win._sidebar_index.get("storage")
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry.status, "error")
 
-    def test_set_tab_status_empty_clears_dot(self):
-        """_set_tab_status with empty status removes existing marker."""
+    def test_set_tab_status_empty_clears_status(self):
+        """_set_tab_status with empty status clears the entry status field."""
         self.win.add_page("Maintenance", "🔧", MagicMock(), category="System")
-        self.win._set_tab_status("Maintenance", "ok", "Good")
-        self.win._set_tab_status("Maintenance", "", "")
-        cat = self.win.sidebar.topLevelItem(0)
-        child = cat.child(0)
-        self.assertNotIn("[OK]", child.text(0))
+        self.win._set_tab_status("maintenance", "ok", "Good")
+        self.win._set_tab_status("maintenance", "", "")
+        entry = self.win._sidebar_index.get("maintenance")
+        self.assertEqual(entry.status, "")
 
     def test_set_tab_status_nonexistent_tab(self):
         """_set_tab_status does nothing for non-existent tab."""
-        self.win._set_tab_status("Nonexistent", "ok", "Good")  # Should not raise
+        self.win._set_tab_status("nonexistent", "ok", "Good")  # Should not raise
 
 
 class TestShowDoctor(unittest.TestCase):
