@@ -566,29 +566,55 @@ def process_message(msg: dict) -> dict | None:
         }
 
 
+def read_mcp_message() -> dict | None:
+    """Read a single MCP message using Content-Length framing (LSP-style)."""
+    headers: dict[str, str] = {}
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            return None
+        line = line.rstrip("\r\n")
+        if line == "":
+            break
+        if ":" in line:
+            key, value = line.split(":", 1)
+            headers[key.strip()] = value.strip()
+
+    length = int(headers.get("Content-Length", "0"))
+    if length <= 0:
+        return None
+
+    body = sys.stdin.read(length)
+    return json.loads(body)
+
+
+def write_mcp_message(msg: dict) -> None:
+    """Write a single MCP message with Content-Length framing."""
+    body = json.dumps(msg)
+    header = f"Content-Length: {len(body.encode('utf-8'))}\r\n\r\n"
+    sys.stdout.write(header + body)
+    sys.stdout.flush()
+
+
 def main():
     """Main loop — read JSON-RPC messages from stdin, write responses to stdout."""
     # Use stderr for logging to avoid polluting the protocol stream
     def log(msg): return sys.stderr.write(f"[loofi-workflow] {msg}\n")  # noqa: E731
     log("MCP Workflow Server starting...")
 
-    # Read from stdin line by line (each line is a JSON-RPC message)
-    for line in sys.stdin:
-        line = line.strip()
-        if not line:
+    while True:
+        try:
+            msg = read_mcp_message()
+        except (json.JSONDecodeError, ValueError) as e:
+            log(f"Invalid message: {e}")
             continue
 
-        try:
-            msg = json.loads(line)
-        except json.JSONDecodeError as e:
-            log(f"Invalid JSON: {e}")
-            continue
+        if msg is None:
+            break
 
         response = process_message(msg)
         if response is not None:
-            out = json.dumps(response)
-            sys.stdout.write(out + "\n")
-            sys.stdout.flush()
+            write_mcp_message(response)
 
     log("MCP Workflow Server shutting down.")
 

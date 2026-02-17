@@ -1,14 +1,19 @@
 {
   "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "toolsets": [
-        "pull_requests",
-        "code_security",
-        "secret_protection",
-        "issues",
-        "repos"
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp_server_fetch"
       ]
     },
     "loofi-workflow": {
@@ -16,6 +21,13 @@
       "command": "python3",
       "args": [
         "scripts/mcp_workflow_server.py"
+      ]
+    },
+    "loofi-agent-sync": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "scripts/mcp_agent_sync_server.py"
       ]
     }
   }

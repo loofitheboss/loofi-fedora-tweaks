@@ -331,23 +331,29 @@ class TestTaskImplementations(unittest.TestCase):
         ok, msg = TaskScheduler._run_cleanup()
         self.assertFalse(ok)
 
+    @patch("utils.scheduler.shutil.which", return_value="/usr/bin/dnf")
+    @patch("utils.scheduler.SystemManager.is_atomic", return_value=False)
     @patch("subprocess.run")
     @patch("utils.notifications.NotificationManager.notify_updates_available")
-    def test_run_update_check_updates_available(self, mock_notify, mock_run):
+    def test_run_update_check_updates_available(self, mock_notify, mock_run, mock_atomic, mock_which):
         mock_run.return_value = MagicMock(returncode=100, stdout="pkg1\npkg2\n")
         ok, msg = TaskScheduler._run_update_check()
         self.assertTrue(ok)
         self.assertIn("2 updates", msg)
 
+    @patch("utils.scheduler.shutil.which", return_value="/usr/bin/dnf")
+    @patch("utils.scheduler.SystemManager.is_atomic", return_value=False)
     @patch("subprocess.run")
-    def test_run_update_check_up_to_date(self, mock_run):
+    def test_run_update_check_up_to_date(self, mock_run, mock_atomic, mock_which):
         mock_run.return_value = MagicMock(returncode=0, stdout="")
         ok, msg = TaskScheduler._run_update_check()
         self.assertTrue(ok)
         self.assertIn("up to date", msg)
 
+    @patch("utils.scheduler.shutil.which", return_value="/usr/bin/dnf")
+    @patch("utils.scheduler.SystemManager.is_atomic", return_value=False)
     @patch("subprocess.run", side_effect=OSError("fail"))
-    def test_run_update_check_error(self, _):
+    def test_run_update_check_error(self, _, mock_atomic, mock_which):
         ok, msg = TaskScheduler._run_update_check()
         self.assertFalse(ok)
 

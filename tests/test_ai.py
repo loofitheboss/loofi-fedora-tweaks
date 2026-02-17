@@ -130,9 +130,11 @@ class TestLlamaCppManager(unittest.TestCase):
         mock_which.side_effect = [None, "/usr/bin/main"]
         self.assertTrue(LlamaCppManager.is_installed())
 
+    @patch("utils.ai.shutil.which", return_value="/usr/bin/dnf")
+    @patch("utils.ai.SystemManager.get_package_manager", return_value="dnf")
     @patch("utils.ai.subprocess.run")
     @patch("utils.ai.LlamaCppManager.is_installed", return_value=False)
-    def test_install_detects_dnf_package(self, mock_is_installed, mock_run):
+    def test_install_detects_dnf_package(self, mock_is_installed, mock_run, mock_pm, mock_which):
         mock_run.return_value = MagicMock(returncode=0)
         result = LlamaCppManager.install()
         self.assertFalse(result.success)

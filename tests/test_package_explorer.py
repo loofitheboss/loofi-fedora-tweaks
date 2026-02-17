@@ -46,11 +46,12 @@ class TestPackageInfo(unittest.TestCase):
 class TestPackageExplorerSearch(unittest.TestCase):
     """Tests for PackageExplorer.search()."""
 
+    @patch('utils.package_explorer.shutil.which', return_value='/usr/bin/dnf')
     @patch('utils.package_explorer.PackageExplorer._is_flatpak_installed')
     @patch('utils.package_explorer.PackageExplorer._is_rpm_installed')
     @patch('utils.package_explorer.SystemManager.is_atomic')
     @patch('utils.package_explorer.subprocess.run')
-    def test_search_dnf_success(self, mock_run, mock_atomic, mock_rpm_inst, mock_fp_inst):
+    def test_search_dnf_success(self, mock_run, mock_atomic, mock_rpm_inst, mock_fp_inst, mock_which):
         """Parses DNF search output correctly."""
         mock_atomic.return_value = False
         mock_rpm_inst.return_value = False
@@ -73,11 +74,12 @@ class TestPackageExplorerSearch(unittest.TestCase):
         self.assertIn("vim-enhanced", names)
         self.assertIn("vim-minimal", names)
 
+    @patch('utils.package_explorer.shutil.which', return_value='/usr/bin/dnf')
     @patch('utils.package_explorer.PackageExplorer._is_flatpak_installed')
     @patch('utils.package_explorer.PackageExplorer._is_rpm_installed')
     @patch('utils.package_explorer.SystemManager.is_atomic')
     @patch('utils.package_explorer.subprocess.run')
-    def test_search_with_flatpak(self, mock_run, mock_atomic, mock_rpm_inst, mock_fp_inst):
+    def test_search_with_flatpak(self, mock_run, mock_atomic, mock_rpm_inst, mock_fp_inst, mock_which):
         """Includes Flatpak results when available."""
         mock_atomic.return_value = False
         mock_rpm_inst.return_value = False
@@ -114,10 +116,11 @@ class TestPackageExplorerSearch(unittest.TestCase):
 
         self.assertEqual(results, [])
 
+    @patch('utils.package_explorer.shutil.which', return_value='/usr/bin/dnf')
     @patch('utils.package_explorer.PackageExplorer._is_rpm_installed')
     @patch('utils.package_explorer.SystemManager.is_atomic')
     @patch('utils.package_explorer.subprocess.run')
-    def test_search_atomic_source(self, mock_run, mock_atomic, mock_rpm_inst):
+    def test_search_atomic_source(self, mock_run, mock_atomic, mock_rpm_inst, mock_which):
         """On atomic Fedora, source is rpm-ostree."""
         mock_atomic.return_value = True
         mock_rpm_inst.return_value = False
@@ -131,8 +134,9 @@ class TestPackageExplorerSearch(unittest.TestCase):
 
         self.assertEqual(results[0].source, "rpm-ostree")
 
+    @patch('utils.package_explorer.shutil.which', return_value='/usr/bin/dnf')
     @patch('utils.package_explorer.subprocess.run')
-    def test_search_no_flatpak(self, mock_run):
+    def test_search_no_flatpak(self, mock_run, mock_which):
         """Skips flatpak search when include_flatpak=False."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
 
@@ -378,9 +382,10 @@ class TestPackageExplorerRecentlyInstalled(unittest.TestCase):
 class TestPackageExplorerInfo(unittest.TestCase):
     """Tests for PackageExplorer.get_package_info()."""
 
+    @patch('utils.package_explorer.shutil.which', return_value='/usr/bin/dnf')
     @patch('utils.package_explorer.SystemManager.is_atomic')
     @patch('utils.package_explorer.subprocess.run')
-    def test_get_info_success(self, mock_run, mock_atomic):
+    def test_get_info_success(self, mock_run, mock_atomic, mock_which):
         """Parses dnf info output correctly."""
         mock_atomic.return_value = False
         info_output = (

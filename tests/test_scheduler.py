@@ -112,9 +112,11 @@ class TestTaskScheduler(unittest.TestCase):
         self.assertEqual(results[1]["task"], "Two")
         self.assertFalse(results[1]["success"])
 
+    @patch('utils.scheduler.shutil.which', return_value='/usr/bin/dnf')
+    @patch('utils.scheduler.SystemManager.is_atomic', return_value=False)
     @patch('utils.notifications.NotificationManager.notify_updates_available')
     @patch('utils.scheduler.subprocess.run')
-    def test_run_update_check_updates_available(self, mock_run, mock_notify):
+    def test_run_update_check_updates_available(self, mock_run, mock_notify, mock_atomic, mock_which):
         """dnf return code 100 reports update availability."""
         mock_run.return_value = MagicMock(returncode=100, stdout="pkg1\npkg2\n", stderr="")
 

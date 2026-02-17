@@ -550,18 +550,20 @@ class TestAgentExecutorExtended(unittest.TestCase):
 
     # ==================== _op_check_dnf_updates ====================
 
+    @patch("utils.agent_runner.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.agent_runner.SystemManager.is_atomic", return_value=False)
     @patch("utils.agent_runner.subprocess.run")
-    def test_op_dnf_updates_available(self, mock_run, mock_atomic):
+    def test_op_dnf_updates_available(self, mock_run, mock_atomic, mock_which):
         """DNF check return code 100 reports available updates."""
         mock_run.return_value = MagicMock(returncode=100, stdout="pkg1\npkg2\n")
         result = AgentExecutor._op_check_dnf_updates({})
         self.assertTrue(result.success)
         self.assertEqual(result.data.get("dnf_updates"), 2)
 
+    @patch("utils.agent_runner.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.agent_runner.SystemManager.is_atomic", return_value=False)
     @patch("utils.agent_runner.subprocess.run")
-    def test_op_dnf_updates_no_updates(self, mock_run, mock_atomic):
+    def test_op_dnf_updates_no_updates(self, mock_run, mock_atomic, mock_which):
         """DNF check return code 0 reports system up to date."""
         mock_run.return_value = MagicMock(returncode=0, stdout="")
         result = AgentExecutor._op_check_dnf_updates({})
@@ -596,9 +598,10 @@ class TestAgentExecutorExtended(unittest.TestCase):
         self.assertEqual(result.data.get("dnf_updates"), 0)
         self.assertIn("up to date", result.message.lower())
 
+    @patch("utils.agent_runner.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.agent_runner.SystemManager.is_atomic", return_value=False)
     @patch("utils.agent_runner.subprocess.run", side_effect=OSError("x"))
-    def test_op_dnf_updates_exception(self, mock_run, mock_atomic):
+    def test_op_dnf_updates_exception(self, mock_run, mock_atomic, mock_which):
         """DNF check exception path returns failure."""
         result = AgentExecutor._op_check_dnf_updates({})
         self.assertFalse(result.success)
