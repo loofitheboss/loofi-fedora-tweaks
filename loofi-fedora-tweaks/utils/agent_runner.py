@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 COMMAND_TIMEOUT_SECONDS = 60
 SCHEDULER_POLL_SECONDS = 10
 PROTECTED_GIT_BRANCHES = {"master", "refs/heads/master"}
+GIT_BRANCH_TIMEOUT_SECONDS = 5
 
 
 class AgentExecutor:
@@ -166,11 +167,12 @@ class AgentExecutor:
 
         tail = args[push_index + 1:]
         if not tail:
-            return (
-                True,
-                "Blocked: ambiguous 'git push' is not allowed for agents. "
-                "Use an explicit non-master refspec.",
-            )
+            if AgentExecutor._is_on_protected_branch():
+                return (
+                    True,
+                    "Blocked: agents are not allowed to push to protected branch 'master'.",
+                )
+            return False, ""
 
         if AgentExecutor._push_targets_protected_branch(tail):
             return (
@@ -195,7 +197,7 @@ class AgentExecutor:
         ]
         # With only remote provided (`git push origin`), destination is implicit.
         if len(non_options) <= 1:
-            return True
+            return AgentExecutor._is_on_protected_branch()
 
         # First non-option is usually remote, remaining are refspecs/branches.
         ref_tokens = non_options[1:]
@@ -224,6 +226,25 @@ class AgentExecutor:
                     return True
 
         return False
+
+    @staticmethod
+    def _is_on_protected_branch() -> bool:
+        """Return True when current git branch resolves to protected master."""
+        try:
+            branch = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True,
+                text=True,
+                timeout=GIT_BRANCH_TIMEOUT_SECONDS,
+                check=False,
+            )
+            if branch.returncode != 0:
+                return True
+            current = branch.stdout.strip()
+            return current in PROTECTED_GIT_BRANCHES
+        except (OSError, subprocess.SubprocessError):
+            # Fail closed if branch cannot be determined.
+            return True
 
     @staticmethod
     def _execute_operation(operation: str, settings: Dict[str, Any]) -> AgentResult:

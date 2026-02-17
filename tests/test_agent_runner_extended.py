@@ -107,17 +107,42 @@ class TestAgentExecutorExtended(unittest.TestCase):
 
     @patch("utils.agent_runner.Arbitrator.can_proceed", return_value=True)
     @patch("utils.agent_runner.CentralExecutor.run")
-    def test_execute_action_git_push_implicit_blocked(self, mock_run, mock_can_proceed):
-        """Ambiguous git push without explicit refspec is blocked for safety."""
+    @patch("utils.agent_runner.AgentExecutor._is_on_protected_branch", return_value=True)
+    def test_execute_action_git_push_implicit_blocked_on_master(
+        self, mock_is_protected, mock_run, mock_can_proceed
+    ):
+        """Implicit git push is blocked when current branch is protected master."""
         agent = self._agent()
         action = self._action(command="git", args=["push"])
         state = AgentState(agent_id="a1")
 
         result = AgentExecutor.execute_action(agent, action, state)
         self.assertFalse(result.success)
-        self.assertIn("ambiguous 'git push'", result.message)
+        self.assertIn("not allowed to push to protected branch 'master'", result.message)
         self.assertTrue(result.data.get("policy_block"))
         mock_run.assert_not_called()
+
+    @patch("utils.agent_runner.Arbitrator.can_proceed", return_value=True)
+    @patch("utils.agent_runner.CentralExecutor.run")
+    @patch("utils.agent_runner.AgentExecutor._is_on_protected_branch", return_value=False)
+    def test_execute_action_git_push_implicit_allowed_on_feature(
+        self, mock_is_protected, mock_run, mock_can_proceed
+    ):
+        """Implicit git push is allowed when current branch is not protected."""
+        mock_run.return_value = SimpleNamespace(
+            success=True,
+            message="ok",
+            exit_code=0,
+            stdout="pushed",
+        )
+        agent = self._agent()
+        action = self._action(command="git", args=["push"])
+        state = AgentState(agent_id="a1")
+
+        result = AgentExecutor.execute_action(agent, action, state)
+        self.assertTrue(result.success)
+        self.assertEqual(result.data.get("exit_code"), 0)
+        mock_run.assert_called_once()
 
     @patch("utils.agent_runner.Arbitrator.can_proceed", return_value=True)
     @patch(
