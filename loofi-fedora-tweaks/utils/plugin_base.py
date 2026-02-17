@@ -106,7 +106,7 @@ class PluginLoader:
     CONFIG_DIR = Path.home() / ".config" / "loofi-fedora-tweaks"
     STATE_FILE = CONFIG_DIR / "plugins.json"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.plugins: Dict[str, LoofiPlugin] = {}
         self._ensure_plugins_dir()
         self._ensure_state()

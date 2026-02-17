@@ -135,7 +135,7 @@ class SparkLine(QWidget):
 class HealthScoreWidget(QWidget):
     """Circular gauge showing aggregate system health score."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._score = 0
         self._grade = "—"
@@ -407,7 +407,7 @@ class DashboardTab(QWidget, PluginInterface):
     # Storage Breakdown
     # ==================================================================
 
-    def _build_storage_section(self):
+    def _build_storage_section(self) -> None:
         self.storage_card = self._card()
         self.storage_inner = QVBoxLayout(self.storage_card)
         title = QLabel(self.tr("💿 Storage"))
@@ -455,7 +455,7 @@ class DashboardTab(QWidget, PluginInterface):
     # Top Processes
     # ==================================================================
 
-    def _build_top_processes(self):
+    def _build_top_processes(self) -> None:
         card = self._card()
         inner = QVBoxLayout(card)
         title = QLabel(self.tr("🔝 Top Processes"))
@@ -488,7 +488,7 @@ class DashboardTab(QWidget, PluginInterface):
     # Recent Actions
     # ==================================================================
 
-    def _build_recent_actions(self):
+    def _build_recent_actions(self) -> None:
         card = self._card()
         inner = QVBoxLayout(card)
         title = QLabel(self.tr("📋 Recent Actions"))

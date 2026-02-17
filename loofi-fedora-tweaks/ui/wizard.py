@@ -200,7 +200,7 @@ class FirstRunWizard(QDialog):
     # Sentinel for v2 completion
     _V2_SENTINEL = _CONFIG_DIR / "wizard_v2.json"
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle(self.tr("Loofi Fedora Tweaks - Setup Wizard"))
         self.setFixedSize(620, 560)
@@ -446,9 +446,10 @@ class FirstRunWizard(QDialog):
         else:
             self._btn_next.setText(self.tr("\u2705 Apply"))
             self._btn_next.setProperty("wizardMode", "apply")
-        if self._btn_next.style() is not None:
-            self._btn_next.style().unpolish(self._btn_next)
-            self._btn_next.style().polish(self._btn_next)
+        style = self._btn_next.style()
+        if style is not None:
+            style.unpolish(self._btn_next)
+            style.polish(self._btn_next)
 
         # Populate contents when entering a step
         if index == 0:

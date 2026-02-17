@@ -50,7 +50,7 @@ class PerformanceTab(BaseTab):
     def create_widget(self) -> QWidget:
         return self
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._current_workload: WorkloadProfile | None = None
         self._current_rec: TuningRecommendation | None = None

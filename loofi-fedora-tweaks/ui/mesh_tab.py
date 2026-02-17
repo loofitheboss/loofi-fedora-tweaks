@@ -45,7 +45,7 @@ class MeshTab(QWidget, PluginInterface):
     # Default shared key for mesh network encryption (should be set during pairing)
     _shared_key = b"loofi-mesh-default-key"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._peers: list = []
         self.init_ui()

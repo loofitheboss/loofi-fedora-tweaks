@@ -2,6 +2,7 @@
 
 > **Python 3.12+** | **PyQt6** | **Fedora Linux**
 > Canonical references: `ARCHITECTURE.md` (structure + layer rules), `ROADMAP.md` (scope)
+> Stabilization rules: `.github/instructions/system_hardening_and_stabilization_guide.md` (mandatory)
 
 ## Build, Test, Lint
 
@@ -10,7 +11,7 @@
 just test                    # Full test suite
 just test-file test_commands # Single test file
 just test-method test_commands.py::TestPrivilegedCommandBuilders::test_dnf_install  # Single method
-just test-coverage           # Tests + coverage (min 75%)
+just test-coverage           # Tests + coverage (CI enforces 80%)
 just lint                    # flake8 (max-line-length=150, ignore E501,W503,E402,E722,E203)
 just typecheck               # mypy
 just verify                  # lint + typecheck + tests + coverage
@@ -27,10 +28,11 @@ mypy loofi-fedora-tweaks/ --ignore-missing-imports --no-error-summary
 
 ## Architecture
 
-PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fedora-tweaks/main.py`):
+PyQt6 desktop app for Fedora system management with four entry modes (`loofi-fedora-tweaks/main.py`):
 - **GUI** (default): `MainWindow` sidebar with 28 lazy-loaded tabs
 - **CLI** (`--cli`): Subcommands in `cli/main.py` with `--json` output
 - **Daemon** (`--daemon`): Background scheduler via `utils/daemon.py`
+- **API** (`api/`): FastAPI REST server for remote management
 
 ### Layer Boundaries (strict — enforced by CI)
 
@@ -38,10 +40,12 @@ PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fe
 |-------|------|---------|-----------|
 | **UI** | `ui/*_tab.py` | PyQt6 widgets, inherit `BaseTab` | `subprocess`, business logic |
 | **Utils** | `utils/*.py` | Business logic, `@staticmethod`, subprocess | `import PyQt6` |
+| **Services** | `services/` | Domain-specific service modules | Direct UI coupling |
 | **CLI** | `cli/main.py` | Argument parsing, calls `utils/` | `import ui`, PyQt6 |
 | **Core** | `core/executor/` | `BaseActionExecutor` + `ActionResult` | Direct UI/CLI coupling |
+| **API** | `api/routes/` | FastAPI endpoints, calls `utils/` | `import ui`, PyQt6 |
 
-`utils/operations.py` is the shared API — GUI and CLI are consumers only.
+`utils/operations.py` is the shared API — GUI, CLI, and API are consumers only.
 
 ## Critical Rules
 
@@ -53,8 +57,9 @@ PyQt6 desktop app for Fedora system management with three entry modes (`loofi-fe
 6. **Never `shell=True`** in subprocess calls
 7. **Always branch on `SystemManager.is_atomic()`** for dnf vs rpm-ostree
 8. **Audit log** all privileged actions (timestamp, action, params, exit code)
-9. **Never hardcode versions in tests** — use dynamic assertions; CI `docs_gate` blocks hardcoded version assertions
+9. **Never hardcode versions in tests** — use dynamic assertions; CI blocks hardcoded version assertions
 10. **Version sync** — `version.py`, `.spec`, `pyproject.toml` must match (use `scripts/bump_version.py`)
+11. **Stabilization gate** — no new major features until Phase 1–2 hardening complete (see stabilization guide)
 
 ## Key Patterns
 
@@ -120,6 +125,13 @@ Register in `MainWindow._lazy_tab()` loaders dict:
 "mytab": lambda: __import__("ui.mytab_tab", fromlist=["MyTabTab"]).MyTabTab(),
 ```
 
+### Dangerous Operations
+```python
+from ui.confirm_dialog import ConfirmActionDialog
+if ConfirmActionDialog.confirm(self, "Delete snapshots", "Cannot be undone"):
+    # proceed — SafetyManager prompts for snapshot creation before risky ops
+```
+
 ## Code Style
 
 - **Imports**: stdlib → third-party → local (alphabetical within groups, blank line between)
@@ -127,10 +139,11 @@ Register in `MainWindow._lazy_tab()` loaders dict:
 - **Type hints**: inline on all public methods; `CommandTuple = Tuple[str, List[str], str]`
 - **Docstrings**: Google-style, module-level docstring on every file
 - **Naming**: `*_tab.py` → `*Tab` class; `utils/*.py` → `*Manager`/`*Ops` with `@staticmethod`; test classes `Test*`; test methods `test_what_scenario`
+- **Commit style**: `fix:`, `feat:`, `docs:`, `test:` prefixes
 
 ## Testing
 
-Framework: `unittest` + `unittest.mock` (~4349 tests, 200 files, min 75% coverage).
+Framework: `unittest` + `unittest.mock` (CI enforces 80% coverage).
 
 ```python
 """Tests for utils/module.py"""
@@ -166,19 +179,23 @@ class TestManager(unittest.TestCase):
 
 ## Version Management
 
-Three files must stay in sync — use `scripts/bump_version.py` (also scaffolds release notes):
+Three files must stay in sync — use `scripts/bump_version.py` (also scaffolds release notes in `docs/releases/`):
 - `loofi-fedora-tweaks/version.py` (source of truth)
 - `loofi-fedora-tweaks.spec`
 - `pyproject.toml`
 
 ## CI/CD
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci.yml` | Push/PR | flake8 + pytest + rpmbuild (Fedora 43 container) |
-| `auto-release.yml` | Master push / tag | Auto-tag + release publish |
-| `pr-security-bot.yml` | PR to master | Bandit (skips B404/B603/B602) + pip-audit + detect-secrets |
-| `copr-publish.yml` | Release | SRPM → Fedora COPR |
+CI runs on every push/PR to master (`.github/workflows/ci.yml`):
+1. **adapter_drift** — verifies AI agent adapters are in sync
+2. **lint** — flake8
+3. **typecheck** — mypy
+4. **stabilization_rules** — enforces hardening compliance
+5. **test** — pytest with `--cov-fail-under=80` (Fedora 43, `QT_QPA_PLATFORM=offscreen`)
+6. **security** — bandit (skips B103,B104,B108,B310,B404,B603,B602)
+7. **stats_check** — project stats freshness
+
+Other workflows: `auto-release.yml` (auto-tag), `pr-security-bot.yml` (PR security scan), `copr-publish.yml` (Fedora COPR).
 
 ## Conventions
 
@@ -193,19 +210,7 @@ Three files must stay in sync — use `scripts/bump_version.py` (also scaffolds 
 
 ## Agent System
 
-For complex multi-step tasks, delegate to specialized agents. Copilot agents (`.github/agents/`) and Claude agents (`.github/claude-agents/`) mirror each other:
-
-| Copilot Agent | Claude Agent | Role |
-|---------------|-------------|------|
-| **Arkitekt** | architecture-advisor | Feature design, code organization, module structure |
-| **Builder** | backend-builder | `utils/` modules, dataclasses, system integration |
-| **CodeGen** | code-implementer | General implementation, bug fixes |
-| **Sculptor** | frontend-integration-builder | UI tabs, CLI commands, MainWindow wiring |
-| **Guardian / Test** | test-writer | Test creation, mock strategy, coverage |
-| **Manager** | project-coordinator | Task decomposition, multi-step orchestration |
-| **Planner** | release-planner | Release coordination, version bumps, roadmap |
-
-**Agent memory** persists in `.github/agent-memory/<agent>/MEMORY.md` — accumulated architectural decisions and patterns.
+Copilot agents (`.github/agents/`) and Claude agents (`.github/claude-agents/`) mirror each other. Agent memory persists in `.github/agent-memory/<agent>/MEMORY.md`. Sync tool: `scripts/sync_ai_adapters.py`.
 
 **Delegation order for new features:** Arkitekt (design) → Builder (utils) → Sculptor (UI/CLI) → Test (tests) → Manager (coordination)
 
@@ -218,80 +223,21 @@ Plan → Design → Build → Test → Doc → Package → Release
 ```
 
 ```bash
-# Single phase
-python3 scripts/workflow_runner.py --phase plan --target-version v45.0
-
-# Full pipeline
-python3 scripts/workflow_runner.py --phase all --target-version v45.0
-
-# Dry run
+python3 scripts/workflow_runner.py --phase plan --target-version v45.0     # Single phase
+python3 scripts/workflow_runner.py --phase all --target-version v45.0      # Full pipeline
 python3 scripts/workflow_runner.py --phase design --target-version v45.0 --dry-run
 ```
 
 - **Race lock** (`.workflow/specs/.race-lock.json`): prevents version mixing across phases
 - **Writer lock**: single-writer mutations across AI assistants (`--mode write` vs `--mode review`)
 - **Artifacts**: specs in `.workflow/specs/`, reports in `.workflow/reports/`
-- **Model routing**: `.github/workflow/model-router.toml` routes tasks to haiku/sonnet/opus
-- **Agent sync**: `scripts/sync_ai_adapters.py` keeps Claude/Copilot agent adapters in sync with canonical `.github/` definitions
-
-### Model Routing
-
-`.github/workflow/model-router.toml` maps phases to intelligence tiers:
-
-| Tier | Model | Phases |
-|------|-------|--------|
-| **Brain** | gpt-5.3-codex / opus | Plan, Design (bad decisions are expensive) |
-| **Labor** | gpt-4o / sonnet | Build, Test (strong coding/testing) |
-| **Labor-Light** | gpt-4o-mini / haiku | Doc, Package, Release (low-risk text) |
-
-### Phase Prompts
-
-Per-phase prompt templates in `.github/workflow/prompts/`:
-- `plan.md` — Task decomposition (coordinator role)
-- `design.md` — Architecture blueprint + pattern enforcement
-- `build.md` — Implementation in dependency order
-- `test.md` — unittest + @patch, 80%+ coverage target
-- `document.md` — CHANGELOG, README, release notes
-- `package.md` — Version alignment validation, build verification
-- `release.md` — Pre-flight checklist, git tag/branch commands
-
-## Skills (Codex)
-
-Reusable skill definitions in `.codex/skills/` map 1:1 to workflow phases. Each `SKILL.md` contains steps, output format, rules, and verification commands:
-
-| Skill | Phase | Purpose |
-|-------|-------|---------|
-| `plan` | P1 | Decompose ACTIVE version from ROADMAP.md into atomic tasks |
-| `design` | P2 | Create architecture specs before implementation |
-| `implement` | P3 | Execute tasks in dependency order, mark done |
-| `test` | P4 | Write/run tests for all changed files (80%+ coverage) |
-| `validate` | — | Check release readiness (version, tests, lint, docs) |
-| `doc` | P5 | Update CHANGELOG, README, release notes |
-| `package` | P6 | Build and verify RPM/Flatpak/AppImage/sdist |
-| `release` | P5-P7 | Full release execution (doc + package + tag) |
-
-### Codex Profiles (`.codex/config.toml`)
-
-| Profile | Model | Use case |
-|---------|-------|----------|
-| `fast` | gpt-4o-mini | Docs, formatting, version bumps |
-| `balanced` | gpt-4o | Logic, tests, UI, reviews |
-| `power` | gpt-5.3-codex | Multi-file architecture, debugging |
-| `planner` | gpt-5.3-codex | Planning/architecture artifacts |
-| `builder` | gpt-4o | Implementation tasks |
-| `scribe` | gpt-4o-mini | Release documentation |
-
-### Adapter Manifest
-
-`.codex/adapter-manifest.json` tracks canonical source locations:
-- Canonical agents: `.github/` (copilot agents + claude agents)
-- Workflow prompts: `.github/workflow/prompts/`
-- Runtime artifacts: `.workflow/` (specs, reports, archive)
-- Sync tool: `scripts/sync_ai_adapters.py` propagates changes from canonical → adapters
+- **Model routing**: `.github/workflow/model-router.toml` routes phases to model tiers (brain/labor/labor-light)
+- **Phase prompts**: `.github/workflow/prompts/` (plan, design, build, test, document, package, release)
+- **Codex skills**: `.codex/skills/` map 1:1 to workflow phases
 
 ## MCP Servers
 
-Configured in `.copilot/mcp-config.json` for Copilot CLI, `.vscode/mcp.json` for VS Code, `.mcp.json` for other tools:
+Configured in `.copilot/mcp-config.json` (Copilot CLI), `.vscode/mcp.json` (VS Code), `.mcp.json` (other tools):
 
 | Server | Purpose |
 |--------|---------|

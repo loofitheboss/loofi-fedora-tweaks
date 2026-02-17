@@ -486,7 +486,7 @@ class AgentRegistry:
     _instance: Optional["AgentRegistry"] = None
     _CONFIG_DIR = os.path.expanduser("~/.config/loofi-fedora-tweaks/agents")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._agents: Dict[str, AgentConfig] = {}
         self._states: Dict[str, AgentState] = {}
         self._ensure_config_dir()

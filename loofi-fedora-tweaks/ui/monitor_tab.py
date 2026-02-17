@@ -258,7 +258,7 @@ class _CoreBar(QWidget):
     the core's current utilisation percentage.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._value: float = 0.0
         self.setFixedHeight(24)

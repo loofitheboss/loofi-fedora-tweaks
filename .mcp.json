@@ -17,11 +17,13 @@
     },
     "loofi-agent-sync": {
       "command": "python3",
-      "args": ["scripts/mcp_agent_sync_server.py"]
+      "args": ["scripts/mcp_agent_sync_server.py"],
+      "cwd": "${workspaceFolder}"
     },
     "loofi-workflow": {
       "command": "python3",
-      "args": ["scripts/mcp_workflow_server.py"]
+      "args": ["scripts/mcp_workflow_server.py"],
+      "cwd": "${workspaceFolder}"
     }
   }
 }

@@ -84,7 +84,7 @@ class SystemPulse(QObject):
     # Generic event signal for extensibility
     event_triggered = pyqtSignal(str, dict)  # event_name, event_data
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._loop: Optional[Any] = None
         self._stop_event = threading.Event()

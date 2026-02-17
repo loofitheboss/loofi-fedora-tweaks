@@ -761,7 +761,7 @@ class AgentScheduler:
     Runs agents on their configured interval triggers in a background thread.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
         self._on_result: Optional[Callable[[str, AgentResult], None]] = None

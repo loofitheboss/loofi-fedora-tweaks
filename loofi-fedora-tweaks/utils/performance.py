@@ -68,7 +68,7 @@ class PerformanceCollector:
     # Disk sector size in bytes (standard Linux block layer)
     SECTOR_SIZE = 512
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Ring buffers for each metric type
         self._cpu_history: deque = deque(maxlen=self.MAX_SAMPLES)
         self._memory_history: deque = deque(maxlen=self.MAX_SAMPLES)

@@ -55,7 +55,7 @@ class _ApplicationsSubTab(QWidget):
     - Output log with command feedback
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         layout = QVBoxLayout()
         self.setLayout(layout)

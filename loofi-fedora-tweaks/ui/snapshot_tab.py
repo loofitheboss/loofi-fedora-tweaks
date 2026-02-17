@@ -45,12 +45,12 @@ class SnapshotTab(BaseTab):
     def create_widget(self) -> QWidget:
         return self
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.init_ui()
         QTimer.singleShot(200, self._refresh_backends)
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         layout = QVBoxLayout()
         self.setLayout(layout)
 
@@ -110,9 +110,9 @@ class SnapshotTab(BaseTab):
                 self.tr("Size"),
             ]
         )
-        self.snap_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        h_header = self.snap_table.horizontalHeader()
+        if h_header is not None:
+            h_header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.snap_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.snap_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.snap_table.setProperty("maxVisibleRows", 4)

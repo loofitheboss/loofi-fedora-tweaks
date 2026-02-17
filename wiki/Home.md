@@ -1,85 +1,94 @@
 # Loofi Fedora Tweaks Wiki
 
-Welcome to the official wiki for **Loofi Fedora Tweaks** — a comprehensive desktop control center for Fedora Linux.
+Welcome to the official wiki for **Loofi Fedora Tweaks** — a modern Fedora control center for maintenance, diagnostics, security, performance, and automation.
 
-## About
+**Current Version**: v46.0.0 "Navigator"  
+**Screenshots Refreshed**: February 17, 2026
 
-Loofi Fedora Tweaks is a PyQt6-based system management application that brings together day-to-day maintenance, diagnostics, tuning, networking, security, and automation in one unified interface.
+![Loofi Fedora Tweaks Dashboard](images/hero-home.png)
 
-**Current Version**: v46.0.0 "Navigator"
+## At a Glance
 
-### Key Features
+- 28 feature tabs across system, packages, hardware, network, security, and automation
+- 4 run modes: GUI, CLI (`--json`), daemon scheduler, and Web API
+- Plugin architecture with marketplace support
+- Atomic-aware behavior (`dnf` vs `rpm-ostree`)
+- Privileged actions through `pkexec` (never `sudo`)
 
-- **28 feature tabs** organized into 8 technical categories
-- **4 run modes**: GUI (default), CLI with `--json` output, Daemon scheduler, and Web API
-- **Plugin architecture** with marketplace support for third-party extensions
-- **Atomic Fedora aware**: Auto-detects Traditional Fedora (`dnf`) vs Atomic Fedora (`rpm-ostree`)
-- **Secure privilege escalation**: All root operations use `pkexec` (Polkit), never `sudo`
-- **Comprehensive test suite**: 5,936 collected (5,901 passed, 35 skipped)
+## Start Here
 
-> **Note**: Before using the automatic wiki publishing workflow, you must enable the Wiki feature in your repository settings (Settings → Features → Wikis). The first push may fail if the wiki hasn't been initialized.
+- [Installation](Installation)
+- [Getting Started](Getting-Started)
+- [GUI Tabs Reference](GUI-Tabs-Reference)
+- [CLI Reference](CLI-Reference)
+- [Screenshots](Screenshots)
 
----
+## Feature Preview
+
+### Core Workflows
+
+![System Monitor](images/system-monitor.png)
+
+![Maintenance Updates](images/maintenance-updates.png)
+
+![Network Connections](images/network-connections.png)
+
+![Security and Privacy](images/security-privacy.png)
+
+### Advanced Workflows
+
+![AI Lab Models](images/ai-lab-models.png)
+
+![Community Marketplace](images/community-marketplace.png)
+
+![Agents Dashboard](images/agents-dashboard.png)
+
+![Diagnostics Watchtower](images/diagnostics-watchtower.png)
 
 ## Wiki Pages
 
 ### Getting Started
 
-- **[Installation](Installation)** — System requirements, installation methods (Quick Install, RPM, from source)
-- **[Getting Started](Getting-Started)** — First-run wizard, GUI navigation, CLI basics
-- **[FAQ](FAQ)** — Frequently asked questions
+- [Installation](Installation)
+- [Getting Started](Getting-Started)
+- [FAQ](FAQ)
 
-### Features & Usage
+### Features and Usage
 
-- **[GUI Tabs Reference](GUI-Tabs-Reference)** — Complete reference for all 28 tabs organized by category
-- **[CLI Reference](CLI-Reference)** — All CLI commands with examples and JSON output
-- **[Configuration](Configuration)** — Config files, themes, QSS styling, app catalog
+- [GUI Tabs Reference](GUI-Tabs-Reference)
+- [CLI Reference](CLI-Reference)
+- [Configuration](Configuration)
+- [Screenshots](Screenshots)
 
-### Architecture & Development
+### Architecture and Development
 
-- **[Architecture](Architecture)** — Project structure, layer rules, critical patterns
-- **[Plugin Development](Plugin-Development)** — Plugin SDK guide, marketplace publishing
-- **[Security Model](Security-Model)** — pkexec policies, audit logging, parameter validation
-- **[Atomic Fedora Support](Atomic-Fedora-Support)** — Detection, behavioral differences, developer rules
+- [Architecture](Architecture)
+- [Plugin Development](Plugin-Development)
+- [Security Model](Security-Model)
+- [Atomic Fedora Support](Atomic-Fedora-Support)
 
-### Contributing & Support
+### Contributing and Support
 
-- **[Contributing](Contributing)** — Development setup, coding standards, PR workflow
-- **[Testing](Testing)** — Test suite metrics, running tests, testing patterns
-- **[CI/CD Pipeline](CI-CD-Pipeline)** — Pipeline files, auto-release flow, manual releases
-- **[Troubleshooting](Troubleshooting)** — Quick diagnostics, common issues, support bundle
+- [Contributing](Contributing)
+- [Testing](Testing)
+- [CI/CD Pipeline](CI-CD-Pipeline)
+- [Troubleshooting](Troubleshooting)
 
 ### Reference
 
-- **[Changelog](Changelog)** — Version history highlights through v46.0.0
-
----
+- [Changelog](Changelog)
 
 ## Quick Links
 
-- **GitHub Repository**: [loofitheboss/loofi-fedora-tweaks](https://github.com/loofitheboss/loofi-fedora-tweaks)
-- **Latest Release**: [v46.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v46.0.0)
-- **Issues**: [Issue Tracker](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
-- **README**: [Main README](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/README.md)
-- **Architecture Doc**: [ARCHITECTURE.md](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/ARCHITECTURE.md)
-
----
-
-## Project Status
-
-- **Latest Stable**: v46.0.0 "Navigator" (February 2026)
-- **Python**: 3.12+
-- **Framework**: PyQt6
-- **Platform**: Fedora 43+
-- **License**: MIT
-
----
+- GitHub Repository: [loofitheboss/loofi-fedora-tweaks](https://github.com/loofitheboss/loofi-fedora-tweaks)
+- Latest Release: [v46.0.0](https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v46.0.0)
+- Issues: [Issue Tracker](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
+- Main README: [README.md](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/README.md)
+- Architecture Doc: [ARCHITECTURE.md](https://github.com/loofitheboss/loofi-fedora-tweaks/blob/master/ARCHITECTURE.md)
 
 ## Support
 
-For bug reports, feature requests, or questions:
-
-1. Check the [Troubleshooting](Troubleshooting) page
-2. Search existing [GitHub Issues](https://github.com/loofitheboss/loofi-fedora-tweaks/issues)
-3. Run diagnostic commands: `loofi-fedora-tweaks --cli doctor` and `loofi-fedora-tweaks --cli support-bundle`
-4. Open a new issue with complete details (Fedora version, desktop environment, steps to reproduce, error logs)
+1. Check [Troubleshooting](Troubleshooting).
+2. Search existing [GitHub Issues](https://github.com/loofitheboss/loofi-fedora-tweaks/issues).
+3. Run `loofi-fedora-tweaks --cli doctor` and `loofi-fedora-tweaks --cli support-bundle`.
+4. Open a new issue with Fedora version, desktop environment, repro steps, and logs.

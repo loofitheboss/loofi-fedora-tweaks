@@ -20,7 +20,7 @@ Delegate to agents. Follow existing patterns. Minimize token usage.
 # Dev run
 ./run.sh
 
-# Run full test suite (~4349 tests, ~75s)
+# Run full test suite (~5936 tests)
 PYTHONPATH=loofi-fedora-tweaks python -m pytest tests/ -v --tb=short
 
 # Run a single test file
@@ -47,9 +47,9 @@ python scripts/bump_version.py
 
 ## ARCHITECTURE
 
-PyQt6 desktop app — **Python 3.12+**, **Fedora Linux**, **28 feature tabs**, **106 utils modules**, **74% test coverage**.
+PyQt6 desktop app — **Python 3.12+**, **Fedora Linux**, **29 feature tabs**, **108 utils modules**, **80% test coverage** (CI-enforced).
 
-Three entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--json`), `--daemon` (background scheduler).
+Four entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--json`), `--daemon` (background scheduler), `--api` (FastAPI REST server via `api/`).
 
 **Layer boundaries (strict):**
 
@@ -57,10 +57,12 @@ Three entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--jso
 | ------- | ------ | --------- |
 | UI | `ui/*_tab.py` | Inherit `BaseTab`, no `subprocess`, no business logic |
 | Utils | `utils/*.py` | All `@staticmethod`, return ops tuples, no PyQt6 |
+| Services | `services/` | Domain-specific service modules, no direct UI coupling |
 | CLI | `cli/main.py` | Argument parsing only, calls `utils/` |
+| API | `api/routes/` | FastAPI endpoints, calls `utils/`, no PyQt6 |
 | Core | `core/executor/` | `BaseActionExecutor` + `ActionResult`, no UI/CLI coupling |
 
-`utils/operations.py` is the shared API — GUI and CLI are consumers only.
+`utils/operations.py` is the shared API — GUI, CLI, and API are consumers only.
 
 **Version sync** — three files must always match, use `scripts/bump_version.py`:
 
@@ -78,8 +80,9 @@ Three entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--jso
 6. **Never `shell=True`** in subprocess calls
 7. **Always branch** on `SystemManager.is_atomic()` for dnf vs rpm-ostree
 8. **Audit log** all privileged actions (timestamp, action, params, exit code)
-9. **Never hardcode versions in tests** — use dynamic assertions; CI `docs_gate` blocks hardcoded version assertions
+9. **Never hardcode versions in tests** — use dynamic assertions; CI `stabilization_rules` blocks hardcoded version assertions
 10. **Always scaffold release notes** — `bump_version.py` creates `docs/releases/RELEASE-NOTES-vX.Y.Z.md`
+11. **Stabilization gate** — no new major features until Phase 1–2 hardening complete (see stabilization guide)
 
 ## KEY PATTERNS
 
@@ -149,6 +152,7 @@ class TestManager(unittest.TestCase):
 - **Type hints**: inline on all public methods; `CommandTuple = Tuple[str, List[str], str]`
 - **Docstrings**: Google-style, module-level on every file
 - **Naming**: `*_tab.py` → `*Tab`; `utils/*.py` → `*Manager`/`*Ops` with `@staticmethod`
+- **Commit style**: `fix:`, `feat:`, `docs:`, `test:` prefixes
 
 ## AGENT SYSTEM
 
@@ -175,7 +179,7 @@ See `.github/instructions/system_hardening_and_stabilization_guide.md`:
 
 ## RELEASE RULES
 
-**Current version:** v44.0.0 "Review Gate"
+**Current version:** v45.0.0
 
 For every vX.Y.0: update `version.py` + `.spec` + `pyproject.toml` (via `bump_version.py`), complete `CHANGELOG.md`, update `README.md`, run full test suite, build and verify RPM.
 

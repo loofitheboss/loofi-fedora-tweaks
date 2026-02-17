@@ -2,11 +2,9 @@
 
 Canonical screenshot assets for user-facing docs.
 
-**Last verified**: v41.0.0 "Coverage"
+**Last verified**: v46.0.0 "Navigator"
 
-**Status**: Screenshots were last captured at v32.0.0 "Abyss" and need to be
-recaptured to reflect the current v41.0.0 UI (theme refinements from v34-v39,
-QSS objectName migration from v39, and new tab layouts from v37).
+**Status**: Screenshot set refreshed on 2026-02-17 for the current UI.
 
 ## Current Files
 
@@ -53,7 +51,7 @@ Screenshots must be captured manually on a running instance. To regenerate:
 | `community-marketplace.png` | Automation > Community | Show marketplace tab |
 | `settings-appearance.png` | Personalize > Settings | Show appearance options |
 
-### Additional screenshots to consider for v41
+### Additional screenshots to consider for v46
 
 - `extensions-tab.png` -- Manage > Extensions (new in v37)
 - `backup-tab.png` -- Manage > Backup (new in v37)
