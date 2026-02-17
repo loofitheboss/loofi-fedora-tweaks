@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 # Module constants
 COMMAND_TIMEOUT_SECONDS = 60
 SCHEDULER_POLL_SECONDS = 10
+PROTECTED_GIT_BRANCHES = {"master", "refs/heads/master"}
 
 
 class AgentExecutor:
@@ -134,12 +135,95 @@ class AgentExecutor:
     @staticmethod
     def _execute_command(cmd: str, args: List[str]) -> AgentResult:
         """Execute a raw command via centralized ActionExecutor."""
+        blocked, reason = AgentExecutor._is_blocked_git_command(cmd, args)
+        if blocked:
+            return AgentResult(
+                success=False,
+                message=reason,
+                data={"policy_block": True, "cmd": cmd, "args": args},
+            )
+
         ar = CentralExecutor.run(cmd, args, timeout=COMMAND_TIMEOUT_SECONDS)
         return AgentResult(
             success=ar.success,
             message=ar.message,
             data={"exit_code": ar.exit_code, "stdout": ar.stdout[:1000]},
         )
+
+    @staticmethod
+    def _is_blocked_git_command(cmd: str, args: List[str]) -> tuple[bool, str]:
+        """Block protected git operations that must remain user-controlled."""
+        if cmd != "git":
+            return False, ""
+
+        push_index = -1
+        for i, token in enumerate(args):
+            if token == "push":
+                push_index = i
+                break
+        if push_index == -1:
+            return False, ""
+
+        tail = args[push_index + 1:]
+        if not tail:
+            return (
+                True,
+                "Blocked: ambiguous 'git push' is not allowed for agents. "
+                "Use an explicit non-master refspec.",
+            )
+
+        if AgentExecutor._push_targets_protected_branch(tail):
+            return (
+                True,
+                "Blocked: agents are not allowed to push to protected branch 'master'.",
+            )
+
+        return False, ""
+
+    @staticmethod
+    def _push_targets_protected_branch(push_args: List[str]) -> bool:
+        """Return True when git push arguments target the protected master branch."""
+        filtered = [a for a in push_args if a]
+        if not filtered:
+            return True
+
+        # Handle `git push --delete origin master` / `git push -d origin master`.
+        has_delete = "--delete" in filtered or "-d" in filtered
+
+        non_options = [
+            a for a in filtered if not a.startswith("-") and a != "--"
+        ]
+        # With only remote provided (`git push origin`), destination is implicit.
+        if len(non_options) <= 1:
+            return True
+
+        # First non-option is usually remote, remaining are refspecs/branches.
+        ref_tokens = non_options[1:]
+
+        for token in ref_tokens:
+            normalized = token.lstrip("+")
+            if normalized in PROTECTED_GIT_BRANCHES:
+                return True
+            if normalized in {"origin/master", "origin/refs/heads/master"}:
+                return True
+
+            if ":" in normalized:
+                src, dst = normalized.split(":", 1)
+                if dst in PROTECTED_GIT_BRANCHES:
+                    return True
+                # `:master` deletion form.
+                if has_delete and dst in PROTECTED_GIT_BRANCHES:
+                    return True
+                if src == "" and dst in PROTECTED_GIT_BRANCHES:
+                    return True
+
+        if has_delete:
+            for token in ref_tokens:
+                normalized = token.lstrip("+")
+                if normalized in PROTECTED_GIT_BRANCHES:
+                    return True
+
+        return False
 
     @staticmethod
     def _execute_operation(operation: str, settings: Dict[str, Any]) -> AgentResult:
