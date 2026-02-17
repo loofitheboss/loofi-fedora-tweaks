@@ -245,7 +245,10 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
     @staticmethod
     def ensure_table_row_heights(table: QTableWidget) -> None:
         """Normalize existing row heights to the configured minimum."""
-        min_height = table.verticalHeader().minimumSectionSize()
+        header = table.verticalHeader()
+        if header is None:
+            return
+        min_height = header.minimumSectionSize()
         for row in range(table.rowCount()):
             table.resizeRowToContents(row)
             if table.rowHeight(row) < min_height:

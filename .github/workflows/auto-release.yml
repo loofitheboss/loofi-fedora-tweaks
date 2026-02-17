@@ -166,9 +166,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Fedora review tool
-        run: dnf install -y python3 fedora-review
+        run: dnf install -y python3 fedora-review mock
+      - name: Configure mock group for CI
+        run: usermod -a -G mock "$(whoami)"
       - name: Fedora review gate
-        run: python3 scripts/check_fedora_review.py
+        run: sg mock -c "python3 scripts/check_fedora_review.py"
 
   docs_gate:
     runs-on: ubuntu-latest
