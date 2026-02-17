@@ -20,7 +20,7 @@ concurrency:
 env:
   PYTHON_VERSION: "3.12"
   COPR_PROJECT: "loofi-fedora-tweaks"
-  COPR_CHROOTS: "fedora-43-x86_64 fedora-44-x86_64 fedora-45-x86_64"
+  COPR_CHROOTS: "fedora-43-x86_64"
 
 jobs:
   publish:
