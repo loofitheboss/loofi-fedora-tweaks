@@ -76,9 +76,10 @@ class StorageTab(BaseTab):
         )
         self.disk_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.disk_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.disk_table.setMaximumHeight(140)
+        self.disk_table.setProperty("maxVisibleRows", 3)
         BaseTab.configure_table(self.disk_table)
         self.set_table_empty_state(self.disk_table, self.tr("Loading disks..."))
+        self._fit_table_height(self.disk_table, max_visible_rows=3)
         dl_layout.addWidget(self.disk_table)
 
         disk_btn_layout = QHBoxLayout()
@@ -116,8 +117,10 @@ class StorageTab(BaseTab):
             QHeaderView.ResizeMode.Stretch
         )
         self.mount_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.mount_table.setProperty("maxVisibleRows", 3)
         BaseTab.configure_table(self.mount_table)
         self.set_table_empty_state(self.mount_table, self.tr("Loading mount points..."))
+        self._fit_table_height(self.mount_table, max_visible_rows=3)
         ml_layout.addWidget(self.mount_table)
 
         layout.addWidget(mount_group)
@@ -180,6 +183,32 @@ class StorageTab(BaseTab):
     # Actions
     # ============================================================
 
+    @staticmethod
+    def _fit_table_height(table: QTableWidget, max_visible_rows: int = 3) -> None:
+        """Fit table height to current rows, capped to a visible row limit."""
+        if max_visible_rows < 1:
+            max_visible_rows = 1
+
+        header = table.horizontalHeader()
+        vertical_header = table.verticalHeader()
+
+        row_height = (
+            vertical_header.defaultSectionSize()
+            if vertical_header is not None
+            else max(36, table.fontMetrics().height() + 14)
+        )
+        header_height = header.height() if header is not None else 0
+        frame = table.frameWidth() * 2
+        scroll_h = table.horizontalScrollBar().sizeHint().height()
+
+        rows = max(1, table.rowCount())
+        visible_rows = min(rows, max_visible_rows)
+        table_height = (
+            header_height + (row_height * visible_rows) + frame + scroll_h + 8
+        )
+
+        table.setFixedHeight(table_height)
+
     def _refresh_all(self):
         """Refresh disk and mount tables."""
         self._refresh_disks()
@@ -196,6 +225,7 @@ class StorageTab(BaseTab):
                 self.set_table_empty_state(
                     self.disk_table, self.tr("No disks detected")
                 )
+                self._fit_table_height(self.disk_table, max_visible_rows=3)
                 return
 
             for disk in disks:
@@ -215,10 +245,12 @@ class StorageTab(BaseTab):
             normalize = getattr(BaseTab, "ensure_table_row_heights", None)
             if callable(normalize):
                 normalize(self.disk_table)
+            self._fit_table_height(self.disk_table, max_visible_rows=3)
         except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.disk_table, self.tr("Failed to load disks"), color="#e8556d"
             )
+            self._fit_table_height(self.disk_table, max_visible_rows=3)
             self.append_output(f"Error listing disks: {exc}\n")
 
     def _refresh_mounts(self):
@@ -232,6 +264,7 @@ class StorageTab(BaseTab):
                 self.set_table_empty_state(
                     self.mount_table, self.tr("No mount points found")
                 )
+                self._fit_table_height(self.mount_table, max_visible_rows=3)
                 return
 
             for mount in mounts:
@@ -248,12 +281,14 @@ class StorageTab(BaseTab):
             normalize = getattr(BaseTab, "ensure_table_row_heights", None)
             if callable(normalize):
                 normalize(self.mount_table)
+            self._fit_table_height(self.mount_table, max_visible_rows=3)
         except (RuntimeError, OSError, ValueError) as exc:
             self.set_table_empty_state(
                 self.mount_table,
                 self.tr("Failed to load mount points"),
                 color="#e8556d",
             )
+            self._fit_table_height(self.mount_table, max_visible_rows=3)
             self.append_output(f"Error listing mounts: {exc}\n")
 
     def _check_smart(self):

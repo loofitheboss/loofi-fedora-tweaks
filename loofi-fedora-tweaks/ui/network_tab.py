@@ -117,6 +117,7 @@ class NetworkTab(BaseTab):
         )
         self.iface_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.iface_table)
+        self._set_table_visible_rows(self.iface_table, visible_rows=3)
         self.set_table_empty_state(self.iface_table, self.tr("Loading interfaces..."))
         iface_layout.addWidget(self.iface_table)
 
@@ -147,6 +148,7 @@ class NetworkTab(BaseTab):
         )
         self.wifi_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.wifi_table)
+        self._set_table_visible_rows(self.wifi_table, visible_rows=3)
         self.set_table_empty_state(
             self.wifi_table, self.tr("Click 'Scan Wi-Fi' to list networks")
         )
@@ -188,6 +190,7 @@ class NetworkTab(BaseTab):
         )
         self.vpn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.vpn_table)
+        self._set_table_visible_rows(self.vpn_table, visible_rows=3)
         self.set_table_empty_state(
             self.vpn_table, self.tr("Loading VPN connections...")
         )
@@ -383,6 +386,7 @@ class NetworkTab(BaseTab):
         )
         self.traffic_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.traffic_table)
+        self._set_table_visible_rows(self.traffic_table, visible_rows=4)
         self.set_table_empty_state(
             self.traffic_table, self.tr("Switch to Monitoring to load traffic")
         )
@@ -409,6 +413,7 @@ class NetworkTab(BaseTab):
         )
         self.conn_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         BaseTab.configure_table(self.conn_table)
+        self._set_table_visible_rows(self.conn_table, visible_rows=4)
         self.set_table_empty_state(
             self.conn_table, self.tr("Switch to Monitoring to load connections")
         )
@@ -431,6 +436,32 @@ class NetworkTab(BaseTab):
     # ------------------------------------------------------------------ #
 
     @staticmethod
+    def _set_table_visible_rows(table: QTableWidget, visible_rows: int = 3) -> None:
+        """Cap table height to a DPI-aware number of visible rows."""
+        if visible_rows < 1:
+            visible_rows = 1
+
+        table.setProperty("maxVisibleRows", visible_rows)
+
+        header = table.horizontalHeader()
+        vertical_header = table.verticalHeader()
+
+        row_height = (
+            vertical_header.defaultSectionSize()
+            if vertical_header is not None
+            else max(36, table.fontMetrics().height() + 14)
+        )
+        header_height = header.height() if header is not None else 0
+        frame = table.frameWidth() * 2
+        scroll_h = table.horizontalScrollBar().sizeHint().height()
+
+        min_height = header_height + row_height + frame + 4
+        max_height = header_height + (row_height * visible_rows) + frame + scroll_h + 8
+
+        table.setMinimumHeight(min_height)
+        table.setMaximumHeight(max_height)
+
+    @staticmethod
     def _make_container(layout):
         """Wrap a QVBoxLayout into a plain QWidget for use as a tab page."""
         from PyQt6.QtCore import Qt
@@ -446,9 +477,7 @@ class NetworkTab(BaseTab):
         scroll = QScrollArea()
         scroll.setWidget(inner)
         scroll.setWidgetResizable(True)
-        scroll.setSizeAdjustPolicy(
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
-        )
+        scroll.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         return scroll

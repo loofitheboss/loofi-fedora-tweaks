@@ -17,8 +17,18 @@ import logging
 
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QTextEdit,
-    QStyledItemDelegate, QTableWidget, QTableWidgetItem, QPushButton, QFileDialog
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QGroupBox,
+    QLabel,
+    QTextEdit,
+    QStyledItemDelegate,
+    QTableWidget,
+    QTableWidgetItem,
+    QPushButton,
+    QFileDialog,
+    QSizePolicy,
 )
 from PyQt6.QtGui import QColor
 from utils.command_runner import CommandRunner
@@ -38,7 +48,9 @@ class _ReadableTableItemDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         """Ensure text stays vertically centered in every table cell."""
         super().initStyleOption(option, index)
-        option.displayAlignment = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        option.displayAlignment = (
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
 
     def sizeHint(self, option, index) -> QSize:
         """Guarantee a non-clipped row height for rendered item text."""
@@ -72,6 +84,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
 
     # Subclasses MUST override _METADATA with their own PluginMetadata
     _METADATA: PluginMetadata = _STUB_META
+    _DEFAULT_TABLE_VISIBLE_ROWS = 4
 
     def __init__(self):
         super().__init__()
@@ -100,13 +113,9 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
 
     def append_output(self, text):
         """Append text to the output area and scroll to bottom."""
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
         self.output_area.insertPlainText(text)
-        self.output_area.moveCursor(
-            self.output_area.textCursor().MoveOperation.End
-        )
+        self.output_area.moveCursor(self.output_area.textCursor().MoveOperation.End)
 
     def on_command_finished(self, exit_code):
         """Handle command completion."""
@@ -167,6 +176,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         text = self.output_area.toPlainText()
         if text:
             from PyQt6.QtWidgets import QApplication
+
             clipboard = QApplication.clipboard()
             if clipboard:
                 clipboard.setText(text)
@@ -177,8 +187,10 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         if not text:
             return
         path, _ = QFileDialog.getSaveFileName(
-            self, self.tr("Save Output"), "output.txt",
-            self.tr("Text Files (*.txt);;All Files (*)")
+            self,
+            self.tr("Save Output"),
+            "output.txt",
+            self.tr("Text Files (*.txt);;All Files (*)"),
         )
         if path:
             try:
@@ -239,6 +251,7 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
         table.setWordWrap(False)
         table.setTextElideMode(Qt.TextElideMode.ElideRight)
         table.setShowGrid(True)
+        table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         table.setObjectName("baseTable")
         BaseTab.ensure_table_row_heights(table)
 
@@ -253,23 +266,58 @@ class BaseTab(*_BaseTabBases):  # type: ignore[misc]
             table.resizeRowToContents(row)
             if table.rowHeight(row) < min_height:
                 table.setRowHeight(row, min_height)
+        max_rows = table.property("maxVisibleRows")
+        if not isinstance(max_rows, int) or max_rows < 1:
+            max_rows = BaseTab._DEFAULT_TABLE_VISIBLE_ROWS
+        BaseTab.fit_table_height(table, max_visible_rows=max_rows)
+
+    @staticmethod
+    def fit_table_height(table: QTableWidget, max_visible_rows: int = 4) -> None:
+        """Fit a table to content rows while capping visible rows."""
+        if max_visible_rows < 1:
+            max_visible_rows = 1
+
+        header = table.horizontalHeader()
+        vertical_header = table.verticalHeader()
+        row_height = (
+            vertical_header.defaultSectionSize()
+            if vertical_header is not None
+            else max(36, table.fontMetrics().height() + 14)
+        )
+        header_height = header.height() if header is not None else 0
+        frame = table.frameWidth() * 2
+        scroll_h = table.horizontalScrollBar().sizeHint().height()
+        rows = max(1, table.rowCount())
+        visible_rows = min(rows, max_visible_rows)
+        table_height = (
+            header_height + (row_height * visible_rows) + frame + scroll_h + 8
+        )
+
+        table.setFixedHeight(table_height)
+        table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
     @staticmethod
     def make_table_item(text, color: str = "") -> QTableWidgetItem:
         """Create a table item. Color is applied via QSS by default."""
         item = QTableWidgetItem(str(text))
-        item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        item.setTextAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         if color:
             item.setForeground(QColor(color))
         return item
 
     @staticmethod
-    def set_table_empty_state(table: QTableWidget, message: str, color: str = "") -> None:
+    def set_table_empty_state(
+        table: QTableWidget, message: str, color: str = ""
+    ) -> None:
         """Render a single full-width empty-state row in a table."""
         table.clearSpans()
         table.setRowCount(1)
         msg_item = BaseTab.make_table_item(message, color=color)
-        msg_item.setTextAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        msg_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
         table.setItem(0, 0, msg_item)
         for col in range(1, table.columnCount()):
             table.setItem(0, col, BaseTab.make_table_item("", color=color))

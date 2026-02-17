@@ -44,4 +44,32 @@ class TestBaseTabConfigureTable(unittest.TestCase):
 
         BaseTab.configure_table(table)
 
-        self.assertEqual(table.verticalHeader().minimumSectionSize(), table.verticalHeader().defaultSectionSize())
+        self.assertEqual(
+            table.verticalHeader().minimumSectionSize(),
+            table.verticalHeader().defaultSectionSize(),
+        )
+
+    def test_configure_table_sets_fixed_vertical_size_policy(self):
+        """configure_table keeps table height constrained in stacked layouts."""
+        from PyQt6.QtWidgets import QSizePolicy
+
+        table = QTableWidget(0, 2)
+
+        BaseTab.configure_table(table)
+
+        policy = table.sizePolicy()
+        self.assertEqual(policy.verticalPolicy(), QSizePolicy.Policy.Fixed)
+        self.assertGreater(table.height(), 0)
+
+    def test_ensure_table_row_heights_respects_max_visible_rows_property(self):
+        """ensure_table_row_heights caps table height using maxVisibleRows."""
+        table = QTableWidget(0, 2)
+        table.setProperty("maxVisibleRows", 2)
+
+        BaseTab.configure_table(table)
+        table.setRowCount(5)
+        BaseTab.ensure_table_row_heights(table)
+
+        row_height = table.verticalHeader().defaultSectionSize()
+        max_expected = table.horizontalHeader().height() + (row_height * 2) + 64
+        self.assertLessEqual(table.height(), max_expected)

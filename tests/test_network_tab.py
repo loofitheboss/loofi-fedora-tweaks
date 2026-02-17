@@ -234,7 +234,12 @@ class TestNetworkTabStaticHelpers(unittest.TestCase):
     def test_make_container_sets_scroll_and_margins(self):
         """_make_container wraps layout with scroll area and standard margins."""
         from PyQt6.QtCore import Qt
-        from PyQt6.QtWidgets import QAbstractScrollArea, QScrollArea, QVBoxLayout
+        from PyQt6.QtWidgets import (
+            QAbstractScrollArea,
+            QScrollArea,
+            QTableWidget,
+            QVBoxLayout,
+        )
 
         from ui.network_tab import NetworkTab
 
@@ -253,7 +258,7 @@ class TestNetworkTabStaticHelpers(unittest.TestCase):
         self.assertIsInstance(scroll, QScrollArea)
         self.assertEqual(
             scroll.sizeAdjustPolicy(),
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored,
         )
         self.assertEqual(
             scroll.horizontalScrollBarPolicy(),
@@ -263,6 +268,11 @@ class TestNetworkTabStaticHelpers(unittest.TestCase):
             scroll.verticalScrollBarPolicy(),
             Qt.ScrollBarPolicy.ScrollBarAsNeeded,
         )
+
+        table = QTableWidget(0, 2)
+        NetworkTab._set_table_visible_rows(table, visible_rows=3)
+        self.assertGreater(table.minimumHeight(), 0)
+        self.assertGreaterEqual(table.maximumHeight(), table.minimumHeight())
 
 
 # =========================================================================
