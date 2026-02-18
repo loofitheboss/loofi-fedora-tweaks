@@ -1,23 +1,36 @@
 {
   "servers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "toolsets": [
-        "pull_requests",
-        "code_security",
-        "secret_protection",
-        "issues",
-        "repos"
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
-    "loofi-workflow": {
+    "taskmaster-ai": {
       "type": "stdio",
-      "command": "python3",
+      "command": "npx",
       "args": [
-        "scripts/mcp_workflow_server.py"
-      ],
-      "cwd": "${workspaceFolder}"
+        "-y",
+        "task-master-ai"
+      ]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "puppeteer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
     },
     "context7": {
       "type": "stdio",
@@ -27,20 +40,33 @@
         "@upstash/context7-mcp@latest"
       ]
     },
-    "fetch": {
+    "memory": {
       "type": "stdio",
-      "command": "uvx",
+      "command": "npx",
       "args": [
-        "mcp-server-fetch"
+        "-y",
+        "@modelcontextprotocol/server-memory"
       ]
     },
-    "loofi-agent-sync": {
+    "filesystem": {
       "type": "stdio",
-      "command": "python3",
+      "command": "npx",
       "args": [
-        "scripts/mcp_agent_sync_server.py"
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
       ],
-      "cwd": "${workspaceFolder}"
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
     }
   }
 }
