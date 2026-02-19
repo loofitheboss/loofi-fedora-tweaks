@@ -1,18 +1,80 @@
 {
-  // MCP Server Configuration — Fedora Tweaks (project-specific servers only)
-  //
-  // Shared servers (github, context7, fetch, memory, etc.) are defined in
-  // the primary workspace folder (Veo Prompt Generator) and available here.
-  //
   "servers": {
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "taskmaster-ai": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "task-master-ai"
+      ]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "puppeteer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
     "loofi-workflow": {
       "type": "stdio",
       "command": "python3",
       "args": [
         "-u",
         "scripts/mcp_workflow_server.py"
-      ],
-      "cwd": "${workspaceFolder}"
+      ]
     },
     "loofi-agent-sync": {
       "type": "stdio",
@@ -20,8 +82,7 @@
       "args": [
         "-u",
         "scripts/mcp_agent_sync_server.py"
-      ],
-      "cwd": "${workspaceFolder}"
+      ]
     }
   }
 }
