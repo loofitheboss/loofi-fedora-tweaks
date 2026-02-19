@@ -37,25 +37,8 @@ Scope: kebab-case, max 100 chars subject.
 
 ## MCP Servers
 
-| Server | Purpose |
-| --- | --- |
-| **sequential-thinking** | Step-by-step chain-of-thought reasoning for complex refactors and architecture |
-| **taskmaster-ai** | AI-powered task management — create, execute, and track workflow tasks |
-| **playwright** | Playwright browser automation for E2E testing |
-| **puppeteer** | Headless browser automation, screenshots, scraping |
-| **context7** | Library documentation lookup for any framework or library |
-| **memory** | Persistent knowledge graph across sessions |
-| **filesystem** | Local file operations within workspace |
-| **github** | GitHub API (PRs, issues, repos, code search) |
+Workspace-level MCP config in primary repo `.vscode/mcp.json`. Repo-specific servers in `.vscode/mcp.json` (local).
 
 ## AI Agents
 
-| Agent | Model | Description |
-| --- | --- | --- |
-| project-coordinator | opus | Plans, breaks down, and coordinates complex features across repos |
-| architecture-advisor | sonnet | Designs features, plans code organization, reviews architecture |
-| backend-builder | sonnet | Implements or modifies backend service modules |
-| frontend-integration-builder | sonnet | Builds or modifies React/PyQt components, integrates state management |
-| code-implementer | sonnet | Implements code changes across any repo |
-| test-writer | haiku | Creates or updates unit tests for code changes |
-| release-planner | haiku | Plans releases, decomposes features into atomic tasks |
+See `AGENTS.md` and `.github/agents/` for agent definitions.
