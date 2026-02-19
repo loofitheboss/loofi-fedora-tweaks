@@ -468,30 +468,43 @@ def read_mcp_message() -> dict | None:
     """Read a single MCP message using Content-Length framing (LSP-style)."""
     headers: dict[str, str] = {}
     while True:
-        line = sys.stdin.readline()
-        if not line:
+        line_bytes = sys.stdin.buffer.readline()
+        if not line_bytes:
             return None
-        line = line.rstrip("\r\n")
+        line = line_bytes.decode("latin-1").rstrip("\r\n")
         if line == "":
             break
         if ":" in line:
             key, value = line.split(":", 1)
-            headers[key.strip()] = value.strip()
+            headers[key.strip().lower()] = value.strip()
 
-    length = int(headers.get("Content-Length", "0"))
+    length_raw = headers.get("content-length")
+    if not length_raw:
+        raise ValueError("Missing Content-Length header")
+
+    try:
+        length = int(length_raw)
+    except ValueError as exc:
+        raise ValueError(f"Invalid Content-Length: {length_raw}") from exc
+
     if length <= 0:
-        return None
+        raise ValueError(f"Invalid Content-Length value: {length}")
 
-    body = sys.stdin.read(length)
-    return json.loads(body)
+    body_bytes = sys.stdin.buffer.read(length)
+    if len(body_bytes) < length:
+        raise ValueError("Incomplete MCP message body")
+
+    body = body_bytes.decode("utf-8")
+    payload = json.loads(body)
+    return payload if isinstance(payload, dict) else None
 
 
 def write_mcp_message(msg: dict) -> None:
     """Write a single MCP message with Content-Length framing."""
-    body = json.dumps(msg)
-    header = f"Content-Length: {len(body.encode('utf-8'))}\r\n\r\n"
-    sys.stdout.write(header + body)
-    sys.stdout.flush()
+    body_bytes = json.dumps(msg).encode("utf-8")
+    header = f"Content-Length: {len(body_bytes)}\r\n\r\n".encode("ascii")
+    sys.stdout.buffer.write(header + body_bytes)
+    sys.stdout.buffer.flush()
 
 
 def main():

@@ -843,10 +843,10 @@ def read_mcp_message() -> dict | None:
 
 def write_mcp_message(msg: dict) -> None:
     """Write a single MCP message with Content-Length framing."""
-    body = json.dumps(msg)
-    header = f"Content-Length: {len(body.encode('utf-8'))}\r\n\r\n"
-    sys.stdout.write(header + body)
-    sys.stdout.flush()
+    body_bytes = json.dumps(msg).encode("utf-8")
+    header = f"Content-Length: {len(body_bytes)}\r\n\r\n".encode("ascii")
+    sys.stdout.buffer.write(header + body_bytes)
+    sys.stdout.buffer.flush()
 
 
 def main():
