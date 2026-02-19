@@ -18,12 +18,50 @@ from utils.update_manager import (
 )
 
 
+class TestDataclasses(unittest.TestCase):
+    """Tests for dataclass definitions."""
+
+    def test_update_entry_fields(self):
+        """UpdateEntry has all required fields."""
+        entry = UpdateEntry(name="vim", version="9.1.0", old_version="9.0.0", size="5MB", repo="updates", severity="bugfix")
+        self.assertEqual(entry.name, "vim")
+        self.assertEqual(entry.version, "9.1.0")
+        self.assertEqual(entry.old_version, "9.0.0")
+        self.assertEqual(entry.size, "5MB")
+        self.assertEqual(entry.repo, "updates")
+        self.assertEqual(entry.severity, "bugfix")
+
+    def test_conflict_entry_fields(self):
+        """ConflictEntry has all required fields."""
+        conflict = ConflictEntry(package="foo", conflict_with="bar", reason="version mismatch")
+        self.assertEqual(conflict.package, "foo")
+        self.assertEqual(conflict.conflict_with, "bar")
+        self.assertEqual(conflict.reason, "version mismatch")
+
+    def test_scheduled_update_fields(self):
+        """ScheduledUpdate has all required fields with defaults."""
+        scheduled = ScheduledUpdate(id="test-123", packages=["vim"], scheduled_time="03:00", timer_unit="test.timer")
+        self.assertEqual(scheduled.id, "test-123")
+        self.assertEqual(scheduled.packages, ["vim"])
+        self.assertEqual(scheduled.scheduled_time, "03:00")
+        self.assertEqual(scheduled.timer_unit, "test.timer")
+
+    def test_scheduled_update_defaults(self):
+        """ScheduledUpdate has empty defaults."""
+        scheduled = ScheduledUpdate(id="test")
+        self.assertEqual(scheduled.packages, [])
+        self.assertEqual(scheduled.scheduled_time, "")
+        self.assertEqual(scheduled.timer_unit, "")
+
+
 class TestUpdateManagerCheckUpdates(unittest.TestCase):
     """Tests for UpdateManager.check_updates()."""
 
     @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.update_manager.subprocess.run")
-    def test_check_updates_dnf_with_updates(self, mock_run, mock_atomic):
+    def test_check_updates_dnf_with_updates(self, mock_run, mock_which, mock_pm, mock_atomic):
         """DNF check-update returns available packages."""
         mock_run.return_value = MagicMock(
             returncode=100,
@@ -40,19 +78,41 @@ class TestUpdateManagerCheckUpdates(unittest.TestCase):
         self.assertEqual(result[0].repo, "updates")
 
     @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.update_manager.subprocess.run")
-    def test_check_updates_dnf_no_updates(self, mock_run, mock_atomic):
+    def test_check_updates_dnf_no_updates(self, mock_run, mock_which, mock_pm, mock_atomic):
         """DNF check-update returns 0 when no updates available."""
         mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
         result = UpdateManager.check_updates()
         self.assertEqual(len(result), 0)
 
     @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value="/usr/bin/dnf")
     @patch("utils.update_manager.subprocess.run")
-    def test_check_updates_dnf_timeout(self, mock_run, mock_atomic):
+    def test_check_updates_dnf_timeout(self, mock_run, mock_which, mock_pm, mock_atomic):
         """DNF check-update timeout returns empty list."""
         import subprocess
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="dnf", timeout=120)
+        result = UpdateManager.check_updates()
+        self.assertEqual(len(result), 0)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value=None)
+    def test_check_updates_dnf_not_found(self, mock_which, mock_pm, mock_atomic):
+        """DNF not installed returns empty list."""
+        result = UpdateManager.check_updates()
+        self.assertEqual(len(result), 0)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value="/usr/bin/dnf")
+    @patch("utils.update_manager.subprocess.run")
+    def test_check_updates_dnf_os_error(self, mock_run, mock_which, mock_pm, mock_atomic):
+        """DNF check-update OSError returns empty list."""
+        mock_run.side_effect = OSError("Permission denied")
         result = UpdateManager.check_updates()
         self.assertEqual(len(result), 0)
 
@@ -78,6 +138,14 @@ class TestUpdateManagerCheckUpdates(unittest.TestCase):
     def test_check_updates_ostree_failure(self, mock_run, mock_atomic):
         """rpm-ostree failure returns empty list."""
         mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="error")
+        result = UpdateManager.check_updates()
+        self.assertEqual(len(result), 0)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=True)
+    @patch("utils.update_manager.subprocess.run")
+    def test_check_updates_ostree_oserror(self, mock_run, mock_atomic):
+        """rpm-ostree OSError returns empty list."""
+        mock_run.side_effect = OSError("command failed")
         result = UpdateManager.check_updates()
         self.assertEqual(len(result), 0)
 
@@ -117,6 +185,23 @@ class TestUpdateManagerConflicts(unittest.TestCase):
         )
         result = UpdateManager.preview_conflicts()
         self.assertEqual(len(result), 1)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=True)
+    @patch("utils.update_manager.subprocess.run")
+    def test_preview_conflicts_ostree_timeout(self, mock_run, mock_atomic):
+        """rpm-ostree conflict preview with TimeoutExpired."""
+        import subprocess
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd="rpm-ostree", timeout=120)
+        result = UpdateManager.preview_conflicts()
+        self.assertEqual(len(result), 0)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=True)
+    @patch("utils.update_manager.subprocess.run")
+    def test_preview_conflicts_ostree_oserror(self, mock_run, mock_atomic):
+        """rpm-ostree conflict preview with OSError."""
+        mock_run.side_effect = OSError("command failed")
+        result = UpdateManager.preview_conflicts()
+        self.assertEqual(len(result), 0)
 
 
 class TestUpdateManagerSchedule(unittest.TestCase):
@@ -221,6 +306,26 @@ class TestUpdateManagerHistory(unittest.TestCase):
         result = UpdateManager.get_update_history()
         self.assertEqual(len(result), 2)
         self.assertTrue(result[0]["booted"])
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=True)
+    @patch("utils.update_manager.subprocess.run")
+    def test_history_ostree_bad_json(self, mock_run, mock_atomic):
+        """rpm-ostree history with invalid JSON returns empty list."""
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="not valid json {",
+            stderr="",
+        )
+        result = UpdateManager.get_update_history()
+        self.assertEqual(len(result), 0)
+
+    @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
+    @patch("utils.update_manager.SystemManager.get_package_manager", return_value="dnf")
+    @patch("utils.update_manager.shutil.which", return_value=None)
+    def test_history_dnf_not_found(self, mock_which, mock_pm, mock_atomic):
+        """DNF history when shutil.which returns None."""
+        result = UpdateManager.get_update_history()
+        self.assertEqual(len(result), 0)
 
     @patch("utils.update_manager.SystemManager.is_atomic", return_value=False)
     @patch("utils.update_manager.subprocess.run")

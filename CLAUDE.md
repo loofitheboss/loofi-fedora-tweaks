@@ -179,7 +179,7 @@ See `.github/instructions/system_hardening_and_stabilization_guide.md`:
 
 ## RELEASE RULES
 
-**Current version:** v45.0.0
+**Current version:** v49.0.0
 
 For every vX.Y.0: update `version.py` + `.spec` + `pyproject.toml` (via `bump_version.py`), complete `CHANGELOG.md`, update `README.md`, run full test suite, build and verify RPM.
 

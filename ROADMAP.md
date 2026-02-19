@@ -38,6 +38,7 @@
 | v46.0 | Navigator | DONE | Category clarity, navigation consistency, release packaging alignment |
 | v47.0 | Experience | DONE | UX experience levels, actionable feedback, health drill-down, guided tour |
 | v48.0 | Sidebar Index | DONE | Tab/sidebar restructure with O(1) ID-based lookups |
+| v49.0 | Shield | DONE | Test coverage expansion for lowest-covered modules |
 
 ---
 
@@ -1040,6 +1041,28 @@ focused on practical Fedora system management.
 ### Dependencies
 
 - v30.0 distribution infrastructure
+
+---
+
+## v49.0 — Shield [DONE]
+
+**Theme**: Test Coverage Expansion & Quality Hardening
+**Focus**: Bring lowest-covered modules (formatting, battery, update_manager, adapter) from 0–30% to 60%+ coverage with comprehensive edge case testing.
+
+### Deliverables
+
+- [x] `test_formatting.py` — 26 tests for pure formatting utilities (was 0% coverage)
+- [x] `test_battery_service.py` — 13 tests for BatteryManager.set_limit with all failure paths (was 24% coverage)
+- [x] `test_update_manager.py` — Enhanced with proper `shutil.which` + `SystemManager` mocking, deduplicated stale tests (28 tests, was 27% coverage)
+- [x] `test_plugin_adapter.py` — Expanded with lifecycle, slugify, version compat, CLI commands, check_compat manifest/permissions, context, integration (53 tests, was 30% coverage)
+- [x] CHANGELOG + ROADMAP + version bump
+
+### Agent Assignment
+
+| Agent | Task |
+|-------|------|
+| Guardian | Test creation, coverage expansion |
+| Planner | Version scope, release planning |
 
 ---
 

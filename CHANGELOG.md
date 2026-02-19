@@ -4,6 +4,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [49.0.0] - 2026-02-19 "Shield"
+
+### Testing — Coverage Expansion
+
+- New `test_formatting.py`: 26 tests covering `bytes_to_human`, `seconds_to_human`, `percent_bar`, `truncate` (was 0% coverage)
+- New `test_battery_service.py`: 13 tests for `BatteryManager.set_limit` — success, failure steps, OSError, SubprocessError, timeout enforcement (was 24% coverage)
+- Enhanced `test_update_manager.py`: Added proper `shutil.which` + `SystemManager` mocking, DNF not found, OSError paths (28 tests total, was 27% coverage)
+- Enhanced `test_plugin_adapter.py`: Added lifecycle, slugify, version compat, CLI commands, check_compat with manifest/permissions, context, and integration tests (53 tests total, was 30% coverage)
+- Deduplicated stale test methods in `test_update_manager.py` with incomplete mock patterns
+
+### Quality
+
+- All test mocks follow `@patch` decorator pattern with module-under-test namespace
+- All subprocess mocks include `timeout` enforcement verification
+- Covers both `dnf` and `rpm-ostree` paths where applicable
+
 ## [48.0.1] - 2026-02-19 "Sidebar Index"
 
 ### Security — API Hardening

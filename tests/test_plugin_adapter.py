@@ -197,6 +197,249 @@ class TestPluginAdapterCreateWidget:
         
         assert isinstance(widget, QWidget)
 
+    def test_create_widget_raises_type_error_on_non_qwidget(self):
+        """create_widget() raises RuntimeError when plugin returns non-QWidget."""
+        get_qapp()
+        legacy = _make_legacy_plugin()
+        # Plugin returns a string instead of QWidget
+        legacy.create_widget.return_value = "not a widget"
+        adapter = PluginAdapter(legacy)
+        
+        with __import__('pytest').raises(RuntimeError) as exc_info:
+            adapter.create_widget()
+        
+        assert "must return QWidget" in str(exc_info.value)
+
+    def test_create_widget_raises_runtime_error_on_failure(self):
+        """create_widget() raises RuntimeError when plugin create_widget fails."""
+        get_qapp()
+        legacy = _make_legacy_plugin()
+        legacy.create_widget.side_effect = ValueError("widget creation failed")
+        adapter = PluginAdapter(legacy)
+        
+        with __import__('pytest').raises(RuntimeError) as exc_info:
+            adapter.create_widget()
+        
+        assert "failed to create widget" in str(exc_info.value)
+
+
+class TestPluginAdapterLifecycle:
+    """Tests for plugin lifecycle methods."""
+
+    def test_on_activate_calls_on_load(self):
+        """on_activate() delegates to wrapped plugin's on_load()."""
+        legacy = _make_legacy_plugin()
+        legacy.on_load = MagicMock()
+        adapter = PluginAdapter(legacy)
+        
+        adapter.on_activate()
+        
+        legacy.on_load.assert_called_once()
+
+    def test_on_activate_handles_missing_on_load(self):
+        """on_activate() handles plugins without on_load method."""
+        legacy = _make_legacy_plugin()
+        # Remove on_load if it exists
+        if hasattr(legacy, 'on_load'):
+            delattr(legacy, 'on_load')
+        adapter = PluginAdapter(legacy)
+        
+        # Should not raise
+        adapter.on_activate()
+
+    def test_on_activate_handles_on_load_error(self):
+        """on_activate() logs warning if on_load() raises exception."""
+        legacy = _make_legacy_plugin()
+        legacy.on_load = MagicMock(side_effect=RuntimeError("load failed"))
+        adapter = PluginAdapter(legacy)
+        
+        # Should not raise, just log
+        adapter.on_activate()
+
+    def test_on_deactivate_is_noop(self):
+        """on_deactivate() does nothing for legacy plugins."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        # Should not raise
+        adapter.on_deactivate()
+
+
+class TestPluginAdapterContext:
+    """Tests for set_context() method."""
+
+    def test_set_context_stores_context(self):
+        """set_context() stores the context dict."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        context = {"main_window": "window", "config_manager": "config"}
+        adapter.set_context(context)
+        
+        assert hasattr(adapter, '_context')
+        assert adapter._context == context
+
+    def test_set_context_with_all_keys(self):
+        """set_context() accepts full context with all keys."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        context = {
+            "main_window": Mock(),
+            "config_manager": Mock(),
+            "executor": Mock()
+        }
+        adapter.set_context(context)
+        
+        assert adapter._context["main_window"] is not None
+        assert adapter._context["config_manager"] is not None
+        assert adapter._context["executor"] is not None
+
+
+class TestPluginAdapterSlugify:
+    """Tests for _slugify() static method."""
+
+    def test_slugify_basic(self):
+        """_slugify() converts basic name."""
+        result = PluginAdapter._slugify("My Plugin")
+        assert result == "my-plugin"
+
+    def test_slugify_multiple_words(self):
+        """_slugify() handles multiple words."""
+        result = PluginAdapter._slugify("AI Enhanced Widget")
+        assert result == "ai-enhanced-widget"
+
+    def test_slugify_with_numbers(self):
+        """_slugify() preserves numbers and converts dots."""
+        result = PluginAdapter._slugify("Test Plugin 2.0")
+        # The dot is treated as non-alphanumeric and becomes hyphen
+        assert result == "test-plugin-2-0"
+
+    def test_slugify_removes_special_chars(self):
+        """_slugify() removes special characters."""
+        result = PluginAdapter._slugify("Plugin (v2)!")
+        assert "plugin" in result
+        assert "(" not in result
+        assert ")" not in result
+        assert "!" not in result
+
+    def test_slugify_underscores(self):
+        """_slugify() converts underscores to hyphens."""
+        result = PluginAdapter._slugify("my_plugin_name")
+        assert result == "my-plugin-name"
+
+    def test_slugify_strips_leading_trailing(self):
+        """_slugify() strips leading/trailing hyphens."""
+        result = PluginAdapter._slugify("  Plugin!  ")
+        assert not result.startswith("-")
+        assert not result.endswith("-")
+
+    def test_slugify_multiple_spaces(self):
+        """_slugify() collapses multiple spaces."""
+        result = PluginAdapter._slugify("My    Plugin")
+        assert result == "my-plugin"
+
+    def test_slugify_already_slug(self):
+        """_slugify() handles already-slugified text."""
+        result = PluginAdapter._slugify("my-plugin")
+        assert result == "my-plugin"
+
+
+class TestPluginAdapterVersionCompat:
+    """Tests for _version_compat() static method."""
+
+    def test_version_compat_equal(self):
+        """_version_compat() returns True for equal versions."""
+        result = PluginAdapter._version_compat("25.0.0", "25.0.0")
+        assert result is True
+
+    def test_version_compat_greater(self):
+        """_version_compat() returns True when current > minimum."""
+        result = PluginAdapter._version_compat("26.0.0", "25.0.0")
+        assert result is True
+
+    def test_version_compat_less(self):
+        """_version_compat() returns False when current < minimum."""
+        result = PluginAdapter._version_compat("24.0.0", "25.0.0")
+        assert result is False
+
+    def test_version_compat_minor_version(self):
+        """_version_compat() compares minor versions."""
+        result = PluginAdapter._version_compat("25.1.0", "25.0.0")
+        assert result is True
+
+    def test_version_compat_patch_version(self):
+        """_version_compat() compares patch versions."""
+        result = PluginAdapter._version_compat("25.0.1", "25.0.0")
+        assert result is True
+
+    def test_version_compat_two_part_version(self):
+        """_version_compat() handles two-part versions."""
+        result = PluginAdapter._version_compat("25.0", "24.5")
+        assert result is True
+
+    def test_version_compat_mismatched_parts(self):
+        """_version_compat() handles different version part counts."""
+        result = PluginAdapter._version_compat("25.0.0", "24.5")
+        assert result is True
+
+    def test_version_compat_invalid_version(self):
+        """_version_compat() assumes compatible on unparseable versions."""
+        result = PluginAdapter._version_compat("invalid", "25.0.0")
+        assert result is True
+
+    def test_version_compat_both_invalid(self):
+        """_version_compat() assumes compatible when both versions invalid."""
+        result = PluginAdapter._version_compat("abc", "xyz")
+        assert result is True
+
+
+class TestPluginAdapterCLICommands:
+    """Tests for get_cli_commands() delegation."""
+
+    def test_get_cli_commands_delegates(self):
+        """get_cli_commands() delegates to wrapped plugin."""
+        legacy = _make_legacy_plugin()
+        commands = {"test": MagicMock()}
+        legacy.get_cli_commands.return_value = commands
+        adapter = PluginAdapter(legacy)
+        
+        result = adapter.get_cli_commands()
+        
+        legacy.get_cli_commands.assert_called_once()
+        assert result == commands
+
+    def test_get_cli_commands_returns_dict(self):
+        """get_cli_commands() returns dict of commands."""
+        legacy = _make_legacy_plugin()
+        legacy.get_cli_commands.return_value = {}
+        adapter = PluginAdapter(legacy)
+        
+        result = adapter.get_cli_commands()
+        
+        assert isinstance(result, dict)
+
+
+class TestPluginAdapterWrappedProperty:
+    """Tests for wrapped_plugin property."""
+
+    def test_wrapped_plugin_property(self):
+        """wrapped_plugin property returns the underlying plugin."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        result = adapter.wrapped_plugin
+        
+        assert result is legacy
+
+    def test_wrapped_plugin_is_readonly(self):
+        """wrapped_plugin property cannot be set (read-only)."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        # Property should be read-only (no setter)
+        assert hasattr(adapter, 'wrapped_plugin')
+
 
 class TestPluginAdapterCheckCompat:
     """Tests for PluginAdapter.check_compat() delegation."""
@@ -224,6 +467,50 @@ class TestPluginAdapterCheckCompat:
         
         # Adapter checks manifest compatibility
         assert isinstance(result, CompatStatus)
+
+    def test_check_compat_with_min_app_version(self):
+        """check_compat() checks manifest min_app_version."""
+        legacy = _make_legacy_plugin()
+        manifest = MagicMock()
+        manifest.min_app_version = "999.0.0"  # Future version
+        legacy.manifest = manifest
+        adapter = PluginAdapter(legacy)
+        
+        detector = MagicMock()
+        result = adapter.check_compat(detector)
+        
+        # Should detect incompatibility
+        assert result.compatible is False
+        assert "Requires app version" in result.reason
+
+    def test_check_compat_with_permissions_warning(self):
+        """check_compat() warns about requested permissions."""
+        legacy = _make_legacy_plugin()
+        manifest = MagicMock()
+        manifest.min_app_version = None
+        manifest.permissions = ["sudo", "network"]
+        legacy.manifest = manifest
+        adapter = PluginAdapter(legacy)
+        
+        detector = MagicMock()
+        result = adapter.check_compat(detector)
+        
+        # Should be compatible but with warnings
+        assert result.compatible is True
+        assert len(result.warnings) > 0
+        assert any("sudo" in w for w in result.warnings)
+        assert any("network" in w for w in result.warnings)
+
+    def test_check_compat_no_manifest(self):
+        """check_compat() returns compatible when no manifest."""
+        legacy = _make_legacy_plugin()
+        adapter = PluginAdapter(legacy)
+        
+        detector = MagicMock()
+        result = adapter.check_compat(detector)
+        
+        assert result.compatible is True
+        assert result.warnings == []
 
 
 class TestPluginAdapterIntegration:

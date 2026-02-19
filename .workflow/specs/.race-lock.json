@@ -1,7 +1,7 @@
 {
-  "version": "v48.0.1",
-  "started_at": "20260219_045100",
+  "version": "v49.0.0",
+  "started_at": "20260219_060000",
   "status": "active",
-  "target_version": "v48.0.1",
-  "bumped_at": "2026-02-19T04:51:08.666195+00:00"
+  "target_version": "v49.0.0",
+  "bumped_at": "2026-02-19T06:00:00.000000+00:00"
 }
