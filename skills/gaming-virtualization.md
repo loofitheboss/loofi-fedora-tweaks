@@ -1,6 +1,7 @@
 # Gaming & Virtualization Skills
 
 ## Game Mode
+
 - **GameMode activation** — Install and enable Feral GameMode for performance
 - **CPU governor** — Switch to performance governor during gaming
 - **Process priority** — Elevate game process priority automatically
@@ -10,6 +11,7 @@
 **CLI:** `advanced`
 
 ## GPU Passthrough (VFIO)
+
 - **IOMMU setup** — Configure IOMMU groups for GPU isolation
 - **VFIO binding** — Bind GPU to vfio-pci driver
 - **Configuration wizard** — Step-by-step passthrough setup
@@ -20,6 +22,7 @@
 **CLI:** `vfio`
 
 ## Virtual Machine Management
+
 - **VM lifecycle** — Create, start, stop, delete KVM/QEMU VMs
 - **VM configuration** — CPU, RAM, disk, network settings per VM
 - **VM templates** — Quick-create VMs from predefined templates
@@ -30,6 +33,7 @@
 **CLI:** `vm`
 
 ## Performance Optimization for Gaming
+
 - **TCP BBR** — Enable BBR congestion control for lower latency
 - **Swappiness tuning** — Reduce swappiness for gaming workloads
 - **DNF tweaks** — Optimize package manager for faster operations
@@ -38,6 +42,7 @@
 **CLI:** `advanced`
 
 ## Gaming Profiles
+
 - **Quick-switch** — One-click gaming profile activation
 - **Custom profiles** — Save and load gaming-specific system configurations
 - **Auto-detection** — Detect game launches and apply profile
@@ -47,6 +52,7 @@
 **CLI:** `profile`
 
 ## GPU Management
+
 - **GPU detection** — Identify discrete and integrated GPUs
 - **Driver info** — Display active GPU driver and version
 - **GPU monitoring** — Temperature, utilization, memory usage

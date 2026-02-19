@@ -1,6 +1,7 @@
 # Security Skills
 
 ## Firewall Management
+
 - **Zone management** — Create, modify, delete firewalld zones
 - **Port rules** — Open/close ports with protocol specification
 - **Rich rules** — Advanced firewall rules with source/destination filtering
@@ -11,6 +12,7 @@
 **CLI:** `firewall`
 
 ## SELinux
+
 - **Mode management** — Switch between enforcing, permissive, disabled
 - **Boolean toggles** — Enable/disable SELinux booleans
 - **Audit review** — Review SELinux denials and generate policies
@@ -18,6 +20,7 @@
 **UI:** Security Tab
 
 ## USB Guard
+
 - **Device policy** — Allow/block USB devices by vendor/product ID
 - **Whitelist management** — Maintain trusted USB device list
 - **Real-time blocking** — Block unauthorized USB devices on connect
@@ -26,6 +29,7 @@
 **UI:** Security Tab
 
 ## Security Audit
+
 - **Security scoring** — Calculate system security posture score
 - **Vulnerability check** — Identify common misconfigurations
 - **Compliance review** — Check against security baselines
@@ -36,6 +40,7 @@
 **CLI:** `security-audit`, `audit-log`
 
 ## Secure Boot
+
 - **Status check** — Verify Secure Boot enrollment state
 - **Key management** — View enrolled keys and certificates
 
@@ -43,6 +48,7 @@
 **UI:** System Info Tab
 
 ## Port Auditing
+
 - **Open port scan** — Identify listening ports and associated processes
 - **Service mapping** — Map ports to systemd services
 - **Suspicious detection** — Flag unexpected listeners
@@ -51,6 +57,7 @@
 **UI:** Security Tab
 
 ## Biometric Authentication
+
 - **Fingerprint enrollment** — Register fingerprint for authentication
 - **Fingerprint login** — Use fingerprint for privilege escalation
 
@@ -58,6 +65,7 @@
 **UI:** Security Tab
 
 ## Privilege Escalation
+
 - **pkexec** — All root operations use Polkit-based escalation (never sudo)
 - **Polkit policy** — Custom policy at `config/org.loofi.fedora-tweaks.policy`
 - **Audit trail** — Every privileged action logged with timestamp, params, exit code

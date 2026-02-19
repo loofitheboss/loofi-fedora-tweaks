@@ -1,6 +1,7 @@
 # Development Skills
 
 ## Developer Tools
+
 - **Toolchain management** — Install and manage development toolchains
 - **IDE integration** — Configure VS Code and other editors
 - **Container support** — Podman/Docker container management
@@ -10,6 +11,7 @@
 **UI:** Development Tab
 
 ## Container Management
+
 - **Podman integration** — Build, run, manage OCI containers
 - **Image management** — Pull, list, remove container images
 - **Container networking** — Configure container network settings
@@ -18,6 +20,7 @@
 **UI:** Development Tab
 
 ## VS Code Integration
+
 - **Workspace setup** — Configure VS Code workspace for Fedora development
 - **Extension management** — Install recommended VS Code extensions
 - **Settings sync** — Synchronize VS Code settings
@@ -26,6 +29,7 @@
 **UI:** Development Tab
 
 ## Diagnostics
+
 - **Dependency doctor** — Check for missing system dependencies
 - **Boot analysis** — Identify slow boot services and configurations
 - **System validation** — Verify system integrity and configuration
@@ -36,6 +40,7 @@
 **CLI:** `doctor`
 
 ## Configuration Management
+
 - **Config file management** — Read, write, validate configuration files
 - **Environment management** — Manage environment variables and dotenv files
 - **Settings persistence** — Save and load application settings

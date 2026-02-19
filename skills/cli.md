@@ -6,7 +6,7 @@
 ## Information & Monitoring
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `info` | System information and version |
 | `health` | System health overview with scores |
 | `disk` | Disk usage and partition details |
@@ -20,7 +20,7 @@
 ## System Operations
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `cleanup` | DNF cache, journal vacuum, SSD trim, autoremove, RPM DB rebuild |
 | `tweak` | Power profiles, audio restart, battery charge limits |
 | `advanced` | DNF tweaks, TCP BBR, GameMode install, swappiness |
@@ -38,7 +38,7 @@
 ## Profiles & Presets
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `preset` | System preset activation and listing |
 | `profile` | System profile save/load/list/activate |
 | `focus-mode` | Enable/disable focus mode (domain blocking, DND) |
@@ -46,7 +46,7 @@
 ## Storage & Backup
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `storage` | Storage management and optimization |
 | `snapshot` | Snapshot create/list/restore/delete |
 | `backup` | Backup wizard operations |
@@ -54,7 +54,7 @@
 ## Logs & Diagnostics
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `logs` | Journal filtering, analysis, and export |
 | `audit-log` | Security audit log review |
 | `security-audit` | Security posture score calculation |
@@ -62,14 +62,14 @@
 ## Virtualization
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `vm` | Virtual machine lifecycle (create/start/stop/delete) |
 | `vfio` | GPU passthrough setup assistant |
 
 ## Advanced Features
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `mesh` | Loofi Link peer discovery on LAN |
 | `teleport` | Workspace state capture and restore |
 | `tuner` | Performance auto-tuning |
@@ -79,14 +79,14 @@
 ## Plugin & Extension Management
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `plugins` | Plugin install/remove/list/enable/disable |
 | `plugin-marketplace` | Browse and install from marketplace |
 
 ## Application Management
 
 | Command | Description |
-|---------|-------------|
+| --------- | ------------- |
 | `self-update` | Check for and apply Loofi updates |
 | `support-bundle` | Export debug information bundle |
 

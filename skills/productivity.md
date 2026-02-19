@@ -1,6 +1,7 @@
 # Productivity Skills
 
 ## Focus Mode
+
 - **Domain blocking** — Block distracting websites via /etc/hosts
 - **Process killing** — Automatically close distracting applications
 - **Do Not Disturb** — Suppress desktop notifications
@@ -11,6 +12,7 @@
 **CLI:** `focus-mode`
 
 ## System Profiles
+
 - **Quick-switch profiles** — Gaming, Development, Battery Saver, Server, Presentation
 - **Custom profiles** — Create and save custom system configurations
 - **Profile import/export** — Share profiles between machines
@@ -21,6 +23,7 @@
 **CLI:** `profile`
 
 ## System Presets
+
 - **Preset management** — Apply curated system configuration bundles
 - **Preset listing** — Browse available presets with descriptions
 - **Custom presets** — Create presets from current system state
@@ -29,6 +32,7 @@
 **CLI:** `preset`
 
 ## State Teleport
+
 - **Workspace capture** — Snapshot current workspace state (open apps, windows, files)
 - **State restore** — Recreate workspace from a saved teleport
 - **Cross-device transfer** — Move workspace state between devices
@@ -38,6 +42,7 @@
 **CLI:** `teleport`
 
 ## Quick Actions & Favorites
+
 - **Quick actions** — Customizable shortcut buttons for frequent operations
 - **Favorites** — Pin favorite tools and operations for quick access
 - **Command palette** — Ctrl+K keyboard shortcut for instant command search
@@ -46,6 +51,7 @@
 **UI:** Dashboard Tab
 
 ## Cloud Sync
+
 - **Configuration sync** — Synchronize settings across devices via cloud storage
 - **Selective sync** — Choose which settings to synchronize
 - **Conflict resolution** — Handle sync conflicts gracefully

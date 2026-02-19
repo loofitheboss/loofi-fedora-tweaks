@@ -6,7 +6,7 @@
 ## Categories
 
 | Category | Skill Files | Description |
-|----------|-------------|-------------|
+| ---------- | ------------- | ------------- |
 | [System Management](system-management.md) | 12 skills | Package ops, cleanup, services, boot, kernel |
 | [Performance & Monitoring](performance-monitoring.md) | 10 skills | CPU/RAM monitoring, auto-tuning, health scoring |
 | [Security](security.md) | 8 skills | Firewall, SELinux, USB guard, audit, secure boot |

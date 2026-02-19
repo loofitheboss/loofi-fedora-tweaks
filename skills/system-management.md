@@ -1,6 +1,7 @@
 # System Management Skills
 
 ## Package Management
+
 - **Install/Remove packages** — DNF or rpm-ostree auto-detected via `SystemManager.get_package_manager()`
 - **Smart updates** — Batch package updates with conflict resolution and rollback
 - **Autoremove** — Clean unused dependency packages
@@ -12,6 +13,7 @@
 **CLI:** `package`, `updates`, `flatpak-manage`
 
 ## System Cleanup
+
 - **DNF cache clean** — Purge package manager cache
 - **Journal vacuum** — Trim systemd journal to size/time limits
 - **SSD TRIM** — Discard unused filesystem blocks
@@ -23,6 +25,7 @@
 **CLI:** `cleanup`
 
 ## Service Management
+
 - **Service control** — Start, stop, restart, enable, disable systemd units
 - **Service discovery** — List all services with status, type, description
 - **Service monitoring** — Track service state changes
@@ -32,6 +35,7 @@
 **CLI:** `service`
 
 ## Boot Configuration
+
 - **Boot analysis** — Analyze boot time and identify slow services
 - **GRUB config** — Modify bootloader parameters safely
 - **Kernel parameters** — View and set kernel command line options
@@ -42,6 +46,7 @@
 **CLI:** `boot`
 
 ## System Information
+
 - **Hardware detection** — CPU, GPU, RAM, motherboard, battery info
 - **Hardware profiles** — Auto-detect hardware model (HP EliteBook, ThinkPad, etc.)
 - **OS detection** — Traditional vs Atomic (Silverblue/Kinoite) Fedora
@@ -52,6 +57,7 @@
 **CLI:** `info`, `hardware`
 
 ## Process Management
+
 - **Process listing** — Top processes by CPU, memory, I/O
 - **Process control** — Kill, signal, priority adjustment
 - **Resource tracking** — Per-process resource consumption history
@@ -61,6 +67,7 @@
 **CLI:** `processes`
 
 ## Factory Reset
+
 - **Full reset** — Restore system to default configuration state
 - **Selective reset** — Reset specific components (network, desktop, packages)
 
