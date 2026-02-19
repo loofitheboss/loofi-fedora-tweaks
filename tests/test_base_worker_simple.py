@@ -17,6 +17,12 @@ try:
     from core.workers import BaseWorker
 except ImportError:
     _SKIP_QT = True
+    # Provide a dummy so class definitions don't crash at collection time
+    class BaseWorker:  # type: ignore[no-redef]
+        """Dummy BaseWorker for environments without PyQt6."""
+        def __init__(self, *a, **kw): pass
+        def report_progress(self, *a, **kw): pass
+        def is_cancelled(self): return False
 
 pytestmark = pytest.mark.skipif(_SKIP_QT, reason="Qt/PyQt6 not available in headless environment")
 

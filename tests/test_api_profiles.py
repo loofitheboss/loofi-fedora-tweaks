@@ -3,15 +3,31 @@
 import os
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
-from fastapi.testclient import TestClient
+import pytest
+
+try:
+    from fastapi.testclient import TestClient
+    _HAS_FASTAPI = True
+except ImportError:
+    _HAS_FASTAPI = False
+
+pytestmark = pytest.mark.skipif(not _HAS_FASTAPI, reason="fastapi not installed")
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.api_server import APIServer
-from utils.auth import AuthManager
-from utils.containers import Result
+if _HAS_FASTAPI:
+    from utils.api_server import APIServer
+    from utils.auth import AuthManager
+    from utils.containers import Result
+else:
+    # Dummy so @patch return_value=Result(...) doesn't crash at collection
+    class Result:  # type: ignore[no-redef]
+        def __init__(self, success=True, message="", data=None):
+            self.success = success
+            self.message = message
+            self.data = data or {}
 
 
 class TestAPIProfiles(unittest.TestCase):

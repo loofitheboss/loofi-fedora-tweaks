@@ -5,11 +5,19 @@ import time
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi.testclient import TestClient
 
-from utils.action_result import ActionResult
-from utils.api_server import APIServer
-from utils.auth import AuthManager
+try:
+    from fastapi.testclient import TestClient
+    _HAS_FASTAPI = True
+except ImportError:
+    _HAS_FASTAPI = False
+
+pytestmark = pytest.mark.skipif(not _HAS_FASTAPI, reason="fastapi not installed")
+
+if _HAS_FASTAPI:
+    from utils.action_result import ActionResult
+    from utils.api_server import APIServer
+    from utils.auth import AuthManager
 
 
 @pytest.fixture

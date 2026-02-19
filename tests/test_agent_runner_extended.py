@@ -8,6 +8,14 @@ from unittest.mock import MagicMock, patch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
+# Pre-mock PyQt6 for headless/Windows environments
+if "PyQt6" not in sys.modules:
+    _qt_mock = MagicMock()
+    for mod in [
+        "PyQt6", "PyQt6.QtCore", "PyQt6.QtWidgets", "PyQt6.QtGui",
+    ]:
+        sys.modules[mod] = _qt_mock
+
 from utils.agents import (
     ActionSeverity,
     AgentAction,
