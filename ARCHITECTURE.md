@@ -3,7 +3,7 @@
 > **Canonical architecture reference.** All agent and instruction files MUST reference this document
 > instead of duplicating architecture details. This file is updated when structure changes.
 >
-> **Version**: 47.0.0 "Experience" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
+> **Version**: 48.0.0 "Sidebar Index" | **Python**: 3.12+ | **Framework**: PyQt6 | **Platform**: Fedora Linux
 
 ## Project Structure
 
@@ -262,7 +262,7 @@ for plugin in PluginRegistry.instance():
 - **Both paths**: Test success AND failure
 - **No root**: Tests run in CI without privileges
 - **Path setup**: `sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))`
-- **Coverage**: 74% current, 80% target
+- **Coverage**: 82% current, 85% stretch goal
 
 ## Adding a Feature
 

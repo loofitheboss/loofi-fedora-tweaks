@@ -64,7 +64,8 @@ class VirtualizationPlugin(LoofiPlugin):
         from utils.virtualization import VirtualizationManager
         status = VirtualizationManager.get_full_status()
         if not status.libvirt_available:
-            return "libvirt is not installed. Install with: sudo dnf install libvirt"
+            from utils.install_hints import build_install_hint
+            return f"libvirt is not installed. {build_install_hint('libvirt')}"
         return "VM listing requires libvirt (use 'virsh list --all')"
 
     @staticmethod

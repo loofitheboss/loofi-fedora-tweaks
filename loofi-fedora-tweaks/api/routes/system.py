@@ -1,37 +1,40 @@
-"""System information API routes."""
+"""System information API routes.
 
-from fastapi import APIRouter
+Security:
+- /health is unauthenticated but does NOT expose version info.
+- /info and /agents require Bearer JWT authentication.
+"""
+
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from utils.agents import AgentRegistry
 from utils.monitor import SystemMonitor
+from utils.auth import AuthManager
 from services.system import SystemManager
-from version import __version__, __version_codename__
 
 router = APIRouter()
 
 
 class HealthResponse(BaseModel):
-    """Health response payload."""
+    """Health response payload — no version info for unauthenticated callers."""
 
     status: str
-    version: str
-    codename: str
 
 
 @router.get("/health", response_model=HealthResponse)
 def get_health():
-    """Basic health check endpoint."""
-    return HealthResponse(
-        status="ok",
-        version=__version__,
-        codename=__version_codename__,
-    )
+    """Basic health check endpoint (unauthenticated, no version leak)."""
+    return HealthResponse(status="ok")
 
 
 @router.get("/info")
-def get_info():
-    """Return system info and health metrics."""
+def get_info(
+    _auth: str = Depends(AuthManager.verify_bearer_token),
+):
+    """Return system info and health metrics (authenticated)."""
+    from version import __version__, __version_codename__
+
     health = SystemMonitor.get_system_health()
     return {
         "version": __version__,
@@ -60,8 +63,10 @@ def get_info():
 
 
 @router.get("/agents")
-def get_agents():
-    """Return agent configs and runtime states."""
+def get_agents(
+    _auth: str = Depends(AuthManager.verify_bearer_token),
+):
+    """Return agent configs and runtime states (authenticated)."""
     registry = AgentRegistry.instance()
     agents = registry.list_agents()
     return {

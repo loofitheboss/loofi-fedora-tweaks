@@ -175,6 +175,19 @@ jobs:
           name: security-report
           path: bandit-report.json
 
+  dependency_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
+      - run: pip install -r requirements.txt pip-audit
+      - run: pip-audit --strict --progress-spinner off
+
   package_flatpak:
     runs-on: ubuntu-latest
     timeout-minutes: 30

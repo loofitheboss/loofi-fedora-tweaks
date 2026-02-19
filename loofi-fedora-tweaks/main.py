@@ -51,12 +51,14 @@ def _check_pyqt6():
     except ImportError as exc:
         msg = str(exc)
         if "libGL" in msg:
+            from utils.install_hints import build_install_hint
             hint = (
                 "PyQt6 cannot load because libGL is missing.\n"
-                "Fix:  sudo dnf install mesa-libGL mesa-libEGL"
+                f"Fix:  {build_install_hint('mesa-libGL mesa-libEGL')}"
             )
         elif "No module named" in msg:
-            hint = "PyQt6 is not installed.\nFix:  sudo dnf install python3-pyqt6"
+            from utils.install_hints import build_install_hint
+            hint = f"PyQt6 is not installed.\nFix:  {build_install_hint('python3-pyqt6')}"
         else:
             hint = f"PyQt6 import failed: {msg}"
 

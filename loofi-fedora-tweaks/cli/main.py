@@ -454,7 +454,8 @@ def cmd_temperature(_args):
 
         if not sensors:
             _print("\n⚠️  No temperature sensors found.")
-            _print("   Ensure lm_sensors is installed: sudo dnf install lm_sensors")
+            from utils.install_hints import build_install_hint
+            _print(f"   Ensure lm_sensors is installed: {build_install_hint('lm_sensors')}")
             return 1
 
         for sensor in sensors:

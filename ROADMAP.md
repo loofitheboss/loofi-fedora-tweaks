@@ -74,7 +74,7 @@ before package and release execution paths. No product feature expansion.
 
 ---
 
-## [ACTIVE] v46.0 "Navigator" — Navigation Clarity & Release Alignment
+## [DONE] v46.0 "Navigator" — Navigation Clarity & Release Alignment
 
 ### Scope
 

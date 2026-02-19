@@ -6,6 +6,7 @@ Rules:
 2. UI modules must not call subprocess.run/check_output/call/Popen
 3. Runtime code must not hardcode executable dnf invocations
 4. broad except Exception handlers must be explicitly allowlisted
+5. Runtime code must not contain "sudo " in string literals
 """
 
 from __future__ import annotations
@@ -29,6 +30,12 @@ ALLOWED_BROAD_EXCEPTIONS = {
     ("loofi-fedora-tweaks/utils/daemon.py", "Daemon.run"),
     ("loofi-fedora-tweaks/ui/lazy_widget.py", "LazyWidget.showEvent"),
     ("loofi-fedora-tweaks/utils/error_handler.py", "_log_error"),
+}
+
+# Paths where "sudo" in strings is expected (docs, sandbox policy docstrings)
+SUDO_STRING_ALLOWLIST = {
+    "loofi-fedora-tweaks/utils/install_hints.py",
+    "loofi-fedora-tweaks/core/plugins/sandbox.py",
 }
 
 
@@ -124,6 +131,22 @@ class _Analyzer(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+    def visit_Constant(self, node: ast.Constant) -> None:
+        if (
+            isinstance(node.value, str)
+            and "sudo " in node.value
+            and self.rel_path not in SUDO_STRING_ALLOWLIST
+        ):
+            self.violations.append(
+                Violation(
+                    rule="sudo-string",
+                    path=self.rel_path,
+                    line=node.lineno,
+                    message=f"string literal contains 'sudo ': {node.value[:60]!r}",
+                )
+            )
+        self.generic_visit(node)
+
 
 def _is_subprocess_call(node: ast.Call) -> bool:
     func = node.func
@@ -207,7 +230,7 @@ def analyze_source(source: str, rel_path: str) -> List[Violation]:
 def analyze_file(path: Path, *, root: Path = ROOT) -> List[Violation]:
     """Analyze one Python file."""
     try:
-        rel_path = str(path.relative_to(root))
+        rel_path = path.relative_to(root).as_posix()
     except ValueError:
         rel_path = str(path)
     source = path.read_text(encoding="utf-8")

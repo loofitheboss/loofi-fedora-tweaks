@@ -26,6 +26,32 @@ All notable changes to this project will be documented in this file.
 - Loader order comment in `core/plugins/loader.py`
 - 20 new tests in `tests/test_sidebar_index.py`
 
+### Stabilization Pass
+
+#### Security — API Hardening
+- Added `COMMAND_ALLOWLIST` (30+ executables) to `/execute` endpoint with `403` rejection + audit logging
+- Auth-gated `/info` and `/agents` endpoints with Bearer JWT via `AuthManager.verify_bearer_token`
+- Stripped version from `/health` endpoint to prevent information disclosure
+
+#### Security — Privilege Hygiene
+- Replaced 4 hardcoded `sudo dnf` strings with `build_install_hint()` calls (main.py, cli/main.py, virtualization plugin)
+- Added Rule 5 (sudo-string AST literal check) to `scripts/check_stabilization_rules.py`
+- Added `SUDO_STRING_ALLOWLIST` for legitimate references (install_hints.py, sandbox.py)
+
+#### Testing — Coverage Expansion
+- 10 new test files (282 test methods) covering previously untested modules:
+  `test_auth.py`, `test_clipboard_sync.py`, `test_state_teleport.py`, `test_vfio.py`,
+  `test_ai_models.py`, `test_disposable_vm.py`, `test_mesh_discovery.py`,
+  `test_voice.py`, `test_arbitrator.py`, `test_agent_scheduler.py`
+
+#### CI — Dependency Auditing
+- Added `dependency_audit` job to CI (pip-audit, runs after security job)
+
+#### Documentation Freshness
+- Updated ARCHITECTURE.md version to 48.0.0, coverage to 82%
+- Updated ROADMAP.md (v46 ACTIVE → DONE)
+- Added API Threat Model section to SECURITY.md (binding, auth, endpoint security table, command allowlist, known limitations)
+
 ## [47.0.0] - 2026-02-18 "Experience"
 
 ### UX Experience System
