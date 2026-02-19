@@ -155,8 +155,10 @@ def update_race_lock(new_version: str, dry_run: bool) -> list[str]:
     new_ver = f"v{new_version}" if not new_version.startswith("v") else new_version
 
     if old_ver != new_ver:
+        lock["version"] = new_ver
         lock["target_version"] = new_ver
         lock["status"] = "active"
+        lock["started_at"] = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         lock["bumped_at"] = datetime.now(timezone.utc).isoformat()
         changes.append(f"  race-lock: {old_ver} -> {new_ver}")
 
