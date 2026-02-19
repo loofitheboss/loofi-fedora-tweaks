@@ -4,7 +4,7 @@
     {
       "label": "Workflow: Phase (write)",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/workflow_runner.py",
         "--phase",
@@ -26,7 +26,7 @@
     {
       "label": "Workflow: Phase (review)",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/workflow_runner.py",
         "--phase",
@@ -46,7 +46,7 @@
     {
       "label": "Workflow: All (write)",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/workflow_runner.py",
         "--phase",
@@ -68,7 +68,7 @@
     {
       "label": "Workflow: Release Writer Lock",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/workflow_runner.py",
         "--release-writer-lock",
@@ -82,7 +82,7 @@
     {
       "label": "Workflow: Sync AI Adapters",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/sync_ai_adapters.py"
       ],
@@ -91,7 +91,7 @@
     {
       "label": "Workflow: Check AI Adapter Drift",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/sync_ai_adapters.py",
         "--check"
@@ -101,7 +101,7 @@
     {
       "label": "Workflow: Validate Release Docs",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/check_release_docs.py"
       ],
@@ -110,7 +110,7 @@
     {
       "label": "Workflow: Validate Release Docs + Logs",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/check_release_docs.py",
         "--require-logs"
@@ -140,7 +140,7 @@
     {
       "label": "Dev: Run Tests",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "-m",
         "pytest",
@@ -183,7 +183,7 @@
     {
       "label": "Dev: Project Stats",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/project_stats.py",
         "--markdown"
@@ -193,7 +193,7 @@
     {
       "label": "Dev: Render Templates",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/sync_ai_adapters.py",
         "--render"
@@ -203,7 +203,7 @@
     {
       "label": "Dev: Bump Version (dry-run)",
       "type": "shell",
-      "command": "python3",
+      "command": "python",
       "args": [
         "scripts/bump_version.py",
         "--dry-run",
