@@ -217,13 +217,13 @@
       "id": "workflowVersion",
       "type": "promptString",
       "description": "Workflow target version (example: v45.0)",
-      "default": "v45.0"
+      "default": "v48.0"
     },
     {
       "id": "workflowVersionNoV",
       "type": "promptString",
       "description": "Workflow target version without v (example: 45.0)",
-      "default": "45.0"
+      "default": "48.0"
     },
     {
       "id": "workflowPhase",

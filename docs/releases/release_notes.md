@@ -1,11 +1,23 @@
-# Release Notes -- Compatibility Alias
+# Release Notes -- Latest
 
-This file is retained for older links.
+Canonical "latest release notes index" for the project.
 
-Canonical latest index:
+## Current Release
 
-- [RELEASE_NOTES.md](RELEASE_NOTES.md)
+- **v45.0.0 "Housekeeping"**
+- Full notes: [RELEASE-NOTES-v45.0.0.md](RELEASE-NOTES-v45.0.0.md)
 
-Version-specific notes:
+## Recent Releases
 
-- `RELEASE-NOTES-vX.Y.Z.md`
+- v44.0.0 "Review Gate": [RELEASE-NOTES-v44.0.0.md](RELEASE-NOTES-v44.0.0.md)
+- v43.0.0 "Stabilization-Only": [RELEASE-NOTES-v43.0.0.md](RELEASE-NOTES-v43.0.0.md)
+- v42.0.0 "Sentinel": [RELEASE-NOTES-v42.0.0.md](RELEASE-NOTES-v42.0.0.md)
+
+## Versioned Notes
+
+Use `RELEASE-NOTES-vX.Y.Z.md` files in this directory for per-version details.
+
+Legacy compatibility paths:
+
+- `docs/releases/release_notes.md`
+- `docs/release_notes.md`

@@ -4,6 +4,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [48.0.1] - 2026-02-19 "Sidebar Index"
+
+### Security — API Hardening
+
+- Added `COMMAND_ALLOWLIST` (30+ executables) to `/execute` endpoint with 403 rejection + audit logging
+- Auth-gated `/info` and `/agents` endpoints with Bearer JWT
+- Stripped version from `/health` endpoint to prevent information disclosure
+
+### Security — Privilege Hygiene
+
+- Replaced 4 hardcoded `sudo dnf` strings with `build_install_hint()` calls
+- Added Rule 5 (sudo-string AST literal check) to `check_stabilization_rules.py`
+
+### Testing
+
+- 10 new test files (282 tests) covering auth, clipboard sync, state teleport, VFIO, AI models, disposable VM, mesh discovery, voice, arbitrator, agent scheduler
+- Fixed test pollution: eagerly import PyQt6 in conftest to prevent mock contamination
+- Aligned all tests with API hardening changes (allowlisted commands, auth gates)
+
+### CI
+
+- Added `dependency_audit` job (pip-audit)
+- Fixed adapter drift in copilot instructions
+- All 14 CI jobs green (6240 tests passing, 82% coverage)
+
+### Documentation
+
+- Updated ARCHITECTURE.md, ROADMAP.md, SECURITY.md
+- Added API Threat Model to SECURITY.md
+
 ## [48.0.0] - 2026-02-17 "Sidebar Index"
 
 ### Sidebar Architecture
@@ -29,25 +59,30 @@ All notable changes to this project will be documented in this file.
 ### Stabilization Pass
 
 #### Security — API Hardening
+
 - Added `COMMAND_ALLOWLIST` (30+ executables) to `/execute` endpoint with `403` rejection + audit logging
 - Auth-gated `/info` and `/agents` endpoints with Bearer JWT via `AuthManager.verify_bearer_token`
 - Stripped version from `/health` endpoint to prevent information disclosure
 
 #### Security — Privilege Hygiene
+
 - Replaced 4 hardcoded `sudo dnf` strings with `build_install_hint()` calls (main.py, cli/main.py, virtualization plugin)
 - Added Rule 5 (sudo-string AST literal check) to `scripts/check_stabilization_rules.py`
 - Added `SUDO_STRING_ALLOWLIST` for legitimate references (install_hints.py, sandbox.py)
 
 #### Testing — Coverage Expansion
+
 - 10 new test files (282 test methods) covering previously untested modules:
   `test_auth.py`, `test_clipboard_sync.py`, `test_state_teleport.py`, `test_vfio.py`,
   `test_ai_models.py`, `test_disposable_vm.py`, `test_mesh_discovery.py`,
   `test_voice.py`, `test_arbitrator.py`, `test_agent_scheduler.py`
 
 #### CI — Dependency Auditing
+
 - Added `dependency_audit` job to CI (pip-audit, runs after security job)
 
 #### Documentation Freshness
+
 - Updated ARCHITECTURE.md version to 48.0.0, coverage to 82%
 - Updated ROADMAP.md (v46 ACTIVE → DONE)
 - Added API Threat Model section to SECURITY.md (binding, auth, endpoint security table, command allowlist, known limitations)
