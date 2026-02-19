@@ -35,6 +35,7 @@ MODEL_ROUTER_FILE = ROOT / ".github" / "workflow" / "model-router.toml"
 PROMPTS_DIR = ROOT / ".github" / "workflow" / "prompts"
 FEDORA_REVIEW_CHECK_SCRIPT = ROOT / "scripts" / "check_fedora_review.py"
 FEDORA_REVIEW_GATED_PHASES = {"package", "release"}
+AGENT_RUN_TIMEOUT_SECONDS = 1800
 
 PHASE_ORDER = ["plan", "design", "build", "test", "doc", "package", "release"]
 DEFAULT_PHASE_MODELS = {
@@ -324,6 +325,44 @@ def release_writer_lock(assistant: str, owner: str, dry_run: bool, force: bool) 
     return True, f"released writer lock held by {held_by}"
 
 
+def build_phase_status(version_tag: str) -> dict[str, Any]:
+    """Build current phase status snapshot for a version."""
+    manifest_path = artifact_paths(version_tag)["run_manifest"]
+    manifest = load_json_file(manifest_path)
+
+    completed: list[str] = []
+    current_phase = "not-started"
+    if manifest and isinstance(manifest.get("phases"), list):
+        for entry in manifest["phases"]:
+            if not isinstance(entry, dict):
+                continue
+            phase_name = entry.get("phase")
+            status = entry.get("status")
+            if isinstance(phase_name, str) and status == "success":
+                completed.append(phase_name)
+        if completed:
+            last = completed[-1]
+            try:
+                index = PHASE_ORDER.index(last)
+                current_phase = (
+                    PHASE_ORDER[index + 1] if index + 1 < len(PHASE_ORDER) else "complete"
+                )
+            except ValueError:
+                current_phase = "unknown"
+        else:
+            current_phase = "plan"
+
+    writer_lock = load_writer_lock()
+    return {
+        "version": version_tag,
+        "run_manifest": str(manifest_path),
+        "manifest_exists": manifest_path.exists(),
+        "completed_phases": completed,
+        "current_phase": current_phase,
+        "writer_lock": writer_lock,
+    }
+
+
 def load_manifest(path: Path, version_tag: str, assistant: str, owner: str, mode: str, issue: str | None) -> dict[str, Any]:
     current = load_json_file(path)
     if current:
@@ -354,6 +393,20 @@ def append_manifest_entry(path: Path, base_manifest: dict[str, Any], entry: dict
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
+def emit_failure(entry: dict[str, Any]) -> None:
+    """Emit a concise error message for blocked/failed phase runs."""
+    error = entry.get("error")
+    if not error:
+        return
+    details = entry.get("details")
+    print(f"ERROR: {error}", file=sys.stderr)
+    if isinstance(details, list):
+        for item in details:
+            print(f"  - {item}", file=sys.stderr)
+    elif isinstance(details, str) and details:
+        print(f"  - {details}", file=sys.stderr)
 
 
 def build_review_instruction(base_instruction: str, phase: str, issue: str | None, review_path: Path) -> str:
@@ -477,7 +530,7 @@ def run_agent(
     sandbox = "read-only" if mode == "review" else "workspace-write"
 
     if not dry_run:
-        agent_binary = "copilot" if assistant == "copilot" else "codex"
+        agent_binary = "copilot" if assistant == "copilot" else "claude" if assistant == "claude" else "codex"
         if shutil.which(agent_binary) is None:
             return 127, {"status": "error", "error": f"'{agent_binary}' command not found in PATH"}
 
@@ -533,10 +586,21 @@ def run_agent(
     if mode == "review":
         if uses_stdin_prompt:
             result = subprocess.run(
-                cmd, input=combined_prompt, text=True, capture_output=True, check=False)
+                cmd,
+                input=combined_prompt,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=AGENT_RUN_TIMEOUT_SECONDS,
+            )
         else:
             result = subprocess.run(
-                cmd, text=True, capture_output=True, check=False)
+                cmd,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=AGENT_RUN_TIMEOUT_SECONDS,
+            )
         metadata["status"] = "success" if result.returncode == 0 else "failed"
         metadata["exit_code"] = result.returncode
         if review_output is not None:
@@ -550,9 +614,19 @@ def run_agent(
 
     if uses_stdin_prompt:
         result = subprocess.run(
-            cmd, input=combined_prompt, text=True, check=False)
+            cmd,
+            input=combined_prompt,
+            text=True,
+            check=False,
+            timeout=AGENT_RUN_TIMEOUT_SECONDS,
+        )
     else:
-        result = subprocess.run(cmd, text=True, check=False)
+        result = subprocess.run(
+            cmd,
+            text=True,
+            check=False,
+            timeout=AGENT_RUN_TIMEOUT_SECONDS,
+        )
     metadata["status"] = "success" if result.returncode == 0 else "failed"
     metadata["exit_code"] = result.returncode
     if result.returncode != 0:
@@ -591,6 +665,99 @@ def validate_phase_ordering(phase: str, version_tag: str) -> tuple[bool, str]:
             f"phase '{phase}' requires prior phases to complete first: "
             f"{', '.join(missing)}. Use --force-phase to bypass.",
         )
+    return True, "ok"
+
+
+def phase_completed_in_manifest(version_tag: str, phase: str) -> bool:
+    """Return True when the phase has a successful manifest entry."""
+    manifest_path = artifact_paths(version_tag)["run_manifest"]
+    manifest = load_json_file(manifest_path)
+    if not manifest or not isinstance(manifest.get("phases"), list):
+        return False
+
+    for entry in manifest["phases"]:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("phase") == phase and entry.get("status") == "success":
+            return True
+    return False
+
+
+def test_report_has_zero_failures(version_tag: str) -> tuple[bool, str]:
+    """Validate test report exists and indicates zero failures."""
+    report_path = artifact_paths(version_tag)["test_report"]
+    report = load_json_file(report_path)
+    if not report:
+        return False, f"missing or invalid test report: {report_path}"
+
+    possible_keys = ("failures", "failed", "failed_tests", "tests_failed")
+    failures = None
+    for key in possible_keys:
+        value = report.get(key)
+        if isinstance(value, int):
+            failures = value
+            break
+
+    if failures is None:
+        return False, f"test report missing failure count fields: {possible_keys}"
+    if failures != 0:
+        return False, f"test report indicates failures={failures}"
+
+    return True, "ok"
+
+
+def package_artifacts_exist() -> tuple[bool, str]:
+    """Check for expected package artifacts before release phase."""
+    candidates = [
+        ROOT / "rpmbuild" / "RPMS",
+        ROOT / "dist",
+    ]
+
+    for base in candidates:
+        if not base.exists():
+            continue
+        if any(path.is_file() for path in base.rglob("*")):
+            return True, f"artifacts found under {base}"
+
+    return False, "no package artifacts found under rpmbuild/RPMS or dist/"
+
+
+def validate_phase_prerequisites(phase: str, version_tag: str) -> tuple[bool, str]:
+    """Enforce explicit phase prerequisites from workflow contract."""
+    artifacts = artifact_paths(version_tag)
+
+    if phase == "design":
+        if not artifacts["tasks"].exists():
+            return False, f"design requires tasks spec: {artifacts['tasks']}"
+        return True, "ok"
+
+    if phase == "build":
+        if not artifacts["arch"].exists():
+            return False, f"build requires architecture spec: {artifacts['arch']}"
+        return True, "ok"
+
+    if phase == "test":
+        if not phase_completed_in_manifest(version_tag, "build"):
+            return False, "test requires build phase to be logged as success"
+        return True, "ok"
+
+    if phase == "doc":
+        ok, reason = test_report_has_zero_failures(version_tag)
+        if not ok:
+            return False, f"doc requires test results with 0 failures: {reason}"
+        return True, "ok"
+
+    if phase == "package":
+        if not phase_completed_in_manifest(version_tag, "doc"):
+            return False, "package requires doc phase to be logged as success"
+        return True, "ok"
+
+    if phase == "release":
+        ok, reason = package_artifacts_exist()
+        if not ok:
+            return False, f"release requires package artifacts: {reason}"
+        return True, "ok"
+
     return True, "ok"
 
 
@@ -641,11 +808,14 @@ def run_phase(
     agents_md = ROOT / "AGENTS.md"
     memory = ROOT / ".github" / "agent-memory" / "project-coordinator" / "MEMORY.md"
 
-    # Phase ordering enforcement (write mode only)
+    # Phase ordering and prerequisites enforcement (write mode only)
     if mode == "write" and not force_phase:
         phase_ok, phase_reason = validate_phase_ordering(phase, version_tag)
         if not phase_ok:
             return 1, {"phase": phase, "status": "blocked", "error": phase_reason, "timestamp": isoformat_utc()}
+        prereq_ok, prereq_reason = validate_phase_prerequisites(phase, version_tag)
+        if not prereq_ok:
+            return 1, {"phase": phase, "status": "blocked", "error": prereq_reason, "timestamp": isoformat_utc()}
 
     if mode == "write":
         ok, reason = ensure_writer_lock(
@@ -845,6 +1015,10 @@ def main() -> int:
                         action="store_true", help="Force-release writer lock")
     parser.add_argument("--force-phase", action="store_true",
                         help="Bypass strict phase ordering enforcement")
+    parser.add_argument("--force", action="store_true",
+                        help="Alias for --force-phase")
+    parser.add_argument("--status", action="store_true",
+                        help="Print workflow phase status for target version and exit")
 
     args = parser.parse_args()
 
@@ -862,6 +1036,22 @@ def main() -> int:
         print(f"ERROR: {message}", file=sys.stderr)
         return 1
 
+    if args.status:
+        status_target = args.target_version
+        if not status_target:
+            lock = load_lock()
+            status_target = lock.get("version") if lock else None
+        if not status_target:
+            parser.error("--target-version is required with --status when no active race lock exists")
+        try:
+            version_tag = normalize_version_tag(status_target)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        status_payload = build_phase_status(version_tag)
+        print(json.dumps(status_payload, indent=2))
+        return 0
+
     if not args.phase or not args.target_version:
         parser.error(
             "--phase and --target-version are required unless --release-writer-lock is used")
@@ -876,6 +1066,8 @@ def main() -> int:
     manifest_path = artifact_paths(version_tag)["run_manifest"]
     manifest_base = load_manifest(
         manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
+
+    force_phase = args.force_phase or args.force
 
     if args.phase == "all":
         for index, phase in enumerate(PHASE_ORDER):
@@ -899,6 +1091,7 @@ def main() -> int:
             manifest_base = load_manifest(
                 manifest_path, version_tag, args.assistant, args.owner, args.mode, args.issue)
             if code != 0:
+                emit_failure(entry)
                 return code
         return 0
 
@@ -912,9 +1105,11 @@ def main() -> int:
         owner=args.owner,
         issue=args.issue,
         lock_ttl_minutes=args.lock_ttl_minutes,
-        force_phase=args.force_phase,
+        force_phase=force_phase,
     )
     append_manifest_entry(manifest_path, manifest_base, entry, args.dry_run)
+    if code != 0:
+        emit_failure(entry)
     return code
 
 

@@ -153,7 +153,7 @@ class PluginLoader:
                 self._registry.register(plugin)
                 loaded.append(plugin.metadata().id)
                 log.debug("Loaded plugin: %s", plugin.metadata().id)
-            except (ImportError, AttributeError, TypeError) as exc:
+            except (ImportError, AttributeError, TypeError, ValueError) as exc:
                 log.warning("Failed to load plugin %s.%s: %s", module_path, class_name, exc)
         return loaded
 

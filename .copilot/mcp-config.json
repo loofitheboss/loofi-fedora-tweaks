@@ -1,72 +1,22 @@
 {
   "mcpServers": {
-    "sequential-thinking": {
+    "loofi-workflow": {
       "type": "stdio",
-      "command": "npx",
+      "command": "python3",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "taskmaster-ai": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "task-master-ai"
-      ]
-    },
-    "playwright": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest"
-      ]
-    },
-    "puppeteer": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-puppeteer"
-      ]
-    },
-    "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ]
-    },
-    "memory": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ]
-    },
-    "filesystem": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "${workspaceFolder}"
-      ]
-    },
-    "github": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
+        "-u",
+        "scripts/mcp_workflow_server.py"
       ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+      "cwd": "${workspaceFolder}"
+    },
+    "loofi-agent-sync": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-u",
+        "scripts/mcp_agent_sync_server.py"
+      ],
+      "cwd": "${workspaceFolder}"
     }
   }
 }

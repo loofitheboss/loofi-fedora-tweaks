@@ -122,6 +122,7 @@ jobs:
           cache: "pip"
           cache-dependency-path: ${{ env.PIP_CACHE_FILES }}
       - run: python3 scripts/sync_ai_adapters.py --check
+      - run: python3 scripts/sync_ai_adapters.py --render --check
 
   pipeline_gate:
     runs-on: ubuntu-latest
@@ -164,6 +165,24 @@ jobs:
             echo "::error::Race lock version ($LOCK_VER) does not match release version ($VER)"
             exit 1
           fi
+
+      - name: Validate all tasks completed
+        run: |
+          VER="v${{ needs.validate.outputs.version }}"
+          TASKS_FILE=".workflow/specs/tasks-${VER}.md"
+          if [ ! -f "$TASKS_FILE" ]; then
+            echo "::error::Missing task spec: $TASKS_FILE"
+            exit 1
+          fi
+
+          # Fail if any unchecked task checkboxes remain.
+          if grep -Eq '^[[:space:]]*-[[:space:]]*\[[[:space:]]\]' "$TASKS_FILE"; then
+            echo "::error::Incomplete tasks found in $TASKS_FILE"
+            grep -En '^[[:space:]]*-[[:space:]]*\[[[:space:]]\]' "$TASKS_FILE" || true
+            exit 1
+          fi
+
+          echo "All tasks are marked complete in $TASKS_FILE"
 
   lint:
     runs-on: ubuntu-latest

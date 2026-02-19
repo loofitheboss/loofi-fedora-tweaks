@@ -13,8 +13,9 @@ Updates version across all files that reference it:
 8. Scans tests for hardcoded versions (warns if found)
 
 Usage:
-  python3 scripts/bump_version.py 41.0.0 --codename "Scaffold"
-  python3 scripts/bump_version.py 41.0.0 --dry-run
+    python3 scripts/bump_version.py 41.0.0 --codename "Scaffold"
+    python3 scripts/bump_version.py 41.0.0 --dry-run
+    python3 scripts/bump_version.py --check
 """
 
 import argparse
@@ -35,6 +36,8 @@ STATS_SCRIPT = PROJECT_ROOT / "scripts" / "project_stats.py"
 SYNC_SCRIPT = PROJECT_ROOT / "scripts" / "sync_ai_adapters.py"
 TESTS_DIR = PROJECT_ROOT / "tests"
 RELEASE_NOTES_DIR = PROJECT_ROOT / "docs" / "releases"
+WORKFLOW_SPECS_DIR = PROJECT_ROOT / ".workflow" / "specs"
+VSCODE_TASKS_FILE = PROJECT_ROOT / ".vscode" / "tasks.json"
 
 # Patterns that indicate hardcoded version strings in test files.
 # Matches assertEqual/assertIn/etc. with quoted version-like strings.
@@ -272,6 +275,180 @@ def scaffold_release_notes(
     return changes
 
 
+def scaffold_workflow_specs(new_version: str, dry_run: bool) -> list[str]:
+    """Create tasks/arch workflow stubs for the new version if missing."""
+    changes: list[str] = []
+    version_tag = f"v{new_version}"
+    tasks_file = WORKFLOW_SPECS_DIR / f"tasks-{version_tag}.md"
+    arch_file = WORKFLOW_SPECS_DIR / f"arch-{version_tag}.md"
+
+    if not tasks_file.exists():
+        tasks_stub = (
+            f"# Tasks — {version_tag}\n\n"
+            "## Contract\n\n"
+            "- [ ] ID: T1 | Files: TBD | Dep: none | Agent: Planner | Description: Define version scope\n"
+            "  Acceptance: Scope is documented and prioritized\n"
+            "  Docs: ROADMAP.md\n"
+            "  Tests: n/a\n"
+        )
+        changes.append(f"  workflow: scaffolded {tasks_file.relative_to(PROJECT_ROOT)}")
+        if not dry_run:
+            WORKFLOW_SPECS_DIR.mkdir(parents=True, exist_ok=True)
+            tasks_file.write_text(tasks_stub, encoding="utf-8")
+
+    if not arch_file.exists():
+        arch_stub = (
+            f"# Architecture — {version_tag}\n\n"
+            "## Goals\n\n"
+            "- Define module boundaries and implementation constraints for this version.\n\n"
+            "## Decisions\n\n"
+            "- Pending.\n"
+        )
+        changes.append(f"  workflow: scaffolded {arch_file.relative_to(PROJECT_ROOT)}")
+        if not dry_run:
+            WORKFLOW_SPECS_DIR.mkdir(parents=True, exist_ok=True)
+            arch_file.write_text(arch_stub, encoding="utf-8")
+
+    return changes
+
+
+def update_vscode_task_defaults(new_version: str, dry_run: bool) -> list[str]:
+    """Update .vscode/tasks.json workflow version defaults to target major.minor."""
+    changes: list[str] = []
+    if not VSCODE_TASKS_FILE.exists():
+        return ["  vscode tasks: file not found (skipped)"]
+
+    try:
+        payload = json.loads(VSCODE_TASKS_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ["  vscode tasks: invalid JSON (skipped)"]
+
+    major_minor = ".".join(new_version.split(".")[:2])
+    desired_with_v = f"v{major_minor}"
+    desired_without_v = major_minor
+
+    updated = False
+    for item in payload.get("inputs", []):
+        if not isinstance(item, dict):
+            continue
+        item_id = item.get("id")
+        if item_id == "workflowVersion" and item.get("default") != desired_with_v:
+            item["default"] = desired_with_v
+            updated = True
+        elif item_id == "workflowVersionNoV" and item.get("default") != desired_without_v:
+            item["default"] = desired_without_v
+            updated = True
+
+    if updated:
+        changes.append(
+            f"  vscode tasks: workflow defaults -> {desired_with_v} / {desired_without_v}"
+        )
+        if not dry_run:
+            VSCODE_TASKS_FILE.write_text(
+                json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+            )
+
+    return changes
+
+
+def run_consistency_check() -> int:
+    """Validate version/template/stats sync without modifying files."""
+    checks: list[tuple[str, list[str], bool]] = []
+
+    # 1) version.py vs spec
+    current_ver, _ = read_current_version()
+    spec_text = SPEC_FILE.read_text(encoding="utf-8") if SPEC_FILE.exists() else ""
+    spec_match = re.search(r"^Version:\s*(.+)$", spec_text, flags=re.MULTILINE)
+    spec_ver = spec_match.group(1).strip() if spec_match else ""
+    version_aligned = bool(spec_ver) and current_ver == spec_ver
+    checks.append(
+        (
+            "version alignment",
+            [f"version.py={current_ver}", f"spec={spec_ver or 'missing'}"],
+            version_aligned,
+        )
+    )
+
+    # 2) stats check
+    stats_ok = False
+    stats_details = ["stats script missing"]
+    if STATS_SCRIPT.exists():
+        try:
+            result = subprocess.run(
+                [sys.executable, str(STATS_SCRIPT), "--check"],
+                cwd=str(PROJECT_ROOT),
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+            stats_ok = result.returncode == 0
+            stats_details = [line for line in (result.stdout or "").splitlines() if line.strip()] or ["no output"]
+        except (subprocess.SubprocessError, OSError, subprocess.TimeoutExpired) as exc:
+            stats_ok = False
+            stats_details = [str(exc)]
+    checks.append(("project stats", stats_details, stats_ok))
+
+    # 3) template render check
+    templates_ok = False
+    templates_details = ["sync script missing"]
+    if SYNC_SCRIPT.exists():
+        try:
+            result = subprocess.run(
+                [sys.executable, str(SYNC_SCRIPT), "--render", "--check"],
+                cwd=str(PROJECT_ROOT),
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+            templates_ok = result.returncode == 0
+            templates_details = [line for line in (result.stdout or "").splitlines() if line.strip()] or ["no output"]
+        except (subprocess.SubprocessError, OSError, subprocess.TimeoutExpired) as exc:
+            templates_ok = False
+            templates_details = [str(exc)]
+    checks.append(("template render", templates_details, templates_ok))
+
+    # 4) workflow specs for active race-lock version
+    lock = {}
+    if RACE_LOCK.exists():
+        try:
+            lock = json.loads(RACE_LOCK.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            lock = {}
+    lock_version = str(lock.get("version") or lock.get("target_version") or "")
+    specs_ok = True
+    specs_details: list[str] = []
+    if lock_version:
+        tasks_file = WORKFLOW_SPECS_DIR / f"tasks-{lock_version}.md"
+        arch_file = WORKFLOW_SPECS_DIR / f"arch-{lock_version}.md"
+        if not tasks_file.exists():
+            specs_ok = False
+            specs_details.append(f"missing {tasks_file.relative_to(PROJECT_ROOT)}")
+        if not arch_file.exists():
+            specs_ok = False
+            specs_details.append(f"missing {arch_file.relative_to(PROJECT_ROOT)}")
+        if not specs_details:
+            specs_details.append(f"specs present for {lock_version}")
+    else:
+        specs_details.append("race lock version not set")
+    checks.append(("workflow specs", specs_details, specs_ok))
+
+    failed = [name for name, _, ok in checks if not ok]
+    for name, details, ok in checks:
+        prefix = "OK" if ok else "FAIL"
+        print(f"[{prefix}] {name}")
+        for item in details:
+            print(f"  - {item}")
+
+    if failed:
+        print("\nConsistency check failed:", ", ".join(failed))
+        return 1
+
+    print("\nConsistency check passed.")
+    return 0
+
+
 def scan_stale_version_tests(old_version: str, old_codename: str) -> list[str]:
     """Scan tests/ for hardcoded version or codename strings that will break after bump.
 
@@ -308,12 +485,26 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Bump version across all project files."
     )
-    parser.add_argument("version", help="New version (e.g. 41.0.0)")
+    parser.add_argument("version", nargs="?", help="New version (e.g. 41.0.0)")
     parser.add_argument("--codename", help="Version codename (e.g. 'Scaffold')")
     parser.add_argument(
         "--dry-run", action="store_true", help="Show what would change without writing"
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Validate version/stats/templates/specs are in sync without modifying files",
+    )
     args = parser.parse_args()
+
+    if args.check:
+        if args.version:
+            print("ERROR: --check does not accept a positional version argument")
+            return 2
+        return run_consistency_check()
+
+    if not args.version:
+        parser.error("version is required unless --check is used")
 
     # Validate version format
     if not re.match(r"^\d+\.\d+\.\d+$", args.version):
@@ -353,6 +544,12 @@ def main() -> int:
         scaffold_release_notes(args.version, args.codename, args.dry_run)
     )
 
+    # 8. Workflow specs scaffold
+    all_changes.extend(scaffold_workflow_specs(args.version, args.dry_run))
+
+    # 9. VS Code task defaults
+    all_changes.extend(update_vscode_task_defaults(args.version, args.dry_run))
+
     # Summary
     print("Changes:")
     for c in all_changes:
@@ -361,7 +558,7 @@ def main() -> int:
     if not all_changes:
         print("  (no changes needed)")
 
-    # 8. Scan for stale version tests (advisory, never blocks)
+    # 10. Scan for stale version tests (advisory, never blocks)
     stale_warnings = scan_stale_version_tests(current_ver, current_codename)
     if stale_warnings:
         print(f"\nStale version references in tests ({len(stale_warnings)}):")

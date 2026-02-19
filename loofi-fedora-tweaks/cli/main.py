@@ -208,7 +208,7 @@ def cmd_network(args):
     return 1
 
 
-def cmd_info(args):
+def cmd_info(_args):
     """Show system information."""
     is_atomic = SystemManager.is_atomic()
     pm = SystemManager.get_package_manager()
@@ -239,7 +239,7 @@ def cmd_info(args):
     return 0
 
 
-def cmd_health(args):
+def cmd_health(_args):
     """Show system health overview."""
     health = SystemMonitor.get_system_health()
 
@@ -319,7 +319,7 @@ def cmd_disk(args):
     if _json_output:
         data = {"root": None, "home": None}
         if usage:
-            level, msg = DiskManager.check_disk_health("/")
+            level, _ = DiskManager.check_disk_health("/")
             data["root"] = {
                 "total": usage.total_human,
                 "used": usage.used_human,
@@ -345,7 +345,7 @@ def cmd_disk(args):
         _print("═══════════════════════════════════════════")
 
         if usage:
-            level, msg = DiskManager.check_disk_health("/")
+            level, _ = DiskManager.check_disk_health("/")
             icon = "🟢" if level == "ok" else ("🟡" if level == "warning" else "🔴")
             _print(f"\n{icon} Root (/)")
             _print(f"   Total: {usage.total_human}")
@@ -427,7 +427,7 @@ def cmd_processes(args):
     return 0
 
 
-def cmd_temperature(args):
+def cmd_temperature(_args):
     """Show temperature readings."""
     sensors = TemperatureManager.get_all_sensors()
 
@@ -552,7 +552,7 @@ def cmd_netmon(args):
     return 0
 
 
-def cmd_doctor(args):
+def cmd_doctor(_args):
     """Run system diagnostics and check dependencies."""
     critical_tools = ["dnf", "pkexec", "systemctl", "flatpak"]
     optional_tools = [
@@ -565,6 +565,8 @@ def cmd_doctor(args):
         "podman",
     ]
 
+    all_ok = True
+
     if _json_output:
         data = {"critical": {}, "optional": {}}
         for tool in critical_tools:
@@ -572,6 +574,7 @@ def cmd_doctor(args):
         for tool in optional_tools:
             data["optional"][tool] = shutil.which(tool) is not None
         data["all_critical_ok"] = all(data["critical"].values())
+        all_ok = data["all_critical_ok"]
         _output_json(data)
     else:
         _print("═══════════════════════════════════════════")
@@ -603,7 +606,7 @@ def cmd_doctor(args):
     return 0 if all_ok else 1
 
 
-def cmd_hardware(args):
+def cmd_hardware(_args):
     """Show detected hardware profile."""
     from services.hardware.hardware_profiles import detect_hardware_profile
 
@@ -1112,7 +1115,7 @@ def cmd_plugin_marketplace(args):
     return 1
 
 
-def cmd_support_bundle(args):
+def cmd_support_bundle(_args):
     """Export support bundle ZIP."""
     result = JournalManager.export_support_bundle()
     if _json_output:
@@ -1154,14 +1157,15 @@ def cmd_vm(args):
     elif args.action == "status":
         status = VMManager.get_vm_info(args.name)
         if _json_output:
-            _output_json(
-                status if isinstance(status, dict) else {"error": "VM not found"}
-            )
+            if status:
+                from dataclasses import asdict
+
+                _output_json(asdict(status))
+            else:
+                _output_json({"error": "VM not found"})
         else:
             if status:
-                _print(
-                    f"VM: {status.get('name', args.name)} [{status.get('state', 'unknown')}]"
-                )
+                _print(f"VM: {status.name} [{status.state}]")
             else:
                 _print(f"❌ VM '{args.name}' not found")
         return 0
@@ -1216,7 +1220,15 @@ def cmd_vfio(args):
         return 0
 
     elif args.action == "plan":
-        plan = VFIOAssistant.get_step_by_step_plan()
+        candidates = VFIOAssistant.get_passthrough_candidates()
+        if not candidates:
+            if _json_output:
+                _output_json({"steps": [], "error": "No passthrough GPU candidates found"})
+            else:
+                _print("❌ No passthrough GPU candidates found")
+            return 1
+
+        plan = VFIOAssistant.get_step_by_step_plan(candidates[0])
         if _json_output:
             _output_json({"steps": plan})
         else:
@@ -1332,11 +1344,11 @@ def cmd_teleport(args):
 
 def cmd_ai_models(args):
     """Handle AI models subcommand."""
-    from utils.ai_models import AIModelManager
+    from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 
     if args.action == "list":
         installed = AIModelManager.get_installed_models()
-        recommended = AIModelManager.RECOMMENDED_MODELS
+        recommended = RECOMMENDED_MODELS
         if _json_output:
             _output_json(
                 {"installed": installed, "recommended": list(recommended.keys())}
@@ -1358,7 +1370,7 @@ def cmd_ai_models(args):
         return 0
 
     elif args.action == "recommend":
-        model = AIModelManager.get_recommended_model()
+        model = AIModelManager.get_recommended_model(AIModelManager.get_system_ram())
         if _json_output:
             _output_json({"recommended": model})
         else:
@@ -1423,7 +1435,7 @@ def cmd_preset(args):
             return 1
         # Write to file
         try:
-            with open(args.path, "w") as f:
+            with open(args.path, "w", encoding="utf-8") as f:
                 json_module.dump(result, f, indent=2)
             if _json_output:
                 _output_json(
@@ -1495,7 +1507,7 @@ def cmd_focus_mode(args):
     return 1
 
 
-def cmd_security_audit(args):
+def cmd_security_audit(_args):
     """Handle security-audit subcommand."""
     score_data = PortAuditor.get_security_score()
 
@@ -3134,8 +3146,6 @@ def cmd_backup(args):
 
 def main(argv: Optional[List[str]] = None):
     """Main CLI entrypoint."""
-    global _json_output
-
     parser = argparse.ArgumentParser(
         prog="loofi",
         description=f'Loofi Fedora Tweaks v{__version__} "{__version_codename__}" - System management CLI',
@@ -3678,13 +3688,13 @@ def main(argv: Optional[List[str]] = None):
     args = parser.parse_args(argv)
 
     # Set JSON mode
-    _json_output = getattr(args, "json", False)
+    globals()["_json_output"] = getattr(args, "json", False)
 
     # Set operation timeout from --timeout flag
-    _operation_timeout = getattr(args, "timeout", 300)  # noqa: F841
+    globals()["_operation_timeout"] = getattr(args, "timeout", 300)
 
     # Set dry-run mode from --dry-run flag
-    _dry_run = getattr(args, "dry_run", False)  # noqa: F841
+    globals()["_dry_run"] = getattr(args, "dry_run", False)
 
     if args.command is None:
         parser.print_help()

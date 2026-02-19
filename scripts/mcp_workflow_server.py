@@ -74,6 +74,20 @@ TOOLS = [
         },
     },
     {
+        "name": "workflow_tasks",
+        "description": "Alias of list_tasks. List tasks for the active (or specified) version with their completion status.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "version": {
+                    "type": "string",
+                    "description": "Version to list tasks for (e.g. 'v33.0.0'). Default: active version from race-lock.",
+                },
+            },
+            "required": [],
+        },
+    },
+    {
         "name": "validate_release",
         "description": "Run release validation checks: version alignment, lint, tests, docs presence.",
         "inputSchema": {
@@ -85,6 +99,54 @@ TOOLS = [
                 },
             },
             "required": [],
+        },
+    },
+    {
+        "name": "workflow_validate",
+        "description": "Alias of validate_release. Run release validation checks.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "quick": {
+                    "type": "boolean",
+                    "description": "If true, skip running full test suite. Default: false.",
+                },
+            },
+            "required": [],
+        },
+    },
+    {
+        "name": "workflow_run_phase",
+        "description": "Run a workflow phase through scripts/workflow_runner.py.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "phase": {
+                    "type": "string",
+                    "description": "Phase to run: plan/design/build/test/doc/package/release/all",
+                },
+                "version": {
+                    "type": "string",
+                    "description": "Target version (e.g. 'v33.0.0'). Default: active version.",
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Runner mode: write or review. Default: review.",
+                },
+                "assistant": {
+                    "type": "string",
+                    "description": "Assistant identity: codex/claude/copilot. Default: codex.",
+                },
+                "force": {
+                    "type": "boolean",
+                    "description": "Bypass phase ordering checks (maps to --force).",
+                },
+                "dry_run": {
+                    "type": "boolean",
+                    "description": "Run in dry-run mode. Default: true.",
+                },
+            },
+            "required": ["phase"],
         },
     },
     {
@@ -121,13 +183,87 @@ TOOLS = [
     },
 ]
 
+RESOURCES = [
+    {
+        "uri": "workflow://race-lock",
+        "name": "Workflow Race Lock",
+        "description": "Current race-lock state from .workflow/specs/.race-lock.json",
+        "mimeType": "application/json",
+    },
+    {
+        "uri": "workflow://tasks/{version}",
+        "name": "Workflow Tasks",
+        "description": "Task spec markdown for a given version (example: workflow://tasks/v33.0.0)",
+        "mimeType": "text/markdown",
+    },
+    {
+        "uri": "workflow://arch/{version}",
+        "name": "Workflow Architecture",
+        "description": "Architecture spec markdown for a given version (example: workflow://arch/v33.0.0)",
+        "mimeType": "text/markdown",
+    },
+    {
+        "uri": "workflow://stats",
+        "name": "Project Stats",
+        "description": "Current project stats JSON from .project-stats.json",
+        "mimeType": "application/json",
+    },
+]
+
 
 def read_json(path: Path) -> dict | None:
     """Read a JSON file, return None if missing or invalid."""
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else None
     except (FileNotFoundError, json.JSONDecodeError):
         return None
+
+
+def _resolve_resource_content(uri: str) -> tuple[str, str, str]:
+    """Resolve MCP resource URI to content tuple: (uri, mimeType, text)."""
+    if uri == "workflow://race-lock":
+        lock_path = SPECS_DIR / ".race-lock.json"
+        lock = read_json(lock_path) or {"error": "race-lock not found"}
+        return uri, "application/json", json.dumps(lock, indent=2)
+
+    if uri == "workflow://stats":
+        if not STATS_FILE.exists():
+            stats_script = PROJECT_ROOT / "scripts" / "project_stats.py"
+            if stats_script.exists():
+                try:
+                    subprocess.run(
+                        [sys.executable, str(stats_script)],
+                        cwd=str(PROJECT_ROOT),
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                        check=False,
+                    )
+                except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError):
+                    pass
+        stats = read_json(STATS_FILE) or {"error": "stats not available"}
+        return uri, "application/json", json.dumps(stats, indent=2)
+
+    if uri.startswith("workflow://tasks/"):
+        version = uri.split("workflow://tasks/", 1)[1].strip()
+        if not version:
+            raise ValueError("tasks resource requires a version in URI")
+        path = SPECS_DIR / f"tasks-{version}.md"
+        if not path.exists():
+            raise FileNotFoundError(f"Task spec not found: {path.name}")
+        return uri, "text/markdown", path.read_text(encoding="utf-8")
+
+    if uri.startswith("workflow://arch/"):
+        version = uri.split("workflow://arch/", 1)[1].strip()
+        if not version:
+            raise ValueError("arch resource requires a version in URI")
+        path = SPECS_DIR / f"arch-{version}.md"
+        if not path.exists():
+            raise FileNotFoundError(f"Arch spec not found: {path.name}")
+        return uri, "text/markdown", path.read_text(encoding="utf-8")
+
+    raise ValueError(f"Unknown resource URI: {uri}")
 
 
 def get_race_lock() -> dict:
@@ -139,7 +275,8 @@ def get_race_lock() -> dict:
 def get_active_version() -> str:
     """Get the active version from race-lock."""
     lock = get_race_lock()
-    return lock.get("target_version", "unknown")
+    value = lock.get("target_version", "unknown")
+    return str(value) if value is not None else "unknown"
 
 
 def get_version_from_source() -> tuple[str, str]:
@@ -221,6 +358,7 @@ def handle_project_stats(args: dict) -> dict:
                     [sys.executable, str(stats_script)],
                     cwd=str(PROJECT_ROOT),
                     capture_output=True,
+                    check=False,
                     timeout=30,
                 )
             except (subprocess.TimeoutExpired, subprocess.SubprocessError):
@@ -341,6 +479,7 @@ def handle_validate_release(args: dict) -> dict:
                 cwd=str(PROJECT_ROOT),
                 capture_output=True,
                 text=True,
+                check=False,
                 timeout=60,
             )
             lint_passed = result.returncode == 0
@@ -362,6 +501,7 @@ def handle_validate_release(args: dict) -> dict:
                 cwd=str(PROJECT_ROOT),
                 capture_output=True,
                 text=True,
+                check=False,
                 timeout=300,
                 env={**os.environ,
                      "PYTHONPATH": str(PROJECT_ROOT / "loofi-fedora-tweaks")},
@@ -449,8 +589,7 @@ def handle_phase_status(args: dict) -> dict:
     manifest_file = REPORTS_DIR / f"run-manifest-{version}.json"
     manifest = read_json(manifest_file)
 
-    all_phases = ["plan", "design", "build",
-                  "test", "document", "package", "release"]
+    all_phases = ["plan", "design", "build", "test", "doc", "package", "release"]
 
     if not manifest or "phases" not in manifest:
         return {
@@ -471,8 +610,65 @@ def handle_phase_status(args: dict) -> dict:
         "version": version,
         "manifest_exists": True,
         "phases": result_phases,
-        "completed_count": sum(1 for v in result_phases.values() if v == "completed"),
+        "completed_count": sum(1 for v in result_phases.values() if v in ("completed", "success")),
         "total_phases": len(all_phases),
+    }
+
+
+def handle_workflow_run_phase(args: dict) -> dict:
+    """Bridge MCP tool to workflow_runner.py phase execution."""
+    phase = str(args.get("phase", "")).strip()
+    if not phase:
+        return {"error": "phase is required"}
+
+    version = str(args.get("version") or get_active_version()).strip()
+    if not version:
+        return {"error": "version could not be resolved"}
+
+    mode = str(args.get("mode") or "review").strip()
+    assistant = str(args.get("assistant") or "codex").strip()
+    force = bool(args.get("force", False))
+    dry_run = bool(args.get("dry_run", True))
+
+    runner = PROJECT_ROOT / "scripts" / "workflow_runner.py"
+    if not runner.exists():
+        return {"error": "workflow_runner.py not found"}
+
+    command = [
+        sys.executable,
+        str(runner),
+        "--phase",
+        phase,
+        "--target-version",
+        version,
+        "--mode",
+        mode,
+        "--assistant",
+        assistant,
+    ]
+    if force:
+        command.append("--force")
+    if dry_run:
+        command.append("--dry-run")
+
+    try:
+        result = subprocess.run(
+            command,
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+        )
+    except (subprocess.TimeoutExpired, OSError, subprocess.SubprocessError) as exc:
+        return {"error": f"workflow run failed: {exc}"}
+
+    return {
+        "command": command,
+        "exit_code": result.returncode,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "ok": result.returncode == 0,
     }
 
 
@@ -482,7 +678,10 @@ TOOL_HANDLERS = {
     "workflow_status": handle_workflow_status,
     "project_stats": handle_project_stats,
     "list_tasks": handle_list_tasks,
+    "workflow_tasks": handle_list_tasks,
     "validate_release": handle_validate_release,
+    "workflow_validate": handle_validate_release,
+    "workflow_run_phase": handle_workflow_run_phase,
     "bump_version": handle_bump_version,
     "phase_status": handle_phase_status,
 }
@@ -504,6 +703,45 @@ def handle_tools_list(_params: dict) -> dict:
     return {"tools": TOOLS}
 
 
+def handle_resources_list(_params: dict) -> dict:
+    """Handle resources/list request."""
+    return {"resources": RESOURCES}
+
+
+def handle_resources_read(params: dict) -> dict:
+    """Handle resources/read request."""
+    uri = str(params.get("uri", "")).strip()
+    if not uri:
+        return {
+            "contents": [{
+                "uri": "",
+                "mimeType": "application/json",
+                "text": json.dumps({"error": "Missing required parameter: uri"}),
+            }],
+            "isError": True,
+        }
+
+    try:
+        resolved_uri, mime_type, text = _resolve_resource_content(uri)
+        return {
+            "contents": [{
+                "uri": resolved_uri,
+                "mimeType": mime_type,
+                "text": text,
+            }],
+            "isError": False,
+        }
+    except (ValueError, TypeError, KeyError, OSError, subprocess.SubprocessError, FileNotFoundError) as e:
+        return {
+            "contents": [{
+                "uri": uri,
+                "mimeType": "application/json",
+                "text": json.dumps({"error": str(e)}),
+            }],
+            "isError": True,
+        }
+
+
 def handle_tools_call(params: dict) -> dict:
     """Handle tools/call request."""
     tool_name = params.get("name", "")
@@ -522,7 +760,7 @@ def handle_tools_call(params: dict) -> dict:
             "content": [{"type": "text", "text": json.dumps(result, indent=2)}],
             "isError": False,
         }
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, OSError, subprocess.SubprocessError) as e:
         return {
             "content": [{"type": "text", "text": json.dumps({"error": str(e)})}],
             "isError": True,
@@ -533,6 +771,8 @@ METHOD_HANDLERS = {
     "initialize": handle_initialize,
     "tools/list": handle_tools_list,
     "tools/call": handle_tools_call,
+    "resources/list": handle_resources_list,
+    "resources/read": handle_resources_read,
 }
 
 
@@ -570,22 +810,35 @@ def read_mcp_message() -> dict | None:
     """Read a single MCP message using Content-Length framing (LSP-style)."""
     headers: dict[str, str] = {}
     while True:
-        line = sys.stdin.readline()
-        if not line:
+        line_bytes = sys.stdin.buffer.readline()
+        if not line_bytes:
             return None
-        line = line.rstrip("\r\n")
+        line = line_bytes.decode("latin-1").rstrip("\r\n")
         if line == "":
             break
         if ":" in line:
             key, value = line.split(":", 1)
-            headers[key.strip()] = value.strip()
+            headers[key.strip().lower()] = value.strip()
 
-    length = int(headers.get("Content-Length", "0"))
+    length_raw = headers.get("content-length")
+    if not length_raw:
+        raise ValueError("Missing Content-Length header")
+
+    try:
+        length = int(length_raw)
+    except ValueError as exc:
+        raise ValueError(f"Invalid Content-Length: {length_raw}") from exc
+
     if length <= 0:
-        return None
+        raise ValueError(f"Invalid Content-Length value: {length}")
 
-    body = sys.stdin.read(length)
-    return json.loads(body)
+    body_bytes = sys.stdin.buffer.read(length)
+    if len(body_bytes) < length:
+        raise ValueError("Incomplete MCP message body")
+
+    body = body_bytes.decode("utf-8")
+    payload = json.loads(body)
+    return payload if isinstance(payload, dict) else None
 
 
 def write_mcp_message(msg: dict) -> None:
