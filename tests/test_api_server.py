@@ -63,13 +63,14 @@ def mock_action_executor():
 
 
 def test_health_endpoint(test_client):
-    """Health endpoint should work without authentication."""
+    """Health endpoint should work without authentication (no version leak)."""
     response = test_client.get("/api/health")
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "ok"
-    assert "version" in payload
-    assert "codename" in payload
+    # Hardened: /health no longer exposes version or codename
+    assert "version" not in payload
+    assert "codename" not in payload
 
 
 def test_token_flow(test_client, valid_api_key, mock_action_executor):
@@ -78,9 +79,10 @@ def test_token_flow(test_client, valid_api_key, mock_action_executor):
     assert token_resp.status_code == 200
     token = token_resp.json()["access_token"]
 
+    # Use allowlisted command (echo is not in COMMAND_ALLOWLIST)
     exec_resp = test_client.post(
         "/api/execute",
-        json={"command": "echo", "args": ["hi"], "preview": True},
+        json={"command": "uname", "args": ["-r"], "preview": True},
         headers={"Authorization": f"Bearer {token}"},
     )
     assert exec_resp.status_code == 200
@@ -167,7 +169,7 @@ class TestInputValidation:
     """Tests for input validation and sanitization."""
 
     def test_command_injection_attempt(self, test_client, valid_token, mock_action_executor):
-        """Command injection attempts should be passed to executor for handling."""
+        """Command injection attempts should be blocked by allowlist."""
         response = test_client.post(
             "/api/execute",
             json={
@@ -177,17 +179,16 @@ class TestInputValidation:
             },
             headers={"Authorization": f"Bearer {valid_token}"},
         )
-        # Request should succeed but ActionExecutor will handle the invalid command
-        assert response.status_code == 200
-        # Verify the command was passed to executor as-is (not executed)
-        mock_action_executor.assert_called()
+        # Hardened: command not in COMMAND_ALLOWLIST → 403
+        assert response.status_code == 403
+        mock_action_executor.assert_not_called()
 
     def test_path_traversal_in_args(self, test_client, valid_token, mock_action_executor):
-        """Path traversal attempts in args should be passed to executor."""
+        """Path traversal attempts in args pass through to executor (command must be allowlisted)."""
         response = test_client.post(
             "/api/execute",
             json={
-                "command": "cat",
+                "command": "uname",
                 "args": ["../../etc/passwd"],
                 "preview": True,
             },
@@ -198,6 +199,20 @@ class TestInputValidation:
         mock_action_executor.assert_called()
         call_args = mock_action_executor.call_args[0]
         assert "../../etc/passwd" in call_args[1]
+
+    def test_non_allowlisted_command_rejected(self, test_client, valid_token, mock_action_executor):
+        """Commands not in COMMAND_ALLOWLIST should be rejected with 403."""
+        response = test_client.post(
+            "/api/execute",
+            json={
+                "command": "cat",
+                "args": ["/etc/passwd"],
+                "preview": True,
+            },
+            headers={"Authorization": f"Bearer {valid_token}"},
+        )
+        assert response.status_code == 403
+        mock_action_executor.assert_not_called()
 
     def test_malformed_json_payload(self, test_client, valid_token):
         """Malformed JSON should return 422."""
@@ -221,7 +236,7 @@ class TestInputValidation:
         assert response.status_code == 422
 
     def test_extremely_long_command(self, test_client, valid_token, mock_action_executor):
-        """Extremely long command should be handled (DoS protection)."""
+        """Extremely long command should be rejected by allowlist."""
         long_command = "a" * 10000
         response = test_client.post(
             "/api/execute",
@@ -232,16 +247,17 @@ class TestInputValidation:
             },
             headers={"Authorization": f"Bearer {valid_token}"},
         )
-        # Should succeed but executor will handle the invalid command
-        assert response.status_code == 200
+        # Hardened: not in COMMAND_ALLOWLIST → 403
+        assert response.status_code == 403
+        mock_action_executor.assert_not_called()
 
     def test_extremely_long_args(self, test_client, valid_token, mock_action_executor):
-        """Extremely long args array should be handled."""
+        """Extremely long args array should be handled for allowlisted commands."""
         long_args = ["arg" + str(i) for i in range(1000)]
         response = test_client.post(
             "/api/execute",
             json={
-                "command": "echo",
+                "command": "uname",
                 "args": long_args,
                 "preview": True,
             },
@@ -327,9 +343,14 @@ class TestAuthorization:
         assert response.status_code == 401
 
     def test_info_endpoint_without_auth(self, test_client):
-        """Read-only /api/info should work without authentication."""
+        """Read-only /api/info now requires Bearer JWT (hardened)."""
+        response = test_client.get("/api/info")
+        # Hardened: /info requires authentication
+        assert response.status_code in [401, 403]
+
+    def test_info_endpoint_with_auth(self, test_client, valid_token):
+        """Authenticated /api/info should return system data."""
         with patch("utils.monitor.SystemMonitor.get_system_health") as mock_health:
-            # Mock the health response
             mock_health.return_value = MagicMock(
                 hostname="test-host",
                 uptime=12345,
@@ -339,7 +360,10 @@ class TestAuthorization:
                 cpu_status="good",
             )
 
-            response = test_client.get("/api/info")
+            response = test_client.get(
+                "/api/info",
+                headers={"Authorization": f"Bearer {valid_token}"},
+            )
             assert response.status_code == 200
             data = response.json()
             assert "version" in data
@@ -355,11 +379,25 @@ class TestErrorHandling:
     """Tests for error handling and response serialization."""
 
     def test_invalid_command_execution(self, test_client, valid_token):
-        """ActionExecutor should handle invalid commands gracefully."""
+        """Non-allowlisted commands should be rejected with 403."""
+        response = test_client.post(
+            "/api/execute",
+            json={
+                "command": "invalid-command-xyz",
+                "args": [],
+                "preview": True,
+            },
+            headers={"Authorization": f"Bearer {valid_token}"},
+        )
+        # Hardened: command not in allowlist → 403
+        assert response.status_code == 403
+
+    def test_allowlisted_command_failure(self, test_client, valid_token):
+        """ActionExecutor should handle allowlisted command failure gracefully."""
         with patch("utils.action_executor.ActionExecutor.run") as mock_run:
             mock_run.return_value = ActionResult(
                 success=False,
-                message="Command not found: invalid-command-xyz",
+                message="Command failed",
                 exit_code=127,
                 stdout="",
                 stderr="command not found",
@@ -369,7 +407,7 @@ class TestErrorHandling:
             response = test_client.post(
                 "/api/execute",
                 json={
-                    "command": "invalid-command-xyz",
+                    "command": "uname",
                     "args": [],
                     "preview": True,
                 },
@@ -378,20 +416,19 @@ class TestErrorHandling:
             assert response.status_code == 200
             data = response.json()
             assert data["preview"]["success"] is False
-            assert "not found" in data["preview"]["message"].lower()
 
     def test_executor_exception_handling(self, test_client, valid_token):
         """ActionExecutor exceptions should propagate as 500 errors."""
         with patch("utils.action_executor.ActionExecutor.run") as mock_run:
             mock_run.side_effect = Exception("Unexpected executor error")
 
-            # FastAPI will let the exception propagate, resulting in 500
+            # Use allowlisted command to pass the allowlist check
             with pytest.raises(Exception):
                 test_client.post(
                     "/api/execute",
                     json={
-                        "command": "echo",
-                        "args": ["test"],
+                        "command": "uname",
+                        "args": ["-r"],
                         "preview": True,
                     },
                     headers={"Authorization": f"Bearer {valid_token}"},
@@ -411,10 +448,11 @@ class TestErrorHandling:
                 action_id="test-123",
             )
 
+            # Use allowlisted command
             response = test_client.post(
                 "/api/execute",
                 json={
-                    "command": "test",
+                    "command": "uname",
                     "args": [],
                     "preview": True,
                 },
@@ -434,13 +472,13 @@ class TestErrorHandling:
             import subprocess
             mock_run.side_effect = subprocess.TimeoutExpired("test", 120)
 
-            # FastAPI will let the exception propagate
+            # Use allowlisted command to pass the allowlist check
             with pytest.raises(subprocess.TimeoutExpired):
                 test_client.post(
                     "/api/execute",
                     json={
-                        "command": "sleep",
-                        "args": ["300"],
+                        "command": "uname",
+                        "args": ["-a"],
                         "preview": True,
                     },
                     headers={"Authorization": f"Bearer {valid_token}"},
@@ -456,7 +494,7 @@ class TestAdditionalSecurity:
     """Additional security edge cases."""
 
     def test_empty_command(self, test_client, valid_token):
-        """Empty command string should be rejected."""
+        """Empty command string should be rejected by allowlist."""
         response = test_client.post(
             "/api/execute",
             json={
@@ -466,11 +504,11 @@ class TestAdditionalSecurity:
             },
             headers={"Authorization": f"Bearer {valid_token}"},
         )
-        # Should either be validation error or handled by executor
-        assert response.status_code in [200, 422]
+        # Empty string not in allowlist → 403
+        assert response.status_code in [403, 422]
 
     def test_special_characters_in_command(self, test_client, valid_token, mock_action_executor):
-        """Special characters in command should be passed to executor."""
+        """Special characters in command should be blocked by allowlist."""
         response = test_client.post(
             "/api/execute",
             json={
@@ -480,14 +518,16 @@ class TestAdditionalSecurity:
             },
             headers={"Authorization": f"Bearer {valid_token}"},
         )
-        assert response.status_code == 200
+        # Hardened: not in COMMAND_ALLOWLIST → 403
+        assert response.status_code == 403
+        mock_action_executor.assert_not_called()
 
     def test_unicode_in_payload(self, test_client, valid_token, mock_action_executor):
-        """Unicode characters should be handled correctly."""
+        """Unicode characters should be handled correctly for allowlisted commands."""
         response = test_client.post(
             "/api/execute",
             json={
-                "command": "echo",
+                "command": "uname",
                 "args": ["你好", "мир", "🚀"],
                 "preview": True,
             },
@@ -496,12 +536,12 @@ class TestAdditionalSecurity:
         assert response.status_code == 200
 
     def test_action_id_validation(self, test_client, valid_token, mock_action_executor):
-        """Action ID should be passed through correctly."""
+        """Action ID should be passed through correctly for allowlisted commands."""
         response = test_client.post(
             "/api/execute",
             json={
-                "command": "echo",
-                "args": ["test"],
+                "command": "uname",
+                "args": ["-r"],
                 "preview": True,
                 "action_id": "custom-action-123",
             },

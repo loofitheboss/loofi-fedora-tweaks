@@ -71,7 +71,9 @@ class TestVfioMeshAiHandlers(unittest.TestCase):
 
     @patch('cli.main._print')
     @patch('utils.vfio.VFIOAssistant.get_step_by_step_plan')
-    def test_vfio_plan(self, mock_plan, mock_print):
+    @patch('utils.vfio.VFIOAssistant.get_passthrough_candidates')
+    def test_vfio_plan(self, mock_candidates, mock_plan, mock_print):
+        mock_candidates.return_value = [{'name': 'Test GPU', 'iommu_group': '1'}]
         mock_plan.return_value = ['Enable IOMMU', 'Bind GPU']
         result = cmd_vfio(argparse.Namespace(action='plan'))
         self.assertEqual(result, 0)

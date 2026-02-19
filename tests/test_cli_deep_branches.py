@@ -528,23 +528,27 @@ class TestCmdDoctor(unittest.TestCase):
     @patch("cli.main._output_json")
     @patch("shutil.which")
     def test_doctor_json_all_found(self, mock_which, mock_json):
-        """JSON mode has a bug: all_ok unbound. We verify the JSON path runs
-        and hits the known UnboundLocalError when all_ok is checked."""
+        """JSON mode: all tools found → returns 0 and outputs valid JSON."""
         _set_json(True)
         mock_which.return_value = "/usr/bin/tool"
-        # Bug in cli/main.py line 493: all_ok only assigned in text branch
-        with self.assertRaises(UnboundLocalError):
-            cmd_doctor(_ns())
+        r = cmd_doctor(_ns())
+        self.assertEqual(r, 0)
+        mock_json.assert_called_once()
+        data = mock_json.call_args[0][0]
+        self.assertTrue(data["all_critical_ok"])
         _set_json(False)
 
     @patch("cli.main._output_json")
     @patch("shutil.which")
     def test_doctor_json_missing(self, mock_which, mock_json):
-        """Same bug, but when tools are missing."""
+        """JSON mode: no tools found → returns 1."""
         _set_json(True)
         mock_which.return_value = None
-        with self.assertRaises(UnboundLocalError):
-            cmd_doctor(_ns())
+        r = cmd_doctor(_ns())
+        self.assertEqual(r, 1)
+        mock_json.assert_called_once()
+        data = mock_json.call_args[0][0]
+        self.assertFalse(data["all_critical_ok"])
         _set_json(False)
 
     @patch("cli.main._print")
