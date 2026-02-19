@@ -58,7 +58,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert isinstance(meta, PluginMetadata)
 
     def test_metadata_maps_name_correctly(self):
@@ -66,7 +66,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin(name="My Custom Plugin")
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.name == "My Custom Plugin"
 
     def test_metadata_maps_description_correctly(self):
@@ -74,7 +74,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin(description="Custom description")
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.description == "Custom description"
 
     def test_metadata_maps_version_correctly(self):
@@ -82,7 +82,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin(version="2.5.1")
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.version == "2.5.1"
 
     def test_metadata_generates_slugified_id(self):
@@ -90,7 +90,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin(name="My Test Plugin")
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.id == "my-test-plugin"
 
     def test_metadata_handles_special_chars_in_name(self):
@@ -98,7 +98,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin(name="Plugin (v2)!")
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         # Should remove special chars and keep alphanumerics/hyphens
         assert "-" in meta.id or meta.id.isalnum()
 
@@ -109,7 +109,7 @@ class TestPluginAdapterMetadata:
         legacy.info = info
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.icon == "🔌"
 
     def test_metadata_category_is_community(self):
@@ -117,7 +117,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.category == "Community"
 
     def test_metadata_badge_is_community(self):
@@ -125,7 +125,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.badge == "community"
 
     def test_metadata_order_is_500(self):
@@ -133,7 +133,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.order == 500
 
     def test_metadata_enabled_is_true(self):
@@ -141,7 +141,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.enabled is True
 
     def test_metadata_requires_is_empty_tuple(self):
@@ -149,7 +149,7 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.requires == ()
 
     def test_metadata_compat_is_empty_dict(self):
@@ -157,17 +157,17 @@ class TestPluginAdapterMetadata:
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
         meta = adapter.metadata()
-        
+
         assert meta.compat == {}
 
     def test_metadata_caching(self):
         """Metadata is computed once and cached."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         meta1 = adapter.metadata()
         meta2 = adapter.metadata()
-        
+
         assert meta1 is meta2  # Same object
 
 
@@ -179,9 +179,9 @@ class TestPluginAdapterCreateWidget:
         get_qapp()  # Ensure QApplication exists
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         widget = adapter.create_widget()
-        
+
         legacy.create_widget.assert_called_once()
         assert widget is legacy.create_widget.return_value
 
@@ -192,9 +192,9 @@ class TestPluginAdapterCreateWidget:
         real_widget = QWidget()
         legacy.create_widget.return_value = real_widget
         adapter = PluginAdapter(legacy)
-        
+
         widget = adapter.create_widget()
-        
+
         assert isinstance(widget, QWidget)
 
     def test_create_widget_raises_type_error_on_non_qwidget(self):
@@ -204,10 +204,10 @@ class TestPluginAdapterCreateWidget:
         # Plugin returns a string instead of QWidget
         legacy.create_widget.return_value = "not a widget"
         adapter = PluginAdapter(legacy)
-        
+
         with __import__('pytest').raises(RuntimeError) as exc_info:
             adapter.create_widget()
-        
+
         assert "must return QWidget" in str(exc_info.value)
 
     def test_create_widget_raises_runtime_error_on_failure(self):
@@ -216,10 +216,10 @@ class TestPluginAdapterCreateWidget:
         legacy = _make_legacy_plugin()
         legacy.create_widget.side_effect = ValueError("widget creation failed")
         adapter = PluginAdapter(legacy)
-        
+
         with __import__('pytest').raises(RuntimeError) as exc_info:
             adapter.create_widget()
-        
+
         assert "failed to create widget" in str(exc_info.value)
 
 
@@ -231,9 +231,9 @@ class TestPluginAdapterLifecycle:
         legacy = _make_legacy_plugin()
         legacy.on_load = MagicMock()
         adapter = PluginAdapter(legacy)
-        
+
         adapter.on_activate()
-        
+
         legacy.on_load.assert_called_once()
 
     def test_on_activate_handles_missing_on_load(self):
@@ -243,7 +243,7 @@ class TestPluginAdapterLifecycle:
         if hasattr(legacy, 'on_load'):
             delattr(legacy, 'on_load')
         adapter = PluginAdapter(legacy)
-        
+
         # Should not raise
         adapter.on_activate()
 
@@ -252,7 +252,7 @@ class TestPluginAdapterLifecycle:
         legacy = _make_legacy_plugin()
         legacy.on_load = MagicMock(side_effect=RuntimeError("load failed"))
         adapter = PluginAdapter(legacy)
-        
+
         # Should not raise, just log
         adapter.on_activate()
 
@@ -260,7 +260,7 @@ class TestPluginAdapterLifecycle:
         """on_deactivate() does nothing for legacy plugins."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         # Should not raise
         adapter.on_deactivate()
 
@@ -272,10 +272,10 @@ class TestPluginAdapterContext:
         """set_context() stores the context dict."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         context = {"main_window": "window", "config_manager": "config"}
         adapter.set_context(context)
-        
+
         assert hasattr(adapter, '_context')
         assert adapter._context == context
 
@@ -283,14 +283,14 @@ class TestPluginAdapterContext:
         """set_context() accepts full context with all keys."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         context = {
             "main_window": Mock(),
             "config_manager": Mock(),
             "executor": Mock()
         }
         adapter.set_context(context)
-        
+
         assert adapter._context["main_window"] is not None
         assert adapter._context["config_manager"] is not None
         assert adapter._context["executor"] is not None
@@ -403,9 +403,9 @@ class TestPluginAdapterCLICommands:
         commands = {"test": MagicMock()}
         legacy.get_cli_commands.return_value = commands
         adapter = PluginAdapter(legacy)
-        
+
         result = adapter.get_cli_commands()
-        
+
         legacy.get_cli_commands.assert_called_once()
         assert result == commands
 
@@ -414,9 +414,9 @@ class TestPluginAdapterCLICommands:
         legacy = _make_legacy_plugin()
         legacy.get_cli_commands.return_value = {}
         adapter = PluginAdapter(legacy)
-        
+
         result = adapter.get_cli_commands()
-        
+
         assert isinstance(result, dict)
 
 
@@ -427,16 +427,16 @@ class TestPluginAdapterWrappedProperty:
         """wrapped_plugin property returns the underlying plugin."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         result = adapter.wrapped_plugin
-        
+
         assert result is legacy
 
     def test_wrapped_plugin_is_readonly(self):
         """wrapped_plugin property cannot be set (read-only)."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         # Property should be read-only (no setter)
         assert hasattr(adapter, 'wrapped_plugin')
 
@@ -448,11 +448,11 @@ class TestPluginAdapterCheckCompat:
         """check_compat() returns CompatStatus."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         detector = MagicMock()
-        
+
         result = adapter.check_compat(detector)
-        
+
         assert isinstance(result, CompatStatus)
         assert result.compatible is True
 
@@ -460,11 +460,11 @@ class TestPluginAdapterCheckCompat:
         """check_compat() returns compat status based on manifest."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         detector = MagicMock()
-        
+
         result = adapter.check_compat(detector)
-        
+
         # Adapter checks manifest compatibility
         assert isinstance(result, CompatStatus)
 
@@ -475,10 +475,10 @@ class TestPluginAdapterCheckCompat:
         manifest.min_app_version = "999.0.0"  # Future version
         legacy.manifest = manifest
         adapter = PluginAdapter(legacy)
-        
+
         detector = MagicMock()
         result = adapter.check_compat(detector)
-        
+
         # Should detect incompatibility
         assert result.compatible is False
         assert "Requires app version" in result.reason
@@ -491,10 +491,10 @@ class TestPluginAdapterCheckCompat:
         manifest.permissions = ["sudo", "network"]
         legacy.manifest = manifest
         adapter = PluginAdapter(legacy)
-        
+
         detector = MagicMock()
         result = adapter.check_compat(detector)
-        
+
         # Should be compatible but with warnings
         assert result.compatible is True
         assert len(result.warnings) > 0
@@ -505,10 +505,10 @@ class TestPluginAdapterCheckCompat:
         """check_compat() returns compatible when no manifest."""
         legacy = _make_legacy_plugin()
         adapter = PluginAdapter(legacy)
-        
+
         detector = MagicMock()
         result = adapter.check_compat(detector)
-        
+
         assert result.compatible is True
         assert result.warnings == []
 
@@ -520,12 +520,12 @@ class TestPluginAdapterIntegration:
         """Adapter correctly wraps entire legacy plugin lifecycle."""
         legacy = _make_legacy_plugin(name="Legacy Test")
         adapter = PluginAdapter(legacy)
-        
+
         # Metadata access
         meta = adapter.metadata()
         assert meta.name == "Legacy Test"
         assert meta.id == "legacy-test"
-        
+
         # Widget creation
         get_qapp()
         widget = adapter.create_widget()
@@ -534,10 +534,10 @@ class TestPluginAdapterIntegration:
     def test_multiple_adapters_for_same_plugin(self):
         """Multiple adapters can wrap the same legacy plugin."""
         legacy = _make_legacy_plugin()
-        
+
         adapter1 = PluginAdapter(legacy)
         adapter2 = PluginAdapter(legacy)
-        
+
         assert adapter1 is not adapter2
         assert adapter1.metadata().id == adapter2.metadata().id
 
@@ -545,8 +545,8 @@ class TestPluginAdapterIntegration:
         """Adapter metadata ID matches across calls."""
         legacy = _make_legacy_plugin(name="Identity Test")
         adapter = PluginAdapter(legacy)
-        
+
         id1 = adapter.metadata().id
         id2 = adapter.metadata().id
-        
+
         assert id1 == id2 == "identity-test"

@@ -11,12 +11,12 @@ v49.0 "Shield" hardens project quality by expanding test coverage for the four l
 
 ### Test Coverage Expansion
 
-| Module | Before | Tests Added | Key Coverage |
-|--------|--------|-------------|--------------|
-| `utils/formatting.py` | 0% | 26 tests | `bytes_to_human`, `seconds_to_human`, `percent_bar`, `truncate` |
-| `services/hardware/battery.py` | 24% | 13 tests | `set_limit` success, failure steps, OSError, SubprocessError, timeout |
-| `utils/update_manager.py` | 27% | 28 total | DNF/rpm-ostree paths, shutil.which, OSError, TimeoutExpired |
-| `core/plugins/adapter.py` | 30% | 53 total | Lifecycle, slugify, version compat, CLI commands, manifest checks |
+| Module                         | Before | Tests Added | Key Coverage                                                          |
+| ------------------------------ | ------ | ----------- | --------------------------------------------------------------------- |
+| `utils/formatting.py`          | 0%     | 26 tests    | `bytes_to_human`, `seconds_to_human`, `percent_bar`, `truncate`       |
+| `services/hardware/battery.py` | 24%    | 13 tests    | `set_limit` success, failure steps, OSError, SubprocessError, timeout |
+| `utils/update_manager.py`      | 27%    | 28 total    | DNF/rpm-ostree paths, shutil.which, OSError, TimeoutExpired           |
+| `core/plugins/adapter.py`      | 30%    | 53 total    | Lifecycle, slugify, version compat, CLI commands, manifest checks     |
 
 ### Quality Improvements
 

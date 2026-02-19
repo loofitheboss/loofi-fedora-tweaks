@@ -53,14 +53,14 @@ Four entry modes via `main.py`: GUI (default), `--cli` (subcommands with `--json
 
 **Layer boundaries (strict):**
 
-| Layer | Path | Key rule |
-| ------- | ------ | --------- |
-| UI | `ui/*_tab.py` | Inherit `BaseTab`, no `subprocess`, no business logic |
-| Utils | `utils/*.py` | All `@staticmethod`, return ops tuples, no PyQt6 |
-| Services | `services/` | Domain-specific service modules, no direct UI coupling |
-| CLI | `cli/main.py` | Argument parsing only, calls `utils/` |
-| API | `api/routes/` | FastAPI endpoints, calls `utils/`, no PyQt6 |
-| Core | `core/executor/` | `BaseActionExecutor` + `ActionResult`, no UI/CLI coupling |
+| Layer    | Path             | Key rule                                                  |
+| -------- | ---------------- | --------------------------------------------------------- |
+| UI       | `ui/*_tab.py`    | Inherit `BaseTab`, no `subprocess`, no business logic     |
+| Utils    | `utils/*.py`     | All `@staticmethod`, return ops tuples, no PyQt6          |
+| Services | `services/`      | Domain-specific service modules, no direct UI coupling    |
+| CLI      | `cli/main.py`    | Argument parsing only, calls `utils/`                     |
+| API      | `api/routes/`    | FastAPI endpoints, calls `utils/`, no PyQt6               |
+| Core     | `core/executor/` | `BaseActionExecutor` + `ActionResult`, no UI/CLI coupling |
 
 `utils/operations.py` is the shared API — GUI, CLI, and API are consumers only.
 

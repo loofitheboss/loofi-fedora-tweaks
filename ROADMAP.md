@@ -7,38 +7,38 @@
 
 ## Version Index
 
-| Version | Codename | Status | Theme |
-|---------|----------|--------|-------|
-| v21.0 | UX Stabilization | DONE | Layout integrity, QSS scoping |
-| v22.0 | Usability | SKIPPED | Search, status indicators, preferences |
-| v23.0 | Architecture Hardening | DONE | Service layer, executor, imports |
-| v24.0 | Power Features | DONE | Profiles, export, log panel, snapshots |
-| v25.0 | Plugin Architecture | DONE | Plugin system, UI redesign, API |
-| v25.0.3 | Maintenance Update Crash Hotfix | DONE | Stabilize Maintenance update actions |
-| v26.0 | Plugin Marketplace | DONE | External plugins, marketplace, sandboxing |
-| v27.0 | Marketplace Enhancement | DONE | CDN index, ratings/reviews, badges, analytics, hot-reload, stronger sandbox |
-| v28.0 | Workflow Contract Reset | DONE | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
-| v29.0 | Usability & Polish | DONE | UX polish, skipped v22 scope, error handling, accessibility, CORS |
-| v30.0 | Distribution & Reliability | DONE | Flatpak, AppImage, auto-update, CI hardening, coverage 75% |
-| v31.0 | Smart UX | DONE | Health score, i18n, batch ops, export report, plugin template |
-| v32.0 | Abyss | DONE | Full visual redesign, activity-based categories, Abyss theme |
-| v33.0 | Bastion | DONE | Testing & type safety debt, CI pipeline hardening |
-| v34.0 | Citadel | DONE | Light theme fix, stability hardening, accessibility polish |
-| v35.0 | Fortress | DONE | Subprocess timeout enforcement, audit logging, privilege hardening |
-| v36.0 | Horizon | DONE | UX safety, performance optimization, navigation polish |
-| v37.0 | Pinnacle | DONE | Smart features, ecosystem expansion, user-requested enhancements |
-| v38.0 | Clarity | DONE | UX polish, theme correctness, stability improvements |
-| v39.0 | Prism | DONE | Deprecated import migration, inline style elimination |
-| v40.0 | Foundation | DONE | Correctness & safety hardening, zero shell injection |
-| v41.0 | Coverage | DONE | Test coverage 80%+, CI pipeline hardening |
-| v42.0 | Sentinel | DONE | Exception narrowing, hardcoded dnf elimination, UX polish |
-| v43.0 | Stabilization-Only | DONE | Policy enforcement, runtime hardening, CI gate tightening |
-| v44.0 | Review Gate | DONE | Fedora review prerequisite enforcement for workflow and CI pipelines |
-| v45.0 | Housekeeping | DONE | Stability fixes, safe guidance cleanup, reliability UX consistency |
-| v46.0 | Navigator | DONE | Category clarity, navigation consistency, release packaging alignment |
-| v47.0 | Experience | DONE | UX experience levels, actionable feedback, health drill-down, guided tour |
-| v48.0 | Sidebar Index | DONE | Tab/sidebar restructure with O(1) ID-based lookups |
-| v49.0 | Shield | DONE | Test coverage expansion for lowest-covered modules |
+| Version | Codename                        | Status  | Theme                                                                             |
+| ------- | ------------------------------- | ------- | --------------------------------------------------------------------------------- |
+| v21.0   | UX Stabilization                | DONE    | Layout integrity, QSS scoping                                                     |
+| v22.0   | Usability                       | SKIPPED | Search, status indicators, preferences                                            |
+| v23.0   | Architecture Hardening          | DONE    | Service layer, executor, imports                                                  |
+| v24.0   | Power Features                  | DONE    | Profiles, export, log panel, snapshots                                            |
+| v25.0   | Plugin Architecture             | DONE    | Plugin system, UI redesign, API                                                   |
+| v25.0.3 | Maintenance Update Crash Hotfix | DONE    | Stabilize Maintenance update actions                                              |
+| v26.0   | Plugin Marketplace              | DONE    | External plugins, marketplace, sandboxing                                         |
+| v27.0   | Marketplace Enhancement         | DONE    | CDN index, ratings/reviews, badges, analytics, hot-reload, stronger sandbox       |
+| v28.0   | Workflow Contract Reset         | DONE    | Clean-slate workflow state, runner-compatible planning artifacts, kickoff handoff |
+| v29.0   | Usability & Polish              | DONE    | UX polish, skipped v22 scope, error handling, accessibility, CORS                 |
+| v30.0   | Distribution & Reliability      | DONE    | Flatpak, AppImage, auto-update, CI hardening, coverage 75%                        |
+| v31.0   | Smart UX                        | DONE    | Health score, i18n, batch ops, export report, plugin template                     |
+| v32.0   | Abyss                           | DONE    | Full visual redesign, activity-based categories, Abyss theme                      |
+| v33.0   | Bastion                         | DONE    | Testing & type safety debt, CI pipeline hardening                                 |
+| v34.0   | Citadel                         | DONE    | Light theme fix, stability hardening, accessibility polish                        |
+| v35.0   | Fortress                        | DONE    | Subprocess timeout enforcement, audit logging, privilege hardening                |
+| v36.0   | Horizon                         | DONE    | UX safety, performance optimization, navigation polish                            |
+| v37.0   | Pinnacle                        | DONE    | Smart features, ecosystem expansion, user-requested enhancements                  |
+| v38.0   | Clarity                         | DONE    | UX polish, theme correctness, stability improvements                              |
+| v39.0   | Prism                           | DONE    | Deprecated import migration, inline style elimination                             |
+| v40.0   | Foundation                      | DONE    | Correctness & safety hardening, zero shell injection                              |
+| v41.0   | Coverage                        | DONE    | Test coverage 80%+, CI pipeline hardening                                         |
+| v42.0   | Sentinel                        | DONE    | Exception narrowing, hardcoded dnf elimination, UX polish                         |
+| v43.0   | Stabilization-Only              | DONE    | Policy enforcement, runtime hardening, CI gate tightening                         |
+| v44.0   | Review Gate                     | DONE    | Fedora review prerequisite enforcement for workflow and CI pipelines              |
+| v45.0   | Housekeeping                    | DONE    | Stability fixes, safe guidance cleanup, reliability UX consistency                |
+| v46.0   | Navigator                       | DONE    | Category clarity, navigation consistency, release packaging alignment             |
+| v47.0   | Experience                      | DONE    | UX experience levels, actionable feedback, health drill-down, guided tour         |
+| v48.0   | Sidebar Index                   | DONE    | Tab/sidebar restructure with O(1) ID-based lookups                                |
+| v49.0   | Shield                          | DONE    | Test coverage expansion for lowest-covered modules                                |
 
 ---
 
@@ -62,12 +62,12 @@ before package and release execution paths. No product feature expansion.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| project-coordinator | v44 workflow state setup and roadmap activation |
-| backend-builder | checker script + workflow runner + CI workflow wiring |
-| test-writer | checker, runner gate, and workflow contract test coverage |
-| release-planner | docs, release notes, version and report artifact alignment |
+| Agent               | Task                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| project-coordinator | v44 workflow state setup and roadmap activation            |
+| backend-builder     | checker script + workflow runner + CI workflow wiring      |
+| test-writer         | checker, runner gate, and workflow contract test coverage  |
+| release-planner     | docs, release notes, version and report artifact alignment |
 
 ### Dependencies
 
@@ -114,12 +114,12 @@ targeted bugfixes, and consistent reliability UX. No major feature expansion.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| project-coordinator | v45 scope and workflow sequencing |
-| backend-builder | runtime lint/compliance fixes and helper integration |
-| test-writer | targeted regression and behavior tests for changed modules |
-| release-planner | version alignment and release documentation for 45.0.0 |
+| Agent               | Task                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| project-coordinator | v45 scope and workflow sequencing                          |
+| backend-builder     | runtime lint/compliance fixes and helper integration       |
+| test-writer         | targeted regression and behavior tests for changed modules |
+| release-planner     | version alignment and release documentation for 45.0.0     |
 
 ### Dependencies
 
@@ -152,14 +152,14 @@ tests, and CI. No major features.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| project-coordinator | workflow state alignment and task orchestration |
-| backend-builder | policy checker, services/utils hardening, command-path refactors |
-| frontend-integration-builder | wizard subprocess extraction + UI exception narrowing |
-| code-implementer | core/cli exception narrowing and shared hardening |
-| test-writer | targeted regression and compliance test updates |
-| release-planner | version/docs/release artifact completion |
+| Agent                        | Task                                                             |
+| ---------------------------- | ---------------------------------------------------------------- |
+| project-coordinator          | workflow state alignment and task orchestration                  |
+| backend-builder              | policy checker, services/utils hardening, command-path refactors |
+| frontend-integration-builder | wizard subprocess extraction + UI exception narrowing            |
+| code-implementer             | core/cli exception narrowing and shared hardening                |
+| test-writer                  | targeted regression and compliance test updates                  |
+| release-planner              | version/docs/release artifact completion                         |
 
 ### Dependencies
 
@@ -213,11 +213,11 @@ and enforce the 80% threshold in all CI workflows. Zero production code changes.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Test | All 23 test files, coverage analysis |
-| Builder | CI workflow improvements |
-| Planner | Release coordination |
+| Agent   | Task                                 |
+| ------- | ------------------------------------ |
+| Test    | All 23 test files, coverage analysis |
+| Builder | CI workflow improvements             |
+| Planner | Release coordination                 |
 
 ### Dependencies
 
@@ -247,12 +247,12 @@ through `PrivilegedCommand.dnf()` or `SystemManager.get_package_manager()`.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Shell injection elimination, dnf replacement, timeout enforcement |
-| CodeGen | Logger formatting, exception handling |
-| Guardian | Stale import fixes, migration tests |
-| Planner | Release coordination |
+| Agent    | Task                                                              |
+| -------- | ----------------------------------------------------------------- |
+| Builder  | Shell injection elimination, dnf replacement, timeout enforcement |
+| CodeGen  | Logger formatting, exception handling                             |
+| Guardian | Stale import fixes, migration tests                               |
+| Planner  | Release coordination                                              |
 
 ### Dependencies
 
@@ -280,13 +280,13 @@ QSS objectNames, and enforce zero DeprecationWarnings.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Import migration, shim removal |
-| CodeGen | Style-to-QSS conversion |
-| Sculptor | QSS rules authoring |
+| Agent    | Task                                            |
+| -------- | ----------------------------------------------- |
+| Builder  | Import migration, shim removal                  |
+| CodeGen  | Style-to-QSS conversion                         |
+| Sculptor | QSS rules authoring                             |
 | Guardian | Migration tests, DeprecationWarning enforcement |
-| Planner | Release coordination |
+| Planner  | Release coordination                            |
 
 ### Dependencies
 
@@ -329,14 +329,14 @@ hardening. No new major features — refine what exists.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | QSS architecture, objectName strategy |
-| Builder | Doctor rewrite, Quick Actions wiring, HistoryManager integration |
-| Sculptor | UI enhancements (undo, breadcrumb, output toolbar, risk badges) |
-| CodeGen | Theme fixes, objectName replacements |
-| Guardian | Tests for all changes |
-| Planner | Release coordination |
+| Agent    | Task                                                             |
+| -------- | ---------------------------------------------------------------- |
+| Arkitekt | QSS architecture, objectName strategy                            |
+| Builder  | Doctor rewrite, Quick Actions wiring, HistoryManager integration |
+| Sculptor | UI enhancements (undo, breadcrumb, output toolbar, risk badges)  |
+| CodeGen  | Theme fixes, objectName replacements                             |
+| Guardian | Tests for all changes                                            |
+| Planner  | Release coordination                                             |
 
 ### Dependencies
 
@@ -379,13 +379,13 @@ Structured audit logging, parameter validation, and Polkit separation.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Subprocess timeouts (56 files), audit logger, parameter validation |
-| CodeGen | Polkit split, dry-run mode, CLI timeout |
-| Guardian | Tests, SECURITY.md, install.sh deprecation |
-| Sculptor | Notification panel UI fix |
-| Planner | Release coordination |
+| Agent    | Task                                                               |
+| -------- | ------------------------------------------------------------------ |
+| Builder  | Subprocess timeouts (56 files), audit logger, parameter validation |
+| CodeGen  | Polkit split, dry-run mode, CLI timeout                            |
+| Guardian | Tests, SECURITY.md, install.sh deprecation                         |
+| Sculptor | Notification panel UI fix                                          |
+| Planner  | Release coordination                                               |
 
 ### Dependencies
 
@@ -426,13 +426,13 @@ and navigation/UI polish based on user feedback.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Safe mode, risk classification, config backup, API security |
-| CodeGen | Performance optimization, lazy imports |
-| Sculptor | Navigation polish, sidebar, breadcrumb improvements |
-| Guardian | Tests, coverage push to 80% |
-| Planner | Release coordination |
+| Agent    | Task                                                        |
+| -------- | ----------------------------------------------------------- |
+| Builder  | Safe mode, risk classification, config backup, API security |
+| CodeGen  | Performance optimization, lazy imports                      |
+| Sculptor | Navigation polish, sidebar, breadcrumb improvements         |
+| Guardian | Tests, coverage push to 80%                                 |
+| Planner  | Release coordination                                        |
 
 ### Dependencies
 
@@ -471,14 +471,14 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | Feature architecture design |
-| Builder | Update manager, extension manager, Flatpak manager, boot config backends |
-| Sculptor | UI tabs, wizard v2, plugin showcase |
-| CodeGen | Wayland tweaks, backup wizard |
-| Guardian | Tests for all features |
-| Planner | Release coordination |
+| Agent    | Task                                                                     |
+| -------- | ------------------------------------------------------------------------ |
+| Arkitekt | Feature architecture design                                              |
+| Builder  | Update manager, extension manager, Flatpak manager, boot config backends |
+| Sculptor | UI tabs, wizard v2, plugin showcase                                      |
+| CodeGen  | Wayland tweaks, backup wizard                                            |
+| Guardian | Tests for all features                                                   |
+| Planner  | Release coordination                                                     |
 
 ### Dependencies
 
@@ -514,12 +514,12 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| CodeGen | Light theme QSS, CommandRunner hardening |
-| Builder | Extract subprocess from UI to utils/ |
+| Agent    | Task                                         |
+| -------- | -------------------------------------------- |
+| CodeGen  | Light theme QSS, CommandRunner hardening     |
+| Builder  | Extract subprocess from UI to utils/         |
 | Guardian | Silent exception fixes, accessibility, tests |
-| Planner | Release coordination |
+| Planner  | Release coordination                         |
 
 ### Dependencies
 
@@ -550,11 +550,11 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
+| Agent    | Task                                              |
+| -------- | ------------------------------------------------- |
 | Guardian | Fix mypy errors, fix failing tests, coverage fill |
-| Builder | Type annotation improvements |
-| Planner | CI pipeline improvements, release checklist |
+| Builder  | Type annotation improvements                      |
+| Planner  | CI pipeline improvements, release checklist       |
 
 ### Dependencies
 
@@ -632,13 +632,13 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
+| Agent    | Task                                      |
+| -------- | ----------------------------------------- |
 | Arkitekt | Approve folder structure, executor design |
-| Builder | Service abstractions, executor impl |
-| Sculptor | Non-blocking UI via QThread |
-| Test | Import tests, executor tests |
-| Planner | CI workflow, docs, packaging |
+| Builder  | Service abstractions, executor impl       |
+| Sculptor | Non-blocking UI via QThread               |
+| Test     | Import tests, executor tests              |
+| Planner  | CI workflow, docs, packaging              |
 
 ---
 
@@ -665,13 +665,13 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Manager | Define search + status plan |
-| Builder | Persistent preferences, reset logic |
-| Sculptor | Search/filter UI, indicators |
-| Test | State transition tests |
-| Planner | Docs + packaging |
+| Agent    | Task                                |
+| -------- | ----------------------------------- |
+| Manager  | Define search + status plan         |
+| Builder  | Persistent preferences, reset logic |
+| Sculptor | Search/filter UI, indicators        |
+| Test     | State transition tests              |
+| Planner  | Docs + packaging                    |
 
 ### Dependencies
 
@@ -701,13 +701,13 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Profiles, JSON export/import |
+| Agent    | Task                            |
+| -------- | ------------------------------- |
+| Builder  | Profiles, JSON export/import    |
 | Sculptor | Advanced mode toggle, log panel |
-| Arkitekt | Validate snapshot system |
-| Test | Profile save/load tests |
-| Planner | Packaging polish |
+| Arkitekt | Validate snapshot system        |
+| Test     | Profile save/load tests         |
+| Planner  | Packaging polish                |
 
 ### Dependencies
 
@@ -741,14 +741,14 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | Define plugin interface |
-| Builder | Plugin loader |
-| Sculptor | Sidebar redesign |
-| Test | Plugin registration tests |
-| Planner | Documentation overhaul |
-| CodeGen | Final integration |
+| Agent    | Task                      |
+| -------- | ------------------------- |
+| Arkitekt | Define plugin interface   |
+| Builder  | Plugin loader             |
+| Sculptor | Sidebar redesign          |
+| Test     | Plugin registration tests |
+| Planner  | Documentation overhaul    |
+| CodeGen  | Final integration         |
 
 ### Dependencies
 
@@ -808,23 +808,23 @@ focused on practical Fedora system management.
 
 ### Phases
 
-| Phase | Tasks | Status | Gate |
-|-------|-------|--------|------|
-| Foundation | T1–T8: Adapter, package, sandbox, loader, installer, integrity, marketplace API, resolver | ✅ DONE | All core modules importable, unit tests pass |
-| Features | T9–T14: Marketplace UI, details dialog, CLI commands, permission dialog, auto-updater | ✅ DONE | CLI commands implemented and tested |
-| Stabilization | T15–T22: 8 new test files (195 tests) | ✅ DONE | 195/195 tests pass (100%) |
-| Release | T23–T27: Version, docs, changelog, RPM | ✅ DONE | v26.0.0 released (2026-02-12) |
+| Phase         | Tasks                                                                                     | Status  | Gate                                         |
+| ------------- | ----------------------------------------------------------------------------------------- | ------- | -------------------------------------------- |
+| Foundation    | T1–T8: Adapter, package, sandbox, loader, installer, integrity, marketplace API, resolver | ✅ DONE | All core modules importable, unit tests pass |
+| Features      | T9–T14: Marketplace UI, details dialog, CLI commands, permission dialog, auto-updater     | ✅ DONE | CLI commands implemented and tested          |
+| Stabilization | T15–T22: 8 new test files (195 tests)                                                     | ✅ DONE | 195/195 tests pass (100%)                    |
+| Release       | T23–T27: Version, docs, changelog, RPM                                                    | ✅ DONE | v26.0.0 released (2026-02-12)                |
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | PluginAdapter design, package format spec |
-| Builder | Sandbox, external loader, installer, integrity, marketplace API, resolver, auto-updater |
-| Sculptor | Marketplace UI, detail dialog, permission dialog |
-| CodeGen | CLI marketplace commands |
+| Agent    | Task                                                                                      |
+| -------- | ----------------------------------------------------------------------------------------- |
+| Arkitekt | PluginAdapter design, package format spec                                                 |
+| Builder  | Sandbox, external loader, installer, integrity, marketplace API, resolver, auto-updater   |
+| Sculptor | Marketplace UI, detail dialog, permission dialog                                          |
+| CodeGen  | CLI marketplace commands                                                                  |
 | Guardian | 8 test files (adapter, sandbox, loader, installer, marketplace, CLI, resolver, integrity) |
-| Planner | Version bump, PLUGIN_SDK.md, CHANGELOG, release notes |
+| Planner  | Version bump, PLUGIN_SDK.md, CHANGELOG, release notes                                     |
 
 ### Dependencies
 
@@ -866,14 +866,14 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | CDN/index contract, isolation design |
-| Builder | Marketplace backend, analytics, hot reload, sandbox hardening |
-| Sculptor | Community tab UX for reviews and verification badges |
-| CodeGen | CLI extensions for review/badge/marketplace flows |
-| Guardian | Unit/integration test matrix for new marketplace features |
-| Planner | Versioning, docs, release checklist and packaging |
+| Agent    | Task                                                          |
+| -------- | ------------------------------------------------------------- |
+| Arkitekt | CDN/index contract, isolation design                          |
+| Builder  | Marketplace backend, analytics, hot reload, sandbox hardening |
+| Sculptor | Community tab UX for reviews and verification badges          |
+| CodeGen  | CLI extensions for review/badge/marketplace flows             |
+| Guardian | Unit/integration test matrix for new marketplace features     |
+| Planner  | Versioning, docs, release checklist and packaging             |
 
 ### Dependencies
 
@@ -900,13 +900,13 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Manager | Decompose v28 kickoff tasks and dependencies |
-| Arkitekt | Validate workflow artifact structure |
-| Builder | Implement workflow/runner integration deltas |
-| Test | Validate contract and workflow state checks |
-| Planner | Finalize docs + release-trace updates |
+| Agent    | Task                                         |
+| -------- | -------------------------------------------- |
+| Manager  | Decompose v28 kickoff tasks and dependencies |
+| Arkitekt | Validate workflow artifact structure         |
+| Builder  | Implement workflow/runner integration deltas |
+| Test     | Validate contract and workflow state checks  |
+| Planner  | Finalize docs + release-trace updates        |
 
 ### Dependencies
 
@@ -944,13 +944,13 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| CodeGen | Error handler, confirm dialog, CORS, sparkline fix |
+| Agent    | Task                                                  |
+| -------- | ----------------------------------------------------- |
+| CodeGen  | Error handler, confirm dialog, CORS, sparkline fix    |
 | Sculptor | Notification toast, sidebar indicators, accessibility |
-| Builder | Settings reset per group |
-| Guardian | Tab smoke tests |
-| Planner | Docs, packaging, release |
+| Builder  | Settings reset per group                              |
+| Guardian | Tab smoke tests                                       |
+| Planner  | Docs, packaging, release                              |
 
 ### Dependencies
 
@@ -987,12 +987,12 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Builder | Packaging scripts, auto-update, offline mode |
-| Arkitekt | pyproject.toml design, CI pipeline |
-| Guardian | Coverage gap analysis + tests |
-| Planner | Release checklist |
+| Agent    | Task                                         |
+| -------- | -------------------------------------------- |
+| Builder  | Packaging scripts, auto-update, offline mode |
+| Arkitekt | pyproject.toml design, CI pipeline           |
+| Guardian | Coverage gap analysis + tests                |
+| Planner  | Release checklist                            |
 
 ### Dependencies
 
@@ -1029,14 +1029,14 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
-| Arkitekt | Health score design, i18n architecture |
-| Builder | Health aggregation, export report, batch ops |
+| Agent    | Task                                                        |
+| -------- | ----------------------------------------------------------- |
+| Arkitekt | Health score design, i18n architecture                      |
+| Builder  | Health aggregation, export report, batch ops                |
 | Sculptor | Dashboard health widget, favorites UI, quick actions config |
-| CodeGen | Plugin template script, i18n tooling |
-| Guardian | Orca screen reader testing, coverage fill |
-| Planner | Release planning |
+| CodeGen  | Plugin template script, i18n tooling                        |
+| Guardian | Orca screen reader testing, coverage fill                   |
+| Planner  | Release planning                                            |
 
 ### Dependencies
 
@@ -1059,10 +1059,10 @@ focused on practical Fedora system management.
 
 ### Agent Assignment
 
-| Agent | Task |
-|-------|------|
+| Agent    | Task                              |
+| -------- | --------------------------------- |
 | Guardian | Test creation, coverage expansion |
-| Planner | Version scope, release planning |
+| Planner  | Version scope, release planning   |
 
 ---
 
