@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.py$'; then flake8 \"$CLAUDE_FILE_PATH\" --max-line-length=150 --ignore=E501,W503,E402,E722,E203 --quiet 2>/dev/null || true; fi"
+            "command": "node -e \"const cp=require('node:child_process');const f=process.env.CLAUDE_FILE_PATH||'';if(!/\\.py$/i.test(f))process.exit(0);cp.spawnSync('flake8',[f,'--max-line-length=150','--ignore=E501,W503,E402,E722,E203','--quiet'],{stdio:'ignore'});process.exit(0);\""
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.py$'; then flake8 \"$CLAUDE_FILE_PATH\" --max-line-length=150 --ignore=E501,W503,E402,E722,E203 --quiet 2>/dev/null || true; fi"
+            "command": "node -e \"const cp=require('node:child_process');const f=process.env.CLAUDE_FILE_PATH||'';if(!/\\.py$/i.test(f))process.exit(0);cp.spawnSync('flake8',[f,'--max-line-length=150','--ignore=E501,W503,E402,E722,E203','--quiet'],{stdio:'ignore'});process.exit(0);\""
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.(env|secret|key)$|mcp\\.env'; then echo 'BLOCKED: Cannot edit secrets/env files' >&2; exit 1; fi"
+            "command": "node -e \"const f=(process.env.CLAUDE_FILE_PATH||'').toLowerCase();if(/\\.(env|secret|key)$/.test(f)||/(^|[\\\\/])mcp\\.env$/.test(f)){console.error('BLOCKED: Cannot edit secrets/env files');process.exit(1);}\""
           }
         ]
       },
@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.(env|secret|key)$|mcp\\.env'; then echo 'BLOCKED: Cannot edit secrets/env files' >&2; exit 1; fi"
+            "command": "node -e \"const f=(process.env.CLAUDE_FILE_PATH||'').toLowerCase();if(/\\.(env|secret|key)$/.test(f)||/(^|[\\\\/])mcp\\.env$/.test(f)){console.error('BLOCKED: Cannot edit secrets/env files');process.exit(1);}\""
           }
         ]
       }
