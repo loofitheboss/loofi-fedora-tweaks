@@ -100,6 +100,18 @@ subprocess.run = _guarded_run
 subprocess.Popen = _guarded_popen
 
 
+# ── Eagerly import PyQt6 so it's in sys.modules BEFORE test collection ──
+# Test files that guard with ``if "PyQt6" not in sys.modules`` rely on this.
+# Without it, those guards fire during collection and permanently replace
+# the real PyQt6 modules with MagicMocks, corrupting hundreds of tests.
+try:
+    from PyQt6.QtWidgets import QApplication  # noqa: F401
+
+    _HAS_PYQT6 = True
+except ImportError:
+    _HAS_PYQT6 = False
+
+
 # ── Session-scoped QApplication singleton ──────────────────────────────
 # Prevents multiple QApplication instances across test files, which causes
 # Qt assertion crashes (IOT/abort) in PyQt6 offscreen mode.
@@ -110,15 +122,15 @@ _qapp_instance = None
 def qapp():
     """Ensure exactly one QApplication exists for the entire test session."""
     global _qapp_instance
-    try:
-        from PyQt6.QtWidgets import QApplication
-
-        _qapp_instance = QApplication.instance()
-        if _qapp_instance is None:
-            _qapp_instance = QApplication([])
-        yield _qapp_instance
-    except ImportError:
+    if not _HAS_PYQT6:
         yield None
+        return
+    from PyQt6.QtWidgets import QApplication
+
+    _qapp_instance = QApplication.instance()
+    if _qapp_instance is None:
+        _qapp_instance = QApplication([])
+    yield _qapp_instance
 
 
 @pytest.fixture
