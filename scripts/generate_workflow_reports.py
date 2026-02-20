@@ -186,9 +186,9 @@ def check_only(version: str) -> int:
     ok = True
     for p in (test_path, manifest_path):
         if p.exists():
-            print(f"  ✓ {p.relative_to(ROOT)}")
+            print(f"  [OK] {p.relative_to(ROOT)}")
         else:
-            print(f"  ✗ {p.relative_to(ROOT)} MISSING")
+            print(f"  [MISSING] {p.relative_to(ROOT)}")
             ok = False
     return 0 if ok else 1
 

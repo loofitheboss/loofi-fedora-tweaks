@@ -248,10 +248,10 @@ class TestAILabPluginClass(unittest.TestCase):
 class TestMinAppVersionEnforcement(unittest.TestCase):
     """Tests for min_app_version enforcement via PluginLoader."""
 
+    @patch('utils.plugin_base.APP_VERSION', "11.0.0")
     def test_compatible_version_loads(self):
         """Plugin with min_app_version <= current version loads successfully."""
         loader = PluginLoader()
-        # Current app is 11.0.0; ai_lab requires 11.0.0
         self.assertTrue(loader._is_version_compatible("11.0.0"))
 
     def test_future_version_blocks(self):

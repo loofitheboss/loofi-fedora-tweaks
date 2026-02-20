@@ -4,6 +4,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - 2026-02-20 "Foundation"
+
+### Version Renormalization
+
+- **Versioning reset to SemVer 1.0.0** — the project graduates to its first production-stable release under proper semantic versioning. Previous v50.0.0 numbering retired.
+- **Development Status → Production/Stable** — `pyproject.toml` classifier updated from "Beta" to "Production/Stable".
+- **Codename: Foundation** — marks the stable baseline for all future development.
+
+### Test Improvements
+
+- New `test_log.py`: tests for centralized logging configuration, XDG path handling, and root logger setup.
+- New `test_monitor.py`: tests for `SystemMonitor` — `bytes_to_human`, `get_memory_info`, `get_cpu_info`, and system health checks.
+- Fixed `test_plugins_v2.py`: added `@patch` decorator for `APP_VERSION` in version compatibility test to decouple from runtime version.
+
+### Packaging
+
+- Updated `loofi-fedora-tweaks.spec` version to 1.0.0.
+- Updated `pyproject.toml` version to 1.0.0.
+- Updated `version.py` to `__version__ = "1.0.0"`, `__version_codename__ = "Foundation"`.
+
 ## [50.0.0] - 2026-02-20 "Forge"
 
 ### Test Coverage Expansion

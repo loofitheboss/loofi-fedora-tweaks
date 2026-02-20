@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loofi_fedora_tweaks"
-version = "50.0.0"
+version = "1.0.0"
 description = "A comprehensive Fedora Linux system management tool with GUI, CLI, and daemon modes"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -12,7 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Loofi" }]
 keywords = ["fedora", "linux", "system-management", "pyqt6", "tweaks"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: X11 Applications :: Qt",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
