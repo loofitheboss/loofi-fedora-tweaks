@@ -1,3 +1,4 @@
+"""Remote app catalog fetcher with local caching and offline fallback."""
 import os
 import json
 import urllib.request

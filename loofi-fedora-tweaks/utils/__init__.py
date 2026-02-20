@@ -1,5 +1,4 @@
-# utils/ — Pure utilities and backward-compatibility re-exports
-#
+"""Utility package providing backward-compatibility re-exports and shared helpers."""
 # Executor layer has moved to core/executor/ (v23.0 refactor).
 # These re-exports maintain backward compatibility — remove in Phase 6.
 from core.executor.action_executor import ActionExecutor  # noqa: F401

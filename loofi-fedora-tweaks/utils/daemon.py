@@ -251,7 +251,7 @@ class Daemon:
                 # Sleep briefly
                 time.sleep(10)
 
-            except Exception as e:
+            except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as e:
                 logger.error("Error in main loop: %s", e, exc_info=True)
                 time.sleep(60)  # Back off on error
 

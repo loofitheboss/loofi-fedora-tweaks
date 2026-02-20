@@ -54,7 +54,7 @@ class LazyWidget(QWidget):
             try:
                 self.real_widget = self.loader_fn()
                 self._layout.addWidget(self.real_widget)
-            except Exception as e:
+            except (ImportError, TypeError, RuntimeError, AttributeError) as e:
                 # Show error if loading fails
                 error_label = QLabel(f"Failed to load: {e}")
                 error_label.setObjectName("errorLabel")

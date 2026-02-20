@@ -171,7 +171,7 @@ class EventBus:
                 subscription.topic,
                 subscription.subscriber_id or "anonymous",
             )
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError, AttributeError) as e:
             logger.error(
                 "Subscriber callback failed: topic='%s', subscriber_id='%s', error=%s",
                 subscription.topic,

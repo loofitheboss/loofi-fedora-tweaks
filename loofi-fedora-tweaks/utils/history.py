@@ -1,3 +1,4 @@
+"""Action history tracking with JSON persistence and undo capability."""
 import json
 import logging
 import os

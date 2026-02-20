@@ -39,6 +39,39 @@
 | v47.0   | Experience                      | DONE    | UX experience levels, actionable feedback, health drill-down, guided tour         |
 | v48.0   | Sidebar Index                   | DONE    | Tab/sidebar restructure with O(1) ID-based lookups                                |
 | v49.0   | Shield                          | DONE    | Test coverage expansion for lowest-covered modules                                |
+| v50.0   | Forge                           | DONE    | Quality hardening, exception narrowing, docstrings, coverage push                 |
+
+---
+
+## [DONE] v50.0 "Forge" — Quality Hardening & Code Forge
+
+### Scope
+
+Pure quality hardening release focused on four pillars: closing the last 5 untested
+modules, narrowing the final 4 broad `except Exception` handlers, completing module
+docstrings for 9 utils modules, and pushing coverage above the 80% CI threshold.
+
+### Planned Deliverables
+
+- [x] Test coverage expansion for 5 untested modules (`action_result`, `errors`, `event_simulator`, `presets`, `remote_config`) — 91 new test methods
+- [x] Narrow remaining broad `except Exception` handlers (4 sites: `error_handler`, `event_bus`, `daemon`, `lazy_widget`) — 6 handlers narrowed
+- [x] Add missing module-level docstrings to 9 utils modules
+- [x] Coverage push toward 80% goal with additional test expansion
+- [x] Version/docs/release artifacts for v50.0.0
+
+### Agent Assignment
+
+| Agent               | Task                                                |
+| ------------------- | --------------------------------------------------- |
+| project-coordinator | v50 scope, workflow state, roadmap activation       |
+| backend-builder     | Exception narrowing (4 sites)                       |
+| code-implementer    | Module docstrings (9 modules)                       |
+| test-writer         | Test suites for 5 untested modules + coverage push  |
+| release-planner     | Version alignment, docs, release notes              |
+
+### Dependencies
+
+- v49.0 Shield (test coverage baseline)
 
 ---
 

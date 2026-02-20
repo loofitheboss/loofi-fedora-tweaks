@@ -1,3 +1,4 @@
+"""Fingerprint enrollment worker using fprintd via QThread."""
 import subprocess
 
 from PyQt6.QtCore import QThread, pyqtSignal

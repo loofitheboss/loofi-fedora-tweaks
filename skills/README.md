@@ -1,7 +1,7 @@
 # Loofi Fedora Tweaks — Skills Reference
 
 > Complete catalog of all application capabilities organized by category.
-> Version: v44.0.0 "Review Gate"
+> Version: v50.0.0 "Forge"
 
 ## Categories
 

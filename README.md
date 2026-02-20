@@ -1,4 +1,4 @@
-# Loofi Fedora Tweaks v49.0.0 "Shield"
+# Loofi Fedora Tweaks v50.0.0 "Forge"
 
 <p align="center">
   <img src="loofi-fedora-tweaks/assets/loofi-fedora-tweaks.png" alt="Loofi Fedora Tweaks Logo" width="128"/>
@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v49.0.0">
-    <img src="https://img.shields.io/badge/Release-v49.0.0-blue?style=for-the-badge&logo=github" alt="Release v49.0.0"/>
+  <a href="https://github.com/loofitheboss/loofi-fedora-tweaks/releases/tag/v50.0.0">
+    <img src="https://img.shields.io/badge/Release-v50.0.0-blue?style=for-the-badge&logo=github" alt="Release v50.0.0"/>
   </a>
   <img src="https://img.shields.io/badge/Fedora-43-blue?style=for-the-badge&logo=fedora" alt="Fedora 43"/>
   <img src="https://img.shields.io/badge/Python-3.12+-green?style=for-the-badge&logo=python" alt="Python"/>
@@ -36,6 +36,19 @@ It is designed to be practical for both casual users and advanced users:
 - Optional headless web API mode.
 - Privileged actions routed through `pkexec` prompts.
 - Automatic detection of Traditional Fedora (`dnf`) and Atomic Fedora (`rpm-ostree`).
+
+---
+
+## What Is New in v50.0.0?
+
+`v50.0.0 "Forge"` is a pure quality hardening release across four pillars:
+
+- **Test coverage expansion** — 91 new test methods across 5 previously untested modules (`action_result`, `errors`, `event_simulator`, `presets`, `remote_config`).
+- **Exception narrowing** — Replaced 6 broad `except Exception` handlers in `error_handler`, `event_bus`, `daemon`, and `lazy_widget` with specific exception types.
+- **Module docstrings** — Added Google-style module-level docstrings to 9 utils modules.
+- **Coverage push** — All new tests contribute to the 80% CI coverage threshold.
+
+Full notes: [`docs/releases/RELEASE-NOTES-v50.0.0.md`](docs/releases/RELEASE-NOTES-v50.0.0.md)
 
 ---
 
@@ -172,12 +185,12 @@ PYTHONPATH=loofi-fedora-tweaks python3 loofi-fedora-tweaks/main.py
 
 ## Run Modes
 
-| Mode | Command | Use case |
-|------|---------|----------|
-| GUI | `loofi-fedora-tweaks` | Daily desktop usage |
-| CLI | `loofi-fedora-tweaks --cli <command>` | Scripting and quick actions |
-| Daemon | `loofi-fedora-tweaks --daemon` | Background scheduled tasks |
-| Web API | `loofi-fedora-tweaks --web` | Headless/remote integration |
+| Mode    | Command                               | Use case                    |
+| ------- | ------------------------------------- | --------------------------- |
+| GUI     | `loofi-fedora-tweaks`                 | Daily desktop usage         |
+| CLI     | `loofi-fedora-tweaks --cli <command>` | Scripting and quick actions |
+| Daemon  | `loofi-fedora-tweaks --daemon`        | Background scheduled tasks  |
+| Web API | `loofi-fedora-tweaks --web`           | Headless/remote integration |
 
 Optional shell alias for convenience:
 
@@ -203,15 +216,15 @@ alias loofi='loofi-fedora-tweaks --cli'
 
 ## Built-In Tabs
 
-| Category | Tabs |
-|----------|------|
-| System | Home, System Info, System Monitor, Community |
-| Packages | Software, Maintenance, Snapshots |
-| Hardware | Hardware, Performance, Storage, Gaming |
-| Network | Network, Loofi Link |
-| Security | Security & Privacy, Backup |
-| Appearance | Desktop, Profiles, Extensions, Settings |
-| Tools | Development, AI Lab, Virtualization |
+| Category    | Tabs                                                          |
+| ----------- | ------------------------------------------------------------- |
+| System      | Home, System Info, System Monitor, Community                  |
+| Packages    | Software, Maintenance, Snapshots                              |
+| Hardware    | Hardware, Performance, Storage, Gaming                        |
+| Network     | Network, Loofi Link                                           |
+| Security    | Security & Privacy, Backup                                    |
+| Appearance  | Desktop, Profiles, Extensions, Settings                       |
+| Tools       | Development, AI Lab, Virtualization                           |
 | Maintenance | Agents, Automation, Diagnostics, Health, Logs, State Teleport |
 
 ---
@@ -358,11 +371,11 @@ bash scripts/build_rpm.sh
 
 Every push to `master` and every pull request runs through two pipelines:
 
-| Pipeline | File | Purpose |
-|----------|------|---------|
-| CI | `.github/workflows/ci.yml` | Lint, typecheck, test, security, plus required Fedora review gate |
-| Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → fedora_review → build → tag → publish |
-| COPR Publish | `.github/workflows/copr-publish.yml` | Build SRPM and submit to Fedora COPR |
+| Pipeline     | File                                 | Purpose                                                           |
+| ------------ | ------------------------------------ | ----------------------------------------------------------------- |
+| CI           | `.github/workflows/ci.yml`           | Lint, typecheck, test, security, plus required Fedora review gate |
+| Auto Release | `.github/workflows/auto-release.yml` | Full release: validate → fedora_review → build → tag → publish    |
+| COPR Publish | `.github/workflows/copr-publish.yml` | Build SRPM and submit to Fedora COPR                              |
 
 ### Auto Release Flow
 

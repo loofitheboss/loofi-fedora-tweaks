@@ -1,3 +1,4 @@
+"""Preset management for saving and applying system configuration snapshots."""
 import logging
 import os
 import json

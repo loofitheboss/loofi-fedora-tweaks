@@ -4,6 +4,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [50.0.0] - 2026-02-20 "Forge"
+
+### Test Coverage Expansion
+
+- New `test_action_result.py`: 13 tests covering ActionResult creation, serialization, factory methods (`ok`, `fail`, `previewed`), and `from_dict` roundtrip (was 0% coverage)
+- New `test_errors.py`: 21 tests covering all 8 LoofiError subclasses — default fields, custom attributes, `code`/`hint`/`recoverable` properties, and inheritance hierarchy (was 0% coverage)
+- New `test_event_simulator.py`: 22 tests covering all EventSimulator methods — storage, network, trusted network, thermal throttling, normal temperature, battery, panic, and custom event publishing (was 0% coverage)
+- New `test_presets.py`: 23 tests covering PresetManager CRUD, sanitize_name path traversal protection, list/save/load/delete, community presets, power profile helpers (was 0% coverage)
+- New `test_remote_config.py`: 12 tests covering AppConfigFetcher remote fetch, cache hit, local fallback, error emission, and save_cache (was 0% coverage)
+
+### Exception Narrowing
+
+- Narrowed `except Exception` in `utils/error_handler.py` L71 → `except (ImportError, RuntimeError, OSError, ValueError, TypeError)`
+- Narrowed `except Exception` in `utils/error_handler.py` L112 → `except (RuntimeError, TypeError, AttributeError, OSError)`
+- Narrowed `except Exception` in `utils/event_bus.py` L174 → `except (RuntimeError, TypeError, ValueError, AttributeError)`
+- Narrowed `except Exception` in `utils/daemon.py` L213 → `except (ImportError, AttributeError, OSError)`
+- Narrowed `except Exception` in `utils/daemon.py` L254 → `except (OSError, RuntimeError, ValueError, subprocess.SubprocessError)`
+- Narrowed `except Exception` in `ui/lazy_widget.py` L57 → `except (ImportError, TypeError, RuntimeError, AttributeError)`
+
+### Module Documentation
+
+- Added Google-style module-level docstrings to 9 utils modules: `__init__`, `action_executor`, `action_result`, `command_runner`, `fingerprint`, `history`, `operations`, `presets`, `remote_config`
+
+### Quality
+
+- Zero remaining broad `except Exception` handlers in target files
+- Cleaned stale `ALLOWED_BROAD_EXCEPTIONS` allowlist entries from `check_stabilization_rules.py` (4 entries removed after narrowing)
+- All 91 new test methods follow `@patch` decorator pattern with module-under-test namespace
+- All subprocess mocks include `timeout` enforcement verification
+
 ## [49.0.0] - 2026-02-19 "Shield"
 
 ### Testing — Coverage Expansion
