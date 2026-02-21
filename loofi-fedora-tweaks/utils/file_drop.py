@@ -15,13 +15,12 @@ import re
 import threading
 import uuid
 from dataclasses import dataclass
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
 
 from utils.containers import Result
 from utils.rate_limiter import TokenBucketRateLimiter
-
 
 DEFAULT_PORT = 53317
 CHUNK_SIZE = 65536  # 64 KB chunks

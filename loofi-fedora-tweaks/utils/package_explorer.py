@@ -5,14 +5,15 @@ Part of v16.0 "Horizon".
 Supports DNF (traditional), rpm-ostree (atomic), and Flatpak.
 """
 
+import logging
 import shutil
 import subprocess
-import logging
 from dataclasses import dataclass
-from typing import List, Optional
 from datetime import datetime, timedelta
+from typing import List, Optional
 
 from services.system import SystemManager
+
 from utils.commands import PrivilegedCommand
 
 logger = logging.getLogger(__name__)

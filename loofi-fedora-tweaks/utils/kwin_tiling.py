@@ -8,14 +8,14 @@ Provides:
 - Window rules management
 """
 
-import logging
-import subprocess
-import shutil
-import os
 import json
+import logging
+import os
+import shutil
+import subprocess
 from dataclasses import dataclass
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

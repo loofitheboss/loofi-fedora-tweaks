@@ -3,7 +3,7 @@ Tests for utils/virtualization.py — Pre-v11.5 virtualization detection.
 Covers: CPU extensions, KVM module, IOMMU groups, VFIO helpers, tool checks.
 """
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 import sys
 import os
 

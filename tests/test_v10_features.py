@@ -4,7 +4,7 @@ Covers: errors hierarchy, command builder, formatting utilities, and hardware pr
 """
 import io
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import sys
 import os
 

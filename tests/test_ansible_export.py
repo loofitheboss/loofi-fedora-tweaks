@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -478,10 +478,7 @@ class TestAnsibleExporter(unittest.TestCase):
         self, mock_pkgs, mock_flatpaks, mock_settings
     ):
         """Playbook falls back to JSON when yaml module is unavailable."""
-        import importlib
-        import utils.ansible_export as mod
 
-        original_generate = AnsibleExporter.generate_playbook.__func__
 
         # Patch the yaml import inside generate_playbook by temporarily removing yaml
         real_import = (

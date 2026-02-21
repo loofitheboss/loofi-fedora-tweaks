@@ -1,6 +1,5 @@
 """Tests for extended coverage of utils/automation_profiles.py."""
 
-import json
 import os
 import sys
 import tempfile

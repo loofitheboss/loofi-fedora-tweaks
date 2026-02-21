@@ -6,8 +6,8 @@ Manages ZRAM (compressed swap in RAM) settings on Fedora.
 import os
 import subprocess
 from dataclasses import dataclass
-from typing import Optional, Tuple
 from pathlib import Path
+from typing import Optional, Tuple
 
 from utils.log import get_logger
 

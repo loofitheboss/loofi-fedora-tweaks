@@ -4,7 +4,7 @@ import sys
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -68,7 +68,7 @@ class TestPluginScannerInitialization:
             plugins_dir = Path(tmpdir) / "plugins"
             assert not plugins_dir.exists()
             
-            scanner = PluginScanner(plugins_dir=plugins_dir)
+            PluginScanner(plugins_dir=plugins_dir)
             assert plugins_dir.exists()
 
     def test_scanner_sets_state_file_path(self):

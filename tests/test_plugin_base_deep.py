@@ -12,7 +12,6 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from utils.plugin_base import (
-    VALID_PERMISSIONS,
     LoofiPlugin,
     PluginInfo,
     PluginLoader,
@@ -56,7 +55,7 @@ class TestPluginLoaderInit(unittest.TestCase):
             with patch.object(PluginLoader, 'PLUGINS_DIR', plugins_dir):
                 with patch.object(PluginLoader, 'CONFIG_DIR', config_dir):
                     with patch.object(PluginLoader, 'STATE_FILE', state_file):
-                        loader = PluginLoader()
+                        PluginLoader()
                         self.assertTrue(plugins_dir.exists())
                         self.assertTrue(state_file.exists())
                         init_file = plugins_dir / "__init__.py"

@@ -6,7 +6,6 @@ flatpak listing, presets, and error handling.
 
 import json
 import os
-import subprocess
 import sys
 import tempfile
 import unittest

@@ -1,13 +1,11 @@
 """Tests for core.plugins.resolver — DependencyResolver version constraints."""
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 from core.plugins.resolver import (
     DependencyResolver,
-    DependencyError,
     ResolverResult
 )
 

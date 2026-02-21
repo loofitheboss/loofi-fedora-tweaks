@@ -6,7 +6,6 @@ has_param, backup_grub, restore_backup, get_backups, and error handling.
 
 import os
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open

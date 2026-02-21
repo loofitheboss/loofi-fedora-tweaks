@@ -6,9 +6,9 @@ Blocks distracting domains, enables DND, and kills specified processes.
 import json
 import logging
 import subprocess
-from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

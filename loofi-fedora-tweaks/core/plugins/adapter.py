@@ -14,14 +14,16 @@ Usage:
 """
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable
+
 import re
+from typing import TYPE_CHECKING, Any, Callable
 
 from PyQt6.QtWidgets import QWidget
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata, CompatStatus
-from utils.plugin_base import LoofiPlugin
 from utils.log import get_logger
+from utils.plugin_base import LoofiPlugin
+
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import CompatStatus, PluginMetadata
 
 if TYPE_CHECKING:
     from core.plugins.compat import CompatibilityDetector

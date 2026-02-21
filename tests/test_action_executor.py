@@ -6,8 +6,7 @@ import json
 import os
 import tempfile
 import time
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

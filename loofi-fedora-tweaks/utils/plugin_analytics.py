@@ -5,7 +5,7 @@ import threading
 import urllib.error
 import urllib.request
 import uuid
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 

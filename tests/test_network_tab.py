@@ -8,7 +8,7 @@ helpers, and timer lifecycle.  All PyQt6 widgets run in offscreen mode
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, mock_open, PropertyMock
+from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 

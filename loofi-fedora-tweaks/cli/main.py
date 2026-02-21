@@ -14,29 +14,33 @@ from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
-from services.hardware import BluetoothManager
-from services.hardware import DiskManager
-from utils.firewall_manager import FirewallManager
-from utils.focus_mode import FocusMode
-from utils.health_timeline import HealthTimeline
-from utils.journal import JournalManager
-from utils.monitor import SystemMonitor
-from utils.network_monitor import NetworkMonitor
-from utils.operations import AdvancedOps, CleanupOps, NetworkOps, TweakOps
-from utils.package_explorer import PackageExplorer
-from utils.plugin_base import PluginLoader
-from utils.plugin_installer import PluginInstaller
-from utils.plugin_marketplace import PluginMarketplace
-from utils.ports import PortAuditor
-from utils.presets import PresetManager
-from services.system import ProcessManager
-from utils.profiles import ProfileManager
-from utils.service_explorer import ServiceExplorer, ServiceScope
-from utils.storage import StorageManager
-from services.system import SystemManager
-from services.hardware import TemperatureManager
-from utils.update_checker import UpdateChecker
-from version import __version__, __version_codename__
+from services.hardware import (
+    BluetoothManager,  # noqa: E402
+    DiskManager,  # noqa: E402
+    TemperatureManager,  # noqa: E402
+)
+from services.system import (
+    ProcessManager,  # noqa: E402
+    SystemManager,  # noqa: E402
+)
+from utils.firewall_manager import FirewallManager  # noqa: E402
+from utils.focus_mode import FocusMode  # noqa: E402
+from utils.health_timeline import HealthTimeline  # noqa: E402
+from utils.journal import JournalManager  # noqa: E402
+from utils.monitor import SystemMonitor  # noqa: E402
+from utils.network_monitor import NetworkMonitor  # noqa: E402
+from utils.operations import AdvancedOps, CleanupOps, NetworkOps, TweakOps  # noqa: E402
+from utils.package_explorer import PackageExplorer  # noqa: E402
+from utils.plugin_base import PluginLoader  # noqa: E402
+from utils.plugin_installer import PluginInstaller  # noqa: E402
+from utils.plugin_marketplace import PluginMarketplace  # noqa: E402
+from utils.ports import PortAuditor  # noqa: E402
+from utils.presets import PresetManager  # noqa: E402
+from utils.profiles import ProfileManager  # noqa: E402
+from utils.service_explorer import ServiceExplorer, ServiceScope  # noqa: E402
+from utils.storage import StorageManager  # noqa: E402
+from utils.update_checker import UpdateChecker  # noqa: E402
+from version import __version__, __version_codename__  # noqa: E402
 
 # Add parent to path for imports
 sys.path.insert(0, str(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -1345,7 +1349,7 @@ def cmd_teleport(args):
 
 def cmd_ai_models(args):
     """Handle AI models subcommand."""
-    from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
+    from utils.ai_models import RECOMMENDED_MODELS, AIModelManager
 
     if args.action == "list":
         installed = AIModelManager.get_installed_models()

@@ -4,7 +4,7 @@ Covers: PerformanceTab, SnapshotTab, LogsTab, StorageTab,
 and NetworkTab overhaul.
 """
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 import sys
 import os
 
@@ -69,7 +69,7 @@ class MockQWidget:
     def addWidget(self, w):
         pass
 
-    def addLayout(self, l):
+    def addLayout(self, layout):
         pass
 
     def addStretch(self):
@@ -116,14 +116,12 @@ class TestPerformanceTabImport(unittest.TestCase):
 
     @patch('utils.auto_tuner.AutoTuner')
     def test_auto_tuner_detect_workload(self, mock_tuner):
-        from utils.auto_tuner import AutoTuner
         mock_tuner.detect_workload = MagicMock()
         mock_tuner.detect_workload()
         mock_tuner.detect_workload.assert_called_once()
 
     @patch('utils.auto_tuner.AutoTuner')
     def test_auto_tuner_get_current_settings(self, mock_tuner):
-        from utils.auto_tuner import AutoTuner
         mock_tuner.get_current_settings = MagicMock(return_value={
             "governor": "performance",
             "swappiness": 60,
@@ -145,7 +143,6 @@ class TestSnapshotTabImport(unittest.TestCase):
 
     @patch('utils.snapshot_manager.SnapshotManager')
     def test_detect_backends(self, mock_mgr):
-        from utils.snapshot_manager import SnapshotManager
         mock_mgr.detect_backends = MagicMock(return_value=[])
         backends = mock_mgr.detect_backends()
         self.assertEqual(backends, [])
@@ -162,7 +159,6 @@ class TestLogsTabImport(unittest.TestCase):
 
     @patch('utils.smart_logs.SmartLogViewer')
     def test_get_error_summary(self, mock_viewer):
-        from utils.smart_logs import SmartLogViewer
         mock_viewer.get_error_summary = MagicMock()
         mock_viewer.get_error_summary("24h")
         mock_viewer.get_error_summary.assert_called_once_with("24h")
@@ -179,8 +175,6 @@ class TestNetworkTabOverhaul(unittest.TestCase):
 
     def test_network_tab_inherits_base_tab(self):
         """Verify NetworkTab class declaration uses BaseTab."""
-        import inspect
-        import importlib
         # Read the source code directly
         filepath = os.path.join(
             os.path.dirname(__file__), '..', 'loofi-fedora-tweaks', 'ui', 'network_tab.py'

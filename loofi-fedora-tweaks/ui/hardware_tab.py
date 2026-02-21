@@ -7,27 +7,27 @@ Expanded in v10.0 "Zenith" to absorb Tweaks tab features:
 - Fingerprint enrollment
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QComboBox,
-    QGroupBox,
-    QSlider,
-    QMessageBox,
-    QGridLayout,
-    QTextEdit,
-)
-from PyQt6.QtCore import Qt, QTimer
-from services.hardware import HardwareManager
-from utils.command_runner import CommandRunner
-from services.hardware import BluetoothManager
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
-from ui.tooltips import HW_CPU_GOVERNOR, HW_FAN_MODE
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSlider,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from services.hardware import BluetoothManager, HardwareManager
+from utils.command_runner import CommandRunner
 from utils.log import get_logger
+
+from ui.tooltips import HW_CPU_GOVERNOR, HW_FAN_MODE
 
 logger = get_logger(__name__)
 

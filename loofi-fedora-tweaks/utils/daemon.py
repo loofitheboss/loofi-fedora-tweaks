@@ -41,9 +41,9 @@ DATA ACCESS
 See utils/scheduler.py for task action definitions.
 """
 
-import time
 import signal
 import subprocess
+import time
 from pathlib import Path
 
 from utils.config_manager import ConfigManager

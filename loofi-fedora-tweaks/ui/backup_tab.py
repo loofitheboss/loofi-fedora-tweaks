@@ -11,23 +11,23 @@ Step 4: View results + existing snapshots
 
 import logging
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QLineEdit,
-    QStackedWidget,
-    QGroupBox,
-    QTableWidget,
-    QHeaderView,
-    QAbstractItemView,
-)
-
 from core.plugins.metadata import PluginMetadata
-from ui.base_tab import BaseTab
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QStackedWidget,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.install_hints import build_install_hint
+
+from ui.base_tab import BaseTab
 
 logger = logging.getLogger(__name__)
 

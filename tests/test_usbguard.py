@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
-from utils.usbguard import USBGuardManager, USBDevice
+from utils.usbguard import USBGuardManager
 
 
 class TestIsInstalled(unittest.TestCase):
@@ -186,7 +186,7 @@ class TestBlockDevice(unittest.TestCase):
     @patch("utils.usbguard.subprocess.run")
     def test_block_permanent(self, mock_run, mock_inst):
         mock_run.return_value = MagicMock(returncode=0)
-        result = USBGuardManager.block_device("2", permanent=True)
+        USBGuardManager.block_device("2", permanent=True)
         args = mock_run.call_args[0][0]
         self.assertIn("-p", args)
 

@@ -3,7 +3,6 @@
 import os
 import sys
 import socket
-import struct
 import unittest
 from unittest.mock import patch, MagicMock
 

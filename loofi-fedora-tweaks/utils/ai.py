@@ -145,7 +145,7 @@ class OllamaManager:
 
         try:
             # Try to start background process
-            subprocess.Popen(  # noqa: timeout — fire-and-forget background daemon
+            subprocess.Popen(  # timeout: fire-and-forget background daemon
                 ["ollama", "serve"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,

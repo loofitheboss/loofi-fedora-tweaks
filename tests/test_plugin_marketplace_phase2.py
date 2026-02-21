@@ -5,14 +5,12 @@ Tests T9-T14 functionality.
 import sys
 import os
 import unittest
-from unittest.mock import Mock, MagicMock, patch, call
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt
 from utils.plugin_installer import InstallerResult
 from core.plugins.package import PluginManifest, PluginPackage
 from utils.plugin_marketplace import PluginMetadata, MarketplaceResult

@@ -3,18 +3,19 @@ Operations Layer - Business logic extracted from UI tabs.
 Provides reusable operations for both GUI and CLI.
 """
 
-import logging
-import subprocess
-import os
 import getpass
+import logging
+import os
+import subprocess
 from dataclasses import dataclass
 from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
-from core.executor.action_result import ActionResult
-from services.system import SystemManager
-from utils.commands import PrivilegedCommand
+from services.system import SystemManager  # noqa: E402
+from utils.commands import PrivilegedCommand  # noqa: E402
+
+from core.executor.action_result import ActionResult  # noqa: E402
 
 
 @dataclass

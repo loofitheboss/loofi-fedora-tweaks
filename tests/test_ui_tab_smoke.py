@@ -14,7 +14,7 @@ Targets: AgentsTab, LogsTab, StorageTab, PerformanceTab, SnapshotTab,
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -54,7 +54,7 @@ class TestDependencyDoctor(unittest.TestCase):
     def test_check_tools_refreshes(self, mock_which):
         from ui.doctor import DependencyDoctor
         d = DependencyDoctor()
-        count1 = len(d.missing_tools)
+        len(d.missing_tools)
         mock_which.return_value = "/usr/bin/fake"
         d.check_tools()
         self.assertEqual(d.missing_tools, [])

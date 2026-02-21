@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from services.system import ServiceManager, UnitScope, UnitState, ServiceUnit, Result
+from services.system import ServiceManager, UnitScope, UnitState, ServiceUnit
 
 
 # ---------------------------------------------------------------------------
@@ -225,7 +225,7 @@ class TestGamingAndFailedDetection(unittest.TestCase):
             ServiceUnit("broken", UnitState.FAILED, UnitScope.USER),
         ]
 
-        failed = ServiceManager.get_failed_units()
+        ServiceManager.get_failed_units()
         # Called for both USER and SYSTEM scopes
         self.assertEqual(mock_list.call_count, 2)
 

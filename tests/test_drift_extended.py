@@ -9,7 +9,6 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from datetime import datetime
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -105,7 +104,7 @@ class TestDriftDetectorInit(unittest.TestCase):
     def test_init_creates_snapshots_directory(self):
         """__init__ creates the snapshots directory."""
         self.assertFalse(DriftDetector.SNAPSHOTS_DIR.exists())
-        detector = DriftDetector()
+        DriftDetector()
         self.assertTrue(DriftDetector.SNAPSHOTS_DIR.exists())
 
 

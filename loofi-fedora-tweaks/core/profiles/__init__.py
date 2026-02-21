@@ -1,6 +1,6 @@
 """Core profile models and storage."""
 
-from core.profiles.models import ProfileBundle, ProfileRecord, SCHEMA_VERSION
+from core.profiles.models import SCHEMA_VERSION, ProfileBundle, ProfileRecord
 from core.profiles.storage import ProfileStore
 
 __all__ = [

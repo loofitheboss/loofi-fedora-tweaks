@@ -10,7 +10,7 @@ Covers:
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -132,8 +132,7 @@ class TestMainGUI(unittest.TestCase):
     @patch("main._check_pyqt6", return_value=True)
     @patch("main._notify_error")
     def test_gui_mode_import_error(self, mock_notify, mock_check):
-        from main import main
-        with patch("builtins.__import__", side_effect=Exception("bad import")) as mock_import:
+        with patch("builtins.__import__", side_effect=Exception("bad import")):
             # The real import will fail so main catches it
             pass
         # Just verify the function path without actual GUI

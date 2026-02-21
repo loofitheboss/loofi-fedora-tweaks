@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.ports import PortAuditor, OpenPort, Result
+from utils.ports import PortAuditor, OpenPort
 
 
 # ---------------------------------------------------------------------------

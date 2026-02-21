@@ -74,7 +74,7 @@ class AILabPlugin(LoofiPlugin):
     @staticmethod
     def _cmd_ai_status() -> str:
         """Show AI capabilities and runtime status."""
-        from utils.ai import OllamaManager, AIConfigManager
+        from utils.ai import AIConfigManager, OllamaManager
         installed = OllamaManager.is_installed()
         running = OllamaManager.is_running() if installed else False
         gpu_mem = AIConfigManager.get_gpu_memory()

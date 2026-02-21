@@ -13,7 +13,7 @@ Tests cover:
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 import pytest
 

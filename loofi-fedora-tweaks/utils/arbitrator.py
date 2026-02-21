@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable
 
-from utils.log import get_logger
-from utils.pulse import SystemPulse, PowerState
 from services.hardware import TemperatureManager
 
+from utils.log import get_logger
+from utils.pulse import PowerState, SystemPulse
 
 logger = get_logger(__name__)
 

@@ -10,17 +10,29 @@ Provides:
 - Output log for operation feedback
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QGridLayout, QTextEdit, QScrollArea,
-    QFrame, QMessageBox, QDialog, QFormLayout, QLineEdit,
-    QComboBox, QFileDialog,
-)
-
-from ui.tab_utils import CONTENT_MARGINS
-from utils.profiles import ProfileManager
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.profiles import ProfileManager
+
+from ui.tab_utils import CONTENT_MARGINS
 
 
 class ProfilesTab(QWidget, PluginInterface):

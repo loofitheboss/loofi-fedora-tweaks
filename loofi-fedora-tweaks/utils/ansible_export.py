@@ -7,14 +7,15 @@ allowing users to replicate their setup on any Fedora machine.
 """
 
 import json
-import subprocess
 import shutil
+import subprocess
 from dataclasses import dataclass
-from typing import Optional, Any
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 from services.system import SystemManager
+
 from utils.log import get_logger
 
 logger = get_logger(__name__)

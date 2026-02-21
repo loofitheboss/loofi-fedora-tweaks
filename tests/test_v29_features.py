@@ -12,7 +12,7 @@ import os
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -389,7 +389,7 @@ class TestErrorHandlerIntegration(unittest.TestCase):
     @patch('utils.error_handler._log_error')
     def test_excepthook_called_for_unhandled_exception(self, mock_log, mock_dialog):
         """When installed, unhandled exceptions route through the handler."""
-        from utils.error_handler import install_error_handler, uninstall_error_handler, _loofi_excepthook
+        from utils.error_handler import install_error_handler
         from utils.errors import NetworkError
 
         original = sys.excepthook

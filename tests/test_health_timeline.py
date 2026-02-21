@@ -10,7 +10,6 @@ import os
 import sqlite3
 import sys
 import tempfile
-import time
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 
@@ -18,7 +17,6 @@ from unittest.mock import patch, MagicMock, mock_open
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from utils.health_timeline import HealthTimeline
-from utils.containers import Result
 
 
 # ---------------------------------------------------------------------------
@@ -31,7 +29,7 @@ class TestDBInit(unittest.TestCase):
     def test_in_memory_db_creates_table(self):
         """In-memory database creates the metrics table."""
         ht = HealthTimeline(db_path=":memory:")
-        conn = sqlite3.connect(":memory:")
+        sqlite3.connect(":memory:")
         # The HealthTimeline instance creates its own connection,
         # so we verify by recording and querying
         result = ht.record_metric("test", 1.0)
@@ -41,7 +39,7 @@ class TestDBInit(unittest.TestCase):
         """File-based database creates the parent directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = os.path.join(tmpdir, "subdir", "test.db")
-            ht = HealthTimeline(db_path=db_path)
+            HealthTimeline(db_path=db_path)
             self.assertTrue(os.path.isdir(os.path.join(tmpdir, "subdir")))
 
     def test_file_db_creates_file(self):
@@ -56,7 +54,7 @@ class TestDBInit(unittest.TestCase):
         """The metrics table has the correct schema."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = os.path.join(tmpdir, "schema.db")
-            ht = HealthTimeline(db_path=db_path)
+            HealthTimeline(db_path=db_path)
             conn = sqlite3.connect(db_path)
             cursor = conn.execute("PRAGMA table_info(metrics)")
             columns = {row[1] for row in cursor}
@@ -197,7 +195,7 @@ class TestGetMetrics(unittest.TestCase):
     def test_get_metrics_respects_time_window(self):
         """Metrics outside the time window are excluded."""
         # Insert a metric with an old timestamp directly
-        conn = sqlite3.connect(":memory:")
+        sqlite3.connect(":memory:")
         # Use the ht's internal path
         self.ht.record_metric("cpu_temp", 65.0, "C")
 

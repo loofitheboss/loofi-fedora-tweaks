@@ -1022,7 +1022,7 @@ class TestExecuteOperation(unittest.TestCase):
         """Test execute_operation with pkexec-prefixed tuple."""
         mock_run.return_value = MagicMock(success=True, message="done")
         op = ("pkexec", ["dnf", "clean", "all"], "Cleaning...")
-        result = execute_operation(op)
+        execute_operation(op)
         mock_run.assert_called_once_with(
             "dnf", ["clean", "all"], preview=False, pkexec=True
         )
@@ -1032,7 +1032,7 @@ class TestExecuteOperation(unittest.TestCase):
         """Test execute_operation with non-pkexec command."""
         mock_run.return_value = MagicMock(success=True, message="done")
         op = ("systemctl", ["--user", "restart", "pipewire"], "Restarting...")
-        result = execute_operation(op)
+        execute_operation(op)
         mock_run.assert_called_once_with(
             "systemctl", ["--user", "restart", "pipewire"], preview=False, pkexec=False
         )
@@ -1042,7 +1042,7 @@ class TestExecuteOperation(unittest.TestCase):
         """Test execute_operation with preview=True."""
         mock_run.return_value = MagicMock(success=True, preview=True)
         op = ("pkexec", ["fstrim", "-av"], "Trimming...")
-        result = execute_operation(op, preview=True)
+        execute_operation(op, preview=True)
         mock_run.assert_called_once_with("fstrim", ["-av"], preview=True, pkexec=True)
 
     @patch("core.executor.action_executor.ActionExecutor.run")

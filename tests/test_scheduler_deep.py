@@ -16,8 +16,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-twea
 
 from utils.scheduler import (
     ScheduledTask,
-    TaskAction,
-    TaskSchedule,
     TaskScheduler,
 )
 

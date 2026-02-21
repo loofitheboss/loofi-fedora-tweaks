@@ -6,24 +6,26 @@ Unified snapshot management across Timeshift, Snapper, and Btrfs backends.
 Uses SnapshotManager from utils/snapshot_manager.py.
 """
 
+from datetime import datetime
+
+from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
+    QGridLayout,
     QGroupBox,
-    QTableWidget,
+    QHBoxLayout,
     QHeaderView,
     QInputDialog,
+    QLabel,
     QMessageBox,
-    QGridLayout,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QTimer
-from ui.base_tab import BaseTab
 from utils.snapshot_manager import SnapshotManager
-from datetime import datetime
-from core.plugins.metadata import PluginMetadata
+
+from ui.base_tab import BaseTab
 
 
 class SnapshotTab(BaseTab):

@@ -6,6 +6,7 @@ This module will be removed in v24.0.
 """
 
 import warnings
+
 from services.hardware.battery import BatteryManager
 
 warnings.warn(

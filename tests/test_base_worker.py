@@ -12,7 +12,6 @@ Tests cover:
 import time
 import unittest
 from typing import Any
-from unittest.mock import MagicMock
 
 import os
 import pytest

@@ -9,13 +9,12 @@ Provides:
 - Security filtering (skip files with sensitive names, binary files)
 """
 
-import os
 import json
 import math
+import os
 import time
 
 from utils.containers import Result
-
 
 # Paths to consider indexing (relative to user home)
 INDEXABLE_PATHS = [

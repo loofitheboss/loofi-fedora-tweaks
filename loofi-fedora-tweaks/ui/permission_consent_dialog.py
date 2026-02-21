@@ -5,12 +5,9 @@ Part of v26.0 Plugin System.
 Shows required permissions to user before plugin installation.
 """
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QTextEdit, QCheckBox
-)
-from PyQt6.QtCore import Qt
 from core.plugins.package import PluginPackage
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QCheckBox, QDialog, QHBoxLayout, QLabel, QPushButton, QTextEdit, QVBoxLayout
 
 
 class PermissionConsentDialog(QDialog):

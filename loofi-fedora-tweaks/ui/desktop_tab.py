@@ -13,29 +13,29 @@ from pathlib import Path
 from PyQt6.QtCore import QTimer
 
 logger = logging.getLogger(__name__)
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
+from core.plugins.metadata import PluginMetadata  # noqa: E402
+from PyQt6.QtWidgets import (  # noqa: E402
     QComboBox,
-    QTextEdit,
-    QScrollArea,
     QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
     QLineEdit,
-    QTabWidget,
     QListWidget,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
+from utils.commands import PrivilegedCommand  # noqa: E402
+from utils.kwin_tiling import KWinManager  # noqa: E402
+from utils.tiling import DotfileManager, TilingManager  # noqa: E402
 
-from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
-from ui.tooltips import DESK_THEME, DESK_FONTS  # noqa: F401 — DESK_EXTENSIONS, DESK_WALLPAPER reserved
-from utils.commands import PrivilegedCommand
-from utils.tiling import TilingManager, DotfileManager
-from utils.kwin_tiling import KWinManager
-from core.plugins.metadata import PluginMetadata
+from ui.base_tab import BaseTab  # noqa: E402
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs  # noqa: E402
+from ui.tooltips import DESK_FONTS, DESK_THEME  # noqa: F401, E402
 
 
 class DesktopTab(BaseTab):

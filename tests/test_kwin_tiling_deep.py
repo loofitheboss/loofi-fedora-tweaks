@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.kwin_tiling import KWinManager, Result
+from utils.kwin_tiling import KWinManager
 
 
 class TestKWinIsKDE(unittest.TestCase):
@@ -176,7 +176,7 @@ class TestApplyTilingPreset(unittest.TestCase):
             MagicMock(returncode=0),  # first binding
             MagicMock(returncode=1, stderr="err"),  # second binding fails
         ] + [MagicMock(returncode=0)] * 20
-        r = KWinManager.apply_tiling_preset("vim")
+        KWinManager.apply_tiling_preset("vim")
         # Some bindings succeeded, some failed
         # Result depends on which binding fails
 

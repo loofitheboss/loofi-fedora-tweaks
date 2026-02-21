@@ -3,7 +3,7 @@ Tests for v9.2 Pulse Update features.
 Tests performance monitoring, process management, temperature, and network monitoring.
 """
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import patch, MagicMock
 import os
 import sys
 from io import StringIO
@@ -16,7 +16,7 @@ from utils.performance import (
 )
 from services.system import ProcessManager, ProcessInfo
 from services.hardware import TemperatureManager, TemperatureSensor
-from utils.network_monitor import NetworkMonitor, InterfaceStats, ConnectionInfo
+from utils.network_monitor import NetworkMonitor, InterfaceStats
 
 
 # ---------------------------------------------------------------------------

@@ -114,7 +114,7 @@ class SafetyManager:
         Returns:
             True if the action should proceed, False otherwise.
         """
-        from PyQt6.QtWidgets import QMessageBox, QApplication
+        from PyQt6.QtWidgets import QApplication, QMessageBox
 
         tool = SafetyManager.check_snapshot_tool()
 

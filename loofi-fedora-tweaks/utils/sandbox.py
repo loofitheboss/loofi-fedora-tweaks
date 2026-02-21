@@ -184,7 +184,7 @@ class SandboxManager:
 
         try:
             # Start process in background
-            process = subprocess.Popen(  # noqa: timeout — fire-and-forget sandboxed process
+            process = subprocess.Popen(  # timeout: fire-and-forget sandboxed process
                 firejail_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -351,7 +351,7 @@ class BubblewrapManager:
         bwrap_cmd.extend(command)
 
         try:
-            process = subprocess.Popen(  # noqa: timeout — fire-and-forget sandboxed process
+            process = subprocess.Popen(  # timeout: fire-and-forget sandboxed process
                 bwrap_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,

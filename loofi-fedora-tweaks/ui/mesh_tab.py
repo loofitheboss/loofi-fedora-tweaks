@@ -8,19 +8,29 @@ Provides a three-sub-tab interface:
   File Drop  — drag-and-drop file sending, transfer progress, incoming acceptance
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QTabWidget, QFileDialog, QProgressBar,
-)
-from PyQt6.QtCore import Qt
-
-from utils.mesh_discovery import MeshDiscovery
-from utils.clipboard_sync import ClipboardSync
-from utils.file_drop import FileDropManager
-from ui.tab_utils import configure_top_tabs
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QProgressBar,
+    QPushButton,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.clipboard_sync import ClipboardSync
+from utils.file_drop import FileDropManager
+from utils.mesh_discovery import MeshDiscovery
+
+from ui.tab_utils import configure_top_tabs
 
 
 class MeshTab(QWidget, PluginInterface):

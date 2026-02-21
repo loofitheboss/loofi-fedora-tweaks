@@ -10,7 +10,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 import urllib.error
-from datetime import datetime
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -99,7 +98,7 @@ class TestPresetMarketplaceInit(unittest.TestCase):
     def test_init_creates_cache_directory(self):
         """__init__ creates the cache directory."""
         self.assertFalse(PresetMarketplace.CACHE_DIR.exists())
-        market = PresetMarketplace()
+        PresetMarketplace()
         self.assertTrue(PresetMarketplace.CACHE_DIR.exists())
 
 

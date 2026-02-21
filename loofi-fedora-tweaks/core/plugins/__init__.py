@@ -21,17 +21,17 @@ Public API:
     ResolverResult   — dependency resolution result (v26.0 Phase 1 T8)
 """
 
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata, CompatStatus
-from core.plugins.registry import PluginRegistry
-from core.plugins.loader import PluginLoader
-from core.plugins.compat import CompatibilityDetector
 from core.plugins.adapter import PluginAdapter
+from core.plugins.compat import CompatibilityDetector
+from core.plugins.integrity import IntegrityVerifier, VerificationResult
+from core.plugins.interface import PluginInterface
+from core.plugins.loader import PluginLoader
+from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.package import PluginManifest, PluginPackage
+from core.plugins.registry import PluginRegistry
+from core.plugins.resolver import DependencyResolver, ResolverResult
 from core.plugins.sandbox import PluginSandbox, RestrictedImporter, create_sandbox
 from core.plugins.scanner import PluginScanner
-from core.plugins.integrity import IntegrityVerifier, VerificationResult
-from core.plugins.resolver import DependencyResolver, ResolverResult
 
 __all__ = [
     "PluginInterface",

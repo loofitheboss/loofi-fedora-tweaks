@@ -4,8 +4,8 @@ Persists favorite/pinned tabs to JSON config.
 """
 
 import json
-import os
 import logging
+import os
 from typing import List
 
 logger = logging.getLogger(__name__)

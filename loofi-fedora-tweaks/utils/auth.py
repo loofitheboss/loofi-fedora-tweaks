@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Optional
 
 import bcrypt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import jwt
 
 from utils.config_manager import ConfigManager
 

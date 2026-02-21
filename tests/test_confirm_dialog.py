@@ -15,7 +15,7 @@ All Qt widgets are mocked — no real QApplication needed.
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 

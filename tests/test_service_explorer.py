@@ -4,8 +4,7 @@ Tests for utils/service_explorer.py
 import unittest
 import sys
 import os
-from unittest.mock import patch, MagicMock, call
-from subprocess import CalledProcessError
+from unittest.mock import patch, MagicMock
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

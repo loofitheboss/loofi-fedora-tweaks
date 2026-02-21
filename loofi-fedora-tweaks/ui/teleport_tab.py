@@ -8,35 +8,35 @@ Provides:
 - Teleport restore with preview and confirmation
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QTextEdit,
-    QScrollArea,
-    QFrame,
-    QMessageBox,
-    QFileDialog,
-    QLineEdit,
-)
-
-from ui.base_tab import BaseTab
-from ui.tab_utils import CONTENT_MARGINS
-from utils.state_teleport import StateTeleportManager
-from utils.file_drop import FileDropManager
-from utils.mesh_discovery import MeshDiscovery
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata
-
 import logging
 import os
 import time
+
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
+from PyQt6.QtWidgets import (
+    QFileDialog,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.file_drop import FileDropManager
+from utils.mesh_discovery import MeshDiscovery
+from utils.state_teleport import StateTeleportManager
+
+from ui.base_tab import BaseTab
+from ui.tab_utils import CONTENT_MARGINS
 
 logger = logging.getLogger(__name__)
 

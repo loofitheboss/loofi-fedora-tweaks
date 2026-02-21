@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, mock_open, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.devtools import DevToolsManager, Result
+from utils.devtools import DevToolsManager
 
 
 class TestGetToolStatus(unittest.TestCase):

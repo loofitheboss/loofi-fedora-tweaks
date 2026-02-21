@@ -10,7 +10,7 @@ comprehensive mock for PyQt6 before importing the module.
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -36,7 +36,7 @@ _orig_qtcore_fp = sys.modules.get('PyQt6.QtCore')
 sys.modules['PyQt6'] = MagicMock()
 sys.modules['PyQt6.QtCore'] = _mock_qtcore
 
-from utils.fingerprint import FingerprintWorker
+from utils.fingerprint import FingerprintWorker  # noqa: E402
 
 # Restore originals so other tests are not polluted
 for _mod, _orig in [('PyQt6', _orig_pyqt6_fp), ('PyQt6.QtCore', _orig_qtcore_fp)]:

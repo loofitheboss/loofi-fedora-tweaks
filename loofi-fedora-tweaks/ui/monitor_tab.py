@@ -13,23 +13,33 @@ based execution.
 import os
 from collections import deque
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QComboBox, QTreeWidget, QTreeWidgetItem, QMenu, QMessageBox,
-    QInputDialog, QFrame, QHeaderView, QGridLayout, QGroupBox,
-    QTabWidget
-)
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import (
-    QPainter, QColor, QPen, QPainterPath, QLinearGradient, QBrush
-)
-
-from utils.performance import PerformanceCollector
-from services.system import ProcessManager
-from ui.tab_utils import configure_top_tabs
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QBrush, QColor, QLinearGradient, QPainter, QPainterPath, QPen
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QInputDialog,
+    QLabel,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+from services.system import ProcessManager
 from utils.log import get_logger
+from utils.performance import PerformanceCollector
+
+from ui.tab_utils import configure_top_tabs
 
 logger = get_logger(__name__)
 

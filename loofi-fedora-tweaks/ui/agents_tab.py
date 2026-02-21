@@ -11,30 +11,31 @@ Provides:
 
 import logging
 import time
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QTabWidget,
-    QTextEdit,
-    QLineEdit,
-    QCheckBox,
-    QSpinBox,
-    QMessageBox,
-    QGridLayout,
-)
+
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
-from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 

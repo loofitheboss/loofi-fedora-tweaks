@@ -13,8 +13,8 @@ import types
 import unittest
 from collections import deque
 from dataclasses import dataclass
-from typing import List, Tuple
-from unittest.mock import MagicMock, patch, PropertyMock
+from typing import List
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -574,7 +574,7 @@ class TestPerformanceSubTab(unittest.TestCase):
     def test_ensure_core_bars_creates_bars(self):
         """_ensure_core_bars should create the requested number of bars."""
         subtab = self._make_subtab()
-        mod = _get_module()
+        _get_module()
         subtab._ensure_core_bars(4)
         self.assertEqual(len(subtab.cpu_core_bars), 4)
 

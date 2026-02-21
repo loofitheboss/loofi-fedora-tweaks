@@ -3,9 +3,10 @@ Lazy loading widget for deferred tab initialization.
 Part of v7.1 performance optimization.
 """
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt6.QtCore import Qt
 from typing import Callable
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 
 class LazyWidget(QWidget):

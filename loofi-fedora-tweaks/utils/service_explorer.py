@@ -6,11 +6,11 @@ Goes beyond the gaming-focused ServiceManager to provide full systemd
 service browsing, control, and inspection for both system and user scopes.
 """
 
-import subprocess
 import logging
+import subprocess
 from dataclasses import dataclass
-from typing import List, Optional
 from enum import Enum
+from typing import List, Optional
 
 from utils.commands import PrivilegedCommand
 

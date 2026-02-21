@@ -10,22 +10,22 @@ hardcoded dnf calls.  All user-visible strings are wrapped in self.tr()
 for i18n readiness.
 """
 
-from PyQt6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QLabel,
-    QPushButton,
-    QListWidget,
-    QListWidgetItem,
-    QHBoxLayout,
-    QMessageBox,
-)
-from PyQt6.QtGui import QIcon, QColor
 import shutil
 
+from PyQt6.QtGui import QColor, QIcon
+from PyQt6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+)
+from services.system import SystemManager
 from utils.command_runner import CommandRunner
 from utils.commands import PrivilegedCommand
-from services.system import SystemManager
 
 
 class DependencyDoctor(QDialog):

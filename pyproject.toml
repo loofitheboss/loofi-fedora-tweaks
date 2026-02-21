@@ -55,3 +55,14 @@ addopts = "-v --tb=short"
 ignore_missing_imports = true
 warn_return_any = true
 no_error_summary = true
+
+[tool.ruff]
+line-length = 150
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501", "E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["loofi_fedora_tweaks"]

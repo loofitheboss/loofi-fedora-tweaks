@@ -5,7 +5,6 @@ import unittest
 import sys
 import os
 from unittest.mock import patch, MagicMock
-from subprocess import CalledProcessError
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

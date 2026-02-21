@@ -4,8 +4,8 @@ Handles detection of Fedora Atomic variants (Silverblue, Kinoite, etc.)
 """
 
 import os
-import subprocess
 import shutil
+import subprocess
 from typing import Any
 
 from utils.log import get_logger

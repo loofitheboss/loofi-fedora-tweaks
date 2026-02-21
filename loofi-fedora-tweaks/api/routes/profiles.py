@@ -4,7 +4,6 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
-
 from utils.auth import AuthManager
 from utils.profiles import ProfileManager
 

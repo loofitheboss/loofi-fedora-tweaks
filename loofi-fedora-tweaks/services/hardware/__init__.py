@@ -10,25 +10,25 @@ Centralized hardware abstraction for:
 - Hardware profile detection (hardware_profiles.py)
 """
 
-from services.hardware.hardware import HardwareManager
 from services.hardware.battery import BatteryManager
-from services.hardware.disk import DiskManager, DiskUsage, LargeDirectory
-from services.hardware.temperature import (
-    TemperatureManager,
-    TemperatureSensor,
-)
 from services.hardware.bluetooth import (
-    BluetoothManager,
     BluetoothDevice,
     BluetoothDeviceType,
+    BluetoothManager,
     BluetoothResult,
     BluetoothStatus,
 )
+from services.hardware.disk import DiskManager, DiskUsage, LargeDirectory
+from services.hardware.hardware import HardwareManager
 from services.hardware.hardware_profiles import (
     PROFILES,
     detect_hardware_profile,
-    get_profile_label,
     get_all_profiles,
+    get_profile_label,
+)
+from services.hardware.temperature import (
+    TemperatureManager,
+    TemperatureSensor,
 )
 
 __all__ = [

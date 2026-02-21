@@ -3,15 +3,15 @@ Configuration Drift Detection - Monitor for unexpected system changes.
 Tracks system state and alerts when it deviates from applied presets.
 """
 
-import json
 import hashlib
+import json
 import logging
 import shutil
 import subprocess
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from typing import List, Optional
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
 from services.system import SystemManager
 

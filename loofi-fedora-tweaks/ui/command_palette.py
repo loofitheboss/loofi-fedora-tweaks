@@ -13,13 +13,17 @@ Integration:
 
 from typing import Callable, Optional
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QLineEdit, QListWidget, QListWidgetItem,
-    QLabel, QWidget,
-)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QKeyEvent
-
+from PyQt6.QtWidgets import (
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.log import get_logger
 
 logger = get_logger(__name__)

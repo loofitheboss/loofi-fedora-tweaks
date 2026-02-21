@@ -12,6 +12,7 @@ Sub-tabs:
 import logging
 import os
 
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -22,20 +23,19 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
-    QTabWidget,
     QTableWidget,
     QTableWidgetItem,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
+from utils.history import HistoryManager
+from utils.network_monitor import NetworkMonitor
+from utils.network_utils import NetworkUtils
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 from ui.tooltips import DIAG_NETWORK
-from utils.history import HistoryManager
-from utils.network_monitor import NetworkMonitor
-from utils.network_utils import NetworkUtils
-from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 

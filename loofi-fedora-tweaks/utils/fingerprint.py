@@ -27,7 +27,7 @@ class FingerprintWorker(QThread):
         cmd = ["fprintd-enroll", "-f", self.finger]
 
         try:
-            process = subprocess.Popen(  # noqa: timeout — interactive enrollment with progress
+            process = subprocess.Popen(  # timeout: interactive enrollment with progress
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

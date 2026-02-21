@@ -3,15 +3,12 @@ Tests for the Notification Center utility.
 Part of v13.5 UX Polish.
 """
 
-import json
-import os
 import time
 
 import pytest
 
 from utils.notification_center import (
     MAX_NOTIFICATIONS,
-    NOTIFICATIONS_FILE,
     Notification,
     NotificationCenter,
 )

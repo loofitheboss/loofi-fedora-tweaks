@@ -1,9 +1,38 @@
 {
   "terminal.integrated.shellIntegration.enabled": true,
   "terminal.integrated.shellIntegration.decorationsEnabled": "both",
-  "pylint.args": [
-    "--extension-pkg-allow-list=PyQt6,PyQt6.QtCore,PyQt6.QtGui,PyQt6.QtWidgets"
+
+  // Python environment
+  "python.defaultInterpreterPath": "python",
+
+  // Ruff — fast linter + formatter (replaces flake8, isort, black)
+  "ruff.enable": true,
+  "ruff.lint.run": "onSave",
+  "ruff.fixAll": true,
+  "ruff.organizeImports": true,
+
+  // Mypy — static type checking
+  "mypy-type-checker.args": [
+    "--ignore-missing-imports",
+    "--warn-return-any"
   ],
+
+  // Pylint — deep analysis
+  "pylint.args": [
+    "--extension-pkg-allow-list=PyQt6,PyQt6.QtCore,PyQt6.QtGui,PyQt6.QtWidgets",
+    "--disable=C0114,C0115,C0116,C0301,E0401"
+  ],
+
+  // Use ruff as the Python formatter
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
   "chatgpt.openOnStartup": false,
   "claudeCode.allowDangerouslySkipPermissions": true,
   "github.copilot.chat.claudeAgent.allowDangerouslySkipPermissions": true,

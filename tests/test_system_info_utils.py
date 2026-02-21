@@ -5,7 +5,6 @@ subprocess.run, file reads) replacing subprocess.getoutput.
 """
 
 import os
-import subprocess
 import sys
 import unittest
 from unittest.mock import MagicMock, mock_open, patch

@@ -6,15 +6,14 @@ All subprocess / filesystem calls are mocked.
 import os
 import sys
 import unittest
-from dataclasses import dataclass
-from unittest.mock import patch, MagicMock, mock_open, PropertyMock
+from unittest.mock import patch, MagicMock, mock_open
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.vm_manager import VMManager, VMInfo, VM_FLAVORS, Result as VMResult
+from utils.vm_manager import VMManager, VMInfo, VM_FLAVORS
 from utils.vfio import VFIOAssistant
-from utils.disposable_vm import DisposableVMManager, Result as DispResult
+from utils.disposable_vm import DisposableVMManager
 from utils.virtualization import IOMMUGroup, IOMMUDevice
 
 

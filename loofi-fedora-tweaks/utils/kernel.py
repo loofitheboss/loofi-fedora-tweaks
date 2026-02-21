@@ -5,12 +5,12 @@ Provides safe interface for modifying kernel boot parameters via grubby.
 
 import logging
 import os
-import subprocess
 import shutil
-from pathlib import Path
+import subprocess
 from dataclasses import dataclass
-from typing import List, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 

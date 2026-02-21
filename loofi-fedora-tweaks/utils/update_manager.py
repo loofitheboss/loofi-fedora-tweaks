@@ -14,8 +14,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
 
-from utils.commands import CommandTuple, PrivilegedCommand
 from services.system.system import SystemManager
+
+from utils.commands import CommandTuple, PrivilegedCommand
 
 logger = logging.getLogger(__name__)
 

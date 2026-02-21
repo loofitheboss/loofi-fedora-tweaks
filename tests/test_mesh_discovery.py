@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 for _mod in ('PyQt6', 'PyQt6.QtCore', 'PyQt6.QtWidgets', 'PyQt6.QtGui'):
     sys.modules.setdefault(_mod, MagicMock())
 
-from utils.mesh_discovery import MeshDiscovery, PeerDevice, SERVICE_TYPE, SERVICE_PORT
+from utils.mesh_discovery import MeshDiscovery, PeerDevice  # noqa: E402
 
 
 class TestGetDeviceId(unittest.TestCase):
@@ -26,7 +26,7 @@ class TestGetDeviceId(unittest.TestCase):
     @patch('builtins.open', mock_open(read_data=""))
     @patch('utils.mesh_discovery.os.path.isfile', return_value=True)
     def test_get_device_id_empty_file_generates_new(self, mock_isfile):
-        with patch('builtins.open', mock_open()) as mocked_write:
+        with patch('builtins.open', mock_open()):
             with patch('utils.mesh_discovery.os.path.isfile', return_value=True):
                 # First open returns empty, needs to pass through
                 pass

@@ -17,7 +17,6 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from utils.agent_notifications import (
-    SEVERITY_RANKS,
     AgentNotificationConfig,
     AgentNotifier,
 )

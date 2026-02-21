@@ -12,24 +12,23 @@ import json
 import os
 from pathlib import Path
 
-from PyQt6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QStackedWidget,
-    QWidget,
-    QRadioButton,
-    QButtonGroup,
-    QFrame,
-    QScrollArea,
-    QCheckBox,
-    QProgressBar,
-)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-
+from PyQt6.QtWidgets import (
+    QButtonGroup,
+    QCheckBox,
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from services.hardware.hardware_profiles import detect_hardware_profile
 from utils.log import get_logger
 from utils.wizard_health import WizardHealth

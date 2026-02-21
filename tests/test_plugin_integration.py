@@ -11,7 +11,6 @@ import os
 import sys
 import logging
 from types import SimpleNamespace
-import pytest
 from unittest.mock import MagicMock, patch
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QListWidgetItem
@@ -324,7 +323,7 @@ class TestPluginIntegrationRegistryIsolation:
 
     def test_second_load_after_reset_starts_fresh(self):
         """Loading builtins twice with a reset in between does not duplicate plugins."""
-        fake_import = _build_fake_import_function()
+        _build_fake_import_function()
 
         registry = PluginRegistry.instance()
         loader = PluginLoader(registry=registry)

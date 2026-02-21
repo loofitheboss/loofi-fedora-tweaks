@@ -4,17 +4,16 @@ Part of v14.0 "Horizon Update".
 """
 
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QDialog,
-    QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTextEdit,
-    QCheckBox,
-    QHBoxLayout,
+    QVBoxLayout,
 )
-
-from version import __version__, __version_codename__
 from utils.log import get_logger
+from version import __version__, __version_codename__
 
 logger = get_logger(__name__)
 

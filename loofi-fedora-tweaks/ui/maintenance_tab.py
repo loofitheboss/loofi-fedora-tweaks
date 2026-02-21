@@ -7,23 +7,32 @@ original UpdatesTab, CleanupTab, and OverlaysTab.
 The Overlays sub-tab is only shown on Atomic (rpm-ostree) systems.
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit,
-    QGroupBox, QProgressBar, QTabWidget, QListWidget, QListWidgetItem,
-    QFrame, QMessageBox
-)
+import shutil
+
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import (
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from services.system import SystemManager
+from utils.command_runner import CommandRunner
+from utils.commands import PrivilegedCommand
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from ui.tooltips import MAINT_CLEANUP, MAINT_JOURNAL, MAINT_ORPHANS
-from utils.commands import PrivilegedCommand
-from utils.command_runner import CommandRunner
-from services.system import SystemManager
-from core.plugins.metadata import PluginMetadata
-
-import shutil
-
 
 # ---------------------------------------------------------------------------
 # Sub-tab: Updates

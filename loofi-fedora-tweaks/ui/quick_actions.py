@@ -19,15 +19,20 @@ Integration:
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QLineEdit, QListWidget, QListWidgetItem,
-    QLabel, QComboBox, QWidget,
-)
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ui.icon_pack import get_qicon
-
 
 # -----------------------------------------------------------------------
 # Data model

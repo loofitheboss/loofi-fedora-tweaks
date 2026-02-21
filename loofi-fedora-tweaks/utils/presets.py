@@ -1,9 +1,9 @@
 """Preset management for saving and applying system configuration snapshots."""
+import json
 import logging
 import os
-import json
-import subprocess
 import shutil
+import subprocess
 
 logger = logging.getLogger(__name__)
 

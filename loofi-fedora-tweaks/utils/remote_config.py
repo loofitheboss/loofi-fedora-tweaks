@@ -1,8 +1,9 @@
 """Remote app catalog fetcher with local caching and offline fallback."""
-import os
 import json
-import urllib.request
+import os
 import urllib.error
+import urllib.request
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 from utils.log import get_logger

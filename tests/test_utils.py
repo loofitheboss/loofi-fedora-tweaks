@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import sys
 import os
-import shutil
 
 # Add source path to sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))

@@ -7,24 +7,38 @@ original WatchtowerTab (services, boot analysis, journal) and
 BootTab (kernel parameters, ZRAM, Secure Boot).
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QTextEdit, QScrollArea, QFrame, QTabWidget,
-    QTreeWidget, QTreeWidgetItem, QComboBox, QMenu, QMessageBox,
-    QSlider, QLineEdit, QCheckBox, QInputDialog
-)
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt
-
-from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMenu,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSlider,
+    QTabWidget,
+    QTextEdit,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 from services.system import ServiceManager, UnitScope, UnitState
 from utils.boot_analyzer import BootAnalyzer
 from utils.journal import JournalManager
-from core.plugins.metadata import PluginMetadata
 from utils.kernel import KernelManager
-from utils.zram import ZramManager
 from utils.secureboot import SecureBootManager
+from utils.zram import ZramManager
 
+from ui.base_tab import BaseTab
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 
 # ---------------------------------------------------------------------------
 # Sub-tab: Watchtower

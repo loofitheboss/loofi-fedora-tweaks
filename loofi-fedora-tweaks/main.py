@@ -1,7 +1,7 @@
-import sys
-import os
 import argparse
 import logging
+import os
+import sys
 
 # Ensure we can import from local modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -124,8 +124,8 @@ def main():
             sys.exit(1)
 
         try:
+            from PyQt6.QtCore import QLocale, QTranslator
             from PyQt6.QtWidgets import QApplication, QMessageBox
-            from PyQt6.QtCore import QTranslator, QLocale
             from ui.main_window import MainWindow
         except ImportError as exc:
             _log.critical("Failed to import GUI modules: %s", exc, exc_info=True)

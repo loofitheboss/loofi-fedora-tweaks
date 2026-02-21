@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.boot_config import BootConfigManager, GrubConfig, KernelEntry
+from utils.boot_config import BootConfigManager, GrubConfig
 
 
 class TestGetGrubConfig(unittest.TestCase):

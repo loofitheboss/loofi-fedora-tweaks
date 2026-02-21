@@ -10,30 +10,30 @@ Provides:
 - Output log for operation feedback
 """
 
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QTextEdit,
-    QScrollArea,
+    QComboBox,
+    QFileDialog,
     QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
     QTableWidget,
     QTableWidgetItem,
-    QHeaderView,
-    QComboBox,
-    QSpinBox,
-    QFileDialog,
-    QMessageBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
+from utils.health_timeline import HealthTimeline
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
-from utils.health_timeline import HealthTimeline
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata
 
 
 class HealthTimelineTab(QWidget, PluginInterface):

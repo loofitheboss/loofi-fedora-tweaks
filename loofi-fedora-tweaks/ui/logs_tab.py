@@ -6,27 +6,28 @@ Structured journal browsing with pattern detection, error summary,
 and log export. Uses SmartLogViewer from utils/smart_logs.py.
 """
 
-from PyQt6.QtWidgets import (
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QGroupBox,
-    QTableWidget,
-    QHeaderView,
-    QComboBox,
-    QSpinBox,
-    QFileDialog,
-    QGridLayout,
-    QTextEdit,
-    QWidget,
-)
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QColor
-from ui.base_tab import BaseTab
-from utils.smart_logs import SmartLogViewer
-from core.plugins.metadata import PluginMetadata
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.log import get_logger
+from utils.smart_logs import SmartLogViewer
+
+from ui.base_tab import BaseTab
 
 logger = get_logger(__name__)
 

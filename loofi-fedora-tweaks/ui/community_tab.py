@@ -7,40 +7,40 @@ Sub-tabs:
 - Marketplace: Browse, search, download community presets with drift detection
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QListWidget,
-    QMessageBox,
-    QInputDialog,
-    QGroupBox,
-    QTabWidget,
-    QFileDialog,
-    QLineEdit,
-    QListWidgetItem,
-    QComboBox,
-    QTextEdit,
-    QCheckBox,
-)
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
-
-from utils.presets import PresetManager
-from utils.config_manager import ConfigManager
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.cloud_sync import CloudSyncManager
-from utils.marketplace import PresetMarketplace, MarketplaceResult
+from utils.config_manager import ConfigManager
 from utils.drift import DriftDetector
+from utils.marketplace import MarketplaceResult, PresetMarketplace
+from utils.plugin_analytics import PluginAnalytics
 from utils.plugin_base import PluginLoader
 from utils.plugin_installer import PluginInstaller
 from utils.plugin_marketplace import PluginMarketplace
-from utils.plugin_analytics import PluginAnalytics
+from utils.presets import PresetManager
 from utils.settings import SettingsManager
-from ui.tab_utils import configure_top_tabs
+
 from ui.permission_consent_dialog import PermissionConsentDialog
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata
+from ui.tab_utils import configure_top_tabs
 
 
 class FetchPresetsThread(QThread):

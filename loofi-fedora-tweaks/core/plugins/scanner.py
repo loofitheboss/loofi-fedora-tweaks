@@ -24,15 +24,17 @@ Usage:
 """
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Any, List, Tuple, Optional
-from dataclasses import dataclass
+
 import hashlib
 import json
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, List, Optional, Tuple
+
+from version import __version__ as APP_VERSION
 
 from core.plugins.package import PluginManifest
-from version import __version__ as APP_VERSION
 
 logger = logging.getLogger(__name__)
 

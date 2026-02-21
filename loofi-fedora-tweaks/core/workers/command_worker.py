@@ -23,10 +23,10 @@ import logging
 from typing import Any, List, Optional
 
 from PyQt6.QtCore import QEventLoop
+from utils.command_runner import CommandRunner
 
 from core.executor.action_result import ActionResult
 from core.workers.base_worker import BaseWorker
-from utils.command_runner import CommandRunner
 
 logger = logging.getLogger(__name__)
 

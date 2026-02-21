@@ -215,7 +215,7 @@ class ContainerManager:
 
         try:
             # Return the process so the caller can manage it
-            return subprocess.Popen(  # noqa: timeout — interactive session, caller manages
+            return subprocess.Popen(  # timeout: interactive session, caller manages
                 ["distrobox", "enter", name],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,

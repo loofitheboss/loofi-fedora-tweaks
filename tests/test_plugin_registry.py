@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
 from core.plugins.registry import PluginRegistry
-from core.plugins.metadata import PluginMetadata, CompatStatus
+from core.plugins.metadata import PluginMetadata
 
 
 # ---------------------------------------------------------------------------

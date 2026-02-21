@@ -26,7 +26,7 @@ class HelloWorldPlugin(LoofiPlugin):
 
     def create_widget(self):
         """Create and return a simple greeting widget."""
-        from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
+        from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
         widget = QWidget()
         layout = QVBoxLayout(widget)

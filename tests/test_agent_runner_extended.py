@@ -734,7 +734,6 @@ class TestAgentExecutorExtended(unittest.TestCase):
     def test_op_detect_workload_idle(self, mock_open, mock_cpu_count):
         """Low CPU and low memory classified as idle workload."""
         # cpu_pct = (0.1/4)*100 = 2.5%, mem_pct = ((16000000-15000000)/16000000)*100 = 6.25%
-        call_count = [0]
         loadavg_data = "0.1 0.05 0.02 1/200 1234"
         meminfo_data = [
             "MemTotal:       16000000 kB\n",

@@ -6,7 +6,7 @@ import sys
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import patch
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "loofi-fedora-tweaks"))
@@ -16,12 +16,8 @@ from utils.agents import (
     AgentConfig,
     AgentRegistry,
     AgentResult,
-    AgentState,
-    AgentStatus,
-    AgentTrigger,
     AgentType,
     ActionSeverity,
-    TriggerType,
 )
 from utils.agent_scheduler import AgentScheduler
 from utils.event_bus import Event, EventBus
@@ -152,7 +148,7 @@ class TestAgentEventIntegration(unittest.TestCase):
         )
 
         self.registry.register_agent(config)
-        scheduler = AgentScheduler(registry=self.registry)
+        AgentScheduler(registry=self.registry)
 
         # Publish event
         self.event_bus.publish(

@@ -7,11 +7,12 @@ Runs in a separate thread to avoid freezing the GUI.
 import os
 import subprocess
 import threading
-from typing import Optional, Any
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Optional
 
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
+
 from utils.log import get_logger
 
 logger = get_logger(__name__)

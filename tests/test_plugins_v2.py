@@ -8,7 +8,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -17,7 +17,6 @@ from utils.plugin_base import (
     PluginLoader,
     LoofiPlugin,
     PluginInfo,
-    PluginManifest,
 )
 
 # Paths to the actual first-party plugins

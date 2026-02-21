@@ -13,7 +13,7 @@ import os
 import re
 import subprocess
 from collections import Counter
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import List, Optional, Tuple
 
 logger = logging.getLogger(__name__)

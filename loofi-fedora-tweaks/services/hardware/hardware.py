@@ -3,11 +3,11 @@ Hardware Manager - Central hardware control abstraction.
 Handles CPU governors, GPU modes, fan control, and thermal management.
 """
 
+import glob
 import logging
 import os
-import glob
-import subprocess
 import shutil
+import subprocess
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)

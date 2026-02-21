@@ -18,6 +18,8 @@ import time
 from typing import Any, Callable, Dict, List, Optional
 
 from services.system import SystemManager
+
+from utils.action_executor import ActionExecutor as CentralExecutor
 from utils.agents import (
     ActionSeverity,
     AgentAction,
@@ -28,8 +30,7 @@ from utils.agents import (
     AgentStatus,
     TriggerType,
 )
-from utils.action_executor import ActionExecutor as CentralExecutor
-from utils.arbitrator import Arbitrator, AgentRequest, Priority
+from utils.arbitrator import AgentRequest, Arbitrator, Priority
 
 logger = logging.getLogger(__name__)
 
@@ -888,7 +889,7 @@ class AgentScheduler:
     def _notify_result(self, agent: AgentConfig, result: AgentResult):
         """Send notifications for an agent result if configured."""
         try:
-            from utils.agent_notifications import AgentNotifier, AgentNotificationConfig
+            from utils.agent_notifications import AgentNotificationConfig, AgentNotifier
 
             if not hasattr(self, "_notifier"):
                 self._notifier = AgentNotifier()

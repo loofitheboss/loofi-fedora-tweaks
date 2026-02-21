@@ -3,8 +3,8 @@ i18n Manager — v31.0 Smart UX
 Qt Linguist translation workflow for internationalization.
 """
 
-import os
 import logging
+import os
 from typing import List
 
 logger = logging.getLogger(__name__)

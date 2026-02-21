@@ -4,15 +4,15 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, Form, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import uvicorn
-
 from api.routes import executor as executor_routes
 from api.routes import profiles as profiles_routes
 from api.routes import system as system_routes
+from fastapi import FastAPI, Form, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
 from utils.auth import AuthManager
 
 

@@ -11,37 +11,37 @@ Features:
 - Security updates check (from Privacy tab)
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QListWidget,
-    QListWidgetItem,
-    QComboBox,
-    QTextEdit,
-    QScrollArea,
-    QFrame,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QCheckBox,
-)
+from core.plugins.interface import PluginInterface
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QScrollArea,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from services.system import SystemManager
+from utils.command_runner import CommandRunner
+from utils.commands import PrivilegedCommand
+from utils.ports import PortAuditor
+from utils.sandbox import SandboxManager
+from utils.usbguard import USBGuardManager
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import CONTENT_MARGINS
-from utils.commands import PrivilegedCommand
-from utils.sandbox import SandboxManager
-from utils.usbguard import USBGuardManager
-from utils.ports import PortAuditor
-from utils.command_runner import CommandRunner
-from services.system import SystemManager
-from core.plugins.interface import PluginInterface
-from core.plugins.metadata import PluginMetadata
 
 
 class SecurityTab(QWidget, PluginInterface):

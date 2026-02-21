@@ -2,7 +2,7 @@
 import unittest
 import sys
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -285,7 +285,7 @@ class TestQuickCommandRegistryBuiltins(unittest.TestCase):
         """Test all built-in commands have non-empty required fields."""
         builtins = QuickCommandRegistry.get_builtin_commands()
         for cmd in builtins:
-            self.assertTrue(cmd.id, f"Command missing id")
+            self.assertTrue(cmd.id, "Command missing id")
             self.assertTrue(cmd.name, f"Command {cmd.id} missing name")
             self.assertTrue(cmd.description, f"Command {cmd.id} missing description")
             self.assertTrue(cmd.category, f"Command {cmd.id} missing category")

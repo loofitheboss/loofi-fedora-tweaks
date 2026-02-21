@@ -14,12 +14,10 @@ from unittest.mock import MagicMock, patch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from core.plugins.sandbox import (
-    VALID_PERMISSIONS,
     IsolationMode,
     PluginIsolationPolicy,
     PluginSandbox,
     RestrictedImporter,
-    create_sandbox,
 )
 
 

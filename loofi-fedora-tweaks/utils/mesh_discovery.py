@@ -225,7 +225,7 @@ class MeshDiscovery:
         ] + txt_args
 
         try:
-            cls._publish_process = subprocess.Popen(  # noqa: timeout — long-running daemon
+            cls._publish_process = subprocess.Popen(  # timeout: long-running daemon
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

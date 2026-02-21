@@ -160,7 +160,7 @@ class TestDetectCurrentDns(unittest.TestCase):
     @patch('utils.network_utils.subprocess.run')
     def test_no_dns_found(self, mock_run):
         mock_run.return_value = MagicMock(stdout="IP4.ADDRESS[1]:192.168.1.2/24\n")
-        dns = NetworkUtils.detect_current_dns()
+        NetworkUtils.detect_current_dns()
         # Line has ':', but value after split is '192.168.1.2/24' — added to set
         # Since there IS a value, it returns it. Let's test truly empty.
         pass

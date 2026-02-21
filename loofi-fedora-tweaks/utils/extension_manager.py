@@ -301,8 +301,8 @@ class ExtensionManager:
         extensions: List[ExtensionEntry] = []
         try:
             # Use gnome-extensions or direct API call via curl
-            import urllib.request
             import urllib.parse
+            import urllib.request
             url = (
                 f"https://extensions.gnome.org/extension-query/"
                 f"?search={urllib.parse.quote(query)}&page={page}"

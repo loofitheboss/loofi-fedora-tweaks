@@ -16,35 +16,34 @@ Features:
 import getpass
 from collections import deque
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QGridLayout,
-    QFrame,
-    QProgressBar,
-    QScrollArea,
-)
-from PyQt6.QtCore import QSize, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath, QLinearGradient
-
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
-
-from ui.icon_pack import get_qicon
-from ui.tooltips import DASH_HEALTH_SCORE, DASH_QUICK_ACTIONS, DASH_FOCUS_MODE, DASH_SYSTEM_OVERVIEW
+from PyQt6.QtCore import QSize, Qt, QTimer, pyqtSignal
+from PyQt6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen
+from PyQt6.QtWidgets import (
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
+from services.hardware.disk import DiskManager
+from services.system import SystemManager
 from services.system.processes import ProcessManager
 from utils.commands import PrivilegedCommand
-from services.system import SystemManager
-from services.hardware.disk import DiskManager
-from utils.monitor import SystemMonitor
-from utils.history import HistoryManager
-from utils.health_score import HealthScoreManager
-from utils.quick_actions_config import QuickActionsConfig
 from utils.focus_mode import FocusMode
+from utils.health_score import HealthScoreManager
+from utils.history import HistoryManager
 from utils.log import get_logger
+from utils.monitor import SystemMonitor
+from utils.quick_actions_config import QuickActionsConfig
+
+from ui.icon_pack import get_qicon
+from ui.tooltips import DASH_FOCUS_MODE, DASH_HEALTH_SCORE, DASH_QUICK_ACTIONS, DASH_SYSTEM_OVERVIEW
 
 logger = get_logger(__name__)
 
@@ -860,8 +859,8 @@ class DashboardTab(QWidget, PluginInterface):
     # ==================================================================
 
     def _reboot(self):
-        from PyQt6.QtWidgets import QMessageBox
         from PyQt6.QtCore import QProcess
+        from PyQt6.QtWidgets import QMessageBox
 
         reply = QMessageBox.question(
             self,

@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QProgressBar, QPushButton
 from PyQt6.QtCore import QProcess, Qt
+from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QPushButton, QVBoxLayout
 from utils.log import get_logger
 
 logger = get_logger(__name__)

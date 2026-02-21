@@ -5,22 +5,23 @@ Part of v17.0 "Atlas".
 Uses StorageManager from utils/storage.py for lsblk, smartctl, df, and fsck.
 """
 
+from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QGroupBox,
-    QTableWidget,
-    QHeaderView,
-    QMessageBox,
     QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QTimer
-from ui.base_tab import BaseTab
 from utils.storage import StorageManager
-from core.plugins.metadata import PluginMetadata
+
+from ui.base_tab import BaseTab
 
 
 class StorageTab(BaseTab):

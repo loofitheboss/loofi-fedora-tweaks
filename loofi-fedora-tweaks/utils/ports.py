@@ -7,9 +7,9 @@ and provides firewall management via firewall-cmd.
 """
 
 import logging
-import subprocess
-import shutil
 import re
+import shutil
+import subprocess
 from dataclasses import dataclass
 from typing import Optional
 

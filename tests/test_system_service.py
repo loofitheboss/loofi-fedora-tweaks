@@ -70,7 +70,7 @@ class TestSystemServiceReboot(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.reboot(delay_seconds=60)
+        service.reboot(delay_seconds=60)
 
         # Verify delay in command
         call_args = mock_worker_class.call_args[0][1]
@@ -83,7 +83,7 @@ class TestSystemServiceReboot(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.reboot(description="Rebooting for updates")
+        service.reboot(description="Rebooting for updates")
 
         # Verify description was passed to CommandWorker
         call_kwargs = mock_worker_class.call_args[1]
@@ -128,7 +128,7 @@ class TestSystemServiceShutdown(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.shutdown(delay_seconds=120)
+        service.shutdown(delay_seconds=120)
 
         # Verify delay in command
         call_args = mock_worker_class.call_args[0][1]
@@ -162,7 +162,7 @@ class TestSystemServiceSuspend(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.suspend(description="Going to sleep")
+        service.suspend(description="Going to sleep")
 
         call_kwargs = mock_worker_class.call_args[1]
         self.assertEqual(call_kwargs['description'], "Going to sleep")
@@ -255,7 +255,7 @@ class TestSystemServiceHostname(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.set_hostname("  fedora-box  ")
+        service.set_hostname("  fedora-box  ")
 
         # Verify whitespace was stripped
         call_args = mock_worker_class.call_args[0][1]
@@ -269,7 +269,7 @@ class TestSystemServiceHostname(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = SystemService()
-        result = service.set_hostname("newhost", description="Renaming server")
+        service.set_hostname("newhost", description="Renaming server")
 
         call_kwargs = mock_worker_class.call_args[1]
         self.assertEqual(call_kwargs['description'], "Renaming server")

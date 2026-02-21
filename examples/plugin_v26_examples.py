@@ -117,7 +117,7 @@ plugin = MyAwesomePlugin()
     
     # Save to file
     package.save("my-awesome-plugin-1.0.0.loofi-plugin")
-    print(f"Created: my-awesome-plugin-1.0.0.loofi-plugin")
+    print("Created: my-awesome-plugin-1.0.0.loofi-plugin")
 
 
 # Example 3: Loading and verifying a .loofi-plugin package
@@ -273,7 +273,6 @@ plugin = DemoPlugin()
 def example_scanner_usage():
     """Use PluginScanner to discover plugins in user directory."""
     from core.plugins import PluginScanner
-    from pathlib import Path
     
     # Initialize scanner (default: ~/.config/loofi-fedora-tweaks/plugins/)
     scanner = PluginScanner()

@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.wayland_display import WaylandDisplayManager, DisplayInfo
+from utils.wayland_display import WaylandDisplayManager
 
 
 class TestSessionDetection(unittest.TestCase):

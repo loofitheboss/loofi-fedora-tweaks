@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import importlib
 import importlib.util
 import inspect
@@ -8,14 +9,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Protocol
 
-from core.plugins.registry import PluginRegistry
-from core.plugins.interface import PluginInterface
-from core.plugins.compat import CompatibilityDetector
-from core.plugins.scanner import PluginScanner
-from core.plugins.adapter import PluginAdapter
-from core.plugins.sandbox import create_sandbox
 from utils.plugin_base import LoofiPlugin
 from version import __version__ as APP_VERSION
+
+from core.plugins.adapter import PluginAdapter
+from core.plugins.compat import CompatibilityDetector
+from core.plugins.interface import PluginInterface
+from core.plugins.registry import PluginRegistry
+from core.plugins.sandbox import create_sandbox
+from core.plugins.scanner import PluginScanner
 
 log = logging.getLogger(__name__)
 

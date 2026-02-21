@@ -8,21 +8,33 @@ Provides:
 - Knowledge sub-tab: indexing status, index/clear buttons, search field
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QTextEdit, QScrollArea, QFrame, QMessageBox, QProgressBar,
-    QTabWidget, QLineEdit, QSpinBox
-)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-
-from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
-from utils.voice import VoiceManager, WHISPER_MODELS
-from utils.context_rag import ContextRAGManager
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.ai_models import RECOMMENDED_MODELS, AIModelManager
+from utils.context_rag import ContextRAGManager
+from utils.voice import WHISPER_MODELS, VoiceManager
 
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 
 # ---------------------------------------------------------------------------
 # Background workers

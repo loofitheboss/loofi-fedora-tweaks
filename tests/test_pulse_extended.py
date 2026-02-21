@@ -9,9 +9,8 @@ and xrandr ValueError branches.
 
 import os
 import sys
-import subprocess
 import unittest
-from unittest.mock import patch, MagicMock, mock_open, PropertyMock, call
+from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -1145,7 +1144,6 @@ class TestRunPollingFallback(unittest.TestCase):
         pulse = SystemPulse()
 
         call_count = [0]
-        original_wait = pulse._stop_event.wait
 
         def wait_side_effect(timeout=None):
             call_count[0] += 1

@@ -4,7 +4,6 @@ import json
 import os
 import sys
 import unittest
-from dataclasses import asdict
 from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -17,7 +16,7 @@ for mod_name in [
     if mod_name not in sys.modules:
         sys.modules[mod_name] = MagicMock()
 
-from utils.state_teleport import (
+from utils.state_teleport import (  # noqa: E402
     StateTeleportManager,
     WorkspaceState,
     TeleportPackage,

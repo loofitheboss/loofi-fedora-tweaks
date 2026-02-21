@@ -12,10 +12,9 @@ Usage::
     toast.show_toast("Update Complete", "All packages updated successfully.")
 """
 
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
-from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
-from PyQt6.QtGui import QPainter, QColor, QPainterPath
-
+from PyQt6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, QTimer
+from PyQt6.QtGui import QColor, QPainter, QPainterPath
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QWidget
 
 # Category → accent color mapping (Abyss palette)
 _CATEGORY_COLORS = {

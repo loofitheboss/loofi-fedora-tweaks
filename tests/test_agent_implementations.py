@@ -2,11 +2,10 @@
 Integration tests for real agent implementations.
 Tests event-driven agent behavior with mocked system execution.
 """
-import json
 import time
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from utils.action_result import ActionResult
 from utils.agent_scheduler import AgentScheduler

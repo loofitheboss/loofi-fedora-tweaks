@@ -4,10 +4,9 @@ Tests all CLI subcommands with mocked subprocess and system calls.
 """
 
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 import sys
 import os
-from io import StringIO
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
@@ -15,7 +14,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-t
 from cli.main import (
     main,
     cmd_info,
-    cmd_health,
     cmd_disk,
     cmd_processes,
     cmd_temperature,

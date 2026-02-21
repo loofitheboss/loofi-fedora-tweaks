@@ -6,35 +6,39 @@ Uses QTabWidget for sub-navigation to preserve all features from the
 original AppsTab and ReposTab.
 """
 
+import logging
+
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QCheckBox,
+    QFrame,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
-    QPushButton,
-    QTextEdit,
-    QGroupBox,
-    QScrollArea,
-    QFrame,
-    QTabWidget,
-    QCheckBox,
-    QListWidget,
     QLineEdit,
+    QListWidget,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
-
-import logging
+from utils.batch_ops import BatchOpsManager
+from utils.command_runner import CommandRunner
+from utils.commands import PrivilegedCommand
+from utils.software_utils import SoftwareUtils
 
 from ui.base_tab import BaseTab
 from ui.tab_utils import configure_top_tabs
 from ui.tooltips import (
-    SW_BATCH_INSTALL, SW_BATCH_REMOVE, SW_CODECS,
-    SW_FLATHUB, SW_RPM_FUSION, SW_SEARCH,
+    SW_BATCH_INSTALL,
+    SW_BATCH_REMOVE,
+    SW_CODECS,
+    SW_FLATHUB,
+    SW_RPM_FUSION,
+    SW_SEARCH,
 )
-from utils.commands import PrivilegedCommand
-from utils.software_utils import SoftwareUtils
-from utils.command_runner import CommandRunner
-from utils.batch_ops import BatchOpsManager
-from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 

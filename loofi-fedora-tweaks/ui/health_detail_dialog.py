@@ -5,12 +5,17 @@ Modal dialog showing per-component health score breakdown with
 actionable fix suggestions and navigation links to relevant tabs.
 """
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QProgressBar, QFrame, QGridLayout,
-)
 from PyQt6.QtCore import Qt, pyqtSignal
-
+from PyQt6.QtWidgets import (
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+)
 from utils.health_detail import HealthDetailManager
 from utils.health_score import HealthScoreManager
 

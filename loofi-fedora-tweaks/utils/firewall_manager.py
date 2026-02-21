@@ -6,8 +6,8 @@ Provides a clean interface to firewall-cmd for managing zones,
 ports, services, and rich rules.
 """
 
-import subprocess
 import logging
+import subprocess
 from dataclasses import dataclass, field
 from typing import List
 

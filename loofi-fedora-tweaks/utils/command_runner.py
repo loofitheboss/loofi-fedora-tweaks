@@ -1,7 +1,8 @@
 """Async command execution via QProcess with timeout, progress, and Flatpak support."""
-from PyQt6.QtCore import QProcess, pyqtSignal, QObject, QTimer
 import re
 from typing import Optional
+
+from PyQt6.QtCore import QObject, QProcess, QTimer, pyqtSignal
 
 from utils.log import get_logger
 

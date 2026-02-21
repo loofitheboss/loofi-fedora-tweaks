@@ -7,35 +7,36 @@ Sub-tabs:
 - Replicator: Export system config as Ansible playbooks and Kickstart files
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QListWidget,
-    QListWidgetItem,
-    QGroupBox,
-    QMessageBox,
-    QDialog,
-    QFormLayout,
-    QComboBox,
-    QLineEdit,
-    QCheckBox,
-    QTabWidget,
-    QScrollArea,
-    QFrame,
-)
+import uuid
+
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
-
-from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
-from core.plugins.metadata import PluginMetadata
-from utils.scheduler import TaskScheduler, ScheduledTask, TaskAction, TaskSchedule
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.ansible_export import AnsibleExporter
 from utils.kickstart import KickstartGenerator
-import uuid
+from utils.scheduler import ScheduledTask, TaskAction, TaskSchedule, TaskScheduler
+
+from ui.base_tab import BaseTab
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 
 
 class AddTaskDialog(QDialog):

@@ -1,11 +1,10 @@
 """Tests for ui/community_tab.py — CommunityTab unit tests with mocked PyQt6."""
 
-import importlib
 import os
 import sys
 import types
 import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -411,7 +410,7 @@ sys.modules["utils.settings"] = _settings_mod
 # Clear cached module if already loaded, then import fresh
 sys.modules.pop("ui.community_tab", None)
 
-from ui.community_tab import CommunityTab, FetchPresetsThread, FetchMarketplaceThread
+from ui.community_tab import CommunityTab, FetchPresetsThread, FetchMarketplaceThread  # noqa: E402
 
 # Restore original modules so other test files are not polluted.
 # Keep ui.community_tab in sys.modules — the @patch decorators need it.

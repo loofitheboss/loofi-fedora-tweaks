@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.ai_models import AIModelManager, RECOMMENDED_MODELS, Result
+from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 
 
 class TestGetAvailableModels(unittest.TestCase):

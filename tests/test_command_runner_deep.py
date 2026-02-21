@@ -3,7 +3,7 @@
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 from PyQt6.QtWidgets import QApplication
 _app = QApplication.instance() or QApplication([])
 
-from utils.command_runner import CommandRunner
+from utils.command_runner import CommandRunner  # noqa: E402
 
 
 class TestCommandRunnerInit(unittest.TestCase):

@@ -7,6 +7,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 
+from core.plugins import PluginInterface, PluginRegistry
 from core.plugins.metadata import CompatStatus, PluginMetadata
 from core.plugins.registry import CATEGORY_ICONS
 from PyQt6.QtCore import QRect, QSize, Qt, QTimer
@@ -27,16 +28,15 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from services.system import SystemManager  # noqa: F401  (re-exported for legacy callers)
 from utils.config_manager import ConfigManager
 from utils.favorites import FavoritesManager
 from utils.focus_mode import FocusMode
 from utils.history import HistoryManager
 from utils.log import get_logger
 from utils.pulse import PulseThread, SystemPulse
-from services.system import SystemManager  # noqa: F401  (re-exported for legacy callers)
 from version import __version__
 
-from core.plugins import PluginInterface, PluginRegistry
 from ui.icon_pack import get_qicon, icon_tint_variant
 from ui.lazy_widget import LazyWidget
 

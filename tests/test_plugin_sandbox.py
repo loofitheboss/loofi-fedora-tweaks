@@ -1,8 +1,6 @@
 """Tests for core.plugins.sandbox — PluginSandbox permission enforcement."""
 import os
 import sys
-import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
@@ -137,7 +135,7 @@ class TestPluginSandboxFilesystemRestrictions:
         plugin = _make_plugin()
         
         with patch("sys.meta_path", []):
-            wrapped = sandbox.wrap(plugin)
+            sandbox.wrap(plugin)
             
             # The sandbox creates restricted builtins
             assert hasattr(sandbox, "_restricted_builtins")
@@ -169,7 +167,7 @@ class TestPluginSandboxWrapping:
         
         original_path = sys.meta_path.copy()
         try:
-            wrapped = sandbox.wrap(plugin)
+            sandbox.wrap(plugin)
             
             # Check if importer was added
             assert hasattr(sandbox, "_importer")
@@ -181,7 +179,7 @@ class TestPluginSandboxWrapping:
         sandbox = PluginSandbox("test", set())
         plugin = _make_plugin()
         
-        wrapped = sandbox.wrap(plugin)
+        sandbox.wrap(plugin)
         
         assert hasattr(sandbox, "_restricted_builtins")
         assert isinstance(sandbox._restricted_builtins, dict)

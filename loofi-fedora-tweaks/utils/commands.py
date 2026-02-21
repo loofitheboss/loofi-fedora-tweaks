@@ -14,8 +14,9 @@ import re
 import subprocess
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from utils.audit import AuditLogger
 from services.system import SystemManager
+
+from utils.audit import AuditLogger
 
 CommandTuple = Tuple[str, List[str], str]
 

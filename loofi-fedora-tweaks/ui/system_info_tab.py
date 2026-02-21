@@ -1,22 +1,22 @@
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QGroupBox,
-    QGridLayout,
-    QPushButton,
-    QComboBox,
-    QFileDialog,
-)
-from PyQt6.QtCore import QTimer
 import os
 
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
-from utils.report_exporter import ReportExporter
-from utils.log import get_logger
+from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 from utils import system_info_utils
+from utils.log import get_logger
+from utils.report_exporter import ReportExporter
 
 logger = get_logger(__name__)
 

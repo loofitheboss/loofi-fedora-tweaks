@@ -9,16 +9,16 @@ and provide clear error messages for plugin developers.
 For high-risk plugins, consider process isolation (bubblewrap, firejail).
 """
 
+import functools
 import logging
 import sys
-import functools
 from dataclasses import dataclass
 from enum import Enum
+from importlib.abc import MetaPathFinder
+from importlib.machinery import ModuleSpec
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Callable, Optional, Protocol, Set
-from importlib.abc import MetaPathFinder
-from importlib.machinery import ModuleSpec
 
 logger = logging.getLogger(__name__)
 

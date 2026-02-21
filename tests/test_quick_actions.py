@@ -2,7 +2,7 @@
 import unittest
 import sys
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -17,7 +17,7 @@ sys.modules["PyQt6.QtWidgets"] = MagicMock()
 sys.modules["PyQt6.QtCore"] = MagicMock()
 sys.modules["PyQt6.QtGui"] = MagicMock()
 
-from ui.quick_actions import QuickAction, QuickActionRegistry, register_default_actions
+from ui.quick_actions import QuickAction, QuickActionRegistry, register_default_actions  # noqa: E402
 
 # Restore originals so other tests are not polluted
 for _mod, _orig in [("PyQt6", _orig_pyqt6), ("PyQt6.QtWidgets", _orig_qtwidgets),
@@ -33,7 +33,8 @@ class TestQuickAction(unittest.TestCase):
 
     def test_create(self):
         """Verify all fields are stored correctly."""
-        cb = lambda: None
+        def cb():
+            return None
         action = QuickAction(
             name="Test",
             category="Cat",

@@ -11,7 +11,7 @@ import os
 import sys
 import types
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock, mock_open, call
+from unittest.mock import patch, MagicMock, mock_open
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -1417,7 +1417,7 @@ class TestSwitchToTab(unittest.TestCase):
         self.win.add_page("Page1", "📦", MagicMock(), category="Overview")
         # Category item text contains "Overview" but has no UserRole widget
         self.win.switch_to_tab("Overview")
-        current = self.win.sidebar.currentItem()
+        self.win.sidebar.currentItem()
         # Should not match the category item (it has no UserRole data)
 
 
@@ -2563,7 +2563,7 @@ class TestWrapInLazy(unittest.TestCase):
 
     def test_wrap_in_lazy_returns_lazy_widget(self):
         """_wrap_in_lazy returns a LazyWidget wrapping the plugin factory."""
-        mod = _get_module()
+        _get_module()
         plugin = MagicMock()
         plugin.create_widget = MagicMock(return_value=_Dummy())
         lazy = self.win._wrap_in_lazy(plugin)

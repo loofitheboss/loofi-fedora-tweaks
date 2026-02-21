@@ -7,8 +7,8 @@ import logging
 import shutil
 import tarfile
 import tempfile
-import urllib.request
 import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 from core.plugins.integrity import IntegrityVerifier
 from core.plugins.package import PluginManifest
 from core.plugins.resolver import DependencyResolver
+
 from utils.plugin_marketplace import PluginMarketplace
 
 logger = logging.getLogger(__name__)

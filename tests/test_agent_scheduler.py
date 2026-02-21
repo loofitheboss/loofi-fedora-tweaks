@@ -3,7 +3,7 @@ import sys
 import os
 import time
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 for _mod in ('PyQt6', 'PyQt6.QtCore', 'PyQt6.QtWidgets', 'PyQt6.QtGui'):
     sys.modules.setdefault(_mod, MagicMock())
 
-from utils.agent_scheduler import AgentScheduler
+from utils.agent_scheduler import AgentScheduler  # noqa: E402
 
 
 def _make_mock_agent(
@@ -73,7 +73,7 @@ class TestAgentSchedulerInit(unittest.TestCase):
         mock_instance = MagicMock()
         mock_instance.get_enabled_agents.return_value = []
         mock_registry_cls.instance.return_value = mock_instance
-        scheduler = AgentScheduler()
+        AgentScheduler()
         mock_registry_cls.instance.assert_called_once()
 
     @patch('utils.agent_scheduler.EventBus')

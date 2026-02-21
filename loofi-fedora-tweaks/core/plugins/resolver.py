@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple
 
 try:
-    from packaging.version import parse as parse_version  # noqa: F401
     from packaging.specifiers import SpecifierSet  # noqa: F401
+    from packaging.version import parse as parse_version  # noqa: F401
     HAS_PACKAGING = True
 except ImportError:
     HAS_PACKAGING = False

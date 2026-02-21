@@ -4,8 +4,7 @@ import json
 import os
 import sys
 import unittest
-from io import StringIO
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

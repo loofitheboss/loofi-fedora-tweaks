@@ -10,7 +10,7 @@ Skipped in CI where the offscreen Qt platform may crash.
 import os
 import unittest
 from typing import Optional, Type
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Skip in CI or offscreen environments — creating real MainWindow spawns
 # EventBus threads that leak and cause SIGABRT when running the full suite.

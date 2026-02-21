@@ -7,14 +7,14 @@ exporting logs ready for support forums.
 """
 
 import logging
-import subprocess
 import os
-from datetime import datetime
-from pathlib import Path
-from dataclasses import dataclass
-from typing import Any, Optional
+import subprocess
 import tempfile
 import zipfile
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 

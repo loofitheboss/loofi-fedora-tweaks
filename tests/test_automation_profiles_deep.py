@@ -4,7 +4,6 @@ Covers rule CRUD, validation, dry-run, action execution, and presets.
 All subprocess + file I/O mocked.
 """
 
-import json
 import os
 import sys
 import unittest

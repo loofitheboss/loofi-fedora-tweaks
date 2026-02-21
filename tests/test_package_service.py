@@ -24,7 +24,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 try:
     from PyQt6.QtCore import QCoreApplication
     from services.package import (
-        BasePackageService,
         DnfPackageService,
         RpmOstreePackageService,
         get_package_service
@@ -105,7 +104,7 @@ class TestDnfPackageService(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = DnfPackageService()
-        result = service.install(["vim", "htop", "git"])
+        service.install(["vim", "htop", "git"])
 
         # Verify all packages in command
         call_args = mock_worker_class.call_args[0][1]
@@ -121,7 +120,7 @@ class TestDnfPackageService(unittest.TestCase):
 
         callback = MagicMock()
         service = DnfPackageService()
-        result = service.install(["vim"], callback=callback)
+        service.install(["vim"], callback=callback)
 
         # Verify progress signal was connected
         mock_worker.progress.connect.assert_called_once()
@@ -149,7 +148,7 @@ class TestDnfPackageService(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = DnfPackageService()
-        result = service.update()
+        service.update()
 
         # Verify command is 'dnf update -y' without specific packages
         call_args = mock_worker_class.call_args[0][1]
@@ -162,7 +161,7 @@ class TestDnfPackageService(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = DnfPackageService()
-        result = service.update(packages=["vim", "git"])
+        service.update(packages=["vim", "git"])
 
         # Verify specific packages in command
         call_args = mock_worker_class.call_args[0][1]
@@ -258,7 +257,7 @@ class TestRpmOstreePackageService(unittest.TestCase):
         mock_worker.get_result.return_value = ActionResult(success=True, message="ok", exit_code=0)
 
         service = RpmOstreePackageService()
-        result = service.install(["vim"])
+        service.install(["vim"])
 
         # Verify --apply-live in command
         call_args = mock_worker_class.call_args[0][1]

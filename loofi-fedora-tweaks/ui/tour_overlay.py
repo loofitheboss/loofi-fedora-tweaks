@@ -7,12 +7,15 @@ a tooltip-style card containing step title, description, and
 Next/Skip buttons.
 """
 
+from PyQt6.QtCore import QPoint, QRect, Qt, pyqtSignal
+from PyQt6.QtGui import QColor, QPainter, QRegion
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtCore import Qt, QRect, QPoint, pyqtSignal
-from PyQt6.QtGui import QPainter, QColor, QRegion
-
 from utils.guided_tour import GuidedTourManager, TourStep
 
 

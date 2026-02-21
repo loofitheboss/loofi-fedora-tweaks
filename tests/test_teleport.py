@@ -6,12 +6,9 @@ file I/O, security filtering, and error handling.
 import hashlib
 import json
 import os
-import platform
 import sys
 import tempfile
-import time
 import unittest
-from dataclasses import asdict
 from unittest.mock import patch, MagicMock, mock_open
 
 # Add source path to sys.path
@@ -21,8 +18,6 @@ from utils.state_teleport import (
     StateTeleportManager,
     WorkspaceState,
     TeleportPackage,
-    _SECRET_PATTERNS,
-    _CREDENTIAL_FILES,
 )
 from utils.containers import Result
 

@@ -15,7 +15,6 @@ This ensures the architecture refactor didn't break imports.
 import os
 import sys
 import pytest
-import warnings
 
 # Add project paths
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -303,7 +302,6 @@ class TestImportPerformance:
         import time
 
         start = time.time()
-        from core.executor import ActionExecutor
 
         duration = time.time() - start
         # Import should take < 1 second (even on slow CI)
@@ -314,8 +312,6 @@ class TestImportPerformance:
         import time
 
         start = time.time()
-        from services.system import SystemManager
-        from services.hardware import HardwareManager
 
         duration = time.time() - start
         # Import should take < 1 second
@@ -357,7 +353,7 @@ class TestCrossModuleCompatibility:
         # Same instance behavior
         r1 = UtilsActionResult.ok("test")
         r2 = CoreActionResult.ok("test")
-        assert type(r1) == type(r2)
+        assert type(r1) is type(r2)
         assert r1.success == r2.success
 
     def test_action_executor_identity(self):

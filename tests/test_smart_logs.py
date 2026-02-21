@@ -562,7 +562,7 @@ class TestExportLogs(unittest.TestCase):
 
 
 # We need the subprocess import for side_effect usage
-import subprocess
+import subprocess  # noqa: E402
 
 
 class TestParseJsonLines(unittest.TestCase):

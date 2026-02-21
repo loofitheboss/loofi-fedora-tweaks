@@ -6,14 +6,15 @@ Generates Anaconda-compatible Kickstart files for automated
 Fedora installations with user's package selection.
 """
 
-import subprocess
 import shutil
+import subprocess
 from dataclasses import dataclass
-from typing import Optional
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Optional
 
 from services.system import SystemManager
+
 from utils.log import get_logger
 
 logger = get_logger(__name__)

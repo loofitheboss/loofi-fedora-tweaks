@@ -3,22 +3,19 @@ Tests for v11.1-v11.3 "AI Polish" updates.
 Covers: AIModelManager, VoiceManager, ContextRAGManager.
 """
 import io
-import json
-import math
 import os
 import sys
 import tempfile
-import time
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.ai_models import AIModelManager, RECOMMENDED_MODELS, _PARAM_BASE_MB
+from utils.ai_models import AIModelManager, RECOMMENDED_MODELS
 from utils.voice import VoiceManager, WHISPER_MODELS
 from utils.context_rag import (
-    ContextRAGManager, INDEXABLE_PATHS, MAX_FILE_SIZE, MAX_INDEX_SIZE,
+    ContextRAGManager, INDEXABLE_PATHS,
 )
 
 

@@ -36,8 +36,8 @@ collect_ignore = [
 # Force offscreen Qt rendering in CI (must be set before any PyQt6 import)
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-import pytest
-from unittest.mock import patch, MagicMock
+import pytest  # noqa: E402
+from unittest.mock import patch, MagicMock  # noqa: E402
 
 # Ensure the app source is on the path for all test modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))

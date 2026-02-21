@@ -6,15 +6,13 @@ private home, profile listing, desktop entry creation, and sandbox status.
 
 import os
 import sys
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch, MagicMock, mock_open
 
 # Add source path to sys.path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.sandbox import SandboxManager, BubblewrapManager, PluginIsolationManager, Result
+from utils.sandbox import SandboxManager, BubblewrapManager, PluginIsolationManager
 
 
 # ---------------------------------------------------------------------------

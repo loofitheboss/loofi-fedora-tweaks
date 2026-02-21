@@ -14,7 +14,6 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any, Optional
 
-
 # ---------------------------------------------------------------------------
 # Result dataclass (mirrors utils.containers.Result)
 # ---------------------------------------------------------------------------

@@ -6,9 +6,8 @@ bytes_to_human, _is_partition, delta calculations, and error paths.
 
 import os
 import sys
-import time
 import unittest
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import mock_open, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

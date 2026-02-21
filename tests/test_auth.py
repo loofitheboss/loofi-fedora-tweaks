@@ -2,9 +2,8 @@
 
 import sys
 import os
-import time
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -41,7 +40,7 @@ if 'fastapi' not in sys.modules:
 if 'jwt' not in sys.modules:
     sys.modules['jwt'] = _jwt_mock
 
-from utils.auth import AuthManager
+from utils.auth import AuthManager  # noqa: E402
 
 
 class TestAuthManagerHashKey(unittest.TestCase):

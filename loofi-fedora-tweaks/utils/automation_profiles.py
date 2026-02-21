@@ -7,10 +7,10 @@ import json
 import logging
 import shlex
 import subprocess
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

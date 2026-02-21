@@ -8,9 +8,8 @@ execute_and_log, and all builder methods.
 import os
 import subprocess
 import sys
-import tempfile
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(
     __file__), '..', 'loofi-fedora-tweaks'))

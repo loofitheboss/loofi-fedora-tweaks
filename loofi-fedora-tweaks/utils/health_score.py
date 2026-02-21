@@ -8,9 +8,10 @@ import shutil
 from dataclasses import dataclass, field
 from typing import List
 
-from services.system import SystemManager
-from utils.monitor import SystemMonitor
 from services.hardware import DiskManager
+from services.system import SystemManager
+
+from utils.monitor import SystemMonitor
 
 logger = logging.getLogger(__name__)
 

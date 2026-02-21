@@ -1,9 +1,6 @@
 """Extended tests for utils/network_monitor.py coverage."""
 
 import os
-import socket
-import struct
-import subprocess
 import sys
 import unittest
 from unittest.mock import MagicMock, mock_open, patch

@@ -7,7 +7,6 @@ server start/stop, and send_clipboard_to_peer.
 
 import os
 import sys
-import struct
 import socket
 import unittest
 from unittest.mock import patch, MagicMock
@@ -272,7 +271,6 @@ class TestServerLifecycle(unittest.TestCase):
 
     def test_start_server_success(self):
         """Server starts successfully on an available port."""
-        import socket
         key = os.urandom(32)
         # Find a free port dynamically to avoid conflicts
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

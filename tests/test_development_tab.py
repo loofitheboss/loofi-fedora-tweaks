@@ -12,7 +12,7 @@ import os
 import sys
 import types
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
@@ -786,7 +786,7 @@ class TestDevelopmentTabInit(unittest.TestCase):
 
     def test_init_calls_refresh_dev_status(self):
         """__init__ calls refresh_dev_status (get_all_status is called)."""
-        tab = _make_tab()
+        _make_tab()
         dtm = sys.modules["utils.devtools"].DevToolsManager
         dtm.get_all_status.assert_called()
 
@@ -795,13 +795,13 @@ class TestDevelopmentTabInit(unittest.TestCase):
         containers = [
             _StubContainer("test", _StubContainerStatus.RUNNING, "fedora:latest"),
         ]
-        tab = _make_tab(distrobox_available=True, containers=containers)
+        _make_tab(distrobox_available=True, containers=containers)
         cm = sys.modules["utils.containers"].ContainerManager
         cm.list_containers.assert_called()
 
     def test_init_skips_refresh_when_distrobox_unavailable(self):
         """__init__ does not call list_containers when distrobox unavailable."""
-        tab = _make_tab(distrobox_available=False)
+        _make_tab(distrobox_available=False)
         cm = sys.modules["utils.containers"].ContainerManager
         cm.list_containers.assert_not_called()
 

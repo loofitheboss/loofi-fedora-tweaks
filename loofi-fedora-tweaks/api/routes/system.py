@@ -7,11 +7,10 @@ Security:
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-
-from utils.agents import AgentRegistry
-from utils.monitor import SystemMonitor
-from utils.auth import AuthManager
 from services.system import SystemManager
+from utils.agents import AgentRegistry
+from utils.auth import AuthManager
+from utils.monitor import SystemMonitor
 
 router = APIRouter()
 

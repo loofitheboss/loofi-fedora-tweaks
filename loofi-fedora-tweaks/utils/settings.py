@@ -11,7 +11,7 @@ automatic recovery from corrupt files.
 import json
 import logging
 import threading
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Optional
 

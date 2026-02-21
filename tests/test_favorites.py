@@ -4,9 +4,7 @@ Tests for FavoritesManager — v31.0 Smart UX
 import unittest
 import sys
 import os
-import json
-import tempfile
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

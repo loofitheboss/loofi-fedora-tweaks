@@ -4,16 +4,20 @@ Normalized to BaseTab in v17.0 "Atlas".
 Uses PrivilegedCommand for package installation.
 """
 
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtWidgets import (
-    QGroupBox, QLabel, QMessageBox, QPushButton,
-    QVBoxLayout, QWidget,
+    QGroupBox,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
-
-from ui.base_tab import BaseTab
 from utils.commands import PrivilegedCommand
 from utils.gaming_utils import GamingUtils
 from utils.log import get_logger
-from core.plugins.metadata import PluginMetadata
+
+from ui.base_tab import BaseTab
 
 logger = get_logger(__name__)
 

@@ -5,12 +5,11 @@ import json
 import tarfile
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch, mock_open
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "loofi-fedora-tweaks"))
 
-from utils.plugin_installer import PluginInstaller, InstallerResult
-from core.plugins.package import PluginManifest
+from utils.plugin_installer import PluginInstaller
 from core.plugins.integrity import VerificationResult
 
 
@@ -84,14 +83,14 @@ class TestPluginInstallerInitialization:
         """Installer creates plugins directory on init."""
         with tempfile.TemporaryDirectory() as tmpdir:
             plugins_dir = Path(tmpdir) / "plugins"
-            installer = PluginInstaller(plugins_dir=plugins_dir)
+            PluginInstaller(plugins_dir=plugins_dir)
             assert plugins_dir.exists()
 
     def test_installer_creates_backups_dir(self):
         """Installer creates backups directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
             plugins_dir = Path(tmpdir) / "plugins"
-            installer = PluginInstaller(plugins_dir=plugins_dir)
+            PluginInstaller(plugins_dir=plugins_dir)
             backups_dir = plugins_dir / ".backups"
             assert backups_dir.exists()
 

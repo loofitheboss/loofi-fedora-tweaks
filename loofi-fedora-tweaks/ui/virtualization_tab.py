@@ -8,43 +8,43 @@ Three sub-tabs wrapped in a QTabWidget:
   3. Disposable      - base image status, launch/cleanup disposable VMs
 """
 
-from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGroupBox,
-    QLabel,
-    QPushButton,
-    QTabWidget,
-    QTableWidget,
-    QHeaderView,
-    QComboBox,
-    QLineEdit,
-    QTextEdit,
-    QScrollArea,
-    QFrame,
-    QMessageBox,
-    QFileDialog,
-    QTreeWidget,
-    QTreeWidgetItem,
-    QListWidget,
-    QListWidgetItem,
-    QDialog,
-    QFormLayout,
-    QSpinBox,
-)
-from PyQt6.QtCore import Qt
-
-from utils.virtualization import VirtualizationManager
-from utils.vm_manager import VMManager, VM_FLAVORS
-from utils.vfio import VFIOAssistant
-from utils.disposable_vm import DisposableVMManager
 import logging
 
-from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTableWidget,
+    QTabWidget,
+    QTextEdit,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.disposable_vm import DisposableVMManager
+from utils.vfio import VFIOAssistant
+from utils.virtualization import VirtualizationManager
+from utils.vm_manager import VM_FLAVORS, VMManager
+
+from ui.base_tab import BaseTab
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 
 logger = logging.getLogger(__name__)
 

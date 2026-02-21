@@ -3,17 +3,18 @@ Task Scheduler - Manages scheduled automation tasks.
 Supports time-based and power-state triggers.
 """
 
-import logging
 import json
+import logging
 import shutil
 import subprocess
-from pathlib import Path
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-from typing import Optional
 from enum import Enum
+from pathlib import Path
+from typing import Optional
 
 from services.system import SystemManager
+
 from utils.audit import AuditLogger
 from utils.commands import PrivilegedCommand
 
@@ -376,8 +377,8 @@ class TaskScheduler:
     def _run_sync_config(cls) -> tuple:
         """Sync config to GitHub Gist."""
         try:
-            from utils.config_manager import ConfigManager
             from utils.cloud_sync import CloudSyncManager
+            from utils.config_manager import ConfigManager
 
             config = ConfigManager.export_all()
             success, message = CloudSyncManager.sync_to_gist(config)

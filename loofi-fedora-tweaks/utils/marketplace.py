@@ -5,12 +5,12 @@ Browse, download, and share system presets with the community.
 
 import json
 import logging
-from pathlib import Path
-from dataclasses import dataclass
-from typing import List, Any
-from datetime import datetime
-import urllib.request
 import urllib.error
+import urllib.request
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, List
 
 logger = logging.getLogger(__name__)
 

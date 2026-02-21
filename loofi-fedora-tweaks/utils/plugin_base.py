@@ -11,17 +11,18 @@ v14.0 additions:
   on_settings_changed, get_settings_schema)
 """
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional, Any
-from pathlib import Path
 import importlib.util
 import json
-import urllib.request
 import urllib.error
+import urllib.request
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
+from version import __version__ as APP_VERSION
 
 from utils.log import get_logger
-from version import __version__ as APP_VERSION
 
 logger = get_logger(__name__)
 

@@ -1,7 +1,5 @@
 """Comprehensive security tests for API server."""
 
-import json
-import time
 from unittest.mock import MagicMock, patch
 
 import pytest

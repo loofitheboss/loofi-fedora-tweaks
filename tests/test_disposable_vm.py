@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 for _mod in ('PyQt6', 'PyQt6.QtCore', 'PyQt6.QtWidgets', 'PyQt6.QtGui'):
     sys.modules.setdefault(_mod, MagicMock())
 
-from utils.disposable_vm import DisposableVMManager
+from utils.disposable_vm import DisposableVMManager  # noqa: E402
 
 
 class TestDisposableVMPaths(unittest.TestCase):

@@ -12,8 +12,8 @@ v42.0.0 Sentinel: Replaced curl-pipe-bash with download-then-execute pattern.
 
 import logging
 import os
-import subprocess
 import shutil
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path

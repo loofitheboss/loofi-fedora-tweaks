@@ -6,27 +6,29 @@ Displays current workload detection, kernel tunables, recommendations,
 and tuning history. Uses AutoTuner from utils/auto_tuner.py.
 """
 
+import time
+
+from core.plugins.metadata import PluginMetadata
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
-    QVBoxLayout,
+    QGridLayout,
+    QGroupBox,
+    QHeaderView,
     QLabel,
     QPushButton,
-    QGroupBox,
-    QGridLayout,
     QTableWidget,
-    QHeaderView,
+    QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QTimer
-from ui.base_tab import BaseTab
 from utils.auto_tuner import (
     AutoTuner,
-    WorkloadProfile,
-    TuningRecommendation,
     TuningHistoryEntry,
+    TuningRecommendation,
+    WorkloadProfile,
 )
-import time
-from core.plugins.metadata import PluginMetadata
 from utils.log import get_logger
+
+from ui.base_tab import BaseTab
 
 logger = get_logger(__name__)
 

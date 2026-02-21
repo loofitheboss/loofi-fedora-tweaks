@@ -66,7 +66,7 @@ class TestRunOperationDryRun(unittest.TestCase):
         with patch("cli.main.AuditLogger", create=True) as mock_audit_cls:
             mock_audit = MagicMock()
             mock_audit_cls.return_value = mock_audit
-            with patch("cli.main._print") as mock_print:
+            with patch("cli.main._print"):
                 result = run_operation(("pkexec", ["dnf", "clean", "all"], "Cleaning"))
         self.assertTrue(result)
         mock_run.assert_not_called()

@@ -48,7 +48,6 @@ class TestGetBootErrors(unittest.TestCase):
 
     @patch("utils.journal.subprocess.run", side_effect=subprocess.TimeoutExpired("j", 30))
     def test_returns_empty_on_timeout(self, mock_run):
-        import subprocess
         self.assertEqual(JournalManager.get_boot_errors(), "")
 
 

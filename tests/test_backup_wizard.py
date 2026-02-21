@@ -14,7 +14,7 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
-from utils.backup_wizard import BackupWizard, SnapshotEntry, SnapshotResult
+from utils.backup_wizard import BackupWizard, SnapshotEntry
 
 
 class TestToolDetection(unittest.TestCase):

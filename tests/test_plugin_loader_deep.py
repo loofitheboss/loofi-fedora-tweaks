@@ -4,7 +4,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
@@ -81,7 +81,7 @@ class TestImportPlugin(unittest.TestCase):
         loader = PluginLoader()
         # This will fail issubclass check because MagicMock - test the TypeError path
         try:
-            result = loader._import_plugin("test.module", "TestClass")
+            loader._import_plugin("test.module", "TestClass")
         except TypeError:
             pass  # Expected when mock class doesn't truly subclass PluginInterface
 

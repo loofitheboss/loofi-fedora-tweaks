@@ -7,25 +7,38 @@ Sub-tabs:
 - Developer Tools: Language version managers, VS Code extensions
 """
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QComboBox,
-    QLineEdit, QScrollArea, QFrame, QMessageBox, QMenu,
-    QTabWidget, QProgressBar
-)
+import shutil
+
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction
-
-from ui.base_tab import BaseTab
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
-from ui.tooltips import DEV_VSCODE, DEV_LANGUAGES, DEV_CONTAINERS  # noqa: F401 — DEV_TOOLBOX reserved
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMenu,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from utils.command_runner import CommandRunner
 from utils.commands import PrivilegedCommand
 from utils.containers import ContainerManager, ContainerStatus
 from utils.devtools import DevToolsManager
 from utils.vscode import VSCodeManager
-from utils.command_runner import CommandRunner
-import shutil
-from core.plugins.metadata import PluginMetadata
+
+from ui.base_tab import BaseTab
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
+from ui.tooltips import DEV_CONTAINERS, DEV_LANGUAGES, DEV_VSCODE  # noqa: F401 — DEV_TOOLBOX reserved
 
 
 class InstallWorker(QThread):

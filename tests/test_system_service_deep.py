@@ -40,7 +40,7 @@ class TestReboot(unittest.TestCase):
     def test_reboot_with_delay(self, MockWorker):
         r = _FakeResult(True)
         MockWorker.return_value = _make_worker(r)
-        result = self._svc().reboot(delay_seconds=60)
+        self._svc().reboot(delay_seconds=60)
         args = MockWorker.call_args[0]
         self.assertIn("--when=+60", args[1])
 

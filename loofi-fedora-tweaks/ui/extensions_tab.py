@@ -8,21 +8,21 @@ removing GNOME Shell and KDE Plasma extensions.
 
 import logging
 
+from core.plugins.metadata import PluginMetadata
 from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QLineEdit,
-    QComboBox,
-    QTableWidget,
-    QHeaderView,
     QAbstractItemView,
+    QComboBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from ui.base_tab import BaseTab
-from core.plugins.metadata import PluginMetadata
 
 logger = logging.getLogger(__name__)
 

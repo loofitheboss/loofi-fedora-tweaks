@@ -10,7 +10,6 @@ Expands beyond HP Elitebook to support ThinkPad, Dell XPS, Framework, etc.
 import os
 import re
 
-
 # Known hardware profiles with their capabilities
 PROFILES = {
     "hp-elitebook": {

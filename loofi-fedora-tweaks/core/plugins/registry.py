@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Iterator
+
 from core.plugins.interface import PluginInterface
 
 # Explicit category ordering — controls sidebar top-to-bottom sequence.

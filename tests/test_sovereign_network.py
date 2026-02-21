@@ -15,14 +15,12 @@ from unittest.mock import patch, MagicMock, mock_open
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 
 from utils.mesh_discovery import (
-    MeshDiscovery, PeerDevice, SERVICE_TYPE, SERVICE_PORT, DEVICE_ID_FILE,
+    MeshDiscovery, PeerDevice,
 )
 from utils.clipboard_sync import ClipboardSync
 from utils.file_drop import (
-    FileDropManager, TransferInfo, MAX_FILE_SIZE, CHUNK_SIZE,
-    DANGEROUS_EXTENSIONS,
+    FileDropManager, TransferInfo, MAX_FILE_SIZE,
 )
-from utils.containers import Result
 
 
 # ===========================================================================

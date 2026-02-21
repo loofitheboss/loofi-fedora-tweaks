@@ -7,12 +7,12 @@ snapshots via Timeshift, Snapper, or raw Btrfs subvolumes.
 """
 
 import logging
+import re
 import shutil
 import subprocess
 import time
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
-import re
 
 from utils.commands import PrivilegedCommand  # noqa: F401 — keep for pattern consistency
 

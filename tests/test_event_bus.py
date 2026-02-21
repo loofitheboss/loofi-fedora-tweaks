@@ -325,7 +325,8 @@ def test_standard_topics_format(event_bus):
 
 def test_subscription_dataclass():
     """Test Subscription dataclass structure."""
-    callback = lambda e: None
+    def callback(e):
+        return None
     sub = Subscription(topic="test.topic", callback=callback, subscriber_id="test_sub")
 
     assert sub.topic == "test.topic"

@@ -62,7 +62,7 @@ class TestPlugin(LoofiPlugin):
         scanner = PluginScanner(plugins_dir=Path(tmpdir))
         discovered = scanner.scan()
         
-        print(f"\n✅ PluginScanner.scan():")
+        print("\n✅ PluginScanner.scan():")
         print(f"   Found {len(discovered)} plugin(s)")
         
         if discovered:
@@ -84,14 +84,14 @@ class TestPlugin(LoofiPlugin):
         # Test loader (instantiation only)
         loader = PluginLoader()
         
-        print(f"\n✅ PluginLoader:")
+        print("\n✅ PluginLoader:")
         print(f"   Has load_external: {hasattr(loader, 'load_external')}")
-        print(f"   Method signature validated: ✓")
+        print("   Method signature validated: ✓")
         
         # Test version parsing
         v1 = scanner._parse_version("26.0.0")
         v2 = scanner._parse_version("25.1.3")
-        print(f"\n✅ Version Parsing:")
+        print("\n✅ Version Parsing:")
         print(f"   '26.0.0' → {v1}")
         print(f"   '25.1.3' → {v2}")
         assert v1 == (26, 0, 0)
@@ -100,7 +100,7 @@ class TestPlugin(LoofiPlugin):
         # Test compatibility check
         from version import __version__
         is_compat = scanner._is_version_compatible("25.0.0")
-        print(f"\n✅ Version Compatibility:")
+        print("\n✅ Version Compatibility:")
         print(f"   Current: {__version__}")
         print(f"   >= 25.0.0: {is_compat}")
         

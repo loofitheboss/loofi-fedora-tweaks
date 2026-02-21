@@ -14,7 +14,7 @@ All Qt widgets are tested in offscreen mode or via mocks.
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -35,7 +35,6 @@ class TestCategoryColorMapping(unittest.TestCase):
 
     def test_colours_are_valid_hex(self):
         from ui.notification_toast import _CATEGORY_COLORS
-        import re
         for category, colour in _CATEGORY_COLORS.items():
             self.assertRegex(
                 colour, r'^#[0-9a-fA-F]{6}$',
@@ -85,7 +84,7 @@ class TestNotificationToastCreation(unittest.TestCase):
         mock_timer = MagicMock()
         mock_timer_cls.return_value = mock_timer
 
-        toast = NotificationToast.__new__(NotificationToast)
+        NotificationToast.__new__(NotificationToast)
         # Verify the class has the expected attributes
         self.assertTrue(hasattr(NotificationToast, 'show_toast'))
         self.assertTrue(hasattr(NotificationToast, 'DISPLAY_MS'))
@@ -146,8 +145,7 @@ class TestShowToastLogic(unittest.TestCase):
         toast._auto_hide_timer.start.assert_called_once_with(4000)
 
     def test_show_toast_uses_category_colour(self):
-        from ui.notification_toast import NotificationToast, _CATEGORY_COLORS
-        from PyQt6.QtGui import QColor
+        from ui.notification_toast import NotificationToast
 
         toast = self._make_mock_toast()
         NotificationToast.show_toast(toast, "Alert", "Sec issue", "security")
@@ -155,7 +153,7 @@ class TestShowToastLogic(unittest.TestCase):
         self.assertIsNotNone(toast._accent_color)
 
     def test_show_toast_unknown_category_uses_default(self):
-        from ui.notification_toast import NotificationToast, _CATEGORY_COLORS
+        from ui.notification_toast import NotificationToast
 
         toast = self._make_mock_toast()
         NotificationToast.show_toast(toast, "Title", "Msg", "nonexistent")
@@ -164,7 +162,6 @@ class TestShowToastLogic(unittest.TestCase):
 
     def test_show_toast_with_parent_positions_correctly(self):
         from ui.notification_toast import NotificationToast
-        from PyQt6.QtCore import QPoint
 
         toast = self._make_mock_toast()
         parent = MagicMock()

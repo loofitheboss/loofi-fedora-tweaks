@@ -9,11 +9,10 @@ Covers:
 - _show_error_dialog shows QMessageBox for LoofiError (mocked)
 """
 
-import logging
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-tweaks'))
 

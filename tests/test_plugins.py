@@ -1,8 +1,6 @@
-import os
-import tempfile
 from pathlib import Path
 
-from utils.plugin_base import PluginLoader, LoofiPlugin, PluginInfo
+from utils.plugin_base import PluginLoader
 
 
 def _write_plugin(dir_path: Path, name: str, manifest: dict, code: str):

@@ -8,16 +8,26 @@ Three sub-tabs inside an internal QTabWidget:
   Advanced    - reset-to-defaults, log-level
 """
 
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QTabWidget, QGroupBox, QLabel,
-    QPushButton, QComboBox, QCheckBox, QFormLayout, QScrollArea,
-    QFrame, QMessageBox,
-)
-
 from core.plugins.interface import PluginInterface
 from core.plugins.metadata import PluginMetadata
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from utils.settings import SettingsManager
-from ui.tab_utils import configure_top_tabs, CONTENT_MARGINS
+
+from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 
 
 class SettingsTab(QWidget, PluginInterface):
