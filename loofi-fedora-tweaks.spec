@@ -1,4 +1,5 @@
 Name:           loofi-fedora-tweaks
+Epoch:          1
 Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Complete Fedora system management with AI, security, and window management
@@ -26,6 +27,10 @@ Requires:       python3-bcrypt
 Requires:       python3-httpx
 Requires:       hicolor-icon-theme
 Requires:       google-noto-color-emoji-fonts
+
+# Version renormalization: 50.0.0 → 1:1.0.0
+Obsoletes:      loofi-fedora-tweaks < 1:1.0.0
+Provides:       loofi-fedora-tweaks = 1:%{version}-%{release}
 
 %description
 A comprehensive GUI application for Fedora 43+
