@@ -1,7 +1,7 @@
 {
-  "version": "v50.0.0",
-  "started_at": "20260220_060000",
+  "version": "v1.0.0",
+  "started_at": "20260220_120000",
   "status": "done",
-  "target_version": "v50.0.0",
-  "bumped_at": "2026-02-20T06:00:00.000000+00:00"
+  "target_version": "v1.0.0",
+  "bumped_at": "2026-02-20T12:00:00.000000+00:00"
 }
