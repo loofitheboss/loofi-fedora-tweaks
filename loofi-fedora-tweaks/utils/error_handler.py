@@ -109,7 +109,7 @@ def _log_error(exc_type: Type[BaseException], exc_value: BaseException, exc_tb) 
                 message=str(exc_value)[:200],
                 category="system",
             )
-    except (RuntimeError, TypeError, AttributeError, OSError) as e:
+    except Exception as e:
         logger.debug("Failed to send notification for error: %s", e)
 
 
