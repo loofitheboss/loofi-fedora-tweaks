@@ -38,6 +38,7 @@ from ui.tooltips import MAINT_CLEANUP, MAINT_JOURNAL, MAINT_ORPHANS
 # Sub-tab: Updates
 # ---------------------------------------------------------------------------
 
+
 class _UpdatesSubTab(QWidget):
     """Sub-tab containing all system update functionality.
 

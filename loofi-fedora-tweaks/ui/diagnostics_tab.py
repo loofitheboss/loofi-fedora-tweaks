@@ -44,6 +44,7 @@ from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 # Sub-tab: Watchtower
 # ---------------------------------------------------------------------------
 
+
 class _WatchtowerSubTab(QWidget):
     """Sub-tab with system diagnostics and service management.
 

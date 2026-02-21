@@ -22,6 +22,8 @@ _mock_qtcore = MagicMock()
 _mock_qtcore.pyqtSignal = lambda *args, **kwargs: MagicMock()
 
 # Make QThread a proper class that can be subclassed
+
+
 class _MockQThread:
     def __init__(self, *args, **kwargs):
         pass

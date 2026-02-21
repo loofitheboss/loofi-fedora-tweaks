@@ -9,11 +9,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-t
 
 # Pre-mock optional dependencies that may not be installed in test environments
 # Create real exception classes for assertRaises compatibility
+
+
 class _MockHTTPException(Exception):
     def __init__(self, status_code=500, detail=None):
         self.status_code = status_code
         self.detail = detail
         super().__init__(detail)
+
 
 class _MockInvalidTokenError(Exception):
     pass

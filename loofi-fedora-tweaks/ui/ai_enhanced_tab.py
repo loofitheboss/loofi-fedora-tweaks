@@ -40,6 +40,7 @@ from ui.tab_utils import CONTENT_MARGINS, configure_top_tabs
 # Background workers
 # ---------------------------------------------------------------------------
 
+
 class ModelDownloadWorker(QThread):
     """Background worker for model downloads."""
     progress = pyqtSignal(str)

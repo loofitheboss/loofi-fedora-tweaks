@@ -13,6 +13,8 @@ from PyQt6.QtWidgets import QWidget, QApplication
 
 # Initialize QApplication for widget tests (needed only once)
 _app = None
+
+
 def get_qapp():
     global _app
     if _app is None:

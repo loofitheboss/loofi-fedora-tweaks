@@ -5,6 +5,7 @@ from utils.history import HistoryManager
 import os
 import subprocess
 
+
 class TestSafety(unittest.TestCase):
     
     @patch('shutil.which')
@@ -30,6 +31,7 @@ class TestSafety(unittest.TestCase):
         # Case 3: Neither
         mock_check_call.side_effect = subprocess.CalledProcessError(1, "pgrep")
         self.assertFalse(SafetyManager.check_dnf_lock())
+
 
 class TestHistory(unittest.TestCase):
     def setUp(self):

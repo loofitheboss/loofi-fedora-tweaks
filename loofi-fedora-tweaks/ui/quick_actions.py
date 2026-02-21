@@ -38,6 +38,7 @@ from ui.icon_pack import get_qicon
 # Data model
 # -----------------------------------------------------------------------
 
+
 @dataclass
 class QuickAction:
     """A single quick action entry."""

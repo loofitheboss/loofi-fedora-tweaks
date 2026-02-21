@@ -20,6 +20,7 @@ from core.plugins.package import PluginManifest, PluginPackage
 
 # ── Helpers ────────────────────────────────────────────────────────
 
+
 def _valid_manifest_kwargs(**overrides):
     """Return kwargs for a valid PluginManifest."""
     base = dict(

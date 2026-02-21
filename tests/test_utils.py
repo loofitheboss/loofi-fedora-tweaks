@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'loofi-fedora-twea
 from utils.presets import PresetManager
 from utils.remote_config import AppConfigFetcher
 
+
 class TestPresetManager(unittest.TestCase):
     @patch('shutil.which')
     @patch('subprocess.check_output')
@@ -38,6 +39,7 @@ class TestPresetManager(unittest.TestCase):
         manager = PresetManager()
         limit = manager._get_battery_limit()
         self.assertEqual(limit, 100)
+
 
 class TestAppConfigFetcher(unittest.TestCase):
     @patch('urllib.request.urlopen')

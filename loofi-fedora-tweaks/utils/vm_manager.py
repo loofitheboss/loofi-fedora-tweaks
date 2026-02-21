@@ -18,6 +18,7 @@ from typing import Any, Optional
 # Result dataclass (mirrors utils.containers.Result)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Result:
     """Operation result with message."""
