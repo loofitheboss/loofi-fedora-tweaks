@@ -450,7 +450,7 @@ class TestPluginInstallerCheckUpdate(unittest.TestCase):
 
             self.assertTrue(result.success)
             self.assertTrue(result.data["update_available"])
-            self.assertEqual(result.data["current_version"], "1.0.0")
+            self.assertEqual(result.data["current_version"], "1.0.0")  # fixture-version
             self.assertEqual(result.data["new_version"], "1.1.0")
 
     @patch('utils.plugin_installer.PluginMarketplace')

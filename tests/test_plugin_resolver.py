@@ -46,7 +46,7 @@ class TestDependencyResolverParseRequirement:
         plugin_id, operator, version = DependencyResolver._parse_requirement("my-plugin==1.0.0")
         assert plugin_id == "my-plugin"
         assert operator == "=="
-        assert version == "1.0.0"
+        assert version == "1.0.0"  # fixture-version
 
     def test_parse_greater_equal_requirement(self):
         """Parse requirement with >= operator."""
@@ -81,7 +81,7 @@ class TestDependencyResolverParseRequirement:
         plugin_id, operator, version = DependencyResolver._parse_requirement("my-plugin >= 1.0.0")
         assert plugin_id == "my-plugin"
         assert operator == ">="
-        assert version == "1.0.0"
+        assert version == "1.0.0"  # fixture-version
 
     def test_parse_handles_hyphens_in_name(self):
         """Parse handles plugin names with multiple hyphens."""

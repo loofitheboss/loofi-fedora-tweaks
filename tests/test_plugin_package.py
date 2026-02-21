@@ -55,7 +55,7 @@ class TestPluginManifestValidation(unittest.TestCase):
     def test_valid_manifest(self):
         m = PluginManifest(**_valid_manifest_kwargs())
         self.assertEqual(m.id, "test-plugin")
-        self.assertEqual(m.version, "1.0.0")
+        self.assertEqual(m.version, "1.0.0")  # fixture-version
 
     def test_invalid_id_empty(self):
         with self.assertRaises(ValueError):
@@ -165,7 +165,7 @@ class TestPluginManifestToJson(unittest.TestCase):
         json_str = original.to_json()
         parsed = json.loads(json_str)
         self.assertEqual(parsed["id"], "test-plugin")
-        self.assertEqual(parsed["version"], "1.0.0")
+        self.assertEqual(parsed["version"], "1.0.0")  # fixture-version
 
     def test_optional_fields_included_when_set(self):
         m = PluginManifest(**_valid_manifest_kwargs(

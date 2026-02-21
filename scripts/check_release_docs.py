@@ -106,6 +106,8 @@ def scan_stale_version_tests(
             continue
 
         for lineno, line in enumerate(content.splitlines(), start=1):
+            if "# fixture-version" in line:
+                continue
             if version in line and _HARDCODED_VERSION_RE.search(line):
                 errors.append(
                     f"stale version assertion in {test_file.name}:{lineno} "

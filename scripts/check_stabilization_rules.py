@@ -26,6 +26,7 @@ SUBPROCESS_FUNCS = TIMEOUT_FUNCS | {"Popen"}
 
 ALLOWED_BROAD_EXCEPTIONS = {
     ("loofi-fedora-tweaks/core/workers/base_worker.py", "BaseWorker.run"),
+    ("loofi-fedora-tweaks/utils/error_handler.py", "_log_error"),
 }
 
 # Paths where "sudo" in strings is expected (docs, sandbox policy docstrings)

@@ -169,7 +169,7 @@ class TestCLIMarketplaceInfo:
             output = mock_stdout.getvalue()
             
             assert "my-plugin" in output or "My Plugin" in output
-            assert "1.0.0" in output  # Version
+            assert "1.0.0" in output  # fixture-version
             assert "Test Author" in output  # Author
 
     @patch('cli.main.PluginMarketplace')
@@ -189,7 +189,7 @@ class TestCLIMarketplaceInfo:
             
             data = json.loads(output)
             assert data['id'] == "test-plugin"
-            assert data['version'] == "1.0.0"
+            assert data['version'] == "1.0.0"  # fixture-version
 
     @patch('cli.main.PluginMarketplace')
     def test_info_plugin_not_found(self, mock_marketplace_class):

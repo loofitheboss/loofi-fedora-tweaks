@@ -51,7 +51,7 @@ class TestParseManifest(unittest.TestCase):
         result = self.scanner._parse_manifest(manifest_path)
         self.assertIsNotNone(result)
         self.assertEqual(result.id, "test-plugin")
-        self.assertEqual(result.version, "1.0.0")
+        self.assertEqual(result.version, "1.0.0")  # fixture-version
 
     def test_missing_fields(self):
         manifest_path = MagicMock()
